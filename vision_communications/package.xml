@@ -2,32 +2,30 @@
 <package>
   <name>vision_communications</name>
   <version>0.0.0</version>
-  <description>vision_communications</description>
-  <maintainer email="afourast@gmail.com">Afouras Triantafyllos</maintainer> 
+  <description>Msg files for vision</description>
+ <maintainer email="paschalidoud@gmail.com">Despoina Paschalidou</maintainer>
 
   <license>BSD</license>
 
-<!--
-  <url type="website">http://ros.org/wiki/stateManager_communications</url>
-   <url type="bugtracker"></url> 
--->
+  <url type="bugtracker">https://github.com/pandora-auth-ros-pkg/pandora_vision/issues</url>
+  <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
-	<buildtool_depend>catkin</buildtool_depend>
+  <author>Despoina Paschalidou</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
 
-   <build_depend>message_generation</build_depend>
-   <run_depend>message_runtime</run_depend>
-
-
+  <build_depend>message_generation</build_depend>
+  <build_depend>message_runtime</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  
+  <run_depend>message_generation</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
    
-   <build_depend>std_msgs</build_depend>
-   <run_depend>std_msgs</run_depend>
-   
-   <build_depend>geometry_msgs</build_depend>
-   <run_depend>geometry_msgs</run_depend>
-   
-
-  <author>pandora</author>
-
   <export>
 
   </export>
