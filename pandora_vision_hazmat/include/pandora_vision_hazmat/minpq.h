@@ -10,6 +10,8 @@
 #ifndef MINPQ_H
 #define MINPQ_H
 
+#include "defines.h"
+
 #include <stdlib.h>
 
 

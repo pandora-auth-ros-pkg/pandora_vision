@@ -9,6 +9,8 @@
 #ifndef IMGFEATURES_H
 #define IMGFEATURES_H
 
+#include "defines.h"
+
 #include <cxcore.h>
 
 /** FEATURE_OXFD <BR> FEATURE_LOWE */
