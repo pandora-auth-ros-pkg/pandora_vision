@@ -18,6 +18,8 @@
 #ifndef KDTREE_H
 #define KDTREE_H
 
+#include "defines.h"
+
 #include <cxcore.h>
 
 

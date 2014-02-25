@@ -9,6 +9,8 @@
 #ifndef XFORM_H
 #define XFORM_H
 
+#include "defines.h"
+
 #include <cxcore.h>
 
 

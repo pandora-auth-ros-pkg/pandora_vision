@@ -20,6 +20,8 @@
 #ifndef SIFT_H
 #define SIFT_H
 
+#include "defines.h"
+
 #include <cxcore.h>
 
 /******************************** Structures *********************************/

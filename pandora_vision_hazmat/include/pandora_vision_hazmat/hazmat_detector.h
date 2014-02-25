@@ -55,15 +55,20 @@
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
+
 using namespace std;
 
+//*
+
+
+//*
 struct HazmatEpsilon{ //the struct in which the results are stored
-int pattern_num;
-float x,y;
-int m;
-float MO;
-int votes;
-CvMat* H;
+  int pattern_num;
+  float x,y;
+  int m;
+  float MO;
+  int votes;
+  CvMat* H;
 };
 
 class HazmatEpsilonDetector{
