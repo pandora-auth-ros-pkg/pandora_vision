@@ -35,7 +35,7 @@
  * Author: Miltiadis-Alexios Papadopoulos
  *********************************************************************/
 
-#include "qrcode_node/qrCode_detection.h"
+#include "pandora_vision_qrcode/qrCode_detection.h"
 
 /**
   @brief Main function of the kinect node
