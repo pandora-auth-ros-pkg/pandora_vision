@@ -35,80 +35,18 @@
  * Author: Miltiadis-Alexios Papadopoulos
  *********************************************************************/
 
-#ifndef QRCODEDETECTOR_HPP
-#define QRCODEDETECTOR_HPP
+#include "qrcode_node/qrCode_detection.h"
 
-#include <iostream>
-#include <opencv2/opencv.hpp>
-#include <zbar.h>
-
-namespace vision {
-
-  struct QrCode
-  {
-    cv::Point qrcode_center;
-    std::string qrcode_desc;
-  };
-
-  class QrCodeDetector
-  {
-    private:
-
-      //!< Debug images publisher flag
-      bool debug_publish;
-
-      //!< Input frame
-      cv::Mat input_frame;
-
-      //!< Grayscale frame, processed for QrCode detection
-      cv::Mat gray_frame;
-
-      //!< Frame for debug purposes
-      cv::Mat debug_frame;
-
-      //!< QrCode scanner
-      zbar::ImageScanner scanner;
-
-      //!< List of detected qrcodes
-      std::vector<QrCode> qrcode_list;
-
-      /**
-        @brief Creates view for debugging purposes.
-        @param image [zbar::Image&] The image
-        @return void
-       **/
-      void debug_show(zbar::Image&);
-
-
-    public:
-
-      int gaussiansharpenblur;
-
-      double gaussiansharpenweight;
-
-      QrCodeDetector();
-
-      /**
-        @brief Detects qrcodes and stores them in a vector.
-        @param frame [cv::Mat] The image in which the QRs are detected
-        @return void
-       **/
-      void detect_qrcode(cv::Mat input_frame);
-
-      void set_debug (bool flag)
-      {
-        debug_publish = flag;
-      };
-
-      cv::Mat get_debug_frame()
-      {
-        return debug_frame;
-      };
-
-      std::vector<QrCode> get_detected_qr()
-      {
-        return qrcode_list;
-      };
-  };
+/**
+  @brief Main function of the kinect node
+  @param argc [int] Number of input arguments
+  @param argv [char**] The input arguments
+  @return int : 0 for success
+ **/
+int main(int argc, char** argv)
+{
+  ros::init(argc,argv,"QrCodeNode");
+  vision::QrCodeDetection QrCodeDetection;
+  ros::spin();
+  return 0;
 }
-#endif
