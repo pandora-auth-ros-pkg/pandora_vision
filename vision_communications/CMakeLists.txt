@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(vision_communications)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS message_generation 
-										std_msgs 
-										geometry_msgs
-                                        sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation
+  std_msgs
+  geometry_msgs
+  sensor_msgs)
 
 # include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 # CATKIN_MIGRATION: removed during catkin migration
@@ -34,26 +34,20 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
 add_message_files(
-	FILES
-	HoleDirectionMsg.msg
-	HolesDirectionsVectorMsg.msg
-	FaceDirectionMsg.msg
-	HolePositionMsg.msg
-	HolesPositionsVectorMsg.msg
-	MotionMsg.msg
-	LineColorAlertMsg.msg
-	HazmatAlertMsg.msg
-	HazmatAlertsVectorMsg.msg
-	QRAlertMsg.msg
-	QRAlertsVectorMsg.msg
-    PlaneArray.msg
-    PlaneDesc.msg
-    PoseType.msg
-    PrimitiveType.msg
-    Shape.msg
-    ShapeArray.msg
-)
-    
+  FILES
+  HoleDirectionMsg.msg
+  HolesDirectionsVectorMsg.msg
+  FaceDirectionMsg.msg
+  HolePositionMsg.msg
+  HolesPositionsVectorMsg.msg
+  MotionMsg.msg
+  LineColorAlertMsg.msg
+  HazmatAlertMsg.msg
+  HazmatAlertsVectorMsg.msg
+  QRAlertMsg.msg
+  QRAlertsVectorMsg.msg
+  )
+
 add_service_files(
    FILES
    AddPlane.srv
@@ -79,17 +73,17 @@ include_directories(${Boost_INCLUDE_DIRS})
 ## Generate added messages and services with any dependencies listed here
 
 generate_messages(
-	DEPENDENCIES    std_msgs
-                    geometry_msgs
-                    sensor_msgs
-)
+  DEPENDENCIES    std_msgs
+  geometry_msgs
+  sensor_msgs
+  )
 # TODO: fill in what other packages will need to use this package
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-	CATKIN_DEPENDS message_runtime 
-     
-    #~ INCLUDE_DIRS # TODO include
-    #~ LIBRARIES # TODO
-)
+  CATKIN_DEPENDS message_runtime
+
+  #~ INCLUDE_DIRS # TODO include
+  #~ LIBRARIES # TODO
+  )
