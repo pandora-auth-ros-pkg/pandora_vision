@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_qrcode)
 
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
     roscpp
     vision_communications
     state_manager
@@ -24,7 +24,7 @@ catkin_package(
       sensor_msgs
     INCLUDE_DIRS
       include
-    LIBRARIES 
+    LIBRARIES
 )
 
 include_directories(include
@@ -32,8 +32,9 @@ include_directories(include
 )
 
 add_executable(qrcode_node
-    src/qrCode_detection.cpp 
-    src/qrCode_detector.cpp  
+    src/qrCode_detection.cpp
+    src/qrCode_detector.cpp
+    src/qrCode_node.cpp
 )
 add_dependencies(qrcode_node vision_communications_gencpp)
 target_link_libraries(qrcode_node ${catkin_LIBRARIES} zbar)
