@@ -40,9 +40,17 @@
 
 #include "hazmat_detector.h"
 
+/**
+@namespace pandora_vision
+@brief The general purpose pandora vision namespace
+**/
 namespace pandora_vision
 {
 
+  /**
+  @class HazmatDetection
+  @brief The hazmat detection class. Inherits the StateClient
+  **/
   class HazmatDetection : public StateClient 
   {
     private:
@@ -81,32 +89,69 @@ namespace pandora_vision
       //variable used for State Managing
       bool hazmatNowOn_;
       
+      int curState; //Current state of robot
+      
+      int prevState;  //Previous state of robot
+      
     public:
           
-      //constructor
-      HazmatDetection();
+      /**
+      @brief Default constructor
+      @return void
+      **/
+      HazmatDetection(void);
             
-      //destructor
-      ~HazmatDetection();	
+      /**
+      @brief Default destructor
+      @return void
+      **/
+      ~HazmatDetection(void);	
       
-      //get parameters from launch file
-      void getGeneralParams();
-      void getHazmatParams();
+      /**
+      @brief Reads the general parameters from the launch file
+      @return void
+      **/
+      void getGeneralParams(void);
       
-      //timer callbacks
-      void hazmatCallback();
+      /**
+      @brief Reads the hazmat - specific parameters from the launch file
+      @return void
+      **/
+      void getHazmatParams(void);
+
+      /**
+      @brief Method called only when a new image message is present
+      @return void
+      **/
+      void hazmatCallback(void);
       
-      //get a new image
+      /**
+      @brief Callback for a new image
+      @param msg [const sensor_msgs::ImageConstPtr&] The new image
+      @return void
+      **/
       void imageCallback(const sensor_msgs::ImageConstPtr& msg);
       
-      void spin();
+      /**
+      @brief Wrapper for ros::spin()
+      @return void
+      **/
+      void spin(void);
       
-      //Implemented from StateClient
+      /**
+      @brief Implemented from state manager. Called when a new transition \
+      happens
+      @param newState [int] The new state of the system
+      @return void
+      **/
       void startTransition(int newState);
-      void completeTransition(void);
       
-      int curState; //Current state of robot
-      int prevState;  //Previous state of robot
+      /**
+      @brief Called when the transition completes
+      @return void
+      **/
+      void completeTransition(void);
+
   };
 
 }
