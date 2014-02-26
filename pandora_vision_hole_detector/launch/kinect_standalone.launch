@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch" />
+  <node name="pandora_vision_hole_detector_node" type="pandora_vision_hole_detector_node" pkg="pandora_vision_hole_detector" respawn="False" output="screen" />
+</launch>
+
+<!--
+rosrun image_view image_view image:=/camera/rgb/image_color
+-->

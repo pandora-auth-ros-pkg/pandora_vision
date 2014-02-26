@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>pandora_vision_kinect</name>
+  <name>pandora_vision_hole_detector</name>
   <version>0.1.0</version>
   <description>Containts hole detection node using kinect sensor.</description>
 
