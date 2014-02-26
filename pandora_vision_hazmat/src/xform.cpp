@@ -18,11 +18,11 @@ static int calc_min_inliers( int, int, double, double );
 static inline double log_factorial( int );
 static struct feature** draw_ransac_sample( struct feature**, int, int );
 static void extract_corresp_pts( struct feature**, int, int, CvPoint2D64f**,
-        CvPoint2D64f** );
+  CvPoint2D64f** );
 static int find_consensus( struct feature**, int, int, CvMat*, ransac_err_fn,
-        double, struct feature*** );
+  double, struct feature*** );
 static inline void release_mem( CvPoint2D64f*, CvPoint2D64f*,
-        struct feature** );
+  struct feature** );
 
 /********************** Functions prototyped in model.h **********************/
 
