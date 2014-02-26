@@ -40,7 +40,7 @@
 /**
  * Constructor
  */
-HazmatDetection::HazmatDetection(void) :_nh()
+HazmatDetection::HazmatDetection(void) :nh_()
 {
 
   // Get General Parameters, such as frame width & height , camera id
@@ -55,29 +55,26 @@ HazmatDetection::HazmatDetection(void) :_nh()
   getHazmatParams();
   
   //Convert field of view from degrees to rads
-  hfov = hfov * CV_PI / 180;
-  vfov = vfov * CV_PI / 180;
 
-  ratioX = hfov / frameWidth;
-  ratioY = vfov / frameHeight;
+  ratioX_ = hfov_ / frameWidth_;
+  ratioY_ = vfov_ / frameHeight_;
 
-  //hazmatFrame = cv::Mat( frameWidth,frameHeight, IPL_DEPTH_8U, 3 );
-  hazmatFrame = cv::Mat( frameWidth,frameHeight, CV_8U );
+  hazmatFrame_ = cv::Mat( frameWidth_,frameHeight_, CV_8U );
     
   // Declare publisher and advertise topic where algorithm results are posted
-  _hazmatPublisher = _nh.advertise
+  hazmatPublisher_ = nh_.advertise
     <vision_communications::HazmatAlertsVectorMsg>("hazmat_alert", 10);
 
   //subscribe to input image's topic
-  sub = image_transport::ImageTransport(_nh).subscribe
-    (imageTopic, 1, &HazmatDetection::imageCallback,this);
+  sub_ = image_transport::ImageTransport(nh_).subscribe
+    (imageTopic_, 1, &HazmatDetection::imageCallback,this);
 
   //initialize states - robot starts in STATE_OFF 
   curState = state_manager_communications::robotModeMsg::MODE_OFF;
   prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
   //initialize state Managing Variables
-  hazmatNowON = false;
+  hazmatNowOn_ = false;
     
   clientInitialize();
     
@@ -90,7 +87,7 @@ HazmatDetection::HazmatDetection(void) :_nh()
 HazmatDetection::~HazmatDetection(void)
 {
   ROS_INFO("[hazmat_node] : Destroying Hazmat Detection instance");
-  delete _hazmatDetector;
+  delete hazmatDetector_;
 }
 
 /**
@@ -100,29 +97,28 @@ void HazmatDetection::getGeneralParams(void)
 {
   packagePath = ros::package::getPath("pandora_vision_hazmat");
   
-  // Get the hazmatDummy parameter if available;
   if (_nh.hasParam("hazmatDummy")) {
   {
-    _nh.getParam("hazmatDummy", hazmatDummy);
-    ROS_DEBUG("hazmatDummy : %d", hazmatDummy);
+    nh_.getParam("hazmatDummy_", hazmatDummy_);
+    ROS_DEBUG("hazmatDummy_ : %d", hazmatDummy_);
   }
   else 
   {
-    ROS_DEBUG("[webNode] : Parameter hazmatDummy not found. Using Default");
-    hazmatDummy = false;
+    ROS_DEBUG("[webNode] : Parameter hazmatDummy_ not found. Using Default");
+    hazmatDummy_ = false;
   }
   
   //get the store location of the image
-  if (_nh.hasParam("saveImagePath"))
+  if (nh_.hasParam("saveImagePath_"))
   {
-    _nh.getParam("saveImagePath", saveImagePath);
-    ROS_DEBUG_STREAM("path : " << saveImagePath);
+    nh_.getParam("saveImagePath_", saveImagePath_);
+    ROS_DEBUG_STREAM("path : " << saveImagePath_);
   }
   else
   {
     ROS_DEBUG
-      ("[hazmatNode] : Parameter saveImagePath not found. Using Default");
-    saveImagePath = "/home/pandora/Desktop/eyeCharts/";
+      ("[hazmatNode] : Parameter saveImagePath_ not found. Using Default");
+    saveImagePath_ = "/home/pandora/Desktop/eyeCharts/";
   }
   
   //!< Get the camera to be used by qr node;
@@ -138,13 +134,12 @@ void HazmatDetection::getGeneralParams(void)
   if (_nh.hasParam("/" + cameraName + "/image_height"))
   {
     _nh.getParam("/" + cameraName + "/image_height", frameHeight);
-    ROS_DEBUG_STREAM("height : " << frameHeight);
+    ROS_DEBUG_STREAM("height : " << frameHeight_);
   }
   else
   {
     ROS_DEBUG("[hazmat_node] : \
         Parameter frameHeight not found. Using Default");
-    frameHeight = DEFAULT_HEIGHT;
   }
   
   //!< Get the Width parameter if available;
@@ -163,12 +158,11 @@ void HazmatDetection::getGeneralParams(void)
   if (_nh.hasParam("/" + cameraName + "/topic_name"))
   {
     _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-    ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
   }
   else 
   {
     ROS_DEBUG("[hazmat_node] : Parameter imageTopic not found. Using Default");
-    imageTopic = "/camera_head/image_raw";
+    imageTopic_ = "/camera_head/image_raw";
   }
   
   //!< Get the images's frame_id;
@@ -211,9 +205,9 @@ void HazmatDetection::getHazmatParams(void)
 {	
   // Get the test parameter if available;
   int colorVariance;
-  if (_nh.hasParam("colorVariance")) 
+  if (nh_.hasParam("colorVariance")) 
   {
-    _nh.getParam("colorVariance", colorVariance);
+    nh_.getParam("colorVariance", colorVariance);
   }
   else 
   {
@@ -223,9 +217,9 @@ void HazmatDetection::getHazmatParams(void)
   }
 
   double votingThreshold;
-  if (_nh.hasParam("votingThreshold")) 
+  if (nh_.hasParam("votingThreshold")) 
   {
-    _nh.getParam("votingThreshold", votingThreshold);
+    nh_.getParam("votingThreshold", votingThreshold);
   }
   else 
   {
@@ -236,9 +230,9 @@ void HazmatDetection::getHazmatParams(void)
 
   //get the minimum area threshold of the hazmat in the image
   double minAreaThreshold;
-  if (_nh.hasParam("minAreaThreshold")) 
+  if (nh_.hasParam("minAreaThreshold")) 
   {
-    _nh.getParam("minAreaThreshold", minAreaThreshold);
+    nh_.getParam("minAreaThreshold", minAreaThreshold);
   }
   else 
   {
@@ -249,9 +243,9 @@ void HazmatDetection::getHazmatParams(void)
 
   //get the maximum area threshold of the hazmat in the image
   double maxAreaThreshold;
-  if (_nh.hasParam("maxAreaThreshold")) 
+  if (nh_.hasParam("maxAreaThreshold")) 
   {
-    _nh.getParam("maxAreaThreshold", maxAreaThreshold);
+    nh_.getParam("maxAreaThreshold", maxAreaThreshold);
   }
   else 
   {
@@ -262,9 +256,9 @@ void HazmatDetection::getHazmatParams(void)
 
   //get the sidelenght parameter of the rectangle in which to test for colour
   int sideLength;
-  if (_nh.hasParam("sideLength")) 
+  if (nh_.hasParam("sideLength")) 
   {
-    _nh.getParam("sideLength", sideLength);
+    nh_.getParam("sideLength", sideLength);
   }
   else 
   {
@@ -275,9 +269,9 @@ void HazmatDetection::getHazmatParams(void)
 
   //get the minimum number of features threshold
   int featureThreshold;
-  if (_nh.hasParam("featureThreshold")) 
+  if (nh_.hasParam("featureThreshold")) 
   {
-    _nh.getParam("featureThreshold", featureThreshold);
+    nh_.getParam("featureThreshold", featureThreshold);
   }
   else 
   {
@@ -287,22 +281,22 @@ void HazmatDetection::getHazmatParams(void)
   }
 
   //how many hazmats i have to search for
-  int hazmatNumber;
-  if (_nh.hasParam("hazmatNumber")) 
+  int hazmatNumber_;
+  if (nh_.hasParam("hazmatNumber_")) 
   {
-    _nh.getParam("hazmatNumber", hazmatNumber);
+    nh_.getParam("hazmatNumber_", hazmatNumber_);
   }
   else 
   {
-    ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber not found. Using Default");
-    hazmatNumber = 9;
+    ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber_ not found. Using Default");
+    hazmatNumber_ = 9;
   }
 
   //get the MO threshold
   double MOThreshold;
-  if (_nh.hasParam("MOThreshold")) 
+  if (nh_.hasParam("MOThreshold")) 
   {
-    _nh.getParam("MOThreshold", MOThreshold);
+    nh_.getParam("MOThreshold", MOThreshold);
   }
   else 
   {
@@ -310,7 +304,7 @@ void HazmatDetection::getHazmatParams(void)
     MOThreshold = 120000;
   }
 
-  _hazmatDetector->setHazmatParameters(
+  hazmatDetector_->setHazmatParameters(
     colorVariance,
     (float)votingThreshold,
     (float)minAreaThreshold,
@@ -331,17 +325,17 @@ void HazmatDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   //update image contents
   //sensor_msgs::CvBridge bridge;
   //hazmatFrame = bridge.imgMsgToCv(msg, "bgr8");
-  //hazmatFrameTimestamp = msg->header.stamp;
+  //hazmatFrameTimestamp_ = msg->header.stamp;
   
   cv_bridge::CvImagePtr in_msg;
   
   in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   
   cv::Mat temp = in_msg->image.clone();	
-  hazmatFrame = new IplImage(temp);
-  hazmatFrameTimestamp = msg->header.stamp;
+  hazmatFrame_ = new IplImage(temp);
+  hazmatFrameTimestamp_ = msg->header.stamp;
   
-  if ( hazmatFrame.empty() )
+  if ( hazmatFrame_.empty() )
   {               
     ROS_ERROR("[hazmatNode] : No more Frames");
     return;
@@ -354,13 +348,13 @@ void HazmatDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
  */
 void HazmatDetection::hazmatCallback()
 {
-  cv::Mat allblack = cv::Mat( frameWidth,frameHeight, CV_8U );
-  if(!hazmatNowON)
+  cv::Mat allblack = cv::Mat( frameWidth_,frameHeight_, CV_8U );
+  if(!hazmatNowOn_)
   {
     return;
   }
   
-  if(std::equal (hazmatFrame.begin<uchar>(), hazmatFrame.end<uchar>(), 
+  if(std::equal (hazmatFrame_.begin<uchar>(), hazmatFrame_.end<uchar>(), 
     allblack.begin<uchar>() ))
   {
     return;
@@ -369,7 +363,7 @@ void HazmatDetection::hazmatCallback()
   vision_communications::HazmatAlertsVectorMsg hazmatVectorMsg;
   vision_communications::HazmatAlertMsg hazmatMsg;
 
-  if (hazmatDummy)
+  if (hazmatDummy_)
   {
     /*
      * Dummy Hazmat Message
@@ -386,7 +380,7 @@ void HazmatDetection::hazmatCallback()
     }	
     if(hazmatVectorMsg.hazmatAlerts.size()>0)
     {
-      _hazmatPublisher.publish(hazmatVectorMsg);
+      hazmatPublisher_.publish(hazmatVectorMsg);
     }
 
     //dummy delay
@@ -401,36 +395,35 @@ void HazmatDetection::hazmatCallback()
     // run hazmat detector
   
     std::vector<HazmatEpsilon> a = 
-      _hazmatDetector->DetectHazmatEpsilon(hazmatFrame);
+      hazmatDetector_->DetectHazmatEpsilon(hazmatFrame_);
 
     //if hazmat found
     if (a.size() > 0)
     {
       hazmatVectorMsg.header.frame_id = cameraFrameId;
-      hazmatVectorMsg.header.stamp = hazmatFrameTimestamp;
+      hazmatVectorMsg.header.stamp = hazmatFrameTimestamp_;
       for (unsigned int i = 0; i < a.size() ; i++)
       {
         //hazmat message information
-        hazmatMsg.yaw = ratioX * ( a[i].x - frameWidth / 2 );
-        hazmatMsg.pitch = - ratioY * ( a[i].y - frameHeight / 2 );
+        hazmatMsg.yaw = ratioX_ * ( a[i].x - frameWidth_ / 2 );
+        hazmatMsg.pitch = - ratioY_ * ( a[i].y - frameHeight_ / 2 );
         hazmatMsg.patternType = a[i].pattern_num;
         //add the message to vector
         hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
               
         ROS_INFO("[hazmatNode] : Hazmat found!");
         //check if eye chart
-        if (a[i].pattern_num >hazmatNumber)
+        if (a[i].pattern_num >hazmatNumber_)
         {
           std::stringstream ss;
           //save Image to the desired location
-          ss << saveImagePath << hazmatFrameTimestamp << ".jpg";
-          imwrite(ss.str().c_str(),hazmatFrame);
-          //cvSaveImage(ss.str().c_str(),hazmatFrame);
+          ss << saveImagePath_ << hazmatFrameTimestamp_ << ".jpg";
+          imwrite(ss.str().c_str(),hazmatFrame_);
         }
       }
       if(hazmatVectorMsg.hazmatAlerts.size() > 0)
       {
-        _hazmatPublisher.publish(hazmatVectorMsg);
+        hazmatPublisher_.publish(hazmatVectorMsg);
       }
 
     }
@@ -455,7 +448,7 @@ void HazmatDetection::startTransition(int newState){
   curState = newState;
     
   //check if each algorithm should be running now
-  hazmatNowON = 
+  hazmatNowOn_ = 
     ( curState == 
       state_manager_communications::robotModeMsg::MODE_EXPLORATION ) ||
     ( curState == 

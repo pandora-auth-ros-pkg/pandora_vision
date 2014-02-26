@@ -45,48 +45,38 @@ class HazmatDetection : public StateClient
   private:
     
     //nodeHandle
-    ros::NodeHandle _nh;
-    HazmatEpsilonDetector* _hazmatDetector;
-    float ratioX;
-    float ratioY;
+    ros::NodeHandle nh_;
+    HazmatEpsilonDetector* hazmatDetector_;
+    float ratioX_;
+    float ratioY_;
     
-    float hfov;  //horizontal Field Of View (rad)
-    float vfov;
-    int frameWidth; //frame width
-    int frameHeight;  //frame height
+    float hfov_;  //horizontal Field Of View (rad)
+    float vfov_;
+    int frameWidth_; //frame width
+    int frameHeight_;  //frame height
     
-    cv::Mat hazmatFrame;  // frame processed by HazmatDetector
+    cv::Mat hazmatFrame_;  // frame processed by HazmatDetector
     
-    ros::Time hazmatFrameTimestamp; // HazmatDetector frame timestamp
+    ros::Time hazmatFrameTimestamp_; // HazmatDetector frame timestamp
     
-    ros::Timer  hazmatTimer;  //Timer for hazmat callback
-    
-    std::string packagePath;
-    std::string saveImagePath;
-    std::string imageTopic;
+    std::string packagePath_;
+    std::string saveImagePath_;
+    std::string imageTopic_;
     std::string cameraName;
     std::string cameraFrameId;
     
-    //time durations for every callback Timer in spin() function
-    double hazmatTime;
-    
-    int hazmatNumber;
-    
-    ros::ServiceClient hazmatClient;
+    int hazmatNumber_;
     
     //publisher
-    ros::Publisher _hazmatPublisher;
+    ros::Publisher hazmatPublisher_;
 
-    //Subscriber
-    
-    std::string transport;
-    image_transport::Subscriber sub;
+    image_transport::Subscriber sub_;
     
     // variables for changing in dummy msg mode for debugging
-    bool hazmatDummy;
+    bool hazmatDummy_;
     
     //variable used for State Managing
-    bool hazmatNowON;
+    bool hazmatNowOn_;
     
   public:
         

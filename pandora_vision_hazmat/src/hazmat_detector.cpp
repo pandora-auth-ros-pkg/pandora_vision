@@ -237,7 +237,8 @@ void HazmatEpsilonDetector::setParameters(void)
 } 
 
 /**
- * Calculates the area of a rectangle, using the area of its 2 fundamental triangles.
+ * Calculates the area of a rectangle, using the area of its 2 \
+ fundamental triangles.
  * Irona's computation method is used
  * @param pt1
  * @param pt2
