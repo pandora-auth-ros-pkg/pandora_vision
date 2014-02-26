@@ -40,8 +40,9 @@
 namespace pandora_vision
 {
   /**
-   * Constructor
-   */
+  @brief Default constructor
+  @return void
+  **/
   HazmatDetection::HazmatDetection(void) :nh_()
   {
 
@@ -84,8 +85,9 @@ namespace pandora_vision
   }
 
   /**
-   * Destructor
-   */
+  @brief Default destructor
+  @return void
+  **/
   HazmatDetection::~HazmatDetection(void)
   {
     ROS_INFO("[hazmat_node] : Destroying Hazmat Detection instance");
@@ -93,8 +95,9 @@ namespace pandora_vision
   }
 
   /**
-   * Get parameters referring to view and frame characteristics
-   */
+  @brief Reads the general parameters from the launch file
+  @return void
+  **/
   void HazmatDetection::getGeneralParams(void)
   {
   packagePath = ros::package::getPath("pandora_vision_hazmat");
@@ -201,8 +204,9 @@ namespace pandora_vision
   }
 
   /**
-   * Get parameters referring to hazmat detection algorithm
-   */
+  @brief Reads the hazmat - specific parameters from the launch file
+  @return void
+  **/
   void HazmatDetection::getHazmatParams(void)
   {	
     // Get the test parameter if available;
@@ -290,7 +294,8 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber_ not found. Using Default");
+      ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber_ not found. \
+      Using Default");
       hazmatNumber_ = 9;
     }
 
@@ -302,7 +307,8 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_DEBUG("[hazmatNode] : Parameter MOThreshold not found. Using Default");
+      ROS_DEBUG("[hazmatNode] : Parameter MOThreshold not found. \
+      Using Default");
       MOThreshold = 120000;
     }
 
@@ -319,9 +325,10 @@ namespace pandora_vision
   }
 
   /**
-   * Called in case of incoming ROS image message.
-   * @param msg
-   */
+  @brief Callback for a new image
+  @param msg [const sensor_msgs::ImageConstPtr&] The new image
+  @return void
+  **/
   void HazmatDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     //update image contents
@@ -346,8 +353,9 @@ namespace pandora_vision
   }
 
   /**
-   * Method called only when a new image message is present
-   */
+  @brief Method called only when a new image message is present
+  @return void
+  **/
   void HazmatDetection::hazmatCallback()
   {
     cv::Mat allblack = cv::Mat( frameWidth_,frameHeight_, CV_8U );
@@ -434,17 +442,20 @@ namespace pandora_vision
   }
 
   /**
-   * ROS spin function
-   */
+  @brief Wrapper for ros::spin()
+  @return void
+  **/
   void HazmatDetection::spin()
   {
     ros::spin();
   }
 
   /**
-   * Starts state transition
-   * @param newState
-   */
+  @brief Implemented from state manager. Called when a new transition \
+  happens
+  @param newState [int] The new state of the system
+  @return void
+  **/
   void HazmatDetection::startTransition(int newState){
     
     curState = newState;
@@ -458,11 +469,13 @@ namespace pandora_vision
       ( curState == 
         state_manager_communications::robotModeMsg::MODE_ARM_APPROACH ) ||
       ( curState == 
-        state_manager_communications::robotModeMsg::MODE_TELEOPERATED_LOCOMOTION )
+        state_manager_communications::robotModeMsg::\
+          MODE_TELEOPERATED_LOCOMOTION )
       ||( curState == 
         state_manager_communications::robotModeMsg::MODE_DF_HOLD );
         
-    if (curState == state_manager_communications::robotModeMsg::MODE_TERMINATING)
+    if (curState == state_manager_communications::robotModeMsg::\
+      MODE_TERMINATING)
     {
       ros::shutdown();
       return;
@@ -474,8 +487,9 @@ namespace pandora_vision
   }
 
   /**
-   * Called when state transition is completed
-   */
+  @brief Called when the transition completes
+  @return void
+  **/
   void HazmatDetection::completeTransition(void)
   {
     ROS_INFO("[hazmatNode] : Transition Complete");
@@ -484,10 +498,10 @@ namespace pandora_vision
 
 
 /**
- * Node's main method
+ * @brief Node's main method
  * @param argc
  * @param argv
- * @return
+ * @return int
  */
 int main(int argc, char** argv)
 {	

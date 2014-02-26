@@ -501,7 +501,9 @@ namespace pandora_vision
     cv::Mat _pattern_image,
     int n)  
   { 
-    IplImage* pattern_image = cvCreateImage( cvSize(cols,rows), IPL_DEPTH_8U, 3 );
+    IplImage* pattern_image = 
+      cvCreateImage( cvSize(cols,rows), IPL_DEPTH_8U, 3 );
+      
     IplImage* temp = new IplImage(_pattern_image);
     pattern_image = cvCloneImage(temp);
    
@@ -569,13 +571,13 @@ namespace pandora_vision
               bool test2 = 
                 ( ((uchar*)img_ycrcb.data)
                   [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2] 
+                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2]
                     >= 
                     (minUV[n][1] - colorVariance_) ) 
                 && 
                 ( ((uchar*)img_ycrcb.data)
                   [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2] 
+                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2]
                     <= 
                     (maxUV[n][1] + colorVariance_) );
               
