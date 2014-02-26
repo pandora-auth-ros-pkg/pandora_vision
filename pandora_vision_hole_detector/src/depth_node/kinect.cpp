@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/kinect.h"
+#include "depth_node/kinect.h"
 
 namespace vision
 {

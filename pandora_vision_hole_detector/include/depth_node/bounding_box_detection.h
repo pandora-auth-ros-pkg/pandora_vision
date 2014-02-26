@@ -35,42 +35,45 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_HOLE_DETECTOR
-#define KINECT_HOLE_DETECTOR
+#ifndef KINECT_BOUNDING_BOX_DETECTION
+#define KINECT_BOUNDING_BOX_DETECTION
 
-#include "pandora_vision_kinect/hole_filters.h"
+#include "depth_node/morphological_operators.h"
 
 /**
-  @namespace vision
-  @brief The main namespace for PANDORA vision
- **/
+@namespace vision
+@brief The main namespace for PANDORA vision
+**/
 namespace vision
 {
   /**
-    @class HoleDetector
-    @brief Provides the functionalities for detecting holes [functional]
-   **/
-  class HoleDetector
+  @class BoundingBoxDetection
+  @brief Provides methods for bounding box detection
+  **/
+  class BoundingBoxDetection
   {
     public:
 
-      static ParticleFilter pf;
-
       /**
-        @brief The HoleDetector constructor
+        @brief Finds rotated bounding boxes from blob outlines
+        @param inImage [const cv::Mat] The input image
+        @param blobsOutlineVector [std::vector<std::vector<cv::Point> >] The
+        outline points of the blobs
+        @param blobsArea [const std::vector<float>&] The blobs' area
+        @param outImage [cv::Mat&] The output image
+        @param outRectangles [std::vector< std::vector<cv::Point2f> >&] The
+        rectangles of the bounding boxes
+        @return void
        **/
-      HoleDetector(void);
+      static void findRotatedBoundingBoxesFromOutline(
+        const cv::Mat inImage,
+        const std::vector<std::vector<cv::Point> > blobsOutlineVector,
+        const std::vector<float> blobsArea,
+        cv::Mat& outImage,
+        std::vector< std::vector<cv::Point2f> >& outRectangles);
 
-      /**
-        @brief Finds the holes provided a depth image in CV_32FC1 format
-        @param[in] depthImage [cv::Mat] The depth image in CV_32FC1 format
-        @param[in] pointCloud [pcl::PointCloud<pcl::PointXYZ>::Ptr] The point
-        cloud from which the depth image is extracted
-        @return std::vector<cv::Point2f> Centers of the possible holes
-       **/
-      static HoleFilters::HolesConveyor findHoles(cv::Mat depthImage,
-          pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud);
   };
+
 }
 
 #endif

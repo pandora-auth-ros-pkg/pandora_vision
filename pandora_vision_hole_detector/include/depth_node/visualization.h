@@ -38,7 +38,7 @@
 #ifndef KINECT_VISUALIZATION
 #define KINECT_VISUALIZATION
 
-#include "pandora_vision_kinect/parameters.h"
+#include "depth_node/parameters.h"
 
 /**
 @namespace vision

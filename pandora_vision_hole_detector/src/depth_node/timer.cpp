@@ -1,4 +1,4 @@
-#include "pandora_vision_kinect/timer.h"
+#include "depth_node/timer.h"
 
 std::map<std::string,double> Timer::times = std::map<std::string,double>();
 std::map<std::string,double> Timer::max_time = std::map<std::string,double>();
@@ -6,14 +6,14 @@ std::map<std::string,double> Timer::min_time = std::map<std::string,double>();
 std::map<std::string,double> Timer::mean_time = std::map<std::string,double>();
 std::map<std::string,double> Timer::sum_time = std::map<std::string,double>();
 
-std::map<std::string,unsigned long> Timer::count = 
+std::map<std::string,unsigned long> Timer::count =
   std::map<std::string,unsigned long>();
-  
-std::map<std::string,std::set<std::string> > Timer::timer_tree = 
+
+std::map<std::string,std::set<std::string> > Timer::timer_tree =
   std::map<std::string,std::set<std::string> >();
-  
+
 std::string Timer::top_node = "";
-  
+
 struct timeval Timer::msTime = timeval();
 
 void Timer::printMsInternal(double t)
@@ -50,7 +50,7 @@ void Timer::printLiteralInternal(double t)
       if(hours >= 1)
       {
         min -= hours * 60;
-        std::cout << min << " hours " <<hours << " minutes " << sec 
+        std::cout << min << " hours " <<hours << " minutes " << sec
           << " sec " << t << " ms\n";
       }
       else
@@ -70,7 +70,7 @@ void Timer::printLiteralInternal(double t)
 }
 
 void Timer::start(std::string timerId, std::string father, bool top)
-{  
+{
   MsdIt it = times.find(timerId);
   if(it == times.end())
   {
@@ -106,7 +106,7 @@ void Timer::start(std::string timerId, std::string father, bool top)
 }
 
 double Timer::stop(std::string timerId)
-{  
+{
   MsdIt it = times.find(timerId);
   if(it == times.end())
   {
@@ -122,7 +122,7 @@ double Timer::stop(std::string timerId)
 }
 
 double Timer::mean(std::string timerId)
-{  
+{
   MsdIt it = times.find(timerId);
   if(it == times.end())
   {
@@ -136,7 +136,7 @@ double Timer::mean(std::string timerId)
 }
 
 void Timer::tick(std::string timerId)
-{  
+{
   MsdIt it = times.find(timerId);
   if(it == times.end())
   {
@@ -197,9 +197,9 @@ void Timer::printLiteralMean(std::string timerId, std::string identation)
   }
   else
   {
-    std::cout << identation << timerId << 
+    std::cout << identation << timerId <<
       "' [" << times[timerId] << " - " <<
-      min_time[timerId] << " , " << mean_time[timerId] << " , " << 
+      min_time[timerId] << " , " << mean_time[timerId] << " , " <<
       max_time[timerId] << " - " << count[timerId] << "]\n";
   }
 }

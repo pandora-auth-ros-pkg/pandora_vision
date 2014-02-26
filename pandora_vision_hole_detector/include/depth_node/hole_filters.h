@@ -38,11 +38,11 @@
 #ifndef KINECT_HOLE_FILTERS
 #define KINECT_HOLE_FILTERS
 
-#include "pandora_vision_kinect/noise_elimination.h"
-#include "pandora_vision_kinect/edge_detection.h"
-#include "pandora_vision_kinect/blob_detection.h"
-#include "pandora_vision_kinect/bounding_box_detection.h"
-#include "pandora_vision_kinect/planes_detection.h"
+#include "depth_node/noise_elimination.h"
+#include "depth_node/edge_detection.h"
+#include "depth_node/blob_detection.h"
+#include "depth_node/bounding_box_detection.h"
+#include "depth_node/planes_detection.h"
 #include <math.h>
 
 /**

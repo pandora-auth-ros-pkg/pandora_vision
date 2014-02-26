@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/morphological_operators.h"
+#include "depth_node/morphological_operators.h"
 
 namespace vision {
 

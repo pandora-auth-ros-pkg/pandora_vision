@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/blob_detection.h"
+#include "depth_node/blob_detection.h"
 
 namespace vision{
 

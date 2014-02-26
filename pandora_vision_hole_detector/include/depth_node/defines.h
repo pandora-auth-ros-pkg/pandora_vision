@@ -81,7 +81,7 @@
 #include <image_transport/image_transport.h>
 #include "std_msgs/String.h"
 
-#include "pandora_vision_kinect/timer.h"
+#include "depth_node/timer.h"
 
 #define DEBUG_SHOW
 //~ #define DEBUG_PRINT

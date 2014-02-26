@@ -38,7 +38,7 @@
 #ifndef KINECT_PLANES_DETECTION
 #define KINECT_PLANES_DETECTION
 
-#include "pandora_vision_kinect/morphological_operators.h"
+#include "depth_node/morphological_operators.h"
 
 /**
   @namespace vision

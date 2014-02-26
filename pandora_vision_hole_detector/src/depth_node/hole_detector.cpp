@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/hole_detector.h"
+#include "depth_node/hole_detector.h"
 
 namespace vision
 {

@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/edge_detection.h"
+#include "depth_node/edge_detection.h"
 
 namespace vision {
 
