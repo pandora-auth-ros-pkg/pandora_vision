@@ -35,12 +35,12 @@
 * Authors:  Tsakalis Vasilis, Despoina Paschalidou
 *********************************************************************/
 
-#ifndef HAZMATEPSILONDETECTOR_H
-#define HAZMATEPSILONDETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H_
+#define PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H_
 
-#include "sift.h"
-#include "kdtree.h"
-#include "xform.h"
+#include "pandora_vision_hazmat/sift.h"
+#include "pandora_vision_hazmat/kdtree.h"
+#include "pandora_vision_hazmat/xform.h"
 
 namespace pandora_vision
 {
@@ -48,7 +48,7 @@ namespace pandora_vision
   struct HazmatEpsilon //the struct in which the results are stored
   { 
     int pattern_num;
-    float x,y;
+    float x, y;
     int m;
     float MO;
     int votes;
@@ -97,25 +97,25 @@ namespace pandora_vision
       
       HazmatEpsilonDetector(std::string package_path); //our constructor
       
-      ~HazmatEpsilonDetector(); //our destructor
+      ~HazmatEpsilonDetector(void); //our destructor
       
       std::vector<CvPoint2D64f> center_of;
       
-      void calcHistograms();
+      void calcHistograms(void);
       
       //shows how many patterns were found in the screenshot
       int patterns_found_counter; 
       
       // Initialize class parameters. Can be tweaked to exchange \
       quality for speed.
-      void setParameters(); 
+      void setParameters(void); 
       
       // Initialize hazmat detector. Loads hazmats from hard disk into memory.
-      void initDetector(); 
+      void initDetector(void); 
       
       // Reads contents from file "contents" and stores into memory \
       the processed hazmats
-      void preprocessHazmat(); 
+      void preprocessHazmat(void); 
       
       // The core of the hazmat detector. Detects hazmats in the screenshot
       std::vector<HazmatEpsilon> detectHazmat(cv::Mat hazmatFrame); 
@@ -124,25 +124,26 @@ namespace pandora_vision
       int detectEpsilon(char* screenshot); 
       
       //our basic function called by programs
-      int HazmatEpsilonDetect(); 
+      int HazmatEpsilonDetect(void); 
       
       // the fully functional detector of both hazmat and epsilon patterns
       std::vector<HazmatEpsilon> DetectHazmatEpsilon(cv::Mat img); 
       
       //upologizw embado tetrapleurou apo tis tesseris korufes tou
       float calculateRectangleArea(
-        CvPoint2D64f pt1,CvPoint2D64f pt2, CvPoint2D64f pt3,CvPoint2D64f pt4); 
+        CvPoint2D64f pt1, CvPoint2D64f pt2, CvPoint2D64f pt3, CvPoint2D64f pt4);
       
-      void setHazmatParameters(int clrVariance,float votingThr,float minAreaThr,
-        float maxAreaThr,int sideLgth,int featThr,float MOThr);
+      void setHazmatParameters(int clrVariance, float votingThr, 
+        float minAreaThr, float maxAreaThr, int sideLgth, int featThr, 
+        float MOThr);
       
-      std::vector <int> findFeature(int &m,int n,int testNum, 
+      std::vector <int> findFeature(int* m, int n, int testNum,  
         struct kd_node* kd_root);
       
-      void calculateArea(CvMat* H,cv::Mat pattern_image);
+      void calculateArea(CvMat* H, cv::Mat pattern_image);
       
-      CvPoint2D64f defineVariance(float& SAD,float& SAD2,
-        IplImage* img,CvMat* H,cv::Mat _pattern_image,int n);  
+      CvPoint2D64f defineVariance(float* SAD, float* SAD2,
+        IplImage* img, CvMat* H, cv::Mat _pattern_image, int n);  
       
       cv::MatND patternHistog;
       
@@ -152,12 +153,10 @@ namespace pandora_vision
       
       float**maxUV;
       
-      int rows,cols; 
-
-      
+      int rows, cols; 
   };
-}
+} // namespace pandora_vision
 
 
 
-#endif
+#endif  // PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H_

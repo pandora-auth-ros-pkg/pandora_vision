@@ -112,12 +112,12 @@ namespace pandora_vision
     for (int i = 0 ; i < nPatterns_ ; i++)
     {
       char temp_name[50];
-      sprintf(temp_name,"/patterns/enter%d.png",i + 1);
+      sprintf(temp_name, "/patterns/enter%d.png", i + 1);
       std::string name = param_path_ + temp_name;
       
       image = cv::imread(name.c_str(), 1);
       cvtColor(image, image, CV_BGR2YCrCb);
-      int height,width,step,channels;
+      int height, width, step, channels;
       height    = image.size().height;
       width     = image.size().width;
       step      = image.step;
@@ -129,53 +129,53 @@ namespace pandora_vision
         {
           if( (j == 0) && (k == 0) )
           {
-            minUV[i][0] = ((uchar *)image.data)
+            minUV[i][0] = (reinterpret_cast<uchar *>(image.data))
               [((height / 2) - (sideLength_ / 2) + j) * step + 
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 1];
-            minUV[i][1] = ((uchar *)image.data)
+            minUV[i][1] = (reinterpret_cast<uchar *>(image.data))
               [((height / 2) - (sideLength_ / 2) + j) * step + 
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 2];
-            maxUV[i][0] = ((uchar *)image.data)
+            maxUV[i][0] = (reinterpret_cast<uchar *>(image.data))
               [((height / 2) - (sideLength_ / 2) + j) * step + 
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 1];
-            maxUV[i][1] = ((uchar *)image.data)
+            maxUV[i][1] = (reinterpret_cast<uchar *>(image.data))
               [((height / 2) - (sideLength_ / 2) + j) * step + 
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 2];
           }
           else
           {
-            if(minUV[i][0] > ((uchar *)image.data)
+            if(minUV[i][0] > (reinterpret_cast<uchar *>(image.data))
               [((height / 2) - (sideLength_ / 2) + j) * step + 
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 1])
             {
-              minUV[i][0] = ((uchar *)image.data)
+              minUV[i][0] = (reinterpret_cast<uchar *>(image.data))
                 [((height / 2) - (sideLength_ / 2) + j) * step + 
                   ((width / 2) - (sideLength_ / 2) + k) * channels + 1];
             }
             
-            if (minUV[i][1] > ((uchar *)image.data)[
+            if (minUV[i][1] > (reinterpret_cast<uchar *>(image.data))[
               ((height / 2) - (sideLength_ / 2) + j) * step +
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 2])
             {
-              minUV[i][1] = ((uchar *)image.data)[
+              minUV[i][1] = (reinterpret_cast<uchar *>(image.data))[
                 ((height / 2) - (sideLength_ / 2) + j) * step +
                   ((width / 2) - (sideLength_ / 2) + k) * channels + 2];
             }
             
-            if(maxUV[i][0] < ((uchar *)image.data)[
+            if(maxUV[i][0] < (reinterpret_cast<uchar *>(image.data))[
               ((height / 2) - (sideLength_ / 2) + j) * step +
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 1])
             {
-              maxUV[i][0] = ((uchar *)image.data)[
+              maxUV[i][0] = (reinterpret_cast<uchar *>(image.data))[
                 ((height / 2) - (sideLength_ / 2) + j) * step +
                   ((width / 2) - (sideLength_ / 2) + k) * channels + 1];
             }
             
-            if(maxUV[i][1] < ((uchar *)image.data)[
+            if(maxUV[i][1] < (reinterpret_cast<uchar *>(image.data))[
               ((height / 2) - (sideLength_ / 2) + j) * step +
                 ((width / 2) - (sideLength_ / 2) + k) * channels + 2])
             {
-              maxUV[i][1] = ((uchar *)image.data)[
+              maxUV[i][1] = (reinterpret_cast<uchar *>(image.data))[
                 ((height / 2) - (sideLength_ / 2) + j) * step +
                   ((width / 2) - (sideLength_ / 2) + k) * channels + 2];
             }
@@ -195,10 +195,10 @@ namespace pandora_vision
       char temp_name[50];
       for(int i = 0 ; i < nPatterns_ ; i++)
       {
-        sprintf(temp_name,"/patterns/enter%d.png",i + 1);
+        sprintf(temp_name, "/patterns/enter%d.png", i + 1);
         std::string name = param_path_ + temp_name;
-        image = cv::imread(name.c_str(),1);
-        cvtColor(image,image, CV_BGR2HSV);
+        image = cv::imread(name.c_str(), 1);
+        cvtColor(image, image, CV_BGR2HSV);
         patterns[i] = image;
       }
       // Quantize the hue to 30 levels
@@ -302,15 +302,15 @@ namespace pandora_vision
     CvPoint2D64f xc[4], 
       c[4] = { 
         { 0, 0 }, 
-        { target->size().width-1, 0 }, 
-        { target->size().width-1, target->size().height-1 }, 
-        { 0, target->size().height-1 } };
+        { target->size().width - 1, 0 }, 
+        { target->size().width - 1, target->size().height - 1 }, 
+        { 0, target->size().height - 1 } };
     
-    for(int i = 0 ; i < 4; i++ )
+    for(int i = 0 ; i < 4 ; i++ )
     {
       xc[i] = persp_xform_pt( c[i], H );
     }
-    for(int i = 0 ; i < 4; i++ )
+    for(int i = 0 ; i < 4 ; i++ )
     {
       cv::line( 
         *img, 
@@ -342,7 +342,7 @@ namespace pandora_vision
     
     while(true)
     {
-      fgets(imgName, 49, contents);	
+      fgets(imgName, 49, contents);
 
       if(imgName[0] == '\n') 
       {
@@ -375,8 +375,8 @@ namespace pandora_vision
       feature_name = param_path_+featName;
 
       //Returns the number of features imported from every pattern
-      nFeats_[n] = import_features((char*)feature_name.c_str(), 
-        FEATURE_LOWE, &feats_[n]);
+      nFeats_[n] = import_features(const_cast<char*>(feature_name.c_str())
+        , FEATURE_LOWE, &feats_[n]);
     } 
     fclose(contents);
   }
@@ -430,14 +430,14 @@ namespace pandora_vision
    * @return
    */
   std::vector <int> HazmatEpsilonDetector::findFeature(
-    int &m,
+    int* m,
     int n,
     int testNum,
     struct kd_node* kd_root)
   {
     struct feature** nbrs;   
     int i;
-    double d0,d1;
+    double d0, d1;
     std::vector <int> tempvector;
     for(i = 0 ; i < testNum ; i++)
     {
@@ -452,7 +452,7 @@ namespace pandora_vision
         {
           feats_[n][i].fwd_match = nbrs[0];
           tempvector.push_back(i);
-          m ++;
+          m++;
         }
       }
       free(nbrs);
@@ -480,7 +480,7 @@ namespace pandora_vision
     point4 = persp_xform_pt( point4, H );
     
     //calculate the final area
-    area_ = calculateRectangleArea(point1,point2,point3,point4);
+    area_ = calculateRectangleArea(point1, point2, point3, point4);
   }
 
   /**
@@ -494,26 +494,26 @@ namespace pandora_vision
    * @return
    */
   CvPoint2D64f HazmatEpsilonDetector::defineVariance(
-    float& SAD,
-    float& SAD2,
+    float* SAD,
+    float* SAD2,
     IplImage* img,
     CvMat* H,
     cv::Mat _pattern_image,
     int n)  
   { 
     IplImage* pattern_image = 
-      cvCreateImage( cvSize(cols,rows), IPL_DEPTH_8U, 3 );
+      cvCreateImage( cvSize(cols, rows), IPL_DEPTH_8U, 3 );
       
     IplImage* temp = new IplImage(_pattern_image);
     pattern_image = cvCloneImage(temp);
    
     IplImage* _xformed = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 3 );
     cvWarpPerspective( pattern_image, _xformed, H, 
-      CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cv::Scalar( 0,0,0 ) );
+      CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cv::Scalar( 0, 0, 0 ) );
     
     cv::Mat xformed(_xformed, false);
    
-    cv::Mat color_image = cv::Mat( cv::Size(cols,rows), CV_8U, 3 );
+    cv::Mat color_image = cv::Mat( cv::Size(cols, rows), CV_8U, 3 );
     xformed.copyTo(color_image);
     cvtColor(color_image, color_image, CV_BGR2YCrCb);
     cv::Mat _img(img, false);
@@ -522,8 +522,8 @@ namespace pandora_vision
     _img.copyTo(img_ycrcb);
     cvtColor(img_ycrcb, img_ycrcb, CV_BGR2YCrCb);
 
-    int height,width,step,channels;
-    int height2,width2,step2,channels2;	
+    int height, width, step, channels;
+    int height2, width2, step2, channels2;
     
     height    = color_image.size().height;
     width     = color_image.size().width;
@@ -554,56 +554,72 @@ namespace pandora_vision
             ( (point.x - (sideLength_/2) +counter2 ) < cols ))
           {
             bool test1 = 
-              ( ((uchar*)img_ycrcb.data)
-                [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                  ( (int)point.x - sideLength_ / 2 + counter2) * channels + 1 ] 
+              ( (reinterpret_cast<uchar*>(img_ycrcb.data)
+                [ ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                    step + 
+                  ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                    channels + 1 ] 
                   >= 
                   (minUV[n][0] - 333333333333333333) )
               && 
-              ( ((uchar*)img_ycrcb.data)
-                [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                  ( (int)point.x - sideLength_ / 2 + counter2) * channels + 1] 
+              ( (reinterpret_cast<uchar*>(img_ycrcb.data)
+                [ ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                    step + 
+                  ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                    channels + 1] 
                   <= 
-                  (maxUV[n][0] + colorVariance_));
+                  (maxUV[n][0] + colorVariance_))));
                   
             if(test1 == true)
             {
               bool test2 = 
-                ( ((uchar*)img_ycrcb.data)
-                  [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2]
+                ( (reinterpret_cast<uchar*>(img_ycrcb.data))
+                  [ ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                      step + 
+                    ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                      channels + 2]
                     >= 
                     (minUV[n][1] - colorVariance_) ) 
                 && 
-                ( ((uchar*)img_ycrcb.data)
-                  [ ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                    ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2]
+                ( (reinterpret_cast<uchar*>(img_ycrcb.data))
+                  [ ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                      step + 
+                    ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                      channels + 2]
                     <= 
                     (maxUV[n][1] + colorVariance_) );
               
               if(test2 == true)
               {
-                votes_ ++;
+                votes_++;
               }
             }
             //find the absolute variance between the initial and the final image
             
-            SAD = SAD + fabsf( 
-              ((uchar*)img_ycrcb.data)[
-                ( (int)point.y - sideLength_ / 2 + counter) * step2 + 
-                ( (int)point.x - sideLength_ / 2 + counter2) * channels2 + 1] - 
-              ((uchar *)color_image.data)[
-                ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                ( (int)point.x - sideLength_ / 2 + counter2) * channels + 1] );
+            *SAD = *SAD + fabsf( 
+              (reinterpret_cast<uchar*>(img_ycrcb.data))[
+                ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                  step2 + 
+                ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                  channels2 + 1] - 
+              (reinterpret_cast<uchar*>(color_image.data))[
+                ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                  step + 
+                ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                  channels + 1] );
                  
-            SAD2 = SAD2 + fabsf( 
-              ((uchar*)img_ycrcb.data)[
-                ( (int)point.y - sideLength_ / 2 + counter) * step2 + 
-                ( (int)point.x - sideLength_ / 2 + counter2) * channels2 + 2] - 
-              ((uchar *)color_image.data)[
-                ( (int)point.y - sideLength_ / 2 + counter) * step + 
-                ( (int)point.x - sideLength_ / 2 + counter2) * channels + 2]); 
-          }	 	
+            *SAD2 = *SAD2 + fabsf( 
+              (reinterpret_cast<uchar*>(img_ycrcb.data))[
+                ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                  step2 + 
+                ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                  channels2 + 2] - 
+              (reinterpret_cast<uchar*>(color_image.data))[
+                ( static_cast<int>(point.y) - sideLength_ / 2 + counter) * 
+                  step + 
+                ( static_cast<int>(point.x) - sideLength_ / 2 + counter2) * 
+                  channels + 2]); 
+          }
         }
       }
     }
@@ -622,8 +638,8 @@ namespace pandora_vision
     cv::Mat hazmatFrame)
   {
     std::vector<HazmatEpsilon> result;
-    frameNum_ ++;
-    IplImage* img = cvCreateImage( cv::Size(cols,rows), IPL_DEPTH_8U, 3 );
+    frameNum_++;
+    IplImage* img = cvCreateImage( cv::Size(cols, rows), IPL_DEPTH_8U, 3 );
     IplImage* temp = new IplImage(hazmatFrame);
     img = cvCloneImage(temp);
     
@@ -663,7 +679,7 @@ namespace pandora_vision
         int m = 0;
         int testNum = nFeats_[n];
         std::vector <int> tempvector;
-        tempvector = findFeature(m,n,testNum,kd_root);
+        tempvector = findFeature(&m, n, testNum, kd_root);
             
         // Run RANSAC to find out a transformation that transforms patterns \
         into screenshot
@@ -685,7 +701,7 @@ namespace pandora_vision
           if( H )
           {
             char temp_name[50];
-            sprintf(temp_name,"/patterns/enter%d.png",n + 1);
+            sprintf(temp_name, "/patterns/enter%d.png", n + 1);
             std::string name;
             name = param_path_ + temp_name;
           
@@ -697,14 +713,14 @@ namespace pandora_vision
               std::cout << "could not load pattern image" << std::endl;
             }
             
-            calculateArea(H,pattern_image);
+            calculateArea(H, pattern_image);
 
             if (area_ >= minAreaThreshold_ && area_ <= maxAreaThreshold_)
             {
               float SAD = 0;
               float SAD2 = 0;
               CvPoint2D64f point;
-              point = defineVariance(SAD, SAD2, img, H, pattern_image, n);
+              point = defineVariance(&SAD, &SAD2, img, H, pattern_image, n);
               
               //check if the final image's results is within thresholds
               if (votes_ > votingThreshold_)
@@ -736,8 +752,8 @@ namespace pandora_vision
                         flag = true;
                         float possibility1 = 0;
                         float possibility2 = 0;
-                        //check if i already have a hazmat in the same place \
-                        and check which fits best
+                        //check if i already have a hazmat in the same place
+                        //and check which fits best
                         if ( a.m > result[v].m)
                         {
                           possibility1 = possibility1 + 0.4;
@@ -751,7 +767,8 @@ namespace pandora_vision
                         {
                           possibility1 = possibility1 + 0.3;
                         }
-                        else{
+                        else
+                        {
                           possibility2 = possibility2 + 0.3;
                         }
                         
@@ -794,21 +811,21 @@ namespace pandora_vision
         {
           for (int l = 0 ; l < tempvector.size() ; l++)
           {
-            feats_[n][tempvector[l]].fwd_match=NULL;
+            feats_[n][tempvector[l]].fwd_match = NULL;
           }
         }
         tempvector.erase(tempvector.begin(), tempvector.end());
       }
       kdtree_release(kd_root);
       free(featShot);
-    }	
-    if(frameNum_>1)
+    }
+    if(frameNum_ > 1)
     {
       frameNum_ = 0;
       delete [] feats_;
     }
     delete temp;
-    cvReleaseImage(&img);	
+    cvReleaseImage(&img);
     return result;
   }
 
@@ -824,4 +841,4 @@ namespace pandora_vision
     result = detectHazmat(img);
     return result;
   }
-}
+} // namespace pandora_vision
