@@ -7,9 +7,9 @@
 */
 
 #include "pandora_vision_hazmat/minpq.h"
-#include "pandora_vision_hazmat/utils.h"
 
-#include <limits.h>
+
+
 
 /************************* Local Function Prototypes *************************/
 
@@ -77,14 +77,14 @@ int minpq_insert( struct min_pq* min_pq, void* data, int key )
   if( min_pq->nallocd == n )
     {
       min_pq->nallocd = array_double( (void**)&min_pq->pq_array,
-				      min_pq->nallocd,
-				      sizeof( struct pq_node ) );
+              min_pq->nallocd,
+              sizeof( struct pq_node ) );
       if( ! min_pq->nallocd )
-	{
-	  fprintf( stderr, "Warning: unable to allocate memory, %s, line %d\n",
-		   __FILE__, __LINE__ );
-	  return 1;
-	}
+  {
+    fprintf( stderr, "Warning: unable to allocate memory, %s, line %d\n",
+       __FILE__, __LINE__ );
+    return 1;
+  }
     }
 
   min_pq->pq_array[n].data = data;
@@ -155,7 +155,7 @@ void minpq_release( struct min_pq** min_pq )
   if( ! min_pq )
     {
       fprintf( stderr, "Warning: NULL pointer error, %s line %d\n", __FILE__,
-	       __LINE__ );
+         __LINE__ );
       return;
     }
   if( *min_pq  &&  (*min_pq)->pq_array )

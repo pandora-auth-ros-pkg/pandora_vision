@@ -15,13 +15,7 @@
 */
 
 #include "pandora_vision_hazmat/kdtree.h"
-#include "pandora_vision_hazmat/minpq.h"
-#include "pandora_vision_hazmat/imgfeatures.h"
-#include "pandora_vision_hazmat/utils.h"
 
-#include <cxcore.h>
-
-#include <stdio.h>
 
 struct bbf_data
 {
@@ -40,7 +34,7 @@ static void insertion_sort( double*, int );
 static int partition_array( double*, int, double );
 static void partition_features( struct kd_node* );
 static struct kd_node* explore_to_leaf( struct kd_node*, struct feature*,
-					struct min_pq* );
+          struct min_pq* );
 static int insert_into_nbr_array( struct feature*, struct feature**, int, int );
 static int within_rect( CvPoint2D64f, CvRect );
 
@@ -64,7 +58,7 @@ struct kd_node* kdtree_build( struct feature* features, int n )
   if( ! features  ||  n <= 0 )
     {
       fprintf( stderr, "Warning: kdtree_build(): no features, %s, line %d\n",
-	       __FILE__, __LINE__ );
+         __FILE__, __LINE__ );
       return NULL;
     }
 
@@ -91,7 +85,7 @@ struct kd_node* kdtree_build( struct feature* features, int n )
     -1 on error.
 */
 int kdtree_bbf_knn( struct kd_node* kd_root, struct feature* feat, int k,
-		    struct feature*** nbrs, int max_nn_chks )
+        struct feature*** nbrs, int max_nn_chks )
 {
   struct kd_node* expl;
   struct min_pq* min_pq;
@@ -102,7 +96,7 @@ int kdtree_bbf_knn( struct kd_node* kd_root, struct feature* feat, int k,
   if( ! nbrs  ||  ! feat  ||  ! kd_root )
     {
       fprintf( stderr, "Warning: NULL pointer error, %s, line %d\n",
-	       __FILE__, __LINE__ );
+         __FILE__, __LINE__ );
       return -1;
     }
 
@@ -113,35 +107,35 @@ int kdtree_bbf_knn( struct kd_node* kd_root, struct feature* feat, int k,
     {
       expl = (struct kd_node*)minpq_extract_min( min_pq );
       if( ! expl )
-	{
-	  fprintf( stderr, "Warning: PQ unexpectedly empty, %s line %d\n",
-		   __FILE__, __LINE__ );
-	  goto fail;
-	}
+  {
+    fprintf( stderr, "Warning: PQ unexpectedly empty, %s line %d\n",
+       __FILE__, __LINE__ );
+    goto fail;
+  }
 
       expl = explore_to_leaf( expl, feat, min_pq );
       if( ! expl )
-	{
-	  fprintf( stderr, "Warning: PQ unexpectedly empty, %s line %d\n",
-		   __FILE__, __LINE__ );
-	  goto fail;
-	}
+  {
+    fprintf( stderr, "Warning: PQ unexpectedly empty, %s line %d\n",
+       __FILE__, __LINE__ );
+    goto fail;
+  }
 
       for( i = 0; i < expl->n; i++ )
-	{
-	  tree_feat = &expl->features[i];
-	  bbf_data = (struct bbf_data*)malloc( sizeof( struct bbf_data ) );
-	  if( ! bbf_data )
-	    {
-	      fprintf( stderr, "Warning: unable to allocate memory,"
-		       " %s line %d\n", __FILE__, __LINE__ );
-	      goto fail;
-	    }
-	  bbf_data->old_data = tree_feat->feature_data;
-	  bbf_data->d = descr_dist_sq(feat, tree_feat);
-	  tree_feat->feature_data = bbf_data;
-	  n += insert_into_nbr_array( tree_feat, _nbrs, n, k );
-	}
+  {
+    tree_feat = &expl->features[i];
+    bbf_data = (struct bbf_data*)malloc( sizeof( struct bbf_data ) );
+    if( ! bbf_data )
+      {
+        fprintf( stderr, "Warning: unable to allocate memory,"
+           " %s line %d\n", __FILE__, __LINE__ );
+        goto fail;
+      }
+    bbf_data->old_data = tree_feat->feature_data;
+    bbf_data->d = descr_dist_sq(feat, tree_feat);
+    tree_feat->feature_data = bbf_data;
+    n += insert_into_nbr_array( tree_feat, _nbrs, n, k );
+  }
       t++;
     }
 
@@ -189,8 +183,8 @@ int kdtree_bbf_knn( struct kd_node* kd_root, struct feature* feat, int k,
      \a max_nn_checks keypoint entries).
 */
 int kdtree_bbf_spatial_knn( struct kd_node* kd_root, struct feature* feat,
-			    int k, struct feature*** nbrs, int max_nn_chks,
-			    CvRect rect, int model )
+          int k, struct feature*** nbrs, int max_nn_chks,
+          CvRect rect, int model )
 {
   struct feature** all_nbrs, ** sp_nbrs;
   CvPoint2D64f pt;
@@ -201,16 +195,16 @@ int kdtree_bbf_spatial_knn( struct kd_node* kd_root, struct feature* feat,
   for( i = 0; i < n; i++ )
     {
       if( model )
-	pt = all_nbrs[i]->mdl_pt;
+  pt = all_nbrs[i]->mdl_pt;
       else
-	pt = all_nbrs[i]->img_pt;
+  pt = all_nbrs[i]->img_pt;
 
       if( within_rect( pt, rect ) )
-	{
-	  sp_nbrs[t++] = all_nbrs[i];
-	  if( t == k )
-	    goto end;
-	}
+  {
+    sp_nbrs[t++] = all_nbrs[i];
+    if( t == k )
+      goto end;
+  }
     }
  end:
   free( all_nbrs );
@@ -310,20 +304,20 @@ static void assign_part_key( struct kd_node* kd_node )
     {
       mean = var = 0;
       for( i = 0; i < n; i++ )
-	mean += features[i].descr[j];
+  mean += features[i].descr[j];
       mean /= n;
       for( i = 0; i < n; i++ )
-	{
-	  x = features[i].descr[j] - mean;
-	  var += x * x;
-	}
+  {
+    x = features[i].descr[j] - mean;
+    var += x * x;
+  }
       var /= n;
 
       if( var > var_max )
-	{
-	  ki = j;
-	  var_max = var;
-	}
+  {
+    ki = j;
+    var_max = var;
+  }
     }
 
   /* partition key value is median of descriptor values at ki */
@@ -427,10 +421,10 @@ static void insertion_sort( double* array, int n )
       k = array[i];
       j = i-1;
       while( j >= 0  &&  array[j] > k )
-	{
-	  array[j+1] = array[j];
-	  j -= 1;
-	}
+  {
+    array[j+1] = array[j];
+    j -= 1;
+  }
       array[j+1] = k;
     }
 }
@@ -455,11 +449,11 @@ static int partition_array( double* array, int n, double pivot )
   for( j = 0; j < n; j++ )
     if( array[j] <= pivot )
       {
-	tmp = array[++i];
-	array[i] = array[j];
-	array[j] = tmp;
-	if( array[i] == pivot )
-	  p = i;
+  tmp = array[++i];
+  array[i] = array[j];
+  array[j] = tmp;
+  if( array[i] == pivot )
+    p = i;
       }
   array[p] = array[i];
   array[i] = pivot;
@@ -488,11 +482,11 @@ static void partition_features( struct kd_node* kd_node )
   for( i = 0; i < n; i++ )
     if( features[i].descr[ki] <= kv )
       {
-	tmp = features[++j];
-	features[j] = features[i];
-	features[i] = tmp;
-	if( features[j].descr[ki] == kv )
-	  p = j;
+  tmp = features[++j];
+  features[j] = features[i];
+  features[i] = tmp;
+  if( features[j].descr[ki] == kv )
+    p = j;
       }
   tmp = features[p];
   features[p] = features[j];
@@ -527,8 +521,8 @@ static void partition_features( struct kd_node* kd_node )
     NULL on error.
 */
 static struct kd_node* explore_to_leaf( struct kd_node* kd_node,
-					struct feature* feat,
-					struct min_pq* min_pq )
+          struct feature* feat,
+          struct min_pq* min_pq )
 {
   struct kd_node* unexpl, * expl = kd_node;
   double kv;
@@ -540,28 +534,28 @@ static struct kd_node* explore_to_leaf( struct kd_node* kd_node,
       kv = expl->kv;
       
       if( ki >= feat->d )
-	{
-	  fprintf( stderr, "Warning: comparing imcompatible descriptors, %s" \
-		   " line %d\n", __FILE__, __LINE__ );
-	  return NULL;
-	}
+  {
+    fprintf( stderr, "Warning: comparing imcompatible descriptors, %s" \
+       " line %d\n", __FILE__, __LINE__ );
+    return NULL;
+  }
       if( feat->descr[ki] <= kv )
-	{
-	  unexpl = expl->kd_right;
-	  expl = expl->kd_left;
-	}
+  {
+    unexpl = expl->kd_right;
+    expl = expl->kd_left;
+  }
       else
-	{
-	  unexpl = expl->kd_left;
-	  expl = expl->kd_right;
-	}
+  {
+    unexpl = expl->kd_left;
+    expl = expl->kd_right;
+  }
       
       if( minpq_insert( min_pq, unexpl, ABS( kv - feat->descr[ki] ) ) )
-	{
-	  fprintf( stderr, "Warning: unable to insert into PQ, %s, line %d\n",
-		   __FILE__, __LINE__ );
-	  return NULL;
-	}
+  {
+    fprintf( stderr, "Warning: unable to insert into PQ, %s, line %d\n",
+       __FILE__, __LINE__ );
+    return NULL;
+  }
     }
 
   return expl;
@@ -584,7 +578,7 @@ static struct kd_node* explore_to_leaf( struct kd_node* kd_node,
     returns 0.
 */
 static int insert_into_nbr_array( struct feature* feat, struct feature** nbrs,
-				  int n, int k )
+          int n, int k )
 {
   struct bbf_data* fdata, * ndata;
   double dn, df;
@@ -604,11 +598,11 @@ static int insert_into_nbr_array( struct feature* feat, struct feature** nbrs,
   if( df >= dn )
     {
       if( n == k )
-	{
-	  feat->feature_data = fdata->old_data;
-	  free( fdata );
-	  return 0;
-	}
+  {
+    feat->feature_data = fdata->old_data;
+    free( fdata );
+    return 0;
+  }
       nbrs[n] = feat;
       return 1;
     }
@@ -630,7 +624,7 @@ static int insert_into_nbr_array( struct feature* feat, struct feature** nbrs,
       ndata = (struct bbf_data*)nbrs[i]->feature_data;
       dn = ndata->d;
       if( dn <= df )
-	break;
+  break;
       nbrs[i+1] = nbrs[i];
       i--;
     }
