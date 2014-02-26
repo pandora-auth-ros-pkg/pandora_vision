@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     image_transport
     sensor_msgs
+    roslint
 )
 
 
@@ -22,6 +23,7 @@ catkin_package(
       cv_bridge
       image_transport
       sensor_msgs
+      roslint
     INCLUDE_DIRS
       include
     LIBRARIES 
@@ -55,3 +57,11 @@ if(HAZMAT_ENABLE_TRAIN)
   target_link_libraries(hazmat_train ${catkin_LIBRARIES} )
 endif()
 
+
+set(ROSLINT_CPP_OPTS 
+    "--filter=-whitespace/end_of_line,-build/include_order,-whitespace/blank_line,-whitespace/parens,-whitespace/comments")
+FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
+     RELATIVE ${PROJECT_SOURCE_DIR} 
+            include/defines.h 
+            )
+roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
