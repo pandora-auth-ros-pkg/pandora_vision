@@ -40,72 +40,76 @@
 
 #include "hazmat_detector.h"
 
-class HazmatDetection : public StateClient 
+namespace pandora_vision
 {
-  private:
-    
-    //nodeHandle
-    ros::NodeHandle nh_;
-    HazmatEpsilonDetector* hazmatDetector_;
-    float ratioX_;
-    float ratioY_;
-    
-    float hfov_;  //horizontal Field Of View (rad)
-    float vfov_;
-    int frameWidth_; //frame width
-    int frameHeight_;  //frame height
-    
-    cv::Mat hazmatFrame_;  // frame processed by HazmatDetector
-    
-    ros::Time hazmatFrameTimestamp_; // HazmatDetector frame timestamp
-    
-    std::string packagePath_;
-    std::string saveImagePath_;
-    std::string imageTopic_;
+
+  class HazmatDetection : public StateClient 
+  {
+    private:
+      
+      //nodeHandle
+      ros::NodeHandle nh_;
+      HazmatEpsilonDetector* hazmatDetector_;
+      float ratioX_;
+      float ratioY_;
+      
+      float hfov_;  //horizontal Field Of View (rad)
+      float vfov_;
+      int frameWidth_; //frame width
+      int frameHeight_;  //frame height
+      
+      cv::Mat hazmatFrame_;  // frame processed by HazmatDetector
+      
+      ros::Time hazmatFrameTimestamp_; // HazmatDetector frame timestamp
+      
+      std::string packagePath_;
+      std::string saveImagePath_;
+      std::string imageTopic_;
     std::string cameraName;
     std::string cameraFrameId;
-    
-    int hazmatNumber_;
-    
-    //publisher
-    ros::Publisher hazmatPublisher_;
+      
+      int hazmatNumber_;
+      
+      //publisher
+      ros::Publisher hazmatPublisher_;
 
-    image_transport::Subscriber sub_;
-    
-    // variables for changing in dummy msg mode for debugging
-    bool hazmatDummy_;
-    
-    //variable used for State Managing
-    bool hazmatNowOn_;
-    
-  public:
-        
-    //constructor
-    HazmatDetection();
+      image_transport::Subscriber sub_;
+      
+      // variables for changing in dummy msg mode for debugging
+      bool hazmatDummy_;
+      
+      //variable used for State Managing
+      bool hazmatNowOn_;
+      
+    public:
           
-    //destructor
-    ~HazmatDetection();	
-    
-    //get parameters from launch file
-    void getGeneralParams();
-    void getHazmatParams();
-    
-    //timer callbacks
-    void hazmatCallback();
-    
-    //get a new image
-    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-    
-    void spin();
-    
-    //Implemented from StateClient
-    void startTransition(int newState);
-    void completeTransition(void);
-    
-    int curState; //Current state of robot
-    int prevState;  //Previous state of robot
-};
+      //constructor
+      HazmatDetection();
+            
+      //destructor
+      ~HazmatDetection();	
+      
+      //get parameters from launch file
+      void getGeneralParams();
+      void getHazmatParams();
+      
+      //timer callbacks
+      void hazmatCallback();
+      
+      //get a new image
+      void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+      
+      void spin();
+      
+      //Implemented from StateClient
+      void startTransition(int newState);
+      void completeTransition(void);
+      
+      int curState; //Current state of robot
+      int prevState;  //Previous state of robot
+  };
 
+}
 #endif
     
     

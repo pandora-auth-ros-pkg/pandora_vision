@@ -28,6 +28,11 @@
 #include "state_client.h"
 #include "vision_communications/HazmatAlertsVectorMsg.h"
 
+//the maximum number of keypoint NN candidates to check during BBF search
+#define KDTREE_BBF_MAX_NN_CHKS 200
+//threshold on squared ratio of distances between NN and 2nd NN
+#define NN_SQ_DIST_RATIO_THR 0.49
+
 //!< Defines from hazmat_detection
 #define HFOV  61.14           //68 hfov in degrees : giwrgos 61.142
 #define VFOV  48              //50 vfov in degrees : giwrgos 47.79
