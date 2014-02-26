@@ -62,7 +62,7 @@ namespace pandora_vision
     ratioX_ = hfov_ / frameWidth_;
     ratioY_ = vfov_ / frameHeight_;
 
-    hazmatFrame_ = cv::Mat( frameWidth_,frameHeight_, CV_8U );
+    hazmatFrame_ = cv::Mat( frameWidth_, frameHeight_, CV_8U );
       
     // Declare publisher and advertise topic where algorithm results are posted
     hazmatPublisher_ = nh_.advertise
@@ -70,7 +70,7 @@ namespace pandora_vision
 
     //subscribe to input image's topic
     sub_ = image_transport::ImageTransport(nh_).subscribe
-      (imageTopic_, 1, &HazmatDetection::imageCallback,this);
+      (imageTopic_, 1, &HazmatDetection::imageCallback, this);
 
     //initialize states - robot starts in STATE_OFF 
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -208,7 +208,7 @@ namespace pandora_vision
   @return void
   **/
   void HazmatDetection::getHazmatParams(void)
-  {	
+  {
     // Get the test parameter if available;
     int colorVariance;
     if (nh_.hasParam("colorVariance")) 
@@ -294,8 +294,8 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber_ not found. \
-      Using Default");
+      ROS_DEBUG(
+        "[hazmatNode] : Parameter hazmatNumber_ not found. Using Default");
       hazmatNumber_ = 9;
     }
 
@@ -307,19 +307,19 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_DEBUG("[hazmatNode] : Parameter MOThreshold not found. \
-      Using Default");
+      ROS_DEBUG(
+        "[hazmatNode] : Parameter MOThreshold not found. Using Default");
       MOThreshold = 120000;
     }
 
     hazmatDetector_->setHazmatParameters(
       colorVariance,
-      (float)votingThreshold,
-      (float)minAreaThreshold,
-      (float)maxAreaThreshold,
+      static_cast<float>(votingThreshold),
+      static_cast<float>(minAreaThreshold),
+      static_cast<float>(maxAreaThreshold),
       sideLength,
       featureThreshold,
-      (float)MOThreshold
+      static_cast<float>(MOThreshold)
     );
 
   }
@@ -340,7 +340,7 @@ namespace pandora_vision
     
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     
-    cv::Mat temp = in_msg->image.clone();	
+    cv::Mat temp = in_msg->image.clone();
     hazmatFrame_ = new IplImage(temp);
     hazmatFrameTimestamp_ = msg->header.stamp;
     
@@ -358,7 +358,7 @@ namespace pandora_vision
   **/
   void HazmatDetection::hazmatCallback()
   {
-    cv::Mat allblack = cv::Mat( frameWidth_,frameHeight_, CV_8U );
+    cv::Mat allblack = cv::Mat( frameWidth_, frameHeight_, CV_8U );
     if(!hazmatNowOn_)
     {
       return;
@@ -387,8 +387,8 @@ namespace pandora_vision
         hazmatMsg.patternType = 0;
 
         hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
-      }	
-      if(hazmatVectorMsg.hazmatAlerts.size()>0)
+      }
+      if(hazmatVectorMsg.hazmatAlerts.size() > 0)
       {
         hazmatPublisher_.publish(hazmatVectorMsg);
       }
@@ -428,7 +428,7 @@ namespace pandora_vision
             std::stringstream ss;
             //save Image to the desired location
             ss << saveImagePath_ << hazmatFrameTimestamp_ << ".jpg";
-            imwrite(ss.str().c_str(),hazmatFrame_);
+            imwrite(ss.str().c_str(), hazmatFrame_);
           }
         }
         if(hazmatVectorMsg.hazmatAlerts.size() > 0)
@@ -437,7 +437,7 @@ namespace pandora_vision
         }
 
       }
-      a.erase(a.begin(),a.end());
+      a.erase(a.begin(), a.end());
     }
   }
 
@@ -494,7 +494,7 @@ namespace pandora_vision
   {
     ROS_INFO("[hazmatNode] : Transition Complete");
   }
-}
+} // namespace pandora_vision
 
 
 /**
@@ -504,13 +504,13 @@ namespace pandora_vision
  * @return int
  */
 int main(int argc, char** argv)
-{	
-  ros::init(argc,argv,"hazmatNode");
+{
+  ros::init(argc, argv, "hazmatNode");
 
   pandora_vision::HazmatDetection* hazmatDetection = 
     new pandora_vision::HazmatDetection();
 
   hazmatDetection->spin();
-  return 0;	
+  return 0;
 }
 

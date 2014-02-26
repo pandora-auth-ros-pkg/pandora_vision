@@ -35,10 +35,10 @@
 * Authors:  Tsakalis Vasilis, Despoina Paschalidou
 *********************************************************************/
  
-#ifndef HAZMATDETECTION_H
-#define HAZMATDETECTION_H
+#ifndef PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H_
+#define PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H_
 
-#include "hazmat_detector.h"
+#include "pandora_vision_hazmat/hazmat_detector.h"
 
 /**
 @namespace pandora_vision
@@ -105,7 +105,7 @@ namespace pandora_vision
       @brief Default destructor
       @return void
       **/
-      ~HazmatDetection(void);	
+      ~HazmatDetection(void);
       
       /**
       @brief Reads the general parameters from the launch file
@@ -154,7 +154,8 @@ namespace pandora_vision
 
   };
 
-}
-#endif
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HAZMAT_INCLUDE_PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H_
     
     
