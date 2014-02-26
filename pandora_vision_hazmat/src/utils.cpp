@@ -8,20 +8,9 @@
 
 #include "pandora_vision_hazmat/utils.h"
 
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
-
-//~ #include <gdk/gdk.h>
-//~ #include <gtk/gtk.h>
-
-#include <errno.h>
-#include <string.h>
-#include <stdlib.h>
-
-
 /*************************** Function Definitions ****************************/
-
+//~ namespace aaaaaa
+//~ {
 
 /*
   Prints an error message and aborts the program.  The error message is
@@ -30,14 +19,14 @@
   
   @param format an error message format string (as with \c printf(3)).
 */
-void fatal_error(char* format, ...)
+void fatal_error(std::string format, ...)
 {
   va_list ap;
   
   fprintf( stderr, "Error: ");
 
-  va_start( ap, format );
-  vfprintf( stderr, format, ap );
+  va_start( ap, format.c_str() );
+  vfprintf( stderr, format.c_str(), ap );
   va_end( ap );
   fprintf( stderr, "\n" );
   abort();
@@ -194,9 +183,9 @@ int array_double( void** array, int n, int size )
   if( ! tmp )
     {
       fprintf( stderr, "Warning: unable to allocate memory in array_double(),"
-	       " %s line %d\n", __FILE__, __LINE__ );
+         " %s line %d\n", __FILE__, __LINE__ );
       if( *array )
-	free( *array );
+  free( *array );
       *array = NULL;
       return 0;
     }
@@ -252,8 +241,8 @@ void draw_x( IplImage* img, CvPoint pt, int r, int w, CvScalar color )
 extern IplImage* stack_imgs( IplImage* img1, IplImage* img2 )
 {
   IplImage* stacked = cvCreateImage( cvSize( MAX(img1->width, img2->width),
-					     img1->height + img2->height ),
-				     IPL_DEPTH_8U, 3 );
+               img1->height + img2->height ),
+             IPL_DEPTH_8U, 3 );
 
   cvZero( stacked );
   cvSetImageROI( stacked, cvRect( 0, 0, img1->width, img1->height ) );
@@ -279,3 +268,5 @@ int win_closed( char* win_name )
     return 1;
   return 0;
 }
+
+//~ }
