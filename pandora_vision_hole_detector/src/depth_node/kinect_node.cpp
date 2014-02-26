@@ -60,7 +60,7 @@ http://www.asciiflow.com/#Draw5547639148542835085/1967816621
                                                                                   +-------+
  **/
 
-#include "pandora_vision_kinect/kinect.h"
+#include "depth_node/kinect.h"
 
 /**
   @brief Main function of the kinect node

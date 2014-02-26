@@ -38,7 +38,7 @@
 #ifndef KINECT_NOISE_ELIMINATION
 #define KINECT_NOISE_ELIMINATION
 
-#include "pandora_vision_kinect/morphological_operators.h"
+#include "depth_node/morphological_operators.h"
 
 /**
   @namespace vision

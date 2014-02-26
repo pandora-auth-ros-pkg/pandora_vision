@@ -38,9 +38,9 @@
 #ifndef KINECT_PARAMETERS
 #define KINECT_PARAMETERS
 
-#include "pandora_vision_kinect/defines.h"
+#include "depth_node/defines.h"
 #include <dynamic_reconfigure/server.h>
-#include <pandora_vision_kinect/kinectConfig.h>
+#include <pandora_vision_hole_detector/kinectConfig.h>
 
 namespace vision
 {

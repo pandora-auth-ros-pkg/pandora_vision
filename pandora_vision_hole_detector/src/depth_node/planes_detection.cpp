@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/planes_detection.h"
+#include "depth_node/planes_detection.h"
 
 namespace vision{
 

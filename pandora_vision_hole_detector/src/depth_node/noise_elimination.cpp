@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "pandora_vision_kinect/noise_elimination.h"
+#include "depth_node/noise_elimination.h"
 
 namespace vision{
 
