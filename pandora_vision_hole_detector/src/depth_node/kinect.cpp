@@ -48,10 +48,12 @@ namespace vision
   {
     ros::Duration(0.5).sleep();
 
-    _inputCloudSubscriber = _nodeHandle.subscribe("/camera/depth/points", 1,
+    _inputCloudSubscriber = _nodeHandle.subscribe(
+      "/synchronized/camera/depth/points", 1,
         &PandoraKinect::inputCloudCallback, this);
 
-    _inputImageSubscriber = _nodeHandle.subscribe("/kinect/image", 1,
+    _inputImageSubscriber = _nodeHandle.subscribe(
+      "/synchronized/camera/rgb/image_raw", 1,
         &PandoraKinect::inputImageCallback, this);
 
     //~ _inputDepthImageSubscriber  =

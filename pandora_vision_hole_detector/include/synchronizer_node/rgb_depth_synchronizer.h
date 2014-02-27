@@ -38,10 +38,6 @@
 #ifndef RBG_DEPTH_SYNCHRONIZER_H
 #define RBG_DEPTH_SYNCHRONIZER_H
 
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <sensor_msgs/Image.h>
 #include <depth_node/defines.h>
 
 /**
@@ -62,30 +58,40 @@ namespace vision
       //!< The ROS node handle
       ros::NodeHandle nodeHandle_;
 
-      //!< The publishers which will advertise the two synchronized topics;
-      //!< one for the point cloud and one for the rgb image
-      ros::Publisher synchronizedPointCloudPublisher;
-      ros::Publisher synchronizedRGBPublisher;
+      //!< The subscriber to the point cloud topic
+      ros::Subscriber pointCloudSubscriber_;
+
+      //!< The publishers which will advertise the
+      //!< synchronized point cloud topic and rgb image extracted from the
+      //<! point cloud;
+      ros::Publisher synchronizedPointCloudPublisher_;
+      ros::Publisher synchronizedRGBImagePublisher_;
 
       /**
-        @brief The synchronized callback for the point cloud and rgb image
+        @brief The synchronized callback for the point cloud
         obtained by the depth sensor.
         @param pointCloudMessage [const sensor_msgs::PointCloud2ConstPtr&]
         The input point cloud
-        @param rgbImageMessage [const sensor_msgs::ImageConstPtr&]
-        The input rgb image
         @return void
        **/
       void synchronizedCallback(
-        const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage,
-        const sensor_msgs::ImageConstPtr& rgbImageMessage);
+        const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage);
+
+      /**
+        @brief Extracts a RGB image from a point cloud message
+        @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
+        The input point cloud message
+        @return cv::Mat The output rgb image
+       **/
+      cv::Mat pointCloudToRGBImage(
+        const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage);
 
     public:
 
-      /**
-        @brief The constructor
-       **/
-      RgbDepthSynchronizer(void);
+        /**
+          @brief The constructor
+         **/
+        RgbDepthSynchronizer(void);
 
       /**
         @brief The default constructor
