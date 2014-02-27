@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     vision_communications
     state_manager
+    state_manager_communications
     cv_bridge
     image_transport
     sensor_msgs
@@ -17,6 +18,7 @@ catkin_package(
       roscpp
       vision_communications
       state_manager
+      state_manager_communications
       cv_bridge
       image_transport
       sensor_msgs
@@ -36,4 +38,7 @@ add_executable(face_node
     src/time_calculator.cpp 
 )
 target_link_libraries(face_node ${catkin_LIBRARIES} )
-add_dependencies(face_node vision_communications_gencpp)
+add_dependencies(face_node 
+    vision_communications_gencpp
+    ${catkin_EXPORTED_TARGETS}
+)

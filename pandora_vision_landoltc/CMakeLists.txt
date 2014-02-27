@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     vision_communications
     state_manager
+    state_manager_communications
     cv_bridge
     image_transport
     sensor_msgs
@@ -17,6 +18,7 @@ catkin_package(
       roscpp
       vision_communications
       state_manager
+      state_manager_communications
       cv_bridge
       image_transport
       sensor_msgs
@@ -33,3 +35,8 @@ add_executable(landoltC_node
   src/landoltC_detection.cpp
 )
 target_link_libraries(landoltC_node ${catkin_LIBRARIES} )
+
+add_dependencies(landoltC_node 
+    vision_communications_gencpp
+    ${catkin_EXPORTED_TARGETS}
+)
