@@ -46,33 +46,17 @@ namespace vision
   {
     ros::Duration(0.5).sleep();
 
-    //!< pointCloudSubscriber will subscribe to the topic to which the depth
-    //!< sensor publishes the point cloud
-    message_filters::Subscriber<sensor_msgs::PointCloud2>
-      pointCloudSubscriber(nodeHandle_, "/camera/depth/points", 1);
-
-    //!< imageSubscriber will subscribe to the topic to which the depth
-    //!< sensor publishes the RGB image
-    message_filters::Subscriber<sensor_msgs::Image>
-      imageSubscriber(nodeHandle_, "/camera/rgb/image_raw", 1);
-
-    typedef message_filters::sync_policies::ApproximateTime
-      <sensor_msgs::PointCloud2, sensor_msgs::Image> syncPolicy;
-
-    //!< ApproximateTime takes a queue size as its constructor argument,
-    //!< hence syncPolicy(10)
-    message_filters::Synchronizer<syncPolicy> sync(syncPolicy(10),
-      pointCloudSubscriber, imageSubscriber);
-
-    sync.registerCallback(
-      boost::bind(&RgbDepthSynchronizer::synchronizedCallback, this, _1, _2));
+    //!< Subscribe to the RGB point cloud topic
+    pointCloudSubscriber_ = nodeHandle_.subscribe(
+      "/camera/depth_registered/points", 1,
+      &RgbDepthSynchronizer::synchronizedCallback, this);
 
     //!< Advertise the synchronized point cloud
-    synchronizedPointCloudPublisher = nodeHandle_.advertise
+    synchronizedPointCloudPublisher_ = nodeHandle_.advertise
       <sensor_msgs::PointCloud2>("/synchronized/camera/depth/points", 1000);
 
-    //!< Advertise the synchronized RGB image
-    synchronizedRGBPublisher = nodeHandle_.advertise
+    //!< Advertise the synchronized rgb image
+    synchronizedRGBImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>("/synchronized/camera/rgb/image_raw", 1000);
   }
 
@@ -96,13 +80,61 @@ namespace vision
     @return void
    **/
   void RgbDepthSynchronizer::synchronizedCallback(
-    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage,
-    const sensor_msgs::ImageConstPtr& rgbImageMessage)
+    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
   {
-    //!< Publish the synchronized point cloud
-    synchronizedPointCloudPublisher.publish(pointCloudMessage);
+    //!< Extract the RGB image from the point cloud
+    cv::Mat rgbImage = pointCloudToRGBImage(pointCloudMessage);
 
+    //!< Convert the cv::Mat image to a ROS message
+    cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
+
+    imageMessagePtr->header = pointCloudMessage->header;
+    imageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
+    imageMessagePtr->image = rgbImage;
+
+    //!< Publish the synchronized point cloud
+    synchronizedPointCloudPublisher_.publish(pointCloudMessage);
     //!< Publish the synchronized rgb image
-    synchronizedRGBPublisher.publish(rgbImageMessage);
+    synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
+  }
+
+
+
+  /**
+    @brief Extracts a RGB image from a point cloud message
+    @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
+    The input point cloud message
+    @return cv::Mat The output rgb image
+   **/
+  cv::Mat RgbDepthSynchronizer::pointCloudToRGBImage(
+    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
+  {
+    PointCloud pointCloud;
+
+    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
+    //!< to pcl::PCLPointCloud2
+    pcl_conversions::toPCL(*pointCloudMessage, pointCloud);
+
+    //!< convert the point cloud from pcl::PCLPointCloud2 to pcl::PointCLoud
+    PointCloudXYZRGBPtr pointCloudXYZRGB (new PointCloudXYZRGB);
+    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZRGB);
+
+    //!< prepare to convert the array to an opencv image
+    cv::Mat rgbImage(pointCloudXYZRGB->height, pointCloudXYZRGB->width,
+      CV_8UC3);
+
+    for (unsigned int row = 0; row < pointCloudXYZRGB->height; ++row)
+    {
+      for (unsigned int col = 0; col < pointCloudXYZRGB->width; ++col)
+      {
+        rgbImage.at<unsigned char>(row, 3 * col + 2) =
+          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].r;
+        rgbImage.at<unsigned char>(row, 3 * col + 1) =
+          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].g;
+        rgbImage.at<unsigned char>(row, 3 * col + 0) =
+          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].b;
+      }
+    }
+    return rgbImage;
   }
 }

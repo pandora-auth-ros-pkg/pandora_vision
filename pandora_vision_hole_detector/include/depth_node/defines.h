@@ -109,6 +109,9 @@ namespace vision
 
   typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
   typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudXYZPtr;
+
+  typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudXYZRGB;
+  typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudXYZRGBPtr;
 }
 
 #endif
