@@ -109,7 +109,7 @@ target_link_libraries(synchronizer_node
 
 add_dependencies(synchronizer_node
   vision_gencfg
-  vision_communications_gencpp
+  ${catkin_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
@@ -147,7 +147,7 @@ target_link_libraries(hole_fusion_node
 
 add_dependencies(hole_fusion_node
   vision_gencfg
-  vision_communications_gencpp
+  ${catkin_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
