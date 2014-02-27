@@ -68,11 +68,13 @@ namespace vision
       ros::Publisher synchronizedPointCloudPublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
 
-      //!< A boolean indicating whether the node is publishing messages
+      //!< A boolean indicating whether the node is publishing through the
+      //!< above two publishers
       bool locked_;
 
       //!< The subscriber to the topic where the hole_fusion node publishes
-      //!< lock/unlock messages concerning the rgb_depth_synchronizer
+      //!< lock/unlock messages concerning the rgb_depth_synchronizer's
+      //!< behaviour
       ros::Subscriber holeFusionSubscriber_;
 
       /**
@@ -104,10 +106,10 @@ namespace vision
 
     public:
 
-        /**
-          @brief The constructor
-         **/
-        RgbDepthSynchronizer(void);
+      /**
+        @brief The constructor
+       **/
+      RgbDepthSynchronizer(void);
 
       /**
         @brief The default constructor
