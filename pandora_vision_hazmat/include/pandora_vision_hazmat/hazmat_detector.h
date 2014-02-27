@@ -42,10 +42,17 @@
 #include "pandora_vision_hazmat/kdtree.h"
 #include "pandora_vision_hazmat/xform.h"
 
+/**
+@namespace pandora_vision
+@brief The general purpose pandora vision namespace
+**/
 namespace pandora_vision
 {
-
-  struct HazmatEpsilon //the struct in which the results are stored
+  /**
+  @struct HazmatEpsilon
+  @brief The struct in which the results are stored 
+  **/
+  struct HazmatEpsilon
   { 
     int pattern_num;
     float x, y;
@@ -55,6 +62,10 @@ namespace pandora_vision
     CvMat* H;
   };
 
+  /**
+  @class HazmatEpsilonDetector
+  @brief The hazmat epsilon detection class
+  **/
   class HazmatEpsilonDetector
   {
       
@@ -92,68 +103,154 @@ namespace pandora_vision
     
     
     public:
+    
+      //shows how many patterns were found in the screenshot
+      int patterns_found_counter; 
+    
+      std::vector<CvPoint2D64f> center_of;
+      
+      cv::MatND patternHistog;
+
       CvPoint2D64f** upperPoints;
       CvPoint2D64f** lowerPoints;
       
       HazmatEpsilonDetector(std::string package_path); //our constructor
       
-      ~HazmatEpsilonDetector(void); //our destructor
+      float**maxUV;
       
-      std::vector<CvPoint2D64f> center_of;
+      int rows, cols; 
       
+      /**
+      @brief Default constructor
+      @return void
+      **/
+      HazmatEpsilonDetector(void);
+      
+      /**
+      @brief Default destructor
+      @return void
+      **/
+      ~HazmatEpsilonDetector(void);
+
+      /**
+      @brief Calculates histograms for given hazmat signs
+      @return void
+      **/
       void calcHistograms(void);
-      
-      //shows how many patterns were found in the screenshot
-      int patterns_found_counter; 
-      
-      // Initialize class parameters. Can be tweaked to exchange \
+
+      /**
+      @brief Initialize class parameters. Can be tweaked to exchange \
       quality for speed.
+      @return void
+      **/
       void setParameters(void); 
-      
-      // Initialize hazmat detector. Loads hazmats from hard disk into memory.
+
+      /**
+      @brief Initialize hazmat detector. Loads hazmats from hard disk \
+      into memory.
+      @return void
+      **/
       void initDetector(void); 
-      
-      // Reads contents from file "contents" and stores into memory \
+
+      /**
+      @brief Reads contents from file "contents" and stores into memory \
       the processed hazmats
+      @return void
+      **/
       void preprocessHazmat(void); 
-      
-      // The core of the hazmat detector. Detects hazmats in the screenshot
-      std::vector<HazmatEpsilon> detectHazmat(cv::Mat hazmatFrame); 
-      
-      // The core of the Epsilon detector. NOT IMPLEMENTED
+
+      /**
+      @brief The core of the Epsilon detector. NOT IMPLEMENTED
+      @param screenshot [char *]
+      @return void
+      **/
       int detectEpsilon(char* screenshot); 
-      
-      //our basic function called by programs
+
+      /**
+      @brief The basic function called by programs
+      @return int
+      **/
       int HazmatEpsilonDetect(void); 
       
-      // the fully functional detector of both hazmat and epsilon patterns
+      /**
+      @brief the fully functional detector of both hazmat and epsilon patterns
+      @param img [cv::Mat]
+      @return std::vector<HazmatEpsilon>
+      **/
       std::vector<HazmatEpsilon> DetectHazmatEpsilon(cv::Mat img); 
       
-      //upologizw embado tetrapleurou apo tis tesseris korufes tou
+      /**
+      @brief Calculates the area of a rectangle from its four corners
+      @param pt1 [CvPoint2D64f]
+      @param pt2 [CvPoint2D64f]
+      @param pt3 [CvPoint2D64f]
+      @param pt4 [CvPoint2D64f]
+      @return float : The area
+      **/
       float calculateRectangleArea(
         CvPoint2D64f pt1, CvPoint2D64f pt2, CvPoint2D64f pt3, CvPoint2D64f pt4);
       
+      /**
+      @brief Sets the hazmat parameters
+      @param clrVariance [int]
+      @param votingThr [float]
+      @param minAreaThr [float]
+      @param maxAreaThr [float]
+      @param sideLgth [int]
+      @param featThr [int]
+      @param MOThr [float]
+      @return void
+      **/
       void setHazmatParameters(int clrVariance, float votingThr, 
         float minAreaThr, float maxAreaThr, int sideLgth, int featThr, 
         float MOThr);
       
+      /**
+      @brief Finds a specific feature (?)
+      @param m [int *]
+      @param n [int]
+      @param testNum [int]
+      @param kd_root [struct kd_node *]
+      @return void
+      **/
       std::vector <int> findFeature(int* m, int n, int testNum,  
         struct kd_node* kd_root);
       
+      /**
+      @brief Calculates the area of a pattern in an image (?)
+      @param H [CvMat*]
+      @param pattern_image [cv::Mat]
+      @return void
+      **/
       void calculateArea(CvMat* H, cv::Mat pattern_image);
       
+      /**
+      @brief (?)
+      @param SAD [float*]
+      @param SAD2 [float*]
+      @param img [IplImage*]
+      @param H [CvMat*]
+      @param _pattern_image [cv::Mat]
+      @param n [int]
+      @return CvPoint2D64f
+      **/
       CvPoint2D64f defineVariance(float* SAD, float* SAD2,
         IplImage* img, CvMat* H, cv::Mat _pattern_image, int n);  
+
+      /**
+      @brief (?)
+      @return void
+      **/
+      void calcMinMax(void);
       
-      cv::MatND patternHistog;
+      /**
+      @brief The core of the hazmat detector. Detects hazmats in the screenshot
+      @param hazmatFrame [cv::Mat]
+      @return std::vector<HazmatEpsilon>
+      **/
+      std::vector<HazmatEpsilon> detectHazmat(cv::Mat hazmatFrame); 
       
-      void calcMinMax();
       
-      float** minUV;
-      
-      float**maxUV;
-      
-      int rows, cols; 
   };
 } // namespace pandora_vision
 
