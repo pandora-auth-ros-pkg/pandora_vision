@@ -41,8 +41,8 @@ namespace pandora_vision
 {
 
   /**
-   * Constructor
-   */
+  @brief Default constructor
+  @return void
   HazmatEpsilonDetector::HazmatEpsilonDetector(std::string package_path): 
     rows(480),
     cols(640)
@@ -55,15 +55,16 @@ namespace pandora_vision
   }
 
   /**
-   * Sets hazmat node related parameters
-   * @param clrVariance
-   * @param votingThr
-   * @param minAreaThr
-   * @param maxAreaThr
-   * @param sideLgth
-   * @param featThr
-   * @param MOThr
-   */
+  @brief Sets the hazmat parameters
+  @param clrVariance [int]
+  @param votingThr [float]
+  @param minAreaThr [float]
+  @param maxAreaThr [float]
+  @param sideLgth [int]
+  @param featThr [int]
+  @param MOThr [float]
+  @return void
+  **/
   void HazmatEpsilonDetector::setHazmatParameters(
     int clrVariance,
     float votingThr,
@@ -85,8 +86,9 @@ namespace pandora_vision
   }
 
   /**
-   * Destructor
-   */
+  @brief Default destructor
+  @return void
+  **/
   HazmatEpsilonDetector::~HazmatEpsilonDetector()
   {
     delete[] nFeats_;
@@ -95,8 +97,9 @@ namespace pandora_vision
   }
 
   /**
-   * Calculates min and max UV values from YUV colorspace of hazmats
-   */
+  @brief (?)
+  @return void
+  **/
   void HazmatEpsilonDetector::calcMinMax(void)
   {
     minUV = new float* [nPatterns_];
@@ -186,8 +189,9 @@ namespace pandora_vision
   }
 
   /**
-   * Calculates histograms for given hazmat signs
-   */
+  @brief Calculates histograms for given hazmat signs
+  @return void
+  **/
   void HazmatEpsilonDetector::calcHistograms(void)
   {
       cv::Mat* patterns = new cv::Mat[nPatterns_];
@@ -226,8 +230,10 @@ namespace pandora_vision
   }
 
   /**
-   * Sets general parameters
-   */
+  @brief Initialize class parameters. Can be tweaked to exchange \
+  quality for speed.
+  @return void
+  **/
   void HazmatEpsilonDetector::setParameters(void)
   {
     // Set parameters
@@ -238,15 +244,13 @@ namespace pandora_vision
   } 
 
   /**
-   * Calculates the area of a rectangle, using the area of its 2 \
-   fundamental triangles.
-   * Irona's computation method is used
-   * @param pt1
-   * @param pt2
-   * @param pt3
-   * @param pt4
-   * @return
-   */
+  @brief Calculates the area of a rectangle from its four corners
+  @param pt1 [CvPoint2D64f]
+  @param pt2 [CvPoint2D64f]
+  @param pt3 [CvPoint2D64f]
+  @param pt4 [CvPoint2D64f]
+  @return float : The area
+  **/
   float HazmatEpsilonDetector::calculateRectangleArea(
     CvPoint2D64f pt1,
     CvPoint2D64f pt2, 
@@ -292,7 +296,7 @@ namespace pandora_vision
   }
 
   /**
-   * Draws detected hazmat for debuging purposes
+   * @brief Draws detected hazmat for debuging purposes
    * @param img
    * @param target
    * @param H
@@ -321,8 +325,10 @@ namespace pandora_vision
   }
 
   /**
-   * Initializes the hazmat/epsilon detector
-   */
+  @brief Initialize hazmat detector. Loads hazmats from hard disk \
+  into memory.
+  @return void
+  **/
   void HazmatEpsilonDetector::initDetector(void)
   {
     // Read number of patterns
@@ -382,8 +388,10 @@ namespace pandora_vision
   }
 
   /**
-   * Preprocess stage. It loads trained hazmats on the detector
-   */
+  @brief Reads contents from file "contents" and stores into memory \
+  the processed hazmats
+  @return void
+  **/
   void HazmatEpsilonDetector::preprocessHazmat(void)
   {
     // Read table of contents
@@ -422,13 +430,13 @@ namespace pandora_vision
   }
 
   /**
-   * Searches for useful features to track
-   * @param m
-   * @param n
-   * @param testNum
-   * @param kd_root
-   * @return
-   */
+  @brief Finds a specific feature (?)
+  @param m [int *]
+  @param n [int]
+  @param testNum [int]
+  @param kd_root [struct kd_node *]
+  @return void
+  **/
   std::vector <int> HazmatEpsilonDetector::findFeature(
     int* m,
     int n,
@@ -461,10 +469,11 @@ namespace pandora_vision
   } 
 
   /**
-   * Calculates a given 4 point area. Its not necessarily a rectangle.
-   * @param H
-   * @param pattern_image
-   */
+  @brief Calculates the area of a pattern in an image (?)
+  @param H [CvMat*]
+  @param pattern_image [cv::Mat]
+  @return void
+  **/
   void  HazmatEpsilonDetector::calculateArea( CvMat* H, cv::Mat pattern_image)
   {
     CvPoint2D64f point1 = {0, 0};
@@ -484,15 +493,15 @@ namespace pandora_vision
   }
 
   /**
-   * calculates variance, useful for later hazmat matching
-   * @param SAD
-   * @param SAD2
-   * @param img
-   * @param H
-   * @param _pattern_image
-   * @param n
-   * @return
-   */
+  @brief (?)
+  @param SAD [float*]
+  @param SAD2 [float*]
+  @param img [IplImage*]
+  @param H [CvMat*]
+  @param _pattern_image [cv::Mat]
+  @param n [int]
+  @return CvPoint2D64f
+  **/
   CvPoint2D64f HazmatEpsilonDetector::defineVariance(
     float* SAD,
     float* SAD2,
@@ -630,10 +639,10 @@ namespace pandora_vision
   }
 
   /**
-   * basic function of the hazmat detector
-   * @param hazmatFrame
-   * @return
-   */
+  @brief The core of the hazmat detector. Detects hazmats in the screenshot
+  @param hazmatFrame [cv::Mat]
+  @return std::vector<HazmatEpsilon>
+  **/
   std::vector<HazmatEpsilon> HazmatEpsilonDetector::detectHazmat(
     cv::Mat hazmatFrame)
   {
@@ -830,10 +839,10 @@ namespace pandora_vision
   }
 
   /**
-   * Basic general function
-   * @param img
-   * @return
-   */
+  @brief the fully functional detector of both hazmat and epsilon patterns
+  @param img [cv::Mat]
+  @return std::vector<HazmatEpsilon>
+  **/
   std::vector<HazmatEpsilon> HazmatEpsilonDetector::DetectHazmatEpsilon(
     cv::Mat img)
   {
