@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(vision_communications)
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
   message_generation
   message_runtime
   std_msgs
   geometry_msgs
   sensor_msgs
+  actionlib_msgs
 )
 
 add_message_files(
@@ -25,19 +26,25 @@ add_message_files(
   DataMatrixAlertsVectorMsg.msg
   )
 
+add_action_files(
+  FILES
+    holeFusionToSynchronizerAction.action
+)
 
 generate_messages(
   DEPENDENCIES
     std_msgs
     geometry_msgs
     sensor_msgs
+    actionlib_msgs
   )
 
 catkin_package(
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
     message_generation
     message_runtime
     std_msgs
     geometry_msgs
     sensor_msgs
+    actionlib_msgs
   )
