@@ -44,12 +44,20 @@ namespace vision
    **/
   RgbDepthSynchronizer::RgbDepthSynchronizer(void)
   {
+    locked_ = true;
+
     ros::Duration(0.5).sleep();
 
     //!< Subscribe to the RGB point cloud topic
     pointCloudSubscriber_ = nodeHandle_.subscribe(
       "/camera/depth_registered/points", 1,
       &RgbDepthSynchronizer::synchronizedCallback, this);
+
+    //!< Subscribe to the hole_fusion lock/unlock topic
+    holeFusionSubscriber_ = nodeHandle_.subscribe(
+      "/vision/hole_fusion/unlock_rgb_depth_synchronizer", 1,
+      &RgbDepthSynchronizer::holeFusionCallback, this);
+
 
     //!< Advertise the synchronized point cloud
     synchronizedPointCloudPublisher_ = nodeHandle_.advertise
@@ -82,20 +90,39 @@ namespace vision
   void RgbDepthSynchronizer::synchronizedCallback(
     const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
   {
-    //!< Extract the RGB image from the point cloud
-    cv::Mat rgbImage = pointCloudToRGBImage(pointCloudMessage);
+    if (!locked_)
+    {
+      //!< Extract the RGB image from the point cloud
+      cv::Mat rgbImage = pointCloudToRGBImage(pointCloudMessage);
 
-    //!< Convert the cv::Mat image to a ROS message
-    cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
+      //!< Convert the cv::Mat image to a ROS message
+      cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
 
-    imageMessagePtr->header = pointCloudMessage->header;
-    imageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
-    imageMessagePtr->image = rgbImage;
+      imageMessagePtr->header = pointCloudMessage->header;
+      imageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
+      imageMessagePtr->image = rgbImage;
 
-    //!< Publish the synchronized point cloud
-    synchronizedPointCloudPublisher_.publish(pointCloudMessage);
-    //!< Publish the synchronized rgb image
-    synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
+      //!< Publish the synchronized point cloud
+      synchronizedPointCloudPublisher_.publish(pointCloudMessage);
+      //!< Publish the synchronized rgb image
+      synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
+    }
+
+    //!< Lock the rgb_depth_synchronizer node
+    locked_ = true;
+  }
+
+
+
+  /**
+    @brief The callback for the hole_fusion node request for the
+    lock/unlock of the rgb_depth_synchronizer node
+    @param lockMsg [const std_msgs::Empty] An empty message
+    @return void
+   **/
+  void RgbDepthSynchronizer::holeFusionCallback(const std_msgs::Empty& lockMsg)
+  {
+    locked_ = false;
   }
 
 
