@@ -34,3 +34,38 @@
 *
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
+
+#include "hole_fusion_node/hole_fusion.h"
+
+namespace vision
+{
+  /**
+    @brief The HoleFusion constructor
+   **/
+  HoleFusion::HoleFusion(void)
+  {
+    //!< Advertise the topic that the rgb_depth_synchronizer will be
+    //!< subscribed to in order for the hole_fusion_node to unlock it
+    unlockPublisher_ = nodeHandle_.advertise <std_msgs::Empty>
+      ("/vision/hole_fusion/unlock_rgb_depth_synchronizer", 1000, true);
+  }
+
+
+
+  /**
+    @brief The HoleFusion deconstructor
+   **/
+  HoleFusion::~HoleFusion(void) {}
+
+
+
+  /**
+    @brief Requests from the synchronizer to process a new point cloud
+    @return void
+   **/
+  void HoleFusion::unlockSynchronizer()
+  {
+    std_msgs::Empty unlockMsg;
+    unlockPublisher_.publish(unlockMsg);
+  }
+}

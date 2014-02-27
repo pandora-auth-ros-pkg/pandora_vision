@@ -35,9 +35,11 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/terminal_state.h>
-#include <vision_communications/holeFusionToSynchronizerAction.h>
+#ifndef HOLE_FUSION_H
+#define HOLE_FUSION_H
+
+#include <depth_node/defines.h>
+#include <std_msgs/Empty.h>
 
 /**
   @namespace vision
@@ -52,10 +54,15 @@ namespace vision
       //!< The ROS node handle
       ros::NodeHandle nodeHandle_;
 
-      //!< The action client
-      actionlib::SimpleActionClient
-        <vision_communications::holeFusionToSynchronizerAction>
-        holeFusionActionClient_("holeFusionActionClient", true);
+      //!< The ROS publisher that will be used for unlocking the
+      //!< synchronizer_node
+      ros::Publisher unlockPublisher_;
+
+      /**
+       @brief Requests from the synchronizer to process a new point cloud
+       @return void
+       **/
+     void unlockSynchronizer();
 
     public:
 
@@ -68,6 +75,6 @@ namespace vision
        @brief The HoleFusion deconstructor
        **/
       ~HoleFusion(void);
-
-  }
+  };
 }
+#endif

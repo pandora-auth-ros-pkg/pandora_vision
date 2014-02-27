@@ -39,6 +39,7 @@
 #define RBG_DEPTH_SYNCHRONIZER_H
 
 #include <depth_node/defines.h>
+#include <std_msgs/Empty.h>
 
 /**
   @namespace vision
@@ -63,9 +64,16 @@ namespace vision
 
       //!< The publishers which will advertise the
       //!< synchronized point cloud topic and rgb image extracted from the
-      //<! point cloud;
+      //!< point cloud;
       ros::Publisher synchronizedPointCloudPublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
+
+      //!< A boolean indicating whether the node is publishing messages
+      bool locked_;
+
+      //!< The subscriber to the topic where the hole_fusion node publishes
+      //!< lock/unlock messages concerning the rgb_depth_synchronizer
+      ros::Subscriber holeFusionSubscriber_;
 
       /**
         @brief The synchronized callback for the point cloud
@@ -76,6 +84,14 @@ namespace vision
        **/
       void synchronizedCallback(
         const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage);
+
+      /**
+        @brief The callback for the hole_fusion node request for the
+        lock/unlock of the rgb_depth_synchronizer node
+        @param lockMsg [const std_msgs::Empty] An empty message
+        @return void
+       **/
+      void holeFusionCallback(const std_msgs::Empty& lockMsg);
 
       /**
         @brief Extracts a RGB image from a point cloud message

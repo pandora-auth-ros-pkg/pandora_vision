@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   sensor_msgs
-  actionlib_msgs
 )
 
 add_message_files(
@@ -26,17 +25,11 @@ add_message_files(
   DataMatrixAlertsVectorMsg.msg
   )
 
-add_action_files(
-  FILES
-    holeFusionToSynchronizerAction.action
-)
-
 generate_messages(
   DEPENDENCIES
     std_msgs
     geometry_msgs
     sensor_msgs
-    actionlib_msgs
   )
 
 catkin_package(
@@ -46,5 +39,4 @@ catkin_package(
     std_msgs
     geometry_msgs
     sensor_msgs
-    actionlib_msgs
   )
