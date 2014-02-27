@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     vision_communications
     state_manager
+    state_manager_communications
     cv_bridge
     image_transport
     sensor_msgs
@@ -22,6 +23,7 @@ catkin_package(
       roscpp
       vision_communications
       state_manager
+      state_manager_communications
       cv_bridge
       image_transport
       sensor_msgs
@@ -75,4 +77,5 @@ set_target_properties(pandora_kinect_node
 add_dependencies(pandora_kinect_node 
   vision_gencfg
   vision_communications_gencpp
+  ${catkin_EXPORTED_TARGETS}
 ) 
