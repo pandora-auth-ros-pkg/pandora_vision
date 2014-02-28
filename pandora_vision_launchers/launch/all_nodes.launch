@@ -1,14 +1,18 @@
 <launch>
-	<include file="$(find vision)/launch/usbCam.launch" />
-	<include file="$(find vision)/launch/holeFindNode.launch" />
-	<include file="$(find vision)/launch/motionNode.launch" />
-	<include file="$(find vision)/launch/qrcodeNode.launch" />
-	<include file="$(find vision)/launch/hazmatNode.launch" />
-	<include file="$(find vision)/launch/faceNode.launch" />
-	<include file="$(find vision)/launch/landoltCNode.launch" />
+<!--
+	<include file="$(find pandora_vision_face)/launch/usbCam.launch" />
+	<include file="$(find pandora_vision_face)/launch/holeFindNode.launch" />
+	<include file="$(find pandora_vision_face)/launch/motionNode.launch" />
+	<include file="$(find pandora_vision_face)/launch/qrcodeNode.launch" />
+	<include file="$(find pandora_vision_face)/launch/hazmatNode.launch" />
+-->
+	<include file="$(find pandora_vision_face)/launch/faceNode.launch" />
+<!--
+	<include file="$(find pandora_vision_face)/launch/landoltCNode.launch" />
+-->
 	
 <!--
-	<include file="$(find vision)/launch/lineColorNode.launch" />
+	<include file="$(find pandora_vision_face)/launch/lineColorNode.launch" />
 -->
 </launch>
 
