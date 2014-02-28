@@ -78,7 +78,7 @@ HazmatDetection::HazmatDetection() :	_nh()
     
     clientInitialize();
     
-	ROS_INFO("[hazmatNode] : Created Hazmat Detection instance");
+	ROS_INFO("[hazmat_node] : Created Hazmat Detection instance");
 }
 
 /**
@@ -86,7 +86,7 @@ HazmatDetection::HazmatDetection() :	_nh()
  */
 HazmatDetection::~HazmatDetection()
 {
-	ROS_INFO("[hazmatNode] : Destroying Hazmat Detection instance");
+	ROS_INFO("[hazmat_node] : Destroying Hazmat Detection instance");
 	delete _hazmatDetector;
 
 }
@@ -113,7 +113,7 @@ void HazmatDetection::getGeneralParams()
 	}
 	else
 	{
-		ROS_DEBUG("[hazmatNode] : Parameter path not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter path not found. Using Default");
 		packagePath = ros::package::getPath("vision");
 	}
 
@@ -124,7 +124,7 @@ void HazmatDetection::getGeneralParams()
 	}
 	else
 	{
-		ROS_DEBUG("[hazmatNode] : Parameter saveImagePath not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter saveImagePath not found. Using Default");
 		saveImagePath = "/home/pandora/Desktop/eyeCharts/";
 	}
 
@@ -135,7 +135,7 @@ void HazmatDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("height : " << frameHeight);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter frameHeight not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter frameHeight not found. Using Default");
 		frameHeight = DEFAULT_HEIGHT;
 	}
 
@@ -145,7 +145,7 @@ void HazmatDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter imageTopic not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter imageTopic not found. Using Default");
 		imageTopic = "/camera_head/image_raw";
 	}
 
@@ -155,7 +155,7 @@ void HazmatDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("width : " << frameWidth);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter frameWidth not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter frameWidth not found. Using Default");
 		frameWidth = DEFAULT_WIDTH;
 	}
 }
@@ -171,7 +171,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("colorVariance", colorVariance);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter colorVariance not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter colorVariance not found. Using Default");
 		colorVariance = 10;
 	}
 
@@ -180,7 +180,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("votingThreshold", votingThreshold);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter votingThreshold not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter votingThreshold not found. Using Default");
 		votingThreshold = 39900;
 	}
 
@@ -190,7 +190,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("minAreaThreshold", minAreaThreshold);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter minAreaThreshold not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter minAreaThreshold not found. Using Default");
 		minAreaThreshold = 1000;
 	}
 
@@ -200,7 +200,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("maxAreaThreshold", maxAreaThreshold);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter maxAreaThreshold not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter maxAreaThreshold not found. Using Default");
 		maxAreaThreshold = 100000;
 	}
 
@@ -210,7 +210,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("sideLength", sideLength);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter sideLength not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter sideLength not found. Using Default");
 		//sideLength = 200
 		sideLength = 100;
 	}
@@ -221,7 +221,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("featureThreshold", featureThreshold);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter featureThreshold not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter featureThreshold not found. Using Default");
 		featureThreshold = 20;
 	}
 
@@ -231,7 +231,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("hazmatNumber", hazmatNumber);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter hazmatNumber not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter hazmatNumber not found. Using Default");
 		hazmatNumber = 9;
 	}
 
@@ -241,7 +241,7 @@ void HazmatDetection::getHazmatParams()
 		_nh.getParam("MOThreshold", MOThreshold);
 	}
 	else {
-		ROS_DEBUG("[hazmatNode] : Parameter MOThreshold not found. Using Default");
+		ROS_DEBUG("[hazmat_node] : Parameter MOThreshold not found. Using Default");
 		MOThreshold = 120000;
 	}
 
@@ -266,7 +266,7 @@ void HazmatDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 	hazmatFrameTimestamp = msg->header.stamp;
 	if ( hazmatFrame.empty() )
 	{               
-		ROS_ERROR("[hazmatNode] : No more Frames");
+		ROS_ERROR("[hazmat_node] : No more Frames");
 		ros::shutdown();
 		return;
 	}
@@ -335,7 +335,7 @@ void HazmatDetection::hazmatCallback()
 				//add the message to vector
 				hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
               
-                   ROS_INFO("[hazmatNode] : Hazmat found!");
+                   ROS_INFO("[hazmat_node] : Hazmat found!");
 				//check if eye chart
 				if (  (a[i].pattern_num >hazmatNumber) )
 				{			
@@ -390,7 +390,7 @@ void HazmatDetection::startTransition(int newState){
  * Called when state transition is completed
  */
 void HazmatDetection::completeTransition(void){
-	ROS_INFO("[hazmatNode] : Transition Complete");
+	ROS_INFO("[hazmat_node] : Transition Complete");
 }
 
 /**
@@ -401,7 +401,7 @@ void HazmatDetection::completeTransition(void){
  */
 int main(int argc, char** argv)
 {	
-	ros::init(argc,argv,"hazmatNode");
+	ros::init(argc,argv,"hazmat_node");
 
 	HazmatDetection* hazmatDetection = new HazmatDetection();
 

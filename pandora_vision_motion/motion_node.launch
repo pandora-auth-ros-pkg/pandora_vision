@@ -1,9 +1,13 @@
 <launch>
-    <group ns="vision">
-			<node name="motionNode" type="motionNode" pkg="vision" respawn="False" output="screen" />
+    <group ns="pandora_vision_motion">
+			<node name="motion_node" type="motion_node" pkg="pandora_vision_motion" respawn="False" output="log" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
-			<include file="$(find vision)/launch/general_params.launch" />	
+				<!-- Package Path /-->
+			<param name="/pandora_vision/packagepath" value="$(find pandora_vision_motion)" />
+
+            <!-- Locate general_params_launcher /-->
+			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
 			
 			<!-- **************** /-->
 			<!-- Debug Mode params /-->

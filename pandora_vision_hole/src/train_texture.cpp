@@ -1,18 +1,39 @@
-/*#############################################################
- * trainTexture.cpp
- *
- * File Description :
- *	Program to find cluster centers and patterns
- *  for the segmentation process.
- *	
- * Contents : 
- *
- * Author : Michael Skolarikis
- *
- * Change Date :	24-10-2011
- *
- *#############################################################
- */
+/*********************************************************************
+*
+* Software License Agreement (BSD License)
+*
+*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions
+*  are met:
+*
+*   * Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   * Redistributions in binary form must reproduce the above
+*     copyright notice, this list of conditions and the following
+*     disclaimer in the documentation and/or other materials provided
+*     with the distribution.
+*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+*     contributors may be used to endorse or promote products derived
+*     from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+*  POSSIBILITY OF SUCH DAMAGE.
+*
+* Author: Michael Skolarikis
+*********************************************************************/
 
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -26,12 +47,19 @@
 #include <stdlib.h>
 
 #include "pandora_vision_hole/pattern.h"
-#include "pandora_vision_hole/textureFilter.h"
+#include "pandora_vision_hole/texture_filter.h"
 #include "pandora_vision_hole/thing.h"
 
 #define NUM_POS_CLUSTERS	50
 #define NUM_NEG_CLUSTERS	50
 
+
+
+/*
+ * File Description :
+ * Program to find cluster centers and patterns
+ * for the segmentation process. 
+ */
 using namespace std;
 
 TextureFilter* filter;
@@ -240,11 +268,11 @@ void calculateResult(int event, int x, int y, int flags, void* param)
 				filter->printPatternHistograms();
 				//filter->visualizePatternHistograms();
 								
-				TimeCalculator timer;
-				timer.startTimer();
+				//~ TimeCalculator timer;
+				//~ timer.startTimer();
 
                                 IplImage* res = filter->calculateTexture(screenShot);
-				cout << "elapsed " << timer.endTimer() << endl;
+				//~ cout << "elapsed " << timer.endTimer() << endl;
 			
 				cvConvertScale(res, imgResult, 255.);
 				

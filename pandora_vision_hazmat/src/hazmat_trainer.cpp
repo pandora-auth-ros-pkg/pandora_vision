@@ -35,6 +35,7 @@
 * Author:  Tsakalis Vasilis
 * 		   Despoina Paschalidou
 *********************************************************************/
+
 #include "pandora_vision_hazmat/sift.h"
 #include "pandora_vision_hazmat/imgfeatures.h"
 #include "pandora_vision_hazmat/utils.h"
@@ -44,6 +45,7 @@
 #include <unistd.h>
 #include  <string.h>
 #include "ros/ros.h"
+#include <ros/package.h>
 #define OPTIONS ":o:m:i:s:c:r:n:b:dxh"
 
 using namespace std;
@@ -74,27 +76,14 @@ int display = 1;
 
 int main( int argc, char** argv )
 {
-	  ros::init(argc,argv,"hazmatTrainNode");
+	  ros::init(argc,argv,"hazmat_train_node");
 	  ros::NodeHandle _nh;
 	  
 	  IplImage* img;
 	  struct feature* features;
 	  int n = 0;
 	  
-	  
-	  std::string packagePath;
-	  //get package path in the pc
-	  if (_nh.hasParam("/vision/packagepath"))
-	  {
-			_nh.getParam("/vision/packagepath", packagePath);
-			ROS_DEBUG_STREAM("path : " << packagePath);
-	  }
-	  else
-	  {
-			ROS_DEBUG("[hazmatNode] : Parameter path not found. Using Default");
-			packagePath = "/home/despoina/pandora/pandora_ros_pkgs/pandora_robot/src/vision";
-	  }
-	  
+	  std::string packagePath = ros::package::getPath("pandora_vision_hazmat");
 	  int numOfPatterns=0;
 	  printf("Give the number of patterns you want to train");
 	  std::cin>>numOfPatterns;

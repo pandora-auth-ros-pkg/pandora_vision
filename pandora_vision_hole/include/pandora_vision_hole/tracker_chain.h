@@ -32,82 +32,39 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: <Name>
+* Author: Michael Skolarikis
 *********************************************************************/
- #ifndef LANDOLTCDETECTION_H
-#define  LANDOLTCDETECTION_H
 
-#include "ros/ros.h"
-#include <ros/package.h>
+#ifndef TRACKERCHAIN_H
+#define TRACKERCHAIN_H
 
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/image_encodings.h>
-#include <image_transport/image_transport.h>
+#include <stdint.h>
 
 #include <opencv2/opencv.hpp>
-#include <cv_bridge/cv_bridge.h>
-
-
-#include "state_client.h"
 
 #include <iostream>
 #include <stdlib.h>
 
-
-#define HFOV	61.14//68		//horizontal field of view in degrees : giwrgos 61.142
-#define VFOV	48  //50		//vertical field of view in degrees : giwrgos 47.79
-#define DEFAULT_HEIGHT	480		//default frame height
-#define DEFAULT_WIDTH	640		//default frame width
-
-class LandoltCDetection : public StateClient 
+#include "thing.h"
+#include "ros/ros.h"
+class TrackerChain : public std::vector<Thing*>
 {
-	private:
-		//nodeHandle
-		ros::NodeHandle _nh;
-		float ratioX;
-		float ratioY;
-		float hfov;		//horizontal Field Of View (rad)
-		float vfov;		
-		int frameWidth;		//frame width
-		int frameHeight; //frame height
-		
-		std::string packagePath;
-		std::string imageTopic;
-		
-		cv::Mat landoltCFrame;				// frame processed by HazmatDetector
-		ros::Time 	landoltCFrameTimestamp;
-		ros::ServiceClient hazmatClient;
-		//Subscriber
-		
-		std::string transport;
-		image_transport::Subscriber sub;
-		
-		
-		//variable used for State Managing
-		bool landoltCNowON;
-		
-	public:
-				
-		//constructor
-		LandoltCDetection();
-					
-		//destructor			
-		~LandoltCDetection();	
-		
-		//get parameters from launch file
-		void getGeneralParams();
-	    
-	    //get a new image
-		void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 	
+	public:										
 		
-		//Implemented from StateClient
-		void startTransition(int newState);
-		void completeTransition(void);
+		TrackerChain();					// constructor
+		~TrackerChain();				// destructor
 		
-		int curState;		//Current state of robot
-		int prevState;		//Previous state of robot
+		void push(Thing* thingPtr);		// push a Thing* in the chain
+				
+		uintptr_t m_id; 				// id of chain
+		
+		bool active;					// true if the chain's last blob, is at most MIN_INACTIVITY frames old
+		bool inactive; 					// true if the chain, is at least, is at least MAX_INACTIVITY frames old 
+		int inactivity;					// shows how many frames have been elapsed, since the last blob has been inserted
+		double probability;				// probability of the chain's last blob
+		
+		CvScalar color;					// color, with which the chain's blobs will be filled
 };
 
 #endif
-			
