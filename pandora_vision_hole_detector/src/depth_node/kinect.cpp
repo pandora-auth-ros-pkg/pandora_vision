@@ -157,58 +157,75 @@ namespace vision
     message
     @return void
    **/
-  void PandoraKinect::inputCloudCallback
-    (const sensor_msgs::PointCloud2ConstPtr& msg)
+  void PandoraKinect::inputCloudCallback(
+    const sensor_msgs::PointCloud2ConstPtr& msg)
   {
+    //!< Extract a PointCloudXYZPtr from the point cloud message
+    PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
+    extractPointCloudFromMessage(msg, pointCloudXYZ);
 
+    //!< Extract the depth image from the PointCloudXYZPtr
+    cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width, CV_32FC1);
+    extractDepthImageFromPointCloud(pointCloudXYZ, depthImage);
+
+    //!< Finds possible holes
+    HoleFilters::HolesConveyor holes = HoleDetector::findHoles(depthImage,
+      pointCloudXYZ);
+
+    return;
+  }
+
+
+
+  /**
+    @brief Extracts a PointCloudXYZPtr (see defines.h)
+    from a point cloud message
+    @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
+    cloud message
+    @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+    @return void
+   **/
+  void PandoraKinect::extractPointCloudFromMessage(
+    const sensor_msgs::PointCloud2ConstPtr& msg,
+    PointCloudXYZPtr& pointCloudXYZ)
+  {
     PointCloud pointCloud;
-    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr\
-     to pcl::PCLPointCloud2
+
+    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
+    //!< to pcl::PCLPointCloud2
     pcl_conversions::toPCL(*msg, pointCloud);
 
-    //!< convert the point cloud from pcl::PCLPointCloud2 to pcl::PointCLoud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloudXYZ
-      (new pcl::PointCloud<pcl::PointXYZ>);
-
+    //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
+    //!< aka PointCloudXYZPtr
     pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+  }
 
 
-    const PointCloudXYZPtr originalPointCloud (new PointCloudXYZ());
-    copyPointCloud(*pointCloudXYZ, *originalPointCloud);
 
-    //!< zArray is a 2D float array each element of which is the input
-    //!< pointcloud -extracted z.
-    //!< It holds floats in meters.
-    //!< This array will be used to produce an opencv image similar to
-    //!< the depth image obtained from /camera/depth/image.
-
-    float zArray [pointCloudXYZ->height][pointCloudXYZ->width];
-
+  /**
+    @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
+    point cloud
+    @param pointCloudXYZ [PointCloudXYZPtr&] The point cloud
+    @param depthImage [cv::Mat&] The extracted depth image
+    @return [cv::Mat] The depth image
+   **/
+  void PandoraKinect::extractDepthImageFromPointCloud(
+    const PointCloudXYZPtr& pointCloudXYZ, cv::Mat& depthImage)
+  {
     for (unsigned int row = 0; row < pointCloudXYZ->height; ++row)
     {
       for (unsigned int col = 0; col < pointCloudXYZ->width; ++col)
       {
-        zArray[row][col] =
+        depthImage.at<float>(row, col) =
           pointCloudXYZ->points[col + pointCloudXYZ->width * row].z;
 
         //!< if element is nan make it a zero
-        if (zArray[row][col] != zArray[row][col])
+        if (depthImage.at<float>(row, col) != depthImage.at<float>(row, col))
         {
-          zArray[row][col] = 0.0;
+          depthImage.at<float>(row, col) = 0.0;
         }
       }
     }
-
-    //!< convert the array to an opencv image depthImage now holds \
-    the depth image
-    cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width,
-      CV_32FC1, zArray);
-
-    //!< Finds possible holes
-    HoleFilters::HolesConveyor holes = HoleDetector::findHoles(depthImage,
-        pointCloudXYZ);
-
-    return;
   }
 
 
@@ -220,7 +237,7 @@ namespace vision
    **/
   void PandoraKinect::storePointCloudVectorToImages
     (const std::vector<PointCloudXYZPtr> in_vector)
-  {
+    {
       for (int i = 0; i < in_vector.size(); i++)
       {
         pcl::io::savePCDFileASCII
