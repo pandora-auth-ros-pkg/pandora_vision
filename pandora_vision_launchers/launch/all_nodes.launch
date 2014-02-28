@@ -1,8 +1,14 @@
 <launch>
-	
-	<include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" />
 
-	<include file="$(find pandora_vision_hole)/hole_find_node.launch" />
+  <arg name="camID" default="/dev/video1"/>
+  <arg name="topic_name" default="/camera_head/image_raw"/>
+
+  <include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" >
+    <arg name="camID" value="$(arg camID)"/>
+    <arg name="topic_name" value="$(arg topic_name)"/>
+  </include>
+
+	<include file="$(find pandora_vision_hole)/launch/hole_find_node.launch" />
 	
 	<include file="$(find pandora_vision_qrcode)/qrcode_node.launch" />
 	<include file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />

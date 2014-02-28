@@ -1,15 +1,12 @@
 <launch>
-	<!-- CamID /-->
-	<arg name="camID" value="/dev/video0"/>
-
-	<!-- Frame Height /-->
-	<param name="height" type="int" value="480"/>
-
-	<!-- Frame Width /-->
-	<param name="width" type="double" value="640"/>
-
-	<!-- Topic Where captured frame is published /-->
-	<param name="imageTopic" type="str" value="/camera_head/image_raw" />
-
-	
+  
+  <!-- Frame Height /-->
+  <param name="height" type="int" value="480"/>
+  
+  <!-- Frame Width /-->
+  <param name="width" type="double" value="640"/>
+  
+  <!-- Topic Where captured frame is published /-->
+  <param name="imageTopic" type="str" value="/camera_head/image_raw" />
+  
 </launch>
