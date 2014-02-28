@@ -1,12 +1,14 @@
 <launch>
-    <group ns="vision">
-			<node name="hazmatNode" type="hazmatNode" pkg="vision" respawn="False" output="screen" />
+    <group ns="pandora_vision_hazmat">
+		
+			<node name="hazmat_train_node" type="hazmat_train_node" pkg="pandora_vision_hazmat" respawn="False" output="screen" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
-			<!-- Package Path /-->
-			<param name="/vision/packagepath" value="$(find vision)" />
+		<!-- Package Path /-->
+			<param name="/vision/packagepath" value="$(find pandora_vision_hazmat)" />
 
-			<include file="$(find vision)/launch/general_params.launch" />		
+            <!-- Locate general_params_launcher /-->
+			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
 
 			<!-- **************** /-->
 			<!-- Debug Mode params /-->

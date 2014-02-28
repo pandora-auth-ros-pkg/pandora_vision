@@ -38,9 +38,9 @@ include_directories(include
 add_executable(hole_find_node
 						src/hole_detection.cpp  
 						src/hole_detector.cpp 
-						src/textureFilter.cpp 
+						src/texture_filter.cpp 
 						src/tracker.cpp 
-						src/trackerChain.cpp 
+						src/tracker_chain.cpp 
 						src/pattern.cpp 
 						src/thing.cpp
 					   )
@@ -53,3 +53,13 @@ add_dependencies(hole_find_node
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
+
+########################### train_texture ############################
+if(TEXTURE_ENABLE_TRAIN)
+	add_executable(train_texture 
+						src/train_texture.cpp
+						src/texture_filter.cpp
+						src/pattern.cpp
+						src/thing.cpp)
+	target_link_libraries(train_texture ${catkin_LIBRARIES})	
+endif()

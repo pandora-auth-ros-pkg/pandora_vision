@@ -35,8 +35,8 @@
 * Author: Michael Skolarikis
 *********************************************************************/
 
-#ifndef PATTERN_H
-#define PATTERN_H
+#ifndef TRACKERCHAIN_H
+#define TRACKERCHAIN_H
 
 #include <stdint.h>
 
@@ -44,62 +44,27 @@
 
 #include <iostream>
 #include <stdlib.h>
+
+#include "thing.h"
 #include "ros/ros.h"
-
-#define POSITIVE 0
-#define NEGATIVE 1
-
-#define	BGR						0
-#define YCrCb					1
-#define CrCb					2
-
-#define EUCLIDEAN				0
-#define EUCLIDEAN_SIMPLE		1
-
-using namespace cv;
-
-struct histogram 
-{
-	int* values;
-	double* valuesNorm;
-	int bins;
-	double norm2;	// norm ^ 2
-};
-
-class Pattern
+class TrackerChain : public std::vector<Thing*>
 {
 	
-	private:
+	public:										
+		
+		TrackerChain();					// constructor
+		~TrackerChain();				// destructor
+		
+		void push(Thing* thingPtr);		// push a Thing* in the chain
 				
-																			
-	public:
+		uintptr_t m_id; 				// id of chain
 		
-		uintptr_t m_id;
+		bool active;					// true if the chain's last blob, is at most MIN_INACTIVITY frames old
+		bool inactive; 					// true if the chain, is at least, is at least MAX_INACTIVITY frames old 
+		int inactivity;					// shows how many frames have been elapsed, since the last blob has been inserted
+		double probability;				// probability of the chain's last blob
 		
-		histogram m_hist;
-	
-		IplImage* m_imgPatternGray;
-		IplImage* m_imgPatternBGR;
-		IplImage* m_imgPatternYCrCb;
-		
-		bool isPositive;
-	
-		Pattern();		
-		~Pattern();
-		
-		void createPattern(IplImage* img, int type);
-		void destroyPattern();
-		void calculateHistogram(CvPoint3D32f* colors3d, int bins, int colorspace);
-		void calculateHistogram(Mat_<Vec2f>* colors2d, int bins, int colorspace);
-		void visualizeHistogram(CvPoint3D32f* colors3d);
-		void visualizeHistogram(Mat_<Vec2f>* colors2d);
-		
-		double calculatePointDistance(CvPoint3D32f pt1, CvPoint3D32f pt2, int type);
-		double calculatePointDistance(CvPoint2D32f pt1, CvPoint2D32f pt2, int type);
-		
-		CvScalar BGR2YCrCb(CvScalar bgr);
-		CvScalar YCrCb2BGR(CvScalar ycrcb);
-		
+		CvScalar color;					// color, with which the chain's blobs will be filled
 };
 
 #endif
