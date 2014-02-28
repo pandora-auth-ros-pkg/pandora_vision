@@ -99,6 +99,29 @@ namespace vision
         (const sensor_msgs::ImageConstPtr& msg);
 
       /**
+        @brief Extracts a PointCloudXYZPtr (see defines.h)
+        from a point cloud message
+        @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
+        cloud message
+        @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+        @return void
+       **/
+      void extractPointCloudFromMessage(
+        const sensor_msgs::PointCloud2ConstPtr& msg,
+        PointCloudXYZPtr& pointCloudXYZ);
+
+      /**
+        @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
+        point cloud
+        @param pointCloudXYZ [PointCloudXYZPtr&] The point cloud
+        @param depthImage [cv::Mat&] The extracted depth image
+        @return [cv::Mat] The depth image
+       **/
+      void extractDepthImageFromPointCloud(
+        const PointCloudXYZPtr& pointCloudXYZ, cv::Mat& depthImage);
+
+
+      /**
         @brief Stores a ensemble of point clouds in pcd images
         @param in_cloud [const std::vector<PointCloudXYZPtr>] The point clouds
         @return void
