@@ -1,6 +1,6 @@
 <launch>
     <group ns="pandora_vision_motion">
-			<node name="motion_node" type="motion_node" pkg="pandora_vision_motion" respawn="False" output="screen" />
+			<node name="motion_node" type="motion_node" pkg="pandora_vision_motion" respawn="False" output="log" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
 				<!-- Package Path /-->
