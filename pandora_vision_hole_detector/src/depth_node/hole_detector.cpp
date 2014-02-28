@@ -54,12 +54,12 @@ namespace vision
   /**
     @brief Finds the holes provided a depth image in CV_32FC1 format
     @param[in] depthImage [cv::Mat] The depth image in CV_32FC1 format
-    @param[in] pointCloud [pcl::PointCloud<pcl::PointXYZ>::Ptr] The point
-    cloud from which the depth image is extracted
+    @param[out] interpolatedDepthImage [cv::Mat&] The denoised
+    depth image in CV_32FC1 format
     @return std::vector<cv::Point2f> Centers of the possible holes
    **/
   HoleFilters::HolesConveyor HoleDetector::findHoles(cv::Mat depthImage,
-    pcl::PointCloud<pcl::PointXYZ>::Ptr initialPointCloud)
+    cv::Mat& interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("findHoles","",true);
@@ -78,7 +78,7 @@ namespace vision
     #endif
 
     //!< Perform noise elimination (black pixels removed)
-    cv::Mat interpolatedDepthImage;
+    //cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImage,
         interpolatedDepthImage);
 
@@ -168,10 +168,12 @@ namespace vision
 
     //!< Since not all blobs are holes, sift blobs according to known properties
     //!< of holes in 3D space
-    HoleFilters::checkHoles(
-        interpolatedDepthImage,
-        initialPointCloud,
-        conveyor);
+    /*
+     *HoleFilters::checkHoles(
+     *    interpolatedDepthImage,
+     *    initialPointCloud,
+     *    conveyor);
+     */
 
 
     #ifdef DEBUG_SHOW

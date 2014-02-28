@@ -39,6 +39,7 @@
 #define KINECT_NODE_H
 
 #include "depth_node/hole_detector.h"
+#include "vision_communications/DepthCandidateHolesVectorMsg.h"
 
 /**
   @namespace vision
@@ -108,9 +109,21 @@ namespace vision
         @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
         @return void
        **/
-      void extractPointCloudFromMessage(
+      void extractPointCloudXYZFromMessage(
         const sensor_msgs::PointCloud2ConstPtr& msg,
         PointCloudXYZPtr& pointCloudXYZ);
+
+      /**
+        @brief Converts a point cloud of type PointCloudXYZPtr to
+        a point cloud of type PointCloud and packs it in a message
+        @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
+        converted
+        @param[out] pointCloud [sensor_msgs::PointCloud2&]
+        The converted point cloud message
+        @return void
+       **/
+      void convertPointCloudXYZToMessage(const PointCloudXYZPtr& pointCloudXYZ,
+        sensor_msgs::PointCloud2& pointCloudMsg);
 
       /**
         @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
@@ -120,7 +133,7 @@ namespace vision
         @return [cv::Mat] The depth image
        **/
       void extractDepthImageFromPointCloud(
-        const PointCloudXYZPtr& pointCloudXYZ, cv::Mat& depthImage);
+        const PointCloudXYZPtr& pointCloudXYZPtr, cv::Mat& depthImage);
 
 
       /**
@@ -130,6 +143,26 @@ namespace vision
        **/
       void storePointCloudVectorToImages
         (const std::vector<PointCloudXYZPtr> in_cloud);
+
+      /**
+       @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
+       message
+       @param[in] conveyor [HoleFilters::HolesConveyor&] A struct containing
+       vectors of the holes' keypoints, bounding rectangles' vertices
+       and blobs' outlines
+       @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
+       @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
+       cloud
+       @param[out] depthCandidateHolesMsg
+       [vision_communications::DepthCandidateHolesVectorMsg&] The output message
+       @return void
+       **/
+      void createCandidateHolesMessage(
+        const HoleFilters::HolesConveyor& conveyor,
+        const cv::Mat& interpolatedDepthImage,
+        const PointCloudXYZPtr& pointCloudXYZPtr,
+        vision_communications::DepthCandidateHolesVectorMsg&
+        depthCandidateHolesMsg);
 
       /**
         @brief Publishes the planes to /vision/kinect/planes topic
