@@ -36,11 +36,9 @@
 *********************************************************************/
 
 #include "depth_node/kinect.h"
-#include "vision_communications/DepthCandidateHolesVectorMsg.h"
 
 namespace vision
 {
-
   /**
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
@@ -173,15 +171,27 @@ namespace vision
   {
     //!< Extract a PointCloudXYZPtr from the point cloud message
     PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
-    extractPointCloudFromMessage(msg, pointCloudXYZ);
+    extractPointCloudXYZFromMessage(msg, pointCloudXYZ);
 
     //!< Extract the depth image from the PointCloudXYZPtr
     cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width, CV_32FC1);
     extractDepthImageFromPointCloud(pointCloudXYZ, depthImage);
 
     //!< Finds possible holes
+    cv::Mat interpolatedDepthImage;
     HoleFilters::HolesConveyor holes = HoleDetector::findHoles(depthImage,
-      pointCloudXYZ);
+      interpolatedDepthImage);
+
+    //!< Create the candidate holes message
+    vision_communications::DepthCandidateHolesVectorMsg depthCandidateHolesMsg;
+
+    createCandidateHolesMessage(holes,
+      interpolatedDepthImage,
+      pointCloudXYZ,
+      depthCandidateHolesMsg);
+
+    //!< Publish the candidate holes message
+    _candidateHolesPublisher.publish(depthCandidateHolesMsg);
 
     return;
   }
@@ -196,7 +206,7 @@ namespace vision
     @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
     @return void
    **/
-  void PandoraKinect::extractPointCloudFromMessage(
+  void PandoraKinect::extractPointCloudXYZFromMessage(
     const sensor_msgs::PointCloud2ConstPtr& msg,
     PointCloudXYZPtr& pointCloudXYZ)
   {
@@ -209,6 +219,98 @@ namespace vision
     //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
     //!< aka PointCloudXYZPtr
     pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+  }
+
+
+
+  /**
+    @brief Converts a point cloud of type PointCloudXYZPtr to
+    a point cloud of type PointCloud and packs it in a message
+    @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
+    converted
+    @param[out] pointCloud [sensor_msgs::PointCloud2&]
+    The converted point cloud message
+    @return void
+   **/
+  void PandoraKinect::convertPointCloudXYZToMessage(const PointCloudXYZPtr& pointCloudXYZPtr,
+    sensor_msgs::PointCloud2& pointCloudMsg)
+  {
+    PointCloud pointCloud;
+
+    //!< Convert the pcl::PointCloud<pcl::PointXYZ>::Ptr aka PointCloudXYZPtr
+    //!< to pcl::PCLPointCloud2
+    pcl::toPCLPointCloud2(*pointCloudXYZPtr, pointCloud);
+
+    //!< Pack the point cloud to a ROS message
+    pcl_conversions::fromPCL(pointCloud, pointCloudMsg);
+  }
+
+
+
+  /**
+    @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
+    message
+    @param[in] conveyor [HoleFilters::HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
+    @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
+    cloud
+    @param[out] depthCandidateHolesMsg
+    [vision_communications::DepthCandidateHolesVectorMsg&] The output message
+    @return void
+   **/
+  void PandoraKinect::createCandidateHolesMessage(
+    const HoleFilters::HolesConveyor& conveyor,
+    const cv::Mat& interpolatedDepthImage,
+    const PointCloudXYZPtr& pointCloudXYZPtr,
+    vision_communications::DepthCandidateHolesVectorMsg& depthCandidateHolesMsg)
+  {
+    //!< Fill the vision_communications::DepthCandidateHolesVectorMsg's
+    //!< candidateHoles vector
+    for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
+    {
+      vision_communications::DepthCandidateHoleMsg holeMsg;
+
+      //!< Push back the keypoint
+      holeMsg.keypointX = conveyor.keyPoints[i].pt.x;
+      holeMsg.keypointY = conveyor.keyPoints[i].pt.y;
+
+      //!< Push back the bounding rectangle's vertices
+      for (int v = 0; v < conveyor.rectangles[i].size(); v++)
+      {
+        holeMsg.verticesX.push_back(conveyor.rectangles[i][v].x);
+        holeMsg.verticesY.push_back(conveyor.rectangles[i][v].y);
+      }
+
+      //!< Push back the blob's outline points
+      for (int o = 0; o < conveyor.outlines[i].size(); o++)
+      {
+        holeMsg.outlineX.push_back(conveyor.outlines[i][o].x);
+        holeMsg.outlineY.push_back(conveyor.outlines[i][o].y);
+      }
+
+      //!< Push back one hole to the holes vector message
+      depthCandidateHolesMsg.candidateHoles.push_back(holeMsg);
+    }
+
+    //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
+    //!< sensor_msgs/PointCloud2 pointCloud
+    sensor_msgs::PointCloud2 pointCloudMessage;
+    convertPointCloudXYZToMessage(pointCloudXYZPtr, pointCloudMessage);
+    depthCandidateHolesMsg.pointCloud = pointCloudMessage;
+
+    //!< Convert the cv::Mat image to a ROS message
+    cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
+
+    imageMessagePtr->header = pointCloudMessage.header;
+    imageMessagePtr->encoding = sensor_msgs::image_encodings::MONO8;
+    imageMessagePtr->image = interpolatedDepthImage;
+
+    //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
+    //!< sensor_msgs/Image interpolatedDepthImage
+    depthCandidateHolesMsg.interpolatedDepthImage =
+      *imageMessagePtr->toImageMsg();
   }
 
 

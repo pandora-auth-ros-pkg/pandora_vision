@@ -64,12 +64,12 @@ namespace vision
       /**
         @brief Finds the holes provided a depth image in CV_32FC1 format
         @param[in] depthImage [cv::Mat] The depth image in CV_32FC1 format
-        @param[in] pointCloud [pcl::PointCloud<pcl::PointXYZ>::Ptr] The point
-        cloud from which the depth image is extracted
+        @param[out] interpolatedDepthImage [cv::Mat&] The denoised
+        depth image in CV_32FC1 format
         @return std::vector<cv::Point2f> Centers of the possible holes
        **/
       static HoleFilters::HolesConveyor findHoles(cv::Mat depthImage,
-          pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud);
+        cv::Mat& interpolatedDepthImage);
   };
 }
 
