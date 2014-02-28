@@ -106,9 +106,6 @@ namespace vision {
       //!< central node for the front camera
       image_transport::Subscriber _frameSubscriberFront;
 
-      //!< The subscriber that listens to the frame topic advertised by the
-      //!< central node for the rear camera
-      image_transport::Subscriber _frameSubscriberBack;
 
       //!< Debug publisher for MotionDetector
       image_transport::Publisher _qrcodeDebugPublisher;
@@ -156,13 +153,7 @@ namespace vision {
        */
       void imageCallbackFront(const sensor_msgs::ImageConstPtr& msg);
 
-      /**
-       * @brief Function called when new ROS message appears, for rear camera
-       * @param msg [const sensor_msgs::ImageConstPtr&] The message
-       * @return void
-       */
-      void imageCallbackBack(const sensor_msgs::ImageConstPtr& msg);
-
+   
       //!< Current state of robot
       int curState;
 

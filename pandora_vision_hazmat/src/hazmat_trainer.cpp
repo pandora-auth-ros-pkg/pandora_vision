@@ -35,6 +35,7 @@
 * Author:  Tsakalis Vasilis
 * 		   Despoina Paschalidou
 *********************************************************************/
+
 #include "pandora_vision_hazmat/sift.h"
 #include "pandora_vision_hazmat/imgfeatures.h"
 #include "pandora_vision_hazmat/utils.h"
@@ -74,7 +75,7 @@ int display = 1;
 
 int main( int argc, char** argv )
 {
-	  ros::init(argc,argv,"hazmatTrainNode");
+	  ros::init(argc,argv,"hazmat_train_node");
 	  ros::NodeHandle _nh;
 	  
 	  IplImage* img;
@@ -91,8 +92,8 @@ int main( int argc, char** argv )
 	  }
 	  else
 	  {
-			ROS_DEBUG("[hazmatNode] : Parameter path not found. Using Default");
-			packagePath = "/home/despoina/pandora/pandora_ros_pkgs/pandora_robot/src/vision";
+			ROS_DEBUG("[hazmat_node] : Parameter path not found. Using Default");
+			packagePath = "/home/paschalidoud/pandora_ws/src/pandora_vision/pandora_vision_hazmat";
 	  }
 	  
 	  int numOfPatterns=0;

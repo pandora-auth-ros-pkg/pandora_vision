@@ -48,7 +48,7 @@ add_dependencies(hazmat_node
 
 ########################### hazmatTrainNode ############################
 if(HAZMAT_ENABLE_TRAIN)
-  add_executable(hazmat_train_node src/siftfeat.cpp
+  add_executable(hazmat_train_node src/hazmat_trainer.cpp
 						src/utils.cpp 
 						src/sift.cpp  
 						src/imgfeatures.cpp)
