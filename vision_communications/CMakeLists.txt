@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
   FILES
+  DepthCandidateHoleMsg.msg
+  DepthCandidateHolesVectorMsg.msg
   HoleDirectionMsg.msg
   HolesDirectionsVectorMsg.msg
   FaceDirectionMsg.msg
