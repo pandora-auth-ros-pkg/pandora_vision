@@ -146,7 +146,7 @@ void FaceDetection::getTimerParams()
 //**************************************//
 void FaceDetection::getGeneralParams()
 {
-	packagePath = ros::package::getPath("vision");
+	packagePath = ros::package::getPath("pandora_vision_face");
 	// Get the faceDummy parameter if available;
 	if (_nh.hasParam("faceDummy")) {
 		_nh.getParam("faceDummy", faceDummy);
@@ -361,30 +361,30 @@ void FaceDetection::faceCallback(const ros::TimerEvent&)
 	}
 	ROS_DEBUG_NAMED("Face Callback","Enters Face Callback");
 
-	int retries = 0;
-	while (true)
-	{
-		pthread_mutex_lock(&faceLock);
-
-		if (isFaceFrameUpdated)
-			break;
-		else
-		{
-			//if input frame is not yet set
-			//sleep for a while to let
-			//imageCallback() to catch up
-			pthread_mutex_unlock(&faceLock);
-
-			ros::Duration(0.5).sleep();
-
-			if (retries > 10)
-			{
-				ROS_INFO("[faceNode] : Timed out waiting for faceFrame!");
-				return;
-			}
-			retries++;
-		}
-	}
+	//~ int retries = 0;
+	//~ while (true)
+	//~ {
+		//~ pthread_mutex_lock(&faceLock);
+//~ 
+		//~ if (isFaceFrameUpdated)
+			//~ break;
+		//~ else
+		//~ {
+			//~ //if input frame is not yet set
+			//~ //sleep for a while to let
+			//~ //imageCallback() to catch up
+			//~ pthread_mutex_unlock(&faceLock);
+//~ 
+			//~ ros::Duration(0.5).sleep();
+//~ 
+			//~ if (retries > 10)
+			//~ {
+				//~ ROS_INFO("[faceNode] : Timed out waiting for faceFrame!");
+				//~ return;
+			//~ }
+			//~ retries++;
+		//~ }
+	//~ }
 
 	// Create Msg for faces
 	vision_communications::FaceDirectionMsg faceMessage;

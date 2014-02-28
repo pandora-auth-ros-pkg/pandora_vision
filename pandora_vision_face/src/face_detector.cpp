@@ -60,8 +60,7 @@ pthread_mutex_t detectFeaturesLock = PTHREAD_MUTEX_INITIALIZER;
 
 FaceDetector::FaceDetector(std::string cascadeName,std::string csv, int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist )
 {	
-	//~ _facePublisher = image_transport::ImageTransport(_nh).advertise("face_rec", 1);
-	
+
 	cascade_name.assign(cascadeName);
 	csv_name.assign(csv);
 	scale = scaleFactor;
@@ -82,8 +81,11 @@ FaceDetector::FaceDetector(std::string cascadeName,std::string csv, int bufferSi
         std::cout<< "Error opening file \"" << csv_name<< std::endl;
         exit(1);
     }
+
 	model = createFisherFaceRecognizer();
+   
     model->train(images, labels);
+
 	N = bufferSize;
 	angleNum = 5;
 	isSkinDetectorEnabled = skinEnabled;
@@ -104,11 +106,7 @@ FaceDetector::FaceDetector(std::string cascadeName,std::string csv, int bufferSi
         
 	storage_total = cvCreateMemStorage(0);
 	cvClearMemStorage(storage_total);
-	
-	//initialization of faces_total sequence, storing all the faces found after 5 rotations
-	
-	
-	std::cout << "Created FaceDetector instance" << std::endl;
+
 	
 }
 
