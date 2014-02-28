@@ -128,7 +128,7 @@ HoleFinder::HoleFinder()
 	filter = new TextureFilter();
 	filter->setColorSpace(CrCb);		
 
-	ROS_INFO("[WebNode - HoleFinder] : Created HoleFinder instance"); 
+	ROS_INFO("[hole_detector] : Created HoleFinder instance"); 
 #if HOLEFINDER_DEBUG_MODE
 	createWindows();
 #endif
@@ -144,7 +144,7 @@ HoleFinder::~HoleFinder()
 	delete filter;
 	filter = NULL;
 
-	ROS_INFO("[WebNode - HoleFinder] : Destroying HoleFinder instance");
+	ROS_INFO("[hole_detector] : Destroying HoleFinder instance");
 }
 
 void HoleFinder::setTexturePath(string str)
@@ -358,7 +358,7 @@ void HoleFinder::findContours(IplImage* input)
 		if (rectArea == 0)
 		{
 			cvSubstituteContour( scanner, 0 );
-			ROS_ERROR( "[WebNode - HoleFinder] : bounding rect of contour can't have zero area... Something's wrong");
+			ROS_ERROR( "[hole_detector] : bounding rect of contour can't have zero area... Something's wrong");
 			continue;
 		}
 
@@ -505,7 +505,7 @@ void HoleFinder::findEdgeImage(IplImage* imgInput)
 			cv::Canny(imgTemp, imgTemp, _cannyLowThresB, _cannyHighThresB, N );
 		}
 		else
-			ROS_ERROR("[WebNode - HoleFinder] : Invalid Edge Detection Canny Parameters 1 ");
+			ROS_ERROR("[hole_detector] : Invalid Edge Detection Canny Parameters 1 ");
 
 		if (_dilateB > 0)
 			cv::dilate(imgTemp,imgTemp,cv::Mat(),cv::Point(),_dilateB);
@@ -518,7 +518,7 @@ void HoleFinder::findEdgeImage(IplImage* imgInput)
 			cv::Canny(imgTemp, imgTemp, _cannyLowThresB1, _cannyHighThresB1, N );
 		}
 		else
-			ROS_ERROR("[WebNode - HoleFinder] : Invalid Edge Detection Canny Parameters 2 ");
+			ROS_ERROR("[hole_detector] : Invalid Edge Detection Canny Parameters 2 ");
 
 		break;
 
@@ -546,12 +546,12 @@ void HoleFinder::findEdgeImage(IplImage* imgInput)
 			cv::Canny( imgTemp, imgTemp, _cannyLowThresB2, _cannyHighThresB2, N );
 		}
 		else
-			ROS_ERROR("[WebNode - HoleFinder] : Invalid Edge Detection Canny Parameters 3 ");
+			ROS_ERROR("[hole_detector] : Invalid Edge Detection Canny Parameters 3 ");
 
 		break;
 
 	default:
-		ROS_ERROR("[WebNode - HoleFinder] : Unknown parameter for edge mode!!!");
+		ROS_ERROR("[hole_detector] : Unknown parameter for edge mode!!!");
 		break;
 	}
 
@@ -576,7 +576,7 @@ void HoleFinder::modifySourceImage(cv::Mat imgCap)
 	else if (imgCap.channels() == 1)
 		imgTemp = imgCap.clone();
 	else
-		ROS_ERROR("[WebNode - HoleFinder] : Unknown number of channels for input image");
+		ROS_ERROR("[hole_detector] : Unknown number of channels for input image");
 
 
 	///////////////////////////////////////////////////////////
@@ -612,7 +612,7 @@ void HoleFinder::modifySourceImage(cv::Mat imgCap)
 		break;
 
 	default :
-		ROS_ERROR("[WebNode - HoleFinder] : Unknown parameter for edge mode!!!");
+		ROS_ERROR("[hole_detector] : Unknown parameter for edge mode!!!");
 		break;
 	}
 	IplImage local_temp = imgTemp;
@@ -691,7 +691,7 @@ void HoleFinder::showImages()
  */
 void HoleFinder::cleanup()
 {
-	//std::cout <<"[WebNode - HoleFinder] :  Cleanup" << endl;
+	//std::cout <<"[hole_detector] :  Cleanup" << endl;
 	cvReleaseImage( &imgEdge);
 	cvReleaseImage( &imgThreshold);	
 	cvReleaseImage( &imgContours);

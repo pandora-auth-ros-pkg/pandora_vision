@@ -49,7 +49,7 @@ HoleFindNode::HoleFindNode() :	_nh() {
 	//create holeFinder 
 	_holeFinder 		=	new HoleFinder();	
 	_tracker 			= 	new Tracker();
-
+    packagePath= ros::package::getPath("pandora_vision_hole");
 	string path = packagePath + "/";
 	_holeFinder->setTexturePath(path);
 
@@ -175,16 +175,6 @@ void HoleFindNode::getGeneralParams()
 		imageTopic = "/camera_head/image_raw";
 	}
 
-	//get package path in the pc
-	if (_nh.hasParam("/vision/packagepath")){
-		_nh.getParam("/vision/packagepath", packagePath);
-		ROS_DEBUG_STREAM("path : " << packagePath);
-	}
-	else
-	{
-		ROS_DEBUG("[HoleFindNode] : Parameter path not found. Using Default");
-		packagePath = ros::package::getPath("vision");
-	}
 }
 
 /**
@@ -200,7 +190,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("modeA : " << _holeFinder->_modeA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter modeA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter modeA not found. Using Default");
 			_holeFinder->_modeA = 0;
 		}
 
@@ -210,7 +200,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("equalizeA : " << _holeFinder->_equalizeA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter equalizeA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter equalizeA not found. Using Default");
 			_holeFinder->_equalizeA = 1;
 		}
 
@@ -220,7 +210,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("smoothA : " << _holeFinder->_smoothA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter smoothA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter smoothA not found. Using Default");
 			_holeFinder->_smoothA = 15;
 		}
 
@@ -230,7 +220,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("erodeA : " << _holeFinder->_erodeA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter erodeA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter erodeA not found. Using Default");
 			_holeFinder->_erodeA = 4;
 		}
 
@@ -240,7 +230,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("dilateA : " << _holeFinder->_dilateA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter dilateA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter dilateA not found. Using Default");
 			_holeFinder->_dilateA = 2;
 		}
 
@@ -250,7 +240,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("openA : " << _holeFinder->_openA);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter openA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter openA not found. Using Default");
 			_holeFinder->_openA = 2;
 		}
 
@@ -260,7 +250,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("closeA : " << _holeFinder->_closeA);
 		}
 		else {
-			ROS_DEBUG("[webNode] : Parameter closeA not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter closeA not found. Using Default");
 			_holeFinder->_closeA = 2;
 		}
 	}
@@ -273,7 +263,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("modeB : " << _holeFinder->_modeB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter modeB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter modeB not found. Using Default");
 			_holeFinder->_modeB = 0;
 		}
 
@@ -283,7 +273,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyConvKernelB : " << _holeFinder->_cannyConvKernelB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyConvKernelB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyConvKernelB not found. Using Default");
 			_holeFinder->_cannyConvKernelB = 3;
 		}
 
@@ -293,7 +283,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyLowThresB : " << _holeFinder->_cannyLowThresB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyLowThresB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyLowThresB not found. Using Default");
 			_holeFinder->_cannyLowThresB = 50;
 		}
 
@@ -303,7 +293,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyHighThresB : " << _holeFinder->_cannyHighThresB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyHighThresB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyHighThresB not found. Using Default");
 			_holeFinder->_cannyHighThresB = 150;
 		}
 
@@ -313,7 +303,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("dilateB : " << _holeFinder->_dilateB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter dilateB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter dilateB not found. Using Default");
 			_holeFinder->_dilateB = 2;
 		}
 
@@ -323,7 +313,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyConvKernelB1 : " << _holeFinder->_cannyConvKernelB1);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyConvKernelB1 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyConvKernelB1 not found. Using Default");
 			_holeFinder->_cannyConvKernelB1 = 3;
 		}
 
@@ -333,7 +323,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyLowThresB1 : " << _holeFinder->_cannyLowThresB1);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyLowThresB1 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyLowThresB1 not found. Using Default");
 			_holeFinder->_cannyLowThresB1 = 0;
 		}
 
@@ -343,7 +333,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyHighThresB1 : " << _holeFinder->_cannyHighThresB1);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyHighThresB1 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyHighThresB1 not found. Using Default");
 			_holeFinder->_cannyHighThresB1 = 0;
 		}
 	}
@@ -356,7 +346,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("gradientB : " << _holeFinder->_gradientB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter gradientB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter gradientB not found. Using Default");
 			_holeFinder->_gradientB = 1;
 		}
 
@@ -366,7 +356,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("equalizeB : " << _holeFinder->_equalizeB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter equalizeB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter equalizeB not found. Using Default");
 			_holeFinder->_equalizeB = 0;
 		}
 
@@ -376,7 +366,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdLowThresB : " << _holeFinder->_thresholdLowThresB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdLowThresB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdLowThresB not found. Using Default");
 			_holeFinder->_thresholdLowThresB = 30;
 		}
 
@@ -386,7 +376,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdHighThresB : " << _holeFinder->_thresholdHighThresB);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdHighThresB not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdHighThresB not found. Using Default");
 			_holeFinder->_thresholdHighThresB = 255;
 		}
 
@@ -396,7 +386,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("dilateB1 : " << _holeFinder->_dilateB1);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter dilateB1 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter dilateB1 not found. Using Default");
 			_holeFinder->_dilateB1 = 2;
 		}
 
@@ -406,7 +396,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyConvKernelB2 : " << _holeFinder->_cannyConvKernelB2);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyConvKernelB2 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyConvKernelB2 not found. Using Default");
 			_holeFinder->_cannyConvKernelB2 = 3;
 		}
 
@@ -416,7 +406,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyLowThresB2 : " << _holeFinder->_cannyLowThresB2);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyLowThresB2 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyLowThresB2 not found. Using Default");
 			_holeFinder->_cannyLowThresB2 = 0;
 		}
 
@@ -426,7 +416,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("cannyHighThresB2 : " << _holeFinder->_cannyHighThresB2);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter cannyHighThresB2 not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter cannyHighThresB2 not found. Using Default");
 			_holeFinder->_cannyHighThresB2 = 0;
 		}
 	}
@@ -439,7 +429,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("erodeC : " << _holeFinder->_erodeC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter erodeC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter erodeC not found. Using Default");
 			_holeFinder->_erodeC = 4;
 		}
 
@@ -449,7 +439,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("dilateC : " << _holeFinder->_dilateC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter dilateC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter dilateC not found. Using Default");
 			_holeFinder->_dilateC = 2;
 		}
 
@@ -459,7 +449,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("openC : " << _holeFinder->_openC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter openC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter openC not found. Using Default");
 			_holeFinder->_openC = 2;
 		}
 
@@ -469,7 +459,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("closeC : " << _holeFinder->_closeC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter closeC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter closeC not found. Using Default");
 			_holeFinder->_closeC = 4;
 		}
 
@@ -479,7 +469,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdLowThresC : " << _holeFinder->_thresholdLowThresC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdLowThresC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdLowThresC not found. Using Default");
 			_holeFinder->_thresholdLowThresC = 60;
 		}
 
@@ -489,7 +479,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdHighThresC : " << _holeFinder->_thresholdHighThresC);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdHighThresC not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdHighThresC not found. Using Default");
 			_holeFinder->_thresholdHighThresC = 255;
 		}
 	}
@@ -502,7 +492,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("erodeD : " << _holeFinder->_erodeD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter erodeD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter erodeD not found. Using Default");
 			_holeFinder->_erodeD = 8;
 		}
 
@@ -512,7 +502,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("dilateD : " << _holeFinder->_dilateD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter dilateD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter dilateD not found. Using Default");
 			_holeFinder->_dilateD = 10;
 		}
 
@@ -522,7 +512,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("openD : " << _holeFinder->_openD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter openD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter openD not found. Using Default");
 			_holeFinder->_openD = 6;
 		}
 
@@ -532,7 +522,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("closeD : " << _holeFinder->_closeD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter closeD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter closeD not found. Using Default");
 			_holeFinder->_closeD = 6;
 		}
 
@@ -542,7 +532,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdLowThresC : " << _holeFinder->_thresholdLowThresD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdLowThresD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdLowThresD not found. Using Default");
 			_holeFinder->_thresholdLowThresD = 127;
 		}
 
@@ -552,7 +542,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thresholdHighThresD : " << _holeFinder->_thresholdHighThresD);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thresholdHighThresD not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thresholdHighThresD not found. Using Default");
 			_holeFinder->_thresholdHighThresC = 255;
 		}
 	}
@@ -566,7 +556,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("lengthContour : " << _holeFinder->_lengthContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter lengthContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter lengthContour not found. Using Default");
 			_holeFinder->_lengthContour = 50;
 		}
 
@@ -576,7 +566,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("areaContour : " << _holeFinder->_areaContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter areaContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter areaContour not found. Using Default");
 			_holeFinder->_areaContour = 100;
 		}
 
@@ -586,7 +576,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("maxAreaContour : " << _holeFinder->_maxAreaContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter maxAreaContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter maxAreaContour not found. Using Default");
 			_holeFinder->_maxAreaContour = 0;
 		}
 
@@ -596,7 +586,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("rectHeightContour : " << _holeFinder->_rectHeightContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter rectHeightContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter rectHeightContour not found. Using Default");
 			_holeFinder->_rectHeightContour = 25;
 		}
 
@@ -606,7 +596,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("rectWidthContour : " << _holeFinder->_rectWidthContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter rectWidthContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter rectWidthContour not found. Using Default");
 			_holeFinder->_rectWidthContour = 25;
 		}
 
@@ -616,7 +606,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("heightToWidthContour : " << _holeFinder->_heightToWidthContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter heightToWidthContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter heightToWidthContour not found. Using Default");
 			_holeFinder->_heightToWidthContour = 3.5;
 		}
 
@@ -626,7 +616,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("widthToHeightContour : " << _holeFinder->_widthToHeightContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter widthToHeightContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter widthToHeightContour not found. Using Default");
 			_holeFinder->_widthToHeightContour = 3.5;
 		}
 
@@ -636,7 +626,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("pixelToRectAreaContour : " << _holeFinder->_pixelToRectAreaContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter pixelToRectAreaContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter pixelToRectAreaContour not found. Using Default");
 			_holeFinder->_pixelToRectAreaContour = 0.6;
 		}
 
@@ -646,7 +636,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("darkToPixelAreaContour : " << _holeFinder->_darkToPixelAreaContour);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter darkToPixelAreaContour not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter darkToPixelAreaContour not found. Using Default");
 			_holeFinder->_darkToPixelAreaContour = 0.7;
 		}
 	}
@@ -659,7 +649,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("minFormFactor : " << _holeFinder->_minFormFactor);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter minFormFactor not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter minFormFactor not found. Using Default");
 			_holeFinder->_minFormFactor = 0.75;
 		}
 
@@ -669,7 +659,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("ellipseFactorMin : " << _holeFinder->_ellipseFactorMin);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter ellipseFactorMin not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter ellipseFactorMin not found. Using Default");
 			_holeFinder->_ellipseFactorMin = 0.8;
 		}
 
@@ -679,7 +669,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("ellipseFactorMax : " << _holeFinder->_ellipseFactorMax);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter ellipseFactorMax not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter ellipseFactorMax not found. Using Default");
 			_holeFinder->_ellipseFactorMax = 1.3;
 		}
 
@@ -689,7 +679,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("minAxisValue : " << _holeFinder->_minAxisValue);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter minAxisValue not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter minAxisValue not found. Using Default");
 			_holeFinder->_minAxisValue = 60;
 		}		
 
@@ -699,7 +689,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("verticalAxisRatio : " << _holeFinder->_verticalAxisRatio);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter verticalAxisRatio not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter verticalAxisRatio not found. Using Default");
 			_holeFinder->_verticalAxisRatio = 1.2;
 		}
 
@@ -709,7 +699,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("horizontalAxisRatio : " << _holeFinder->_horizontalAxisRatio);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter horizontalAxisRatio not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter horizontalAxisRatio not found. Using Default");
 			_holeFinder->_horizontalAxisRatio = 3.3;
 		}
 
@@ -719,7 +709,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thetaHigh : " << _holeFinder->_thetaHigh);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thetaHigh not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thetaHigh not found. Using Default");
 			_holeFinder->_thetaHigh = 56;
 		}	
 
@@ -729,7 +719,7 @@ void HoleFindNode::getHoleParams()
 			ROS_DEBUG_STREAM("thetaHigh : " << _holeFinder->_thetaLow);
 		}
 		else {
-			ROS_DEBUG("[WebNode] : Parameter thetaLow not found. Using Default");
+			ROS_DEBUG("[hole_find_node] : Parameter thetaLow not found. Using Default");
 			_holeFinder->_thetaLow = 55;
 		}		
 	}
@@ -747,7 +737,7 @@ void HoleFindNode::getTrackerParams(){
 		ROS_DEBUG_STREAM("csVmin : " << _tracker->csVmin);
 	}
 	else {
-		ROS_DEBUG("[WebNode] : Parameter csVmin not found. Using Default");
+		ROS_DEBUG("[hole_find_node] : Parameter csVmin not found. Using Default");
 		_tracker->csVmin = 10;
 	}
 
@@ -757,7 +747,7 @@ void HoleFindNode::getTrackerParams(){
 		ROS_DEBUG_STREAM("csVmax : " << _tracker->csVmax);
 	}
 	else {
-		ROS_DEBUG("[WebNode] : Parameter csVmax not found. Using Default");
+		ROS_DEBUG("[hole_find_node] : Parameter csVmax not found. Using Default");
 		_tracker->csVmax = 70;
 	}
 
@@ -767,7 +757,7 @@ void HoleFindNode::getTrackerParams(){
 		ROS_DEBUG_STREAM("csSmin : " << _tracker->csSmin);
 	}
 	else {
-		ROS_DEBUG("[WebNode] : Parameter csSmin not found. Using Default");
+		ROS_DEBUG("[hole_find_node] : Parameter csSmin not found. Using Default");
 		_tracker->csSmin = 20;
 	}
 
@@ -777,7 +767,7 @@ void HoleFindNode::getTrackerParams(){
 		ROS_DEBUG_STREAM("csSmax : " << _tracker->csSmax);
 	}
 	else {
-		ROS_DEBUG("[WebNode] : Parameter csSmax not found. Using Default");
+		ROS_DEBUG("[hole_find_node] : Parameter csSmax not found. Using Default");
 		_tracker->csSmax = 255;
 	}
 
@@ -797,7 +787,7 @@ void HoleFindNode::imageCallback(const sensor_msgs::ImageConstPtr& msg){
 	frameNum++;
 	if ( holeFrame == NULL )			
 	{               
-		ROS_ERROR("[HoleFindNode] : No more Frames");
+		ROS_ERROR("[hole_find_node] : No more Frames");
 		ros::shutdown();
 		return;
 	}
@@ -878,7 +868,7 @@ void HoleFindNode::holeCallback(){
 				holeMessage.probability = current->probability;
 				holeMessage.holeId = current->m_chainId;
 				//holeMessage.type = vision_communications::victimIdentificationDirectionMsg::HOLE;
-
+                std::cout <<"Hole found with probabity: "<< holeMessage.probability << std::endl;
 				holesVectorMessage.holesDirections.push_back(holeMessage);
 				//}
 
@@ -1025,7 +1015,7 @@ void HoleFindNode::startTransition(int newState)
  * Called as soon as the transition is complete.
  */
 void HoleFindNode::completeTransition(void){
-	ROS_INFO("[HoleFindNode] : Transition Complete");
+	ROS_INFO("[hole_find_node] : Transition Complete");
 }
 
 /**
@@ -1035,7 +1025,7 @@ void HoleFindNode::completeTransition(void){
  * @return
  */
 int main(int argc, char** argv){	
-	ros::init(argc,argv,"HoleFindNode");
+	ros::init(argc,argv,"hole_find_node");
 	HoleFindNode holeFindNode;
 	ros::spin();
 	return 0;	
