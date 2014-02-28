@@ -3,6 +3,7 @@
 	<include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" />
 	<include file="$(find pandora_vision_qrcode)/qrcode_node.launch" />
 	<include file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
+	<include file="$(find pandora_vision_landoltc)/landoltc_node.launch" />
 	
 	<include file="$(find pandora_vision_motion)/motion_node.launch" />
 	
@@ -14,9 +15,7 @@
 <!--
 	<include file="$(find pandora_vision_face)/launch/faceNode.launch" />
 -->
-<!--
-	<include file="$(find pandora_vision_face)/launch/landoltCNode.launch" />
--->
+
 	
 </launch>
 
