@@ -36,6 +36,7 @@
 *********************************************************************/
 
 #include "depth_node/kinect.h"
+#include "vision_communications/DepthCandidateHolesVectorMsg.h"
 
 namespace vision
 {
@@ -48,18 +49,28 @@ namespace vision
   {
     ros::Duration(0.5).sleep();
 
+    //!< Subscribe to the point cloud published by the
+    //!< rgb_depth_synchronizer node
     _inputCloudSubscriber = _nodeHandle.subscribe(
       "/synchronized/camera/depth/points", 1,
-        &PandoraKinect::inputCloudCallback, this);
+      &PandoraKinect::inputCloudCallback, this);
 
+    //!< Subscribe to the RGB image published by the
+    //!< rgb_depth_synchronizer node
     _inputImageSubscriber = _nodeHandle.subscribe(
       "/synchronized/camera/rgb/image_raw", 1,
-        &PandoraKinect::inputImageCallback, this);
+      &PandoraKinect::inputImageCallback, this);
 
     //~ _inputDepthImageSubscriber  =
-      //~ _nodeHandle.subscribe("/camera/depth/image",
-        //~ 1, &PandoraKinect::inputDepthImageCallback, this);
+    //~ _nodeHandle.subscribe("/camera/depth/image",
+    //~ 1, &PandoraKinect::inputDepthImageCallback, this);
 
+    //!< Advertise the candidate holes found by the depth node
+    _candidateHolesPublisher = _nodeHandle.advertise
+      <vision_communications::DepthCandidateHolesVectorMsg>(
+      "/synchronized/camera/depth/candidate_holes", 1000);
+
+    //!< Advertise the point cloud's planes
     _planePublisher = _nodeHandle.advertise<PointCloudXYZ>
       ("/vision/kinect/planes", 1000);
   }

@@ -67,6 +67,8 @@ namespace vision
       ros::Subscriber     _inputDepthImageSubscriber;
       //!< ROS publisher for computed 2D planes
       ros::Publisher      _planePublisher;
+      //!< ROS publisher for the candidate holes
+      ros::Publisher      _candidateHolesPublisher;
 
       Parameters params;
 
