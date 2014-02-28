@@ -1,9 +1,0 @@
-<launch>
-	<include file="$(find state_manager)/launch/stateManager.launch" />
-	<include file="$(find vision)/launch/all_nodes.launch" />
-
-	<!-- Uncomment to change state from launch file -->
-	<!-- Alternative: rosrun stateManager stateChanger 1 -->
-	<!-- <node name="stateChanger" type="stateChanger" pkg="stateManager" args="4" /> -->
-</launch>
-

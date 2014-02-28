@@ -1,12 +1,14 @@
 <launch>
-    <group ns="vision">
-			<node name="holeFindNode" type="holeFindNode" pkg="vision" respawn="False" output="screen" />
+    <group ns="pandora_vision_hole">
+		
+			<node name="hole_find_node" type="hole_find_node" pkg="pandora_vision_hole" respawn="False" output="screen" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
-			<!-- Package Path /-->
-			<param name="/vision/packagepath" value="$(find vision)" />
-			
-			<include file="$(find vision)/launch/general_params.launch" />	
+				<!-- Package Path /-->
+			<param name="/vision/packagepath" value="$(find pandora_vision_hole)" />
+
+            <!-- Locate general_params_launcher /-->
+			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
 			
 			<!-- **************** /-->
 			<!-- Debug Mode params /-->

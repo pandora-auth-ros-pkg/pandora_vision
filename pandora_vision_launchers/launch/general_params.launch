@@ -1,6 +1,6 @@
 <launch>
 	<!-- CamID /-->
-	<arg name="camID" value="/dev/video1"/>
+	<arg name="camID" value="/dev/video0"/>
 
 	<!-- Frame Height /-->
 	<param name="height" type="int" value="480"/>
@@ -8,49 +8,8 @@
 	<!-- Frame Width /-->
 	<param name="width" type="double" value="640"/>
 
-
-	<!-- Retries for Capturing /-->
-	<param name="retries" type="int" value="15"/>
-
 	<!-- Topic Where captured frame is published /-->
 	<param name="imageTopic" type="str" value="/camera_head/image_raw" />
 
-	<!-- ******************* /-->
-			<!--  UVC driver params  /-->
-			<!-- ******************* /-->
-
-				<!-- Enable/Disable Webcam Auto White Balance /-->
-				<param name="autoWhiteBalance" type="int" value="0"/>
-
-				<!-- Webcam Absolute White Balance Value /-->
-				<param name="absWhiteBalance" type="int" value="5010"/>
-
-				<!-- Enable/Disable Webcam Auto Exposure /-->
-				<param name="autoExposure" type="int" value="0"/>
-
-				<!-- Choose between webcam Auto exposure Modes: /-->
-				<!-- Auto		 [0] /-->
-				<!-- Manual		 [1] /-->
-				<!-- Shutter Priority	 [2] /-->
-				<!-- Aperture Priority	 [3] /-->
-				<param name="autoExposureMode" type="int" value="1"/>
-
-				<!-- Webcam Absolute Exposure Value /-->
-				<param name="absExposure" type="int" value="240"/>
-
-				<!-- Webcam Gain /-->
-				<param name="gain" type="int" value="253"/>
-
-				<!-- Webcam Saturation /-->
-				<param name="saturation" type="int" value="50"/>
-
-            <!-- ************** /-->
-			<!--  Timer params  /-->
-			<!-- ************** /-->
-
-				<!-- Timer Period for frame grabbing from web camera /-->
-				<param name="grabFrameTime" type="double" value="0.05"/>
-
-				<!-- Timer Period for frame grabbing from second web camera /-->
-				<param name="grabSecondFrameTime" type="double" value="0.05"/>
+	
 </launch>

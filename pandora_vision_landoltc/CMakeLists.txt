@@ -31,12 +31,13 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(landoltC_node 
-  src/landoltC_detection.cpp
+add_executable(landoltc_node 
+						  src/landoltc_detection.cpp
+						  src/landoltc_node.cpp
 )
-target_link_libraries(landoltC_node ${catkin_LIBRARIES} )
+target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
-add_dependencies(landoltC_node 
+add_dependencies(landoltc_node 
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )

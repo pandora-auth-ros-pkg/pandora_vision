@@ -45,7 +45,7 @@
  **/
 int main(int argc, char** argv)
 {
-  ros::init(argc,argv,"QrCodeNode");
+  ros::init(argc,argv,"QrCode_node");
   vision::QrCodeDetection QrCodeDetection;
   ros::spin();
   return 0;
