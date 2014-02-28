@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include  <string.h>
 #include "ros/ros.h"
+#include <ros/package.h>
 #define OPTIONS ":o:m:i:s:c:r:n:b:dxh"
 
 using namespace std;
@@ -82,20 +83,7 @@ int main( int argc, char** argv )
 	  struct feature* features;
 	  int n = 0;
 	  
-	  
-	  std::string packagePath;
-	  //get package path in the pc
-	  if (_nh.hasParam("/vision/packagepath"))
-	  {
-			_nh.getParam("/vision/packagepath", packagePath);
-			ROS_DEBUG_STREAM("path : " << packagePath);
-	  }
-	  else
-	  {
-			ROS_DEBUG("[hazmat_node] : Parameter path not found. Using Default");
-			packagePath = "/home/paschalidoud/pandora_ws/src/pandora_vision/pandora_vision_hazmat";
-	  }
-	  
+	  std::string packagePath = ros::package::getPath("pandora_vision_hazmat");
 	  int numOfPatterns=0;
 	  printf("Give the number of patterns you want to train");
 	  std::cin>>numOfPatterns;
