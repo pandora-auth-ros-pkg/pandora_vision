@@ -1,28 +1,39 @@
-/*#############################################################
- * MotionDetection.cpp
- *
- * File Description :
- *	ROS Node of motion detection, vision package 
- *	
- * Contents :	completeTransition()
- * 				getGeneralParams()
- * 				getMotionParams()
- * 				getTimerParams()
- * 				motionCallback()
- * 				imageCallback()
- * 				spin()
- * 				startTransition()
- *
- * Author : Aprilis George
- *
- * Refactoring: Miltiadis-Alexios Papadopoulos
- *
- * Date :	24-10-2011
- *
- * Change History :
- *
- *#############################################################
- */
+/*********************************************************************
+*
+* Software License Agreement (BSD License)
+*
+*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions
+*  are met:
+*
+*   * Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   * Redistributions in binary form must reproduce the above
+*     copyright notice, this list of conditions and the following
+*     disclaimer in the documentation and/or other materials provided
+*     with the distribution.
+*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+*     contributors may be used to endorse or promote products derived
+*     from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+*  POSSIBILITY OF SUCH DAMAGE.
+*
+* Author:  George Aprilis
+*********************************************************************/
 
 #include "pandora_vision_motion/motion_detection.h"
 
@@ -69,7 +80,7 @@ MotionDetection::MotionDetection() :	_nh() {
     
     clientInitialize();
     
-	ROS_INFO("[MotionNode] : Created Motion Detection instance");
+	ROS_INFO("[Motion_node] : Created Motion Detection instance");
 }
 
 /**
@@ -77,7 +88,7 @@ MotionDetection::MotionDetection() :	_nh() {
  */
 MotionDetection::~MotionDetection()
 {
-	ROS_INFO("[MotionNode] : Destroying Motion Detection instance");
+	ROS_INFO("[motion_node] : Destroying Motion Detection instance");
 	delete _motionDetector;
 }
 
@@ -92,7 +103,7 @@ void MotionDetection::getGeneralParams()
 		ROS_DEBUG("motionDummy: %d", motionDummy);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter motionDummy not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter motionDummy not found. Using Default");
 		motionDummy = false;
 	}
 
@@ -102,7 +113,7 @@ void MotionDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("debugMotion : " << debugMotion);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter debugMotion not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter debugMotion not found. Using Default");
 		debugMotion = true;
 	}
 
@@ -112,7 +123,7 @@ void MotionDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("height : " << frameHeight);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter frameHeight not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter frameHeight not found. Using Default");
 		frameHeight = DEFAULT_HEIGHT;
 	}
 
@@ -122,7 +133,7 @@ void MotionDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter imageTopic not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter imageTopic not found. Using Default");
 		imageTopic = "/camera_head/image_raw";
 	}
 
@@ -132,7 +143,7 @@ void MotionDetection::getGeneralParams()
 		ROS_DEBUG_STREAM("width : " << frameWidth);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter frameWidth not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter frameWidth not found. Using Default");
 		frameWidth = DEFAULT_WIDTH;
 	}
 }
@@ -148,7 +159,7 @@ void MotionDetection::getMotionParams()
 		ROS_DEBUG_STREAM("motionBuffer : " << _motionDetector->N);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter motionBuffer not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter motionBuffer not found. Using Default");
 		_motionDetector->N = 4;
 	}
 
@@ -159,7 +170,7 @@ void MotionDetection::getMotionParams()
 
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter motionDiffThres not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter motionDiffThres not found. Using Default");
 		_motionDetector->diff_threshold = 45;
 	}
 
@@ -169,7 +180,7 @@ void MotionDetection::getMotionParams()
 		ROS_DEBUG_STREAM("motionHighThres : " << _motionDetector->motion_high_thres);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter motionHighThres not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter motionHighThres not found. Using Default");
 		_motionDetector->motion_high_thres = 7500;
 	}
 
@@ -179,7 +190,7 @@ void MotionDetection::getMotionParams()
 		ROS_DEBUG_STREAM("motionLowThres : " << _motionDetector->motion_low_thres);
 	}
 	else {
-		ROS_DEBUG("[MotionNode] : Parameter motionLowThres not found. Using Default");
+		ROS_DEBUG("[motion_node] : Parameter motionLowThres not found. Using Default");
 		_motionDetector->motion_low_thres = 200;
 	}
 }
@@ -201,7 +212,7 @@ void MotionDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 	if ( motionFrame.empty() )
 	{               
-		ROS_ERROR("[motionNode] : No more Frames or something went wrong with bag file");
+		ROS_ERROR("[motion_node] : No more Frames or something went wrong with bag file");
 		ros::shutdown();
 		return;
 	}
@@ -282,6 +293,7 @@ void MotionDetection::motionDetectAndPost()
 			motionMessage.header.frame_id = "headCamera";
 			//motionMessage.type = vision_communications::victimIdentificationDirectionMsg::MOTION;
 			motionMessage.header.stamp = ros::Time::now();
+			std::cout << "Motion found with probability: "<< motionMessage.probability<<std::endl;
 			_motionPublisher.publish(motionMessage);
 		}
 
@@ -338,7 +350,7 @@ void MotionDetection::startTransition(int newState){
  * Called when state transition is completed
  */
 void MotionDetection::completeTransition(void){
-	ROS_INFO("[MotionNode] : Transition Complete");
+	ROS_INFO("[motion_node] : Transition Complete");
 }
 
 /**
@@ -349,7 +361,7 @@ void MotionDetection::completeTransition(void){
  */
 int main(int argc, char** argv)
 {	
-	ros::init(argc,argv,"MotionNode");
+	ros::init(argc,argv,"motion_node");
 	MotionDetection motionDetection;
 	ros::spin();
 	return 0;	
