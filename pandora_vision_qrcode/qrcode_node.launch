@@ -1,9 +1,10 @@
 <launch>
-	<group ns="vision">
-		<node name="qrcode_node" type="qrcode_node" pkg="vision" respawn="False" output="screen" />
+	<group ns="pandora_vision_qrcode">
+		
+		<node name="qrcode_node" type="qrcode_node" pkg="pandora_vision_qrcode" respawn="False" output="screen" />
 		<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 		
-		<include file="$(find vision)/launch/general_params.launch" />	
+		<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />	
 			
 		<!-- **************** /-->
 		<!-- Debug Mode params /-->
