@@ -1,7 +1,7 @@
 <launch>
     <group ns="pandora_vision_hazmat">
 		
-			<node name="hazmat_node" type="hazmatNode" pkg="pandora_vision_hazmat" respawn="False" output="screen" />
+			<node name="hazmat_node" type="hazmat_node" pkg="pandora_vision_hazmat" respawn="False" output="screen" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
 			<!-- Package Path /-->

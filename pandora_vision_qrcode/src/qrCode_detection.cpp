@@ -74,16 +74,14 @@ namespace vision
     //!< image_transport::ImageTransport it(_nh);
     _frameSubscriberFront = image_transport::ImageTransport(_nh).subscribe(
         imageTopic, 1, &QrCodeDetection::imageCallbackFront, this);
-    _frameSubscriberBack = image_transport::ImageTransport(_nh).subscribe(
-        imageTopicback, 1, &QrCodeDetection::imageCallbackBack, this);
-
+   
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
     clientInitialize();
 
-    ROS_INFO("[QrCodeNode] : Created QrCode Detection instance");
+    ROS_INFO("[QrCode_node] : Created QrCode Detection instance");
   }
 
 
@@ -93,7 +91,7 @@ namespace vision
    */
   QrCodeDetection::~QrCodeDetection()
   {
-    ROS_INFO("[QrCodeNode] : Destroying QrCode Detection instance");
+    ROS_INFO("[QrCode_node] : Destroying QrCode Detection instance");
   }
 
 
@@ -113,7 +111,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : \
+      ROS_DEBUG("[QrCode_node] : \
           Parameter qrcodeDummy not found. Using Default");
       qrcodeDummy = false;
     }
@@ -126,7 +124,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : \
+      ROS_DEBUG("[QrCode_node] : \
           Parameter debugQrCode not found. Using Default");
       debugQrCode = true;
     }
@@ -139,7 +137,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : \
+      ROS_DEBUG("[QrCode_node] : \
           Parameter frameHeight not found. Using Default");
       frameHeight = DEFAULT_HEIGHT;
     }
@@ -152,7 +150,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : Parameter imageTopic not found. Using Default");
+      ROS_DEBUG("[QrCode_node] : Parameter imageTopic not found. Using Default");
       imageTopic = "/camera_head/image_raw";
     }
 
@@ -164,7 +162,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : Parameter frameWidth not found. Using Default");
+      ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
     }
   }
@@ -201,7 +199,7 @@ namespace vision
     }
     else
     {
-      ROS_DEBUG("[QrCodeNode] : \
+      ROS_DEBUG("[QrCode_node] : \
           Parameter qrcodeSharpenWeight not found. Using Default");
       _qrcodeDetector.gaussiansharpenweight = 0.8;
     }
@@ -239,39 +237,6 @@ namespace vision
 
     qrcodeDetectAndPost("headCamera");
   }
-
-
-
-  /**
-   * @brief Function called when new ROS message appears, for rear camera
-   * @param msg [const sensor_msgs::ImageConstPtr&] The message
-   * @return void
-   */
-  void QrCodeDetection::imageCallbackBack(const sensor_msgs::ImageConstPtr& msg)
-  {
-    int res = -1;
-
-    cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    qrcodeFrame = in_msg->image.clone();
-    qrcodeFrameTimestamp = msg->header.stamp;
-
-    if (qrcodeFrame.empty())
-    {
-      ROS_ERROR("[qrcodeNode] : \
-          No more Frames or something went wrong with bag file");
-      ros::shutdown();
-      return;
-    }
-
-    if(!qrcodeNowON)
-    {
-      return;
-    }
-
-    qrcodeDetectAndPost("assCamera");
-  }
-
 
 
   /**
@@ -324,8 +289,6 @@ namespace vision
           (list_qrcodes[i].qrcode_center.x - (double)frameWidth / 2);
         qrcodeMsg.pitch = -ratioY *
           (list_qrcodes[i].qrcode_center.y - (double)frameHeight / 2);
-
-        std::cout<< "qr found!" << std::endl;
 
         qrcodeVectorMsg.qrAlerts.push_back(qrcodeMsg);
 
