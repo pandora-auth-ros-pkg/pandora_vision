@@ -59,95 +59,95 @@
 #include <sensor_msgs/image_encodings.h>
 #include "skin_detector.h"
 
-
-class FaceDetector
+namespace pandora_vision 
 {
-	private:
-		ros::NodeHandle 	_nh;
-		SkinDetector* 				skinDetector;
-		CvMemStorage* 				storage_total;
+  class FaceDetector
+  {
+    private:
+      ros::NodeHandle 	_nh;
+      SkinDetector* 				skinDetector;
+      CvMemStorage* 				storage_total;
 
-		std::vector<std::vector< cv::Rect_<int> > >     faces;
-		
-		std::vector< cv::Rect_<int> > 	    faces_total;
-		
-		cv::CascadeClassifier	cascade;	//N elements
-				
-		std::string 	 			cascade_name;
-		std::string                 csv_name;
-		
-		//parameters used in cvHaarDetectObjects functions:
-		double				scale;
-		int					minNeighbors;
-		cv::Size			minFaceSize;
-		cv::Size		    maxFaceSize; ///TODO: Change it dynamically too
-		
-		cv::Mat*				dstArray;
-		
-		//struct used to pass multiple parameters in different threads		
-		typedef struct
-			{
-				//input
-				cv::Mat				    frameIN;
-				float					angle;
-				double				    scale;
-				int					    minNeighbors;
-				cv::Size				minFaceSize;
-				FaceDetector* 			thisObj;
-				cv::Mat					dst;
-				int						retVal;
-				cv::CascadeClassifier	cascade;
-			} ThParams;
-		
-		bool						isSkinDetectorEnabled;	//if enabled SkinDetector output is
-															//also considered in probability value. 
-		int							N; 						//circular buffer size, 
-		int 						angleNum;				//number of rotation angles and threads
-		int							now, prev; 				//circular buffer iterators
-		float						probability;			//total probability of face found
-		
-		std::vector<cv::Mat>        buffer;	//the image buffer used to store previous frames
-		float*						partProb;	//vector with partial probabilities that are used
-										//to calculate total probability of a face according
-										//to consistency in last N frames.
-		//debug images:
-		cv::Mat 					skinImg;
-		cv::Mat 					faceNow;
-		cv::Mat 					facePrev;
-		//These vectors hold the images and corresponding labels:
-		std::vector<cv::Mat> images;
-		std::vector<int> labels;
-		int imageWidth;
-		int imageHeight;
-		image_transport::Publisher _facePublisher;	
-		cv::Ptr<cv::FaceRecognizer> model;
-		
-	public:
-		//debug switch - webNode changes it externally:
-		bool						isDebugMode;
-		
-	public:	
-		FaceDetector(std::string cascadePath,std::string csv, int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist);
-		~FaceDetector();
-		int 	findFaces(cv::Mat frameIN );			//Implementation with image buffer contributing to probability
-		int	findFaces1Frame(cv::Mat frameIN );	//Normal Implementation, probability of each face equals 1
-		int* 	getFaceRectTable();
-		int	getFaceRectTableSize();
-		float	getProbability();
-		cv::Mat getFaceNow();		//Debug image getter
-		cv::Mat getFacePrev();	//Debug image getter
-		cv::Mat getFaceSkin();	//Debug image getter
+      std::vector<std::vector< cv::Rect_<int> > >     faces;
+      
+      std::vector< cv::Rect_<int> > 	    faces_total;
+      
+      cv::CascadeClassifier	cascade;	//N elements
+          
+      std::string 	 			cascade_name;
+      std::string model_path_name;
+      
+      //parameters used in cvHaarDetectObjects functions:
+      double				scale;
+      int					minNeighbors;
+      cv::Size			minFaceSize;
+      cv::Size		    maxFaceSize; ///TODO: Change it dynamically too
+      
+      cv::Mat*				dstArray;
+      
+      //struct used to pass multiple parameters in different threads		
+      typedef struct
+        {
+          //input
+          cv::Mat				    frameIN;
+          float					angle;
+          double				    scale;
+          int					    minNeighbors;
+          cv::Size				minFaceSize;
+          FaceDetector* 			thisObj;
+          cv::Mat					dst;
+          int						retVal;
+          cv::CascadeClassifier	cascade;
+        } ThParams;
+      
+      bool						isSkinDetectorEnabled;	//if enabled SkinDetector output is
+                                //also considered in probability value. 
+      int							N; 						//circular buffer size, 
+      int 						angleNum;				//number of rotation angles and threads
+      int							now, prev; 				//circular buffer iterators
+      float						probability;			//total probability of face found
+      
+      std::vector<cv::Mat>        buffer;	//the image buffer used to store previous frames
+      float*						partProb;	//vector with partial probabilities that are used
+                      //to calculate total probability of a face according
+                      //to consistency in last N frames.
+      //debug images:
+      cv::Mat 					skinImg;
+      cv::Mat 					faceNow;
+      cv::Mat 					facePrev;
+      //These vectors hold the images and corresponding labels:
+      std::vector<cv::Mat> images;
+      std::vector<int> labels;
+      int imageWidth;
+      int imageHeight;
+      image_transport::Publisher _facePublisher;	
+      cv::Ptr<cv::FaceRecognizer> model;
+      
+    public:
+      //debug switch - webNode changes it externally:
+      bool						isDebugMode;
+      
+    public:	
+      FaceDetector(std::string cascadePath,std::string model_path, int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist);
+      ~FaceDetector();
+      int 	findFaces(cv::Mat frameIN );			//Implementation with image buffer contributing to probability
+      int	findFaces1Frame(cv::Mat frameIN );	//Normal Implementation, probability of each face equals 1
+      int* 	getFaceRectTable();
+      int	getFaceRectTableSize();
+      float	getProbability();
+      cv::Mat getFaceNow();		//Debug image getter
+      cv::Mat getFacePrev();	//Debug image getter
+      cv::Mat getFaceSkin();	//Debug image getter
 
-	private:
-		
-		static void* 	threadRotateThenDetect( void* arg );	//the actual job being done by each different thread
-		int             detectFace(cv::Mat img,cv::CascadeClassifier cascade, float* rotMat, float angle);
-		cv::Mat 		frameRotate( cv::Mat frameIN, float angle, float* rotMatData );	//self explanatory
-        void 		    initFrameProbBuffers(cv::Mat frameIN);
-		void 			createRectangles(cv::Mat tmp);
-		void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
-		
-		static void     read_csv(const std::string& filename, std::vector<cv::Mat>& images, std::vector<int>& labels);
-};
-
+    private:
+      
+      static void* 	threadRotateThenDetect( void* arg );	//the actual job being done by each different thread
+      int             detectFace(cv::Mat img,cv::CascadeClassifier cascade, float* rotMat, float angle);
+      cv::Mat 		frameRotate( cv::Mat frameIN, float angle, float* rotMatData );	//self explanatory
+      void 		    initFrameProbBuffers(cv::Mat frameIN);
+      void 			createRectangles(cv::Mat tmp);
+      void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
+      
+  };
+}
 #endif
