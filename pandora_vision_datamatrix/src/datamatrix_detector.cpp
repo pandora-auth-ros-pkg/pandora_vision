@@ -45,17 +45,56 @@ namespace pandora_vision
   **/
   DatamatrixDetector::DatamatrixDetector()
   {
-    
+    img=NULL;
+    dec=NULL;
+    reg=NULL;
+    msg=NULL;
   }
   
-  
-  
+
   /**
     @brief Destructor
    */
   DatamatrixDetector::~DatamatrixDetector()
   {
-    
+    ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance destroyed");
   }
   
+  
+  /**
+    @brief Detects datamatrixes and stores them in a vector. 
+    @param frame [cv::Mat] The image in which the QRs are detected
+    @return void
+   */
+  void DatamatrixDetector::detect_datamatrix(cv::Mat image)
+  {
+    //!< creates and initializes a new DmtxImage structure using pixel 
+    //!< data provided  by  the calling application. 
+    img = dmtxImageCreate(image.data, image.cols, image.rows, 
+        DmtxPack24bppBGR);
+    ROS_ASSERT(img != NULL);    
+    
+    //!< creates  and  initializes a new DmtxDecode struct, which 
+    //!< designates the image to be scanned and initializes the scan 
+    //!< grid pattern.    
+    dec = dmtxDecodeCreate(img, 1);
+    ROS_ASSERT(dec != NULL);
+    
+    //!< searches  every  pixel location in a grid pattern looking 
+    //!< for potential barcode regions. A DmtxRegion is returned 
+    //!< whenever a potential  barcode region  is found, or if the final 
+    //!< pixel location has been scanned.
+    reg = dmtxRegionFindNext(dec, NULL);
+    if(reg != NULL) 
+    {
+      msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
+      if(msg != NULL) {
+        fputs("output: \"", stdout);
+        fwrite(msg->output, sizeof(unsigned char), msg->outputIdx, stdout);
+        fputs("\"\n", stdout);
+        dmtxMessageDestroy(&msg);
+      }
+    }  
+  
+  }
 }
