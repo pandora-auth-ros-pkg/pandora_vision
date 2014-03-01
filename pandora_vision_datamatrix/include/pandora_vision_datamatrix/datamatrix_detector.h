@@ -40,12 +40,20 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <dmtx.h>
 
 namespace pandora_vision 
 {
   class DatamatrixDetector
   {
     private:
+    
+    DmtxImage      *img;
+    DmtxDecode     *dec;
+    DmtxRegion     *reg;
+    DmtxMessage    *msg;
+    
+    cv::Mat datamatrix_frame;
     
     public:
     
@@ -60,6 +68,13 @@ namespace pandora_vision
       @return void
     **/
     virtual ~DatamatrixDetector();
+    
+    /**
+      @brief Detects datamatrixes and stores them in a vector.
+      @param frame [cv::Mat] The image in which the datamatrixess are detected
+      @return void
+    **/
+    void detect_datamatrix(cv::Mat image);
     
   };  
 }
