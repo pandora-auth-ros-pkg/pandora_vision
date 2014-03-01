@@ -1,14 +1,10 @@
 <launch>
   <group ns="pandora_vision_hole">
+    
+    <param name="camera_name" value="kinect" />
   
-    <node name="hole_find_node" type="hole_find_node" pkg="pandora_vision_hole" respawn="False" output="screen" />
+    <node name="hole_find_node" type="hole_find_node" pkg="pandora_vision_hole" respawn="false" output="screen" />
     <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
-      
-      <!-- Package Path /-->
-      <param name="/pandora_vision/packagepath" value="$(find pandora_vision_hole)" />
-
-      <!-- Locate general_params_launcher /-->
-      <include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
     
       <!-- **************** /-->
       <!-- Debug Mode params /-->
