@@ -86,6 +86,9 @@ namespace vision {
 
       int frameWidth;
       int frameHeight;
+      
+      std::string cameraName;
+      std::string cameraFrameId;
 
       //!< Frame processed by MotionDetector
       cv::Mat qrcodeFrame;
@@ -141,10 +144,9 @@ namespace vision {
       /**
        * @brief This method uses a QrCodeDetector instance to detect all present
        * qrcodes in a given frame
-       * @param frame_id [std::string] The frame id
        * @return void
        */
-      void qrcodeDetectAndPost(std::string frame_id);
+      void qrcodeDetectAndPost();
 
       /**
        * Function called when new ROS message appears, for front camera

@@ -145,7 +145,7 @@ void HoleFindNode::getGeneralParams()
     holeDummy = false;
   }
 
-  // Get the Height parameter if available;
+  // Get the camera to be used by hole node;
   if (_nh.hasParam("camera_name")) {
     _nh.getParam("camera_name", cameraName);
     ROS_DEBUG_STREAM("camera_name : " << cameraName);
