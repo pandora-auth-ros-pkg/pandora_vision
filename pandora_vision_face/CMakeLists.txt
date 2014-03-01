@@ -32,6 +32,7 @@ include_directories(include
 )
 
 add_executable(face_node 
+    src/face_node.cpp
     src/face_detection.cpp
     src/face_detector.cpp
     src/skin_detector.cpp
@@ -42,3 +43,11 @@ add_dependencies(face_node
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
+
+########################### modelTRainer ############################
+if(MODEL_ENABLE_TRAIN)
+  add_executable(model_train_node 
+                    src/model_trainer.cpp
+  )
+  target_link_libraries(model_train_node ${catkin_LIBRARIES} )
+endif()
