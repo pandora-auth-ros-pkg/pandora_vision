@@ -1,0 +1,218 @@
+/*********************************************************************
+*
+* Software License Agreement (BSD License)
+*
+*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions
+*  are met:
+*
+*   * Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   * Redistributions in binary form must reproduce the above
+*     copyright notice, this list of conditions and the following
+*     disclaimer in the documentation and/or other materials provided
+*     with the distribution.
+*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+*     contributors may be used to endorse or promote products derived
+*     from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+*  POSSIBILITY OF SUCH DAMAGE.
+*
+* Author: Despoina Paschalidou
+*********************************************************************/
+
+#include "pandora_vision_datamatrix/datamatrix_detection.h"
+
+namespace pandora_vision
+{
+  /**
+   *@brief Constructor
+  **/
+  DatamatrixDetection::DatamatrixDetection() : _nh(), datamatrixNowON(false)
+  {
+    
+    //!< Get General Parameters, such as frame width & height , camera id
+    getGeneralParams();
+    
+    //!< subscribe to input image's topic
+    //!< image_transport::ImageTransport it(_nh);
+    _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
+        imageTopic, 1, &DatamatrixDetection::imageCallback, this);
+   
+    //!< initialize states - robot starts in STATE_OFF
+    curState = state_manager_communications::robotModeMsg::MODE_OFF;
+    prevState = state_manager_communications::robotModeMsg::MODE_OFF;
+
+    clientInitialize();
+
+    ROS_INFO("[Datamatrix_node] : Created QrCode Detection instance");
+    
+  }
+  
+  
+  
+  /**
+    @brief Destructor
+   */
+  DatamatrixDetection::~DatamatrixDetection()
+  {
+    ROS_INFO("[Datamatrix_node] : Destroying datamatrix Detection instance");
+  }
+  
+  
+  
+  /**
+   * @brief Get parameters referring to view and frame characteristics 
+   * from launch file
+   * @return void
+   */
+  void DatamatrixDetection::getGeneralParams()
+  {
+    
+    packagePath = ros::package::getPath("pandora_vision_datamatrix");
+     
+    //!< Get the Height parameter if available;
+    if (_nh.hasParam("height"))
+    {
+      _nh.getParam("height", frameHeight);
+      ROS_DEBUG_STREAM("height : " << frameHeight);
+    }
+    else
+    {
+      ROS_DEBUG("[Datamatrix_node] : \
+          Parameter frameHeight not found. Using Default");
+      frameHeight = DEFAULT_HEIGHT;
+    }
+
+    //!< Get the listener's topic;
+    if (_nh.hasParam("imageTopic"))
+    {
+      _nh.getParam("imageTopic", imageTopic);
+      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+    }
+    else
+    {
+      ROS_DEBUG("[Datamatrix_node] : \
+            Parameter imageTopic not found.Using Default");
+      imageTopic = "/camera_head/image_raw";
+    }
+
+    //!< Get the Width parameter if available;
+    if (_nh.hasParam("width"))
+    {
+      _nh.getParam("width", frameWidth);
+      ROS_DEBUG_STREAM("width : " << frameWidth);
+    }
+    else
+    {
+      ROS_DEBUG("[Datamatrix_node] : \
+          Parameter frameWidth not found. Using Default");
+      frameWidth = DEFAULT_WIDTH;
+    }
+  }
+  
+  
+  
+  /**
+   * @brief Function called when new ROS message appears from camera
+   * @param msg [const sensor_msgs::ImageConstPtr&] The message
+   * @return void
+  */
+  void DatamatrixDetection::imageCallback(
+      const sensor_msgs::ImageConstPtr& msg)
+  {
+    
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    datamatrixFrame = in_msg->image.clone();
+    datamatrixFrameTimestamp = msg->header.stamp;
+
+    if (!datamatrixFrame.data)
+    {
+      ROS_ERROR("[Datamatrix_node] : \
+          No more Frames!");
+      return;
+    }
+
+    if(!datamatrixNowON)
+    {
+      return;
+    }
+
+    datamatrixCallback("headCamera");
+  }
+  
+  
+  
+  /**
+   * @brief This method uses a DatamatrixDetector instance to detect 
+   * all present datamatrixes in a given frame
+   * @param frame_id [std::string] The frame id
+   * @return void
+  */
+  void DatamatrixDetection::datamatrixCallback(std::string frame_id)
+  {
+
+   
+  }
+  
+  /**
+   * @brief Node's state manager
+   * @param newState [int] The robot's new state
+   * @return void
+  */
+  void DatamatrixDetection::startTransition(int newState)
+  {
+    curState = newState;
+
+    //!< check if datamatrix algorithm should be running now
+    datamatrixNowON	=
+      (curState ==
+       state_manager_communications::robotModeMsg::MODE_EXPLORATION)
+      || (curState ==
+          state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+      || (curState ==
+          state_manager_communications::robotModeMsg::MODE_ARM_APPROACH)
+      || (curState ==
+          state_manager_communications::robotModeMsg::MODE_TELEOPERATED_LOCOMOTION)
+      || (curState ==
+          state_manager_communications::robotModeMsg::MODE_DF_HOLD);
+
+    //!< shutdown if the robot is switched off
+    if (curState ==
+        state_manager_communications::robotModeMsg::MODE_TERMINATING)
+    {
+      ros::shutdown();
+      return;
+    }
+
+    prevState=curState;
+
+    //!< this needs to be called everytime a node finishes transition
+    transitionComplete(curState);
+  }
+
+  /**
+   * @brief After completion of state transition
+   * @return void
+   */
+  void DatamatrixDetection::completeTransition()
+  {
+    ROS_INFO("[Datamatrix_node] : Transition Complete");
+  }
+  
+} 
