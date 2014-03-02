@@ -620,8 +620,8 @@ namespace vision
     @param[in] interpolatedDepthImage [const cv::Mat&] The denoised depth image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
     The undistorted input point cloud
-    @param[in][out] conveyor [HolesConveyor&] A struct that contains the final valid
-    holes
+    @param[in][out] conveyor [HolesConveyor&] A struct that contains the final
+    valid holes
     @return void
    **/
   void HoleFilters::checkHoles(

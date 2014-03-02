@@ -38,8 +38,12 @@
 #ifndef HOLE_FUSION_H
 #define HOLE_FUSION_H
 
-#include <depth_node/defines.h>
 #include <std_msgs/Empty.h>
+#include <depth_node/defines.h>
+#include "depth_node/parameters.h"
+#include "depth_node/hole_filters.h"
+#include "vision_communications/DepthCandidateHolesVectorMsg.h"
+#include "message_conversions/message_conversions.h"
 
 /**
   @namespace vision
@@ -58,21 +62,52 @@ namespace vision
       //!< synchronizer_node
       ros::Publisher unlockPublisher_;
 
+      //!< The ROS subscriber for acquisition of candidate holes through the
+      //!< depth node
+      ros::Subscriber depthCandidateHolesSubscriber_;
+
       /**
-       @brief Requests from the synchronizer to process a new point cloud
+        @brief Requests from the synchronizer to process a new point cloud
+        @return void
+       **/
+      void unlockSynchronizer();
+
+      /**
+        @brief Callback for the candidate holes via the depth node
+        @param depthCandidateHolesVector
+        [const vision_communications::DepthCandidateHolesVectorMsg&]
+        The message containing the necessary information to filter hole
+        candidates acquired through the depth node
+        @return void
+       **/
+      void depthCandidateHolesCallback(
+        const vision_communications::DepthCandidateHolesVectorMsg&
+        depthCandidateHolesVector);
+
+      /**
+       @brief Recreates the HoleFilters::HolesConveyor struct for the
+       candidate holes from the
+       vision_communications::DepthCandidateHolesVectorMsg message
+       @param[in] holesMsg
+       [vision_communications::DepthCandidateHolesVectorMsg&] The input
+       depth candidate holes
+       @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+       struct
        @return void
        **/
-     void unlockSynchronizer();
+      void fromDepthMessageToConveyor(
+        const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+        HoleFilters::HolesConveyor& conveyor);
 
     public:
 
       /**
-       @brief The HoleFusion constructor
+        @brief The HoleFusion constructor
        **/
       HoleFusion(void);
 
       /**
-       @brief The HoleFusion deconstructor
+        @brief The HoleFusion deconstructor
        **/
       ~HoleFusion(void);
   };

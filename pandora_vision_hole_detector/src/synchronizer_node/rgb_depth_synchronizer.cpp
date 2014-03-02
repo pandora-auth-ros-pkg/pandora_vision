@@ -36,6 +36,7 @@
 *********************************************************************/
 
 #include "synchronizer_node/rgb_depth_synchronizer.h"
+#include "message_conversions/message_conversions.h"
 
 namespace vision
 {
@@ -66,6 +67,8 @@ namespace vision
     //!< Advertise the synchronized rgb image
     synchronizedRGBImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>("/synchronized/camera/rgb/image_raw", 1000);
+
+    ROS_INFO("RgbDepthSynchronizer node initiated");
   }
 
 
@@ -74,7 +77,10 @@ namespace vision
     @brief Default destructor
     @return void
    **/
-  RgbDepthSynchronizer::~RgbDepthSynchronizer(void) {}
+  RgbDepthSynchronizer::~RgbDepthSynchronizer(void)
+  {
+    ROS_INFO("RgbDepthSynchronizer node terminated");
+  }
 
 
 
@@ -93,7 +99,8 @@ namespace vision
     if (!locked_)
     {
       //!< Extract the RGB image from the point cloud
-      cv::Mat rgbImage = pointCloudToRGBImage(pointCloudMessage);
+      cv::Mat rgbImage = MessageConversions::pointCloudToRGBImage(
+        pointCloudMessage);
 
       //!< Convert the cv::Mat image to a ROS message
       cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
@@ -125,45 +132,5 @@ namespace vision
   void RgbDepthSynchronizer::holeFusionCallback(const std_msgs::Empty& lockMsg)
   {
     locked_ = false;
-  }
-
-
-
-  /**
-    @brief Extracts a RGB image from a point cloud message
-    @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
-    The input point cloud message
-    @return cv::Mat The output rgb image
-   **/
-  cv::Mat RgbDepthSynchronizer::pointCloudToRGBImage(
-    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
-  {
-    PointCloud pointCloud;
-
-    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
-    //!< to pcl::PCLPointCloud2
-    pcl_conversions::toPCL(*pointCloudMessage, pointCloud);
-
-    //!< convert the point cloud from pcl::PCLPointCloud2 to pcl::PointCLoud
-    PointCloudXYZRGBPtr pointCloudXYZRGB (new PointCloudXYZRGB);
-    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZRGB);
-
-    //!< prepare to convert the array to an opencv image
-    cv::Mat rgbImage(pointCloudXYZRGB->height, pointCloudXYZRGB->width,
-      CV_8UC3);
-
-    for (unsigned int row = 0; row < pointCloudXYZRGB->height; ++row)
-    {
-      for (unsigned int col = 0; col < pointCloudXYZRGB->width; ++col)
-      {
-        rgbImage.at<unsigned char>(row, 3 * col + 2) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].r;
-        rgbImage.at<unsigned char>(row, 3 * col + 1) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].g;
-        rgbImage.at<unsigned char>(row, 3 * col + 0) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].b;
-      }
-    }
-    return rgbImage;
   }
 }

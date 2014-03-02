@@ -95,15 +95,6 @@ namespace vision
        **/
       void holeFusionCallback(const std_msgs::Empty& lockMsg);
 
-      /**
-        @brief Extracts a RGB image from a point cloud message
-        @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
-        The input point cloud message
-        @return cv::Mat The output rgb image
-       **/
-      cv::Mat pointCloudToRGBImage(
-        const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage);
-
     public:
 
       /**

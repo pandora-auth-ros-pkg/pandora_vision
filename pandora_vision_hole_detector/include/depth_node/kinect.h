@@ -102,30 +102,6 @@ namespace vision
         (const sensor_msgs::ImageConstPtr& msg);
 
       /**
-        @brief Extracts a PointCloudXYZPtr (see defines.h)
-        from a point cloud message
-        @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
-        cloud message
-        @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
-        @return void
-       **/
-      void extractPointCloudXYZFromMessage(
-        const sensor_msgs::PointCloud2ConstPtr& msg,
-        PointCloudXYZPtr& pointCloudXYZ);
-
-      /**
-        @brief Converts a point cloud of type PointCloudXYZPtr to
-        a point cloud of type PointCloud and packs it in a message
-        @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
-        converted
-        @param[out] pointCloud [sensor_msgs::PointCloud2&]
-        The converted point cloud message
-        @return void
-       **/
-      void convertPointCloudXYZToMessage(const PointCloudXYZPtr& pointCloudXYZ,
-        sensor_msgs::PointCloud2& pointCloudMsg);
-
-      /**
         @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
         point cloud
         @param pointCloudXYZ [PointCloudXYZPtr&] The point cloud
@@ -162,7 +138,8 @@ namespace vision
         const cv::Mat& interpolatedDepthImage,
         const PointCloudXYZPtr& pointCloudXYZPtr,
         vision_communications::DepthCandidateHolesVectorMsg&
-        depthCandidateHolesMsg);
+        depthCandidateHolesMsg,
+        const std::string& encoding);
 
       /**
         @brief Publishes the planes to /vision/kinect/planes topic

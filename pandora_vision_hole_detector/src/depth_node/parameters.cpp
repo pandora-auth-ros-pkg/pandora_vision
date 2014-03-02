@@ -127,7 +127,8 @@ namespace vision
     server.setCallback(boost::bind(&Parameters::callback, this,_1, _2));
   }
 
-  void Parameters::callback(vision::kinectConfig &config, uint32_t level)
+  void Parameters::callback(pandora_vision_hole_detector::kinectConfig &config,
+    uint32_t level)
   {
     Parameters::kanny_ratio = config.kanny_ratio;
     Parameters::kanny_kernel_size = config.kanny_kernel_size;
