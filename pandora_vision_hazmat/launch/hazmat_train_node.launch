@@ -5,7 +5,7 @@
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
 		<!-- Package Path /-->
-			<param name="/vision/packagepath" value="$(find pandora_vision_hazmat)" />
+			<param name="/pandora_vision/packagepath" value="$(find pandora_vision_hazmat)" />
 
             <!-- Locate general_params_launcher /-->
 			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
