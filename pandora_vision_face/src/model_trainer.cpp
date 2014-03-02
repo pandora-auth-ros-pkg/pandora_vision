@@ -40,6 +40,8 @@
 #include "opencv2/contrib/contrib.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -52,6 +54,7 @@ using namespace std;
 
 static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';') 
 {
+    boost::filesystem::path filePath(filename);
     std::ifstream file(filename.c_str(), ifstream::in);
     if (!file) {
         string error_message = "No valid input file was given, please check the given filename.";
@@ -62,8 +65,12 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
         stringstream liness(line);
         getline(liness, path, separator);
         getline(liness, classlabel);
+        
+        boost::filesystem::path linePath(path);
+        
         if(!path.empty() && !classlabel.empty()) {
-            images.push_back(imread(path, 0));
+            images.push_back(imread(boost::filesystem::absolute(linePath, 
+                                    filePath.parent_path()).string(), 0));
             labels.push_back(atoi(classlabel.c_str()));
         }
     }
@@ -76,7 +83,7 @@ int main()
     vector<int> labels;
     // Read in the data. This can fail if no valid
     // input filename is given.
-      std::string fn_csv = "/home/paschalidoud/pandora_ws/src/pandora_vision/pandora_vision_face/data/csv.ext";
+    std::string fn_csv = ros::package::getPath("pandora_vision_face") + "/data/csv.ext";
     try {
         read_csv(fn_csv, images, labels);
     } catch (cv::Exception& e) {
@@ -102,8 +109,10 @@ int main()
     string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
     cout << result_message << endl;
     
-    std::cout<<"Saving model to"<<std::endl;
+    std::string outFile(ros::package::getPath("pandora_vision_face") + "/data/model.xml");
+    
+    std::cout<<"Saving model to " << outFile << std::endl;
 
-    model->save(ros::package::getPath("pandora_vision_face") + "/data/model.xml"); 
+    model->save(outFile); 
 
 }
