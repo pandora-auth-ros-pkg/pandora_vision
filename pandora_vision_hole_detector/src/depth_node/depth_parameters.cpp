@@ -130,6 +130,9 @@ namespace vision
   void DepthParameters::callback(pandora_vision_hole_detector::depth_cfgConfig
     &config, uint32_t level)
   {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("DepthParameters callback called");
+    #endif
     DepthParameters::kanny_ratio = config.kanny_ratio;
     DepthParameters::kanny_kernel_size = config.kanny_kernel_size;
     DepthParameters::kanny_low_threshold = config.kanny_low_threshold;

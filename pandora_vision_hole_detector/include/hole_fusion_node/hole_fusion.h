@@ -102,6 +102,11 @@ namespace vision
         const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
         HoleFilters::HolesConveyor& conveyor);
 
+      void unpackDepthMessage(
+        const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+        HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
+        cv::Mat& interpolatedDepthImage);
+
     public:
 
       /**
