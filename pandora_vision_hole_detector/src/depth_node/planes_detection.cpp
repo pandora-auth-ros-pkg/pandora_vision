@@ -70,12 +70,12 @@ namespace vision{
     std::vector<pcl::ModelCoefficients> coefficientsVectorOut;
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
-    if (Parameters::segmentation_method == 0)
+    if (DepthParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
           planesVectorOut, coefficientsVectorOut, inliersVector);
     }
-    else if (Parameters::segmentation_method == 1)
+    else if (DepthParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
           planesVectorOut, coefficientsVectorOut, inliersVector);
@@ -93,13 +93,14 @@ namespace vision{
   /**
     @brief Identify the planes in a point cloud and return a vector
     cointaining pointers to them.
-    @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose planes we
-    wish to locate
-    @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not on the
-    input cloud.
-    @param[out] planesVectorOut [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+    @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose planes
+    we wish to locate
+    @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not on
+    the input cloud.
+    @param[out] planesVectorOut
+    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
     the output vector of pointers to planes
-    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&] the
+    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&] The
     output vector of coefficients of each plane detected
     @return void
    **/
@@ -139,12 +140,12 @@ namespace vision{
 
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
-    if (Parameters::segmentation_method == 0)
+    if (DepthParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, inliersVector);
     }
-    else if (Parameters::segmentation_method == 1)
+    else if (DepthParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, inliersVector);
@@ -188,11 +189,12 @@ namespace vision{
       //!< Mandatory
       seg.setModelType (pcl::SACMODEL_PLANE);
       seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setMaxIterations (Parameters::max_iterations);
+      seg.setMaxIterations (DepthParameters::max_iterations);
 
       //!< Maybe a value needs to be set dynamically here, depending on
       //!< the distance of the kinect to the plane.
-      seg.setDistanceThreshold (Parameters::point_to_plane_distance_threshold);
+      seg.setDistanceThreshold(
+        DepthParameters::point_to_plane_distance_threshold);
 
       //!< Create the filtering object
       pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -209,7 +211,7 @@ namespace vision{
       //!< While 100 x num_points_to_exclude % of the original
       //!< cloud is still there
       while (cloudIn->points.size () >
-          Parameters::num_points_to_exclude * nr_points)
+          DepthParameters::num_points_to_exclude * nr_points)
       {
         //!< Segment the largest planar component from the remaining cloud
         seg.setInputCloud (cloudIn);
@@ -217,7 +219,8 @@ namespace vision{
 
         if (inliers->indices.size () == 0)
         {
-          std::cerr << "Could not estimate a planar model for the given dataset."
+          std::cerr
+            << "Could not estimate a planar model for the given dataset."
             << std::endl;
           break;
         }
@@ -311,11 +314,12 @@ namespace vision{
     seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
     seg.setNormalDistanceWeight(0.01);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (Parameters::max_iterations);
+    seg.setMaxIterations (DepthParameters::max_iterations);
 
     //!< Maybe a value needs to be set dynamically here,
     //!< depending on the distance of the kinect to the plane.
-    seg.setDistanceThreshold(Parameters::point_to_plane_distance_threshold);
+    seg.setDistanceThreshold(
+      DepthParameters::point_to_plane_distance_threshold);
 
     //!< Create the filtering object
     pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -339,7 +343,7 @@ namespace vision{
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >
-        Parameters::num_points_to_exclude * nr_points)
+        DepthParameters::num_points_to_exclude * nr_points)
     {
       //!< Segment the largest planar component from the
       //!< remaining cloud
@@ -357,7 +361,8 @@ namespace vision{
       //!< Extract the inliers
       extract.setInputCloud (cloudIn);
       extract.setIndices (inliers);
-      //!< Remove the plane found from cloudIn and place it in cloud_p. cloudIn goes unaffected.
+      //!< Remove the plane found from cloudIn and place it in cloud_p.
+      //!< cloudIn goes unaffected.
       extract.setNegative (false);
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p

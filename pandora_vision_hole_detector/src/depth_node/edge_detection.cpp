@@ -54,14 +54,14 @@ namespace vision {
     inImage.copyTo(outImage);
     cv::Mat detected_edges;
     cv::Mat dst;
-    int ratio = Parameters::kanny_ratio;
-    int kernel_size = Parameters::kanny_kernel_size;
-    int lowThreshold = Parameters::kanny_low_threshold;
+    int ratio = DepthParameters::kanny_ratio;
+    int kernel_size = DepthParameters::kanny_kernel_size;
+    int lowThreshold = DepthParameters::kanny_low_threshold;
 
     //!< Reduce noise with a kernel 3x3
     cv::blur(outImage, detected_edges, cv::Size(
-          Parameters::kanny_blur_noise_kernel_size,
-          Parameters::kanny_blur_noise_kernel_size));
+          DepthParameters::kanny_blur_noise_kernel_size,
+          DepthParameters::kanny_blur_noise_kernel_size));
 
     //!< Canny detector
     cv::Canny(detected_edges, detected_edges, lowThreshold,
@@ -446,10 +446,11 @@ namespace vision {
     @brief Takes as input a depth image containing floats, locates the edges in
     it and tries to clear as much noise as possible in the edges image. As noise
     we identify everything that is not, or does not look like, hole-like shapes,
-    with the knowledge that these shapes might be open curves, or that holes-like
-    shapes in a edge image are not connected to anything else, ergo they are
-    standalone shapes in it.  It outputs a binary image that contains areas that
-    we wish to validate as holes.
+    with the knowledge that these shapes might be open curves, or that
+    holes-like shapes in a edge image are not connected to anything else,
+    ergo they are standalone shapes in it.
+    It outputs a binary image that contains areas that we wish to validate
+    as holes.
     @param[in] inImage [const cv::Mat&] The depth image extracted from the depth
     sensor, in floats
     @param[out] edges [cv::Mat&] The final denoised edges image that corresponds
@@ -471,14 +472,14 @@ namespace vision {
     //!< Facilitate the edge detection by converting the 32FC1 image \
     values to a range of 0-255
       visualizableDenoisedImage = Visualization::scaleImageForVisualization
-      (tempImg, Parameters::scale_method);
+      (tempImg, DepthParameters::scale_method);
 
     //!< from now onwards every image is in the range of 0-255
     EdgeDetection::applySobel
       (visualizableDenoisedImage, denoisedDepthImageEdges);
 
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
-        Parameters::threshold_lower_value, 255, 3);
+        DepthParameters::threshold_lower_value, 255, 3);
 
     //!< make all non zero pixels have a value of 255
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
@@ -514,7 +515,7 @@ namespace vision {
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if(Parameters::debug_show_connect_pairs) // Debug
+    if(DepthParameters::debug_show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection before";
@@ -643,7 +644,7 @@ namespace vision {
           //!< If the curve is close to a straight line,
           //!< do not connect pair[i].first and pair[i].second
           if (pairsDistance >=
-              Parameters::AB_to_MO_ratio * outlineBisectorPointDist)
+              DepthParameters::AB_to_MO_ratio * outlineBisectorPointDist)
           {
             continue;
           }
@@ -780,7 +781,7 @@ namespace vision {
     #endif
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_connect_pairs) // Debug
+    if(DepthParameters::debug_show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection after";
@@ -789,7 +790,7 @@ namespace vision {
       inImage.copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(Parameters::debug_show_connect_pairs) // Debug
+    if(DepthParameters::debug_show_connect_pairs) // Debug
     {
       Visualization::multipleShow("connectPairs function", imgs, msgs, 1200, 1);
     }
@@ -810,8 +811,8 @@ namespace vision {
     Timer::start("enhanceContrast");
     #endif
 
-    inImage.convertTo(outImage, -1, Parameters::contrast_enhance_alpha,
-        Parameters::contrast_enhance_beta);
+    inImage.convertTo(outImage, -1, DepthParameters::contrast_enhance_alpha,
+        DepthParameters::contrast_enhance_beta);
 
     #ifdef DEBUG_TIME
     Timer::tick("enhanceContrast");
@@ -842,7 +843,7 @@ namespace vision {
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
 
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Initial Edges";
@@ -857,7 +858,7 @@ namespace vision {
     Morphology::dilation(temp,2);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After 2 steps of dilation";
@@ -873,7 +874,7 @@ namespace vision {
     Morphology::thinning(temp,thinnedImg,100);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After thinning";
@@ -894,7 +895,7 @@ namespace vision {
     Timer::start("Sector #2","denoiseEdges");
     #endif
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After edge contamination";
@@ -926,7 +927,7 @@ namespace vision {
     thinnedImg = thinnedImg - closedLines;
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : The closed shapes";
@@ -937,7 +938,7 @@ namespace vision {
     }
     #endif
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Without closed shapes";
@@ -969,7 +970,7 @@ namespace vision {
           {
             std::set<unsigned int> ret;
             std::pair<GraphNode,GraphNode> pts = findNeighs(thinnedImg,i,j,ret);
-            if(ret.size() > Parameters::minimum_curve_points)
+            if(ret.size() > DepthParameters::minimum_curve_points)
             {
               lines.push_back(ret);
               farPts.push_back(pts);
@@ -1004,7 +1005,7 @@ namespace vision {
     Timer::start("Sector #4");
     #endif
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After connection of distant edges";
@@ -1019,7 +1020,7 @@ namespace vision {
     thinnedImg = thinnedImg + closedLines;
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After re-insertion of closed shapes";
@@ -1038,7 +1039,7 @@ namespace vision {
     Timer::tick("Sector #4");
     #endif
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After pruning and dilation";
@@ -1047,10 +1048,10 @@ namespace vision {
       img.copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(Parameters::debug_show_denoise_edges) // Debug
+    if(DepthParameters::debug_show_denoise_edges) // Debug
     {
       Visualization::multipleShow("denoiseEdges function", imgs, msgs,
-          Parameters::debug_show_denoise_edges_size, 1);
+          DepthParameters::debug_show_denoise_edges_size, 1);
     }
     #endif
     #ifdef DEBUG_TIME
@@ -1226,7 +1227,7 @@ namespace vision {
 
     std::pair<GraphNode,GraphNode> edgePoints;
     //!< If it is small avoid the fuzz
-    if(ret.size() < Parameters::minimum_curve_points)
+    if(ret.size() < DepthParameters::minimum_curve_points)
     {
       return edgePoints;
     }
@@ -1304,7 +1305,7 @@ namespace vision {
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if(Parameters::debug_show_get_shapes_clear_border) // Debug
+    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Before clear blorders";
@@ -1400,7 +1401,7 @@ namespace vision {
     Timer::tick("getShapesClearBorder");
     #endif
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_get_shapes_clear_border) // Debug
+    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After clear borders";
@@ -1409,7 +1410,7 @@ namespace vision {
       inImage.copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(Parameters::debug_show_get_shapes_clear_border) // Debug
+    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
     {
       Visualization::multipleShow("getShapesClearBorder function", imgs, msgs,
           1200, 1);

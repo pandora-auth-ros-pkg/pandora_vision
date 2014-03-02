@@ -55,7 +55,7 @@ namespace vision{
 
     chooseInterpolationMethod(inImage);
 
-    switch(Parameters::interpolation_method)
+    switch(DepthParameters::interpolation_method)
     {
       case 0: //!< Thinning-like interpolation
       {
@@ -470,18 +470,18 @@ namespace vision{
     std = sqrt(std);
     bper = (float)blacks / (image.rows * image.cols);
 
-    Parameters::interpolation_method = 15;
+    DepthParameters::interpolation_method = 15;
     if(bper > 0.7)  //!< Choose close
     {
-      Parameters::interpolation_method = 2;
+      DepthParameters::interpolation_method = 2;
     }
     else if(mean < 0.7)
     {
-      Parameters::interpolation_method = 1;
+      DepthParameters::interpolation_method = 1;
     }
     else
     {
-      Parameters::interpolation_method = 0;
+      DepthParameters::interpolation_method = 0;
     }
     #ifdef DEBUG_TIME
     Timer::tick("chooseInterpolationMethod");

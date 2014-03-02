@@ -40,7 +40,8 @@
 
 #include <std_msgs/Empty.h>
 #include <depth_node/defines.h>
-#include "depth_node/parameters.h"
+#include "hole_fusion_node/hole_fusion_parameters.h"
+#include "depth_node/depth_parameters.h"
 #include "depth_node/hole_filters.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
 #include "message_conversions/message_conversions.h"
@@ -58,6 +59,8 @@ namespace vision
       //!< The ROS node handle
       ros::NodeHandle nodeHandle_;
 
+      HoleFusionParameters params;
+      DepthParameters  kparams;
       //!< The ROS publisher that will be used for unlocking the
       //!< synchronizer_node
       ros::Publisher unlockPublisher_;

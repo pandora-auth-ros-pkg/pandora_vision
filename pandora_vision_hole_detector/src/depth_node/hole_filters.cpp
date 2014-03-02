@@ -145,7 +145,7 @@ namespace vision
           inKeyPoints[validKeyPointsIndices[i]].pt.y,
           inKeyPoints[validKeyPointsIndices[i]].pt.x) - mean;
 
-      if(value > 0 && value < Parameters::depth_difference)
+      if(value > 0 && value < DepthParameters::depth_difference)
       {
         valid.insert(validKeyPointsIndices[i]);
       }
@@ -638,21 +638,22 @@ namespace vision
 
     std::map<int, int> filtersOrder;
 
-    if (Parameters::run_checker_depth_diff > 0)
+    if (DepthParameters::run_checker_depth_diff > 0)
     {
-      filtersOrder[Parameters::run_checker_depth_diff] = 1;
+      filtersOrder[DepthParameters::run_checker_depth_diff] = 1;
     }
-    if (Parameters::run_checker_outline_of_rectangle > 0)
+    if (DepthParameters::run_checker_outline_of_rectangle > 0)
     {
-      filtersOrder[Parameters::run_checker_outline_of_rectangle] = 2;
+      filtersOrder[DepthParameters::run_checker_outline_of_rectangle] = 2;
     }
-    if (Parameters::run_checker_depth_area > 0)
+    if (DepthParameters::run_checker_depth_area > 0)
     {
-      filtersOrder[Parameters::run_checker_depth_area] = 3;
+      filtersOrder[DepthParameters::run_checker_depth_area] = 3;
     }
-    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
+    if (DepthParameters::run_checker_brushfire_outline_to_rectangle > 0)
     {
-      filtersOrder[Parameters::run_checker_brushfire_outline_to_rectangle] = 4;
+      filtersOrder[DepthParameters::run_checker_brushfire_outline_to_rectangle]
+        = 4;
     }
 
     std::vector<cv::Mat> imgs;
@@ -666,13 +667,13 @@ namespace vision
         interpolatedDepthImage,
         initialPointCloud,
         conveyor,
-        Parameters::rectangle_inflation_size,
+        DepthParameters::rectangle_inflation_size,
         imgs,
         msgs);
     } //!< o_it iterator ends
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_check_holes) // Debug
+    if(DepthParameters::debug_show_check_holes) // Debug
     {
       Visualization::multipleShow("checkHoles functions", imgs, msgs, 1200, 1);
     }
@@ -804,7 +805,7 @@ namespace vision
     conveyor.keyPoints = finalKeyPoints;
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_check_holes) // Debug
+    if(DepthParameters::debug_show_check_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" ") + windowMsg;
@@ -883,7 +884,7 @@ namespace vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than Parameters::bounding_box_min_area_threshold
+        //!< be greater than DepthParameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles(
             keyPoints,
             rectangles,
@@ -900,7 +901,7 @@ namespace vision
 
         BlobDetection::raycastKeypoint(keyPoints,
             denoisedDepthImageEdges,
-            Parameters::raycast_keypoint_partitions,
+            DepthParameters::raycast_keypoint_partitions,
             blobsOutlineVector,
             blobsArea);
 
@@ -923,7 +924,7 @@ namespace vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than Parameters::bounding_box_min_area_threshold
+        //!< be greater than DepthParameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles (
             keyPoints,
             rectangles,
@@ -958,9 +959,10 @@ namespace vision
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>] The key points
     @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >] The
     rectangles found
-    @param[in] inRectanglesArea [const std::vector<float>] The area of each rectangle
-    @param[in] inContours [const std::vector<std::vector<cv::Point> >] The outline
-    of each blob found
+    @param[in] inRectanglesArea [const std::vector<float>]
+    The area of each rectangle
+    @param[in] inContours [const std::vector<std::vector<cv::Point> >]
+    The outline of each blob found
     @param[out] conveyor [HolesConveyor&] The container of vector of blobs'
     keypoints, outlines and areas
     @return void
