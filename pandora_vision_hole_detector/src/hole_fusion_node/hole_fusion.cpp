@@ -186,6 +186,21 @@ namespace vision
   }
 
 
+
+  /**
+    @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+    candidate holes, the interpolated depth image and the point cloud
+    from the vision_communications::DepthCandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [vision_communications::DepthCandidateHolesVectorMsg&] The input
+    depth candidate holes message
+    @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+    struct
+    @param[out] pointCloudXYZ [PointCloudXYZPtr&] The output point cloud
+    @param[out] interpolatedDepthImage [cv::Mat&] The output interpolated
+    depth image
+    @return void
+   **/
   void HoleFusion::unpackDepthMessage(
     const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
     HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
