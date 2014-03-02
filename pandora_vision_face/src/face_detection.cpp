@@ -462,8 +462,9 @@ namespace pandora_vision
     }
 
     prevState=curState;
-
-    transitionComplete(curState); //this needs to be called everytime a node finishes transition
+    
+    //!< this needs to be called everytime a node finishes transition
+    transitionComplete(curState); 
   }
   
   /**
