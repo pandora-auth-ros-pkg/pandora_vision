@@ -61,51 +61,52 @@
 
 namespace pandora_vision 
 {
+  
   class FaceDetector
   {
     private:
-      ros::NodeHandle 	_nh;
-      SkinDetector* 				skinDetector;
-      CvMemStorage* 				storage_total;
+    
+      SkinDetector* skinDetector;
+      CvMemStorage* storage_total;
 
       std::vector<std::vector< cv::Rect_<int> > >     faces;
       
       std::vector< cv::Rect_<int> > 	    faces_total;
       
-      cv::CascadeClassifier	cascade;	//N elements
+      cv::CascadeClassifier	cascade;	
           
-      std::string 	 			cascade_name;
+      std::string cascade_name;
       std::string model_path_name;
       
       //parameters used in cvHaarDetectObjects functions:
-      double				scale;
-      int					minNeighbors;
-      cv::Size			minFaceSize;
-      cv::Size		    maxFaceSize; ///TODO: Change it dynamically too
+      double scale;
+      int	minNeighbors;
+      cv::Size minFaceSize;
+      cv::Size maxFaceSize; 
       
-      cv::Mat*				dstArray;
+      cv::Mat* dstArray;
       
-      //struct used to pass multiple parameters in different threads		
+      //!< Struct used to pass multiple parameters in different threads		
       typedef struct
         {
-          //input
-          cv::Mat				    frameIN;
-          float					angle;
-          double				    scale;
-          int					    minNeighbors;
-          cv::Size				minFaceSize;
-          FaceDetector* 			thisObj;
-          cv::Mat					dst;
-          int						retVal;
+          cv::Mat	frameIN;
+          float	angle;
+          double scale;
+          int	minNeighbors;
+          cv::Size minFaceSize;
+          FaceDetector* thisObj;
+          cv::Mat	dst;
+          int	retVal;
           cv::CascadeClassifier	cascade;
         } ThParams;
       
-      bool						isSkinDetectorEnabled;	//if enabled SkinDetector output is
-                                //also considered in probability value. 
-      int							N; 						//circular buffer size, 
-      int 						angleNum;				//number of rotation angles and threads
-      int							now, prev; 				//circular buffer iterators
-      float						probability;			//total probability of face found
+      //!< If enabled SkinDetector output, is also considered in
+      //!< probability value
+      bool isSkinDetectorEnabled;	 
+      int	N; 						//circular buffer size, 
+      int angleNum;				//number of rotation angles and threads
+      int	now, prev; 				//circular buffer iterators
+      float	probability;			//total probability of face found
       
       std::vector<cv::Mat>        buffer;	//the image buffer used to store previous frames
       float*						partProb;	//vector with partial probabilities that are used

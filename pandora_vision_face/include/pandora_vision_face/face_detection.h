@@ -55,67 +55,77 @@
 #include "time_calculator.h"
 #include "state_client.h"
 
-#define HFOV					61.14//68		//horizontal field of view in degrees : giwrgos 61.142
-#define VFOV					48  //50		//vertical field of view in degrees : giwrgos 47.79
-#define DEFAULT_HEIGHT			480		//default frame height
-#define DEFAULT_WIDTH			640		//default frame width
+//!< Horizontal field of view in degrees 
+#define HFOV 61.14
+
+//!< vertical field of view in degrees
+#define VFOV 48  
+
+//!< default frame height
+#define DEFAULT_HEIGHT 480	
+
+//!< default frame width	
+#define DEFAULT_WIDTH	 640		
 
 namespace pandora_vision 
 {
   class FaceDetection : public StateClient 
-  {	private:
+  {	
+    private:
       
-      //nodeHandle
+      //!< The NodeHandle
       ros::NodeHandle _nh;
+      
       FaceDetector*	_faceDetector;
+      
       float ratioX;
       float ratioY;
       
-      float hfov;		//horizontal Field Of View (rad)
+      //!< Horizontal field of view in rad
+      float hfov;		
+      
+      //!< Vertical Field Of View (rad)
       float vfov;		
-      int frameWidth;		//frame width
-      int frameHeight;	//frame height
       
-      cv::Mat		faceFrame;					// frame processed by FaceDetector
-      cv::Mat		extraFrame;					// copy frame processed by FaceDetector
+      int frameWidth;		
+      int frameHeight;	
       
-      ros::Time		faceFrameTimestamp;			// FaceDetector frame timestamp
-      ros::Timer		faceTimer;                              // timer for frame callback
+      //!< Frame processed by FaceDetector
+      cv::Mat	faceFrame;					
+      cv::Mat	extraFrame;					
+      
+      //!<FaceDetector frame timestamp
+      ros::Time faceFrameTimestamp;	
+      
+      //!< Timer used for FaceCallaback
+      ros::Timer faceTimer;       
 
+      //!< The topic subscribed to for the camera
       std::string imageTopic;
+      
       bool isFaceFrameUpdated;	
       
-      //time durations for every callback Timer in spin() function
-      double faceDenseTime;
-      double faceSparseTime;
+      //!< time durations for every callback Timer 
+      double faceTime;
       
-      //Client used for testing ---by Management Team---
-      ros::ServiceClient faceClient;
-      
-      //publishers for FaceDetector result messages
+      //!< Publishers for FaceDetector result messages
       ros::Publisher _victimDirectionPublisher;
       
-      //the subscriber that listens to the frame topic advertised by the central node
+      //!< The subscriber that listens to the frame 
+      //!< topic advertised by the central node
       image_transport::Subscriber _frameSubscriber;
       
-      //debug publishers for FaceDetector
-      image_transport::Publisher _facePrevPublisher;
-      image_transport::Publisher _faceNowPublisher;
-      image_transport::Publisher _faceSkinPublisher;
-      
-      // variables for changing in dummy msg mode for debugging
+      //!< variables for changing in dummy msg mode for debugging
       bool faceDummy;
-      // variables for changing in debug mode. Publish images for debugging
-      bool debugFace;
-      
-      //variable used for State Managing
+     
+      //!< Variable used for State Managing
       bool faceNowON;
       
-      //mutex lock needed to prevent conflicts between
-      //updating face frame and using it for face detection
+      //!< Mutex lock needed to prevent conflicts between
+      //!< updating face frame and using it for face detection
       pthread_mutex_t	faceLock;
       
-      //parameters for the FaceDetector:
+      //!< parameters for the FaceDetector:
       std::string cascadeName;
       std::string model_path;
       int bufferSize;
@@ -124,39 +134,72 @@ namespace pandora_vision
       int mn;
       int minFaceDim;
       
-      //paths for Skin Detector
+      //!< Paths for Skin Detector
       std::string skinHist;
       std::string wallHist;
       std::string wall2Hist;
       std::string packagePath;
-    
-    public:
-          
-      //constructor
-      FaceDetection();
-            
-      //destructor			
-      ~FaceDetection();	
       
-      //get parameters from launch file
+      //!< Current state of robot
+      int curState;		
+      //!< Previous state of robot
+      int prevState;		
+      
+      /**
+       * @brief Get parameters referring to view and frame characteristics from
+       * launch file
+       * @return void
+      */  
       void getGeneralParams();
+      
+      /**
+       * @brief Get parameters referring to facedetection algorithm
+       * @return void
+      */
       void getFaceParams();
+      
       void getTimerParams();
       
-      //timer callbacks
+      /**
+       * @brief This method uses a FaceDetector instance to detect all 
+       * present faces in a given frame
+       * @param timer [ros:TimerEvemt] the timer used to call 
+       * faceCallback
+       * @return void
+      */
       void faceCallback(const ros::TimerEvent&);
       
-      //get a new image
+      /**
+       * Function called when new ROS message appears, for front camera
+       * @param msg [const sensor_msgs::ImageConstPtr&] The message
+       * @return void
+      */
       void imageCallback(const sensor_msgs::ImageConstPtr& msg);
       
+    public:
+          
+      //!< The Constructor
+      FaceDetection();
+            
+      //!< The Destructor			
+      virtual ~FaceDetection();	
+    
       void createFaceMessage(vision_communications::FaceDirectionMsg &faceMessage);
       void createDummyFaceMessage(float &center_x, float &center_y, vision_communications::FaceDirectionMsg &faceMessage);
-      //Implemented from StateClient
+      
+      /**
+       * @brief Node's state manager
+       * @param newState [int] The robot's new state
+       * @return void
+      */
       void startTransition(int newState);
+      
+      /**
+       * @brief After completion of state transition
+       * @return void
+      */
       void completeTransition(void);
       
-      int curState;		//Current state of robot
-      int prevState;		//Previous state of robot
   };
 }
 #endif
