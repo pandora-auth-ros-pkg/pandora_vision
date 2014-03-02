@@ -218,23 +218,23 @@ namespace vision{
 
     cv::SimpleBlobDetector::Params params;
 
-    params.minThreshold = Parameters::blob_min_threshold; //40;
-    params.maxThreshold = Parameters::blob_max_threshold; //60;
-    params.thresholdStep = Parameters::blob_threshold_step;
+    params.minThreshold = DepthParameters::blob_min_threshold; //40;
+    params.maxThreshold = DepthParameters::blob_max_threshold; //60;
+    params.thresholdStep = DepthParameters::blob_threshold_step;
 
-    params.minArea = Parameters::blob_min_area;
-    params.maxArea = Parameters::blob_max_area;
+    params.minArea = DepthParameters::blob_min_area;
+    params.maxArea = DepthParameters::blob_max_area;
 
-    params.minConvexity = Parameters::blob_min_convexity; //0.6;
-    params.maxConvexity = Parameters::blob_max_convexity;
+    params.minConvexity = DepthParameters::blob_min_convexity; //0.6;
+    params.maxConvexity = DepthParameters::blob_max_convexity;
 
-    params.minInertiaRatio = Parameters::blob_min_inertia_ratio;//0.5;
+    params.minInertiaRatio = DepthParameters::blob_min_inertia_ratio;//0.5;
 
-    params.maxCircularity = Parameters::blob_max_circularity;
-    params.minCircularity = Parameters::blob_min_circularity; //0.3;
+    params.maxCircularity = DepthParameters::blob_max_circularity;
+    params.minCircularity = DepthParameters::blob_min_circularity; //0.3;
 
-    params.filterByColor = Parameters::blob_filter_by_color;
-    params.filterByCircularity = Parameters::blob_filter_by_circularity;
+    params.filterByColor = DepthParameters::blob_filter_by_color;
+    params.filterByCircularity = DepthParameters::blob_filter_by_circularity;
 
     cv::SimpleBlobDetector blobDetector(params);
     blobDetector.create("SimpleBlob");

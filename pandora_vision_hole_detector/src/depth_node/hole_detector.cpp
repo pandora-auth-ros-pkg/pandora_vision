@@ -67,7 +67,7 @@ namespace vision
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if(Parameters::debug_show_find_holes) // Debug
+    if(DepthParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Initial Depth";
@@ -83,7 +83,7 @@ namespace vision
         interpolatedDepthImage);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes) // Debug
+    if(DepthParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Interpolated depth image";
@@ -100,7 +100,7 @@ namespace vision
         denoisedDepthImageEdges);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes) // Debug
+    if(DepthParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Edges after denoise");
@@ -117,7 +117,7 @@ namespace vision
     BlobDetection::detectBlobs(denoisedDepthImageEdges, keyPoints);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes) // Debug
+    if(DepthParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Initial keypoints");
@@ -135,7 +135,7 @@ namespace vision
     /**
       Get me blobs that their center point is inside the image,
       their bounding box is also inside the image, and their area is
-      greater than Parameters::bounding_box_min_area_threshold.
+      greater than DepthParameters::bounding_box_min_area_threshold.
       Each keypoint is associated with exactly one rectangle.
       The end product here is a set of keypoints, a set of rectangles that
       enclose them and a set of the outlines of the blobs found, all tightly
@@ -144,11 +144,11 @@ namespace vision
     HoleFilters::validateBlobs(
       keyPoints,
       denoisedDepthImageEdges,
-      Parameters::bounding_box_detection_method,
+      DepthParameters::bounding_box_detection_method,
       conveyor);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes) // Debug
+    if(DepthParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Blobs");
@@ -176,7 +176,7 @@ namespace vision
  *
  *
  *    #ifdef DEBUG_SHOW
- *    if(Parameters::debug_show_find_holes) // Debug
+ *    if(DepthParameters::debug_show_find_holes) // Debug
  *    {
  *      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
  *      msg += STR(" : Final keypoints");
@@ -189,10 +189,10 @@ namespace vision
  *          conveyor.keyPoints)
  *      );
  *    }
- *    if(Parameters::debug_show_find_holes)
+ *    if(DepthParameters::debug_show_find_holes)
  *    {
  *      Visualization::multipleShow("findHoles function",imgs,msgs,
- *        Parameters::debug_show_find_holes_size,1);
+ *        DepthParameters::debug_show_find_holes_size,1);
  *    }
  *    #endif
  */

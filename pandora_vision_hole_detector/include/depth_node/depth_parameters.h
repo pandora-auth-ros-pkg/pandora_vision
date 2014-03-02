@@ -35,12 +35,12 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_PARAMETERS
-#define KINECT_PARAMETERS
+#ifndef DEPTH_PARAMETERS
+#define DEPTH_PARAMETERS
 
 #include "depth_node/defines.h"
 #include <dynamic_reconfigure/server.h>
-#include <pandora_vision_hole_detector/kinectConfig.h>
+#include <pandora_vision_hole_detector/depth_cfgConfig.h>
 
 namespace vision
 {
@@ -76,20 +76,20 @@ namespace vision
 
   };
 
-  struct Parameters
+  struct DepthParameters
   {
 
-    Parameters(void);
+    DepthParameters(void);
 
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::kinectConfig>
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
       server;
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::kinectConfig>::
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>::
       CallbackType f;
 
-    void callback(pandora_vision_hole_detector::kinectConfig &config,
+    void callback(pandora_vision_hole_detector::depth_cfgConfig &config,
       uint32_t level);
 
-    //!< -------------------Parameters-----------------------------//
+    //!< -------------------DepthParameters-----------------------------//
 
     //!< Subscriber of kinect parameter changing
     ros::Subscriber     _parameterChangingSubscriber;

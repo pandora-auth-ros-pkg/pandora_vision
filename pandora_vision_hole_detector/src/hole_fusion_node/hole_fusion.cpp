@@ -119,7 +119,7 @@ namespace vision
     #ifdef DEBUG_SHOW
     std::vector<std::string> msgs;
     std::vector<cv::Mat> imgs;
-    if(Parameters::debug_show_find_holes) // Debug
+    if(HoleFusionParameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Final keypoints");
@@ -132,10 +132,10 @@ namespace vision
           conveyor.keyPoints)
         );
     }
-    if(Parameters::debug_show_find_holes)
+    if(HoleFusionParameters::debug_show_find_holes)
     {
       Visualization::multipleShow("depthCandidateHolesCallback function",
-        imgs, msgs, Parameters::debug_show_find_holes_size,1);
+        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size,1);
     }
     #endif
   }

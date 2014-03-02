@@ -51,7 +51,7 @@ namespace vision
 
     //!< Subscribe to the RGB point cloud topic
     pointCloudSubscriber_ = nodeHandle_.subscribe(
-      "/camera/depth_registered/points", 1,
+      "/camera/depth/points", 1,
       &RgbDepthSynchronizer::synchronizedCallback, this);
 
     //!< Subscribe to the hole_fusion lock/unlock topic
@@ -119,6 +119,7 @@ namespace vision
       //!< of this if-block without the explicit request of the hole_fusion node
       locked_ = true;
     }
+      synchronizedPointCloudPublisher_.publish(pointCloudMessage);
   }
 
 

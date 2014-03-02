@@ -38,7 +38,7 @@
 #ifndef KINECT_VISUALIZATION
 #define KINECT_VISUALIZATION
 
-#include "depth_node/parameters.h"
+#include "depth_node/depth_parameters.h"
 
 /**
 @namespace vision

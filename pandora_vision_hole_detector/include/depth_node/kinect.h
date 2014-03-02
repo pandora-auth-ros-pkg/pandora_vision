@@ -71,7 +71,7 @@ namespace vision
       //!< ROS publisher for the candidate holes
       ros::Publisher      _candidateHolesPublisher;
 
-      Parameters params;
+      DepthParameters params;
 
       HoleDetector hd; //!< Just to try out the particle filter
 

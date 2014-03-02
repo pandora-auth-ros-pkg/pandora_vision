@@ -216,7 +216,7 @@ namespace vision{
     const std::vector<std::vector<cv::Point> > outlineVector,
     const float hz)
   {
-    cv::Mat img = scaleImageForVisualization(inImage, Parameters::scale_method);
+    cv::Mat img = scaleImageForVisualization(inImage, DepthParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(0, 255, 0),
        cv::DrawMatchesFlags::DEFAULT);
@@ -284,7 +284,7 @@ namespace vision{
       const int ms,
       const std::vector<cv::KeyPoint>& keypoints)
   {
-    cv::Mat img = scaleImageForVisualization(inImage, Parameters::scale_method);
+    cv::Mat img = scaleImageForVisualization(inImage, DepthParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(255, 0, 0),
         cv::DrawMatchesFlags::DEFAULT);
@@ -313,7 +313,7 @@ namespace vision{
     const int ms)
   {
     cv::imshow(windowTitle, scaleImageForVisualization(inImage,
-          Parameters::scale_method));
+          DepthParameters::scale_method));
     cv::waitKey(ms);
   }
 
