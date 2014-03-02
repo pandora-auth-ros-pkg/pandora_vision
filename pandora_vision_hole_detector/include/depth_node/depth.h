@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_NODE_H
-#define KINECT_NODE_H
+#ifndef DEPTH_H
+#define DEPTH_H
 
 #include "depth_node/hole_detector.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
@@ -62,10 +62,6 @@ namespace vision
       ros::Time           _kinectDepthFrameTimestamp;
       //!< Subscriber of Kinect point cloud
       ros::Subscriber     _inputCloudSubscriber;
-      //!< Subscriber of kinect RGB image
-      ros::Subscriber     _inputImageSubscriber;
-      //!< Subscriber of Kinect depth image
-      ros::Subscriber     _inputDepthImageSubscriber;
       //!< ROS publisher for computed 2D planes
       ros::Publisher      _planePublisher;
       //!< ROS publisher for the candidate holes
@@ -85,21 +81,6 @@ namespace vision
       void inputCloudCallback
         (const sensor_msgs::PointCloud2ConstPtr& msg);
 
-      /**
-        @brief Callback for the RGB image
-        @param msg [const sensor_msgs::ImageConstPtr&] The RGB image
-        @return void
-       **/
-      void inputImageCallback
-        (const sensor_msgs::ImageConstPtr& msg);
-
-      /**
-        @brief Callback for the depth image
-        @param msg [const sensor_msgs::ImageConstPtr&] The depth image
-        @return void
-       **/
-      void inputDepthImageCallback
-        (const sensor_msgs::ImageConstPtr& msg);
 
       /**
         @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr

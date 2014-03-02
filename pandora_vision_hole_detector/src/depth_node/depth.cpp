@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/kinect.h"
+#include "depth_node/depth.h"
 #include "message_conversions/message_conversions.h"
 
 namespace vision
@@ -54,16 +54,6 @@ namespace vision
       "/synchronized/camera/depth/points", 1,
       &PandoraKinect::inputCloudCallback, this);
 
-    //!< Subscribe to the RGB image published by the
-    //!< rgb_depth_synchronizer node
-    _inputImageSubscriber = _nodeHandle.subscribe(
-      "/synchronized/camera/rgb/image_raw", 1,
-      &PandoraKinect::inputImageCallback, this);
-
-    //~ _inputDepthImageSubscriber  =
-    //~ _nodeHandle.subscribe("/camera/depth/image",
-    //~ 1, &PandoraKinect::inputDepthImageCallback, this);
-
     //!< Advertise the candidate holes found by the depth node
     _candidateHolesPublisher = _nodeHandle.advertise
       <vision_communications::DepthCandidateHolesVectorMsg>(
@@ -81,83 +71,6 @@ namespace vision
     @return void
    **/
   PandoraKinect::~PandoraKinect(void) {}
-
-
-
-  /**
-    @brief Callback for the RGB image
-    @param msg [const sensor_msgs::ImageConstPtr&] The RGB image
-    @return void
-  **/
-  void PandoraKinect::inputImageCallback(const sensor_msgs::ImageConstPtr& msg)
-  {
-    cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    _kinectFrame= in_msg->image.clone();
-    _kinectFrameTimestamp = msg->header.stamp;
-
-    if (_kinectFrame.empty())
-    {
-      ROS_ERROR("[kinectNode] : No more Frames");
-      return;
-    }
-  }
-
-
-
-  /**
-    @brief Callback for the depth image
-    @param msg [const sensor_msgs::ImageConstPtr&] The depth image
-    @return void
-   **/
-  void PandoraKinect::inputDepthImageCallback
-    (const sensor_msgs::ImageConstPtr& msg)
-    {
-      cv_bridge::CvImagePtr in_msg;
-
-      try
-      {
-        in_msg = cv_bridge::toCvCopy
-          (msg, sensor_msgs::image_encodings::TYPE_32FC1);
-      }
-      catch (cv_bridge::Exception& e)
-      {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-        return;
-      }
-
-      _kinectDepthFrame = in_msg->image.clone();
-      _kinectDepthFrameTimestamp = msg->header.stamp;
-      if (_kinectDepthFrame.empty())
-      {
-        ROS_ERROR("[kinectNode] : No more Frames");
-        return;
-      }
-
-    //!< each pixel has one value of intensity in the range of 0-255.\
-    127 for unknown depth.
-
-    double min;
-    double max;
-
-    cv::minMaxIdx(_kinectDepthFrame, &min, &max);
-    cv::Mat adjMap;
-    cv::convertScaleAbs(_kinectDepthFrame, _kinectDepthFrame, 255 / max);
-    cv::imshow("Out", _kinectDepthFrame);
-    cv::waitKey(1);
-
-    //std::cerr << adjMap << std::endl << std::endl;
-
-    /*
-    // each pixel has one value; the distance from the sensor to the point in
-    // the depth scene. 0 for unknown distance
-    cv::namedWindow("Depth image from kinect", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Depth image from kinect", _kinectDepthFrame);
-
-    std::cerr << _kinectDepthFrame << std::endl << std::endl;
-    */
-
-  }
 
 
 
