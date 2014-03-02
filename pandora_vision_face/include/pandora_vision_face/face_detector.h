@@ -69,9 +69,9 @@ namespace pandora_vision
       SkinDetector* skinDetector;
       CvMemStorage* storage_total;
 
-      std::vector<std::vector< cv::Rect_<int> > >     faces;
+      std::vector<std::vector<cv::Rect_<int> > > faces;
       
-      std::vector< cv::Rect_<int> > 	    faces_total;
+      std::vector<cv::Rect_<int> > faces_total;
       
       cv::CascadeClassifier	cascade;	
           
@@ -89,7 +89,7 @@ namespace pandora_vision
       //!< Struct used to pass multiple parameters in different threads		
       typedef struct
         {
-          cv::Mat	frameIN;
+          cv::Mat	frame;
           float	angle;
           double scale;
           int	minNeighbors;
@@ -103,15 +103,23 @@ namespace pandora_vision
       //!< If enabled SkinDetector output, is also considered in
       //!< probability value
       bool isSkinDetectorEnabled;	 
-      int	N; 						//circular buffer size, 
-      int angleNum;				//number of rotation angles and threads
+      
+      int	_bufferSize; 
+      
+      //!< Number of rotation angles						
+      int angleNum;			
+      
       int	now, prev; 				//circular buffer iterators
       float	probability;			//total probability of face found
       
-      std::vector<cv::Mat>        buffer;	//the image buffer used to store previous frames
-      float*						partProb;	//vector with partial probabilities that are used
-                      //to calculate total probability of a face according
-                      //to consistency in last N frames.
+      //!< Image buffer used to store frames
+      std::vector<cv::Mat> frame_buffer;
+      
+      //!< Vector with partial probabilities that are used to
+      //!< calculate total probability of face according to 
+      //!< consistency in last _bufferSize frames
+      std::vector<float> probability_buffer;	
+      
       //debug images:
       cv::Mat 					skinImg;
       cv::Mat 					faceNow;
@@ -124,14 +132,30 @@ namespace pandora_vision
       image_transport::Publisher _facePublisher;	
       cv::Ptr<cv::FaceRecognizer> model;
       
+      /**
+        @brief Initializes frame and probability buffer
+        @param image [cv::Mat] The current frame
+        @return void
+      */
+      void initFrameProbBuffers(cv::Mat frame);
+      
     public:
       //debug switch - webNode changes it externally:
       bool						isDebugMode;
       
-    public:	
+      //!< The Constructor
       FaceDetector(std::string cascadePath,std::string model_path, int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist);
-      ~FaceDetector();
-      int 	findFaces(cv::Mat frameIN );			//Implementation with image buffer contributing to probability
+      
+      //!< The Destructor
+      virtual ~FaceDetector();
+      
+      /**
+        @brief Searches for faces in current frame.
+        @param image [cv::Mat] The  current frame
+        @return number [int] of faces found in current frame
+      **/
+      int findFaces(cv::Mat frame );			
+      
       int	findFaces1Frame(cv::Mat frameIN );	//Normal Implementation, probability of each face equals 1
       int* 	getFaceRectTable();
       int	getFaceRectTableSize();
@@ -143,9 +167,21 @@ namespace pandora_vision
     private:
       
       static void* 	threadRotateThenDetect( void* arg );	//the actual job being done by each different thread
-      int             detectFace(cv::Mat img,cv::CascadeClassifier cascade, float* rotMat, float angle);
-      cv::Mat 		frameRotate( cv::Mat frameIN, float angle, float* rotMatData );	//self explanatory
-      void 		    initFrameProbBuffers(cv::Mat frameIN);
+      int detectFace(cv::Mat img,cv::CascadeClassifier cascade, float angle);
+      
+      /**
+        @brief Rotates input frame according to the given angle
+        @param frame [cv::Mat] the frame to be rotated.
+        @param thAngle [int] angle in degrees (angle>=0)
+          any angle more than 360 degrees is reduced to a primary circle 
+          angle.
+        @param	rotMatData pointer to the data of the rotation
+          matrix values produces for this rotation (this function feels the values)
+        @return the frame rotated
+      */
+      cv::Mat frameRotate( cv::Mat frame, float angle);	
+      
+      
       void 			createRectangles(cv::Mat tmp);
       void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
       
