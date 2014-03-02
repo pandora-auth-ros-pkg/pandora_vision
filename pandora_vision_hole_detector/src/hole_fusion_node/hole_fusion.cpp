@@ -94,20 +94,14 @@ namespace vision
     const vision_communications::DepthCandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
-    //!< Recreate the conveyor
+    //!< Unpack the message
     HoleFilters::HolesConveyor conveyor;
-    fromDepthMessageToConveyor(depthCandidateHolesVector, conveyor);
-
-    //!< Unpack the interpolated depth image
     cv::Mat interpolatedDepthImage;
-    MessageConversions::extractImageFromMessageContainer(
-      depthCandidateHolesVector, interpolatedDepthImage,
-      sensor_msgs::image_encodings::TYPE_32FC1);
-
-    //!< Unpack the point cloud
     PointCloudXYZPtr pointCloudXYZ(new PointCloudXYZ);
-    MessageConversions::extractPointCloudXYZFromMessageContainer(
-      depthCandidateHolesVector, pointCloudXYZ);
+
+    unpackDepthMessage(depthCandidateHolesVector, conveyor, pointCloudXYZ,
+      interpolatedDepthImage);
+
 
     //!< check holes for debugging purposes
     HoleFilters::checkHoles(
@@ -189,5 +183,24 @@ namespace vision
       }
       conveyor.outlines.push_back(outlinePoints);
     }
+  }
+
+
+  void HoleFusion::unpackDepthMessage(
+    const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+    HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
+    cv::Mat& interpolatedDepthImage)
+  {
+    //!< Recreate the conveyor
+    fromDepthMessageToConveyor(holesMsg, conveyor);
+
+    //!< Unpack the interpolated depth image
+    MessageConversions::extractImageFromMessageContainer(holesMsg,
+      interpolatedDepthImage,
+      sensor_msgs::image_encodings::TYPE_32FC1);
+
+    //!< Unpack the point cloud
+    MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
+      pointCloudXYZ);
   }
 }

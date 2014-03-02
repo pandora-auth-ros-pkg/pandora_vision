@@ -130,6 +130,9 @@ namespace vision
   void HoleFusionParameters::callback(pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
     uint32_t level)
   {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("HoleFusionParameters callback called");
+    #endif
     HoleFusionParameters::kanny_ratio = config.kanny_ratio;
     HoleFusionParameters::kanny_kernel_size = config.kanny_kernel_size;
     HoleFusionParameters::kanny_low_threshold = config.kanny_low_threshold;
