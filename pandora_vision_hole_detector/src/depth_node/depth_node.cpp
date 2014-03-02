@@ -40,12 +40,12 @@ http://www.asciiflow.com/#Draw5547639148542835085/1967816621
 *
                                        +--------------+
  +-------------------+     +---------->|edge_detection|+----------->+
- |pandora_kinect_node|     |           +--------------+             |     +-----------------------+
+ |    depth_node     |     |           +--------------+             |     +-----------------------+
  +-------------------+     |           +-----------------+          |+--->|morphological_operators|
           +                +---------->|noise_elimination|+-------->|     +-----------------------+
           v                |           +-----------------+          |                 +
        +------+       +--->|           +--------------+             |                 v
-       |kinect|       |    +---------->|blob_detection|+----------->|          +-------------+
+       |depth |       |    +---------->|blob_detection|+----------->|          +-------------+
        +------+       |    |           +--------------+             |          |visualization|
           +           |    |           +----------------------+     |          +-------------+
           v           |    +---------->|bounding_box_detection|+--->|                 +
@@ -60,7 +60,7 @@ http://www.asciiflow.com/#Draw5547639148542835085/1967816621
                                                                                   +-------+
  **/
 
-#include "depth_node/kinect.h"
+#include "depth_node/depth.h"
 
 /**
   @brief Main function of the kinect node
@@ -70,7 +70,7 @@ http://www.asciiflow.com/#Draw5547639148542835085/1967816621
  **/
 int main(int argc, char** argv) {
   srand (time(NULL));
-  ros::init(argc, argv, "KinectNode");
+  ros::init(argc, argv, "DepthNode");
   vision::PandoraKinect pandora_kinect;
   ros::spin();
   return 0;
