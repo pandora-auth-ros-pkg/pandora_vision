@@ -76,20 +76,6 @@ namespace pandora_vision
     _victimDirectionPublisher = 
       _nh.advertise<vision_communications::FaceDirectionMsg>("face_direction", 10);
 
-    //!< Advertise topics for debugging if we are in debug mode
-    if (debugFace)
-    {
-      _faceDetector->isDebugMode = debugFace; 
-      _faceNowPublisher = 
-        image_transport::ImageTransport(_nh).advertise("faceNow", 1);
-      _facePrevPublisher = 
-        image_transport::ImageTransport(_nh).advertise("facePrev", 1);
-      if(skinEnabled)
-      {
-        _faceSkinPublisher = image_transport::ImageTransport(_nh).advertise("faceSkin", 1);
-      }
-    }
-
     //!< Subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
@@ -106,12 +92,12 @@ namespace pandora_vision
     isFaceFrameUpdated = false;
 
     clientInitialize();
-    
-    //!< Create and start faceTimer
-    faceTimer = _nh.createTimer(ros::Duration(faceSparseTime), 
+        
+     //!< Create and start faceTimer
+    faceTimer = _nh.createTimer(ros::Duration(faceTime), 
       &FaceDetection::faceCallback , this);
     faceTimer.start();
-    
+      
     ROS_INFO("[face_node] : Created Face Detection instance");
   }
 
@@ -131,26 +117,16 @@ namespace pandora_vision
   void FaceDetection::getTimerParams()
   {
     //!< Get the FaceDenseTime parameter if available
-    if (_nh.hasParam("faceDenseTime")) {
-      _nh.getParam("faceDenseTime", faceDenseTime);
-      ROS_DEBUG_STREAM("faceDenseTime : " << faceDenseTime);
+    if (_nh.hasParam("faceTime")) {
+      _nh.getParam("faceTime", faceTime);
+      ROS_DEBUG_STREAM("faceTime : " << faceTime);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter faceDenseTime not found. Using Default");
-      faceDenseTime = 0.5;
+      faceTime = 0.5;
     }
 
-    //!< Get the FaceSparseTime parameter if available
-    if (_nh.hasParam("faceSparseTime")) {
-      _nh.getParam("faceSparseTime", faceSparseTime);
-      ROS_DEBUG_STREAM("faceSparseTime : " << faceSparseTime);
-    }
-    else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter faceSparseTime not found. Using Default");
-      faceSparseTime = 1.5;
-    }
   }
 
    /**
@@ -161,14 +137,14 @@ namespace pandora_vision
   void FaceDetection::getGeneralParams()
   {
     packagePath = ros::package::getPath("pandora_vision_face");
-    model_path= packagePath + "/data/model.xml";
+
     //!< Get the faceDummy parameter if available;
     if (_nh.hasParam("faceDummy")) {
       _nh.getParam("faceDummy", faceDummy);
       ROS_DEBUG("faceDummy: %d", faceDummy);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter faceDummy not found. Using Default");
       faceDummy = false;
     }
@@ -179,7 +155,7 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter frameHeight not found. Using Default");
       frameHeight = DEFAULT_HEIGHT;
     }
@@ -190,7 +166,7 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter imageTopic not found. Using Default");
       imageTopic = "/camera_head/image_raw";
     }
@@ -201,7 +177,7 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
     }
@@ -213,38 +189,39 @@ namespace pandora_vision
   **/
   void FaceDetection::getFaceParams()
   {
-    //!< Get the debugFace parameter if available;
-    if (_nh.hasParam("debugFace")) {
-      _nh.getParam("debugFace", debugFace);
-      ROS_DEBUG_STREAM("debugFace : " << debugFace);
-    }
-    else {
-      ROS_DEBUG("[FaceNode] : \
-      Parameter debugFace not found. Using Default");
-      debugFace = true;
-    }
-
+    
     //!< Get the path of haar_cascade xml file if available;
     if (_nh.hasParam("cascadeName")) {
       _nh.getParam("cascadeName", cascadeName);
       ROS_DEBUG_STREAM("cascadeName : " << cascadeName);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter cascadeName not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter cascadeName not found. Using Default");
       std::string temp="/data/haarcascade_frontalface_alt_tree.xml";
       cascadeName.assign(packagePath);
       cascadeName.append(temp);
-
     }
-
+    
+    //!< Get the path of model_path xml file to be loaded
+    if (_nh.hasParam("model_path")) {
+      _nh.getParam("model_path",  model_path);
+      ROS_DEBUG_STREAM(" model_path : " <<  model_path);
+    }
+    else {
+      ROS_DEBUG("[face_node] : \
+        Parameter model_path not found. Using Default");
+            model_path= packagePath + "/data/model.xml";
+    }    
+        
+    
     if (_nh.hasParam("bufferSize")) {
       _nh.getParam("bufferSize", bufferSize);
       ROS_DEBUG_STREAM("bufferSize : " << bufferSize);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter bufferSize not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter bufferSize not found. Using Default");
       bufferSize = 5;
     }
 
@@ -253,8 +230,8 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("skinEnabled : " << skinEnabled);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter skinEnabled not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter skinEnabled not found. Using Default");
       skinEnabled = false;
     }
 
@@ -264,29 +241,27 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("scaleFactor : " << scaleFactor);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter scaleFactor not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter scaleFactor not found. Using Default");
       scaleFactor = 1.1;
     }
 
-    //
     if (_nh.hasParam("mn")) {
       _nh.getParam("mn", mn);
       ROS_DEBUG_STREAM("minimum Neighbors : " << mn);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
-      Parameter mn not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter mn not found. Using Default");
       mn = 5;
     }
 
-    //
     if (_nh.hasParam("minFaceDim")) {
       _nh.getParam("minFaceDim", minFaceDim);
       ROS_DEBUG_STREAM("minFaceDim : " << minFaceDim);
     }
     else {
-      ROS_DEBUG("[faceNode] : \
+      ROS_DEBUG("[face_node] : \
       Parameter minFaceDim not found. Using Default");
       minFaceDim = 70;
     }
@@ -296,8 +271,8 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("skinHist : " << skinHist);
     }
     else {
-      ROS_DEBUG("[FaceNode] : \
-      Parameter skinHist not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter skinHist not found. Using Default");
       std::string temp="/data/histogramms/histogramm_skin.jpg";
       skinHist.assign(packagePath);
       skinHist.append(temp);
@@ -308,8 +283,8 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("wallHist : " << wallHist);
     }
     else {
-      ROS_DEBUG("[FaceNode] : \
-      Parameter wallHist not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter wallHist not found. Using Default");
       std::string temp="/data/histogramms/histogramm_wall.jpg";
       wallHist.assign(packagePath);
       wallHist.append(temp);
@@ -320,8 +295,8 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("wall2Hist : " << wall2Hist);
     }
     else {
-      ROS_DEBUG("[FaceNode] : \
-      Parameter wall2Hist not found. Using Default");
+      ROS_DEBUG("[face_node] : \
+        Parameter wall2Hist not found. Using Default");
       std::string temp="/data/histogramms/histogramm_wall2.jpg";
       wall2Hist.assign(packagePath);
       wall2Hist.append(temp);
@@ -346,7 +321,7 @@ namespace pandora_vision
 
     if (faceFrame.empty() )
     {
-      ROS_ERROR("[faceNode] : \
+      ROS_ERROR("[face_node] : \
       No more Frames or something went wrong with bag file");
       return;
     }
@@ -432,58 +407,36 @@ namespace pandora_vision
   void FaceDetection::createFaceMessage(
   vision_communications::FaceDirectionMsg &faceMessage)
   {
-    //do the detection
+    //!< start the detection process
     int facesNum = _faceDetector->findFaces(extraFrame);
 
-    //if there is a problem with loading, findFaces returns -2
-    if (facesNum == -2) ROS_ERROR( "[faceNode] : Problem with loading Skin images" );
+    //!< if there is a problem with loading, findFaces returns -2
+    if (facesNum == -2) 
+      ROS_ERROR( "[face_node] : Problem with loading Skin images" );
 
-    if (facesNum == 0)
+    if(facesNum == 0)
     {
       ROS_DEBUG_NAMED("Face Callback","Face not found");
     }
-    //send message if faces are found
-    if (facesNum) {
-      ROS_DEBUG_NAMED("Face Callback","Face found");
+    
+    //!< send message if faces are found
+    if (facesNum) 
+    {
       int* facesTable = _faceDetector->getFaceRectTable();
-      //Send a message for every face found in the frame
-      for(int i=0 ; i < facesNum ; i++) {
-
-
-        faceMessage.yaw = ratioX * ( facesTable[i*4] - (double)frameWidth/2 );
-        faceMessage.pitch = -ratioY * ( facesTable[i*4+1] - (double)frameHeight/2 );
+      //!< Send a message for every face found in the frame
+      for(int i=0 ; i < facesNum ; i++) 
+      {
+        faceMessage.yaw = ratioX * ( facesTable[i*4] - 
+          (double)frameWidth/2 );
+        faceMessage.pitch = -ratioY * ( facesTable[i*4+1] - 
+          (double)frameHeight/2 );
         faceMessage.header.frame_id="headCamera";
         faceMessage.probability = _faceDetector->getProbability();
         faceMessage.header.stamp = ros::Time::now();
-        std::cout<<"[FaceNode]:Face found"<<std::endl;
+        ROS_INFO("[face_node]:Face found");
         _victimDirectionPublisher.publish(faceMessage);
       }
       delete facesTable;
-    }
-
-    if (debugFace) {
-
-      cv_bridge::CvImage out_msg_faceNow;
-      out_msg_faceNow.encoding = sensor_msgs::image_encodings::MONO8;
-      out_msg_faceNow.image = _faceDetector->getFaceNow();
-
-      _faceNowPublisher.publish(out_msg_faceNow.toImageMsg());
-
-      cv_bridge::CvImage out_msg_facePrev;
-      out_msg_facePrev.encoding = sensor_msgs::image_encodings::MONO8;
-      out_msg_facePrev.image = _faceDetector->getFacePrev();
-
-      _faceNowPublisher.publish(out_msg_facePrev.toImageMsg());
-
-      if(skinEnabled)
-      {
-        cv_bridge::CvImage out_msg_faceSkin;
-        out_msg_faceSkin.encoding = sensor_msgs::image_encodings::MONO8;
-        out_msg_faceSkin.image = _faceDetector->getFaceSkin();
-
-        _faceNowPublisher.publish(out_msg_faceSkin.toImageMsg());
-      }
-
     }
   }
 
@@ -497,21 +450,12 @@ namespace pandora_vision
 
     curState = newState;
 
-    //check if face detection algorithm should be running now
+    //!< check if face detection algorithm should be running now
     faceNowON=	( curState == state_manager_communications::robotModeMsg::MODE_EXPLORATION) ||
                 ( curState == state_manager_communications::robotModeMsg::MODE_ARM_APPROACH ) ||
                 ( curState == state_manager_communications::robotModeMsg::MODE_DF_HOLD );
 
-    //set the Face Detector Timer period according to the current State
-    if( (curState == state_manager_communications::robotModeMsg::MODE_EXPLORATION) ) {
-      faceTimer.setPeriod( ros::Duration(faceSparseTime) );
-    }
-    if( (curState == state_manager_communications::robotModeMsg::MODE_ARM_APPROACH) ||
-        (curState == state_manager_communications::robotModeMsg::MODE_DF_HOLD) ) {
-      faceTimer.setPeriod( ros::Duration(faceDenseTime) );
-    }
-
-    //shutdown if the robot is switched off
+    //!< shutdown if the robot is switched off
     if (curState == state_manager_communications::robotModeMsg::MODE_TERMINATING) {
       ros::shutdown();
       return;
@@ -528,6 +472,6 @@ namespace pandora_vision
    */
   void FaceDetection::completeTransition(void) 
   {
-    ROS_INFO("[FaceNode] : Transition Complete");
+    ROS_INFO("[Face_node] : Transition Complete");
   }
 }

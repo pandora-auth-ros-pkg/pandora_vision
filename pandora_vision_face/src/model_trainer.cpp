@@ -72,7 +72,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 int main()
 {
    // These vectors hold the images and corresponding labels.
-    vector<Mat> images;
+    vector<cv::Mat> images;
     vector<int> labels;
     // Read in the data. This can fail if no valid
     // input filename is given.
@@ -84,8 +84,11 @@ int main()
         // nothing more we can do
         exit(1);
     }
-    
-    Mat testSample = images[images.size() - 1];
+    int im_width = images[0].cols;
+    int im_height = images[0].rows;
+    std::cout<<"im_width" <<im_width<<std::endl;
+    std::cout<<"im_height" <<im_height<<std::endl;
+    cv::Mat testSample = images[images.size() - 1];
     int testLabel = labels[labels.size() - 1];
     images.pop_back();
     labels.pop_back();
