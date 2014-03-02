@@ -36,6 +36,7 @@
 *********************************************************************/
 
 #include "depth_node/kinect.h"
+#include "message_conversions/message_conversions.h"
 
 namespace vision
 {
@@ -171,7 +172,7 @@ namespace vision
   {
     //!< Extract a PointCloudXYZPtr from the point cloud message
     PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
-    extractPointCloudXYZFromMessage(msg, pointCloudXYZ);
+    MessageConversions::extractPointCloudXYZFromMessage(msg, pointCloudXYZ);
 
     //!< Extract the depth image from the PointCloudXYZPtr
     cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width, CV_32FC1);
@@ -188,61 +189,13 @@ namespace vision
     createCandidateHolesMessage(holes,
       interpolatedDepthImage,
       pointCloudXYZ,
-      depthCandidateHolesMsg);
+      depthCandidateHolesMsg,
+      sensor_msgs::image_encodings::TYPE_32FC1);
 
     //!< Publish the candidate holes message
     _candidateHolesPublisher.publish(depthCandidateHolesMsg);
 
     return;
-  }
-
-
-
-  /**
-    @brief Extracts a PointCloudXYZPtr (see defines.h)
-    from a point cloud message
-    @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
-    cloud message
-    @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
-    @return void
-   **/
-  void PandoraKinect::extractPointCloudXYZFromMessage(
-    const sensor_msgs::PointCloud2ConstPtr& msg,
-    PointCloudXYZPtr& pointCloudXYZ)
-  {
-    PointCloud pointCloud;
-
-    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
-    //!< to pcl::PCLPointCloud2
-    pcl_conversions::toPCL(*msg, pointCloud);
-
-    //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
-    //!< aka PointCloudXYZPtr
-    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
-  }
-
-
-
-  /**
-    @brief Converts a point cloud of type PointCloudXYZPtr to
-    a point cloud of type PointCloud and packs it in a message
-    @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
-    converted
-    @param[out] pointCloud [sensor_msgs::PointCloud2&]
-    The converted point cloud message
-    @return void
-   **/
-  void PandoraKinect::convertPointCloudXYZToMessage(const PointCloudXYZPtr& pointCloudXYZPtr,
-    sensor_msgs::PointCloud2& pointCloudMsg)
-  {
-    PointCloud pointCloud;
-
-    //!< Convert the pcl::PointCloud<pcl::PointXYZ>::Ptr aka PointCloudXYZPtr
-    //!< to pcl::PCLPointCloud2
-    pcl::toPCLPointCloud2(*pointCloudXYZPtr, pointCloud);
-
-    //!< Pack the point cloud to a ROS message
-    pcl_conversions::fromPCL(pointCloud, pointCloudMsg);
   }
 
 
@@ -264,7 +217,8 @@ namespace vision
     const HoleFilters::HolesConveyor& conveyor,
     const cv::Mat& interpolatedDepthImage,
     const PointCloudXYZPtr& pointCloudXYZPtr,
-    vision_communications::DepthCandidateHolesVectorMsg& depthCandidateHolesMsg)
+    vision_communications::DepthCandidateHolesVectorMsg& depthCandidateHolesMsg,
+    const std::string& encoding)
   {
     //!< Fill the vision_communications::DepthCandidateHolesVectorMsg's
     //!< candidateHoles vector
@@ -294,17 +248,20 @@ namespace vision
       depthCandidateHolesMsg.candidateHoles.push_back(holeMsg);
     }
 
+
     //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
     //!< sensor_msgs/PointCloud2 pointCloud
     sensor_msgs::PointCloud2 pointCloudMessage;
-    convertPointCloudXYZToMessage(pointCloudXYZPtr, pointCloudMessage);
+    MessageConversions::convertPointCloudXYZToMessage(pointCloudXYZPtr,
+      pointCloudMessage);
     depthCandidateHolesMsg.pointCloud = pointCloudMessage;
+
 
     //!< Convert the cv::Mat image to a ROS message
     cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
 
     imageMessagePtr->header = pointCloudMessage.header;
-    imageMessagePtr->encoding = sensor_msgs::image_encodings::MONO8;
+    imageMessagePtr->encoding = encoding;
     imageMessagePtr->image = interpolatedDepthImage;
 
     //!< Fill vision_communications::DepthCandidateHolesVectorMsg's

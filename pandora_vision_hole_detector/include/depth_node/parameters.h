@@ -81,10 +81,13 @@ namespace vision
 
     Parameters(void);
 
-    dynamic_reconfigure::Server<vision::kinectConfig> server;
-    dynamic_reconfigure::Server<vision::kinectConfig>::CallbackType f;
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::kinectConfig>
+      server;
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::kinectConfig>::
+      CallbackType f;
 
-    void callback(vision::kinectConfig &config, uint32_t level);
+    void callback(pandora_vision_hole_detector::kinectConfig &config,
+      uint32_t level);
 
     //!< -------------------Parameters-----------------------------//
 

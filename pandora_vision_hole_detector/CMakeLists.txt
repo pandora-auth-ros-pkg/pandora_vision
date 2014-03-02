@@ -109,6 +109,7 @@ target_link_libraries(synchronizer_node
 
 add_dependencies(synchronizer_node
   vision_gencfg
+  vision_communications_gencpp
   ${catkin_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
@@ -126,7 +127,7 @@ add_library(hole_fusion_lib
   src/depth_node/timer.cpp
   src/depth_node/visualization.cpp
 )
-
+  ${catkin_LIBRARIES}
 target_link_libraries(hole_fusion_lib
   ${catkin_LIBRARIES}
 )
@@ -147,6 +148,8 @@ target_link_libraries(hole_fusion_node
 
 add_dependencies(hole_fusion_node
   vision_gencfg
+  vision_communications_gencpp
+${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
@@ -259,7 +262,7 @@ src/hole_fusion_node/rgb_filters.cpp
 
 include/message_conversions.h
 src/message_conversions.cpp
-
+<Merge Conflict>
 
 ## synchronizer_node ##
 
