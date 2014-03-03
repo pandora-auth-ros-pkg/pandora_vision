@@ -37,11 +37,6 @@
 *********************************************************************/
 
 #include "pandora_vision_face/face_detector.h"
-using namespace cv;
-pthread_mutex_t faceFrameLock = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t faceSeqLock = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t detectFeaturesLock = PTHREAD_MUTEX_INITIALIZER;
-//pthread_mutex_t rotDisplayLock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace pandora_vision
 {
@@ -56,7 +51,6 @@ namespace pandora_vision
    * @param bufferSize [int] number of frames in the frame buffer
    * @param skinEnabled [bool] enables the verification 
    *        of face algorithm using the Skin detector
-   * @param scaleFactor [double] scale factor used in cvHaarDetect function
    * @param mn parameter used in cvHaarDetect function
    * @param minFaceDim parameter used in cvHaarDetect function
    * @param skinHist Histogram - parameter to be passed in the Skin Detector
@@ -64,23 +58,18 @@ namespace pandora_vision
    * @param wall2Hist Histogram - parameter to be passed in the Skin Detector
    * @return void
   */
-
-  FaceDetector::FaceDetector(std::string cascadeName,std::string model_path,int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist )
+  FaceDetector::FaceDetector(std::string cascade_path,std::string model_path,
+    int bufferSize, bool skinEnabled, std::string skinHist, 
+    std::string wallHist, std::string wall2Hist )
   {
-    cascade_name.assign(cascadeName);
-    model_path_name.assign(model_path);
-    scale = scaleFactor;
-    //~ std::cout<<"cascade_name "<<cascade_name<<std::endl;
-    //~ std::cout<<"model_path "<<model_path<<std::endl;
-    cascade.load(cascade_name);
+    cascade.load(cascade_path);
     if(cascade.empty())
     {
-      fprintf(stderr, "ERROR: Could not load classifier cascade \n");
+      ROS_ERROR("[Face Detector]: Cannot load cascade classifier");
       exit(0);
     }
 
-    model = createFisherFaceRecognizer();
-
+    model = cv::createFisherFaceRecognizer();
     model->load(model_path);
 
     _bufferSize = bufferSize;
@@ -89,20 +78,13 @@ namespace pandora_vision
     isDebugMode = false;
 
     now = 0;
-    prev = 0;
-
-    dstArray = new cv::Mat[angleNum];
+        
     probability = 1.;
-
 
     if (isSkinDetectorEnabled == true)
     {
       skinDetector = new SkinDetector( skinHist, wallHist, wall2Hist );
     }
-
-    storage_total = cvCreateMemStorage(0);
-    cvClearMemStorage(storage_total);
-
 
   }
 
@@ -110,16 +92,10 @@ namespace pandora_vision
    * Class Destructor
    * Deallocates all memory used for storing sequences of faces,
    * matrices and images
-   */
-
+  */
   FaceDetector::~FaceDetector()
   {
 
-    cvReleaseMemStorage( &storage_total );
-    faces.erase (faces.begin(),faces.begin()+faces.size());
-
-    delete [] dstArray;
-    
     //!< Erase frame and probability buffers
     if (!frame_buffer.empty())
     {
@@ -173,7 +149,8 @@ namespace pandora_vision
     }
     else
     {
-      probability_buffer[now] = round( cv::norm(tmp,cv::NORM_L1,cv::noArray())/ 255.) / (float)totalArea;
+      probability_buffer[now] = round( cv::norm(tmp,cv::NORM_L1,
+        cv::noArray())/ 255.) / (float)totalArea;
     }
     //!< clear value from last scan
     probability = 0.; 
@@ -185,22 +162,21 @@ namespace pandora_vision
     }
     probability = probability / _bufferSize;
 
-    //Compare Probability with Skin Output
+    //!< Compare Probability with Skin Output
     if(isSkinDetectorEnabled )
     {
       std::cout<<"Skin detector enabled"<<std::endl;
       skinDetector->init();
 
-      //when there is a problem with detectSkin() it returns 1
-      //in this case findFaces() returns -2
+      //!< When there is a problem with detectSkin() it returns 1
+      //!<in this case findFaces() returns -2
       if ( skinDetector->detectSkin( frame ) )
       {
         return -2;
       }
-      compareWithSkinDetector(probability, tmp, totalArea);
+      //compareWithSkinDetector(probability, tmp, totalArea);
     }
     now = (now + 1) % _bufferSize; //prepare index for next frame
-
 
     return facesNum;
   }
@@ -264,8 +240,6 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
   skinDetector->deallocateMemory();
 }
 
-  
-
   /**
     @brief Initializes frame and probability buffer
     @param image [cv::Mat] The current frame
@@ -277,7 +251,7 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
     {
       for(int ii=0; ii<_bufferSize; ii++)
       {
-        cv::Mat tmp=Mat::zeros(frame.size().width,frame.size().height,CV_8UC1);
+        cv::Mat tmp= cv::Mat::zeros(frame.size().width,frame.size().height,CV_8UC1);
         frame_buffer.push_back(tmp);
       }
     }
@@ -301,7 +275,6 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
     cv::Rect faceRect;
     cv::Point start;
     cv::Point end;
-    prev = (now + _bufferSize - 1) % _bufferSize; //index of previous frame
     for(int i = 0; i < ( faces_total.size() ? (faces_total.size()) : 0) ; i++)
     {
       faceRect = faces_total.at(i);
@@ -318,233 +291,132 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
     @return 	integer of the sum of faces found in all rotations 
     of the frame.
   */
-  int FaceDetector::findFaces1Frame(cv::Mat frameIN)
+  int FaceDetector::findFaces1Frame(cv::Mat frame)
   {
-   
     float angle[] = { 0, 45, 315, 90, 270 };
 
     int facesNum_total = 0;
-    cv::Rect temp(0,0,0,0);
-    
-    //!< Create number of threads equal to the number of rotating angles
-    pthread_t* thr = new pthread_t[angleNum];
-
-    //!< Allocate space for an array of pointers to structs
-    ThParams** params = new ThParams*[angleNum];
-
-    //! Create a new struct of parameters for each thread and give values to it
+    int faceNum=0;
     for(int i=0 ; i<angleNum ; i++)
     {
-      params[i] = new ThParams;
-      params[i]->frame = frameIN;
-      params[i]->angle = angle[i];
-      params[i]->scale = scale;
-      params[i]->thisObj = this;
-      params[i]->retVal = i;
-      params[i]->cascade = cascade;
+      int facesNum = 0;
+      cv::Mat src(frame.size().width , 
+        frame.size().height,CV_8UC3);
+      src=frame.clone();
+      if(!src.data)
+      {
+        ROS_ERROR("No image data in current thread");
+      }
+      cv::Mat rotated_frame;
+      rotated_frame=frameRotate(src ,angle[i]);
+      if(!rotated_frame.data)
+      {
+        ROS_INFO("Rotated frame is empty");
+      }
+      facesNum = detectFace(rotated_frame);
+      
+      facesNum_total+= facesNum;  
     }
-
-    //!< All threads are created
-    for(int i=0 ; i<angleNum ; i++)
-    {
-      pthread_create( &thr[i], NULL, threadRotateThenDetect , (void*)params[i] );
-    }
-
-    //!< All threads join, summing to the total the number of faces found in each one
-    for(int i=0 ; i<angleNum ; i++)
-    {
-      pthread_join(thr[i], NULL);
-      facesNum_total += params[i]->retVal;
-    }
-
-    for(int i=0; i<angleNum ; i++)
-    {
-      delete params[i];
-    }
-    delete [] params;
-    delete [] thr;
 
     //!< Number of Faces is the sum of all faces found in 
     //!< each rotated frame
     return facesNum_total;
   }
 
-
-
-/********************* getFaceRectTable ************************
- * Type:		PUBLIC
- * Description: Creates the continuous table of faces found that
- * 				contains information for each face in every set
- * 				of 4 values:
- * 					table[i*4]		=	face #i position x center
- * 				  	table[i*4+1]	=	face #i position y center
- * 					table[i*4+2]	=	face #i rectangle width
- * 					table[i*4+3]	=	face #i rectangle height
- * @return 		int[] table of face positions and sizes
- ***************************************************************/
-
-int* FaceDetector::getFaceRectTable()
-{
-  cv::Rect faceRect;
-  int* table = new int[ 4*faces_total.size() ];
-  for(int i = 0; i < faces_total.size(); i++)
+  /**
+    @brief Creates the continuous table of faces found that contains
+    information for each face in every set of 4 values:
+    table[i*4]		=	face #i position x center
+    table[i*4+1]	=	face #i position y center
+    table[i*4+2]	=	face #i rectangle width
+    table[i*4+3]	=	face #i rectangle height
+    @return int[] table of face positions and sizes
+  */
+  int* FaceDetector::getFacePositionTable()
   {
-    faceRect = faces_total.at(i);
-    table[i*4]   = round( faceRect.x + faceRect.width*0.5 ); //face center x
-    table[i*4+1] = round( faceRect.y + faceRect.height*0.5 ); //face center y
-    table[i*4+2] = faceRect.width; //width
-    table[i*4+3] = faceRect.height; //height
-
-    //Debug:
-    //cout << table[i*4] << " ";
-    //cout << table[i*4+1] << " ";
-    //cout << table[i*4+2] << " ";
-    //cout << table[i*4+3] << endl;
+    cv::Rect faceRect;
+    int* table = new int[ 4*faces_total.size() ];
+    for(int ii = 0; ii < faces_total.size(); ii++)
+    {
+      faceRect = faces_total.at(ii);
+      
+      //!< Face center_x
+      table[ii*4]   = round( faceRect.x + faceRect.width*0.5 ); 
+      
+      //!< Face center_y
+      table[ii*4+1] = round( faceRect.y + faceRect.height*0.5 ); 
+      
+      //!< Face width
+      table[ii*4+2] = faceRect.width;
+      
+      //!< Face height
+      table[ii*4+3] = faceRect.height;
+    }
+    return table;
+  }
+  
+  /**
+    @brief Returns the size of the table with the positions of the 
+    faces found
+    @return [int] size of table
+  */
+  int FaceDetector::getFaceTableSize()
+  {
+    return 4*faces_total.size();
   }
 
-  return table;
-}
-
-
-
-/***************** getFaceRectTableSize ********************
- * Type:		PUBLIC
- * Description: Returns the size of the table returned by
- * 				routine	getFaceRectTable.
- * @return 		integer size of table
- ***********************************************************/
-
-int FaceDetector::getFaceRectTableSize()
-{
-  return 4*faces_total.size();
-}
-
-
-
-/******************* getProbability ************************
- * Type:		PUBLIC
- * Description: Returns the probability of the faces de-
- * 				tected in the frame, calculated considering
- * 				the consistency in the last frames and (if
- * 				enabled) the relation with SkinDetector
- * 				output.
- * @return 		float probability value
- ***********************************************************/
-
-float FaceDetector::getProbability()
-{
-  return probability;
-}
-
-cv::Mat FaceDetector::getFaceNow() {
-  return faceNow;
-}
-
-cv::Mat FaceDetector::getFacePrev() {
-  return facePrev;
-}
-cv::Mat FaceDetector::getFaceSkin() {
-  return skinImg;
-}
+  /**
+    @brief Returns the probability of the faces detected in the frame
+    @return [float] probability value
+  */
+  float FaceDetector::getProbability()
+  {
+    return probability;
+  }
    
   /**
-    @brief Represents one thread. The rotation and face detection are 
-      threaded, each tread working in one value of the angle parameter.
-    @param void pointer that will be the arguments of the
-      thread. A pointer to struct ThParams is used for this reason.
-    @return void
+    @brief Calls detectMultiscale to scan frame for faces and drawFace 
+      to create rectangles around the faces found in each frame
+    @param frame [cv::Mat] the frame to be scaned.
+    @param cascade [cv::CascadeClassifier] the classifier used for 
+      detection
+    @param	angle [float] the rotation angle
+    @return [int] the number of faces found in each frame
   */
-  void* FaceDetector::threadRotateThenDetect(void* arg)
+  int FaceDetector::detectFace(cv::Mat img)
   {
    
-    int facesNum = 0;
-    ThParams* params;
-    params = (ThParams*)arg;
+    cv::Mat original(img.size().width,img.size().height,CV_8UC1);
+    original = img.clone();
+    cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
+    cvtColor(original, gray, CV_BGR2GRAY);
+    std::vector< cv::Rect_<int> > thrfaces;
+    int im_width = 92;
+    int im_height = 112;
 
-    pthread_mutex_lock( &faceFrameLock );
-    cv::Mat src(params->frame.size().width , 
-      params->frame.size().height,CV_8UC3);
-    
-    src=params->frame.clone();
-    if(!src.data)
+    if(!cascade.empty())
     {
-      ROS_ERROR("No image data in current thread");
+      //!< Find the faces in the frame:
+      cascade.detectMultiScale(gray, thrfaces);
+      for(int i = 0; i < (thrfaces.size() ? thrfaces.size() : 0); i++)
+      {
+        //!< Process face by face:
+        cv::Rect face_i = thrfaces[i];
+        cv::Mat face = gray(face_i);
+        cv::Mat face_resized;
+        cv::resize(face, face_resized, cv::Size(im_width, im_height), 1.0, 1.0, cv::INTER_CUBIC);
+        int prediction = model->predict(face_resized);
+        ROS_INFO_STREAM("Prediction " <<prediction);
+        rectangle(original, face_i, CV_RGB(0, 255,0), 1);
+        //!< Add every element created for each frame, to the total amount of faces
+        faces_total.push_back (thrfaces.at(i));
+      }
     }
-    pthread_mutex_unlock( &faceFrameLock );
+    int res = thrfaces.size();
+    thrfaces.erase (thrfaces.begin(),thrfaces.begin()+thrfaces.size());
+    return res;
 
-    params->dst = params->thisObj->frameRotate(src , params->angle);
-    if(!params->dst .data)
-    {
-      std::cout<<"No image data"<<std::endl;
-    }
-
-    //pthread_mutex_lock( &faceSeqLock );
-    facesNum = params->thisObj->detectFace(params->dst,params->cascade, params->angle);
-    //1.1 , 3 , CV_HAAR_DO_CANNY_PRUNING , cvSize(40, 40)
-    //pthread_mutex_unlock( &faceSeqLock );
-
-
-    params->retVal = facesNum;
-    //terminates the calling thread
-    pthread_exit(NULL);
   }
-
-
-
-/********************** detectFace *************************
- * Type:		PRIVATE
- * Description: Called by findfaces()
- * 				calls cvHaarDetectObjects to scan frame for
- * 				faces, and drawFace to create rectangles a-
- * 				round the face/faces found in each frame.
- *
- * detectMultiScale is called!!!face detection happens now!
- */
-int FaceDetector::detectFace(cv::Mat img,cv::CascadeClassifier cascade,float angle)
-{
- 
-  cv::Mat original(img.size().width,img.size().height,CV_8UC1);
-  original = img.clone();
-  cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
-  cvtColor(original, gray, CV_BGR2GRAY);
-  vector< Rect_<int> > thrfaces;
-  int im_width = 92;
-  int im_height = 112;
-
-  if(!cascade.empty())
-  {
-
-    // Find the faces in the frame:
-    pthread_mutex_lock( &detectFeaturesLock );
-
-    cascade.detectMultiScale(gray, thrfaces);
-    for(int i = 0; i < (thrfaces.size() ? thrfaces.size() : 0); i++)
-    {
-      // Process face by face:
-      cv::Rect face_i = thrfaces[i];
-      cv::Mat face = gray(face_i);
-      cv::Mat face_resized;
-      cv::resize(face, face_resized, Size(im_width, im_height), 1.0, 1.0, INTER_CUBIC);
-      int prediction = model->predict(face_resized);
-      std::cout<<"Prediction"<<prediction<<std::endl;
-      rectangle(original, face_i, CV_RGB(0, 255,0), 1);
-      cv_bridge::CvImage faceMSg;
-
-      faceMSg.encoding  = sensor_msgs::image_encodings::MONO8;
-      faceMSg.image = original.clone();
-      //~ _facePublisher.publish(  faceMSg.toImageMsg());
-      pthread_mutex_lock( &faceSeqLock );
-      //add every element created for each frame, to the total amount of faces
-      faces_total.push_back (thrfaces.at(i));
-      pthread_mutex_unlock( &faceSeqLock );
-    }
-  }
-  int res = thrfaces.size();
-  thrfaces.erase (thrfaces.begin(),thrfaces.begin()+thrfaces.size());
-  pthread_mutex_unlock( &detectFeaturesLock );
-  return res;
-
-}
 
   /**
     @brief Rotates input frame according to the given angle
@@ -563,11 +435,11 @@ int FaceDetector::detectFace(cv::Mat img,cv::CascadeClassifier cascade,float ang
     
     //!< Calculate rotation matrix
     cv::Mat matRotation = getRotationMatrix2D(
-      cv::Point( iImageCenterX, iImageCenterY ), (thAngle - 180), 1 );
+      cv::Point( iImageCenterX, iImageCenterY ), (thAngle - 180), 1.1 );
   
     cv::Mat rotated_frame;
     cv::warpAffine( frame, rotated_frame, matRotation, rotated_frame.size() );
-
+    
     return rotated_frame;
   }
 

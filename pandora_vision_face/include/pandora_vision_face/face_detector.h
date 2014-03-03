@@ -33,19 +33,14 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Author: Aprilis George
-* 		  Despoina Paschalidou
+* 		    Despoina Paschalidou
 *********************************************************************/
 
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
 #include <math.h>
-#include <cstdlib>
-#include <cstdio>
 #include <iostream>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -61,45 +56,16 @@
 
 namespace pandora_vision 
 {
-  
   class FaceDetector
   {
     private:
     
       SkinDetector* skinDetector;
-      CvMemStorage* storage_total;
-
+      
       std::vector<std::vector<cv::Rect_<int> > > faces;
       
       std::vector<cv::Rect_<int> > faces_total;
-      
-      cv::CascadeClassifier	cascade;	
-          
-      std::string cascade_name;
-      std::string model_path_name;
-      
-      //parameters used in cvHaarDetectObjects functions:
-      double scale;
-      int	minNeighbors;
-      cv::Size minFaceSize;
-      cv::Size maxFaceSize; 
-      
-      cv::Mat* dstArray;
-      
-      //!< Struct used to pass multiple parameters in different threads		
-      typedef struct
-        {
-          cv::Mat	frame;
-          float	angle;
-          double scale;
-          int	minNeighbors;
-          cv::Size minFaceSize;
-          FaceDetector* thisObj;
-          cv::Mat	dst;
-          int	retVal;
-          cv::CascadeClassifier	cascade;
-        } ThParams;
-      
+  
       //!< If enabled SkinDetector output, is also considered in
       //!< probability value
       bool isSkinDetectorEnabled;	 
@@ -109,8 +75,11 @@ namespace pandora_vision
       //!< Number of rotation angles						
       int angleNum;			
       
-      int	now, prev; 				//circular buffer iterators
-      float	probability;			//total probability of face found
+      int	now;
+      
+      cv::Mat skinImg;
+      //!< Total probability of face found in a frame 
+      float	probability;		
       
       //!< Image buffer used to store frames
       std::vector<cv::Mat> frame_buffer;
@@ -120,16 +89,10 @@ namespace pandora_vision
       //!< consistency in last _bufferSize frames
       std::vector<float> probability_buffer;	
       
-      //debug images:
-      cv::Mat 					skinImg;
-      cv::Mat 					faceNow;
-      cv::Mat 					facePrev;
-      //These vectors hold the images and corresponding labels:
-      std::vector<cv::Mat> images;
-      std::vector<int> labels;
-      int imageWidth;
-      int imageHeight;
-      image_transport::Publisher _facePublisher;	
+      //!< Cascade classifier for face detection
+      cv::CascadeClassifier	cascade;      
+      
+      //!<Trained model for face detection
       cv::Ptr<cv::FaceRecognizer> model;
       
       /**
@@ -139,12 +102,36 @@ namespace pandora_vision
       */
       void initFrameProbBuffers(cv::Mat frame);
       
+      /**
+        @brief Rotates the given frame in 5 main angles and
+          searches for faces in each rotated frame.
+        @param frameIN [cv::Mat] The frame to be scanned for faces
+        @return 	integer of the sum of faces found in all rotations 
+          of the frame.
+      */
+      int	findFaces1Frame(cv::Mat frame);	
+      
+      /**
+        @brief Calls detectMultiscale to scan frame for faces and drawFace 
+          to create rectangles around the faces found in each frame
+        @param frame [cv::Mat] the frame to be scaned.
+        @param cascade [cv::CascadeClassifier] the classifier used for 
+          detection
+        @param	angle [float] the rotation angle
+        @return [int] the number of faces found in each frame
+      */
+      int detectFace(cv::Mat img);
+      
+      void 			createRectangles(cv::Mat tmp);
+      void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
+      
     public:
       //debug switch - webNode changes it externally:
       bool						isDebugMode;
       
       //!< The Constructor
-      FaceDetector(std::string cascadePath,std::string model_path, int bufferSize, bool skinEnabled, double scaleFactor, std::string skinHist, std::string wallHist, std::string wall2Hist);
+      FaceDetector(std::string cascade_path,std::string model_path, 
+        int bufferSize, bool skinEnabled, std::string skinHist, std::string wallHist, std::string wall2Hist);
       
       //!< The Destructor
       virtual ~FaceDetector();
@@ -154,22 +141,33 @@ namespace pandora_vision
         @param image [cv::Mat] The  current frame
         @return number [int] of faces found in current frame
       **/
-      int findFaces(cv::Mat frame );			
-      
-      int	findFaces1Frame(cv::Mat frameIN );	//Normal Implementation, probability of each face equals 1
-      int* 	getFaceRectTable();
-      int	getFaceRectTableSize();
-      float	getProbability();
-      cv::Mat getFaceNow();		//Debug image getter
-      cv::Mat getFacePrev();	//Debug image getter
-      cv::Mat getFaceSkin();	//Debug image getter
-
-    private:
-      
-      static void* 	threadRotateThenDetect( void* arg );	//the actual job being done by each different thread
-      int detectFace(cv::Mat img,cv::CascadeClassifier cascade, float angle);
+      int findFaces(cv::Mat frame);			
       
       /**
+        @brief Creates the continuous table of faces found that contains
+        information for each face in every set of 4 values:
+        table[i*4]		=	face #i position x center
+        table[i*4+1]	=	face #i position y center
+        table[i*4+2]	=	face #i rectangle width
+        table[i*4+3]	=	face #i rectangle height
+        @return int[] table of face positions and sizes
+      */
+      int* 	getFacePositionTable();
+      
+      /**
+        @brief Returns the size of the table with the positions of the 
+        faces found
+        @return [int] size of table
+      */
+      int	getFaceTableSize();
+      
+      /**
+        @brief Returns the probability of the faces detected in the frame
+        @return [float] probability value
+      */
+      float	getProbability();
+      
+       /**
         @brief Rotates input frame according to the given angle
         @param frame [cv::Mat] the frame to be rotated.
         @param thAngle [int] angle in degrees (angle>=0)
@@ -179,12 +177,7 @@ namespace pandora_vision
           matrix values produces for this rotation (this function feels the values)
         @return the frame rotated
       */
-      cv::Mat frameRotate( cv::Mat frame, float angle);	
-      
-      
-      void 			createRectangles(cv::Mat tmp);
-      void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
-      
+      cv::Mat frameRotate( cv::Mat frame, float angle);	      
   };
 }
 #endif

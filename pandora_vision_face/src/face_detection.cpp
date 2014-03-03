@@ -65,7 +65,7 @@ namespace pandora_vision
 
     //!< Initialize face detector
     _faceDetector =	new FaceDetector(cascadeName,model_path, bufferSize, 
-      skinEnabled, scaleFactor, skinHist, wallHist, wall2Hist);
+      skinEnabled,skinHist, wallHist, wall2Hist);
 
     //!< Memory will allocated in the imageCallback
     faceFrame= cv::Mat::zeros(frameWidth,frameHeight,CV_8UC3);
@@ -84,13 +84,7 @@ namespace pandora_vision
     //!< Initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState =state_manager_communications::robotModeMsg::MODE_OFF;
-
-    //!< Initialize mutex lock
-    pthread_mutex_init ( &faceLock, NULL);
-
-    //!< Initialize flag used to sync the callbacks
-    isFaceFrameUpdated = false;
-
+    
     clientInitialize();
         
      //!< Create and start faceTimer
@@ -235,37 +229,6 @@ namespace pandora_vision
       skinEnabled = false;
     }
 
-
-    if (_nh.hasParam("scaleFactor")) {
-      _nh.getParam("scaleFactor", scaleFactor);
-      ROS_DEBUG_STREAM("scaleFactor : " << scaleFactor);
-    }
-    else {
-      ROS_DEBUG("[face_node] : \
-        Parameter scaleFactor not found. Using Default");
-      scaleFactor = 1.1;
-    }
-
-    if (_nh.hasParam("mn")) {
-      _nh.getParam("mn", mn);
-      ROS_DEBUG_STREAM("minimum Neighbors : " << mn);
-    }
-    else {
-      ROS_DEBUG("[face_node] : \
-        Parameter mn not found. Using Default");
-      mn = 5;
-    }
-
-    if (_nh.hasParam("minFaceDim")) {
-      _nh.getParam("minFaceDim", minFaceDim);
-      ROS_DEBUG_STREAM("minFaceDim : " << minFaceDim);
-    }
-    else {
-      ROS_DEBUG("[face_node] : \
-      Parameter minFaceDim not found. Using Default");
-      minFaceDim = 70;
-    }
-
     if (_nh.hasParam("skinHist")) {
       _nh.getParam("skinHist", skinHist);
       ROS_DEBUG_STREAM("skinHist : " << skinHist);
@@ -311,9 +274,6 @@ namespace pandora_vision
    */
   void FaceDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-   
-    int res = -1;
-    
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg,sensor_msgs::image_encodings::BGR8);
     faceFrame= in_msg->image.clone();
@@ -324,17 +284,6 @@ namespace pandora_vision
       ROS_ERROR("[face_node] : \
       No more Frames or something went wrong with bag file");
       return;
-    }
-
-    //!< Try to lock face variables
-    res = pthread_mutex_trylock(&faceLock);
-
-    //!< If lock was successful: update frame, set boolean and unlock
-    if(res == 0)
-    {
-      extraFrame=faceFrame.clone();
-      isFaceFrameUpdated = true;
-      pthread_mutex_unlock(&faceLock);
     }
   }
   /**
@@ -365,12 +314,6 @@ namespace pandora_vision
     {
       createFaceMessage(faceMessage);
     }
-
-    //!<reset the flag
-    isFaceFrameUpdated = false;
-    
-    //!< Unlock before leaving
-    pthread_mutex_unlock(&faceLock);
 }
   /**
    * @brief This method creates a message for debbuging reasons
@@ -422,7 +365,7 @@ namespace pandora_vision
     //!< send message if faces are found
     if (facesNum) 
     {
-      int* facesTable = _faceDetector->getFaceRectTable();
+      int* facesTable = _faceDetector->getFacePositionTable();
       //!< Send a message for every face found in the frame
       for(int i=0 ; i < facesNum ; i++) 
       {
