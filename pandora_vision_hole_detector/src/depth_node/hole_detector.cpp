@@ -168,34 +168,34 @@ namespace vision
 
     //!< Since not all blobs are holes, sift blobs according to known properties
     //!< of holes in 3D space
-/*
- *    HoleFilters::checkHoles(
- *        interpolatedDepthImage,
- *        initialPointCloud,
- *        conveyor);
- *
- *
- *    #ifdef DEBUG_SHOW
- *    if(DepthParameters::debug_show_find_holes) // Debug
- *    {
- *      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
- *      msg += STR(" : Final keypoints");
- *      msgs.push_back(msg);
- *      imgs.push_back(
- *        Visualization::showKeypoints(
- *          msg,
- *          interpolatedDepthImage,
- *          -1,
- *          conveyor.keyPoints)
- *      );
- *    }
- *    if(DepthParameters::debug_show_find_holes)
- *    {
- *      Visualization::multipleShow("findHoles function",imgs,msgs,
- *        DepthParameters::debug_show_find_holes_size,1);
- *    }
- *    #endif
- */
+    /*
+     *HoleFilters::checkHoles(
+     *    interpolatedDepthImage,
+     *    initialPointCloud,
+     *    conveyor);
+     */
+
+
+    #ifdef DEBUG_SHOW
+    if(DepthParameters::debug_show_find_holes) // Debug
+    {
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Keypoints sent to hole_fusion");
+      msgs.push_back(msg);
+      imgs.push_back(
+        Visualization::showKeypoints(
+          msg,
+          interpolatedDepthImage,
+          -1,
+          conveyor.keyPoints)
+      );
+    }
+    if(DepthParameters::debug_show_find_holes)
+    {
+      Visualization::multipleShow("findHoles function",imgs,msgs,
+        DepthParameters::debug_show_find_holes_size,1);
+    }
+    #endif
 
     //-------------------------------------------//
     //~ cv::Mat tempMat;

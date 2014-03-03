@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/planes_detection.h"
+#include "hole_fusion_node/planes_detection.h"
 
-namespace vision{
-
+namespace vision
+{
   /**
     @brief Identify the planes in a point cloud and return the number of
     detected planes.
@@ -70,12 +70,12 @@ namespace vision{
     std::vector<pcl::ModelCoefficients> coefficientsVectorOut;
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
-    if (DepthParameters::segmentation_method == 0)
+    if (HoleFusionParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
           planesVectorOut, coefficientsVectorOut, inliersVector);
     }
-    else if (DepthParameters::segmentation_method == 1)
+    else if (HoleFusionParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
           planesVectorOut, coefficientsVectorOut, inliersVector);
@@ -140,12 +140,12 @@ namespace vision{
 
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
-    if (DepthParameters::segmentation_method == 0)
+    if (HoleFusionParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, inliersVector);
     }
-    else if (DepthParameters::segmentation_method == 1)
+    else if (HoleFusionParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, inliersVector);
@@ -156,6 +156,8 @@ namespace vision{
     // << " sec."
     // << std::endl;
   }
+
+
 
   /**
     @brief Locates planes using the SACS segmentation
@@ -189,12 +191,12 @@ namespace vision{
       //!< Mandatory
       seg.setModelType (pcl::SACMODEL_PLANE);
       seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setMaxIterations (DepthParameters::max_iterations);
+      seg.setMaxIterations (HoleFusionParameters::max_iterations);
 
       //!< Maybe a value needs to be set dynamically here, depending on
       //!< the distance of the kinect to the plane.
       seg.setDistanceThreshold(
-        DepthParameters::point_to_plane_distance_threshold);
+        HoleFusionParameters::point_to_plane_distance_threshold);
 
       //!< Create the filtering object
       pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -211,7 +213,7 @@ namespace vision{
       //!< While 100 x num_points_to_exclude % of the original
       //!< cloud is still there
       while (cloudIn->points.size () >
-          DepthParameters::num_points_to_exclude * nr_points)
+          HoleFusionParameters::num_points_to_exclude * nr_points)
       {
         //!< Segment the largest planar component from the remaining cloud
         seg.setInputCloud (cloudIn);
@@ -265,7 +267,6 @@ namespace vision{
         }
       }
 
-
       planesVectorOut = cloud_ps;
       coefficientsVectorOut = coefficientsVector;
       inliersVectorOut = inliersVector;
@@ -314,12 +315,12 @@ namespace vision{
     seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
     seg.setNormalDistanceWeight(0.01);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (DepthParameters::max_iterations);
+    seg.setMaxIterations (HoleFusionParameters::max_iterations);
 
     //!< Maybe a value needs to be set dynamically here,
     //!< depending on the distance of the kinect to the plane.
     seg.setDistanceThreshold(
-      DepthParameters::point_to_plane_distance_threshold);
+      HoleFusionParameters::point_to_plane_distance_threshold);
 
     //!< Create the filtering object
     pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -343,7 +344,7 @@ namespace vision{
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >
-        DepthParameters::num_points_to_exclude * nr_points)
+        HoleFusionParameters::num_points_to_exclude * nr_points)
     {
       //!< Segment the largest planar component from the
       //!< remaining cloud
@@ -395,7 +396,6 @@ namespace vision{
 
       i++;
 
-
        //!< If the number of planes found so far exceeds the number one,
        //!< return. We are only interested in holes that lie on one plane.
 
@@ -421,10 +421,9 @@ namespace vision{
     @param[in] cloudIn [const PointCloudXYZPtr&] The point cloud to filter
     @return PointCloudXYZPtr A pointer to the filtered cloud
    **/
-  PointCloudXYZPtr PlanesDetection::applyVoxelGridFilter
-    (const PointCloudXYZPtr& cloudIn)
-    {
-
+  PointCloudXYZPtr PlanesDetection::applyVoxelGridFilter(
+    const PointCloudXYZPtr& cloudIn)
+  {
     PointCloudXYZPtr cloudOut (new PointCloudXYZ());
 
     pcl::VoxelGrid <pcl::PointXYZ> sor;

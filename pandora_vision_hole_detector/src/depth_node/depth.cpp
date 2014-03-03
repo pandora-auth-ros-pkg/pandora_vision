@@ -62,6 +62,8 @@ namespace vision
     //!< Advertise the point cloud's planes
     _planePublisher = _nodeHandle.advertise<PointCloudXYZ>
       ("/vision/kinect/planes", 1000);
+
+    ROS_INFO("Depth node initiated");
   }
 
 
@@ -70,7 +72,10 @@ namespace vision
     @brief Default destructor
     @return void
    **/
-  PandoraKinect::~PandoraKinect(void) {}
+  PandoraKinect::~PandoraKinect(void)
+  {
+    ROS_INFO("Depth node terminated");
+  }
 
 
 

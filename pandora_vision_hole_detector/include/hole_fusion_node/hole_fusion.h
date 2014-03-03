@@ -39,13 +39,12 @@
 #define HOLE_FUSION_H
 
 #include <std_msgs/Empty.h>
-#include <depth_node/defines.h>
-#include "hole_fusion_node/hole_fusion_parameters.h"
-#include "depth_node/depth_parameters.h"
-#include "depth_node/hole_filters.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
 #include "message_conversions/message_conversions.h"
-
+#include <depth_node/defines.h>
+#include "depth_node/depth_parameters.h"
+#include "hole_fusion_node/depth_filters.h"
+#include "hole_fusion_node/hole_fusion_parameters.h"
 /**
   @namespace vision
   @brief The main namespace for PANDORA vision
@@ -59,8 +58,9 @@ namespace vision
       //!< The ROS node handle
       ros::NodeHandle nodeHandle_;
 
+      //!< The parameters needed for the hole fusion node
       HoleFusionParameters params;
-      DepthParameters  kparams;
+
       //!< The ROS publisher that will be used for unlocking the
       //!< synchronizer_node
       ros::Publisher unlockPublisher_;

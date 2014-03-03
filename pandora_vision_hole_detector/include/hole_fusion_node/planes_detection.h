@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_PLANES_DETECTION
-#define KINECT_PLANES_DETECTION
+#ifndef PLANES_DETECTION_H
+#define PLANES_DETECTION_H
 
-#include "depth_node/morphological_operators.h"
+#include "hole_fusion_node/hole_fusion_parameters.h"
 
 /**
   @namespace vision

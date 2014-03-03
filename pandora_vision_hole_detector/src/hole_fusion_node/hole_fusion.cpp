@@ -104,7 +104,7 @@ namespace vision
 
 
     //!< check holes for debugging purposes
-    HoleFilters::checkHoles(
+    DepthFilters::checkHoles(
       interpolatedDepthImage,
       pointCloudXYZ,
       conveyor);
