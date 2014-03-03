@@ -60,17 +60,27 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
         string error_message = "No valid input file was given, please check the given filename.";
         CV_Error(CV_StsBadArg, error_message);
     }
-    string line, path, classlabel;
+    std::string line, url, path, classlabel;
     while (getline(file, line)) {
-        stringstream liness(line);
-        getline(liness, path, separator);
-        getline(liness, classlabel);
+        std::stringstream liness(line);
+        std::getline(liness, url, separator);
+        std::getline(liness, path, separator);
+        std::getline(liness, classlabel);
         
         boost::filesystem::path linePath(path);
+        boost::filesystem::path abs;
+        
+        abs = boost::filesystem::absolute(linePath, filePath.parent_path());
+        
+        if (!boost::filesystem::exists(path)) {
+          ROS_WARN("File not found, downloading now...");
+          std::string cmd = "wget " + url + " --no-check-certificate -nH --cut-dirs=3 --directory-prefix=" +
+              abs.parent_path().string();
+          system(cmd.c_str());
+        }
         
         if(!path.empty() && !classlabel.empty()) {
-            images.push_back(imread(boost::filesystem::absolute(linePath, 
-                                    filePath.parent_path()).string(), 0));
+            images.push_back(imread(abs.string(), 0));
             labels.push_back(atoi(classlabel.c_str()));
         }
     }
@@ -83,6 +93,9 @@ int main()
     vector<int> labels;
     // Read in the data. This can fail if no valid
     // input filename is given.
+    
+    std::string path_to_images = ros::package::getPath("pandora_vision_face") + "att_faces";
+    
     std::string fn_csv = ros::package::getPath("pandora_vision_face") + "/data/csv.ext";
     try {
         read_csv(fn_csv, images, labels);
@@ -93,8 +106,8 @@ int main()
     }
     int im_width = images[0].cols;
     int im_height = images[0].rows;
-    std::cout<<"im_width" <<im_width<<std::endl;
-    std::cout<<"im_height" <<im_height<<std::endl;
+    std::cout<<"im_width = " <<im_width<<std::endl;
+    std::cout<<"im_height = " <<im_height<<std::endl;
     cv::Mat testSample = images[images.size() - 1];
     int testLabel = labels[labels.size() - 1];
     images.pop_back();
