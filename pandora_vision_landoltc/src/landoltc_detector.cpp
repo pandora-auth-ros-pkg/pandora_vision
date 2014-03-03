@@ -35,21 +35,9 @@
 * Author: Victor Daropoulos
 *********************************************************************/
 
+#include "pandora_vision_landoltc/landoltc_detector.h"
 
-#include "pandora_vision_landoltc/landoltc_detection.h"
-
-/**
-@brief Main function of the landoltC node
-@param argc [int] Number of input arguments
-@param argv [char**] The input arguments
-@return int : 0 for success
-**/
-
-int main(int argc, char** argv) 
+namespace pandora_vision
 {
-
-  ros::init(argc, argv, "landoltc_node");
-  pandora_vision::LandoltCDetection landoltc_finder;  
-  ros::spin();
-  return 0;
-}
+  
+} 
