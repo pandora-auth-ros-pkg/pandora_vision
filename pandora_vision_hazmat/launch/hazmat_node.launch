@@ -4,10 +4,7 @@
 			<node name="hazmat_node" type="hazmat_node" pkg="pandora_vision_hazmat" respawn="False" output="screen" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
-			<!-- Package Path /-->
-			<param name="/vision/packagepath" value="$(find pandora_vision_hazmat)" />
-
-            <!-- Locate general_params_launcher /-->
+      <!-- Locate general_params_launcher /-->
 			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />		
 
 			<!-- **************** /-->
