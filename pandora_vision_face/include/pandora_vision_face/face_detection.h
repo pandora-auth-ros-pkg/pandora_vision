@@ -103,8 +103,6 @@ namespace pandora_vision
       //!< The topic subscribed to for the camera
       std::string imageTopic;
       
-      bool isFaceFrameUpdated;	
-      
       //!< time durations for every callback Timer 
       double faceTime;
       
@@ -121,19 +119,13 @@ namespace pandora_vision
       //!< Variable used for State Managing
       bool faceNowON;
       
-      //!< Mutex lock needed to prevent conflicts between
-      //!< updating face frame and using it for face detection
-      pthread_mutex_t	faceLock;
-      
+  
       //!< parameters for the FaceDetector:
       std::string cascadeName;
       std::string model_path;
       int bufferSize;
       bool skinEnabled; 
-      double scaleFactor; 
-      int mn;
-      int minFaceDim;
-      
+   
       //!< Paths for Skin Detector
       std::string skinHist;
       std::string wallHist;
