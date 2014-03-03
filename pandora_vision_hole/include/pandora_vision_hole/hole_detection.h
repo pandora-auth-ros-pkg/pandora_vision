@@ -78,8 +78,8 @@ private:
 
   float ratioX;
   float ratioY;
-  float hfov;			//horizontal Field Of View (rad)
-  float vfov;			//vertical Field Of View (rad)
+  double hfov;			//horizontal Field Of View (rad)
+  double vfov;			//vertical Field Of View (rad)
   int frameNum;		//current frame id
   int frameWidth;		//frame width
   int frameHeight;	//frame height

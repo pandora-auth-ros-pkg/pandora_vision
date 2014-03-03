@@ -12,7 +12,7 @@
 
   <include file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
   <include file="$(find pandora_vision_landoltc)/landoltc_node.launch" />
-  <include file="$(find pandora_vision_motion)/motion_node.launch" />
+  <include file="$(find pandora_vision_motion)/launch/motion_node.launch" />
 
   <include file="$(find pandora_vision_face)/launch/face_node.launch" />
 

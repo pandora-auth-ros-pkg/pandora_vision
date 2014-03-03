@@ -97,55 +97,75 @@ MotionDetection::~MotionDetection()
  */
 void MotionDetection::getGeneralParams()
 {
-	// Get the motionDummy parameter if available;
-	if (_nh.hasParam("motionDummy")) {
-		_nh.getParam("motionDummy", motionDummy);
-		ROS_DEBUG("motionDummy: %d", motionDummy);
-	}
-	else {
-		ROS_DEBUG("[motion_node] : Parameter motionDummy not found. Using Default");
-		motionDummy = false;
-	}
+  // Get the motionDummy parameter if available;
+  if (_nh.hasParam("motionDummy")) {
+    _nh.getParam("motionDummy", motionDummy);
+    ROS_DEBUG("motionDummy: %d", motionDummy);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter motionDummy not found. Using Default");
+    motionDummy = false;
+  }
+  
+  // Get the debugMotion parameter if available;
+  if (_nh.hasParam("debugMotion")) {
+    _nh.getParam("debugMotion", debugMotion);
+    ROS_DEBUG_STREAM("debugMotion : " << debugMotion);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter debugMotion not found. Using Default");
+    debugMotion = true;
+  }
+  
+  //!< Get the camera to be used by hole node;
+  if (_nh.hasParam("camera_name")) {
+    _nh.getParam("camera_name", cameraName);
+    ROS_DEBUG_STREAM("camera_name : " << cameraName);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter frameHeight not found. Using Default");
+    cameraName = "camera";
+  }
 
-	// Get the debugMotion parameter if available;
-	if (_nh.hasParam("debugMotion")) {
-		_nh.getParam("debugMotion", debugMotion);
-		ROS_DEBUG_STREAM("debugMotion : " << debugMotion);
-	}
-	else {
-		ROS_DEBUG("[motion_node] : Parameter debugMotion not found. Using Default");
-		debugMotion = true;
-	}
+  //!< Get the Height parameter if available;
+  if (_nh.hasParam("/" + cameraName + "/image_height")) {
+    _nh.getParam("/" + cameraName + "/image_height", frameHeight);
+    ROS_DEBUG_STREAM("height : " << frameHeight);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter frameHeight not found. Using Default");
+    frameHeight = DEFAULT_HEIGHT;
+  }
+  
+  //!< Get the Width parameter if available;
+  if (_nh.hasParam("/" + cameraName + "/image_width")) {
+    _nh.getParam("/" + cameraName + "/image_width", frameWidth);
+    ROS_DEBUG_STREAM("width : " << frameWidth);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter frameWidth not found. Using Default");
+    frameWidth = DEFAULT_WIDTH;
+  }
+  
+  //!< Get the images's topic;
+  if (_nh.hasParam("/" + cameraName + "/topic_name")) {
+    _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
+    ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter imageTopic not found. Using Default");
+    imageTopic = "/camera_head/image_raw";
+  }
 
-	// Get the Height parameter if available;
-	if (_nh.hasParam("height")) {
-		_nh.getParam("height", frameHeight);
-		ROS_DEBUG_STREAM("height : " << frameHeight);
-	}
-	else {
-		ROS_DEBUG("[motion_node] : Parameter frameHeight not found. Using Default");
-		frameHeight = DEFAULT_HEIGHT;
-	}
-
-	// Get the listener's topic;
-	if (_nh.hasParam("imageTopic")) {
-		_nh.getParam("imageTopic", imageTopic);
-		ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-	}
-	else {
-		ROS_DEBUG("[motion_node] : Parameter imageTopic not found. Using Default");
-		imageTopic = "/camera_head/image_raw";
-	}
-
-	// Get the Width parameter if available;
-	if (_nh.hasParam("width")) {
-		_nh.getParam("width", frameWidth);
-		ROS_DEBUG_STREAM("width : " << frameWidth);
-	}
-	else {
-		ROS_DEBUG("[motion_node] : Parameter frameWidth not found. Using Default");
-		frameWidth = DEFAULT_WIDTH;
-	}
+  //!< Get the images's frame_id;
+  if (_nh.hasParam("/" + cameraName + "/camera_frame_id")) {
+    _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+    ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+  }
+  else {
+    ROS_DEBUG("[motion_node] : Parameter camera_frame_id not found. Using Default");
+    cameraFrameId = "/camera";
+  }
 }
 
 /**
@@ -290,7 +310,7 @@ void MotionDetection::motionDetectAndPost()
 			//motionMessage.x = -1;
 			//motionMessage.y = -1;
 			//motionMessage.area = _motionDetector->getCount();
-			motionMessage.header.frame_id = "headCamera";
+			motionMessage.header.frame_id = cameraFrameId;
 			//motionMessage.type = vision_communications::victimIdentificationDirectionMsg::MOTION;
 			motionMessage.header.stamp = ros::Time::now();
 			std::cout << "Motion found with probability: "<< motionMessage.probability<<std::endl;

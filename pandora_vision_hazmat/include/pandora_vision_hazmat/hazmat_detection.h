@@ -51,8 +51,8 @@
 #include "state_client.h"
 #include "vision_communications/HazmatAlertsVectorMsg.h"
 #include "hazmat_detector.h"
-#define HFOV	61.14//68		//horizontal field of view in degrees : giwrgos 61.142
-#define VFOV	48  //50		//vertical field of view in degrees : giwrgos 47.79
+#define HFOV	61.14//68		//horizontal field of view in degrees
+#define VFOV	48  //50		//vertical field of view in degrees
 #define DEFAULT_HEIGHT	480		//default frame height
 #define DEFAULT_WIDTH	640		//default frame width
 
@@ -66,8 +66,8 @@ class HazmatDetection : public StateClient {
 		float ratioX;
 		float ratioY;
 		
-		float hfov;		//horizontal Field Of View (rad)
-		float vfov;		
+		double hfov;		//horizontal Field Of View (rad)
+		double vfov;		
 		int frameWidth;		//frame width
 		int frameHeight;	//frame height
 		
@@ -80,6 +80,8 @@ class HazmatDetection : public StateClient {
 		std::string packagePath;
 		std::string saveImagePath;
 		std::string imageTopic;
+		std::string cameraName;
+		std::string cameraFrameId;
 		
 		//time durations for every callback Timer in spin() function
 		double hazmatTime;

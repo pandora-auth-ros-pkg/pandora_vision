@@ -76,9 +76,6 @@ int display = 1;
 
 int main( int argc, char** argv )
 {
-	  ros::init(argc,argv,"hazmat_train_node");
-	  ros::NodeHandle _nh;
-	  
 	  IplImage* img;
 	  struct feature* features;
 	  int n = 0;
