@@ -43,15 +43,17 @@
  */
 HazmatDetection::HazmatDetection() :	_nh()
 {
-	//initialize hazmat detector
-	_hazmatDetector = new HazmatEpsilonDetector();
-
+	
     // Get General Parameters, such as frame width & height , camera id
 	getGeneralParams();
 	
+  
+  //initialize hazmat detector
+	_hazmatDetector = new HazmatEpsilonDetector(packagePath);
+  
 	//Get HazmatDetector Parameters
 	getHazmatParams();
-
+  
 	
 	//Convert field of view from degrees to rads
 	hfov = HFOV * CV_PI / 180;
@@ -96,6 +98,8 @@ HazmatDetection::~HazmatDetection()
  */
 void HazmatDetection::getGeneralParams()
 {
+  packagePath= ros::package::getPath("pandora_vision_hazmat");
+  
 	// Get the hazmatDummy parameter if available;
 	if (_nh.hasParam("hazmatDummy")) {
 		_nh.getParam("hazmatDummy", hazmatDummy);
@@ -104,17 +108,6 @@ void HazmatDetection::getGeneralParams()
 	else {
 		ROS_DEBUG("[webNode] : Parameter hazmatDummy not found. Using Default");
 		hazmatDummy = false;
-	}
-
-	//get package path in the pc
-	if (_nh.hasParam("/vision/packagepath")){
-		_nh.getParam("/vision/packagepath", packagePath);
-		ROS_DEBUG_STREAM("path : " << packagePath);
-	}
-	else
-	{
-		ROS_DEBUG("[hazmat_node] : Parameter path not found. Using Default");
-		packagePath = ros::package::getPath("vision");
 	}
 
 	//get the store location of the image
