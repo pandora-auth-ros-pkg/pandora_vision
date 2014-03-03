@@ -71,12 +71,12 @@ namespace pandora_vision
     }
 
     //!< Initialize face detector
-    _faceDetector =	new FaceDetector(cascadeName,model_path, bufferSize, 
+    _faceDetector =	new FaceDetector(cascade_path,model_path, bufferSize, 
       skinEnabled,skinHist, wallHist, wall2Hist);
 
     //!< Memory will allocated in the imageCallback
     faceFrame= cv::Mat::zeros(frameWidth,frameHeight,CV_8UC3);
-    extraFrame=cv::Mat::zeros(frameWidth,frameHeight,CV_8UC3);
+   
 
     //!< Declare publisher and advertise topic where algorithm 
     //!< results are posted
@@ -192,16 +192,16 @@ namespace pandora_vision
   {
     
     //!< Get the path of haar_cascade xml file if available;
-    if (_nh.hasParam("cascadeName")) {
-      _nh.getParam("cascadeName", cascadeName);
-      ROS_DEBUG_STREAM("cascadeName : " << cascadeName);
+    if (_nh.hasParam("cascade_path")) {
+      _nh.getParam("cascade_path", cascade_path);
+      ROS_DEBUG_STREAM("cascade_path : " << cascade_path);
     }
     else {
       ROS_DEBUG("[face_node] : \
         Parameter cascadeName not found. Using Default");
       std::string temp="/data/haarcascade_frontalface_alt_tree.xml";
-      cascadeName.assign(packagePath);
-      cascadeName.append(temp);
+      cascade_path.assign(packagePath);
+      cascade_path.append(temp);
     }
     
     //!< Get the path of model_path xml file to be loaded
@@ -358,7 +358,7 @@ namespace pandora_vision
   vision_communications::FaceDirectionMsg &faceMessage)
   {
     //!< start the detection process
-    int facesNum = _faceDetector->findFaces(extraFrame);
+    int facesNum = _faceDetector->findFaces(faceFrame);
 
     //!< if there is a problem with loading, findFaces returns -2
     if (facesNum == -2) 

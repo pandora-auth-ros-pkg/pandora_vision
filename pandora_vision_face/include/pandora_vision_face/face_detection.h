@@ -93,8 +93,7 @@ namespace pandora_vision
       
       //!< Frame processed by FaceDetector
       cv::Mat	faceFrame;					
-      cv::Mat	extraFrame;					
-      
+        
       //!<FaceDetector frame timestamp
       ros::Time faceFrameTimestamp;	
       
@@ -122,7 +121,7 @@ namespace pandora_vision
       
   
       //!< parameters for the FaceDetector:
-      std::string cascadeName;
+      std::string cascade_path;
       std::string model_path;
       int bufferSize;
       bool skinEnabled; 

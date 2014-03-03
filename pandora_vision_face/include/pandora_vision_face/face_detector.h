@@ -58,8 +58,7 @@ namespace pandora_vision
 {
   class FaceDetector
   {
-    private:
-    
+    private:      
       SkinDetector* skinDetector;
       
       std::vector<std::vector<cv::Rect_<int> > > faces;
@@ -89,8 +88,8 @@ namespace pandora_vision
       //!< consistency in last _bufferSize frames
       std::vector<float> probability_buffer;	
       
-      //!< Cascade classifier for face detection
-      cv::CascadeClassifier	cascade;      
+        //!< Cascade classifier for face detection
+      cv::CascadeClassifier	cascade;   
       
       //!<Trained model for face detection
       cv::Ptr<cv::FaceRecognizer> model;
@@ -120,12 +119,14 @@ namespace pandora_vision
         @param	angle [float] the rotation angle
         @return [int] the number of faces found in each frame
       */
-      int detectFace(cv::Mat img);
+      int detectFace(cv::Mat img); 
       
       void 			createRectangles(cv::Mat tmp);
       void 			compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
       
     public:
+    
+      
       //debug switch - webNode changes it externally:
       bool						isDebugMode;
       
@@ -141,7 +142,7 @@ namespace pandora_vision
         @param image [cv::Mat] The  current frame
         @return number [int] of faces found in current frame
       **/
-      int findFaces(cv::Mat frame);			
+      int findFaces(cv::Mat img);			
       
       /**
         @brief Creates the continuous table of faces found that contains
@@ -177,7 +178,9 @@ namespace pandora_vision
           matrix values produces for this rotation (this function feels the values)
         @return the frame rotated
       */
-      cv::Mat frameRotate( cv::Mat frame, float angle);	      
+      cv::Mat frameRotate( cv::Mat frame, float angle);	   
+      
+     
   };
 }
 #endif

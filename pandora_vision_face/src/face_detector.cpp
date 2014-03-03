@@ -44,7 +44,7 @@ namespace pandora_vision
    * @brief Class Constructor
    * Initializes cascade_name and constants
    * and allocates memory for sequence of elements
-   * @param cascadeName [std::string] the name of 
+   * @param cascade_path [std::string] the name of 
    *        the cascade to be loaded
    * @param model_path [std::string] the path to the model
    *        to be loaded
@@ -68,7 +68,7 @@ namespace pandora_vision
       ROS_ERROR("[Face Detector]: Cannot load cascade classifier");
       exit(0);
     }
-
+        
     model = cv::createFisherFaceRecognizer();
     model->load(model_path);
 
@@ -95,7 +95,6 @@ namespace pandora_vision
   */
   FaceDetector::~FaceDetector()
   {
-
     //!< Erase frame and probability buffers
     if (!frame_buffer.empty())
     {
@@ -127,13 +126,14 @@ namespace pandora_vision
     tmp=cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
     initFrameProbBuffers(frame);
-    createRectangles(tmp);
+    //~ createRectangles(tmp);
     
     //!< Clear vector of faces before using it for the current frame
     faces_total.erase (faces_total.begin(),faces_total.begin()+
       faces_total.size());
     
-    int facesNum = findFaces1Frame(frame);
+    int facesNum = detectFace(frame);
+    ROS_INFO_STREAM("Number of faces found "<<facesNum);
 
     int totalArea = 0;
 
@@ -385,12 +385,12 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
   */
   int FaceDetector::detectFace(cv::Mat img)
   {
-   
     cv::Mat original(img.size().width,img.size().height,CV_8UC1);
     original = img.clone();
     cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
     cvtColor(original, gray, CV_BGR2GRAY);
     std::vector< cv::Rect_<int> > thrfaces;
+    
     int im_width = 92;
     int im_height = 112;
 
@@ -398,7 +398,7 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
     {
       //!< Find the faces in the frame:
       cascade.detectMultiScale(gray, thrfaces);
-      for(int i = 0; i < (thrfaces.size() ? thrfaces.size() : 0); i++)
+      for(int i = 0; i < thrfaces.size(); i++)
       {
         //!< Process face by face:
         cv::Rect face_i = thrfaces[i];
