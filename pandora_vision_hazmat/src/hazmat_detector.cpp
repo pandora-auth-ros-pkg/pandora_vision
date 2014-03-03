@@ -44,17 +44,9 @@
 /**
  * Constructor
  */
-HazmatEpsilonDetector::HazmatEpsilonDetector()
-:rows(480),
- cols(640)
+HazmatEpsilonDetector::HazmatEpsilonDetector(std::string package_path):rows(480),cols(640)
 {
-	ros::NodeHandle nh;
-	if (!nh.getParam("/pandora_vision/packagepath", param_path))
-	{
-		ROS_ERROR("METAFILE PARAMETER NOT FOUND");
-		param_path = ros::package::getPath("pandora_vision_hazmat");
-	}
-
+  param_path = package_path;
 	setParameters();
 	initDetector();
 	frameNum=0;
