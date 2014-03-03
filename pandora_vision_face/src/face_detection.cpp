@@ -65,8 +65,8 @@ namespace pandora_vision
     
     if (!boost::filesystem::exists(model_path)) {
       ROS_WARN("Model file not found, downloading now...");
-      std::string cmd = "wget https://pandora.ee.auth.gr/rosbags/model.xml --no-check-certificate --directory-prefix=" +
-          ros::package::getPath("pandora_vision_face") + "/data";
+      std::string cmd = "wget " + model_url + " --no-check-certificate --directory-prefix=" +
+          model_path;
       system(cmd.c_str());
     }
 
@@ -182,6 +182,7 @@ namespace pandora_vision
       Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
     }
+    
   }
 
   /**
@@ -202,6 +203,17 @@ namespace pandora_vision
       std::string temp="/data/haarcascade_frontalface_alt_tree.xml";
       cascade_path.assign(packagePath);
       cascade_path.append(temp);
+    }
+    
+    //!< Get the model.xml url;
+    if (_nh.hasParam("model_url")) {
+      _nh.getParam("model_url", model_url);
+      ROS_DEBUG_STREAM("modelURL : " << model_url);
+    }
+    else {
+      ROS_DEBUG("[face_node] : \
+      Parameter model_url not found. Using Default");
+      model_url = "https://pandora.ee.auth.gr/vision/model.xml";
     }
     
     //!< Get the path of model_path xml file to be loaded
