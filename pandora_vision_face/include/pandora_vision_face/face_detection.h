@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string>
 #include <pthread.h>
+#include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
 #include <ros/package.h>

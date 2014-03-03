@@ -62,6 +62,13 @@ namespace pandora_vision
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
+    
+    if (!boost::filesystem::exists(model_path)) {
+      ROS_WARN("Model file not found, downloading now...");
+      std::string cmd = "wget https://pandora.ee.auth.gr/rosbags/model.xml --no-check-certificate --directory-prefix=" +
+          ros::package::getPath("pandora_vision_face") + "/data";
+      system(cmd.c_str());
+    }
 
     //!< Initialize face detector
     _faceDetector =	new FaceDetector(cascadeName,model_path, bufferSize, 
