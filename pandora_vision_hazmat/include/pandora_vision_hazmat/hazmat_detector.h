@@ -70,7 +70,7 @@ class HazmatEpsilonDetector{
 public:
 	CvPoint2D64f** upperPoints;
 	CvPoint2D64f** lowerPoints;
-	HazmatEpsilonDetector(); //our constructor
+	HazmatEpsilonDetector(std::string package_path); //our constructor
 	~HazmatEpsilonDetector(); //our destructor
     vector<CvPoint2D64f> center_of;
 	void calcHistograms();
