@@ -57,8 +57,8 @@ namespace pandora_vision
     getFaceParams();
 
     //!< Convert field of view from degrees to rads
-    hfov = HFOV * CV_PI / 180;
-    vfov = VFOV * CV_PI / 180;
+    hfov = hfov * CV_PI / 180;
+    vfov = vfov * CV_PI / 180;
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
@@ -149,38 +149,75 @@ namespace pandora_vision
       Parameter faceDummy not found. Using Default");
       faceDummy = false;
     }
+    
+    //!< Get the camera to be used by hole node;
+    if (_nh.hasParam("camera_name")) {
+      _nh.getParam("camera_name", cameraName);
+      ROS_DEBUG_STREAM("camera_name : " << cameraName);
+    }
+    else {
+      ROS_DEBUG("[face_node] : Parameter frameHeight not found. Using Default");
+      cameraName = "camera";
+    }
 
     //!< Get the Height parameter if available;
-    if (_nh.hasParam("height")) {
-      _nh.getParam("height", frameHeight);
+    if (_nh.hasParam("/" + cameraName + "/image_height")) {
+      _nh.getParam("/" + cameraName + "/image_height", frameHeight);
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
     else {
-      ROS_DEBUG("[face_node] : \
-      Parameter frameHeight not found. Using Default");
+      ROS_DEBUG("[face_node] : Parameter frameHeight not found. Using Default");
       frameHeight = DEFAULT_HEIGHT;
     }
-
-    //!< Get the images's topic;
-    if (_nh.hasParam("imageTopic")) {
-      _nh.getParam("imageTopic", imageTopic);
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else {
-      ROS_DEBUG("[face_node] : \
-      Parameter imageTopic not found. Using Default");
-      imageTopic = "/camera_head/image_raw";
-    }
-
+    
     //!< Get the Width parameter if available;
-    if (_nh.hasParam("width")) {
-      _nh.getParam("width", frameWidth);
+    if (_nh.hasParam("/" + cameraName + "/image_width")) {
+      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
     else {
-      ROS_DEBUG("[face_node] : \
-      Parameter frameWidth not found. Using Default");
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
+    }
+    
+    //!< Get the images's topic;
+    if (_nh.hasParam("/" + cameraName + "/topic_name")) {
+      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
+      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+    }
+    else {
+      ROS_DEBUG("[face_node] : Parameter imageTopic not found. Using Default");
+      imageTopic = "/camera_head/image_raw";
+    }
+  
+    //!< Get the images's frame_id;
+    if (_nh.hasParam("/" + cameraName + "/camera_frame_id")) {
+      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+    }
+    else {
+      ROS_DEBUG("[face_node] : Parameter camera_frame_id not found. Using Default");
+      cameraFrameId = "/camera";
+    }
+
+    //!< Get the HFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/hfov")) {
+      _nh.getParam("/" + cameraName + "/hfov", hfov);
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    }
+    else {
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
+      hfov = HFOV;
+    }
+    
+    //!< Get the VFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/vfov")) {
+      _nh.getParam("/" + cameraName + "/vfov", vfov);
+      ROS_DEBUG_STREAM("VFOV : " << vfov);
+    }
+    else {
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
+      vfov = VFOV;
     }
     
   }
@@ -308,7 +345,6 @@ namespace pandora_vision
   /**
    * @brief This method uses a FaceDetector instance to detect all 
    * present faces in a given frame
-   * @param frame_id [std::string] The frame id
    * @return void
   */
   void FaceDetection::faceCallback(const ros::TimerEvent&)
@@ -392,7 +428,7 @@ namespace pandora_vision
           (double)frameWidth/2 );
         faceMessage.pitch = -ratioY * ( facesTable[i*4+1] - 
           (double)frameHeight/2 );
-        faceMessage.header.frame_id="headCamera";
+        faceMessage.header.frame_id = cameraFrameId;
         faceMessage.probability = _faceDetector->getProbability();
         faceMessage.header.stamp = ros::Time::now();
         ROS_INFO("[face_node]:Face found");

@@ -83,13 +83,15 @@ namespace pandora_vision
       float ratioY;
       
       //!< Horizontal field of view in rad
-      float hfov;		
+      double hfov;		
       
       //!< Vertical Field Of View (rad)
-      float vfov;		
+      double vfov;		
       
       int frameWidth;		
       int frameHeight;	
+      
+      std::string cameraName;
       
       //!< Frame processed by FaceDetector
       cv::Mat	faceFrame;					
@@ -102,6 +104,7 @@ namespace pandora_vision
 
       //!< The topic subscribed to for the camera
       std::string imageTopic;
+      std::string cameraFrameId;
       
       //!< time durations for every callback Timer 
       double faceTime;

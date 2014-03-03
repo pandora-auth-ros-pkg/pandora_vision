@@ -32,8 +32,9 @@ include_directories(include
 )
 
 add_executable(landoltc_node 
+              src/landoltc_node.cpp
 						  src/landoltc_detection.cpp
-						  src/landoltc_node.cpp
+              src/landoltc_detector.cpp
 )
 target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
