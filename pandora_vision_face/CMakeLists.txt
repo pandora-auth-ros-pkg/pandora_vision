@@ -46,8 +46,8 @@ add_dependencies(face_node
 
 ########################### modelTRainer ############################
 if(MODEL_ENABLE_TRAIN)
-  add_executable(model_train_node 
-                    src/model_trainer.cpp
+  add_executable(model_train 
+                  src/model_trainer.cpp
   )
-  target_link_libraries(model_train_node ${catkin_LIBRARIES} )
+  target_link_libraries(model_train ${catkin_LIBRARIES} )
 endif()
