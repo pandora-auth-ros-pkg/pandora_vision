@@ -65,7 +65,7 @@ namespace pandora_vision
     
     if (!boost::filesystem::exists(model_path)) {
       ROS_WARN("Model file not found, downloading now...");
-      std::string cmd = "wget " + model_url + " --no-check-certificate --directory-prefix=" +
+      std::string cmd = "wget " + model_url + " --no-check-certificate --output-document=" +
           model_path;
       system(cmd.c_str());
     }
