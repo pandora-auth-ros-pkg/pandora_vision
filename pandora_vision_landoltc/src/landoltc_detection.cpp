@@ -50,11 +50,15 @@ namespace pandora_vision
   {
     packagePath = ros::package::getPath("pandora_vision_landoltc");
     
+    if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+   ros::console::notifyLoggerLevelsChanged();
+}
+    
     getGeneralParams();
     
       
     //!<Loading reference image passed as argument to main
-     cv::Mat ref(800,600,CV_8UC1);
+    cv::Mat ref(800,600,CV_8UC1);
     ref=cv::imread(patternPath);
     if (!ref.data)
     std::cout<<"Pattern image not loaded"<< std::endl;
@@ -71,7 +75,7 @@ namespace pandora_vision
     
     cv::findContours(ref,_refContours,cv::RETR_LIST,cv::CHAIN_APPROX_SIMPLE);
    
-    _inputImageSubscriber = _nh.subscribe("/camera_head/image_raw",1,&LandoltCDetection::imageCallback,this);
+    _inputImageSubscriber = _nh.subscribe(imageTopic,1,&LandoltCDetection::imageCallback,this);
 
     ROS_INFO("[landoltc_node] : Created LandoltC Detection instance");
 
