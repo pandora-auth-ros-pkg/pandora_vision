@@ -60,8 +60,8 @@ HoleFindNode::HoleFindNode() :	_nh() {
   getTrackerParams();
 
   //Convert field of view from degrees to rads
-  hfov = HFOV * CV_PI / 180;
-  vfov = VFOV * CV_PI / 180;
+  hfov = hfov * CV_PI / 180;
+  vfov = vfov * CV_PI / 180;
 
   ratioX = hfov / frameWidth;
   ratioY = vfov / frameHeight;
@@ -193,6 +193,26 @@ void HoleFindNode::getGeneralParams()
   else {
     ROS_DEBUG("[HoleFindNode] : Parameter camera_frame_id not found. Using Default");
     cameraFrameId = "/camera";
+  }
+  
+    //!< Get the HFOV parameter if available;
+  if (_nh.hasParam("/" + cameraName + "/hfov")) {
+    _nh.getParam("/" + cameraName + "/hfov", hfov);
+    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  }
+  else {
+    ROS_DEBUG("[HoleFindNode] : Parameter frameWidth not found. Using Default");
+    hfov = HFOV;
+  }
+  
+  //!< Get the VFOV parameter if available;
+  if (_nh.hasParam("/" + cameraName + "/vfov")) {
+    _nh.getParam("/" + cameraName + "/vfov", vfov);
+    ROS_DEBUG_STREAM("VFOV : " << vfov);
+  }
+  else {
+    ROS_DEBUG("[HoleFindNode] : Parameter frameWidth not found. Using Default");
+    vfov = VFOV;
   }
 
 }

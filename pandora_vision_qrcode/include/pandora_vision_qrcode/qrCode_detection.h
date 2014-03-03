@@ -52,10 +52,10 @@
 #include "vision_communications/QRAlertsVectorMsg.h"
 #include "qrCode_detector.h"
 
-//!< Horizontal field of view in degrees : giwrgos 61.142
+//!< Horizontal field of view in degrees
 #define HFOV 61.14  //68
 
-//!< vertical field of view in degrees : giwrgos 47.79
+//!< vertical field of view in degrees 
 #define VFOV 48     //50
 
 //!< default frame height
@@ -79,10 +79,10 @@ namespace vision {
       float ratioY;
 
       //!< Horizontal Field Of View (rad)
-      float hfov;
+      double hfov;
 
       //!< Vertical Field Of View (rad)
-      float vfov;
+      double vfov;
 
       int frameWidth;
       int frameHeight;
@@ -99,15 +99,12 @@ namespace vision {
       //!< The topic subscribed to for the front camera
       std::string imageTopic;
 
-      //!< The topic subscribed to for the rear camera
-      std::string imageTopicback;
-
       //!< Publishers for QrCodeDetector result messages
       ros::Publisher _qrcodePublisher;
 
       //!< The subscriber that listens to the frame topic advertised by the
       //!< central node for the front camera
-      image_transport::Subscriber _frameSubscriberFront;
+      image_transport::Subscriber _frameSubscriber;
 
 
       //!< Debug publisher for MotionDetector
@@ -146,14 +143,14 @@ namespace vision {
        * qrcodes in a given frame
        * @return void
        */
-      void qrcodeDetectAndPost();
+      void qrCallback();
 
       /**
        * Function called when new ROS message appears, for front camera
        * @param msg [const sensor_msgs::ImageConstPtr&] The message
        * @return void
        */
-      void imageCallbackFront(const sensor_msgs::ImageConstPtr& msg);
+      void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
    
       //!< Current state of robot

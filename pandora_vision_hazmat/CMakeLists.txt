@@ -48,10 +48,10 @@ add_dependencies(hazmat_node
 
 ########################### hazmatTrainNode ############################
 if(HAZMAT_ENABLE_TRAIN)
-  add_executable(hazmat_train_node src/hazmat_trainer.cpp
+  add_executable(hazmat_train src/hazmat_trainer.cpp
 						src/utils.cpp 
 						src/sift.cpp  
 						src/imgfeatures.cpp)
-  target_link_libraries(hazmat_train_node ${catkin_LIBRARIES} )
+  target_link_libraries(hazmat_train ${catkin_LIBRARIES} )
 endif()
 

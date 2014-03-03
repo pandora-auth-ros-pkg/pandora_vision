@@ -51,8 +51,8 @@ namespace vision
     getGeneralParams();
 
     //!< Convert field of view from degrees to rads
-    hfov = HFOV * CV_PI / 180;
-    vfov = VFOV * CV_PI / 180;
+    hfov = hfov * CV_PI / 180;
+    vfov = vfov * CV_PI / 180;
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
@@ -72,8 +72,8 @@ namespace vision
 
     //!< subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
-    _frameSubscriberFront = image_transport::ImageTransport(_nh).subscribe(
-        imageTopic, 1, &QrCodeDetection::imageCallbackFront, this);
+    _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
+        imageTopic, 1, &QrCodeDetection::imageCallback, this);
    
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -185,6 +185,26 @@ namespace vision
       ROS_DEBUG("[QrCode_node] : Parameter camera_frame_id not found. Using Default");
       cameraFrameId = "/camera";
     }
+    
+    //!< Get the HFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/hfov")) {
+      _nh.getParam("/" + cameraName + "/hfov", hfov);
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
+      hfov = HFOV;
+    }
+    
+    //!< Get the VFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/vfov")) {
+      _nh.getParam("/" + cameraName + "/vfov", vfov);
+      ROS_DEBUG_STREAM("VFOV : " << vfov);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
+      vfov = VFOV;
+    }
 
   }
 
@@ -233,7 +253,7 @@ namespace vision
    * @param msg [const sensor_msgs::ImageConstPtr&] The message
    * @return void
    */
-  void QrCodeDetection::imageCallbackFront(
+  void QrCodeDetection::imageCallback(
       const sensor_msgs::ImageConstPtr& msg)
   {
     int res = -1;
@@ -256,7 +276,7 @@ namespace vision
       return;
     }
 
-    qrcodeDetectAndPost();
+    qrCallback();
   }
 
 
@@ -265,7 +285,7 @@ namespace vision
    * qrcodes in a given frame
    * @return void
    */
-  void QrCodeDetection::qrcodeDetectAndPost()
+  void QrCodeDetection::qrCallback()
   {
 
     //!< Create message of QrCode Detector

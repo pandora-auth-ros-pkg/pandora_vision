@@ -58,8 +58,6 @@
 #include <iostream>
 #include <stdlib.h>
 
-#define HFOV					61.14//68		//horizontal field of view in degrees : giwrgos 61.142
-#define VFOV					48  //50		//vertical field of view in degrees : giwrgos 47.79
 #define DEFAULT_HEIGHT			480		//default frame height
 #define DEFAULT_WIDTH			640		//default frame width
 
@@ -84,6 +82,8 @@ class MotionDetection : public StateClient {
 		ros::Time		motionFrameTimestamp;		// MotionDetector frame timestamp
 
 		string imageTopic;
+		string cameraName;
+		string cameraFrameId;
 		
 		//publishers for MotionDetector result messages
 		ros::Publisher _motionPublisher;
