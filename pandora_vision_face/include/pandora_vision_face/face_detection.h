@@ -123,6 +123,7 @@ namespace pandora_vision
       //!< parameters for the FaceDetector:
       std::string cascade_path;
       std::string model_path;
+      std::string model_url;
       int bufferSize;
       bool skinEnabled; 
    

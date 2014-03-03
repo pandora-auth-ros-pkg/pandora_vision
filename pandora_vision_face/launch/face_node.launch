@@ -1,97 +1,78 @@
 <launch>
     <group ns="pandora_vision_face">
-		
-			<node name="face_node" type="face_node" pkg="pandora_vision_face" respawn="False" output="screen" />
-			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
-			
-				<!-- Package Path /-->
-			<param name="/pandora_vision/packagepath" value="$(find pandora_vision_face)" />
-
+    
+      <node name="face_node" type="face_node" pkg="pandora_vision_face" respawn="False" output="screen" />
+      <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+  
             <!-- Locate general_params_launcher /-->
-			<include file="$(find pandora_vision_launchers)/launch/general_params.launch" />	
-			
-			<!-- **************** /-->
-			<!-- Debug Mode params /-->
-			<!-- **************** /-->
-				
-				<!-- Enable Face Debug /-->
-				<param name="debugFace" type="bool" value="True"/>
-				
-				<!-- Enable Skin Debug /-->
-				<param name="debugSkin" type="bool" value="True"/>
+      <include file="$(find pandora_vision_launchers)/launch/general_params.launch" />	
+      
+      <!-- **************** /-->
+      <!-- Debug Mode params /-->
+      <!-- **************** /-->
         
-			<!-- **************** /-->
-			<!-- Dummy Msg params /-->
-			<!-- **************** /-->
-			
-				<!-- Enable Face Dummy /-->
-				<param name="faceDummy" type="bool" value="False"/>
-				
-				<!-- Enable Skin Dummy /-->
-				<param name="skinDummy" type="bool" value="False"/>
-				
+        <!-- Enable Face Debug /-->
+        <param name="debugFace" type="bool" value="True"/>
+        
+        <!-- Enable Skin Debug /-->
+        <param name="debugSkin" type="bool" value="True"/>
+        
+      <!-- **************** /-->
+      <!-- Dummy Msg params /-->
+      <!-- **************** /-->
+      
+        <!-- Enable Face Dummy /-->
+        <param name="faceDummy" type="bool" value="False"/>
+        
+        <!-- Enable Skin Dummy /-->
+        <param name="skinDummy" type="bool" value="False"/>
+        
             
             <!-- ************** /-->
-			<!--  Timer params  /-->
-			<!-- ************** /-->
+      <!--  Timer params  /-->
+      <!-- ************** /-->
             
-				<!-- Timer Period for face detection in Exploration & Identification State  /-->
-				<param name="faceSparseTime" type="double" value="40"/>
-				
-				<!-- Timer Period for face detection in Arm Scan State  /-->
-				<param name="faceDenseTime" type="double" value="0.12"/>
-
-			<!-- ********************* /-->
-			<!--  FaceDetector params  /-->
-			<!-- ********************* /-->
-			
-					<!-- Filepath for haarcascade xml  /-->
-					<param name="cascadeName" type="str" value="$(find pandora_vision_face)/data/haarcascade_frontalface_alt_tree.xml"/>  
-					
-					<!-- Filepath for csv ext  /-->
-					<param name="csvName" type="str" value="$(find pandora_vision_face)/data/csv.ext"/>  
-					
-					<!-- Filepath for haarcascade xml  /-->
-
-<!--
-					<param name="cascadeName" type="str" value="$(find pandora_vision_face)/data/robocupTraining3.xml"/>  
--->
-
-					<!-- Buffer size (number of frames) /--> 
-					<param name="bufferSize" type="int" value="2"/> 
-					
-					<!-- Flag for to enable/disable Skin Detector result in face estimation /--> 
-					<param name="skinEnabled" type="bool" value="False"/>
-				
-				<!-- ********************* /-->
-				<!--  cvHaarDetectObjects  /-->
-				<!-- ********************* /-->
-				
-					<!-- Scale factor used in Haar Object Detection /--> 
-					<param name="scaleFactor" type="double" value="1.3"/>
-				
-					<!-- Number of neighboring features to be considered face /--> 
-					<param name="mn" type="int" value="3"/>
-				
-					<!-- Dimension of minimum square size of faces to search for /--> 
-					<param name="minFaceDim" type="int" value="30"/>
-
-				
-			<!-- *********************** /-->
-			<!--  SkinDetector params  /-->
-			<!-- *********************** /-->
-			
-				<!-- Filepath for skin (positive) histogramm  /-->
-				<param name="skinHist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_skin.jpg"/>
-				
-				<!-- Filepath for wall (negative) histogramm  /-->
-				<param name="wallHist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_wall.jpg"/>
-				
-				<!-- Filepath for wall ( 2nd negative) histogramm  /-->
-				<param name="wall2Hist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_wall2.jpg"/>
-				
-				<!-- threshold for final size of skin contours  /-->
-				<param name="sizeThreshold" type="int" value="300"/>
+        <!-- Timer Period for face detection in Exploration & Identification State  /-->
+        <param name="faceSparseTime" type="double" value="40"/>
+        
+        <!-- Timer Period for face detection in Arm Scan State  /-->
+        <param name="faceDenseTime" type="double" value="0.12"/>
+  
+      <!-- ********************* /-->
+      <!--  FaceDetector params  /-->
+      <!-- ********************* /-->
+      
+          <!-- Filepath for haarcascade xml  /-->
+          <param name="cascadeName" type="str" value="$(find pandora_vision_face)/data/haarcascade_frontalface_alt_tree.xml"/>  
+          
+          <!-- Filepath for model.xml  /-->
+          <param name="model_path" type="str" value="$(find pandora_vision_face)/data/model.xml"/>  
+          
+          <!-- Url for model.xml /-->
+          <param name="model_url" type="str" value="https://pandora.ee.auth.gr/vision/model.xml"/>  
+  
+          <!-- Buffer size (number of frames) /--> 
+          <param name="bufferSize" type="int" value="2"/> 
+          
+          <!-- Flag for to enable/disable Skin Detector result in face estimation /--> 
+          <param name="skinEnabled" type="bool" value="False"/>
+    
+        
+      <!-- *********************** /-->
+      <!--  SkinDetector params  /-->
+      <!-- *********************** /-->
+      
+        <!-- Filepath for skin (positive) histogramm  /-->
+        <param name="skinHist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_skin.jpg"/>
+        
+        <!-- Filepath for wall (negative) histogramm  /-->
+        <param name="wallHist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_wall.jpg"/>
+        
+        <!-- Filepath for wall ( 2nd negative) histogramm  /-->
+        <param name="wall2Hist" type="str" value="$(find pandora_vision_face)/data/histogramms/histogramm_wall2.jpg"/>
+        
+        <!-- threshold for final size of skin contours  /-->
+        <param name="sizeThreshold" type="int" value="300"/>
 
     </group>
 </launch>
