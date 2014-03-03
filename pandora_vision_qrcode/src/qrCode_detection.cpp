@@ -51,8 +51,8 @@ namespace vision
     getGeneralParams();
 
     //!< Convert field of view from degrees to rads
-    hfov = HFOV * CV_PI / 180;
-    vfov = VFOV * CV_PI / 180;
+    hfov = hfov * CV_PI / 180;
+    vfov = vfov * CV_PI / 180;
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
@@ -60,7 +60,7 @@ namespace vision
     //!< Declare publisher and advertise topic
     //!< where algorithm results are posted
     _qrcodePublisher =
-      _nh.advertise<vision_communications::QRAlertsVectorMsg>("qr_alert", 10);
+      _nh.advertise<vision_communications::QRAlertsVectorMsg>("/vision/qr_alert", 10, true);
 
     //!< Advertise topics for debugging if we are in debug mode
     if (debugQrCode)
@@ -72,8 +72,8 @@ namespace vision
 
     //!< subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
-    _frameSubscriberFront = image_transport::ImageTransport(_nh).subscribe(
-        imageTopic, 1, &QrCodeDetection::imageCallbackFront, this);
+    _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
+        imageTopic, 1, &QrCodeDetection::imageCallback, this);
    
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -128,11 +128,21 @@ namespace vision
           Parameter debugQrCode not found. Using Default");
       debugQrCode = true;
     }
+    
+    //!< Get the camera to be used by qr node;
+    if (_nh.hasParam("camera_name")) {
+      _nh.getParam("camera_name", cameraName);
+      ROS_DEBUG_STREAM("camera_name : " << cameraName);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter frameHeight not found. Using Default");
+      cameraName = "camera";
+    }
 
     //!< Get the Height parameter if available;
-    if (_nh.hasParam("height"))
+    if (_nh.hasParam("/" + cameraName + "/image_height"))
     {
-      _nh.getParam("height", frameHeight);
+      _nh.getParam("/" + cameraName + "/image_height", frameHeight);
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
     else
@@ -141,23 +151,11 @@ namespace vision
           Parameter frameHeight not found. Using Default");
       frameHeight = DEFAULT_HEIGHT;
     }
-
-    //!< Get the listener's topic;
-    if (_nh.hasParam("imageTopic"))
-    {
-      _nh.getParam("imageTopic", imageTopic);
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else
-    {
-      ROS_DEBUG("[QrCode_node] : Parameter imageTopic not found. Using Default");
-      imageTopic = "/camera_head/image_raw";
-    }
-
+    
     //!< Get the Width parameter if available;
-    if (_nh.hasParam("width"))
+    if (_nh.hasParam("/" + cameraName + "/image_width"))
     {
-      _nh.getParam("width", frameWidth);
+      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
     else
@@ -165,6 +163,49 @@ namespace vision
       ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
     }
+
+    //!< Get the listener's topic;
+    if (_nh.hasParam("/" + cameraName + "/topic_name"))
+    {
+      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
+      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+    }
+    else
+    {
+      ROS_DEBUG("[QrCode_node] : Parameter imageTopic not found. Using Default");
+      imageTopic = "/camera_head/image_raw";
+    }
+    
+    //!< Get the images's frame_id;
+    if (_nh.hasParam("/" + cameraName + "/camera_frame_id")) {
+      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter camera_frame_id not found. Using Default");
+      cameraFrameId = "/camera";
+    }
+    
+    //!< Get the HFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/hfov")) {
+      _nh.getParam("/" + cameraName + "/hfov", hfov);
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
+      hfov = HFOV;
+    }
+    
+    //!< Get the VFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/vfov")) {
+      _nh.getParam("/" + cameraName + "/vfov", vfov);
+      ROS_DEBUG_STREAM("VFOV : " << vfov);
+    }
+    else {
+      ROS_DEBUG("[QrCode_node] : Parameter frameWidth not found. Using Default");
+      vfov = VFOV;
+    }
+
   }
 
 
@@ -212,7 +253,7 @@ namespace vision
    * @param msg [const sensor_msgs::ImageConstPtr&] The message
    * @return void
    */
-  void QrCodeDetection::imageCallbackFront(
+  void QrCodeDetection::imageCallback(
       const sensor_msgs::ImageConstPtr& msg)
   {
     int res = -1;
@@ -235,17 +276,16 @@ namespace vision
       return;
     }
 
-    qrcodeDetectAndPost("headCamera");
+    qrCallback();
   }
 
 
   /**
    * @brief This method uses a QrCodeDetector instance to detect all present
    * qrcodes in a given frame
-   * @param frame_id [std::string] The frame id
    * @return void
    */
-  void QrCodeDetection::qrcodeDetectAndPost(std::string frame_id)
+  void QrCodeDetection::qrCallback()
   {
 
     //!< Create message of QrCode Detector
@@ -275,7 +315,7 @@ namespace vision
        */
 
       //!< do detection and examine result cases
-      qrcodeVectorMsg.header.frame_id = frame_id;
+      qrcodeVectorMsg.header.frame_id = cameraFrameId;
       qrcodeVectorMsg.header.stamp = ros::Time::now();
 
       _qrcodeDetector.detect_qrcode(qrcodeFrame);
@@ -292,7 +332,7 @@ namespace vision
 
         qrcodeVectorMsg.qrAlerts.push_back(qrcodeMsg);
 
-        std::cout << "QR found." << std::endl ;
+        ROS_INFO("QR found.");
       }
 
       if (debugQrCode)

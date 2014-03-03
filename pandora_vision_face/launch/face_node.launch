@@ -1,11 +1,10 @@
 <launch>
     <group ns="pandora_vision_face">
+      
+      <param name="camera_name" value="kinect" />
     
       <node name="face_node" type="face_node" pkg="pandora_vision_face" respawn="False" output="screen" />
       <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
-  
-            <!-- Locate general_params_launcher /-->
-      <include file="$(find pandora_vision_launchers)/launch/general_params.launch" />	
       
       <!-- **************** /-->
       <!-- Debug Mode params /-->
@@ -33,17 +32,14 @@
       <!-- ************** /-->
             
         <!-- Timer Period for face detection in Exploration & Identification State  /-->
-        <param name="faceSparseTime" type="double" value="40"/>
+        <param name="faceTime" type="double" value="0.12"/>
         
-        <!-- Timer Period for face detection in Arm Scan State  /-->
-        <param name="faceDenseTime" type="double" value="0.12"/>
-  
       <!-- ********************* /-->
       <!--  FaceDetector params  /-->
       <!-- ********************* /-->
       
           <!-- Filepath for haarcascade xml  /-->
-          <param name="cascadeName" type="str" value="$(find pandora_vision_face)/data/haarcascade_frontalface_alt_tree.xml"/>  
+          <param name="cascade_path" type="str" value="$(find pandora_vision_face)/data/haarcascade_frontalface_alt_tree.xml"/>  
           
           <!-- Filepath for model.xml  /-->
           <param name="model_path" type="str" value="$(find pandora_vision_face)/data/model.xml"/>  
