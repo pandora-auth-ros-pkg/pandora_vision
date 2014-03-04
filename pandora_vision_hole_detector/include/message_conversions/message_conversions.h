@@ -59,9 +59,9 @@ namespace vision
       /**
         @brief Extracts a PointCloudXYZPtr (see defines.h)
         from a point cloud message
-        @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
+        @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
         cloud message
-        @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+        @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
         @return void
        **/
       static void extractPointCloudXYZFromMessage(
@@ -71,9 +71,9 @@ namespace vision
       /**
         @brief Extracts a PointCloudXYZPtr (see defines.h)
         from a point cloud message container
-        @param msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
+        @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
         cloud message
-        @param pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+        @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
         @return void
        **/
       static void extractPointCloudXYZFromMessageContainer(
@@ -131,7 +131,7 @@ namespace vision
 
       /**
         @brief Extracts a RGB image from a point cloud message
-        @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
+        @param[in] pointCloud [const sensor_msgs::PointCloud2ConstPtr&]
         The input point cloud message
         @return cv::Mat The output rgb image
        **/

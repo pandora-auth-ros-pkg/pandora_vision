@@ -77,7 +77,7 @@ namespace vision
 
       /**
         @brief Callback for the candidate holes via the depth node
-        @param depthCandidateHolesVector
+        @param[in] depthCandidateHolesVector
         [const vision_communications::DepthCandidateHolesVectorMsg&]
         The message containing the necessary information to filter hole
         candidates acquired through the depth node

@@ -124,68 +124,106 @@ namespace vision
   {
     ros::NodeHandle _nodeHandle;
 
-    server.setCallback(boost::bind(&HoleFusionParameters::callback, this,_1, _2));
+    server.setCallback(boost::bind(&HoleFusionParameters::callback,
+        this,_1, _2));
   }
 
-  void HoleFusionParameters::callback(pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
-    uint32_t level)
+  void HoleFusionParameters::callback(pandora_vision_hole_detector::
+    hole_fusion_cfgConfig &config, uint32_t level)
   {
     #ifdef DEBUG_SHOW
     ROS_INFO("HoleFusionParameters callback called");
     #endif
-    HoleFusionParameters::kanny_ratio = config.kanny_ratio;
-    HoleFusionParameters::kanny_kernel_size = config.kanny_kernel_size;
-    HoleFusionParameters::kanny_low_threshold = config.kanny_low_threshold;
+    HoleFusionParameters::kanny_ratio =
+      config.kanny_ratio;
+    HoleFusionParameters::kanny_kernel_size =
+      config.kanny_kernel_size;
+    HoleFusionParameters::kanny_low_threshold =
+      config.kanny_low_threshold;
     HoleFusionParameters::kanny_blur_noise_kernel_size =
       config.kanny_blur_noise_kernel_size;
-    HoleFusionParameters::contrast_enhance_beta = config.contrast_enhance_beta;
-    HoleFusionParameters::contrast_enhance_alpha = config.contrast_enhance_alpha;
-    HoleFusionParameters::threshold_lower_value = config.threshold_lower_value;
-    HoleFusionParameters::adaptive_max_value = config.adaptive_max_value;
-    HoleFusionParameters::adaptive_method = config.adaptive_method;
-    HoleFusionParameters::adaptive_block_size = config.adaptive_block_size;
-    HoleFusionParameters::adaptive_c_value = config.adaptive_c_value;
-    HoleFusionParameters::blob_min_threshold = config.blob_min_threshold;
-    HoleFusionParameters::blob_max_threshold = config.blob_max_threshold;
-    HoleFusionParameters::blob_threshold_step = config.blob_threshold_step;
-    HoleFusionParameters::blob_min_area = config.blob_min_area;
-    HoleFusionParameters::blob_max_area = config.blob_max_area;
-    HoleFusionParameters::blob_min_convexity = config.blob_min_convexity;
-    HoleFusionParameters::blob_max_convexity = config.blob_max_convexity;
-    HoleFusionParameters::blob_min_inertia_ratio = config.blob_min_inertia_ratio;
-    HoleFusionParameters::blob_max_circularity = config.blob_max_circularity;
-    HoleFusionParameters::blob_min_circularity = config.blob_min_circularity;
-    HoleFusionParameters::blob_filter_by_color = config.blob_filter_by_color;
-    HoleFusionParameters::blob_filter_by_circularity = config.blob_filter_by_circularity;
+    HoleFusionParameters::contrast_enhance_beta =
+      config.contrast_enhance_beta;
+    HoleFusionParameters::contrast_enhance_alpha =
+      config.contrast_enhance_alpha;
+    HoleFusionParameters::threshold_lower_value =
+      config.threshold_lower_value;
+    HoleFusionParameters::adaptive_max_value =
+      config.adaptive_max_value;
+    HoleFusionParameters::adaptive_method =
+      config.adaptive_method;
+    HoleFusionParameters::adaptive_block_size =
+      config.adaptive_block_size;
+    HoleFusionParameters::adaptive_c_value =
+      config.adaptive_c_value;
+    HoleFusionParameters::blob_min_threshold =
+      config.blob_min_threshold;
+    HoleFusionParameters::blob_max_threshold =
+      config.blob_max_threshold;
+    HoleFusionParameters::blob_threshold_step =
+      config.blob_threshold_step;
+    HoleFusionParameters::blob_min_area =
+      config.blob_min_area;
+    HoleFusionParameters::blob_max_area =
+      config.blob_max_area;
+    HoleFusionParameters::blob_min_convexity =
+      config.blob_min_convexity;
+    HoleFusionParameters::blob_max_convexity =
+      config.blob_max_convexity;
+    HoleFusionParameters::blob_min_inertia_ratio =
+      config.blob_min_inertia_ratio;
+    HoleFusionParameters::blob_max_circularity =
+      config.blob_max_circularity;
+    HoleFusionParameters::blob_min_circularity =
+      config.blob_min_circularity;
+    HoleFusionParameters::blob_filter_by_color =
+      config.blob_filter_by_color;
+    HoleFusionParameters::blob_filter_by_circularity =
+      config.blob_filter_by_circularity;
     HoleFusionParameters::bounding_box_min_area_threshold =
       config.bounding_box_min_area_threshold;
     HoleFusionParameters::bounding_box_detection_method =
       config.bounding_box_detection_method;
     HoleFusionParameters::raycast_keypoint_partitions =
       config.raycast_keypoint_partitions;
-    HoleFusionParameters::AB_to_MO_ratio = config.AB_to_MO_ratio;
-    HoleFusionParameters::interpolation_method = config.interpolation_method;
-    HoleFusionParameters::run_checker_depth_diff = config.run_checker_depth_diff;
+    HoleFusionParameters::AB_to_MO_ratio =
+      config.AB_to_MO_ratio;
+    HoleFusionParameters::interpolation_method =
+      config.interpolation_method;
+    HoleFusionParameters::run_checker_depth_diff =
+      config.run_checker_depth_diff;
     HoleFusionParameters::run_checker_outline_of_rectangle =
       config.run_checker_outline_of_rectangle;
-    HoleFusionParameters::run_checker_depth_area = config.run_checker_depth_area;
+    HoleFusionParameters::run_checker_depth_area =
+      config.run_checker_depth_area;
     HoleFusionParameters::run_checker_brushfire_outline_to_rectangle =
       config.run_checker_brushfire_outline_to_rectangle;
-    HoleFusionParameters::rectangle_inflation_size = config.rectangle_inflation_size;
-    HoleFusionParameters::depth_difference = config.depth_difference;
-    HoleFusionParameters::segmentation_method = config.segmentation_method;
-    HoleFusionParameters::max_iterations = config.max_iterations;
-    HoleFusionParameters::num_points_to_exclude = config.num_points_to_exclude;
+    HoleFusionParameters::rectangle_inflation_size =
+      config.rectangle_inflation_size;
+    HoleFusionParameters::depth_difference =
+      config.depth_difference;
+    HoleFusionParameters::segmentation_method =
+      config.segmentation_method;
+    HoleFusionParameters::max_iterations =
+      config.max_iterations;
+    HoleFusionParameters::num_points_to_exclude =
+      config.num_points_to_exclude;
     HoleFusionParameters::point_to_plane_distance_threshold =
       config.point_to_plane_distance_threshold;
-    HoleFusionParameters::scale_method = config.scale_method;
-    HoleFusionParameters::debug_show_find_holes = config.debug_show_find_holes;
-    HoleFusionParameters::debug_show_find_holes_size = config.debug_show_find_holes_size;
-    HoleFusionParameters::debug_time_find_holes = config.debug_time_find_holes;
-    HoleFusionParameters::debug_show_denoise_edges = config.debug_show_denoise_edges;
+    HoleFusionParameters::scale_method =
+      config.scale_method;
+    HoleFusionParameters::debug_show_find_holes =
+      config.debug_show_find_holes;
+    HoleFusionParameters::debug_show_find_holes_size =
+      config.debug_show_find_holes_size;
+    HoleFusionParameters::debug_time_find_holes =
+      config.debug_time_find_holes;
+    HoleFusionParameters::debug_show_denoise_edges =
+      config.debug_show_denoise_edges;
     HoleFusionParameters::debug_show_denoise_edges_size =
       config.debug_show_denoise_edges_size;
-    HoleFusionParameters::debug_show_connect_pairs = config.debug_show_connect_pairs;
+    HoleFusionParameters::debug_show_connect_pairs =
+      config.debug_show_connect_pairs;
     HoleFusionParameters::debug_show_connect_pairs_size =
       config.debug_show_connect_pairs_size;
 
@@ -194,10 +232,12 @@ namespace vision
     HoleFusionParameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
 
-    HoleFusionParameters::debug_show_check_holes = config.debug_show_check_holes;
+    HoleFusionParameters::debug_show_check_holes =
+      config.debug_show_check_holes;
     HoleFusionParameters::debug_show_check_holes_size =
       config.debug_show_check_holes_size;
 
-    HoleFusionParameters::minimum_curve_points = config.minimum_curve_points;
+    HoleFusionParameters::minimum_curve_points =
+      config.minimum_curve_points;
   }
 }
