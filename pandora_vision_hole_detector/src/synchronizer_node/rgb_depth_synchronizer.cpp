@@ -96,6 +96,10 @@ namespace vision
   {
     if (!locked_)
     {
+      //!< Lock the rgb_depth_synchronizer node; aka prevent the execution
+      //!< of this if-block without the explicit request of the hole_fusion node
+      locked_ = true;
+
       //!< Extract the RGB image from the point cloud
       cv::Mat rgbImage = MessageConversions::pointCloudToRGBImage(
         pointCloudMessage);
@@ -112,10 +116,6 @@ namespace vision
 
       //!< Publish the synchronized rgb image
       synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
-
-      //!< Lock the rgb_depth_synchronizer node; aka prevent the execution
-      //!< of this if-block without the explicit request of the hole_fusion node
-      locked_ = true;
     }
   }
 

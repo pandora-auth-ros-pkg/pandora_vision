@@ -40,6 +40,8 @@
 
 #include <std_msgs/Empty.h>
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
+#include "vision_communications/CandidateHoleMsg.h"
+#include "vision_communications/RgbCandidateHolesVectorMsg.h"
 #include "message_conversions/message_conversions.h"
 #include <depth_node/defines.h>
 #include "depth_node/depth_parameters.h"
@@ -69,6 +71,26 @@ namespace vision
       //!< depth node
       ros::Subscriber depthCandidateHolesSubscriber_;
 
+      //!< The ROS subscriber for acquisition of candidate holes through the
+      //!< rgb node
+      ros::Subscriber rgbCandidateHolesSubscriber_;
+
+      //!< Indicates how many of the depth_node and rgb_node nodes have
+      //!< received hole candidates and are ready to send them for processing
+      int numNodesReady;
+
+      //!< The point cloud received by the depth node
+      PointCloudXYZPtr pointCloudXYZ;
+
+      //!< The interpolated depth image received by the depth node
+      cv::Mat interpolatedDepthImage;
+
+      //!< The conveyor of hole candidates received by the depth node
+      HoleFilters::HolesConveyor depthHolesConveyor;
+
+      //!< The conveyor of hole candidates received by the rgb node
+      HoleFilters::HolesConveyor rgbHolesConveyor;
+
       /**
         @brief Requests from the synchronizer to process a new point cloud
         @return void
@@ -88,38 +110,67 @@ namespace vision
         depthCandidateHolesVector);
 
       /**
-       @brief Recreates the HoleFilters::HolesConveyor struct for the
-       candidate holes from the
-       vision_communications::DepthCandidateHolesVectorMsg message
-       @param[in] holesMsg
-       [vision_communications::DepthCandidateHolesVectorMsg&] The input
-       depth candidate holes
-       @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
-       struct
-       @return void
+        @brief Callback for the candidate holes via the rgb node
+        @param[in] depthCandidateHolesVector
+        [const vision_communications::RgbCandidateHolesVectorMsg&]
+        The message containing the necessary information to filter hole
+        candidates acquired through the rgb node
+        @return void
        **/
-      void fromDepthMessageToConveyor(
-        const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+      void rgbCandidateHolesCallback(
+        const vision_communications::RgbCandidateHolesVectorMsg&
+        rgbCandidateHolesVector);
+
+      /**
+        @brief Recreates the HoleFilters::HolesConveyor struct for the
+        candidate holes from the
+        vision_communications::CandidateHolerMsg message
+        @param[in]candidateHolesVector
+        [const std::vector<vision_communications::CandidateHoleMsg>&]
+        The input candidate holes
+        @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+        struct
+        @return void
+       **/
+      void fromCandidateHoleMsgToConveyor(
+        const std::vector<vision_communications::CandidateHoleMsg>&
+        candidateHolesVector,
         HoleFilters::HolesConveyor& conveyor);
 
       /**
-       @brief Unpacks the the HoleFilters::HolesConveyor struct for the
-       candidate holes, the interpolated depth image and the point cloud
-       from the vision_communications::DepthCandidateHolesVectorMsg message
-       @param[in] holesMsg
-       [vision_communications::DepthCandidateHolesVectorMsg&] The input
-       depth candidate holes message
-       @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
-       struct
-       @param[out] pointCloudXYZ [PointCloudXYZPtr&] The output point cloud
-       @param[out] interpolatedDepthImage [cv::Mat&] The output interpolated
-       depth image
-       @return void
+        @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+        candidate holes, the interpolated depth image and the point cloud
+        from the vision_communications::DepthCandidateHolesVectorMsg message
+        @param[in] holesMsg
+        [vision_communications::DepthCandidateHolesVectorMsg&] The input
+        candidate holes message obtained through the depth node
+        @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+        struct
+        @param[out] pointCloudXYZ [PointCloudXYZPtr&] The output point cloud
+        @param[out] interpolatedDepthImage [cv::Mat&] The output interpolated
+        depth image
+        @return void
        **/
       void unpackDepthMessage(
         const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
         HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
         cv::Mat& interpolatedDepthImage);
+
+      /**
+        @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+        candidate holes, the RGB image
+        from the vision_communications::DepthCandidateHolesVectorMsg message
+        @param[in] holesMsg
+        [vision_communications::RgbCandidateHolesVectorMsg&] The input
+        candidate holes message obtained throught the RGB node
+        @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+        struct
+        @param[out] rgbImage [cv::Mat&] The output RGB image
+        @return void
+       **/
+      void unpackRgbMessage(
+        const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
+        HoleFilters::HolesConveyor& conveyor, cv::Mat& rgbImage);
 
     public:
 

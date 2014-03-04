@@ -1,6 +1,6 @@
 Header header
 
-vision_communications/DepthCandidateHoleMsg[] candidateHoles
+vision_communications/CandidateHoleMsg[] candidateHoles
 
 sensor_msgs/Image interpolatedDepthImage
 
