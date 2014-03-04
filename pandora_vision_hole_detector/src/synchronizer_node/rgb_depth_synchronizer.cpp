@@ -87,10 +87,8 @@ namespace vision
   /**
     @brief The synchronized callback for the point cloud and rgb image
     obtained by the depth sensor.
-    @param pointCloudMessage [const sensor_msgs::PointCloud2ConstPtr&]
+    @param[in] pointCloudMessage [const sensor_msgs::PointCloud2ConstPtr&]
     The input point cloud
-    @param rgbImageMessage [const sensor_msgs::ImageConstPtr&]
-    The input rgb image
     @return void
    **/
   void RgbDepthSynchronizer::synchronizedCallback(
@@ -126,7 +124,7 @@ namespace vision
   /**
     @brief The callback for the hole_fusion node request for the
     lock/unlock of the rgb_depth_synchronizer node
-    @param lockMsg [const std_msgs::Empty] An empty message
+    @param[in] lockMsg [const std_msgs::Empty] An empty message
     @return void
    **/
   void RgbDepthSynchronizer::holeFusionCallback(const std_msgs::Empty& lockMsg)

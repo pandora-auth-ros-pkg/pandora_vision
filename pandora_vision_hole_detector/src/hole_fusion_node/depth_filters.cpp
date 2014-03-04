@@ -238,7 +238,7 @@ namespace vision
     points the outline consists of
     @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
     The bounding boxes' vertices
-    @param inflationsize [const int] Grow the rectangle by inflationsize as
+    @param[in] inflationsize [const int] Grow the rectangle by inflationsize as
     to acquire more points to check for plane existence.
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs

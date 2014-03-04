@@ -35,8 +35,8 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef KINECT_HOLE_FILTERS
-#define KINECT_HOLE_FILTERS
+#ifndef DEPTH_NODE_HOLE_FILTERS
+#define DEPTH_NODE_HOLE_FILTERS
 
 #include "depth_node/noise_elimination.h"
 #include "depth_node/edge_detection.h"

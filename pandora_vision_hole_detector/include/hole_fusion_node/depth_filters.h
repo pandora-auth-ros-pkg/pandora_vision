@@ -35,14 +35,10 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef DEPTH_FILTERS_H
-#define DEPTH_FILTERS_H
+#ifndef HOLE_FUSION_NODE_DEPTH_FILTERS_H
+#define HOLE_FUSION_NODE_DEPTH_FILTERS_H
 
-#include "depth_node/noise_elimination.h"
-#include "depth_node/edge_detection.h"
 #include "depth_node/hole_filters.h"
-#include "depth_node/blob_detection.h"
-#include "depth_node/bounding_box_detection.h"
 #include "hole_fusion_node/planes_detection.h"
 #include <math.h>
 
@@ -98,7 +94,6 @@ namespace vision
           const std::vector<std::vector<cv::Point2f> >& inRectangles,
           std::vector<std::string>& msgs);
 
-
       /**
         @brief Brushfire from a blobs's outline to its bounding box
         with an inflation size (inflates the rectangle by inflationSize pixels).
@@ -113,8 +108,8 @@ namespace vision
         points the outline consists of
         @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
         The bounding boxes' vertices
-        @param inflationsize [const int] Grow the rectangle by inflationsize as
-        to acquire more points to check for plane existence.
+        @param[in] inflationsize [const int] Grow the rectangle by inflationsize
+        as to acquire more points to check for plane existence.
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -124,7 +119,7 @@ namespace vision
           const std::vector<cv::KeyPoint> keyPoints,
           const std::vector<std::vector<cv::Point> > outlines,
           const std::vector<std::vector<cv::Point2f> > rectangles,
-          int inflationSize);
+          const int inflationSize);
 
       /**
         @brief  Given the bounding box of a blob, inflate it.
