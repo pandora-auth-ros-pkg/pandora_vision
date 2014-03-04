@@ -142,7 +142,7 @@ namespace vision
     //!< candidateHoles vector
     for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
     {
-      vision_communications::DepthCandidateHoleMsg holeMsg;
+      vision_communications::CandidateHoleMsg holeMsg;
 
       //!< Push back the keypoint
       holeMsg.keypointX = conveyor.keyPoints[i].pt.x;

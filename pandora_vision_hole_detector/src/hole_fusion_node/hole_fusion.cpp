@@ -42,8 +42,11 @@ namespace vision
   /**
     @brief The HoleFusion constructor
    **/
-  HoleFusion::HoleFusion(void)
+  HoleFusion::HoleFusion(void) : pointCloudXYZ(new PointCloudXYZ)
   {
+    //!< Initialize the numNodesReady variable
+    numNodesReady = 0;
+
     //!< Advertise the topic that the rgb_depth_synchronizer will be
     //!< subscribed to in order for the hole_fusion_node to unlock it
     unlockPublisher_ = nodeHandle_.advertise <std_msgs::Empty>
@@ -54,6 +57,12 @@ namespace vision
     depthCandidateHolesSubscriber_= nodeHandle_.subscribe(
       "/synchronized/camera/depth/candidate_holes", 1,
       &HoleFusion::depthCandidateHolesCallback, this);
+
+    //!< Subscribe to the topic where the rgb node publishes
+    //!< candidate holes
+    rgbCandidateHolesSubscriber_= nodeHandle_.subscribe(
+      "/synchronized/camera/rgb/candidate_holes", 1,
+      &HoleFusion::rgbCandidateHolesCallback, this);
 
     ROS_INFO("HoleFusion node initiated");
   }
@@ -94,20 +103,24 @@ namespace vision
     const vision_communications::DepthCandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
-    //!< Unpack the message
-    HoleFilters::HolesConveyor conveyor;
-    cv::Mat interpolatedDepthImage;
-    PointCloudXYZPtr pointCloudXYZ(new PointCloudXYZ);
+    //!< Clear the current depthHolesConveyor struct
+    //!< (or else keyPoints, rectangles and outlines accumulate)
+    this->depthHolesConveyor.keyPoints.clear();
+    this->depthHolesConveyor.rectangles.clear();
+    this->depthHolesConveyor.outlines.clear();
 
-    unpackDepthMessage(depthCandidateHolesVector, conveyor, pointCloudXYZ,
-      interpolatedDepthImage);
+    //!< Unpack the message
+    unpackDepthMessage(depthCandidateHolesVector,
+      this->depthHolesConveyor,
+      this->pointCloudXYZ,
+      this->interpolatedDepthImage);
 
 
     //!< check holes for debugging purposes
     DepthFilters::checkHoles(
-      interpolatedDepthImage,
-      pointCloudXYZ,
-      conveyor);
+      this->interpolatedDepthImage,
+      this->pointCloudXYZ,
+      this->depthHolesConveyor);
 
 
     #ifdef DEBUG_SHOW
@@ -121,9 +134,9 @@ namespace vision
       imgs.push_back(
         Visualization::showKeypoints(
           msg,
-          interpolatedDepthImage,
+          this->interpolatedDepthImage,
           -1,
-          conveyor.keyPoints)
+          this->depthHolesConveyor.keyPoints)
         );
     }
     if(HoleFusionParameters::debug_show_find_holes)
@@ -137,36 +150,52 @@ namespace vision
 
 
   /**
+    @brief Callback for the candidate holes via the rgb node
+    @param[in] depthCandidateHolesVector
+    [const vision_communications::RgbCandidateHolesVectorMsg&]
+    The message containing the necessary information to filter hole
+    candidates acquired through the rgb node
+    @return void
+   **/
+  void HoleFusion::rgbCandidateHolesCallback(
+    const vision_communications::RgbCandidateHolesVectorMsg&
+    rgbCandidateHolesVector)
+  {}
+
+
+
+  /**
     @brief Recreates the HoleFilters::HolesConveyor struct for the
     candidate holes from the
-    vision_communications::DepthCandidateHolesVectorMsg message
-    @param[in] holesMsg
-    [vision_communications::DepthCandidateHolesVectorMsg&] The input
-    depth candidate holes
+    vision_communications::CandidateHolerMsg message
+    @param[in]candidateHolesVector
+    [const std::vector<vision_communications::CandidateHoleMsg>&]
+    The input candidate holes
     @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
     struct
     @return void
    **/
-  void HoleFusion::fromDepthMessageToConveyor(
-    const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+  void HoleFusion::fromCandidateHoleMsgToConveyor(
+    const std::vector<vision_communications::CandidateHoleMsg>&
+    candidateHolesVector,
     HoleFilters::HolesConveyor& conveyor)
   {
-    for (unsigned int i = 0; i < holesMsg.candidateHoles.size(); i++)
+    for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
     {
       //!< Recreate conveyor.keypoints
       cv::KeyPoint holeKeypoint;
-      holeKeypoint.pt.x = holesMsg.candidateHoles[i].keypointX;
-      holeKeypoint.pt.y = holesMsg.candidateHoles[i].keypointY;
+      holeKeypoint.pt.x = candidateHolesVector[i].keypointX;
+      holeKeypoint.pt.y = candidateHolesVector[i].keypointY;
       conveyor.keyPoints.push_back(holeKeypoint);
 
       //!< Recreate conveyor.rectangles
       std::vector<cv::Point2f> renctangleVertices;
       for (unsigned int v = 0;
-        v < holesMsg.candidateHoles[i].verticesX.size(); v++)
+        v < candidateHolesVector[i].verticesX.size(); v++)
       {
         cv::Point2f vertex;
-        vertex.x = holesMsg.candidateHoles[i].verticesX[v];
-        vertex.y = holesMsg.candidateHoles[i].verticesY[v];
+        vertex.x = candidateHolesVector[i].verticesX[v];
+        vertex.y = candidateHolesVector[i].verticesY[v];
         renctangleVertices.push_back(vertex);
       }
       conveyor.rectangles.push_back(renctangleVertices);
@@ -174,11 +203,11 @@ namespace vision
       //!< Recreate conveyor.outlines
       std::vector<cv::Point> outlinePoints;
       for (unsigned int o = 0;
-        o < holesMsg.candidateHoles[i].outlineX.size(); o++)
+        o < candidateHolesVector[i].outlineX.size(); o++)
       {
         cv::Point outlinePoint;
-        outlinePoint.x = holesMsg.candidateHoles[i].outlineX[o];
-        outlinePoint.y = holesMsg.candidateHoles[i].outlineY[o];
+        outlinePoint.x = candidateHolesVector[i].outlineX[o];
+        outlinePoint.y = candidateHolesVector[i].outlineY[o];
         outlinePoints.push_back(outlinePoint);
       }
       conveyor.outlines.push_back(outlinePoints);
@@ -193,7 +222,7 @@ namespace vision
     from the vision_communications::DepthCandidateHolesVectorMsg message
     @param[in] holesMsg
     [vision_communications::DepthCandidateHolesVectorMsg&] The input
-    depth candidate holes message
+    candidate holes message obtained through the depth node
     @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
     struct
     @param[out] pointCloudXYZ [PointCloudXYZPtr&] The output point cloud
@@ -207,15 +236,44 @@ namespace vision
     cv::Mat& interpolatedDepthImage)
   {
     //!< Recreate the conveyor
-    fromDepthMessageToConveyor(holesMsg, conveyor);
+    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
     //!< Unpack the interpolated depth image
-    MessageConversions::extractImageFromMessageContainer(holesMsg,
+    MessageConversions::extractDepthImageFromMessageContainer(
+      holesMsg,
       interpolatedDepthImage,
       sensor_msgs::image_encodings::TYPE_32FC1);
 
     //!< Unpack the point cloud
     MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
       pointCloudXYZ);
+  }
+
+
+
+  /**
+    @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+    candidate holes, the RGB image
+    from the vision_communications::DepthCandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [vision_communications::RgbCandidateHolesVectorMsg&] The input
+    candidate holes message obtained throught the RGB node
+    @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+    struct
+    @param[out] rgbImage [cv::Mat&] The output RGB image
+    @return void
+   **/
+  void HoleFusion::unpackRgbMessage(
+    const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
+    HoleFilters::HolesConveyor& conveyor, cv::Mat& rgbImage)
+  {
+    //!< Recreate the conveyor
+    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
+
+    //!< Unpack the RGB image
+    MessageConversions::extractRgbImageFromMessageContainer(
+      holesMsg,
+      rgbImage,
+      sensor_msgs::image_encodings::TYPE_32FC1);
   }
 }

@@ -160,18 +160,38 @@ namespace vision
 
 
   /**
-    @brief Extracts a cv::Mat image from a custom ROS message containing
-    an image
+    @brief Extracts a cv::Mat image from a custom ROS message  of type
+    vision_communications::DepthCandidateHolesVectorMsg
+    containing the interpolated depth image
     @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
     @param[out] image [cv::Mat&] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
-  void MessageConversions::extractImageFromMessageContainer(
+  void MessageConversions::extractDepthImageFromMessageContainer(
     const vision_communications::DepthCandidateHolesVectorMsg& msg,
     cv::Mat& image, const std::string& encoding)
   {
     sensor_msgs::Image imageMsg = msg.interpolatedDepthImage;
+    extractImageFromMessage(imageMsg, image, encoding);
+  }
+
+
+
+  /**
+    @brief Extracts a cv::Mat image from a custom ROS message  of type
+    vision_communications::RgbCandidateHolesVectorMsg
+    containing the rgb image
+    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
+    @param[out] image [cv::Mat&] The output image
+    @param[in] encoding [const std::string&] The image encoding
+    @return void
+   **/
+  void MessageConversions::extractRgbImageFromMessageContainer(
+    const vision_communications::RgbCandidateHolesVectorMsg& msg,
+    cv::Mat& image, const std::string& encoding)
+  {
+    sensor_msgs::Image imageMsg = msg.rgbImage;
     extractImageFromMessage(imageMsg, image, encoding);
   }
 
