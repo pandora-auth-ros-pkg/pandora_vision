@@ -103,6 +103,8 @@ namespace vision
     const vision_communications::DepthCandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
+    ROS_INFO("Hole Fusion Depth callback");
+
     //!< Clear the current depthHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
     this->depthHolesConveyor.keyPoints.clear();
@@ -160,7 +162,22 @@ namespace vision
   void HoleFusion::rgbCandidateHolesCallback(
     const vision_communications::RgbCandidateHolesVectorMsg&
     rgbCandidateHolesVector)
-  {}
+  {
+    ROS_INFO("Hole Fusion RGB callback");
+
+    //!< Clear the current rgbHolesConveyor struct
+    //!< (or else keyPoints, rectangles and outlines accumulate)
+    this->rgbHolesConveyor.keyPoints.clear();
+    this->rgbHolesConveyor.rectangles.clear();
+    this->rgbHolesConveyor.outlines.clear();
+
+    //!< Unpack the message
+    unpackRgbMessage(rgbCandidateHolesVector,
+      this->rgbHolesConveyor,
+      this->rgbImage);
+
+    Visualization::showScaled("rgb", this->rgbImage, 1);
+  }
 
 
 
@@ -274,6 +291,6 @@ namespace vision
     MessageConversions::extractRgbImageFromMessageContainer(
       holesMsg,
       rgbImage,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+      sensor_msgs::image_encodings::TYPE_32FC3);
   }
 }
