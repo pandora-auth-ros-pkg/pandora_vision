@@ -136,6 +136,14 @@ namespace pandora_vision
       this->pointCloudXYZ,
       this->interpolatedDepthImage);
 
+    #ifdef DEBUG_SHOW
+    if (HoleFusionParameters::debug_show_find_holes)
+    {
+      Visualization::showScaled(
+        "interpolated depth image arrived in Hole Fusion node",
+        this->interpolatedDepthImage, 1);
+    }
+    #endif
 
     //!< check holes for debugging purposes
     DepthFilters::checkHoles(
@@ -199,6 +207,14 @@ namespace pandora_vision
     unpackRgbMessage(rgbCandidateHolesVector,
       this->rgbHolesConveyor,
       this->rgbImage);
+
+    #ifdef DEBUG_SHOW
+    if (HoleFusionParameters::debug_show_find_holes)
+    {
+      Visualization::showScaled(
+        "RGB image arrived in Hole Fusion node", this->rgbImage, 1);
+    }
+    #endif
 
     numNodesReady++;
   }
