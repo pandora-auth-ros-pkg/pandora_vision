@@ -61,8 +61,8 @@ namespace pandora_vision
       float ratioX_;
       float ratioY_;
       
-      float hfov_;  //horizontal Field Of View (rad)
-      float vfov_;
+      double hfov_;  //horizontal Field Of View (rad)
+      double vfov_;
       int frameWidth_; //frame width
       int frameHeight_;  //frame height
       
@@ -73,8 +73,8 @@ namespace pandora_vision
       std::string packagePath_;
       std::string saveImagePath_;
       std::string imageTopic_;
-    std::string cameraName;
-    std::string cameraFrameId;
+      std::string cameraName;
+      std::string cameraFrameId;
       
       int hazmatNumber_;
       
