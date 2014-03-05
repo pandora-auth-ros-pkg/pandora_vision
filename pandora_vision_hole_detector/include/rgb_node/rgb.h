@@ -43,7 +43,7 @@
 #include "depth_node/hole_filters.h"
 #include "message_conversions/message_conversions.h"
 
-namespace vision
+namespace pandora_vision
 {
   class Rgb
   {

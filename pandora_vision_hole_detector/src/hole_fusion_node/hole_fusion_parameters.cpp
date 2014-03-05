@@ -37,7 +37,7 @@
 
 #include "hole_fusion_node/hole_fusion_parameters.h"
 
-namespace vision
+namespace pandora_vision
 {
   //!< Kanny parameters
   int HoleFusionParameters::kanny_ratio = 3;

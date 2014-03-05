@@ -46,7 +46,7 @@
 int main(int argc, char** argv) {
   srand (time(NULL));
   ros::init(argc, argv, "hole_fusion_node");
-  vision::HoleFusion hole_fusion;
+  pandora_vision::HoleFusion hole_fusion;
   ros::spin();
   return 0;
 }

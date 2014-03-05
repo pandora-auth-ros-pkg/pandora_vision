@@ -37,7 +37,7 @@
 
 #include "depth_node/hole_filters.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief Given a set of keypoints and an edges image, this function

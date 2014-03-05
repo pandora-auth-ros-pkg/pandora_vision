@@ -37,7 +37,7 @@
 
 #include "rgb_node/rgb.h"
 
-namespace vision
+namespace pandora_vision
 {
   //!< Constructor
   Rgb::Rgb(void)

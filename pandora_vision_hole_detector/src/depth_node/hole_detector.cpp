@@ -37,9 +37,8 @@
 
 #include "depth_node/hole_detector.h"
 
-namespace vision
+namespace pandora_vision
 {
-
   ParticleFilter HoleDetector::pf = ParticleFilter();
 
   HoleDetector::HoleDetector(void)

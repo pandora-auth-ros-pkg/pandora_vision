@@ -37,8 +37,8 @@
 
 #include "depth_node/edge_detection.h"
 
-namespace vision {
-
+namespace pandora_vision
+{
   /**
     @brief Applies the Canny edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format

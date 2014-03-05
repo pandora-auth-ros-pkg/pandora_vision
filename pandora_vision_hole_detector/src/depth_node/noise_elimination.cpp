@@ -37,8 +37,8 @@
 
 #include "depth_node/noise_elimination.h"
 
-namespace vision{
-
+namespace pandora_vision
+{
   /**
     @brief Given an input image from the depth sensor, this function
     eliminates noise in it depending on the amount of noise

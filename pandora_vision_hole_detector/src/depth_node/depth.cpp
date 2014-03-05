@@ -38,7 +38,7 @@
 #include "depth_node/depth.h"
 #include "message_conversions/message_conversions.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief Default constructor. Initiates communications, loads parameters.

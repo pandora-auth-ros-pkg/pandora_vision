@@ -44,7 +44,7 @@
   @namespace vision
   @brief The main namespace for PANDORA vision
  **/
-namespace vision
+namespace pandora_vision
 {
   /**
     @class HoleDetector

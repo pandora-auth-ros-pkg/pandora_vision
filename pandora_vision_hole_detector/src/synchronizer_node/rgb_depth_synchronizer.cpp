@@ -38,7 +38,7 @@
 #include "synchronizer_node/rgb_depth_synchronizer.h"
 #include "message_conversions/message_conversions.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief The constructor

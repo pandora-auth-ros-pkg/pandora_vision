@@ -42,7 +42,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
 
-namespace vision
+namespace pandora_vision
 {
   struct HoleFusionParameters
   {

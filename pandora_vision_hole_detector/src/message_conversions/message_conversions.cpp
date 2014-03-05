@@ -41,7 +41,7 @@
   @namespace vision
   @brief The main namespace for PANDORA vision
  **/
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief Extracts a PointCloudXYZPtr (see defines.h)
