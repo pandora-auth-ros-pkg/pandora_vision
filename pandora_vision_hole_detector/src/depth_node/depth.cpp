@@ -46,6 +46,10 @@ namespace pandora_vision
    **/
   PandoraKinect::PandoraKinect(void)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("PandoraKinect");
+    #endif
+
     ros::Duration(0.5).sleep();
 
     //!< Subscribe to the point cloud published by the
@@ -64,6 +68,10 @@ namespace pandora_vision
       ("/vision/kinect/planes", 1000);
 
     ROS_INFO("Depth node initiated");
+
+    #ifdef DEBUG_TIME
+    Timer::tick("PandoraKinect");
+    #endif
   }
 
 
@@ -88,7 +96,13 @@ namespace pandora_vision
   void PandoraKinect::inputCloudCallback(
     const sensor_msgs::PointCloud2ConstPtr& msg)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("inputCloudCallback", "", true);
+    #endif
+
+    #ifdef DEBUG_SHOW
     ROS_INFO("Depth node callback");
+    #endif
 
     //!< Extract a PointCloudXYZPtr from the point cloud message
     PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
@@ -115,6 +129,10 @@ namespace pandora_vision
     //!< Publish the candidate holes message
     _candidateHolesPublisher.publish(depthCandidateHolesMsg);
 
+    #ifdef DEBUG_TIME
+    Timer::tick("inputCloudCallback");
+    #endif
+
     return;
   }
 
@@ -140,6 +158,10 @@ namespace pandora_vision
     vision_communications::DepthCandidateHolesVectorMsg& depthCandidateHolesMsg,
     const std::string& encoding)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesMessage", "inputCloudCallback");
+    #endif
+
     //!< Fill the vision_communications::DepthCandidateHolesVectorMsg's
     //!< candidateHoles vector
     for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
@@ -188,6 +210,10 @@ namespace pandora_vision
     //!< sensor_msgs/Image interpolatedDepthImage
     depthCandidateHolesMsg.interpolatedDepthImage =
       *imageMessagePtr->toImageMsg();
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesMessage");
+    #endif
   }
 
 
@@ -202,6 +228,10 @@ namespace pandora_vision
   void PandoraKinect::extractDepthImageFromPointCloud(
     const PointCloudXYZPtr& pointCloudXYZ, cv::Mat& depthImage)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractDepthImageFromPointCloud", "inputCloudCallback");
+    #endif
+
     for (unsigned int row = 0; row < pointCloudXYZ->height; ++row)
     {
       for (unsigned int col = 0; col < pointCloudXYZ->width; ++col)
@@ -216,6 +246,10 @@ namespace pandora_vision
         }
       }
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractDepthImageFromPointCloud");
+    #endif
   }
 
 
@@ -225,14 +259,22 @@ namespace pandora_vision
     @param in_cloud [const std::vector<PointCloudXYZPtr>] The point clouds
     @return void
    **/
-  void PandoraKinect::storePointCloudVectorToImages
-    (const std::vector<PointCloudXYZPtr> in_vector)
+  void PandoraKinect::storePointCloudVectorToImages(
+    const std::vector<PointCloudXYZPtr> in_vector)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("storePointCloudVectorToImages");
+    #endif
+
+    for (int i = 0; i < in_vector.size(); i++)
     {
-      for (int i = 0; i < in_vector.size(); i++)
-      {
-        pcl::io::savePCDFileASCII
-          (boost::to_string(i) + "_.pcd", *in_vector[i]);
-      }
+      pcl::io::savePCDFileASCII
+        (boost::to_string(i) + "_.pcd", *in_vector[i]);
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("storePointCloudVectorToImages");
+    #endif
   }
 
 
@@ -242,10 +284,13 @@ namespace pandora_vision
   @param cloudVector [const std::vector<PointCloudXYZPtr>] The point clouds\
   containing the planes
   @return void
-  **/
-  void PandoraKinect::publishPlanes
-    (const std::vector<PointCloudXYZPtr> cloudVector)
+   **/
+  void PandoraKinect::publishPlanes(
+    const std::vector<PointCloudXYZPtr> cloudVector)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("publishPlanes");
+    #endif
 
     PointCloudXYZPtr aggregatedPlanes (new PointCloudXYZ);
 
@@ -257,6 +302,10 @@ namespace pandora_vision
     aggregatedPlanes->header.frame_id = cloudVector[0]->header.frame_id;
     aggregatedPlanes->header.stamp = cloudVector[0]->header.stamp;
     _planePublisher.publish(aggregatedPlanes);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("publishPlanes");
+    #endif
   }
 
 }

@@ -55,6 +55,10 @@ namespace pandora_vision
     const sensor_msgs::PointCloud2ConstPtr& msg,
     PointCloudXYZPtr& pointCloudXYZ)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractPointCloudXYZFromMessage");
+    #endif
+
     PointCloud pointCloud;
 
     //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
@@ -64,6 +68,10 @@ namespace pandora_vision
     //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
     //!< aka PointCloudXYZPtr
     pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractPointCloudXYZFromMessage");
+    #endif
   }
 
 
@@ -80,6 +88,10 @@ namespace pandora_vision
     const vision_communications::DepthCandidateHolesVectorMsg& msg,
     PointCloudXYZPtr& pointCloudXYZ)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractPointCloudXYZFromMessageContainer");
+    #endif
+
     PointCloud pointCloud;
 
     //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
@@ -89,6 +101,10 @@ namespace pandora_vision
     //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
     //!< aka PointCloudXYZPtr
     pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractPointCloudXYZFromMessageContainer");
+    #endif
   }
 
 
@@ -106,6 +122,10 @@ namespace pandora_vision
     const PointCloudXYZPtr& pointCloudXYZPtr,
     sensor_msgs::PointCloud2& pointCloudMsg)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("convertPointCloudXYZToMessage");
+    #endif
+
     PointCloud pointCloud;
 
     //!< Convert the pcl::PointCloud<pcl::PointXYZ>::Ptr aka PointCloudXYZPtr
@@ -114,6 +134,10 @@ namespace pandora_vision
 
     //!< Pack the point cloud to a ROS message
     pcl_conversions::fromPCL(pointCloud, pointCloudMsg);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("convertPointCloudXYZToMessage");
+    #endif
   }
 
 
@@ -130,11 +154,19 @@ namespace pandora_vision
     const sensor_msgs::ImageConstPtr& msg, cv::Mat& image,
     const std::string& encoding)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractImageFromMessage");
+    #endif
+
     cv_bridge::CvImagePtr in_msg;
 
     in_msg = cv_bridge::toCvCopy(msg, encoding);
 
     image = in_msg->image.clone();
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractImageFromMessage");
+    #endif
   }
 
 
@@ -150,11 +182,19 @@ namespace pandora_vision
   void MessageConversions::extractImageFromMessage(
     const sensor_msgs::Image& msg, cv::Mat& image, const std::string& encoding)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractImageFromMessage");
+    #endif
+
     cv_bridge::CvImagePtr in_msg;
 
     in_msg = cv_bridge::toCvCopy(msg, encoding);
 
     image = in_msg->image.clone();
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractImageFromMessage");
+    #endif
   }
 
 
@@ -172,8 +212,16 @@ namespace pandora_vision
     const vision_communications::DepthCandidateHolesVectorMsg& msg,
     cv::Mat& image, const std::string& encoding)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractDepthImageFromMessageContainer");
+    #endif
+
     sensor_msgs::Image imageMsg = msg.interpolatedDepthImage;
     extractImageFromMessage(imageMsg, image, encoding);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractDepthImageFromMessageContainer");
+    #endif
   }
 
 
@@ -191,8 +239,16 @@ namespace pandora_vision
     const vision_communications::RgbCandidateHolesVectorMsg& msg,
     cv::Mat& image, const std::string& encoding)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("extractRgbImageFromMessageContainer");
+    #endif
+
     sensor_msgs::Image imageMsg = msg.rgbImage;
     extractImageFromMessage(imageMsg, image, encoding);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractRgbImageFromMessageContainer");
+    #endif
   }
 
 
@@ -206,6 +262,10 @@ namespace pandora_vision
   cv::Mat MessageConversions::pointCloudToRGBImage(
     const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("pointCloudToRGBImage");
+    #endif
+
     PointCloud pointCloud;
 
     //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
@@ -232,6 +292,11 @@ namespace pandora_vision
           pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].b;
       }
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("pointCloudToRGBImage");
+    #endif
+
     return rgbImage;
   }
 }

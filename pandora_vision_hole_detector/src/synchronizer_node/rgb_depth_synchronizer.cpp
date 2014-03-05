@@ -45,6 +45,10 @@ namespace pandora_vision
    **/
   RgbDepthSynchronizer::RgbDepthSynchronizer(void)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("RgbDepthSynchronizer");
+    #endif
+
     locked_ = true;
 
     //!< Subscribe to the RGB point cloud topic
@@ -67,6 +71,10 @@ namespace pandora_vision
       <sensor_msgs::Image>("/synchronized/camera/rgb/image_raw", 1000);
 
     ROS_INFO("RgbDepthSynchronizer node initiated");
+
+    #ifdef DEBUG_TIME
+    Timer::tick("RgbDepthSynchronizer");
+    #endif
   }
 
 
@@ -92,6 +100,10 @@ namespace pandora_vision
   void RgbDepthSynchronizer::synchronizedCallback(
     const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("synchronizedCallback", "", true);
+    #endif
+
     if (!locked_)
     {
 
@@ -120,6 +132,10 @@ namespace pandora_vision
       //!< Publish the synchronized rgb image
       synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("synchronizedCallback");
+    #endif
   }
 
 
@@ -132,6 +148,14 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::holeFusionCallback(const std_msgs::Empty& lockMsg)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("holeFusionCallback");
+    #endif
+
     locked_ = false;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("holeFusionCallback");
+    #endif
   }
 }
