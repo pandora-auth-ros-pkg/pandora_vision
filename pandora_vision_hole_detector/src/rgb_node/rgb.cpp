@@ -74,7 +74,10 @@ namespace vision
    **/
   void Rgb::rgbImageCallback(const sensor_msgs::Image& inImage)
   {
+    #ifdef DEBUG_SHOW
     ROS_INFO("RGB node callback");
+    #endif
+
     HoleFilters::HolesConveyor rgbHolesConveyor;
     std::vector<cv::Point2f> rectangles;
     std::vector<cv::Point> outlines;

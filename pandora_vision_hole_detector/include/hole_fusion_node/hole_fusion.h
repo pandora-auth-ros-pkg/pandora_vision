@@ -38,6 +38,7 @@
 #ifndef HOLE_FUSION_H
 #define HOLE_FUSION_H
 
+#include <boost/thread.hpp>
 #include <std_msgs/Empty.h>
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
 #include "vision_communications/CandidateHoleMsg.h"
@@ -174,6 +175,14 @@ namespace vision
       void unpackRgbMessage(
         const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
         HoleFilters::HolesConveyor& conveyor, cv::Mat& rgbImage);
+
+      /**
+        @brief Waits for both hole sources(rgb and depth nodes) to have sent
+        their candidate holes and then it implements a strategy to combine
+        information from both sources in order to accurately find valid holes
+        @return void
+       **/
+      void processCandidateHoles();
 
     public:
 

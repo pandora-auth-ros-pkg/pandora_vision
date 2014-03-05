@@ -44,6 +44,8 @@ namespace vision
    **/
   HoleFusion::HoleFusion(void) : pointCloudXYZ(new PointCloudXYZ)
   {
+    ros::Duration(0.5).sleep();
+
     //!< Initialize the numNodesReady variable
     numNodesReady = 0;
 
@@ -65,6 +67,16 @@ namespace vision
       &HoleFusion::rgbCandidateHolesCallback, this);
 
     ROS_INFO("HoleFusion node initiated");
+
+    //!< Start the synchronizer
+    unlockSynchronizer();
+
+    //!< Create a seperate thread responsible for watching when the RGB and
+    //!< depth nodes have their respective candidate holes sent to the hole
+    //!< fusion node for the essential part of fusing the two kinds of
+    //!< information
+    boost::thread processCandidateHolesThread(
+      &HoleFusion::processCandidateHoles, this);
   }
 
 
@@ -85,6 +97,10 @@ namespace vision
    **/
   void HoleFusion::unlockSynchronizer()
   {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Sending unlock message");
+    #endif
+
     std_msgs::Empty unlockMsg;
     unlockPublisher_.publish(unlockMsg);
   }
@@ -103,7 +119,10 @@ namespace vision
     const vision_communications::DepthCandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
+
+    #ifdef DEBUG_SHOW
     ROS_INFO("Hole Fusion Depth callback");
+    #endif
 
     //!< Clear the current depthHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
@@ -147,6 +166,8 @@ namespace vision
         imgs, msgs, HoleFusionParameters::debug_show_find_holes_size,1);
     }
     #endif
+
+    numNodesReady++;
   }
 
 
@@ -163,7 +184,10 @@ namespace vision
     const vision_communications::RgbCandidateHolesVectorMsg&
     rgbCandidateHolesVector)
   {
+
+    #ifdef DEBUG_SHOW
     ROS_INFO("Hole Fusion RGB callback");
+    #endif
 
     //!< Clear the current rgbHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
@@ -176,7 +200,7 @@ namespace vision
       this->rgbHolesConveyor,
       this->rgbImage);
 
-    Visualization::showScaled("rgb", this->rgbImage, 1);
+    numNodesReady++;
   }
 
 
@@ -292,5 +316,50 @@ namespace vision
       holesMsg,
       rgbImage,
       sensor_msgs::image_encodings::TYPE_32FC3);
+  }
+
+
+
+  /**
+    @brief Waits for both hole sources(rgb and depth nodes) to have sent
+    their candidate holes and then it implements a strategy to combine
+    information from both sources in order to accurately find valid holes
+    @return void
+   **/
+  void HoleFusion::processCandidateHoles()
+  {
+    while(true)
+    {
+
+      #ifdef DEBUG_SHOW
+      ROS_INFO ("numNodesReady: %d", numNodesReady);
+      #endif
+
+      //!< If not both sources are ready, sleep.
+      if (numNodesReady != 2)
+      {
+        try
+        {
+          boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+        }
+        catch(boost::thread_interrupted&)
+        {
+          return;
+        }
+      }
+      else
+      {
+
+        #ifdef DEBUG_SHOW
+        ROS_INFO("Processing candidate holes");
+        #endif
+
+        //!< Do some processing
+
+        //!< Processing complete.
+        numNodesReady = 0;
+        unlockSynchronizer();
+      }
+    }
   }
 }

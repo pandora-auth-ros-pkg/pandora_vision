@@ -88,6 +88,8 @@ namespace vision
   void PandoraKinect::inputCloudCallback(
     const sensor_msgs::PointCloud2ConstPtr& msg)
   {
+    ROS_INFO("Depth node callback");
+
     //!< Extract a PointCloudXYZPtr from the point cloud message
     PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
     MessageConversions::extractPointCloudXYZFromMessage(msg, pointCloudXYZ);
