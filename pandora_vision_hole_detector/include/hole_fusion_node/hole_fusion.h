@@ -79,6 +79,9 @@ namespace vision
       //!< received hole candidates and are ready to send them for processing
       int numNodesReady;
 
+      //!< The rgb received by the RGB node
+      cv::Mat rgbImage;
+
       //!< The point cloud received by the depth node
       PointCloudXYZPtr pointCloudXYZ;
 
