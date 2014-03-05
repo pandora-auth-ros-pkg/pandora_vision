@@ -47,8 +47,6 @@ namespace vision
   {
     locked_ = true;
 
-    ros::Duration(0.5).sleep();
-
     //!< Subscribe to the RGB point cloud topic
     pointCloudSubscriber_ = nodeHandle_.subscribe(
       "/camera/depth_registered/points", 1,
@@ -96,6 +94,11 @@ namespace vision
   {
     if (!locked_)
     {
+
+      #ifdef DEBUG_SHOW
+      ROS_INFO("Synchronizer unlocked");
+      #endif
+
       //!< Lock the rgb_depth_synchronizer node; aka prevent the execution
       //!< of this if-block without the explicit request of the hole_fusion node
       locked_ = true;
