@@ -37,8 +37,8 @@
 
 #include "depth_node/visualization.h"
 
-namespace vision{
-
+namespace pandora_vision
+{
   /**
     @brief Shows multiple images in one window
     @param[in] title [const std::string] The window's title

@@ -37,8 +37,8 @@
 
 #include "depth_node/morphological_operators.h"
 
-namespace vision {
-
+namespace pandora_vision
+{
   /**
     @brief Checks if a kernel in a specific point in an image is satisfied
     @param kernal [const char [3][3]] The kernel

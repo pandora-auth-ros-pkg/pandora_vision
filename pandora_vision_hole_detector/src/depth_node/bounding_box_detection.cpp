@@ -37,8 +37,8 @@
 
 #include "depth_node/bounding_box_detection.h"
 
-namespace vision{
-
+namespace pandora_vision
+{
   /**
     @brief Finds rotated bounding boxes from blob outlines. The blob's area
     must be larger than DepthParameters::bounding_box_min_area_threshold.

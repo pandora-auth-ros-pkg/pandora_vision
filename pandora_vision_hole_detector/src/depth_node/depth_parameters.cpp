@@ -37,7 +37,7 @@
 
 #include "depth_node/depth_parameters.h"
 
-namespace vision
+namespace pandora_vision
 {
   //!< Kanny parameters
   int DepthParameters::kanny_ratio = 3;

@@ -37,9 +37,8 @@
 
 #include "hole_fusion_node/depth_filters.h"
 
-namespace vision
+namespace pandora_vision
 {
-
   /**
     @brief Checks for valid holes just by depth difference between the center
     of the blob and the edges of the bounding box

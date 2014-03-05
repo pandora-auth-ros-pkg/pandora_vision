@@ -37,7 +37,7 @@
 
 #include "hole_fusion_node/planes_detection.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief Identify the planes in a point cloud and return the number of

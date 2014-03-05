@@ -102,7 +102,7 @@
 @namespace vision
 @brief The main namespace for PANDORA vision
 **/
-namespace vision
+namespace pandora_vision
 {
   typedef pcl::PCLPointCloud2 PointCloud;
   typedef pcl::PCLPointCloud2::Ptr PointCloudPtr;

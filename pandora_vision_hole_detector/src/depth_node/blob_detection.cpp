@@ -37,8 +37,8 @@
 
 #include "depth_node/blob_detection.h"
 
-namespace vision{
-
+namespace pandora_vision
+{
   /**
     @brief Implements the brushfire algorithm for all blob keypoints in order to
     find a blob limits

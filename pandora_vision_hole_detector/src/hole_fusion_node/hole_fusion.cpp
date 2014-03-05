@@ -37,7 +37,7 @@
 
 #include "hole_fusion_node/hole_fusion.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief The HoleFusion constructor

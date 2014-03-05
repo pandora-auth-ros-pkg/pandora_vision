@@ -71,7 +71,7 @@ http://www.asciiflow.com/#Draw5547639148542835085/1967816621
 int main(int argc, char** argv) {
   srand (time(NULL));
   ros::init(argc, argv, "DepthNode");
-  vision::PandoraKinect pandora_kinect;
+  pandora_vision::PandoraKinect pandora_kinect;
   ros::spin();
   return 0;
 }

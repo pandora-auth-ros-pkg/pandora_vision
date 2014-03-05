@@ -46,7 +46,7 @@
 int main(int argc, char** argv) {
   srand (time(NULL));
   ros::init(argc, argv, "rgb_node");
-  vision::Rgb rgb;
+  pandora_vision::Rgb rgb;
   ros::spin();
   return 0;
 }
