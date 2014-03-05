@@ -596,7 +596,6 @@ namespace pandora_vision
       }
 
       //!< Check if the visitedPointsPointCloud points are on a plane
-
       int numPlanes = PlanesDetection::locatePlanes(visitedPointsPointCloud,
           false);
 

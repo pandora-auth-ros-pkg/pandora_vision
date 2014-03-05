@@ -52,7 +52,7 @@ namespace pandora_vision
       const bool applyVoxelFilter)
   {
     #ifdef DEBUG_TIME
-    Timer::start("locatePlanes");
+    Timer::start("locatePlanes", "checkHolesRectangleOutline");
     #endif
 
     PointCloudXYZPtr inCloud (new PointCloudXYZ);
@@ -109,6 +109,9 @@ namespace pandora_vision
     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
     std::vector<pcl::ModelCoefficients>& coefficientsVectorOut)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("locatePlanes (void)", "checkHolesRectangleOutline");
+    #endif
 
     double start_time = pcl::getTime();
     PointCloudXYZPtr inCloud (new PointCloudXYZ);
@@ -155,6 +158,9 @@ namespace pandora_vision
     // << double (end_time - start_time)
     // << " sec."
     // << std::endl;
+    #ifdef DEBUG_TIME
+    Timer::tick("locatePlanes (void)");
+    #endif
   }
 
 
@@ -174,106 +180,112 @@ namespace pandora_vision
     The inliers for each plane
     @return void
    **/
-  void PlanesDetection::locatePlanesUsingSACSegmentation
-    (const PointCloudXYZPtr& cloudIn,
-     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>&  planesVectorOut,
-     std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
-     std::vector<pcl::PointIndices::Ptr>& inliersVectorOut)
+  void PlanesDetection::locatePlanesUsingSACSegmentation (
+    const PointCloudXYZPtr& cloudIn,
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>&  planesVectorOut,
+    std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
+    std::vector<pcl::PointIndices::Ptr>& inliersVectorOut)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("locatePlanesUsingSACSegmentation", "locatePlanes");
+    #endif
+
+    pcl::ModelCoefficients coefficients;
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
+
+    //!< Create the segmentation object
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    //!< Optional
+    seg.setOptimizeCoefficients (true);
+    //!< Mandatory
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (HoleFusionParameters::max_iterations);
+
+    //!< Maybe a value needs to be set dynamically here, depending on
+    //!< the distance of the kinect to the plane.
+    seg.setDistanceThreshold(
+      HoleFusionParameters::point_to_plane_distance_threshold);
+
+    //!< Create the filtering object
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f
+      (new pcl::PointCloud<pcl::PointXYZ>);
+
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloud_ps;
+    std::vector<pcl::ModelCoefficients> coefficientsVector;
+    std::vector<pcl::PointIndices::Ptr> inliersVector;
+
+    int i = 0;
+    int nr_points = (int) cloudIn->points.size();
+    //!< While 100 x num_points_to_exclude % of the original
+    //!< cloud is still there
+    while (cloudIn->points.size () >
+      HoleFusionParameters::num_points_to_exclude * nr_points)
     {
+      //!< Segment the largest planar component from the remaining cloud
+      seg.setInputCloud (cloudIn);
+      seg.segment (*inliers, coefficients);
 
-      pcl::ModelCoefficients coefficients;
-      pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
-
-      //!< Create the segmentation object
-      pcl::SACSegmentation<pcl::PointXYZ> seg;
-      //!< Optional
-      seg.setOptimizeCoefficients (true);
-      //!< Mandatory
-      seg.setModelType (pcl::SACMODEL_PLANE);
-      seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setMaxIterations (HoleFusionParameters::max_iterations);
-
-      //!< Maybe a value needs to be set dynamically here, depending on
-      //!< the distance of the kinect to the plane.
-      seg.setDistanceThreshold(
-        HoleFusionParameters::point_to_plane_distance_threshold);
-
-      //!< Create the filtering object
-      pcl::ExtractIndices<pcl::PointXYZ> extract;
-
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f
-        (new pcl::PointCloud<pcl::PointXYZ>);
-
-      std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloud_ps;
-      std::vector<pcl::ModelCoefficients> coefficientsVector;
-      std::vector<pcl::PointIndices::Ptr> inliersVector;
-
-      int i = 0;
-      int nr_points = (int) cloudIn->points.size();
-      //!< While 100 x num_points_to_exclude % of the original
-      //!< cloud is still there
-      while (cloudIn->points.size () >
-          HoleFusionParameters::num_points_to_exclude * nr_points)
+      if (inliers->indices.size () == 0)
       {
-        //!< Segment the largest planar component from the remaining cloud
-        seg.setInputCloud (cloudIn);
-        seg.segment (*inliers, coefficients);
-
-        if (inliers->indices.size () == 0)
-        {
-          std::cerr
-            << "Could not estimate a planar model for the given dataset."
-            << std::endl;
-          break;
-        }
-
-        //!< Extract the inliers
-        extract.setInputCloud (cloudIn);
-        extract.setIndices (inliers);
-        //!< Remove the plane found from cloudIn and place it in
-        //!< loud_p. cloudIn goes unaffected.
-        extract.setNegative (false);
-
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p
-          (new pcl::PointCloud<pcl::PointXYZ>);
-        extract.filter (*cloud_p);
-        // std::cerr << "PointCloud representing the planar component: "
-        // << cloud_p->width
-        // << " x "
-        // << cloud_p->height
-        // << " data points."
-        // << std::endl;
-
-        cloud_ps.push_back(cloud_p);
-        coefficientsVector.push_back(coefficients);
-        inliersVector.push_back(inliers);
-
-        //!< Create the filtering object. Remove the plane \
-        //!< found from cloudIn.
-        //!< cloud_f = cloudIn - cloud_p. cloudIn goes unaffected.
-        extract.setNegative (true);
-        extract.filter (*cloud_f);
-        *cloudIn = *cloud_f;
-
-        i++;
-
-
-         //!< If the number of planes found so far exceeds the number one,
-         //!< return. We are only interested in holes that lie on one plane.
-
-        if (i > 1)
-        {
-          return;
-        }
+        std::cerr
+          << "Could not estimate a planar model for the given dataset."
+          << std::endl;
+        break;
       }
 
-      planesVectorOut = cloud_ps;
-      coefficientsVectorOut = coefficientsVector;
-      inliersVectorOut = inliersVector;
-      // std::cerr << "Total number of planes found: "
-      // << cloud_ps.size()
+      //!< Extract the inliers
+      extract.setInputCloud (cloudIn);
+      extract.setIndices (inliers);
+      //!< Remove the plane found from cloudIn and place it in
+      //!< loud_p. cloudIn goes unaffected.
+      extract.setNegative (false);
+
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p
+        (new pcl::PointCloud<pcl::PointXYZ>);
+      extract.filter (*cloud_p);
+      // std::cerr << "PointCloud representing the planar component: "
+      // << cloud_p->width
+      // << " x "
+      // << cloud_p->height
+      // << " data points."
       // << std::endl;
+
+      cloud_ps.push_back(cloud_p);
+      coefficientsVector.push_back(coefficients);
+      inliersVector.push_back(inliers);
+
+      //!< Create the filtering object. Remove the plane \
+      //!< found from cloudIn.
+      //!< cloud_f = cloudIn - cloud_p. cloudIn goes unaffected.
+      extract.setNegative (true);
+      extract.filter (*cloud_f);
+      *cloudIn = *cloud_f;
+
+      i++;
+
+
+      //!< If the number of planes found so far exceeds the number one,
+      //!< return. We are only interested in holes that lie on one plane.
+
+      if (i > 1)
+      {
+        return;
+      }
     }
+
+    planesVectorOut = cloud_ps;
+    coefficientsVectorOut = coefficientsVector;
+    inliersVectorOut = inliersVector;
+    // std::cerr << "Total number of planes found: "
+    // << cloud_ps.size()
+    // << std::endl;
+    #ifdef DEBUG_TIME
+    Timer::tick("locatePlanesUsingSACSegmentation");
+    #endif
+  }
 
 
 
@@ -298,6 +310,9 @@ namespace pandora_vision
      std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
      std::vector<pcl::PointIndices::Ptr>& inliersVectorOut)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("locatePlanesUsingNormalsSACSegmentation", "locatePlanes");
+    #endif
 
     pcl::ModelCoefficients coefficients;
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
@@ -411,6 +426,9 @@ namespace pandora_vision
     // std::cerr << "Total number of planes found: "
     // << cloud_ps.size()
     // << std::endl;
+    #ifdef DEBUG_TIME
+    Timer::tick("locatePlanesUsingNormalsSACSegmentation");
+    #endif
   }
 
 
@@ -424,12 +442,20 @@ namespace pandora_vision
   PointCloudXYZPtr PlanesDetection::applyVoxelGridFilter(
     const PointCloudXYZPtr& cloudIn)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("applyVoxelGridFilter", "locatePlanes");
+    #endif
+
     PointCloudXYZPtr cloudOut (new PointCloudXYZ());
 
     pcl::VoxelGrid <pcl::PointXYZ> sor;
     sor.setInputCloud (cloudIn);
     sor.setLeafSize (0.01f, 0.01f, 0.01f);
     sor.filter (*cloudOut);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyVoxelGridFilter");
+    #endif
 
     return cloudOut;
   }

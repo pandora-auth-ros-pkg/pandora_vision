@@ -61,7 +61,7 @@ namespace pandora_vision
     cv::Mat& interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findHoles","",true);
+    Timer::start("findHoles","inputCloudCallback");
     #endif
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;

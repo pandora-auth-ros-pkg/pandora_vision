@@ -44,6 +44,10 @@ namespace pandora_vision
    **/
   HoleFusion::HoleFusion(void) : pointCloudXYZ(new PointCloudXYZ)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("HoleFusion");
+    #endif
+
     ros::Duration(0.5).sleep();
 
     //!< Initialize the numNodesReady variable
@@ -77,6 +81,10 @@ namespace pandora_vision
     //!< information
     boost::thread processCandidateHolesThread(
       &HoleFusion::processCandidateHoles, this);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("HoleFusion");
+    #endif
   }
 
 
@@ -87,22 +95,6 @@ namespace pandora_vision
   HoleFusion::~HoleFusion(void)
   {
     ROS_INFO("HoleFusion node terminated");
-  }
-
-
-
-  /**
-    @brief Requests from the synchronizer to process a new point cloud
-    @return void
-   **/
-  void HoleFusion::unlockSynchronizer()
-  {
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Sending unlock message");
-    #endif
-
-    std_msgs::Empty unlockMsg;
-    unlockPublisher_.publish(unlockMsg);
   }
 
 
@@ -119,6 +111,9 @@ namespace pandora_vision
     const vision_communications::DepthCandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("depthCandidateHolesCallback", "", true);
+    #endif
 
     #ifdef DEBUG_SHOW
     ROS_INFO("Hole Fusion Depth callback");
@@ -176,6 +171,10 @@ namespace pandora_vision
     #endif
 
     numNodesReady++;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("depthCandidateHolesCallback");
+    #endif
   }
 
 
@@ -192,6 +191,9 @@ namespace pandora_vision
     const vision_communications::RgbCandidateHolesVectorMsg&
     rgbCandidateHolesVector)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("rgbCandidateHolesCallback", "", true);
+    #endif
 
     #ifdef DEBUG_SHOW
     ROS_INFO("Hole Fusion RGB callback");
@@ -217,6 +219,10 @@ namespace pandora_vision
     #endif
 
     numNodesReady++;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("rgbCandidateHolesCallback");
+    #endif
   }
 
 
@@ -237,6 +243,10 @@ namespace pandora_vision
     candidateHolesVector,
     HoleFilters::HolesConveyor& conveyor)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("fromCandidateHoleMsgToConveyor");
+    #endif
+
     for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
     {
       //!< Recreate conveyor.keypoints
@@ -269,6 +279,53 @@ namespace pandora_vision
       }
       conveyor.outlines.push_back(outlinePoints);
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("fromCandidateHoleMsgToConveyor");
+    #endif
+  }
+
+
+
+  /**
+    @brief Waits for both hole sources(rgb and depth nodes) to have sent
+    their candidate holes and then it implements a strategy to combine
+    information from both sources in order to accurately find valid holes
+    @return void
+   **/
+  void HoleFusion::processCandidateHoles()
+  {
+    while(true)
+    {
+      #ifdef DEBUG_SHOW
+      ROS_INFO ("numNodesReady: %d", numNodesReady);
+      #endif
+
+      //!< If not both sources are ready, sleep.
+      if (numNodesReady != 2)
+      {
+        try
+        {
+          boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+        }
+        catch(boost::thread_interrupted&)
+        {
+          return;
+        }
+      }
+      else
+      {
+        #ifdef DEBUG_SHOW
+        ROS_INFO("Processing candidate holes");
+        #endif
+
+        //!< Do some processing
+
+        //!< Processing complete.
+        numNodesReady = 0;
+        unlockSynchronizer();
+      }
+    }
   }
 
 
@@ -292,6 +349,10 @@ namespace pandora_vision
     HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
     cv::Mat& interpolatedDepthImage)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("unpackDepthMessage", "depthCandidateHolesCallback");
+    #endif
+
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
@@ -304,6 +365,10 @@ namespace pandora_vision
     //!< Unpack the point cloud
     MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
       pointCloudXYZ);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackDepthMessage");
+    #endif
   }
 
 
@@ -324,6 +389,10 @@ namespace pandora_vision
     const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
     HoleFilters::HolesConveyor& conveyor, cv::Mat& rgbImage)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("unpackRgbMessage", "rgbCandidateHolesCallback");
+    #endif
+
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
@@ -332,50 +401,25 @@ namespace pandora_vision
       holesMsg,
       rgbImage,
       sensor_msgs::image_encodings::TYPE_32FC3);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackRgbMessage");
+    #endif
   }
 
 
 
   /**
-    @brief Waits for both hole sources(rgb and depth nodes) to have sent
-    their candidate holes and then it implements a strategy to combine
-    information from both sources in order to accurately find valid holes
+    @brief Requests from the synchronizer to process a new point cloud
     @return void
    **/
-  void HoleFusion::processCandidateHoles()
+  void HoleFusion::unlockSynchronizer()
   {
-    while(true)
-    {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Sending unlock message");
+    #endif
 
-      #ifdef DEBUG_SHOW
-      ROS_INFO ("numNodesReady: %d", numNodesReady);
-      #endif
-
-      //!< If not both sources are ready, sleep.
-      if (numNodesReady != 2)
-      {
-        try
-        {
-          boost::this_thread::sleep(boost::posix_time::milliseconds(500));
-        }
-        catch(boost::thread_interrupted&)
-        {
-          return;
-        }
-      }
-      else
-      {
-
-        #ifdef DEBUG_SHOW
-        ROS_INFO("Processing candidate holes");
-        #endif
-
-        //!< Do some processing
-
-        //!< Processing complete.
-        numNodesReady = 0;
-        unlockSynchronizer();
-      }
-    }
+    std_msgs::Empty unlockMsg;
+    unlockPublisher_.publish(unlockMsg);
   }
 }
