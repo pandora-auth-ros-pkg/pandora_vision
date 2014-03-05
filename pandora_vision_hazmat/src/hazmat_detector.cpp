@@ -43,12 +43,13 @@ namespace pandora_vision
   /**
   @brief Default constructor
   @return void
+  **/
   HazmatEpsilonDetector::HazmatEpsilonDetector(std::string package_path): 
     rows(480),
     cols(640)
   {
 
-  param_path = package_path;
+    param_path_ = package_path;
     setParameters();
     initDetector();
     frameNum_ = 0;

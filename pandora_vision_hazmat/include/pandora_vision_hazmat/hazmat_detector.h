@@ -117,6 +117,7 @@ namespace pandora_vision
       HazmatEpsilonDetector(std::string package_path); //our constructor
       
       float**maxUV;
+      float**minUV;
       
       int rows, cols; 
       

@@ -49,10 +49,8 @@ namespace pandora_vision
     // Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
 
-  //initialize hazmat detector
-  _hazmatDetector = new HazmatEpsilonDetector(packagePath);	
-  //initialize hazmat detector
-	_hazmatDetector = new HazmatEpsilonDetector(packagePath);
+    //initialize hazmat detector
+    hazmatDetector_ = new HazmatEpsilonDetector(packagePath_);	
   
     //Get HazmatDetector Parameters
     getHazmatParams();
@@ -100,9 +98,9 @@ namespace pandora_vision
   **/
   void HazmatDetection::getGeneralParams(void)
   {
-  packagePath = ros::package::getPath("pandora_vision_hazmat");
+    packagePath_ = ros::package::getPath("pandora_vision_hazmat");
   
-  if (_nh.hasParam("hazmatDummy")) {
+    if (nh_.hasParam("hazmatDummy"))
     {
       nh_.getParam("hazmatDummy_", hazmatDummy_);
       ROS_DEBUG("hazmatDummy_ : %d", hazmatDummy_);
@@ -127,8 +125,8 @@ namespace pandora_vision
     }
   
   //!< Get the camera to be used by qr node;
-  if (_nh.hasParam("camera_name")) {
-    _nh.getParam("camera_name", cameraName);
+  if (nh_.hasParam("camera_name")) {
+    nh_.getParam("camera_name", cameraName);
     ROS_DEBUG_STREAM("camera_name : " << cameraName);
   }
   else {
@@ -136,43 +134,43 @@ namespace pandora_vision
     cameraName = "camera";
   }
   //!< Get the Height parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/image_height"))
-    {
-    _nh.getParam("/" + cameraName + "/image_height", frameHeight);
-      ROS_DEBUG_STREAM("height : " << frameHeight_);
-    }
-    else
-    {
-      ROS_DEBUG("[hazmat_node] : \
-        Parameter frameHeight not found. Using Default");
-    }
-  
-    //!< Get the Width parameter if available;
-    if (_nh.hasParam("/" + cameraName + "/image_width"))
-    {
-      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-    else
-    {
-      ROS_DEBUG("[hazmat_node] : Parameter frameWidth not found. Using Default");
-      frameWidth = DEFAULT_WIDTH;
-    }
+  if (nh_.hasParam("/" + cameraName + "/image_height"))
+  {
+  nh_.getParam("/" + cameraName + "/image_height", frameHeight_);
+    ROS_DEBUG_STREAM("height : " << frameHeight_);
+  }
+  else
+  {
+    ROS_DEBUG("[hazmat_node] : \
+      Parameter frameHeight not found. Using Default");
+  }
 
-    //!< Get the listener's topic;
-    if (_nh.hasParam("/" + cameraName + "/topic_name"))
-    {
-      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-    }
-    else 
-    {
-      ROS_DEBUG("[hazmat_node] : Parameter imageTopic not found. Using Default");
-      imageTopic_ = "/camera_head/image_raw";
-    }
-  
+  //!< Get the Width parameter if available;
+  if (nh_.hasParam("/" + cameraName + "/image_width"))
+  {
+    nh_.getParam("/" + cameraName + "/image_width", frameWidth_);
+    ROS_DEBUG_STREAM("width : " << frameWidth_);
+  }
+  else
+  {
+    ROS_DEBUG("[hazmat_node] : Parameter frameWidth not found. Using Default");
+    frameWidth_ = DEFAULT_WIDTH;
+  }
+
+  //!< Get the listener's topic;
+  if (nh_.hasParam("/" + cameraName + "/topic_name"))
+  {
+    nh_.getParam("/" + cameraName + "/topic_name", imageTopic_);
+  }
+  else 
+  {
+    ROS_DEBUG("[hazmat_node] : Parameter imageTopic not found. Using Default");
+    imageTopic_ = "/camera_head/image_raw";
+  }
+
   //!< Get the images's frame_id;
-  if (_nh.hasParam("/" + cameraName + "/camera_frame_id")) {
-    _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+  if (nh_.hasParam("/" + cameraName + "/camera_frame_id")) {
+    nh_.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
     ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
   }
   else 
@@ -182,23 +180,23 @@ namespace pandora_vision
   }
   
   //!< Get the HFOV parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/hfov")) {
-    _nh.getParam("/" + cameraName + "/hfov", hfov);
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  if (nh_.hasParam("/" + cameraName + "/hfov")) {
+    nh_.getParam("/" + cameraName + "/hfov", hfov_);
+    ROS_DEBUG_STREAM("HFOV : " << hfov_);
   }
   else {
     ROS_DEBUG("[hazmat_node] : Parameter frameWidth not found. Using Default");
-    hfov = HFOV;
+    hfov_ = HFOV;
   }
   
   //!< Get the VFOV parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/vfov")) {
-    _nh.getParam("/" + cameraName + "/vfov", vfov);
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
+  if (nh_.hasParam("/" + cameraName + "/vfov")) {
+    nh_.getParam("/" + cameraName + "/vfov", vfov_);
+    ROS_DEBUG_STREAM("VFOV : " << vfov_);
   }
   else {
     ROS_DEBUG("[hazmat_node] : Parameter frameWidth not found. Using Default");
-    vfov = VFOV;
+    vfov_ = VFOV;
   }
   
   }
