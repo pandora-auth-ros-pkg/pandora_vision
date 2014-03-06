@@ -44,17 +44,13 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
-#include <tf/transform_listener.h>
-
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
-
-
-#include "state_client.h"
 
 #include <iostream>
 #include <stdlib.h>
 
+#include "landoltc_detector.h"
 //!< default frame height
 #define DEFAULT_HEIGHT 480
 
@@ -63,132 +59,68 @@
 
 namespace pandora_vision
 {
-  class LandoltCDetection
-  {
-    private:
-    //!<Subscriber of RGB Image
-    ros::Subscriber _inputImageSubscriber;
-    //!<Node Handler
-    ros::NodeHandle _nh;
-    //!<Value for threshholding gradients
-    int _minDiff;
-    //!<Value for thresholding values in voting array
-    int _threshold;
-    //!<Vector containing centers of possible landolts
-    std::vector <cv::Point> _centers;
-    //!<Vector containing colors of landolts,used for seperating them later
-    std::vector<cv::Scalar> _fillColors;
-    //!<Vector containing bounding rectangles of each landolt
-    std::vector<cv::Rect> _rectangles;
-    //!<Vector containing centers of verified landolts
-    std::vector<cv::Point> _newCenters;
-    //!<Vector containing contour points of reference C
-    std::vector<std::vector<cv::Point> > _refContours;
-    //!<2D Matrix containing "votes" of each pixel, used for finding the centers
-    cv::Mat _voting;
-    //!<2D Matrix containing landoltsC's, each colored with a unique color
-    cv::Mat _coloredContours;
-    //!<2D Matric used for separating each LandoltC to each parts
-    cv::Mat _mask;
-    
-    std::string packagePath;
-    
-    std::string patternPath;
-    
-    int frameHeight;
-    int frameWidth;
-    
-    std::string cameraName;
-    std::string cameraFrameId;
-    
-    //!< The topic subscribed to for the front camera
-    std::string imageTopic;
-      
+class LandoltCDetection
+{
+private:
+  //!<Subscriber of RGB Image
+  ros::Subscriber _inputImageSubscriber;
+  //!<Node Handler
+  ros::NodeHandle _nh;
+  //!< Current frame to be processed
+  cv::Mat landoltCFrame;
+
+  LandoltCDetector _landoltcDetector;
+  std::string packagePath;
+
+  std::string patternPath;
+
+  int frameHeight;
+  int frameWidth;
+
+  std::string cameraName;
+  std::string cameraFrameId;
+
+  //!< The topic subscribed to for the front camera
+  std::string imageTopic;
+
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
   @return void
   **/
-   void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+  void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
-   public:
+  /**
+  @brief main function called for publishing messages in
+    data fusion. In this function an object of class landoltcDetector
+    is created to identify landoltCs in current frame.
+  @param void
+  @return void
+  **/
+  void landoltcCallback();
+
+public:
 
   /**
   @brief Default Constructor
   @param ref [cv::Mat&] Reference Image
   @return void
   **/
-   LandoltCDetection();
+  LandoltCDetection();
 
   /**
   @brief Default Destructor
   @return void
   **/
   virtual ~LandoltCDetection();
-  
+
   /**
-  @brief Get parameters referring to view and frame characteristics 
+  @brief Get parameters referring to view and frame characteristics
   @return void
   **/
   void getGeneralParams();
-  
-  /**
-  @brief Rasterize line between two points
-  @param A [cv::Point] The start point of a line
-  @param B [cv::Point] The end point of a line
-  @return void
-  **/
-   void rasterizeLine(cv::Point A,cv::Point B);
 
-  /**
-  @brief Finds Centers based on gradient
-  @param rows [int] Number of rows of matrix
-  @param cols [int] Number of columns of matrix
-  @param grX [float*] X gradient component
-  @param grY [float*] Y gradient component
-  @return void
-  **/
-   void findCenters(int rows,int cols,float* grX,float* grY);
-   
-  /**
-  @brief Finds LandoltC Contours on RGB Frames
-  @param inImage [cv::Mat&] Input Image
-  @param rows [int] Number of rows of matrix
-  @param cols [int] Number of columns of matrix
-  @param ref [std::vector<cv::Point>] Vector containing contour points of reference image
-  @return void
-  **/
-   void findLandoltContours(cv::Mat& inImage,int rows,int cols,std::vector<cv::Point> ref);
 
-  /**
-  @brief Mask for separating a LandoltC Contour to its components
-  @param rows [int] Number of rows of matrix
-  @param cols [int] Number of columns of matrix
-  @return void
-  **/
-   void applyMask(int rows,int cols);
-
-  /**
-  @brief Function called from ImageCallBack that Initiates LandoltC search in the frame
-  @param input [cv::Mat&] Matrix containing the frame received from the camera
-  @return void
-  **/
-   void begin(cv::Mat& input);
-   
-  /**
-  @brief Thinning algorith using the Zhang-Suen method
-  @param in [cv::Mat&] Matrix containing the frame to thin
-  @return void
-  **/
-   void thinning(cv::Mat& in);
-   
-  /**
-  @brief Thinning iteration call from the thinning function
-  @param in [cv::Mat&] Matrix containing the frame to thin
-  @param iter [int] Number of iteration with values 1-2
-  @return void
-  **/
-   void thinningIter(cv::Mat& in,int iter);
-  };
+};
 }
 #endif
