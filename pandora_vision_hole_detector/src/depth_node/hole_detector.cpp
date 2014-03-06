@@ -39,16 +39,12 @@
 
 namespace pandora_vision
 {
-  ParticleFilter HoleDetector::pf = ParticleFilter();
+  /**
+   @brief The HoleDetector constructor
+   **/
+  HoleDetector::HoleDetector(void) {}
 
-  HoleDetector::HoleDetector(void)
-  {
-    unsigned int N = 1000;
-    std::vector<std::pair<float,float> > limits;
-    limits.push_back(std::pair<float,float>(0,480));
-    limits.push_back(std::pair<float,float>(0,640));
-    pf.initialize(N, limits);
-  }
+
 
   /**
     @brief Finds the holes provided a depth image in CV_32FC1 format

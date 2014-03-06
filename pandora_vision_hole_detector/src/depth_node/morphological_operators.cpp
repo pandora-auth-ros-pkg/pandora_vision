@@ -351,7 +351,7 @@ namespace pandora_vision
 
     //!< if the image is saturated by the thickenning operator,
     //!< cease its operation
-    bool running;
+    bool isRunning;
     for (unsigned int s = 0; s < steps; s++)
     {
       if(visualize)
@@ -359,7 +359,7 @@ namespace pandora_vision
         Visualization::show("Thickening iteration", *outImage, 500);
       }
 
-      running = false;
+      isRunning = false;
       for (int kernelId = 0; kernelId < 8; kernelId++)
       {
         for (unsigned int rows = 1; rows < outImage->rows - 1; rows++)
@@ -372,13 +372,13 @@ namespace pandora_vision
                   cv::Point(cols, rows)))
               {
                 outImage->at<unsigned char>(rows, cols) = 255;
-                running = true;
+                isRunning = true;
               }
             }
           }
         }
       }
-      if (!running)
+      if (!isRunning)
       {
         break;
       }
@@ -444,7 +444,7 @@ namespace pandora_vision
 
     //!< if the image is saturated by the thinning operator,
     //!< cease its operation
-    bool running;
+    bool isRunning;
     static unsigned int limit = 0;
     static unsigned int *pts =
       new unsigned int[outImage->cols * outImage->rows];
@@ -464,7 +464,7 @@ namespace pandora_vision
 
     for (unsigned int s = 0; s < steps; s++)
     {
-      running = false;
+      isRunning = false;
 
       for(unsigned int i = 0 ; i < limit ; i++)
       {
@@ -474,12 +474,12 @@ namespace pandora_vision
             cv::Point(pts[i] % outImage->cols, pts[i] / outImage->cols)))
           {
             outImage->data[pts[i]] = 0;
-            running = true;
+            isRunning = true;
             break;
           }
         }
       }
-      if (!running)
+      if (!isRunning)
       {
         break;
       }
@@ -543,7 +543,7 @@ namespace pandora_vision
         {0, 0, 1} }
     };
 
-    bool running;
+    bool isRunning;
     for (unsigned int s = 0; s < steps; s++)
     {
       if(visualize)
@@ -551,7 +551,7 @@ namespace pandora_vision
         Visualization::show("Pruning iteration", *img, 100);
       }
 
-      running = false;
+      isRunning = false;
       for (int kernelId = 0; kernelId < 9; kernelId++)
       {
         for (unsigned int rows = 1; rows < img->rows - 1; rows++)
@@ -563,13 +563,13 @@ namespace pandora_vision
               if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
                 img->at<unsigned char>(rows, cols) = 0;
-                running = true;
+                isRunning = true;
               }
             }
           }
         }
       }
-      if (!running)
+      if (!isRunning)
       {
         break;
       }
@@ -633,7 +633,7 @@ namespace pandora_vision
         {0, 2, 1} }
     };
 
-    bool running;
+    bool isRunning;
     for (unsigned int s = 0; s < steps; s++)
     {
       if(visualize)
@@ -641,7 +641,7 @@ namespace pandora_vision
         Visualization::show("Pruning iteration", *img, 100);
       }
 
-      running = false;
+      isRunning = false;
       for (int kernelId = 0; kernelId < 9; kernelId++)
       {
         for (unsigned int rows = 1; rows < img->rows - 1; rows++)
@@ -653,13 +653,13 @@ namespace pandora_vision
               if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
                 img->at<unsigned char>(rows, cols) = 0;
-                running = true;
+                isRunning = true;
               }
             }
           }
         }
       }
-      if (!running)
+      if (!isRunning)
       {
         break;
       }
@@ -744,11 +744,11 @@ namespace pandora_vision
       }
     }
 
-    bool running;
+    bool isRunning;
     for (unsigned int s = 0; s < steps; s++)
     {
       next.clear();
-      running = false;
+      isRunning = false;
 
       for(std::set<unsigned int>::iterator it = current.begin() ;
         it != current.end() ; it++)
@@ -766,7 +766,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x - 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x - 1) * img->cols + (y - 1) );
               break;
             }
@@ -778,7 +778,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y,x - 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x - 1) * img->cols + (y) );
               break;
             }
@@ -790,7 +790,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x - 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x - 1) * img->cols + (y + 1) );
               break;
             }
@@ -802,7 +802,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x) * img->cols + (y - 1) );
               break;
             }
@@ -814,7 +814,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x) * img->cols + (y + 1) );
               break;
             }
@@ -826,7 +826,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x + 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x + 1) * img->cols + (y - 1) );
               break;
             }
@@ -838,7 +838,7 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y,x + 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x + 1) * img->cols + (y) );
               break;
             }
@@ -850,14 +850,14 @@ namespace pandora_vision
           {
             if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x + 1)))
             {
-              running = true;
+              isRunning = true;
               next.insert( (x + 1) * img->cols + (y + 1) );
               break;
             }
           }
         }
       }
-      if (!running)
+      if (!isRunning)
       {
         break;
       }

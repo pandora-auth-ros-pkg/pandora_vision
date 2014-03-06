@@ -69,9 +69,6 @@ namespace pandora_vision
 
       DepthParameters params;
 
-      HoleDetector hd; //!< Just to try out the particle filter
-
-
       /**
         @brief Callback for the point cloud
         @param msg [const sensor_msgs::PointCloud2ConstPtr&] The point cloud

@@ -70,7 +70,7 @@ namespace pandora_vision
 
       //!< A boolean indicating whether the node is publishing through the
       //!< above two publishers
-      bool locked_;
+      bool isLocked_;
 
       //!< The subscriber to the topic where the hole_fusion node publishes
       //!< lock/unlock messages concerning the rgb_depth_synchronizer's
