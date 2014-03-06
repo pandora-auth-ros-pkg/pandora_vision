@@ -957,11 +957,11 @@ namespace pandora_vision
 
     std::vector<std::set<unsigned int> > lines;
     std::vector<std::pair<GraphNode,GraphNode> > farPts;
-    bool finished = false;
+    bool hasFinished = false;
 
-    while(!finished)
+    while(!hasFinished)
     {
-      finished = true;
+      hasFinished = true;
       for(unsigned int i = 1 ; i < thinnedImg.rows - 1; i++)
       {
         for(unsigned int j = 1 ; j < thinnedImg.cols - 1; j++)
@@ -976,11 +976,11 @@ namespace pandora_vision
               lines.push_back(ret);
               farPts.push_back(pts);
             }
-            finished = false;
+            hasFinished = false;
             break;
           }
         }
-        if(!finished)
+        if(!hasFinished)
         {
           break;
         }

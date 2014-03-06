@@ -49,7 +49,7 @@ namespace pandora_vision
     Timer::start("RgbDepthSynchronizer");
     #endif
 
-    locked_ = true;
+    isLocked_ = true;
 
     //!< Subscribe to the RGB point cloud topic
     pointCloudSubscriber_ = nodeHandle_.subscribe(
@@ -104,7 +104,7 @@ namespace pandora_vision
     Timer::start("synchronizedCallback", "", true);
     #endif
 
-    if (!locked_)
+    if (!isLocked_)
     {
 
       #ifdef DEBUG_SHOW
@@ -113,7 +113,7 @@ namespace pandora_vision
 
       //!< Lock the rgb_depth_synchronizer node; aka prevent the execution
       //!< of this if-block without the explicit request of the hole_fusion node
-      locked_ = true;
+      isLocked_ = true;
 
       //!< Extract the RGB image from the point cloud
       cv::Mat rgbImage = MessageConversions::pointCloudToRGBImage(
@@ -152,7 +152,7 @@ namespace pandora_vision
     Timer::start("holeFusionCallback");
     #endif
 
-    locked_ = false;
+    isLocked_ = false;
 
     #ifdef DEBUG_TIME
     Timer::tick("holeFusionCallback");

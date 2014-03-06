@@ -54,8 +54,6 @@ namespace pandora_vision
   {
     public:
 
-      static ParticleFilter pf;
-
       /**
         @brief The HoleDetector constructor
        **/
