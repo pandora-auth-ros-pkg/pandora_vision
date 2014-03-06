@@ -48,12 +48,12 @@ namespace pandora_vision
     from a point cloud message
     @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
     cloud message
-    @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
     @return void
    **/
   void MessageConversions::extractPointCloudXYZFromMessage(
     const sensor_msgs::PointCloud2ConstPtr& msg,
-    PointCloudXYZPtr& pointCloudXYZ)
+    PointCloudXYZPtr* pointCloudXYZ)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractPointCloudXYZFromMessage");
@@ -67,7 +67,7 @@ namespace pandora_vision
 
     //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
     //!< aka PointCloudXYZPtr
-    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+    pcl::fromPCLPointCloud2 (pointCloud, *(*pointCloudXYZ));
 
     #ifdef DEBUG_TIME
     Timer::tick("extractPointCloudXYZFromMessage");
@@ -81,12 +81,12 @@ namespace pandora_vision
     from a point cloud message container
     @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
     cloud message
-    @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
     @return void
    **/
   void MessageConversions::extractPointCloudXYZFromMessageContainer(
     const vision_communications::DepthCandidateHolesVectorMsg& msg,
-    PointCloudXYZPtr& pointCloudXYZ)
+    PointCloudXYZPtr* pointCloudXYZ)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractPointCloudXYZFromMessageContainer");
@@ -100,7 +100,7 @@ namespace pandora_vision
 
     //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
     //!< aka PointCloudXYZPtr
-    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+    pcl::fromPCLPointCloud2 (pointCloud, *(*pointCloudXYZ));
 
     #ifdef DEBUG_TIME
     Timer::tick("extractPointCloudXYZFromMessageContainer");
@@ -114,13 +114,13 @@ namespace pandora_vision
     a point cloud of type PointCloud and packs it in a message
     @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
     converted
-    @param[out] pointCloud [sensor_msgs::PointCloud2&]
+    @param[out] pointCloud [sensor_msgs::PointCloud2*]
     The converted point cloud message
     @return void
    **/
   void MessageConversions::convertPointCloudXYZToMessage(
     const PointCloudXYZPtr& pointCloudXYZPtr,
-    sensor_msgs::PointCloud2& pointCloudMsg)
+    sensor_msgs::PointCloud2* pointCloudMsg)
   {
     #ifdef DEBUG_TIME
     Timer::start("convertPointCloudXYZToMessage");
@@ -133,7 +133,7 @@ namespace pandora_vision
     pcl::toPCLPointCloud2(*pointCloudXYZPtr, pointCloud);
 
     //!< Pack the point cloud to a ROS message
-    pcl_conversions::fromPCL(pointCloud, pointCloudMsg);
+    pcl_conversions::fromPCL(pointCloud, *pointCloudMsg);
 
     #ifdef DEBUG_TIME
     Timer::tick("convertPointCloudXYZToMessage");
@@ -146,12 +146,12 @@ namespace pandora_vision
     @brief Extracts a cv::Mat image from a ROS image message pointer
     @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS image
     message pointer
-    @param[out] image [cv::Mat&] The output image
+    @param[out] image [cv::Mat*] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
   void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::ImageConstPtr& msg, cv::Mat& image,
+    const sensor_msgs::ImageConstPtr& msg, cv::Mat* image,
     const std::string& encoding)
   {
     #ifdef DEBUG_TIME
@@ -162,7 +162,7 @@ namespace pandora_vision
 
     in_msg = cv_bridge::toCvCopy(msg, encoding);
 
-    image = in_msg->image.clone();
+    *image = in_msg->image.clone();
 
     #ifdef DEBUG_TIME
     Timer::tick("extractImageFromMessage");
@@ -175,12 +175,12 @@ namespace pandora_vision
     @brief Extracts a cv::Mat image from a ROS image message
     @param[in] msg [const sensor_msgs::Image&] The input ROS image
     message
-    @param[out] image [cv::Mat&] The output image
+    @param[out] image [cv::Mat*] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
   void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::Image& msg, cv::Mat& image, const std::string& encoding)
+    const sensor_msgs::Image& msg, cv::Mat* image, const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractImageFromMessage");
@@ -190,7 +190,7 @@ namespace pandora_vision
 
     in_msg = cv_bridge::toCvCopy(msg, encoding);
 
-    image = in_msg->image.clone();
+    *image = in_msg->image.clone();
 
     #ifdef DEBUG_TIME
     Timer::tick("extractImageFromMessage");
@@ -204,13 +204,13 @@ namespace pandora_vision
     vision_communications::DepthCandidateHolesVectorMsg
     containing the interpolated depth image
     @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-    @param[out] image [cv::Mat&] The output image
+    @param[out] image [cv::Mat*] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
   void MessageConversions::extractDepthImageFromMessageContainer(
     const vision_communications::DepthCandidateHolesVectorMsg& msg,
-    cv::Mat& image, const std::string& encoding)
+    cv::Mat* image, const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractDepthImageFromMessageContainer");
@@ -231,13 +231,13 @@ namespace pandora_vision
     vision_communications::RgbCandidateHolesVectorMsg
     containing the rgb image
     @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-    @param[out] image [cv::Mat&] The output image
+    @param[out] image [cv::Mat*] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
   void MessageConversions::extractRgbImageFromMessageContainer(
     const vision_communications::RgbCandidateHolesVectorMsg& msg,
-    cv::Mat& image, const std::string& encoding)
+    cv::Mat* image, const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractRgbImageFromMessageContainer");

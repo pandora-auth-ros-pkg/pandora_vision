@@ -79,22 +79,22 @@ namespace pandora_vision
         @brief Given a set of keypoints and an edges image, this function
         returns the valid keypoints and for each one, its respective, least
         area, rotated bounding box and the points of its outline.
-        @param[in] keyPoints [const std::vector<cv::KeyPoint>]
+        @param[in] keyPoints [const std::vector<cv::KeyPoint>&]
         The original keypoints found.
-        @param[in] denoisedDepthImageEdges [const cv::Mat] The original denoised
+        @param[in] denoisedDepthImageEdges [cv::Mat*] The original denoised
         depth edges image
-        @param[in] detectionMethod [const int] The method by which the outline
+        @param[in] detectionMethod [const int&] The method by which the outline
         of a blob is obtained. 0 means by means of brushfire, 1 by means of
         raycasting
-        @param[in][out] conveyor [HolesConveyor&] A struct that contains the
+        @param[in][out] conveyor [HolesConveyor*] A struct that contains the
         final valid holes
         @return void
        **/
       static void validateBlobs(
-          const std::vector<cv::KeyPoint> keyPoints,
-          const cv::Mat denoisedDepthImageEdges,
-          const int detectionMethod,
-          HolesConveyor& conveyor);
+          const std::vector<cv::KeyPoint>& keyPoints,
+          cv::Mat* denoisedDepthImageEdges,
+          const int& detectionMethod,
+          HolesConveyor* conveyor);
 
       /**
         @brief This functions takes as input arguments a keypoints vector of
@@ -106,23 +106,23 @@ namespace pandora_vision
         reside in at least one rectangle) and a vector of rectangles (again
         represented by its 4 vertices). There is a one-to-one association
         between the keypoints and the rectangles.
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>] The key points
-        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >]
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The key points
+        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
         The rectangles found
-        @param[in] inRectanglesArea [const std::vector<float>] The area of each
+        @param[in] inRectanglesArea [const std::vector<float>&] The area of each
         rectangle
-        @param[in] inContours [const std::vector<std::vector<cv::Point> >] The
+        @param[in] inContours [const std::vector<std::vector<cv::Point> >&] The
         outline of each blob found
-        @param[out] conveyor [HolesConveyor&] The container of vector of blobs'
+        @param[out] conveyor [HolesConveyor*] The container of vector of blobs'
         keypoints, outlines and areas
         @return void
        **/
       static void validateKeypointsToRectangles(
-          const std::vector<cv::KeyPoint> inKeyPoints,
-          const std::vector<std::vector<cv::Point2f> > inRectangles,
-          const std::vector<float> inRectanglesArea,
-          const std::vector<std::vector<cv::Point> > inContours,
-          HolesConveyor& conveyor);
+          const std::vector<cv::KeyPoint>& inKeyPoints,
+          const std::vector<std::vector<cv::Point2f> >& inRectangles,
+          const std::vector<float>& inRectanglesArea,
+          const std::vector<std::vector<cv::Point> >& inContours,
+          HolesConveyor* conveyor);
   };
 
 }

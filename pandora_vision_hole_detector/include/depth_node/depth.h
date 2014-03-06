@@ -85,21 +85,21 @@ namespace pandora_vision
       /**
         @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
         point cloud
-        @param pointCloudXYZ [PointCloudXYZPtr&] The point cloud
-        @param depthImage [cv::Mat&] The extracted depth image
+        @param pointCloudXYZ [const PointCloudXYZPtr&] The point cloud
+        @param depthImage [cv::Mat*] The extracted depth image
         @return [cv::Mat] The depth image
        **/
       void extractDepthImageFromPointCloud(
-        const PointCloudXYZPtr& pointCloudXYZPtr, cv::Mat& depthImage);
+        const PointCloudXYZPtr& pointCloudXYZPtr, cv::Mat* depthImage);
 
 
       /**
         @brief Stores a ensemble of point clouds in pcd images
-        @param in_cloud [const std::vector<PointCloudXYZPtr>] The point clouds
+        @param in_cloud [const std::vector<PointCloudXYZPtr>&] The point clouds
         @return void
        **/
       void storePointCloudVectorToImages
-        (const std::vector<PointCloudXYZPtr> in_cloud);
+        (const std::vector<PointCloudXYZPtr>& in_cloud);
 
       /**
        @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
@@ -111,25 +111,26 @@ namespace pandora_vision
        @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
        cloud
        @param[out] depthCandidateHolesMsg
-       [vision_communications::DepthCandidateHolesVectorMsg&] The output message
+       [vision_communications::DepthCandidateHolesVectorMsg*] The output message
+       @param[in] encoding [std::string&] The interpoladedDepth image's encoding
        @return void
        **/
       void createCandidateHolesMessage(
         const HoleFilters::HolesConveyor& conveyor,
         const cv::Mat& interpolatedDepthImage,
         const PointCloudXYZPtr& pointCloudXYZPtr,
-        vision_communications::DepthCandidateHolesVectorMsg&
+        vision_communications::DepthCandidateHolesVectorMsg*
         depthCandidateHolesMsg,
         const std::string& encoding);
 
       /**
         @brief Publishes the planes to /vision/kinect/planes topic
-        @param cloudVector [const std::vector<PointCloudXYZPtr>] The point
+        @param cloudVector [const std::vector<PointCloudXYZPtr>&] The point
         clouds containing the planes
         @return void
        **/
       void publishPlanes
-        (const std::vector<PointCloudXYZPtr> cloudVector);
+        (const std::vector<PointCloudXYZPtr>& cloudVector);
 
 
     public:

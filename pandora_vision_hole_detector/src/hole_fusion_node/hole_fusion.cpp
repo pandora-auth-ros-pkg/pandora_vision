@@ -127,9 +127,9 @@ namespace pandora_vision
 
     //!< Unpack the message
     unpackDepthMessage(depthCandidateHolesVector,
-      this->depthHolesConveyor,
-      this->pointCloudXYZ,
-      this->interpolatedDepthImage);
+      &this->depthHolesConveyor,
+      &this->pointCloudXYZ,
+      &this->interpolatedDepthImage);
 
     #ifdef DEBUG_SHOW
     if (HoleFusionParameters::debug_show_find_holes)
@@ -144,7 +144,7 @@ namespace pandora_vision
     DepthFilters::checkHoles(
       this->interpolatedDepthImage,
       this->pointCloudXYZ,
-      this->depthHolesConveyor);
+      &this->depthHolesConveyor);
 
 
     #ifdef DEBUG_SHOW
@@ -207,8 +207,8 @@ namespace pandora_vision
 
     //!< Unpack the message
     unpackRgbMessage(rgbCandidateHolesVector,
-      this->rgbHolesConveyor,
-      this->rgbImage);
+      &this->rgbHolesConveyor,
+      &this->rgbImage);
 
     #ifdef DEBUG_SHOW
     if (HoleFusionParameters::debug_show_find_holes)
@@ -234,14 +234,14 @@ namespace pandora_vision
     @param[in]candidateHolesVector
     [const std::vector<vision_communications::CandidateHoleMsg>&]
     The input candidate holes
-    @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
     struct
     @return void
    **/
   void HoleFusion::fromCandidateHoleMsgToConveyor(
     const std::vector<vision_communications::CandidateHoleMsg>&
     candidateHolesVector,
-    HoleFilters::HolesConveyor& conveyor)
+    HoleFilters::HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("fromCandidateHoleMsgToConveyor");
@@ -253,7 +253,7 @@ namespace pandora_vision
       cv::KeyPoint holeKeypoint;
       holeKeypoint.pt.x = candidateHolesVector[i].keypointX;
       holeKeypoint.pt.y = candidateHolesVector[i].keypointY;
-      conveyor.keyPoints.push_back(holeKeypoint);
+      conveyor->keyPoints.push_back(holeKeypoint);
 
       //!< Recreate conveyor.rectangles
       std::vector<cv::Point2f> renctangleVertices;
@@ -265,7 +265,7 @@ namespace pandora_vision
         vertex.y = candidateHolesVector[i].verticesY[v];
         renctangleVertices.push_back(vertex);
       }
-      conveyor.rectangles.push_back(renctangleVertices);
+      conveyor->rectangles.push_back(renctangleVertices);
 
       //!< Recreate conveyor.outlines
       std::vector<cv::Point> outlinePoints;
@@ -277,7 +277,7 @@ namespace pandora_vision
         outlinePoint.y = candidateHolesVector[i].outlineY[o];
         outlinePoints.push_back(outlinePoint);
       }
-      conveyor.outlines.push_back(outlinePoints);
+      conveyor->outlines.push_back(outlinePoints);
     }
 
     #ifdef DEBUG_TIME
@@ -337,17 +337,17 @@ namespace pandora_vision
     @param[in] holesMsg
     [vision_communications::DepthCandidateHolesVectorMsg&] The input
     candidate holes message obtained through the depth node
-    @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
     struct
-    @param[out] pointCloudXYZ [PointCloudXYZPtr&] The output point cloud
-    @param[out] interpolatedDepthImage [cv::Mat&] The output interpolated
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
+    @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
     depth image
     @return void
    **/
   void HoleFusion::unpackDepthMessage(
     const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
-    HoleFilters::HolesConveyor& conveyor, PointCloudXYZPtr& pointCloudXYZ,
-    cv::Mat& interpolatedDepthImage)
+    HoleFilters::HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
+    cv::Mat* interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("unpackDepthMessage", "depthCandidateHolesCallback");
@@ -380,14 +380,14 @@ namespace pandora_vision
     @param[in] holesMsg
     [vision_communications::RgbCandidateHolesVectorMsg&] The input
     candidate holes message obtained throught the RGB node
-    @param[out] conveyor [HoleFilters::HolesConveyor&] The output conveyor
+    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
     struct
-    @param[out] rgbImage [cv::Mat&] The output RGB image
+    @param[out] rgbImage [cv::Mat*] The output RGB image
     @return void
    **/
   void HoleFusion::unpackRgbMessage(
     const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
-    HoleFilters::HolesConveyor& conveyor, cv::Mat& rgbImage)
+    HoleFilters::HolesConveyor* conveyor, cv::Mat* rgbImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("unpackRgbMessage", "rgbCandidateHolesCallback");

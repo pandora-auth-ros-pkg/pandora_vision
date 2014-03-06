@@ -41,15 +41,15 @@
 #include "depth_node/visualization.h"
 
 /**
-@namespace vision
-@brief The main namespace for PANDORA vision
-**/
+  @namespace vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-  @class Morphology
-  @brief Provides methods for image binary morphological operators
-  **/
+    @class Morphology
+    @brief Provides methods for image binary morphological operators
+   **/
   class Morphology
   {
 
@@ -60,102 +60,102 @@ namespace pandora_vision
         @brief Checks if a kernel in a specific point in an image is satisfied
         @param kernal [const char [3][3]] The kernel
         @param img [const cv::Mat&] The input image (uchar)
-        @param center [const cv::Point] The center of the kernel
+        @param center [const cv::Point&] The center of the kernel
         @return bool : True on match
        **/
       static bool kernelCheck(const char kernel[3][3], const cv::Mat& img,
-          const cv::Point center);
+        const cv::Point& center);
 
       /**
         @brief Performs steps of erosion
         @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void erosion(cv::Mat& img, const int steps,
-          const bool visualize = false);
+      static void erosion(cv::Mat* img, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of dilation
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void dilation(cv::Mat& img, const int steps,
-          const bool visualize = false);
+      static void dilation(cv::Mat* img, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of opening
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void opening(cv::Mat& img, const int steps,
-          const bool visualize = false);
+      static void opening(cv::Mat* img, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of closing
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void closing(cv::Mat& img, const int steps,
-          const bool visualize = false);
+      static void closing(cv::Mat* img, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of thickenning
-        @param inImage [cv::Mat&] The input image in CV_8UC1 format
-        @param outImage [cv::Mat&] The output image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param inImage [const cv::Mat&] The input image in CV_8UC1 format
+        @param outImage [cv::Mat*] The output image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void thickenning(cv::Mat& inImage, cv::Mat& outImage,
-          const int steps, const bool visualize = false);
+      static void thickenning(const cv::Mat& inImage, cv::Mat* outImage,
+        const int& steps, const bool& visualize = false);
 
       /**
         @brief Performs steps of thinning
         (http://homepages.inf.ed.ac.uk/rbf/HIPR2/thin.htm)
-        @param inImage [cv::Mat&] The input image in CV_8UC1 format
-        @param outImage [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param inImage [const cv::Mat&] The input image in CV_8UC1 format
+        @param outImage [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void thinning(cv::Mat& inImage, cv::Mat& outImage, const int steps,
-          const bool visualize = false);
+      static void thinning(const cv::Mat& inImage, cv::Mat* outImage,
+        const int& steps, const bool& visualize = false);
 
       /**
         @brief Performs steps of pruning
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void pruning(cv::Mat& inImage, const int steps,
-          const bool visualize = false);
+      static void pruning(cv::Mat* inImage, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of strict pruning (removes more stuff)
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
-        @param visualize [const bool] True for step-by-step visualization
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
+        @param visualize [const bool&] True for step-by-step visualization
         @return void
        **/
-      static void pruningStrict(cv::Mat& inImage, const int steps,
-          const bool visualize = false);
+      static void pruningStrict(cv::Mat* inImage, const int& steps,
+        const bool& visualize = false);
 
       /**
         @brief Performs steps of strict pruning (removes more stuff)
-        @param img [cv::Mat&] The input image in CV_8UC1 format
-        @param steps [const int] Number of operator steps
+        @param img [cv::Mat*] The input image in CV_8UC1 format
+        @param steps [const int&] Number of operator steps
         @return void
        **/
-      static void pruningStrictIterative(cv::Mat& inImage, const int steps);
+      static void pruningStrictIterative(cv::Mat* inImage, const int& steps);
   };
 
 }

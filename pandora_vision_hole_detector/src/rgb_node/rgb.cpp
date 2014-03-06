@@ -105,7 +105,7 @@ namespace pandora_vision
 
     vision_communications::RgbCandidateHolesVectorMsg rgbCandidateHolesMsg;
     createCandidateHolesMessage(rgbHolesConveyor,
-      inImage, rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_32FC1);
+      inImage, &rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_32FC1);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
   }
@@ -116,7 +116,7 @@ namespace pandora_vision
   void Rgb::createCandidateHolesMessage(
     const HoleFilters::HolesConveyor& conveyor,
     const sensor_msgs::Image& rgbImage,
-    vision_communications::RgbCandidateHolesVectorMsg& rgbCandidateHolesMsg,
+    vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
     const std::string& encoding)
   {
     //!< Fill the vision_communications::RgbCandidateHolesVectorMsg's
@@ -144,11 +144,11 @@ namespace pandora_vision
       }
 
       //!< Push back one hole to the holes vector message
-      rgbCandidateHolesMsg.candidateHoles.push_back(holeMsg);
+      rgbCandidateHolesMsg->candidateHoles.push_back(holeMsg);
     }
 
     //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
     //!< sensor_msgs/Image interpolatedDepthImage
-    rgbCandidateHolesMsg.rgbImage = rgbImage;
+    rgbCandidateHolesMsg->rgbImage = rgbImage;
   }
 }

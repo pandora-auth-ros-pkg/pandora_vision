@@ -42,14 +42,14 @@ namespace pandora_vision
   /**
     @brief Identify the planes in a point cloud and return the number of
     detected planes.
-    @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose
+    @param[in] inputCloud [const PointCloudXYZPtr&] The point cloud whose
     planes we wish to locate
-    @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not
+    @param[in] applyVoxelFilter [const bool&] Apply the voxel filter or not
     on the input cloud.
     @return The number of planes detected in inputCloud.
    **/
-  int PlanesDetection::locatePlanes(const PointCloudXYZPtr inputCloud,
-      const bool applyVoxelFilter)
+  int PlanesDetection::locatePlanes(const PointCloudXYZPtr& inputCloud,
+      const bool& applyVoxelFilter)
   {
     #ifdef DEBUG_TIME
     Timer::start("locatePlanes", "checkHolesRectangleOutline");
@@ -73,12 +73,12 @@ namespace pandora_vision
     if (HoleFusionParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
-          planesVectorOut, coefficientsVectorOut, inliersVector);
+          &planesVectorOut, &coefficientsVectorOut, &inliersVector);
     }
     else if (HoleFusionParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
-          planesVectorOut, coefficientsVectorOut, inliersVector);
+          &planesVectorOut, &coefficientsVectorOut, &inliersVector);
     }
 
     #ifdef DEBUG_TIME
@@ -93,21 +93,21 @@ namespace pandora_vision
   /**
     @brief Identify the planes in a point cloud and return a vector
     cointaining pointers to them.
-    @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose planes
+    @param[in] inputCloud [const PointCloudXYZPtr&] The point cloud whose planes
     we wish to locate
-    @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not on
+    @param[in] applyVoxelFilter [const bool&] Apply the voxel filter or not on
     the input cloud.
     @param[out] planesVectorOut
-    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
     the output vector of pointers to planes
-    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&] The
+    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*] The
     output vector of coefficients of each plane detected
     @return void
    **/
-  void PlanesDetection::locatePlanes(const PointCloudXYZPtr inputCloud,
-    const bool applyVoxelFilter,
-    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
-    std::vector<pcl::ModelCoefficients>& coefficientsVectorOut)
+  void PlanesDetection::locatePlanes(const PointCloudXYZPtr& inputCloud,
+    const bool& applyVoxelFilter,
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>* planesVectorOut,
+    std::vector<pcl::ModelCoefficients>* coefficientsVectorOut)
   {
     #ifdef DEBUG_TIME
     Timer::start("locatePlanes (void)", "checkHolesRectangleOutline");
@@ -146,12 +146,12 @@ namespace pandora_vision
     if (HoleFusionParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
-        planesVectorOut, coefficientsVectorOut, inliersVector);
+        planesVectorOut, coefficientsVectorOut, &inliersVector);
     }
     else if (HoleFusionParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
-        planesVectorOut, coefficientsVectorOut, inliersVector);
+        planesVectorOut, coefficientsVectorOut, &inliersVector);
     }
     //double end_time = pcl::getTime ();
     // std::cout << "Time taken from cloud input to planes' locating: "
@@ -172,19 +172,19 @@ namespace pandora_vision
     @param[in] cloudIn [const PointCloudXYZPtr&] The point cloud whose planes we
     wish to locate
     @param[out] planesVectorOut
-    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
     the output vector of pointers to planes
-    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&]
+    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*]
     The output vector of coefficients of each plane detected
-    @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>&]
+    @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>*]
     The inliers for each plane
     @return void
    **/
   void PlanesDetection::locatePlanesUsingSACSegmentation (
     const PointCloudXYZPtr& cloudIn,
-    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>&  planesVectorOut,
-    std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
-    std::vector<pcl::PointIndices::Ptr>& inliersVectorOut)
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*  planesVectorOut,
+    std::vector<pcl::ModelCoefficients>* coefficientsVectorOut,
+    std::vector<pcl::PointIndices::Ptr>* inliersVectorOut)
   {
     #ifdef DEBUG_TIME
     Timer::start("locatePlanesUsingSACSegmentation", "locatePlanes");
@@ -276,9 +276,9 @@ namespace pandora_vision
       }
     }
 
-    planesVectorOut = cloud_ps;
-    coefficientsVectorOut = coefficientsVector;
-    inliersVectorOut = inliersVector;
+    *planesVectorOut = cloud_ps;
+    *coefficientsVectorOut = coefficientsVector;
+    *inliersVectorOut = inliersVector;
     // std::cerr << "Total number of planes found: "
     // << cloud_ps.size()
     // << std::endl;
@@ -296,19 +296,19 @@ namespace pandora_vision
     @param[in] cloudIn [const PointCloudXYZPtr&] The point cloud whose planes we
     wish to locate
     @param[out] planesVectorOut
-    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+    [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
     The output vector of pointers to planes
-    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&]
+    @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*]
     The output[out] vector of coefficients of each plane detected
-    @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>&]
+    @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>*]
     The inliers for each plane
     @return void
     **/
   void PlanesDetection::locatePlanesUsingNormalsSACSegmentation
     (const PointCloudXYZPtr& cloudIn,
-     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
-     std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
-     std::vector<pcl::PointIndices::Ptr>& inliersVectorOut)
+     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>* planesVectorOut,
+     std::vector<pcl::ModelCoefficients>* coefficientsVectorOut,
+     std::vector<pcl::PointIndices::Ptr>* inliersVectorOut)
   {
     #ifdef DEBUG_TIME
     Timer::start("locatePlanesUsingNormalsSACSegmentation", "locatePlanes");
@@ -420,9 +420,9 @@ namespace pandora_vision
       }
     }
 
-    planesVectorOut = cloud_ps;
-    coefficientsVectorOut = coefficientsVector;
-    inliersVectorOut = inliersVector;
+    *planesVectorOut = cloud_ps;
+    *coefficientsVectorOut = coefficientsVector;
+    *inliersVectorOut = inliersVector;
     // std::cerr << "Total number of planes found: "
     // << cloud_ps.size()
     // << std::endl;

@@ -43,11 +43,11 @@ namespace pandora_vision
     @brief Checks if a kernel in a specific point in an image is satisfied
     @param kernal [const char [3][3]] The kernel
     @param img [const cv::Mat&] The input image (uchar)
-    @param center [const cv::Point] The center of the kernel
+    @param center [const cv::Point&] The center of the kernel
     @return bool : True on match
    **/
   bool Morphology::kernelCheck(const char kernel[3][3], const cv::Mat& img,
-    const cv::Point center)
+    const cv::Point& center)
   {
     static unsigned char *ptr;
     ptr = (unsigned char *) img.data;
@@ -75,69 +75,70 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of erosion
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param img [cv::Mat*] The input image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::erosion(cv::Mat& img, const int steps, const bool visualize)
+  void Morphology::erosion(cv::Mat* img, const int& steps,
+    const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("erosion");
     #endif
 
     cv::Mat helper;
-    img.copyTo(helper);
+    img->copyTo(helper);
 
     for(unsigned int s = 0 ; s < steps ; s++)
     {
       if(visualize)
       {
-        Visualization::show("Erosion iteration",img,500);
+        Visualization::show("Erosion iteration", *img, 500);
       }
-      for(unsigned int i = 1 ; i < img.rows - 1 ; i++)
+      for(unsigned int i = 1 ; i < img->rows - 1 ; i++)
       {
-        for(unsigned int j = 1 ; j < img.cols - 1 ; j++)
+        for(unsigned int j = 1 ; j < img->cols - 1 ; j++)
         {
-          if(img.at<unsigned char>(i,j) != 0) //!< That's foreground
+          if(img->at<unsigned char>(i,j) != 0) //!< That's foreground
           {
             //!< Check for all adjacent
-            if(img.at<unsigned char>(i + 1,j + 1) == 0)
+            if(img->at<unsigned char>(i + 1,j + 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i + 1,j) == 0)
+            if(img->at<unsigned char>(i + 1,j) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i + 1,j - 1) == 0)
+            if(img->at<unsigned char>(i + 1,j - 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i,j + 1) == 0)
+            if(img->at<unsigned char>(i,j + 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i,j - 1) == 0)
+            if(img->at<unsigned char>(i,j - 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i - 1,j - 1) == 0)
+            if(img->at<unsigned char>(i - 1,j - 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i - 1,j) == 0)
+            if(img->at<unsigned char>(i - 1,j) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
             }
-            if(img.at<unsigned char>(i - 1,j + 1) == 0)
+            if(img->at<unsigned char>(i - 1,j + 1) == 0)
             {
               helper.at<unsigned char>(i,j) = 0;
               continue;
@@ -145,7 +146,7 @@ namespace pandora_vision
           }
         }
       }
-      helper.copyTo(img);
+      helper.copyTo(*img);
     }
     #ifdef DEBUG_TIME
     Timer::tick("erosion");
@@ -156,68 +157,69 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of dilation
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param img [cv::Mat&*] The input image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::dilation(cv::Mat& img, const int steps, const bool visualize)
+  void Morphology::dilation(cv::Mat* img, const int& steps,
+    const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("dilation", "denoiseEdges");
     #endif
 
     cv::Mat helper;
-    img.copyTo(helper);
+    img->copyTo(helper);
 
     static unsigned int p = 0;
 
     for(unsigned int s = 0 ; s < steps ; s++)
     {
-      for(unsigned int i = 1 ; i < img.rows - 1 ; i++)
+      for(unsigned int i = 1 ; i < img->rows - 1 ; i++)
       {
-        for(unsigned int j = 1 ; j < img.cols - 1 ; j++)
+        for(unsigned int j = 1 ; j < img->cols - 1 ; j++)
         {
-          p = i * img.cols + j;
-          if(img.data[i * img.cols + j] == 0) //!< That's foreground
+          p = i * img->cols + j;
+          if(img->data[i * img->cols + j] == 0) //!< That's foreground
           {
             //!< Check for all adjacent
-            if(img.data[p + img.cols + 1] != 0)
+            if(img->data[p + img->cols + 1] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p + img.cols] != 0)
+            if(img->data[p + img->cols] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p + img.cols - 1] != 0)
+            if(img->data[p + img->cols - 1] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p + 1] != 0)
+            if(img->data[p + 1] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p - 1] != 0)
+            if(img->data[p - 1] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p - img.cols + 1] != 0)
+            if(img->data[p - img->cols + 1] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p - img.cols] != 0)
+            if(img->data[p - img->cols] != 0)
             {
               helper.data[p] = 255;
               continue;
             }
-            if(img.data[p - img.cols - 1] != 0)
+            if(img->data[p - img->cols - 1] != 0)
             {
               helper.data[p] = 255;
               continue;
@@ -225,7 +227,7 @@ namespace pandora_vision
           }
         }
       }
-      helper.copyTo(img);
+      helper.copyTo(*img);
     }
     #ifdef DEBUG_TIME
     Timer::tick("dilation");
@@ -237,11 +239,12 @@ namespace pandora_vision
   /**
     @brief Performs steps of opening
     @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::opening(cv::Mat& img, const int steps, const bool visualize)
+  void Morphology::opening(cv::Mat* img, const int& steps,
+    const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("opening");
@@ -251,7 +254,7 @@ namespace pandora_vision
     {
       if(visualize)
       {
-        Visualization::show("Opening iteration",img,500);
+        Visualization::show("Opening iteration", *img, 500);
       }
 
       erosion(img, 1, false);
@@ -266,12 +269,13 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of closing
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param img [cv::Mat*] The input image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::closing(cv::Mat& img, const int steps, const bool visualize)
+  void Morphology::closing(cv::Mat* img, const int& steps,
+    const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("closing");
@@ -281,7 +285,7 @@ namespace pandora_vision
     {
       if(visualize)
       {
-        Visualization::show("Closing iteration",img,500);
+        Visualization::show("Closing iteration", *img, 500);
       }
 
       dilation(img, 1, false);
@@ -296,14 +300,14 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of thickenning
-    @param inImage [cv::Mat&] The input image in CV_8UC1 format
-    @param outImage [cv::Mat&] The output image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param inImage [const cv::Mat&] The input image in CV_8UC1 format
+    @param outImage [cv::Mat*] The output image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::thickenning(cv::Mat& inImage, cv::Mat& outImage,
-      const int steps, const bool visualize)
+  void Morphology::thickenning(const cv::Mat& inImage, cv::Mat* outImage,
+      const int& steps, const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("thickenning");
@@ -343,7 +347,7 @@ namespace pandora_vision
         {2, 2, 0} }
     };
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
 
     //!< if the image is saturated by the thickenning operator,
     //!< cease its operation
@@ -352,21 +356,22 @@ namespace pandora_vision
     {
       if(visualize)
       {
-        Visualization::show("Thickening iteration", outImage, 500);
+        Visualization::show("Thickening iteration", *outImage, 500);
       }
 
       running = false;
       for (int kernelId = 0; kernelId < 8; kernelId++)
       {
-        for (unsigned int rows = 1; rows < outImage.rows - 1; rows++)
+        for (unsigned int rows = 1; rows < outImage->rows - 1; rows++)
         {
-          for (unsigned int cols = 1; cols < outImage.cols - 1; cols++)
+          for (unsigned int cols = 1; cols < outImage->cols - 1; cols++)
           {
-            if(outImage.at<unsigned char>(rows,cols) == 0)
+            if(outImage->at<unsigned char>(rows,cols) == 0)
             {
-              if (kernelCheck(kernels[kernelId], outImage, cv::Point(cols, rows)))
+              if (kernelCheck(kernels[kernelId], *outImage,
+                  cv::Point(cols, rows)))
               {
-                outImage.at<unsigned char>(rows, cols) = 255;
+                outImage->at<unsigned char>(rows, cols) = 255;
                 running = true;
               }
             }
@@ -388,14 +393,14 @@ namespace pandora_vision
   /**
     @brief Performs steps of thinning
     (http://homepages.inf.ed.ac.uk/rbf/HIPR2/thin.htm)
-    @param inImage [cv::Mat&] The input image in CV_8UC1 format
+    @param inImage [const cv::Mat&] The input image in CV_8UC1 format
     @param outImage [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::thinning(cv::Mat& inImage, cv::Mat& outImage,
-      const int steps, const bool visualize)
+  void Morphology::thinning(const cv::Mat& inImage, cv::Mat* outImage,
+      const int& steps, const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("thinning", "denoiseEdges");
@@ -435,22 +440,23 @@ namespace pandora_vision
         {2, 1, 2} }
     };
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
 
     //!< if the image is saturated by the thinning operator,
     //!< cease its operation
     bool running;
     static unsigned int limit = 0;
-    static unsigned int *pts = new unsigned int[outImage.cols * outImage.rows];
+    static unsigned int *pts =
+      new unsigned int[outImage->cols * outImage->rows];
     limit = 0;
 
-    for (unsigned int rows = 1; rows < outImage.rows - 1; rows++)
+    for (unsigned int rows = 1; rows < outImage->rows - 1; rows++)
     {
-      for (unsigned int cols = 1; cols < outImage.cols - 1; cols++)
+      for (unsigned int cols = 1; cols < outImage->cols - 1; cols++)
       {
-        if(inImage.data[rows * outImage.cols + cols] != 0)
+        if(inImage.data[rows * outImage->cols + cols] != 0)
         {
-          pts[limit]= rows * outImage.cols + cols;
+          pts[limit]= rows * outImage->cols + cols;
           limit++;
         }
       }
@@ -464,10 +470,10 @@ namespace pandora_vision
       {
         for (int kernelId = 0; kernelId < 8; kernelId++)
         {
-          if (kernelCheck(kernels[kernelId], outImage,
-            cv::Point(pts[i] % outImage.cols, pts[i] / outImage.cols)))
+          if (kernelCheck(kernels[kernelId], *outImage,
+            cv::Point(pts[i] % outImage->cols, pts[i] / outImage->cols)))
           {
-            outImage.data[pts[i]] = 0;
+            outImage->data[pts[i]] = 0;
             running = true;
             break;
           }
@@ -487,12 +493,13 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of pruning
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param img [cv::Mat*] The input image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::pruning(cv::Mat& img, const int steps, const bool visualize)
+  void Morphology::pruning(cv::Mat* img, const int& steps,
+    const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("pruning");
@@ -541,21 +548,21 @@ namespace pandora_vision
     {
       if(visualize)
       {
-        Visualization::show("Pruning iteration", img, 100);
+        Visualization::show("Pruning iteration", *img, 100);
       }
 
       running = false;
       for (int kernelId = 0; kernelId < 9; kernelId++)
       {
-        for (unsigned int rows = 1; rows < img.rows - 1; rows++)
+        for (unsigned int rows = 1; rows < img->rows - 1; rows++)
         {
-          for (unsigned int cols = 1; cols < img.cols - 1; cols++)
+          for (unsigned int cols = 1; cols < img->cols - 1; cols++)
           {
-            if(img.at<unsigned char>(rows,cols) != 0)
+            if(img->at<unsigned char>(rows,cols) != 0)
             {
-              if (kernelCheck(kernels[kernelId], img, cv::Point(cols, rows)))
+              if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
-                img.at<unsigned char>(rows, cols) = 0;
+                img->at<unsigned char>(rows, cols) = 0;
                 running = true;
               }
             }
@@ -576,13 +583,13 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of strict pruning (removes more stuff)
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
-    @param visualize [const bool] True for step-by-step visualization
+    @param img [cv::Mat*] The input image in CV_8UC1 format
+    @param steps [const int*] Number of operator steps
+    @param visualize [const bool&] True for step-by-step visualization
     @return void
    **/
-  void Morphology::pruningStrict(cv::Mat& img, const int steps,
-      const bool visualize)
+  void Morphology::pruningStrict(cv::Mat* img, const int& steps,
+      const bool& visualize)
   {
     #ifdef DEBUG_TIME
     Timer::start("pruningStrict");
@@ -631,21 +638,21 @@ namespace pandora_vision
     {
       if(visualize)
       {
-        Visualization::show("Pruning iteration", img, 100);
+        Visualization::show("Pruning iteration", *img, 100);
       }
 
       running = false;
       for (int kernelId = 0; kernelId < 9; kernelId++)
       {
-        for (unsigned int rows = 1; rows < img.rows - 1; rows++)
+        for (unsigned int rows = 1; rows < img->rows - 1; rows++)
         {
-          for (unsigned int cols = 1; cols < img.cols - 1; cols++)
+          for (unsigned int cols = 1; cols < img->cols - 1; cols++)
           {
-            if(img.at<unsigned char>(rows,cols) != 0)
+            if(img->at<unsigned char>(rows,cols) != 0)
             {
-              if (kernelCheck(kernels[kernelId], img, cv::Point(cols, rows)))
+              if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
-                img.at<unsigned char>(rows, cols) = 0;
+                img->at<unsigned char>(rows, cols) = 0;
                 running = true;
               }
             }
@@ -666,11 +673,11 @@ namespace pandora_vision
 
   /**
     @brief Performs steps of strict pruning (removes more stuff)
-    @param img [cv::Mat&] The input image in CV_8UC1 format
-    @param steps [const int] Number of operator steps
+    @param img [cv::Mat*] The input image in CV_8UC1 format
+    @param steps [const int&] Number of operator steps
     @return void
    **/
-  void Morphology::pruningStrictIterative(cv::Mat& img, const int steps)
+  void Morphology::pruningStrictIterative(cv::Mat* img, const int& steps)
   {
     #ifdef DEBUG_TIME
     Timer::start("pruningStrictIterative","denoiseEdges");
@@ -718,18 +725,18 @@ namespace pandora_vision
 
     std::set<unsigned int> current, next;
 
-    for (unsigned int rows = 1; rows < img.rows - 1; rows++)
+    for (unsigned int rows = 1; rows < img->rows - 1; rows++)
     {
-      for (unsigned int cols = 1; cols < img.cols - 1; cols++)
+      for (unsigned int cols = 1; cols < img->cols - 1; cols++)
       {
-        if(img.at<unsigned char>(rows,cols) != 0)
+        if(img->at<unsigned char>(rows,cols) != 0)
         {
           //!< Check for initial stuff
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(cols,rows)))
+            if(kernelCheck(kernels[i], *img, cv::Point(cols,rows)))
             {
-              current.insert(rows * img.cols + cols);
+              current.insert(rows * img->cols + cols);
               break;
             }
           }
@@ -748,103 +755,103 @@ namespace pandora_vision
       {
         static unsigned int x = 0;
         static unsigned int y = 0;
-        x = *it / img.cols;
-        y = *it % img.cols;
+        x = *it / img->cols;
+        y = *it % img->cols;
 
-        img.at<unsigned char>(x,y) = 0;
+        img->at<unsigned char>(x,y) = 0;
 
-        if(img.at<unsigned char>(x - 1, y - 1) != 0)
+        if(img->at<unsigned char>(x - 1, y - 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y - 1,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x - 1)))
             {
               running = true;
-              next.insert( (x - 1) * img.cols + (y - 1) );
+              next.insert( (x - 1) * img->cols + (y - 1) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x - 1, y) != 0)
+        if(img->at<unsigned char>(x - 1, y) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y,x - 1)))
             {
               running = true;
-              next.insert( (x - 1) * img.cols + (y) );
+              next.insert( (x - 1) * img->cols + (y) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x - 1, y + 1) != 0)
+        if(img->at<unsigned char>(x - 1, y + 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y + 1,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x - 1)))
             {
               running = true;
-              next.insert( (x - 1) * img.cols + (y + 1) );
+              next.insert( (x - 1) * img->cols + (y + 1) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x, y - 1) != 0)
+        if(img->at<unsigned char>(x, y - 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y - 1,x)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x)))
             {
               running = true;
-              next.insert( (x) * img.cols + (y - 1) );
+              next.insert( (x) * img->cols + (y - 1) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x, y + 1) != 0)
+        if(img->at<unsigned char>(x, y + 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y + 1,x)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x)))
             {
               running = true;
-              next.insert( (x) * img.cols + (y + 1) );
+              next.insert( (x) * img->cols + (y + 1) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x + 1, y - 1) != 0)
+        if(img->at<unsigned char>(x + 1, y - 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y - 1,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x + 1)))
             {
               running = true;
-              next.insert( (x + 1) * img.cols + (y - 1) );
+              next.insert( (x + 1) * img->cols + (y - 1) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x + 1, y) != 0)
+        if(img->at<unsigned char>(x + 1, y) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y,x + 1)))
             {
               running = true;
-              next.insert( (x + 1) * img.cols + (y) );
+              next.insert( (x + 1) * img->cols + (y) );
               break;
             }
           }
         }
-        if(img.at<unsigned char>(x + 1, y + 1) != 0)
+        if(img->at<unsigned char>(x + 1, y + 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i],img,cv::Point(y + 1,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x + 1)))
             {
               running = true;
-              next.insert( (x + 1) * img.cols + (y + 1) );
+              next.insert( (x + 1) * img->cols + (y + 1) );
               break;
             }
           }

@@ -58,67 +58,67 @@ namespace pandora_vision
         @brief Given an input image from the depth sensor, this function
         eliminates noise in it depending on the amount of noise
         @param[in] inImage [cv::Mat&] The input image
-        @param[out] outImage [cv::Mat&] The denoised depth image
+        @param[out] outImage [cv::Mat*] The denoised depth image
         @return void
        **/
       static void performNoiseElimination(const cv::Mat& inImage,
-          cv::Mat& outImage);
+          cv::Mat* outImage);
 
       /**
         @brief Interpolates the noise produced by kinect. The noise is the areas
         kinect cannot produce depth measurements (value = 0)
         @param[in] inImage [const cv::Mat&] The input image
-        @param[out] outImage [cv::Mat&] The output image
+        @param[out] outImage [cv::Mat*] The output image
         @return void
        **/
-      static void interpolation(const cv::Mat& inImage, cv::Mat& outImage);
+      static void interpolation(const cv::Mat& inImage, cv::Mat* outImage);
 
       /**
         @brief Iteration for the interpolateNoise function
-        @param[in][out] inImage [cv::Mat&] The input image
+        @param[in][out] inImage [cv::Mat*] The input image
         @return flag [bool]. if flag == true there exist pixels
         that their value needs to be interpolated
        **/
-      static bool interpolationIteration(cv::Mat& inImage);
+      static bool interpolationIteration(cv::Mat* inImage);
 
       /**
         @brief Interpolates the noise of an image at its borders.
-        @param[in][out] inImage [cv::Mat &] The image whose noise will be
+        @param[in][out] inImage [cv::Mat*] The image whose noise will be
         interpolated at the edges.
         @return void
        **/
-      static void interpolateImageBorders(cv::Mat& inImage);
+      static void interpolateImageBorders(cv::Mat* inImage);
 
       /**
         @brief Replaces the value (0) of pixel im(row, col) with the mean value
         of its non-zero neighbors.
         @param[in] inImage [const cv::Mat &] The input depth image
-        @param[in] row [const int] The row index of the pixel of interest
-        @param[in] col [const int] The column index of the pixel of interest
+        @param[in] row [const int&] The row index of the pixel of interest
+        @param[in] col [const int&] The column index of the pixel of interest
         @param[in][out] endFlag [bool] True indicates that there are pixels
         left with zero value
         @return void
        **/
       static float interpolateZeroPixel(const cv::Mat& inImage,
-          const int row, const int col, bool& endFlag);
+          const int& row, const int& col, bool& endFlag);
 
       /**
         @brief Interpolates the noise produced by kinect. The black blobs take
         the depth value of the closest neighbour obstacles.
         @param[in] inImage [const cv::Mat&] The input image
-        @param[out] outImage [cv::Mat&] The output image
+        @param[out] outImage [cv::Mat*] The output image
         @return void
        **/
-      static void brushfireNear(const cv::Mat& inImage,cv::Mat& outImage);
+      static void brushfireNear(const cv::Mat& inImage, cv::Mat* outImage);
 
       /**
         @brief Iteration for the interpolateNoise_brushNear function
-        @param[in][out] image [cv::Mat&] The input image
-        @param index [const unsigned int] Where to start the brushfire algorithm
+        @param[in][out] image [cv::Mat*] The input image
+        @param index [const unsigned int&] Where to start the brushfire algorithm
         (index = y * cols + x)
         @return void
        **/
-      static void brushfireNearStep(cv::Mat& image, const unsigned int index);
+      static void brushfireNearStep(cv::Mat* image, const unsigned int& index);
 
       /**
         @brief Changes the interpolation method according to the image's values
@@ -130,11 +130,11 @@ namespace pandora_vision
       /**
         @brief Transforms all black noise to white
         @param[in] inImage [const cv::Mat&] The input image
-        @param[out] outImage [cv::Mat&] The output image
+        @param[out] outImage [cv::Mat*] The output image
         @return void
        **/
       static void transformNoiseToWhite(const cv::Mat& inImage,
-          cv::Mat& outImage);
+          cv::Mat* outImage);
   };
 
 }

@@ -43,11 +43,11 @@ namespace pandora_vision
     @brief Given an input image from the depth sensor, this function
     eliminates noise in it depending on the amount of noise
     @param[in] inImage [const cv::Mat&] The input image
-    @param[out] outImage [cv::Mat&] The denoised depth image
+    @param[out] outImage [cv::Mat*] The denoised depth image
     @return void
    **/
   void NoiseElimination::performNoiseElimination(const cv::Mat& inImage,
-      cv::Mat& outImage)
+      cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("performNoiseElimination", "findHoles");
@@ -84,17 +84,17 @@ namespace pandora_vision
     @brief Interpolates the noise produced by kinect. The noise is the areas\
     kinect cannot produce depth measurements (value = 0)
     @param[in] inImage [const cv::Mat&] The input image
-    @param[out] outImage [cv::Mat&] The output image
+    @param[out] outImage [cv::Mat*] The output image
     @return void
    **/
   void NoiseElimination::interpolation(const cv::Mat& inImage,
-      cv::Mat& outImage)
+      cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("interpolation", "performNoiseElimination");
     #endif
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
     //!< in the end, only pixels adjacent to the edge of the
     //!< image are left black
     while (interpolationIteration(outImage));
@@ -108,29 +108,31 @@ namespace pandora_vision
 
   /**
     @brief Iteration for the interpolateNoise function
-    @param[in][out] inImage [cv::Mat&] The input image
+    @param[in][out] inImage [cv::Mat*] The input image
     @return flag [bool]. if flag == true there exist pixels
     that their value needs to be interpolated
    **/
-  bool NoiseElimination::interpolationIteration(cv::Mat& inImage)
+  bool NoiseElimination::interpolationIteration(cv::Mat* inImage)
   {
     cv::Mat marker;
-    inImage.copyTo(marker);
+    inImage->copyTo(marker);
 
     bool flag = false;
 
-    for (int i = 1; i < inImage.rows - 1; i++)
+    for (int i = 1; i < inImage->rows - 1; i++)
     {
-      for (int j = 1; j < inImage.cols - 1; j++)
+      for (int j = 1; j < inImage->cols - 1; j++)
       {
-        if (inImage.at<float>(i, j) == 0)
+        if (inImage->at<float>(i, j) == 0)
         {
           marker.at<float>(i, j) =
-            interpolateZeroPixel(inImage, i, j, flag);
+            interpolateZeroPixel(*inImage, i, j, flag);
         }
       }
     }
-    inImage = marker;
+
+    *inImage = marker;
+
     return flag;
   }
 
@@ -138,11 +140,11 @@ namespace pandora_vision
 
   /**
     @brief Interpolates the noise of an image at its borders.
-    @param[in][out] inImage [cv::Mat&] The image whose noise will be
+    @param[in][out] inImage [cv::Mat*] The image whose noise will be
     interpolated at the edges.
     @return void
    **/
-  void NoiseElimination::interpolateImageBorders(cv::Mat& inImage)
+  void NoiseElimination::interpolateImageBorders(cv::Mat* inImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("interpolateImageBorders");
@@ -150,33 +152,33 @@ namespace pandora_vision
 
     //!< interpolate the pixels at the edges of the inImage
     //!< interpolate the rows
-    for (unsigned int i = 1; i < inImage.cols - 1; ++i)
+    for (unsigned int i = 1; i < inImage->cols - 1; ++i)
     {
-      inImage.at<float>(0, i) = inImage.at<float>(1, i);
-      inImage.at<float>(inImage.rows - 1, i) =
-        inImage.at<float>(inImage.rows - 2, i);
+      inImage->at<float>(0, i) = inImage->at<float>(1, i);
+      inImage->at<float>(inImage->rows - 1, i) =
+        inImage->at<float>(inImage->rows - 2, i);
     }
 
     //!< interpolate the columns
-    for (unsigned int i = 1; i < inImage.rows - 1; ++i)
+    for (unsigned int i = 1; i < inImage->rows - 1; ++i)
     {
-      inImage.at<float>(i, 0) = inImage.at<float>(i, 1);
-      inImage.at<float>(i, inImage.cols - 1) =
-        inImage.at<float>(i, inImage.cols - 2);
+      inImage->at<float>(i, 0) = inImage->at<float>(i, 1);
+      inImage->at<float>(i, inImage->cols - 1) =
+        inImage->at<float>(i, inImage->cols - 2);
     }
 
     //!< interpolate the corners
     /// top left
-    inImage.at<float>(0, 0) = inImage.at<float>(1, 1);
+    inImage->at<float>(0, 0) = inImage->at<float>(1, 1);
     /// top right
-    inImage.at<float>(0, inImage.cols - 1) =
-      inImage.at<float>(1, inImage.cols - 2);
+    inImage->at<float>(0, inImage->cols - 1) =
+      inImage->at<float>(1, inImage->cols - 2);
     /// bottom left
-    inImage.at<float>(inImage.rows - 1, 0) =
-      inImage.at<float>(inImage.rows - 2, 1);
+    inImage->at<float>(inImage->rows - 1, 0) =
+      inImage->at<float>(inImage->rows - 2, 1);
     /// bottom right
-    inImage.at<float>(inImage.rows - 1, inImage.cols - 1) =
-      inImage.at<float>(inImage.rows - 2, inImage.cols - 2);
+    inImage->at<float>(inImage->rows - 1, inImage->cols - 1) =
+      inImage->at<float>(inImage->rows - 2, inImage->cols - 2);
 
     #ifdef DEBUG_TIME
     Timer::tick("interpolateImageBorders");
@@ -189,16 +191,16 @@ namespace pandora_vision
     @brief Replaces the value (0) of pixel im(row, col) with the mean value
     of its non-zero neighbors.
     @param[in] inImage [const cv::Mat &] The input depth image
-    @param[in] row [const int] The row index of the pixel of interest
-    @param[in] col [const int] The column index of the pixel of interest
+    @param[in] row [const int&] The row index of the pixel of interest
+    @param[in] col [const int&] The column index of the pixel of interest
     @param[in][out] endFlag [bool] True indicates that there are pixels
     left with zero value
     @return void
    **/
   float NoiseElimination::interpolateZeroPixel(
     const cv::Mat& inImage,
-    const int row,
-    const int col,
+    const int& row,
+    const int& col,
     bool& endFlag)
   {
     float sumValueOfNonZeroPixels = 0;
@@ -274,40 +276,40 @@ namespace pandora_vision
     @brief Interpolates the noise produced by kinect. The black blobs take
     the depth value of the closest neighbour obstacles.
     @param[in] inImage [const cv::Mat&] The input image
-    @param[out] outImage [cv::Mat&] The output image
+    @param[out] outImage [cv::Mat*] The output image
     @return void
    **/
   void NoiseElimination::brushfireNear(const cv::Mat& inImage,
-      cv::Mat& outImage)
+      cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("brushfireNear","performNoiseElimination");
     #endif
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
     bool finished = false;
 
-    for(unsigned int i = 0 ; i<outImage.rows ; i++)
+    for(unsigned int i = 0 ; i < outImage->rows ; i++)
     {
-      outImage.at<float>(i,0) = 1;
-      outImage.at<float>(i,outImage.cols-1) = 1;
+      outImage->at<float>(i,0) = 1;
+      outImage->at<float>(i, outImage->cols-1) = 1;
     }
-    for(unsigned int i = 0 ; i<outImage.cols ; i++)
+    for(unsigned int i = 0 ; i<outImage->cols ; i++)
     {
-      outImage.at<float>(0,i) = 1;
-      outImage.at<float>(outImage.rows -1 ,i) = 1;
+      outImage->at<float>(0,i) = 1;
+      outImage->at<float>(outImage->rows -1 ,i) = 1;
     }
     while(!finished)
     {
       finished = true;
 
-      for(unsigned int i = 1 ; i < outImage.rows - 1 ; i++)
+      for(unsigned int i = 1 ; i < outImage->rows - 1 ; i++)
       {
-        for(unsigned int j = 1 ; j< outImage.cols - 1 ; j++)
+        for(unsigned int j = 1 ; j< outImage->cols - 1 ; j++)
         {
-          if(outImage.at<float>(i,j) == 0)  //!< Found black
+          if(outImage->at<float>(i,j) == 0)  //!< Found black
           {
-            brushfireNearStep(outImage, i * outImage.cols + j);
+            brushfireNearStep(outImage, i * outImage->cols + j);
             finished = false;
             break;
           }
@@ -328,25 +330,25 @@ namespace pandora_vision
   /**
     @brief Iteration for the interpolateNoise_brushNear function
     @param[in][out] image [cv::Mat&] The input image
-    @param index [const unsigned int] Where to start the brushfire algorithm
+    @param index [const unsigned int&] Where to start the brushfire algorithm
     (index = y * cols + x)
     @return void
    **/
-  void NoiseElimination::brushfireNearStep(cv::Mat& image,
-      const unsigned int index)
+  void NoiseElimination::brushfireNearStep(cv::Mat* image,
+      const unsigned int& index)
   {
     #ifdef DEBUG_TIME
     Timer::start("brushfireNearStep");
     #endif
 
-    unsigned int x = index/image.cols;
-    unsigned int y = index%image.cols;
+    unsigned int x = index / image->cols;
+    unsigned int y = index % image->cols;
 
     std::vector<unsigned int> current,next;
     std::set<unsigned int> visited;
 
-    current.push_back(x * image.cols + y);
-    visited.insert(x * image.cols + y);
+    current.push_back(x * image->cols + y);
+    visited.insert(x * image->cols + y);
 
     while(current.size()!=0)
     {
@@ -356,14 +358,14 @@ namespace pandora_vision
         {
           for(int n = -1 ; n < 2 ; n++)
           {
-            x = (int)current[i]/image.cols + m;
-            y = (int)current[i]%image.cols + n;
+            x = (int)current[i] / image->cols + m;
+            y = (int)current[i] % image->cols + n;
 
-            if((image.at<float>(x,y) == 0) &&
-              visited.find(x * image.cols + y) == visited.end())
+            if((image->at<float>(x,y) == 0) &&
+              visited.find(x * image->cols + y) == visited.end())
             {
-              next.push_back(x * image.cols + y);
-              visited.insert(x * image.cols + y);
+              next.push_back(x * image->cols + y);
+              visited.insert(x * image->cols + y);
             }
           }
         }
@@ -379,38 +381,38 @@ namespace pandora_vision
     for(std::set<unsigned int>::iterator it = visited.begin();
       it!=visited.end(); it++)
     {
-      x = *it/image.cols;
-      y = *it%image.cols;
+      x = *it / image->cols;
+      y = *it % image->cols;
 
-      val = image.at<float>(x-1,y+1);
+      val = image->at<float>(x-1,y+1);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x-1,y-1);
+      val = image->at<float>(x-1,y-1);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x-1,y);
+      val = image->at<float>(x-1,y);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x+1,y+1);
+      val = image->at<float>(x+1,y+1);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x+1,y-1);
+      val = image->at<float>(x+1,y-1);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x+1,y);
+      val = image->at<float>(x+1,y);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x,y-1);
+      val = image->at<float>(x,y-1);
       if(val < lower && val!=0) lower = val;
 
-      val = image.at<float>(x,y+1);
+      val = image->at<float>(x,y+1);
       if(val < lower && val!=0) lower = val;
     }
 
     for(std::set<unsigned int>::iterator it = visited.begin();
         it!=visited.end(); it++)
     {
-      image.at<float>(*it/image.cols,*it%image.cols) = lower;
+      image->at<float>(*it / image->cols,*it % image->cols) = lower;
     }
 
     #ifdef DEBUG_TIME
@@ -493,17 +495,17 @@ namespace pandora_vision
   /**
     @brief Transforms all black noise to white
     @param[in] inImage [const cv::Mat&] The input image
-    @param[out] outImage [cv::Mat&] The output image
+    @param[out] outImage [cv::Mat*] The output image
     @return void
    **/
   void NoiseElimination::transformNoiseToWhite(const cv::Mat& inImage,
-      cv::Mat& outImage)
+      cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("transformNoiseToWhite","performNoiseElimination");
     #endif
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
 
     for(unsigned int i = 0 ; i < inImage.rows ; i++)
     {
@@ -511,11 +513,11 @@ namespace pandora_vision
       {
         if(inImage.at<float>(i,j) != 0)
         {
-          outImage.at<float>(i,j) = 4.0;
+          outImage->at<float>(i,j) = 4.0;
         }
         else
         {
-          outImage.at<float>(i,j) = 0.0;
+          outImage->at<float>(i,j) = 0.0;
         }
       }
     }

@@ -79,7 +79,7 @@ namespace pandora_vision
     //!< Perform noise elimination (black pixels removed)
     //cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImage,
-        interpolatedDepthImage);
+        &interpolatedDepthImage);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_find_holes) // Debug
@@ -96,7 +96,7 @@ namespace pandora_vision
     //!< Edge computation
     cv::Mat denoisedDepthImageEdges;
     EdgeDetection::computeEdges(interpolatedDepthImage,
-        denoisedDepthImageEdges);
+        &denoisedDepthImageEdges);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_find_holes) // Debug
@@ -113,7 +113,7 @@ namespace pandora_vision
     //!< Find blobs in the edges image. Each blob is represented as \
     a keypoint which is the center of the blob found.
     std::vector<cv::KeyPoint> keyPoints;
-    BlobDetection::detectBlobs(denoisedDepthImageEdges, keyPoints);
+    BlobDetection::detectBlobs(denoisedDepthImageEdges, &keyPoints);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_find_holes) // Debug
@@ -142,9 +142,9 @@ namespace pandora_vision
      **/
     HoleFilters::validateBlobs(
       keyPoints,
-      denoisedDepthImageEdges,
+      &denoisedDepthImageEdges,
       DepthParameters::bounding_box_detection_method,
-      conveyor);
+      &conveyor);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_find_holes) // Debug

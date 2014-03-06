@@ -57,34 +57,34 @@ namespace pandora_vision
       /**
         @brief Identify the planes in a point cloud and return the number of
         detected planes.
-        @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose
+        @param[in] inputCloud [const PointCloudXYZPtr&] The point cloud whose
         planes we wish to locate
-        @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not
+        @param[in] applyVoxelFilter [const bool&] Apply the voxel filter or not
         on the input cloud.
         @return The number of planes detected in inputCloud.
        **/
-      static int locatePlanes(const PointCloudXYZPtr inputCloud,
-          const bool applyVoxelFilter);
+      static int locatePlanes(const PointCloudXYZPtr& inputCloud,
+          const bool& applyVoxelFilter);
 
 
       /**
         @brief Identify the planes in a point cloud and return a vector
         cointaining pointers to them.
-        @param[in] inputCloud [const PointCloudXYZPtr] The point cloud whose
+        @param[in] inputCloud [const PointCloudXYZPtr&] The point cloud whose
         planes we wish to locate
-        @param[in] applyVoxelFilter [const bool] Apply the voxel filter or not
+        @param[in] applyVoxelFilter [const bool&] Apply the voxel filter or not
         on the input cloud.
         @param[out] planesVectorOut
-        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
         the output vector of pointers to planes
-        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&]
+        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*]
         the output vector of coefficients of each plane detected
         @return void
        **/
-      static void locatePlanes(const PointCloudXYZPtr inputCloud,
-          const bool applyVoxelFilter,
-          std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
-          std::vector<pcl::ModelCoefficients>& coefficientsVectorOut);
+      static void locatePlanes(const PointCloudXYZPtr& inputCloud,
+          const bool& applyVoxelFilter,
+          std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>* planesVectorOut,
+          std::vector<pcl::ModelCoefficients>* coefficientsVectorOut);
 
       /**
         @brief Locates planes using the SACS segmentation
@@ -93,19 +93,19 @@ namespace pandora_vision
         @param[in] cloudIn [const PointCloudXYZPtr&] The point cloud whose
         planes we wish to locate
         @param[out] planesVectorOut
-        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
         the output vector of pointers to planes
-        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&]
+        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*]
         The output vector of coefficients of each plane detected
-        @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>&]
+        @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>*]
         The inliers for each plane
         @return void
        **/
       static void locatePlanesUsingSACSegmentation
         (const PointCloudXYZPtr& cloudIn,
-         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
-         std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
-         std::vector<pcl::PointIndices::Ptr>& inliersVectorOut);
+         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>* planesVectorOut,
+         std::vector<pcl::ModelCoefficients>* coefficientsVectorOut,
+         std::vector<pcl::PointIndices::Ptr>* inliersVectorOut);
 
       /**
         @brief Locates planes using the normals SACS segmentation
@@ -114,19 +114,19 @@ namespace pandora_vision
         @param[in] cloudIn [const PointCloudXYZPtr&] The point cloud whose
         planes we wish to locate
         @param[out] planesVectorOut
-        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>]
+        [std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>*]
         The output vector of pointers to planes
-        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>&]
+        @param[out] coefficientsVectorOut [std::vector<pcl::ModelCoefficients>*]
         The output[out] vector of coefficients of each plane detected
-        @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>&]
+        @param[out] inliersVectorOut [std::vector<pcl::PointIndices::Ptr>*]
         The inliers for each plane
         @return void
        **/
       static void locatePlanesUsingNormalsSACSegmentation
         (const PointCloudXYZPtr& cloudIn,
-         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>& planesVectorOut,
-         std::vector<pcl::ModelCoefficients>& coefficientsVectorOut,
-         std::vector<pcl::PointIndices::Ptr>& inliersVectorOut);
+         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr>* planesVectorOut,
+         std::vector<pcl::ModelCoefficients>* coefficientsVectorOut,
+         std::vector<pcl::PointIndices::Ptr>* inliersVectorOut);
 
       /**
         @brief Applies a voxel grid filtering

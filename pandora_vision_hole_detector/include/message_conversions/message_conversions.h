@@ -62,60 +62,60 @@ namespace pandora_vision
         from a point cloud message
         @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
         cloud message
-        @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+        @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
         @return void
        **/
       static void extractPointCloudXYZFromMessage(
         const sensor_msgs::PointCloud2ConstPtr& msg,
-        PointCloudXYZPtr& pointCloudXYZ);
+        PointCloudXYZPtr* pointCloudXYZ);
 
       /**
         @brief Extracts a PointCloudXYZPtr (see defines.h)
         from a point cloud message container
         @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
         cloud message
-        @param[out] pointCloudXYZ [PointCloudXYZPtr&] The extracted point cloud
+        @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
         @return void
        **/
       static void extractPointCloudXYZFromMessageContainer(
         const vision_communications::DepthCandidateHolesVectorMsg& msg,
-        PointCloudXYZPtr& pointCloudXYZ);
+        PointCloudXYZPtr* pointCloudXYZ);
 
       /**
         @brief Converts a point cloud of type PointCloudXYZPtr to
         a point cloud of type PointCloud and packs it in a message
         @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
         converted
-        @param[out] pointCloud [sensor_msgs::PointCloud2&]
+        @param[out] pointCloud [sensor_msgs::PointCloud2*]
         The converted point cloud message
         @return void
        **/
       static void convertPointCloudXYZToMessage(
         const PointCloudXYZPtr& pointCloudXYZPtr,
-        sensor_msgs::PointCloud2& pointCloudMsg);
+        sensor_msgs::PointCloud2* pointCloudMsg);
 
       /**
         @brief Extracts a cv::Mat image from a ROS image message pointer
         @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS image
         message pointer
-        @param[out] image [cv::Mat&] The output image
+        @param[out] image [cv::Mat*] The output image
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
       static void extractImageFromMessage(
-        const sensor_msgs::ImageConstPtr& msg, cv::Mat& image,
+        const sensor_msgs::ImageConstPtr& msg, cv::Mat* image,
         const std::string& encoding);
 
       /**
         @brief Extracts a cv::Mat image from a ROS image message
         @param[in] msg [const sensor_msgs::Image&] The input ROS image
         message
-        @param[out] image [cv::Mat&] The output image
+        @param[out] image [cv::Mat*] The output image
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
       static void extractImageFromMessage(
-        const sensor_msgs::Image& msg, cv::Mat& image,
+        const sensor_msgs::Image& msg, cv::Mat* image,
         const std::string& encoding);
 
       /**
@@ -123,26 +123,26 @@ namespace pandora_vision
         vision_communications::DepthCandidateHolesVectorMsg
         containing the interpolated depth image
         @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-        @param[out] image [cv::Mat&] The output image
+        @param[out] image [cv::Mat*] The output image
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
       static void extractDepthImageFromMessageContainer(
         const vision_communications::DepthCandidateHolesVectorMsg& msg,
-        cv::Mat& image, const std::string& encoding);
+        cv::Mat* image, const std::string& encoding);
 
       /**
         @brief Extracts a cv::Mat image from a custom ROS message  of type
         vision_communications::RgbCandidateHolesVectorMsg
         containing the rgb image
         @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-        @param[out] image [cv::Mat&] The output image
+        @param[out] image [cv::Mat*] The output image
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
       static void extractRgbImageFromMessageContainer(
         const vision_communications::RgbCandidateHolesVectorMsg& msg,
-        cv::Mat& image, const std::string& encoding);
+        cv::Mat* image, const std::string& encoding);
 
       /**
         @brief Extracts a RGB image from a point cloud message

@@ -42,16 +42,16 @@ namespace pandora_vision
   /**
     @brief Applies the Canny edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-    @param[out] outImage [cv::Mat&] The processed image in CV_8UC1 format
+    @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
     @return void
    **/
-  void EdgeDetection::applyCanny(const cv::Mat& inImage, cv::Mat& outImage)
+  void EdgeDetection::applyCanny(const cv::Mat& inImage, cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("applyCanny", "computeEdges");
     #endif
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
     cv::Mat detected_edges;
     cv::Mat dst;
     int ratio = DepthParameters::kanny_ratio;
@@ -59,7 +59,7 @@ namespace pandora_vision
     int lowThreshold = DepthParameters::kanny_low_threshold;
 
     //!< Reduce noise with a kernel 3x3
-    cv::blur(outImage, detected_edges, cv::Size(
+    cv::blur(*outImage, detected_edges, cv::Size(
           DepthParameters::kanny_blur_noise_kernel_size,
           DepthParameters::kanny_blur_noise_kernel_size));
 
@@ -70,8 +70,8 @@ namespace pandora_vision
     //!< Using Canny's output as a mask, we display our result
     dst = cv::Scalar::all(0);
 
-    outImage.copyTo(dst, detected_edges);
-    outImage = dst; //??????????????
+    outImage->copyTo(dst, detected_edges);
+    *outImage = dst; //??????????????
 
     #ifdef DEBUG_TIME
     Timer::tick("applyCanny");
@@ -83,10 +83,10 @@ namespace pandora_vision
   /**
     @brief Applies the Scharr edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-    @param[out] outImage [cv::Mat&] The processed image in CV_8UC1 format
+    @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
     @return void
    **/
-  void EdgeDetection::applyScharr (const cv::Mat& inImage, cv::Mat& outImage)
+  void EdgeDetection::applyScharr (const cv::Mat& inImage, cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("applyScharr", "computeEdges");
@@ -116,7 +116,7 @@ namespace pandora_vision
     cv::Mat grad_g;
     cv::addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad_g);
 
-    outImage = grad_g;
+    *outImage = grad_g;
 
     #ifdef DEBUG_TIME
     Timer::tick("applyScharr");
@@ -128,10 +128,10 @@ namespace pandora_vision
   /**
     @brief Applies the Sobel edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-    @param[out] outImage [cv::Mat&] The processed image in CV_8UC1 format
+    @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
     @return void
    **/
-  void EdgeDetection::applySobel (const cv::Mat& inImage, cv::Mat& outImage)
+  void EdgeDetection::applySobel (const cv::Mat& inImage, cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("applySobel", "computeEdges");
@@ -161,7 +161,7 @@ namespace pandora_vision
     cv::Mat grad_g;
     cv::addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad_g);
 
-    outImage = grad_g;
+    *outImage = grad_g;
 
     #ifdef DEBUG_TIME
     Timer::tick("applySobel");
@@ -173,10 +173,10 @@ namespace pandora_vision
   /**
     @brief Applies the Laplacian edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-    @param[out] outImage [cv::Mat&] The processed image in CV_8UC1 format
+    @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
     @return void
    **/
-  void EdgeDetection::applyLaplacian (const cv::Mat& inImage, cv::Mat& outImage)
+  void EdgeDetection::applyLaplacian (const cv::Mat& inImage, cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("applyLaplacian", "computeEdges");
@@ -190,8 +190,8 @@ namespace pandora_vision
     cv::Mat edges;
     inImage.copyTo(edges);
 
-    cv::Laplacian(edges, outImage, ddepth, 1, scale, delta, cv::BORDER_DEFAULT);
-    convertScaleAbs(outImage, outImage);
+    cv::Laplacian(edges, *outImage, ddepth, 1, scale, delta, cv::BORDER_DEFAULT);
+    convertScaleAbs(*outImage, *outImage);
 
     #ifdef DEBUG_TIME
     Timer::tick("applyLaplacian");
@@ -203,57 +203,57 @@ namespace pandora_vision
   /**
     @brief Applies contamination to the edges image. It keeps only the edges\
     that are not iteratively neighbors to the image's limits
-    @param[in][out] inImage [cv::Mat&] Input image in CV_8UC1 format
+    @param[in][out] inImage [cv::Mat*] Input image in CV_8UC1 format
     @return void
    **/
-  void EdgeDetection::applyEdgeContamination (cv::Mat& inImage)
+  void EdgeDetection::applyEdgeContamination (cv::Mat* inImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("applyEdgeContamination", "denoiseEdges");
     #endif
 
-    int rows = inImage.rows;
-    int cols = inImage.cols;
+    int rows = inImage->rows;
+    int cols = inImage->cols;
     std::set<unsigned int> current,next,visited;
 
     for(unsigned int i = 0 ; i < rows ; i++)  //!< Border blacken
     {
-      inImage.data[i * inImage.cols] = 0;
-      inImage.data[i * inImage.cols + cols - 1] = 0;
+      inImage->data[i * inImage->cols] = 0;
+      inImage->data[i * inImage->cols + cols - 1] = 0;
     }
 
     for(unsigned int j = 0 ; j < cols ; j++)  //!< Border blacken
     {
-      inImage.data[j] = 0;
-      inImage.data[(rows - 1) * inImage.cols + j] = 0;
+      inImage->data[j] = 0;
+      inImage->data[(rows - 1) * inImage->cols + j] = 0;
     }
 
     for(unsigned int i = 1 ; i < rows - 1 ; i++)  //!< Find outer white borders
     {
-      if(inImage.data[i * inImage.cols + 1] > 0)
+      if(inImage->data[i * inImage->cols + 1] > 0)
       {
         current.insert(i * cols + 1);
-        inImage.data[i * inImage.cols + 1] = 0;
+        inImage->data[i * inImage->cols + 1] = 0;
       }
-      if(inImage.data[i * inImage.cols + cols - 2] > 0)
+      if(inImage->data[i * inImage->cols + cols - 2] > 0)
       {
         current.insert(i * cols + cols - 2);
-        inImage.data[i * inImage.cols + cols - 2] = 0;
+        inImage->data[i * inImage->cols + cols - 2] = 0;
       }
     }
 
     for(unsigned int j = 1 ; j < cols - 1 ; j++)  //!< Find outer white borders
     {
-      if(inImage.data[1 * inImage.cols + j] > 0)
+      if(inImage->data[1 * inImage->cols + j] > 0)
       {
         current.insert(1 * cols + j);
-        inImage.data[1 * inImage.cols + j] = 0;
+        inImage->data[1 * inImage->cols + j] = 0;
       }
 
-      if(inImage.data[(rows - 2) * inImage.cols + j] > 0)
+      if(inImage->data[(rows - 2) * inImage->cols + j] > 0)
       {
         current.insert((rows - 2) * cols + j);
-        inImage.data[(rows - 2) * inImage.cols + j] = 0;
+        inImage->data[(rows - 2) * inImage->cols + j] = 0;
       }
     }
 
@@ -265,52 +265,52 @@ namespace pandora_vision
         int x = *i / cols;
         int y = *i % cols;
 
-        if(inImage.data[(x - 1) * inImage.cols + y - 1] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y - 1] != 0)
         {
           next.insert((x - 1) * cols + y - 1);
-          inImage.data[(x - 1) * inImage.cols + y - 1] = 0;
+          inImage->data[(x - 1) * inImage->cols + y - 1] = 0;
         }
 
-        if(inImage.data[(x - 1) * inImage.cols + y] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y] != 0)
         {
           next.insert((x - 1) * cols + y);
-          inImage.data[(x - 1) * inImage.cols + y] = 0;
+          inImage->data[(x - 1) * inImage->cols + y] = 0;
         }
 
-        if(inImage.data[(x - 1) * inImage.cols + y + 1] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y + 1] != 0)
         {
           next.insert((x - 1) * cols + y + 1);
-          inImage.data[(x - 1) * inImage.cols + y + 1] = 0;
+          inImage->data[(x - 1) * inImage->cols + y + 1] = 0;
         }
 
-        if(inImage.data[x * inImage.cols + y + 1] != 0)
+        if(inImage->data[x * inImage->cols + y + 1] != 0)
         {
           next.insert(x * cols + y + 1);
-          inImage.data[x * inImage.cols + y + 1] = 0;
+          inImage->data[x * inImage->cols + y + 1] = 0;
         }
 
-        if(inImage.data[x * inImage.cols + y - 1] != 0)
+        if(inImage->data[x * inImage->cols + y - 1] != 0)
         {
           next.insert(x * cols + y - 1);
-          inImage.data[x * inImage.cols + y - 1] = 0;
+          inImage->data[x * inImage->cols + y - 1] = 0;
         }
 
-        if(inImage.data[(x + 1) * inImage.cols + y - 1] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y - 1] != 0)
         {
           next.insert((x + 1) * cols + y - 1);
-          inImage.data[(x + 1) * inImage.cols + y - 1] = 0;
+          inImage->data[(x + 1) * inImage->cols + y - 1] = 0;
         }
 
-        if(inImage.data[(x + 1) * inImage.cols + y] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y] != 0)
         {
           next.insert((x + 1) * cols + y);
-          inImage.data[(x + 1) * inImage.cols + y] = 0;
+          inImage->data[(x + 1) * inImage->cols + y] = 0;
         }
 
-        if(inImage.data[(x + 1) * inImage.cols + y + 1] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y + 1] != 0)
         {
           next.insert((x + 1) * cols + y + 1);
-          inImage.data[(x + 1) * inImage.cols + y + 1] = 0;
+          inImage->data[(x + 1) * inImage->cols + y + 1] = 0;
         }
       }
       current.swap(next);
@@ -328,14 +328,14 @@ namespace pandora_vision
     @brief Apply the anisotropic diffusion technique as to facilitate the
     edge detection of low contrast regions.
     @param[in] inImage [const cv::Mat &] The input image in CV_32FC1 format
-    @param[out] outImage [cv::Mat &] The output image in CV_32FC1 format
-    @param[in] iterations [const int] The number of iterations to execute.
-    @param[in] method [const int] Diffusion equation 0 or 1. see below for more
+    @param[out] outImage [cv::Mat*] The output image in CV_32FC1 format
+    @param[in] iterations [const int&] The number of iterations to execute.
+    @param[in] method [const int&] Diffusion equation 0 or 1. see below for more
     @documentation http://www.csse.uwa.edu.au/~pk/research/matlabfns/
     @return void
    **/
   void EdgeDetection::anisotropicDiffusion (const cv::Mat& inImage,
-      cv::Mat& outImage, const int iterations, const int method)
+      cv::Mat* outImage, const int& iterations, const int& method)
   {
     #ifdef DEBUG_TIME
     Timer::start("anisotropicDiffusion");
@@ -343,47 +343,47 @@ namespace pandora_vision
     int kappa = 1;
     float lamda = 0.25;
 
-    inImage.copyTo(outImage);
+    inImage.copyTo(*outImage);
 
-    cv::Mat deltaNorth = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat deltaSouth = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat deltaEast  = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat deltaWest  = cv::Mat::zeros(outImage.size(), CV_32FC1);
+    cv::Mat deltaNorth = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat deltaSouth = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat deltaEast  = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat deltaWest  = cv::Mat::zeros(outImage->size(), CV_32FC1);
 
-    cv::Mat cN = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat cS = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat cE = cv::Mat::zeros(outImage.size(), CV_32FC1);
-    cv::Mat cW = cv::Mat::zeros(outImage.size(), CV_32FC1);
+    cv::Mat cN = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat cS = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat cE = cv::Mat::zeros(outImage->size(), CV_32FC1);
+    cv::Mat cW = cv::Mat::zeros(outImage->size(), CV_32FC1);
 
     for (unsigned int iter = 0; iter < iterations; iter++)
     {
-      for (unsigned int rows = 1; rows < outImage.rows - 1; rows++)
+      for (unsigned int rows = 1; rows < outImage->rows - 1; rows++)
       {
-        for (unsigned int cols = 1; cols < outImage.cols - 1; cols ++)
+        for (unsigned int cols = 1; cols < outImage->cols - 1; cols ++)
         {
           deltaNorth.at<float>(rows, cols) =
-            outImage.at<float>(rows, cols - 1) -
-            outImage.at<float>(rows, cols);
+            outImage->at<float>(rows, cols - 1) -
+            outImage->at<float>(rows, cols);
 
           deltaSouth.at<float>(rows, cols) =
-            outImage.at<float>(rows, cols + 1) -
-            outImage.at<float>(rows, cols);
+            outImage->at<float>(rows, cols + 1) -
+            outImage->at<float>(rows, cols);
 
           deltaEast.at<float>(rows, cols) =
-            outImage.at<float>(rows + 1, cols) -
-            outImage.at<float>(rows, cols);
+            outImage->at<float>(rows + 1, cols) -
+            outImage->at<float>(rows, cols);
 
           deltaWest.at<float>(rows, cols) =
-            outImage.at<float>(rows - 1, cols) -
-            outImage.at<float>(rows, cols);
+            outImage->at<float>(rows - 1, cols) -
+            outImage->at<float>(rows, cols);
         }
       }
 
       if (method == 0)
       {
-        for (unsigned int rows = 0; rows < outImage.rows; rows++)
+        for (unsigned int rows = 0; rows < outImage->rows; rows++)
         {
-          for (unsigned int cols = 0; cols < outImage.cols; cols ++)
+          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
           {
             cN.at<float>(rows, cols) =
               exp(-pow((deltaNorth.at<float>(rows, cols) / kappa), 2));
@@ -399,9 +399,9 @@ namespace pandora_vision
       }
       else if (method == 1)
       {
-        for (unsigned int rows = 0; rows < outImage.rows; rows++)
+        for (unsigned int rows = 0; rows < outImage->rows; rows++)
         {
-          for (unsigned int cols = 0; cols < outImage.cols; cols ++)
+          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
           {
             cN.at<float>(rows, cols) =
               1 / (1 + pow((deltaNorth.at<float>(rows, cols) / kappa), 2));
@@ -416,9 +416,9 @@ namespace pandora_vision
       }
       else if (method == 2)
       {
-        for (unsigned int rows = 0; rows < outImage.rows; rows++)
+        for (unsigned int rows = 0; rows < outImage->rows; rows++)
         {
-          for (unsigned int cols = 0; cols < outImage.cols; cols ++)
+          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
           {
             cN.at<float>(rows, cols) =
               exp(pow((deltaNorth.at<float>(rows, cols) * kappa), 2));
@@ -432,7 +432,7 @@ namespace pandora_vision
           }
         }
       }
-      outImage += lamda * (cN.mul(deltaNorth) + cS.mul(deltaSouth)
+      *outImage += lamda * (cN.mul(deltaNorth) + cS.mul(deltaSouth)
           + cE.mul(deltaEast) + cW.mul(deltaWest));
     }
     #ifdef DEBUG_TIME
@@ -453,11 +453,11 @@ namespace pandora_vision
     as holes.
     @param[in] inImage [const cv::Mat&] The depth image extracted from the depth
     sensor, in floats
-    @param[out] edges [cv::Mat&] The final denoised edges image that corresponds
+    @param[out] edges [cv::Mat*] The final denoised edges image that corresponds
     to the input image
     @return void
    **/
-  void EdgeDetection::computeEdges(const cv::Mat& inImage, cv::Mat& edges)
+  void EdgeDetection::computeEdges(const cv::Mat& inImage, cv::Mat* edges)
   {
     #ifdef DEBUG_TIME
     Timer::start("computeEdges", "findHoles");
@@ -476,7 +476,7 @@ namespace pandora_vision
 
     //!< from now onwards every image is in the range of 0-255
     EdgeDetection::applySobel
-      (visualizableDenoisedImage, denoisedDepthImageEdges);
+      (visualizableDenoisedImage, &denoisedDepthImageEdges);
 
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
         DepthParameters::threshold_lower_value, 255, 3);
@@ -485,7 +485,7 @@ namespace pandora_vision
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
         0, 255, 0);
 
-    denoisedDepthImageEdges.copyTo(edges);
+    denoisedDepthImageEdges.copyTo(*edges);
 
     EdgeDetection::denoiseEdges(edges);
 
@@ -499,17 +499,17 @@ namespace pandora_vision
   /**
     @brief Connects each point of a number of pair of points  with a line or an
     elliptic arc
-    @param[in][out] inImage [cv::Mat] The image whose selected points will be
+    @param[in][out] inImage [cv::Mat*] The image whose selected points will be
     connected and line or the elliptic arc drawn on
-    @param[in] pairs [const std::vector<std::pair<GraphNode,GraphNode> >]
+    @param[in] pairs [const std::vector<std::pair<GraphNode,GraphNode> >&]
     The vector of pair points
-    @param[in] method [const int] Denotes the connection type. 0 for line,
+    @param[in] method [const int&] Denotes the connection type. 0 for line,
     1 for elliptic arc
     @return void
    **/
-  void EdgeDetection::connectPairs(cv::Mat& inImage,
-      const std::vector<std::pair<GraphNode,GraphNode> > pairs,
-      const int method)
+  void EdgeDetection::connectPairs(cv::Mat* inImage,
+      const std::vector<std::pair<GraphNode,GraphNode> >& pairs,
+      const int& method)
   {
 
     #ifdef DEBUG_SHOW
@@ -521,7 +521,7 @@ namespace pandora_vision
       msg += " : Connection before";
       msgs.push_back(msg);
       cv::Mat tmp;
-      inImage.copyTo(tmp);
+      inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
     #endif
@@ -535,7 +535,7 @@ namespace pandora_vision
       for (unsigned int i = 0; i < pairs.size(); i++)
       {
         cv::line(
-            inImage,
+            *inImage,
             cv::Point(pairs[i].first.y, pairs[i].first.x),
             cv::Point(pairs[i].second.y, pairs[i].second.x),
             cv::Scalar(255, 255, 255), 1, 8);
@@ -545,12 +545,12 @@ namespace pandora_vision
     {
 
       cv::Mat inImageDrawnOnce;
-      cv::Mat addedArcs =  cv::Mat(inImage.rows, inImage.cols, CV_8UC1,
+      cv::Mat addedArcs =  cv::Mat(inImage->rows, inImage->cols, CV_8UC1,
           cv::Scalar::all(0));
 
       for (unsigned int i = 0; i < pairs.size(); i++)
       {
-        inImage.copyTo(inImageDrawnOnce);
+        inImage->copyTo(inImageDrawnOnce);
 
         float pairsDistance = sqrt(
             pow((pairs[i].first.x - pairs[i].second.x), 2) +
@@ -578,17 +578,17 @@ namespace pandora_vision
         {
           counter++;
 
-          if (bisectorPoint.y + counter * cos(bisectorAngle) > inImage.rows-1 ||
-              bisectorPoint.y + counter * cos(bisectorAngle) < 0 ||
-              bisectorPoint.x + counter * sin(bisectorAngle) > inImage.cols-1 ||
-              bisectorPoint.x + counter * sin(bisectorAngle) < 0)
+          if (bisectorPoint.y + counter * cos(bisectorAngle) > inImage->rows - 1
+            || bisectorPoint.y + counter * cos(bisectorAngle) < 0 ||
+            bisectorPoint.x + counter * sin(bisectorAngle) > inImage->cols - 1
+            || bisectorPoint.x + counter * sin(bisectorAngle) < 0)
           {
             inLimitsOne = false;
           }
-          if (bisectorPoint.y - counter * cos(bisectorAngle) > inImage.rows-1 ||
-              bisectorPoint.y - counter * cos(bisectorAngle) < 0 ||
-              bisectorPoint.x - counter * sin(bisectorAngle) > inImage.cols-1 ||
-              bisectorPoint.x - counter * sin(bisectorAngle) < 0)
+          if (bisectorPoint.y - counter * cos(bisectorAngle) > inImage->rows - 1
+            || bisectorPoint.y - counter * cos(bisectorAngle) < 0 ||
+            bisectorPoint.x - counter * sin(bisectorAngle) > inImage->cols - 1
+            || bisectorPoint.x - counter * sin(bisectorAngle) < 0)
           {
             inLimitsTwo= false;
           }
@@ -599,7 +599,7 @@ namespace pandora_vision
             {
               for (int n = -1; n < 2; n++)
               {
-                if (inImage.at<uchar>(
+                if (inImage->at<uchar>(
                       bisectorPoint.y + m + counter * cos(bisectorAngle),
                       bisectorPoint.x + n + counter * sin(bisectorAngle)) != 0)
                 {
@@ -620,7 +620,7 @@ namespace pandora_vision
             {
               for (int n = -1; n < 2; n++)
               {
-                if (inImage.at<uchar>(
+                if (inImage->at<uchar>(
                       bisectorPoint.y + m - counter * cos(bisectorAngle),
                       bisectorPoint.x + n - counter * sin(bisectorAngle)) != 0)
                 {
@@ -759,12 +759,12 @@ namespace pandora_vision
               180,
               cv::Scalar(255, 255, 255));
 
-          for (unsigned int rows = 0; rows < inImage.rows; rows++)
+          for (unsigned int rows = 0; rows < inImage->rows; rows++)
           {
-            for (unsigned int cols = 0; cols < inImage.cols; cols++)
+            for (unsigned int cols = 0; cols < inImage->cols; cols++)
             {
               if (inImageDrawnOnce.at<unsigned char>(rows, cols) != 0 &&
-                  inImage.at<unsigned char>(rows, cols) == 0)
+                  inImage->at<unsigned char>(rows, cols) == 0)
               {
                 addedArcs.at<uchar>(rows, cols) = 255;
               }
@@ -773,7 +773,7 @@ namespace pandora_vision
         }
       }
 
-      inImage += addedArcs;
+      *inImage += addedArcs;
     }
 
     #ifdef DEBUG_TIME
@@ -787,7 +787,7 @@ namespace pandora_vision
       msg += " : Connection after";
       msgs.push_back(msg);
       cv::Mat tmp;
-      inImage.copyTo(tmp);
+      inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
     if(DepthParameters::debug_show_connect_pairs) // Debug
@@ -802,16 +802,16 @@ namespace pandora_vision
   /**
    * @brief Enhances an image's contrast, regardless of its format.
    * @param[in] inImage [const cv::Mat &] The input image
-   * @param[out] outImage [cv::Mat &] The contrast-enhanced image
+   * @param[out] outImage [cv::Mat*] The contrast-enhanced image
    * @return void
    **/
-  void EdgeDetection::enhanceContrast(const cv::Mat& inImage, cv::Mat& outImage)
+  void EdgeDetection::enhanceContrast(const cv::Mat& inImage, cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("enhanceContrast");
     #endif
 
-    inImage.convertTo(outImage, -1, DepthParameters::contrast_enhance_alpha,
+    inImage.convertTo(*outImage, -1, DepthParameters::contrast_enhance_alpha,
         DepthParameters::contrast_enhance_beta);
 
     #ifdef DEBUG_TIME
@@ -823,10 +823,10 @@ namespace pandora_vision
   /**
     @brief Takes an input image in unsigned char format and tries to isolate
     hole-like shapes so as to facilitate the blob detection process
-    @param[in][out] img [cv::Mat&] The input image in unsigned char format
+    @param[in][out] img [cv::Mat*] The input image in unsigned char format
     @return void
    **/
-  void EdgeDetection::denoiseEdges(cv::Mat& img)
+  void EdgeDetection::denoiseEdges(cv::Mat* img)
   {
     #ifdef DEBUG_TIME
     Timer::start("denoiseEdges","computeEdges");
@@ -837,7 +837,7 @@ namespace pandora_vision
     #endif
 
     cv::Mat temp;
-    img.copyTo(temp);
+    img->copyTo(temp);
 
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
@@ -855,7 +855,7 @@ namespace pandora_vision
     #endif
 
     //!< Perform dilation
-    Morphology::dilation(temp,2);
+    Morphology::dilation(&temp, 2);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_denoise_edges) // Debug
@@ -871,7 +871,7 @@ namespace pandora_vision
 
     //!< Perform thinning
     cv::Mat thinnedImg;
-    Morphology::thinning(temp,thinnedImg,100);
+    Morphology::thinning(temp, &thinnedImg,100);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_denoise_edges) // Debug
@@ -886,7 +886,7 @@ namespace pandora_vision
     #endif
 
     //!< Perform edge contamination
-    EdgeDetection::applyEdgeContamination(thinnedImg);
+    EdgeDetection::applyEdgeContamination(&thinnedImg);
 
     #ifdef DEBUG_TIME
     Timer::tick("Sector #1");
@@ -907,22 +907,22 @@ namespace pandora_vision
     #endif
 
     //!< Eliminate closed shapes
-    for(unsigned int i = 0 ; i < img.rows ; i++)
+    for(unsigned int i = 0 ; i < img->rows ; i++)
     {
       thinnedImg.at<unsigned char>(i,0) = 0;
-      thinnedImg.at<unsigned char>(i,img.cols - 1) = 0;
+      thinnedImg.at<unsigned char>(i, img->cols - 1) = 0;
     }
-    for(unsigned int i = 0 ; i < img.cols ; i++)
+    for(unsigned int i = 0 ; i < img->cols ; i++)
     {
       thinnedImg.at<unsigned char>(0,i) = 0;
-      thinnedImg.at<unsigned char>(img.rows - 1,i) = 0;
+      thinnedImg.at<unsigned char>(img->rows - 1,i) = 0;
     }
 
     // Must throw away the closed lines
     cv::Mat closedLines;
     thinnedImg.copyTo(closedLines);
 
-    Morphology::pruningStrictIterative(closedLines,1000);
+    Morphology::pruningStrictIterative(&closedLines,1000);
 
     thinnedImg = thinnedImg - closedLines;
 
@@ -969,7 +969,8 @@ namespace pandora_vision
           if(thinnedImg.at<unsigned char> (i,j) != 0)
           {
             std::set<unsigned int> ret;
-            std::pair<GraphNode,GraphNode> pts = findNeighs(thinnedImg,i,j,ret);
+            std::pair<GraphNode,GraphNode> pts =
+              findNeighs(&thinnedImg, i, j, &ret);
             if(ret.size() > DepthParameters::minimum_curve_points)
             {
               lines.push_back(ret);
@@ -996,7 +997,7 @@ namespace pandora_vision
     }
 
     //!< Connect pairs
-    connectPairs(thinnedImg, farPts, 1);
+    connectPairs(&thinnedImg, farPts, 1);
 
     #ifdef DEBUG_TIME
     Timer::tick("Sector #3");
@@ -1032,7 +1033,7 @@ namespace pandora_vision
     #endif
 
     //!< Extract only the outer border of closed shapes
-    thinnedImg.copyTo(img);
+    thinnedImg.copyTo(*img);
     EdgeDetection::getShapesClearBorder(img);
 
     #ifdef DEBUG_TIME
@@ -1045,7 +1046,7 @@ namespace pandora_vision
       msg += " : After pruning and dilation";
       msgs.push_back(msg);
       cv::Mat tmp;
-      img.copyTo(tmp);
+      img->copyTo(tmp);
       imgs.push_back(tmp);
     }
     if(DepthParameters::debug_show_denoise_edges) // Debug
@@ -1063,16 +1064,16 @@ namespace pandora_vision
   /**
     @brief Identifies in which curve a point lies on and returns the curve's
     two end points
-    @param[in] img [cv::Mat&] The input binary image
-    @param[in] x_ [const int] The x coordinate of the point
-    @param[in] y_ [const int] The y coordinate of the point
+    @param[in] img [cv::Mat*] The input binary image
+    @param[in] x_ [const int&] The x coordinate of the point
+    @param[in] y_ [const int&] The y coordinate of the point
     @param[out] ret [std::set<unsigned int>&] The points that represent the
     curve on which the point lies on
-    @return edgePoints [std::pair<GraphNode, GraphNode>] The curve's pair of
+    @return edgePoints [std::pair<GraphNode, GraphNode>*] The curve's pair of
     end points
    **/
   std::pair<GraphNode,GraphNode> EdgeDetection::findNeighs(
-      cv::Mat& img, const int x_, const int y_, std::set<unsigned int>& ret)
+      cv::Mat* img, const int& x_, const int& y_, std::set<unsigned int>* ret)
   {
     #ifdef DEBUG_TIME
     Timer::start("findNeighs","denoiseEdges");
@@ -1084,8 +1085,8 @@ namespace pandora_vision
     std::vector<GraphNode*> originCurr, originNext;
     GraphNode* father = new GraphNode(x_,y_);
 
-    ret.insert(x_ * img.cols + y_);
-    current.push_back(x_ * img.cols + y_);
+    ret->insert(x_ * img->cols + y_);
+    current.push_back(x_ * img->cols + y_);
     originCurr.push_back(father);
     nodes.clear();
     nodes.push_back(father);
@@ -1098,90 +1099,90 @@ namespace pandora_vision
       for(unsigned int i = 0 ; i < current.size() ; i++)
       {
         std::vector<unsigned int> currNext;
-        int x = current[i] / img.cols;
-        int y = current[i] % img.cols;
-        img.at<unsigned char>(x,y) = 0;
+        int x = current[i] / img->cols;
+        int y = current[i] % img->cols;
+        img->at<unsigned char>(x,y) = 0;
         unsigned int counter = 0;
-        if(img.at<unsigned char>(x - 1,y - 1) != 0 &&
-            currs.find((x-1) * img.cols + y - 1) == currs.end() &&
-            ret.find((x-1) * img.cols + y - 1) == ret.end())
+        if(img->at<unsigned char>(x - 1,y - 1) != 0 &&
+            currs.find((x-1) * img->cols + y - 1) == currs.end() &&
+            ret->find((x-1) * img->cols + y - 1) == ret->end())
         {
-          next.push_back((x-1) * img.cols + y - 1);
+          next.push_back((x-1) * img->cols + y - 1);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x-1) * img.cols + y - 1);
+          ret->insert((x-1) * img->cols + y - 1);
           counter ++;
         }
-        if(img.at<unsigned char>(x - 1,y) != 0 &&
-            currs.find((x-1) * img.cols + y) == currs.end() &&
-            ret.find((x-1) * img.cols + y) == ret.end())
+        if(img->at<unsigned char>(x - 1,y) != 0 &&
+            currs.find((x-1) * img->cols + y) == currs.end() &&
+            ret->find((x-1) * img->cols + y) == ret->end())
         {
-          next.push_back((x-1) * img.cols + y);
+          next.push_back((x-1) * img->cols + y);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x-1) * img.cols + y);
+          ret->insert((x-1) * img->cols + y);
           counter ++;
         }
-        if(img.at<unsigned char>(x - 1,y + 1) != 0 &&
-            currs.find((x-1) * img.cols + y + 1) == currs.end() &&
-            ret.find((x-1) * img.cols + y + 1) == ret.end())
+        if(img->at<unsigned char>(x - 1,y + 1) != 0 &&
+            currs.find((x-1) * img->cols + y + 1) == currs.end() &&
+            ret->find((x-1) * img->cols + y + 1) == ret->end())
         {
-          next.push_back((x-1) * img.cols + y + 1);
+          next.push_back((x-1) * img->cols + y + 1);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x-1) * img.cols + y + 1);
-          counter ++;
-        }
-
-        if(img.at<unsigned char>(x,y - 1) != 0 &&
-            currs.find((x) * img.cols + y - 1) == currs.end() &&
-            ret.find((x) * img.cols + y - 1) == ret.end())
-        {
-          next.push_back((x) * img.cols + y - 1);
-          originNext.push_back(originCurr[i]);
-          currNext.push_back(originNext.size() - 1);
-          ret.insert((x) * img.cols + y - 1);
-          counter ++;
-        }
-        if(img.at<unsigned char>(x,y + 1) != 0 &&
-            currs.find((x) * img.cols + y + 1) == currs.end() &&
-            ret.find((x) * img.cols + y + 1) == ret.end())
-        {
-          next.push_back((x) * img.cols + y + 1);
-          originNext.push_back(originCurr[i]);
-          currNext.push_back(originNext.size() - 1);
-          ret.insert((x) * img.cols + y + 1);
+          ret->insert((x-1) * img->cols + y + 1);
           counter ++;
         }
 
-        if(img.at<unsigned char>(x + 1,y - 1) != 0 &&
-            currs.find((x+1) * img.cols + y - 1) == currs.end() &&
-            ret.find((x+1) * img.cols + y - 1) == ret.end())
+        if(img->at<unsigned char>(x,y - 1) != 0 &&
+            currs.find((x) * img->cols + y - 1) == currs.end() &&
+            ret->find((x) * img->cols + y - 1) == ret->end())
         {
-          next.push_back((x+1) * img.cols + y - 1);
+          next.push_back((x) * img->cols + y - 1);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x+1) * img.cols + y - 1);
+          ret->insert((x) * img->cols + y - 1);
           counter ++;
         }
-        if(img.at<unsigned char>(x + 1,y) != 0 &&
-            currs.find((x+1) * img.cols + y) == currs.end() &&
-            ret.find((x+1) * img.cols + y) == ret.end())
+        if(img->at<unsigned char>(x,y + 1) != 0 &&
+            currs.find((x) * img->cols + y + 1) == currs.end() &&
+            ret->find((x) * img->cols + y + 1) == ret->end())
         {
-          next.push_back((x+1) * img.cols + y);
+          next.push_back((x) * img->cols + y + 1);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x+1) * img.cols + y);
+          ret->insert((x) * img->cols + y + 1);
           counter ++;
         }
-        if(img.at<unsigned char>(x + 1,y + 1) != 0 &&
-            currs.find((x+1) * img.cols + y + 1) == currs.end() &&
-            ret.find((x+1) * img.cols + y + 1) == ret.end())
+
+        if(img->at<unsigned char>(x + 1,y - 1) != 0 &&
+            currs.find((x+1) * img->cols + y - 1) == currs.end() &&
+            ret->find((x+1) * img->cols + y - 1) == ret->end())
         {
-          next.push_back((x+1) * img.cols + y + 1);
+          next.push_back((x+1) * img->cols + y - 1);
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
-          ret.insert((x+1) * img.cols + y + 1);
+          ret->insert((x+1) * img->cols + y - 1);
+          counter ++;
+        }
+        if(img->at<unsigned char>(x + 1,y) != 0 &&
+            currs.find((x+1) * img->cols + y) == currs.end() &&
+            ret->find((x+1) * img->cols + y) == ret->end())
+        {
+          next.push_back((x+1) * img->cols + y);
+          originNext.push_back(originCurr[i]);
+          currNext.push_back(originNext.size() - 1);
+          ret->insert((x+1) * img->cols + y);
+          counter ++;
+        }
+        if(img->at<unsigned char>(x + 1,y + 1) != 0 &&
+            currs.find((x+1) * img->cols + y + 1) == currs.end() &&
+            ret->find((x+1) * img->cols + y + 1) == ret->end())
+        {
+          next.push_back((x+1) * img->cols + y + 1);
+          originNext.push_back(originCurr[i]);
+          currNext.push_back(originNext.size() - 1);
+          ret->insert((x+1) * img->cols + y + 1);
           counter ++;
         }
 
@@ -1227,7 +1228,7 @@ namespace pandora_vision
 
     std::pair<GraphNode,GraphNode> edgePoints;
     //!< If it is small avoid the fuzz
-    if(ret.size() < DepthParameters::minimum_curve_points)
+    if(ret->size() < DepthParameters::minimum_curve_points)
     {
       return edgePoints;
     }
@@ -1297,10 +1298,10 @@ namespace pandora_vision
     this function fills closed regions, at first, and then extracts the outline
     of each region. Used when there is a closed region with garbage pixels with
     a value of 255 within it.
-    @param[in][out] inImage [cv::Mat] The input image
+    @param[in][out] inImage [cv::Mat*] The input image
     @return void
    **/
-  void EdgeDetection::getShapesClearBorder (cv::Mat& inImage)
+  void EdgeDetection::getShapesClearBorder (cv::Mat* inImage)
   {
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
@@ -1311,7 +1312,7 @@ namespace pandora_vision
       msg += " : Before clear blorders";
       msgs.push_back(msg);
       cv::Mat tmp;
-      inImage.copyTo(tmp);
+      inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
     #endif
@@ -1320,22 +1321,22 @@ namespace pandora_vision
     #endif
 
     //!< Invert the image to facilitate floodfill's operation
-    for (unsigned int rows = 0; rows < inImage.rows; rows++)
+    for (unsigned int rows = 0; rows < inImage->rows; rows++)
     {
-      for (unsigned int cols = 0; cols < inImage.cols; cols++)
+      for (unsigned int cols = 0; cols < inImage->cols; cols++)
       {
-        if (inImage.at<unsigned char>(rows, cols) == 0)
+        if (inImage->at<unsigned char>(rows, cols) == 0)
         {
-          inImage.at<unsigned char>(rows, cols) = 255;
+          inImage->at<unsigned char>(rows, cols) = 255;
         }
         else
         {
-          inImage.at<unsigned char>(rows, cols) = 0;
+          inImage->at<unsigned char>(rows, cols) = 0;
         }
       }
     }
 
-    cv::floodFill(inImage, cv::Point(0,0), 0);
+    cv::floodFill(*inImage, cv::Point(0,0), 0);
 
     Morphology::dilation(inImage, 1);
 
@@ -1373,19 +1374,19 @@ namespace pandora_vision
         {2, 2, 2} }
     };
 
-    cv::Mat bordersImage = cv::Mat(inImage.rows, inImage.cols, CV_8UC1,
+    cv::Mat bordersImage = cv::Mat(inImage->rows, inImage->cols, CV_8UC1,
         cv::Scalar::all(0));
 
     for (int kernelId = 0; kernelId < 8; kernelId++)
     {
-      for (unsigned int rows = 1; rows < inImage.rows - 1; rows++)
+      for (unsigned int rows = 1; rows < inImage->rows - 1; rows++)
       {
-        for (unsigned int cols = 1; cols < inImage.cols - 1; cols++)
+        for (unsigned int cols = 1; cols < inImage->cols - 1; cols++)
         {
-          if (inImage.at<unsigned char>(rows, cols) != 0 &&
+          if (inImage->at<unsigned char>(rows, cols) != 0 &&
               bordersImage.at<unsigned char>(rows, cols) == 0)
           {
-            if (Morphology::kernelCheck(kernels[kernelId], inImage,
+            if (Morphology::kernelCheck(kernels[kernelId], *inImage,
                   cv::Point(cols,rows)))
             {
               bordersImage.at<unsigned char>(rows, cols) = 255;
@@ -1395,7 +1396,7 @@ namespace pandora_vision
       }
     }
 
-    bordersImage.copyTo(inImage);
+    bordersImage.copyTo(*inImage);
 
     #ifdef DEBUG_TIME
     Timer::tick("getShapesClearBorder");
@@ -1407,7 +1408,7 @@ namespace pandora_vision
       msg += " : After clear borders";
       msgs.push_back(msg);
       cv::Mat tmp;
-      inImage.copyTo(tmp);
+      inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
     if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
