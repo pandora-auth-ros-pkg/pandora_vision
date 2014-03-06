@@ -46,8 +46,8 @@ namespace pandora_vision
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
     @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&] The
     bounding boxes' vertices
-    @param[in][out] msgs [std::vector<std::string>&] Messages for debug reasons
-    @param[in] inflationSize [const int] The number of pixels by which the
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
+    @param[in] inflationSize [const in&t] The number of pixels by which the
     bounding rectange will be inflated
     @return std::set<unsigned int> The indices of valid (by this filter) blobs
    **/
@@ -55,8 +55,8 @@ namespace pandora_vision
     const cv::Mat& depthImage,
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
-    std::vector<std::string>& msgs,
-    const int inflationSize)
+    std::vector<std::string>* msgs,
+    const int& inflationSize)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesDepthDiff","applyFilter");
@@ -148,7 +148,7 @@ namespace pandora_vision
       {
         valid.insert(validKeyPointsIndices[i]);
       }
-      msgs.push_back(TOSTR(value));
+      msgs->push_back(TOSTR(value));
     }
 
     #ifdef DEBUG_TIME
@@ -166,14 +166,14 @@ namespace pandora_vision
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
     @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&] The
     bounding boxes' vertices
-    @param[in][out] msgs [std::vector<std::string>&] Messages for debug reasons
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter) blobs
    **/
   std::set<unsigned int> DepthFilters::checkHolesDepthArea(
     const cv::Mat& depthImage,
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
-    std::vector<std::string>& msgs)
+    std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesDepthArea","applyFilter");
@@ -208,7 +208,7 @@ namespace pandora_vision
       float vhigh = -23279.4 * pow(mean,3) + 112218.0 * pow(mean,2) -
         182162.0 * mean + 112500 - area;
 
-      msgs.push_back(TOSTR(vlow)+std::string(",")+TOSTR(vhigh));
+      msgs->push_back(TOSTR(vlow)+std::string(",")+TOSTR(vhigh));
 
       if(vlow < 0 && vhigh > 0)
       {
@@ -223,32 +223,34 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief Brushfire from a blobs's outline to its bounding box
     with an inflation size (inflates the rectangle by inflationSize pixels).
     If the points between the blob's outline and the inflated rectangle
     lie on one plane, this blob is a hole.
-    @param[in] inImage [const cv::Mat] The input depth image
-    @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+    @param[in] inImage [const cv::Mat&] The input depth image
+    @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The original point cloud acquired from the depth sensor
-    @param[in] keyPoints [const std::vector<cv::KeyPoint>] The keypoints of
+    @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
     blobs
-    @param[in] outlines [const std::vector<std::vector<cv::point> >&] The
+    @param[in] outlines [const std::vector<std::vector<cv::point> >&&] The
     points the outline consists of
-    @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
+    @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&&]
     The bounding boxes' vertices
-    @param[in] inflationsize [const int] Grow the rectangle by inflationsize as
+    @param[in] inflationsize [const int&] Grow the rectangle by inflationsize as
     to acquire more points to check for plane existence.
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
   std::set<unsigned int> DepthFilters::checkHolesBrushfireOutlineToRectangle(
-    const cv::Mat inImage,
-    const PointCloudXYZPtr initialPointCloud,
-    const std::vector<cv::KeyPoint> keyPoints,
-    const std::vector<std::vector<cv::Point> > outlines,
-    const std::vector<std::vector<cv::Point2f> > rectangles,
-    const int inflationSize)
+    const cv::Mat& inImage,
+    const PointCloudXYZPtr& initialPointCloud,
+    const std::vector<cv::KeyPoint>& keyPoints,
+    const std::vector<std::vector<cv::Point> >& outlines,
+    const std::vector<std::vector<cv::Point2f> >& rectangles,
+    const int& inflationSize)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesBrushfireOutlineToRectangle","applyFilter");
@@ -352,7 +354,7 @@ namespace pandora_vision
 
       std::set<unsigned int> visitedPoints;
       BlobDetection::brushfirePoint(brushfireBeginPoints[i],
-          canvas, visitedPoints);
+          &canvas, &visitedPoints);
 
       /**
        * In order to construct a new point cloud
@@ -421,28 +423,30 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief  Given the bounding box of a blob, inflate it.
     All the points that lie on the (edges of the) rectangle should
     also lie on exactly one plane for the blob to be a hole.
-    @param[in] inImage [const cv::Mat] The input depth image
-    @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+    @param[in] inImage [const cv::Mat&] The input depth image
+    @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The original point cloud,  uninterpolated, undistorted.
-    @param[in] keyPoints [const std::vector<cv::KeyPoint>] The keypoints of
+    @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
     blobs
-    @param[in] rectangles [const std::vector<std::vector<cv::point2f> >] The
+    @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&] The
     bounding boxes' vertices
-    @param[in] inflationsize [cosnt int] grow the rectangle by inflationsize
+    @param[in] inflationsize [cosnt int&] grow the rectangle by inflationsize
     as to acquire more points to check for plane existence.
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
   std::set<unsigned int> DepthFilters::checkHolesRectangleOutline(
-      const cv::Mat inImage,
-      const PointCloudXYZPtr initialPointCloud,
-      const std::vector<cv::KeyPoint> keyPoints,
-      const std::vector<std::vector<cv::Point2f> > rectangles,
-      const int inflationSize)
+      const cv::Mat& inImage,
+      const PointCloudXYZPtr& initialPointCloud,
+      const std::vector<cv::KeyPoint>& keyPoints,
+      const std::vector<std::vector<cv::Point2f> >& rectangles,
+      const int& inflationSize)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesRectangleOutline","applyFilter");
@@ -612,20 +616,22 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief Apply a cascade-like hole checker. Each filter applied is attached
     to an order which relates to the sequence of the overall filter execution.
     @param[in] interpolatedDepthImage [const cv::Mat&] The denoised depth image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
     The undistorted input point cloud
-    @param[in][out] conveyor [HoleFilters::HolesConveyor&] A struct that
+    @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
     contains the final valid holes
     @return void
    **/
   void DepthFilters::checkHoles(
     const cv::Mat& interpolatedDepthImage,
-    const pcl::PointCloud<pcl::PointXYZ>::Ptr initialPointCloud,
-    HoleFilters::HolesConveyor& conveyor)
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
+    HoleFilters::HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHoles","findHoles");
@@ -666,8 +672,8 @@ namespace pandora_vision
         initialPointCloud,
         conveyor,
         HoleFusionParameters::rectangle_inflation_size,
-        imgs,
-        msgs);
+        &imgs,
+        &msgs);
     } //!< o_it iterator ends
 
     #ifdef DEBUG_SHOW
@@ -685,27 +691,27 @@ namespace pandora_vision
   /**
    @brief Apply a cascade-like hole checker. Each filter applied is attached
    to an order which relates to the sequence of the overall filter execution.
-   @param[in] method [const unsigned int] The filter identifier to execute
+   @param[in] method [const unsigned int&] The filter identifier to execute
    @param[in] img [const cv::Mat&] The input depth image
-   @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr] The
+   @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
    original point cloud that corresponds to the input depth image
-   @param[in][out] conveyor [HoleFilters::HolesConveyor&] The structure that
+   @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
    holds the final holes' data
-   @param[in] inflationSize [const int] The amount of pixels by which each
+   @param[in] inflationSize [const int&] The amount of pixels by which each
    bounding box is inflated
-   @param[in][out] imgs [std::vector<cv::Mat>&] A vector of images which shows
+   @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which shows
    the holes that are considered valid by each filter
-   @param[in][out] msgs [std::vector<std::string>&] Debug messages
+   @param[in][out] msgs [std::vector<std::string>*] Debug messages
    @return void
    **/
   void DepthFilters::applyFilter(
-    const unsigned int method,
+    const unsigned int& method,
     const cv::Mat& img,
-    const PointCloudXYZPtr pointCloud,
-    HoleFilters::HolesConveyor& conveyor,
-    const int inflationSize,
-    std::vector<cv::Mat>& imgs,
-    std::vector<std::string>& msgs)
+    const PointCloudXYZPtr& pointCloud,
+    HoleFilters::HolesConveyor* conveyor,
+    const int& inflationSize,
+    std::vector<cv::Mat>* imgs,
+    std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
     Timer::start("applyFilter","checkHoles");
@@ -733,9 +739,9 @@ namespace pandora_vision
       {
         indexes = checkHolesDepthDiff(
           img,
-          conveyor.keyPoints,
-          conveyor.rectangles,
-          msgs_,
+          conveyor->keyPoints,
+          conveyor->rectangles,
+          &msgs_,
           inflationSize);
         windowMsg = "Filter: Depth difference";
         break;
@@ -749,8 +755,8 @@ namespace pandora_vision
         indexes = checkHolesRectangleOutline(
           img,
           pointCloud,
-          conveyor.keyPoints,
-          conveyor.rectangles,
+          conveyor->keyPoints,
+          conveyor->rectangles,
           inflationSize);
         windowMsg = "Filter: Outline of rectangle on plane";
         break;
@@ -760,9 +766,9 @@ namespace pandora_vision
       {
         indexes = checkHolesDepthArea(
           img,
-          conveyor.keyPoints,
-          conveyor.rectangles,
-          msgs_);
+          conveyor->keyPoints,
+          conveyor->rectangles,
+          &msgs_);
         windowMsg = "Filter: Area / Depth";
         break;
       }
@@ -776,9 +782,9 @@ namespace pandora_vision
         indexes = checkHolesBrushfireOutlineToRectangle(
           img,
           pointCloud,
-          conveyor.keyPoints,
-          conveyor.outlines,
-          conveyor.rectangles,
+          conveyor->keyPoints,
+          conveyor->outlines,
+          conveyor->rectangles,
           inflationSize);
         windowMsg = "Filter: Points around blob to plane";
         break;
@@ -788,38 +794,38 @@ namespace pandora_vision
     for(std::set<unsigned int>::iterator it = indexes.begin() ;
       it != indexes.end() ; it++)
     {
-      finalKeyPoints.push_back(conveyor.keyPoints[*it]);
-      finalRectangles.push_back(conveyor.rectangles[*it]);
-      finalBlobsOutlineVector.push_back(conveyor.outlines[*it]);
+      finalKeyPoints.push_back(conveyor->keyPoints[*it]);
+      finalRectangles.push_back(conveyor->rectangles[*it]);
+      finalBlobsOutlineVector.push_back(conveyor->outlines[*it]);
 
-      if(msgs_.size() == conveyor.keyPoints.size())
+      if(msgs_.size() == conveyor->keyPoints.size())
       {
         finalMsgs.push_back(msgs_[*it]);
       }
     }
 
-    conveyor.outlines = finalBlobsOutlineVector;
-    conveyor.rectangles = finalRectangles;
-    conveyor.keyPoints = finalKeyPoints;
+    conveyor->outlines = finalBlobsOutlineVector;
+    conveyor->rectangles = finalRectangles;
+    conveyor->keyPoints = finalKeyPoints;
 
     #ifdef DEBUG_SHOW
     if(HoleFusionParameters::debug_show_check_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" ") + windowMsg;
-      msgs.push_back(msg);
+      msgs->push_back(msg);
 
       cv::Mat tmp;
       tmp = Visualization::showHoles(
         windowMsg.c_str(),
         img,
         -1,
-        conveyor.keyPoints,
-        conveyor.rectangles,
+        conveyor->keyPoints,
+        conveyor->rectangles,
         finalMsgs,
-        conveyor.outlines);
+        conveyor->outlines);
 
-      imgs.push_back(tmp);
+      imgs->push_back(tmp);
     }
     #endif
     #ifdef DEBUG_TIME

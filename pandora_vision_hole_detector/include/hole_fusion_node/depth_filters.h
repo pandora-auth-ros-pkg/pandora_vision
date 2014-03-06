@@ -43,15 +43,15 @@
 #include <math.h>
 
 /**
-@namespace vision
-@brief The main namespace for PANDORA vision
-**/
+  @namespace vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-  @class HoleDetector
-  @brief Provides the functionalities for detecting holes [functional]
-  **/
+    @class HoleDetector
+    @brief Provides the functionalities for detecting holes [functional]
+   **/
   class DepthFilters
   {
     public:
@@ -63,19 +63,19 @@ namespace pandora_vision
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
         @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
         The bounding boxes' vertices
-        @param[in][out] msgs [std::vector<std::string>&] Messages for debug
+        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
         reasons
-        @param[in] inflationSize [const int] The number of pixels by which the
+        @param[in] inflationSize [const int&] The number of pixels by which the
         bounding rectange will be inflated
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
       static std::set<unsigned int> checkHolesDepthDiff(
-          const cv::Mat& depthImage,
-          const std::vector<cv::KeyPoint>& inKeyPoints,
-          const std::vector<std::vector<cv::Point2f> >& inRectangles,
-          std::vector<std::string>& msgs,
-          const int inflationSize);
+        const cv::Mat& depthImage,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point2f> >& inRectangles,
+        std::vector<std::string>* msgs,
+        const int& inflationSize);
 
       /**
         @brief Checks for valid holes by area / depth comparison
@@ -83,108 +83,111 @@ namespace pandora_vision
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
         @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
         The bounding boxes' vertices
-        @param[in][out] msgs [std::vector<std::string>&] Messages for debug
+        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
         reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
       static std::set<unsigned int> checkHolesDepthArea(
-          const cv::Mat& depthImage,
-          const std::vector<cv::KeyPoint>& inKeyPoints,
-          const std::vector<std::vector<cv::Point2f> >& inRectangles,
-          std::vector<std::string>& msgs);
+        const cv::Mat& depthImage,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point2f> >& inRectangles,
+        std::vector<std::string>* msgs);
 
       /**
         @brief Brushfire from a blobs's outline to its bounding box
         with an inflation size (inflates the rectangle by inflationSize pixels).
         If the points between the blob's outline and the inflated rectangle
         lie on one plane, this blob is a hole.
-        @param[in] inImage [const cv::Mat] The input depth image
-        @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+        @param[in] inImage [const cv::Mat&] The input depth image
+        @param[in] initialPointCloud
+        [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
         The original point cloud acquired from the depth sensor
-        @param[in] keyPoints [const std::vector<cv::KeyPoint>] The keypoints of
+        @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
         blobs
         @param[in] outlines [const std::vector<std::vector<cv::point> >&] The
         points the outline consists of
         @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
         The bounding boxes' vertices
-        @param[in] inflationsize [const int] Grow the rectangle by inflationsize
+        @param[in] inflationsize [const int&] Grow the rectangle by inflationsize
         as to acquire more points to check for plane existence.
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
       static std::set<unsigned int> checkHolesBrushfireOutlineToRectangle(
-          const cv::Mat inImage,
-          const PointCloudXYZPtr initialPointCloud,
-          const std::vector<cv::KeyPoint> keyPoints,
-          const std::vector<std::vector<cv::Point> > outlines,
-          const std::vector<std::vector<cv::Point2f> > rectangles,
-          const int inflationSize);
+        const cv::Mat& inImage,
+        const PointCloudXYZPtr& initialPointCloud,
+        const std::vector<cv::KeyPoint>& keyPoints,
+        const std::vector<std::vector<cv::Point> >& outlines,
+        const std::vector<std::vector<cv::Point2f> >& rectangles,
+        const int& inflationSize);
 
       /**
         @brief  Given the bounding box of a blob, inflate it.
         All the points that lie on the (edges of the) rectangle should
         also lie on exactly one plane for the blob to be a hole.
-        @param[in] inImage [const cv::Mat] The input depth image
-        @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+        @param[in] inImage [const cv::Mat&] The input depth image
+        @param[in] initialPointCloud
+        [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
         The original point cloud,  uninterpolated, undistorted.
-        @param[in] keyPoints [const std::vector<cv::KeyPoint>] The keypoints of
+        @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
         blobs
-        @param[in] rectangles [const std::vector<std::vector<cv::point2f> >] The
+        @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&] The
         bounding boxes' vertices
-        @param[in] inflationsize [cosnt int] grow the rectangle by inflationsize
+        @param[in] inflationsize [cosnt int&] grow the rectangle by inflationsize
         as to acquire more points to check for plane existence.
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
       static std::set<unsigned int> checkHolesRectangleOutline(
-          const cv::Mat inImage,
-          const PointCloudXYZPtr initialPointCloud,
-          const std::vector<cv::KeyPoint> keyPoints,
-          const std::vector<std::vector<cv::Point2f> > rectangles,
-          const int inflationSize);
+        const cv::Mat& inImage,
+        const PointCloudXYZPtr& initialPointCloud,
+        const std::vector<cv::KeyPoint>& keyPoints,
+        const std::vector<std::vector<cv::Point2f> >& rectangles,
+        const int& inflationSize);
 
       /**
-        @brief Apply a cascade-like hole checker. Each filter applied is attached
-        to an order which relates to the sequence of the overall filter execution.
-        @param[in] interpolatedDepthImage [cv::Mat] The denoised depth image
-        @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+        @brief Apply a cascade-like hole checker. Each filter applied is
+        attached to an order which relates to the sequence of the overall
+        filter execution.
+        @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
+        @param[in] initialPointCloud
+        [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
         The undistorted input point cloud
-        @param[in][out] conveyor [HoleFilters::HolesConveyor&] A struct that
+        @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
         contains the final valid holes
         @return void
        **/
       static void checkHoles(
-          const cv::Mat& interpolatedDepthImage,
-          const pcl::PointCloud<pcl::PointXYZ>::Ptr initialPointCloud,
-          HoleFilters::HolesConveyor& conveyor);
+        const cv::Mat& interpolatedDepthImage,
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
+        HoleFilters::HolesConveyor* conveyor);
 
       /**
-        @brief Apply a cascade-like hole checker. Each filter applied is
-        attached to an order which relates to the sequence of the overall filter
-        execution.
-        @param[in] method [const unsigned int] The filter identifier to execute
+        @brief Apply a cascade-like hole checker. Each filter applied
+        is attached to an order which relates to the sequence of the overall
+        filter execution.
+        @param[in] method [const unsigned int&] The filter identifier to execute
         @param[in] img [const cv::Mat&] The input depth image
-        @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr] The
+        @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
         original point cloud that corresponds to the input depth image
-        @param[in][out] conveyor [HoleFilters::HolesConveyor&] The structure
+        @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure
         that holds the final holes' data
-        @param[in] inflationSize [const int] The amount of pixels by which each
+        @param[in] inflationSize [const int&] The amount of pixels by which each
         bounding box is inflated
-        @param[in][out] imgs [std::vector<cv::Mat>&] A vector of images which
+        @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which
         shows the holes that are considered valid by each filter
-        @param[in][out] msgs [std::vector<std::string>&] Debug messages
+        @param[in][out] msgs [std::vector<std::string>*] Debug messages
         @return void
        **/
       static void applyFilter(
-          const unsigned int method,
-          const cv::Mat& img,
-          const PointCloudXYZPtr pointCloud,
-          HoleFilters::HolesConveyor& conveyor,
-          const int inflationSize,
-          std::vector<cv::Mat>& imgs,
-          std::vector<std::string>& msgs);
-
+        const unsigned int& method,
+        const cv::Mat& img,
+        const PointCloudXYZPtr& pointCloud,
+        HoleFilters::HolesConveyor* conveyor,
+        const int& inflationSize,
+        std::vector<cv::Mat>* imgs,
+        std::vector<std::string>* msgs);
   };
 
 }

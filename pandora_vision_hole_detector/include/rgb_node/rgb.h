@@ -70,7 +70,7 @@ namespace pandora_vision
       void createCandidateHolesMessage(
         const HoleFilters::HolesConveyor& conveyor,
         const sensor_msgs::Image& rgbImage,
-        vision_communications::RgbCandidateHolesVectorMsg& rgbCandidateHolesMsg,
+        vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
         const std::string& encoding);
 
     public:

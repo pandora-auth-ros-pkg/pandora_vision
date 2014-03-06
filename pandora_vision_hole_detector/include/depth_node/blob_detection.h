@@ -57,18 +57,18 @@ namespace pandora_vision
       /**
         @brief Implements the brushfire algorithm for all blob keypoints in
         order to find a blob limits
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>] The keypoints
-        @param[in] edgesImage [const cv::Mat] The input image
-        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >&]
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+        @param[in] edgesImage [cv::Mat*] The input image
+        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
         The output vector containing the blobs' outline
-        @param[out] blobsArea [std::vector<float>&] The area of each blob
+        @param[out] blobsArea [std::vector<float>*] The area of each blob
         @return void
        **/
       static void brushfireKeypoint (
-          const std::vector<cv::KeyPoint> inKeyPoints,
-          cv::Mat edgesImage,
-          std::vector<std::vector<cv::Point> >& blobsOutlineVector,
-          std::vector<float>& blobsArea);
+          const std::vector<cv::KeyPoint>& inKeyPoints,
+          cv::Mat* edgesImage,
+          std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+          std::vector<float>* blobsArea);
 
       /**
         @brief Implements the brushfire algorithm. Its specific purpose is
@@ -80,51 +80,52 @@ namespace pandora_vision
         two areas of non-zero value pixels.
         @return void
        **/
-      static void brushfirePoint(const cv::Point inPoint,
-          cv::Mat inImage,
-          std::set<unsigned int>& pointsCovered);
+      static void brushfirePoint(const cv::Point& inPoint,
+          cv::Mat* inImage,
+          std::set<unsigned int>* pointsCovered);
 
 
       /**
         @brief Detects blobs in an image
-        @param[in] inImage [const cv::Mat] The input image
-        @param[out] keyPointsOut [std::vector<cv::KeyPoint>&] The ouput
+        @param[in] inImage [const cv::Mat&] The input image
+        @param[out] keyPointsOut [std::vector<cv::KeyPoint>*] The ouput
         @return void
        **/
-      static void detectBlobs(const cv::Mat inImage,
-          std::vector<cv::KeyPoint>& keyPointsOut);
+      static void detectBlobs(const cv::Mat& inImage,
+          std::vector<cv::KeyPoint>* keyPointsOut);
 
       /**
         @brief Implements a raycast algorithm for all blob keypoints in order
         to find the blob limits
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>] The keypoints
-        @param[in] edgesImage [cv::Mat] The input image
-        @param[in] partitions [const int] The number of directions towards which
-        the outline of the blob will be sought, or the number of partitions in
-        which the blob will be divided by the rays. Same deal.
-        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >&]
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+        @param[in] edgesImage [cv::Mat*] The input image
+        @param[in] partitions [const int&] The number of directions
+        towards which the outline of the blob will be sought,
+        or the number of partitions in which the blob will be divided by
+        the rays.  Same deal.
+        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
         The output vector containing the blobs' (rough approximate) outline
-        @param[out] blobsArea [std::vector<float>&] The area of each blob
+        @param[out] blobsArea [std::vector<float>*] The area of each blob
         @return void
        **/
       static void raycastKeypoint(
-          const std::vector<cv::KeyPoint> inKeyPoints,
-          cv::Mat edgesImage,
-          const int partitions,
-          std::vector<std::vector<cv::Point> >& blobsOutlineVector,
-          std::vector<float>& blobsArea);
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        cv::Mat* edgesImage,
+        const int& partitions,
+        std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+        std::vector<float>* blobsArea);
 
       /**
-        @brief Takes as input a binary image and stores in @outlines the
-        outlines of closed curves. (Assumes that the input image comprises
-        entirely of closed curves.)
-        @param[in] inImage [cv::Mat&] The input binary image
-        @param[out] outlines [std::vector<std::vector<cv::Point> >&] The points
+        @brief Takes as input a binary image and stores in
+        @outlines the outlines of closed curves.
+        (Assumes that the input image comprises entirely of closed curves.)
+        @param[in] inImage [cv::Mat*] The input binary image
+        @param[out] outlines [std::vector<std::vector<cv::Point> >*] The points
         that each detected closed curve consists of
         @return void
        **/
-      static void getClosedCurves(cv::Mat& inImage,
-          std::vector<std::vector<cv::Point> >& outlines);
+      static void getClosedCurves(cv::Mat* inImage,
+        std::vector<std::vector<cv::Point> >* outlines);
 
   };
 

@@ -106,11 +106,11 @@ namespace pandora_vision
 
     //!< Extract a PointCloudXYZPtr from the point cloud message
     PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
-    MessageConversions::extractPointCloudXYZFromMessage(msg, pointCloudXYZ);
+    MessageConversions::extractPointCloudXYZFromMessage(msg, &pointCloudXYZ);
 
     //!< Extract the depth image from the PointCloudXYZPtr
     cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width, CV_32FC1);
-    extractDepthImageFromPointCloud(pointCloudXYZ, depthImage);
+    extractDepthImageFromPointCloud(pointCloudXYZ, &depthImage);
 
     //!< Finds possible holes
     cv::Mat interpolatedDepthImage;
@@ -123,7 +123,7 @@ namespace pandora_vision
     createCandidateHolesMessage(holes,
       interpolatedDepthImage,
       pointCloudXYZ,
-      depthCandidateHolesMsg,
+      &depthCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_32FC1);
 
     //!< Publish the candidate holes message
@@ -148,14 +148,15 @@ namespace pandora_vision
     @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
     cloud
     @param[out] depthCandidateHolesMsg
-    [vision_communications::DepthCandidateHolesVectorMsg&] The output message
+    [vision_communications::DepthCandidateHolesVectorMsg*] The output message
+    @param[in] encoding [std::string&] The interpoladedDepth image's encoding
     @return void
    **/
   void PandoraKinect::createCandidateHolesMessage(
     const HoleFilters::HolesConveyor& conveyor,
     const cv::Mat& interpolatedDepthImage,
     const PointCloudXYZPtr& pointCloudXYZPtr,
-    vision_communications::DepthCandidateHolesVectorMsg& depthCandidateHolesMsg,
+    vision_communications::DepthCandidateHolesVectorMsg* depthCandidateHolesMsg,
     const std::string& encoding)
   {
     #ifdef DEBUG_TIME
@@ -187,7 +188,7 @@ namespace pandora_vision
       }
 
       //!< Push back one hole to the holes vector message
-      depthCandidateHolesMsg.candidateHoles.push_back(holeMsg);
+      depthCandidateHolesMsg->candidateHoles.push_back(holeMsg);
     }
 
 
@@ -195,8 +196,8 @@ namespace pandora_vision
     //!< sensor_msgs/PointCloud2 pointCloud
     sensor_msgs::PointCloud2 pointCloudMessage;
     MessageConversions::convertPointCloudXYZToMessage(pointCloudXYZPtr,
-      pointCloudMessage);
-    depthCandidateHolesMsg.pointCloud = pointCloudMessage;
+      &pointCloudMessage);
+    depthCandidateHolesMsg->pointCloud = pointCloudMessage;
 
 
     //!< Convert the cv::Mat image to a ROS message
@@ -208,7 +209,7 @@ namespace pandora_vision
 
     //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
     //!< sensor_msgs/Image interpolatedDepthImage
-    depthCandidateHolesMsg.interpolatedDepthImage =
+    depthCandidateHolesMsg->interpolatedDepthImage =
       *imageMessagePtr->toImageMsg();
 
     #ifdef DEBUG_TIME
@@ -221,12 +222,12 @@ namespace pandora_vision
   /**
     @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
     point cloud
-    @param pointCloudXYZ [PointCloudXYZPtr&] The point cloud
-    @param depthImage [cv::Mat&] The extracted depth image
+    @param pointCloudXYZ [const PointCloudXYZPtr&] The point cloud
+    @param depthImage [cv::Mat*] The extracted depth image
     @return [cv::Mat] The depth image
    **/
   void PandoraKinect::extractDepthImageFromPointCloud(
-    const PointCloudXYZPtr& pointCloudXYZ, cv::Mat& depthImage)
+    const PointCloudXYZPtr& pointCloudXYZ, cv::Mat* depthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractDepthImageFromPointCloud", "inputCloudCallback");
@@ -236,13 +237,13 @@ namespace pandora_vision
     {
       for (unsigned int col = 0; col < pointCloudXYZ->width; ++col)
       {
-        depthImage.at<float>(row, col) =
+        depthImage->at<float>(row, col) =
           pointCloudXYZ->points[col + pointCloudXYZ->width * row].z;
 
         //!< if element is nan make it a zero
-        if (depthImage.at<float>(row, col) != depthImage.at<float>(row, col))
+        if (depthImage->at<float>(row, col) != depthImage->at<float>(row, col))
         {
-          depthImage.at<float>(row, col) = 0.0;
+          depthImage->at<float>(row, col) = 0.0;
         }
       }
     }
@@ -256,11 +257,11 @@ namespace pandora_vision
 
   /**
     @brief Stores a ensemble of point clouds in pcd images
-    @param in_cloud [const std::vector<PointCloudXYZPtr>] The point clouds
+    @param in_cloud [const std::vector<PointCloudXYZPtr>&] The point clouds
     @return void
    **/
   void PandoraKinect::storePointCloudVectorToImages(
-    const std::vector<PointCloudXYZPtr> in_vector)
+    const std::vector<PointCloudXYZPtr>& in_vector)
   {
     #ifdef DEBUG_TIME
     Timer::start("storePointCloudVectorToImages");
@@ -281,12 +282,12 @@ namespace pandora_vision
 
   /**
   @brief Publishes the planes to /vision/kinect/planes topic
-  @param cloudVector [const std::vector<PointCloudXYZPtr>] The point clouds\
+  @param cloudVector [const std::vector<PointCloudXYZPtr>&] The point clouds\
   containing the planes
   @return void
    **/
   void PandoraKinect::publishPlanes(
-    const std::vector<PointCloudXYZPtr> cloudVector)
+    const std::vector<PointCloudXYZPtr>& cloudVector)
   {
     #ifdef DEBUG_TIME
     Timer::start("publishPlanes");

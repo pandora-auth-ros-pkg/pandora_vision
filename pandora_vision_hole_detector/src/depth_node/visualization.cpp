@@ -1,39 +1,39 @@
 /*********************************************************************
-*
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*
-* Authors: Alexandros Filotheou, Manos Tsardoulias
-*********************************************************************/
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Authors: Alexandros Filotheou, Manos Tsardoulias
+ *********************************************************************/
 
 #include "depth_node/visualization.h"
 
@@ -41,20 +41,20 @@ namespace pandora_vision
 {
   /**
     @brief Shows multiple images in one window
-    @param[in] title [const std::string] The window's title
+    @param[in] title [const std::string&] The window's title
     @param[in] imgs [const std::vector<cv::Mat>&] The images to be shown
     @param[in] titles [const std::vector<std::string>&] The titles for each
     image
-    @param[in] maxSize [const unsigned int] The maximum size of the window
-    @param[in] ms [const int] How many seconds the showing lasts
+    @param[in] maxSize [const unsigned int&] The maximum size of the window
+    @param[in] ms [const int&] How many seconds the showing lasts
     @return void
    **/
   void Visualization::multipleShow(
-      const std::string title,
-      const std::vector<cv::Mat>& imgs,
-      const std::vector<std::string>& titles,
-      const unsigned int maxSize,
-      const int ms)
+    const std::string& title,
+    const std::vector<cv::Mat>& imgs,
+    const std::vector<std::string>& titles,
+    const unsigned int& maxSize,
+    const int& ms)
   {
     if(imgs.size() == 0)
     {
@@ -133,13 +133,13 @@ namespace pandora_vision
 
   /**
     @brief Scales an image from its original format to CV_8UC1
-    @param[in] inImage [const cv::Mat] The image to show
-    @param[in] ms [const int] How many ms the showing lasts
+    @param[in] inImage [const cv::Mat&] The image to show
+    @param[in] ms [const int&] How many ms the showing lasts
     @return void
    **/
   cv::Mat Visualization::scaleImageForVisualization(
-      const cv::Mat inImage,
-      const int method)
+    const cv::Mat& inImage,
+    const int& method)
   {
     cv::Mat outImage;
 
@@ -176,15 +176,15 @@ namespace pandora_vision
 
   /**
     @brief Overrides the cv::imshow function.
-    @param[in] windowTitle [const std::string] The window title
+    @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show
-    @param[in] ms [const int] How many ms the showing lasts
+    @param[in] ms [const int&] How many ms the showing lasts
     @return void
    **/
   void Visualization::show(
-      const std::string windowTitle,
-      const cv::Mat& inImage,
-      const int ms)
+    const std::string& windowTitle,
+    const cv::Mat& inImage,
+    const int& ms)
   {
     cv::imshow(windowTitle, inImage);
     cv::waitKey(ms);
@@ -194,32 +194,34 @@ namespace pandora_vision
 
   /**
     @brief Depicts the keypoints and bounding boxes
-    @param[in] windowTitle [const std::string] The window title
+    @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show
-    @param[in] ms [const int] How many ms the showing lasts
+    @param[in] ms [const int&] How many ms the showing lasts
     @param[in] keypoints [const std::vector<cv::KeyPoint>&] The keypoints
-    @param[in] bounding_boxes [const std::vector<std::vector<cv::Point2f> >&] The
-    bounding boxes' vertices
-    @param[in] msgs [const std::vector<std::string>] Message to show to each keypoint
-    @param[in] outlineVector [const std::vector<std::vector<cv::Point> >] The
+    @param[in] bounding_boxes [const std::vector<std::vector<cv::Point2f> >&]
+    The bounding boxes' vertices
+    @param[in] msgs [const std::vector<std::string>&] Message to show to
+    each keypoint
+    @param[in] outlineVector [const std::vector<std::vector<cv::Point> >&] The
     valid holes' outlines
-    @param[in] hz [const float] If positive holds the Hz
+    @param[in] hz [const float&] If positive holds the Hz
     @return void
    **/
   cv::Mat Visualization::showHoles(
-    const std::string windowTitle,
+    const std::string& windowTitle,
     const cv::Mat& inImage,
-    const int ms,
+    const int& ms,
     const std::vector<cv::KeyPoint>& keypoints,
     const std::vector<std::vector<cv::Point2f> >& bounding_boxes,
-    const std::vector<std::string> msgs,
-    const std::vector<std::vector<cv::Point> > outlineVector,
-    const float hz)
+    const std::vector<std::string>& msgs,
+    const std::vector<std::vector<cv::Point> >& outlineVector,
+    const float& hz)
   {
-    cv::Mat img = scaleImageForVisualization(inImage, DepthParameters::scale_method);
+    cv::Mat img = scaleImageForVisualization(inImage,
+      DepthParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(0, 255, 0),
-       cv::DrawMatchesFlags::DEFAULT);
+      cv::DrawMatchesFlags::DEFAULT);
 
     for(unsigned int i = 0; i < outlineVector.size(); i++)
     {
@@ -242,7 +244,7 @@ namespace pandora_vision
       for(int j = 0; j < 4; j++)
       {
         cv::line(img, bounding_boxes[i][j],
-           bounding_boxes[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
+          bounding_boxes[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
       }
       if(msgs.size() == bounding_boxes.size())
       {
@@ -255,9 +257,9 @@ namespace pandora_vision
     if(hz > 0)
     {
       cv::putText(img,
-          (TOSTR(hz)+std::string("Hz")).c_str(),
-          cvPoint(20,20),
-          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,0,255), 1, CV_AA);
+        (TOSTR(hz)+std::string("Hz")).c_str(),
+        cvPoint(20,20),
+        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,0,255), 1, CV_AA);
     }
 
     if(ms >= 0)
@@ -272,22 +274,23 @@ namespace pandora_vision
 
   /**
     @brief Depicts the keypoints and bounding boxes
-    @param[in] windowTitle [const std::string] The window title
+    @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show
-    @param[in] ms [const int] How many ms the showing lasts
+    @param[in] ms [const int&] How many ms the showing lasts
     @param[in] keypoints [const std::vector<cv::KeyPoint>&] The keypoints
     @return void
    **/
   cv::Mat Visualization::showKeypoints(
-      const std::string windowTitle,
-      const cv::Mat& inImage,
-      const int ms,
-      const std::vector<cv::KeyPoint>& keypoints)
+    const std::string& windowTitle,
+    const cv::Mat& inImage,
+    const int& ms,
+    const std::vector<cv::KeyPoint>& keypoints)
   {
-    cv::Mat img = scaleImageForVisualization(inImage, DepthParameters::scale_method);
+    cv::Mat img = scaleImageForVisualization(inImage,
+      DepthParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(255, 0, 0),
-        cv::DrawMatchesFlags::DEFAULT);
+      cv::DrawMatchesFlags::DEFAULT);
 
     if(ms >= 0)
     {
@@ -302,18 +305,18 @@ namespace pandora_vision
   /**
     @brief Overrides the cv::imshow function. Provides image scaling from
     the image's original forma to CV_8UC1 format
-    @param[in] windowTitle [const std::string] The window title
+    @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show
-    @param[in] ms [const int] How many ms the showing lasts
+    @param[in] ms [const int&] How many ms the showing lasts
     @return void
    **/
   void Visualization::showScaled(
-    const std::string windowTitle,
+    const std::string& windowTitle,
     const cv::Mat& inImage,
-    const int ms)
+    const int& ms)
   {
     cv::imshow(windowTitle, scaleImageForVisualization(inImage,
-          DepthParameters::scale_method));
+        DepthParameters::scale_method));
     cv::waitKey(ms);
   }
 

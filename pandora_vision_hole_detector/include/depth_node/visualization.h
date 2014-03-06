@@ -41,110 +41,111 @@
 #include "depth_node/depth_parameters.h"
 
 /**
-@namespace vision
-@brief The main namespace for PANDORA vision
-**/
+  @namespace vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-  @class Visualization
-  @brief Provides methods for image visualization
-  **/
+    @class Visualization
+    @brief Provides methods for image visualization
+   **/
   class Visualization
   {
     public:
 
       /**
         @brief Shows multiple images in one window
-        @param[in] title [const std::string] The window's title
+        @param[in] title [const std::string&] The window's title
         @param[in] imgs [const std::vector<cv::Mat>&] The images to be shown
         @param[in] titles [const std::vector<std::string>&] The titles for each
         image
-        @param[in] maxSize [const unsigned int] The maximum size of the window
-        @param[in] ms [const int] How many seconds the showing lasts
+        @param[in] maxSize [const unsigned int&] The maximum size of the window
+        @param[in] ms [const int&] How many seconds the showing lasts
         @return void
        **/
       static void multipleShow(
-          const std::string title,
-          const std::vector<cv::Mat>& imgs,
-          const std::vector<std::string>& titles,
-          const unsigned int maxSize,
-          const int ms);
+        const std::string& title,
+        const std::vector<cv::Mat>& imgs,
+        const std::vector<std::string>& titles,
+        const unsigned int& maxSize,
+        const int& ms);
 
       /**
         @brief Scales an image from its original format to CV_8UC1
-        @param[in] inImage [const cv::Mat] The image to show
-        @param[in] ms [const int] How many ms the showing lasts
+        @param[in] inImage [const cv::Mat&] The image to show
+        @param[in] ms [const int&] How many ms the showing lasts
         @return void
        **/
       static cv::Mat scaleImageForVisualization(
-          const cv::Mat inImage,
-          const int method);
+        const cv::Mat& inImage,
+        const int& method);
 
       /**
         @brief Overrides the cv::imshow function.
-        @param[in] windowTitle [const std::string] The window title
+        @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
-        @param[in] ms [const int] How many ms the showing lasts
+        @param[in] ms [const int&] How many ms the showing lasts
         @return void
        **/
       static void show(
-          const std::string windowTitle,
-          const cv::Mat& inImage,
-          const int ms);
+        const std::string& windowTitle,
+        const cv::Mat& inImage,
+        const int& ms);
 
       /**
         @brief Depicts the keypoints and bounding boxes
-        @param[in] windowTitle [const std::string] The window title
+        @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
-        @param[in] ms [const int] How many ms the showing lasts
+        @param[in] ms [const int&] How many ms the showing lasts
         @param[in] keypoints [const std::vector<cv::KeyPoint>&] The keypoints
-        @param[in] bounding_boxes [const std::vector<std::vector<cv::Point2f> >&]
+        @param[in] bounding_boxes
+        [const std::vector<std::vector<cv::Point2f> >&]
         The bounding boxes' vertices
         @param[in] msgs [const std::vector<std::string>] Message to show to each
         keypoint
-        @param[in] outlineVector [const std::vector<std::vector<cv::Point> >] The
-        valid holes' outlines
-        @param[in] hz [const float] If positive holds the Hz
+        @param[in] outlineVector [const std::vector<std::vector<cv::Point> >&]
+        The valid holes' outlines
+        @param[in] hz [const floa&t] If positive holds the Hz
         @return void
        **/
       static cv::Mat showHoles(
-          const std::string windowTitle,
-          const cv::Mat& inImage,
-          const int ms,
-          const std::vector<cv::KeyPoint>& keypoints,
-          const std::vector<std::vector<cv::Point2f> >& bounding_boxes,
-          const std::vector<std::string> msgs,
-          const std::vector<std::vector<cv::Point> > outlineVector,
-          const float hz = -1);
+        const std::string& windowTitle,
+        const cv::Mat& inImage,
+        const int& ms,
+        const std::vector<cv::KeyPoint>& keypoints,
+        const std::vector<std::vector<cv::Point2f> >& bounding_boxes,
+        const std::vector<std::string>& msgs,
+        const std::vector<std::vector<cv::Point> >& outlineVector,
+        const float& hz = -1);
 
       /**
         @brief Depicts the keypoints and bounding boxes
-        @param[in] windowTitle [const std::string] The window title
+        @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
-        @param[in] ms [const int] How many ms the showing lasts
+        @param[in] ms [const int&] How many ms the showing lasts
         @param[in] keypoints [const std::vector<cv::KeyPoint>&] The keypoints
         @return void
        **/
       static cv::Mat showKeypoints(
-          const std::string windowTitle,
-          const cv::Mat& inImage,
-          const int ms,
-          const std::vector<cv::KeyPoint>& keypoints
-          );
+        const std::string& windowTitle,
+        const cv::Mat& inImage,
+        const int& ms,
+        const std::vector<cv::KeyPoint>& keypoints
+        );
 
       /**
         @brief Overrides the cv::imshow function. Provides image scaling from
         the image's original forma to CV_8UC1 format
-        @param[in] windowTitle [const std::string] The window title
+        @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
-        @param[in] ms [const int] How many ms the showing lasts
+        @param[in] ms [const int&] How many ms the showing lasts
         @return void
        **/
       static void showScaled(
-          const std::string windowTitle,
-          const cv::Mat& inImage,
-          const int ms);
+        const std::string& windowTitle,
+        const cv::Mat& inImage,
+        const int& ms);
 
   };
 }

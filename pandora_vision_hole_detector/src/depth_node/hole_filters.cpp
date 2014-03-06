@@ -43,21 +43,21 @@ namespace pandora_vision
     @brief Given a set of keypoints and an edges image, this function
     returns the valid keypoints and for each one, its respective, least
     area, rotated bounding box and the points of its outline.
-    @param[in] keyPoints [const std::vector<cv::KeyPoint>]
+    @param[in] keyPoints [const std::vector<cv::KeyPoint>&]
     The original keypoints found.
-    @param[in] denoisedDepthImageEdges [const cv::Mat] The original denoised
+    @param[in] denoisedDepthImageEdges [cv::Mat*] The original denoised
     depth edges image
-    @param[in] detectionMethod [const int] The method by which the outline of a
+    @param[in] detectionMethod [const int&] The method by which the outline of a
     blob is obtained. 0 means by means of brushfire, 1 by means of raycasting
-    @param[in][out] conveyor [HolesConveyor&] A struct that contains the final
+    @param[in][out] conveyor [HolesConveyor*] A struct that contains the final
     valid holes
     @return void
    **/
   void HoleFilters::validateBlobs(
-    const std::vector<cv::KeyPoint> keyPoints,
-    const cv::Mat denoisedDepthImageEdges,
-    const int detectionMethod,
-    HolesConveyor& conveyor)
+    const std::vector<cv::KeyPoint>& keyPoints,
+    cv::Mat* denoisedDepthImageEdges,
+    const int& detectionMethod,
+    HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("validateBlobs","findHoles");
@@ -72,13 +72,13 @@ namespace pandora_vision
 
         BlobDetection::brushfireKeypoint(keyPoints,
             denoisedDepthImageEdges,
-            blobsOutlineVector,
-            blobsArea);
+            &blobsOutlineVector,
+            &blobsArea);
 
         //!< For each outline found, find the rotated rectangle
         //!< with the least area that encloses it.
         cv::Mat inputDenoisedDepthImageEdges;
-        denoisedDepthImageEdges.copyTo(inputDenoisedDepthImageEdges);
+        denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
 
         cv::Mat rectanglesImage;
         std::vector< std::vector<cv::Point2f> > rectangles;
@@ -89,8 +89,8 @@ namespace pandora_vision
             inputDenoisedDepthImageEdges,
             blobsOutlineVector,
             blobsArea,
-            rectanglesImage,
-            rectangles);
+            &rectanglesImage,
+            &rectangles);
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
@@ -112,13 +112,13 @@ namespace pandora_vision
         BlobDetection::raycastKeypoint(keyPoints,
             denoisedDepthImageEdges,
             DepthParameters::raycast_keypoint_partitions,
-            blobsOutlineVector,
-            blobsArea);
+            &blobsOutlineVector,
+            &blobsArea);
 
         //!< For each outline found, find the rotated rectangle
         //!< with the least area that encloses it.
         cv::Mat inputDenoisedDepthImageEdges;
-        denoisedDepthImageEdges.copyTo(inputDenoisedDepthImageEdges);
+        denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
 
         cv::Mat rectanglesImage;
         std::vector< std::vector<cv::Point2f> > rectangles;
@@ -129,13 +129,13 @@ namespace pandora_vision
             inputDenoisedDepthImageEdges,
             blobsOutlineVector,
             blobsArea,
-            rectanglesImage,
-            rectangles);
+            &rectanglesImage,
+            &rectangles);
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
         //!< be greater than DepthParameters::bounding_box_min_area_threshold
-        validateKeypointsToRectangles (
+        validateKeypointsToRectangles(
             keyPoints,
             rectangles,
             blobsArea,
@@ -166,23 +166,23 @@ namespace pandora_vision
     reside in at least one rectangle) and a vector of rectangles (again
     represented by its 4 vertices). There is a one-to-one association
     between the keypoints and the rectangles.
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>] The key points
-    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >] The
+    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The key points
+    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&] The
     rectangles found
-    @param[in] inRectanglesArea [const std::vector<float>]
+    @param[in] inRectanglesArea [const std::vector<float>&]
     The area of each rectangle
-    @param[in] inContours [const std::vector<std::vector<cv::Point> >]
+    @param[in] inContours [const std::vector<std::vector<cv::Point> >&]
     The outline of each blob found
-    @param[out] conveyor [HolesConveyor&] The container of vector of blobs'
+    @param[out] conveyor [HolesConveyor*] The container of vector of blobs'
     keypoints, outlines and areas
     @return void
    **/
   void HoleFilters::validateKeypointsToRectangles (
-    const std::vector<cv::KeyPoint> inKeyPoints,
-    const std::vector<std::vector<cv::Point2f> > inRectangles,
-    const std::vector<float> inRectanglesArea,
-    const std::vector<std::vector<cv::Point> > inContours,
-    HolesConveyor& conveyor)
+    const std::vector<cv::KeyPoint>& inKeyPoints,
+    const std::vector<std::vector<cv::Point2f> >& inRectangles,
+    const std::vector<float>& inRectanglesArea,
+    const std::vector<std::vector<cv::Point> >& inContours,
+    HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("validateKeypointsToRectangles","validateBlobs");
@@ -207,10 +207,10 @@ namespace pandora_vision
        */
       if (keypointResidesInRectIds.size() == 1)
       {
-        conveyor.keyPoints.push_back(inKeyPoints[keypointId]);
-        conveyor.rectangles.push_back(
+        conveyor->keyPoints.push_back(inKeyPoints[keypointId]);
+        conveyor->rectangles.push_back(
           inRectangles[keypointResidesInRectIds[0]]);
-        conveyor.outlines.push_back(inContours[keypointId]);
+        conveyor->outlines.push_back(inContours[keypointId]);
       }
 
       /*
@@ -230,9 +230,9 @@ namespace pandora_vision
           }
         }
 
-        conveyor.keyPoints.push_back(inKeyPoints[keypointId]);
-        conveyor.rectangles.push_back(inRectangles[minAreaRectId]);
-        conveyor.outlines.push_back(inContours[keypointId]);
+        conveyor->keyPoints.push_back(inKeyPoints[keypointId]);
+        conveyor->rectangles.push_back(inRectangles[minAreaRectId]);
+        conveyor->outlines.push_back(inContours[keypointId]);
       }
       /*
        * If the keypoint has no rectangle attached to it

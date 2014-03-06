@@ -43,21 +43,21 @@ namespace pandora_vision
     @brief Finds rotated bounding boxes from blob outlines. The blob's area
     must be larger than DepthParameters::bounding_box_min_area_threshold.
     The blob and its bounding rectangle must be inside the image's limits.
-    @param[in] inImage [const cv::Mat] The input image
-    @param[in] blobsOutlineVector [const std::vector<std::vector<cv::Point> >]
+    @param[in] inImage [const cv::Mat&] The input image
+    @param[in] blobsOutlineVector [const std::vector<std::vector<cv::Point> >&]
     The outline points of the blobs
     @param[in] blobsArea [const std::vector<float>&] The blobs' area
-    @param[out] outImage [cv::Mat&] The output image
-    @param[out] outRectangles [std::vector< std::vector<cv::Point2f> >&] The
+    @param[out] outImage [cv::Mat*] The output image
+    @param[out] outRectangles [std::vector< std::vector<cv::Point2f> >*] The
     rectangles of the bounding boxes
     @return void
    **/
   void BoundingBoxDetection::findRotatedBoundingBoxesFromOutline(
-    const cv::Mat inImage,
-    const std::vector<std::vector<cv::Point> > blobsOutlineVector,
-    const std::vector<float> blobsArea,
-    cv::Mat& outImage,
-    std::vector<std::vector<cv::Point2f> >& outRectangles)
+    const cv::Mat& inImage,
+    const std::vector<std::vector<cv::Point> >& blobsOutlineVector,
+    const std::vector<float>& blobsArea,
+    cv::Mat* outImage,
+    std::vector<std::vector<cv::Point2f> >* outRectangles)
   {
     #ifdef DEBUG_TIME
     Timer::start("findRotatedBoundingBoxesFromOutline","validateBlobs");
@@ -114,10 +114,10 @@ namespace pandora_vision
       }
 
       //!< push back the 4 vertices of rectangle i
-      outRectangles.push_back(rect_points_vector);
+      outRectangles->push_back(rect_points_vector);
     }
 
-    outImage = drawing;
+    *outImage = drawing;
 
     #ifdef DEBUG_TIME
     Timer::tick("findRotatedBoundingBoxesFromOutline");
