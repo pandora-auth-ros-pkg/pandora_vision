@@ -42,7 +42,7 @@ namespace pandora_vision
   /**
     @brief The HoleFusion constructor
    **/
-  HoleFusion::HoleFusion(void) : pointCloudXYZ(new PointCloudXYZ)
+  HoleFusion::HoleFusion(void) : pointCloudXYZ_(new PointCloudXYZ)
   {
     #ifdef DEBUG_TIME
     Timer::start("HoleFusion");
@@ -51,7 +51,7 @@ namespace pandora_vision
     ros::Duration(0.5).sleep();
 
     //!< Initialize the numNodesReady variable
-    numNodesReady = 0;
+    numNodesReady_ = 0;
 
     //!< Advertise the topic that the rgb_depth_synchronizer will be
     //!< subscribed to in order for the hole_fusion_node to unlock it
@@ -74,13 +74,6 @@ namespace pandora_vision
 
     //!< Start the synchronizer
     unlockSynchronizer();
-
-    //!< Create a seperate thread responsible for watching when the RGB and
-    //!< depth nodes have their respective candidate holes sent to the hole
-    //!< fusion node for the essential part of fusing the two kinds of
-    //!< information
-    boost::thread processCandidateHolesThread(
-      &HoleFusion::processCandidateHoles, this);
 
     #ifdef DEBUG_TIME
     Timer::tick("HoleFusion");
@@ -121,30 +114,30 @@ namespace pandora_vision
 
     //!< Clear the current depthHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
-    this->depthHolesConveyor.keyPoints.clear();
-    this->depthHolesConveyor.rectangles.clear();
-    this->depthHolesConveyor.outlines.clear();
+    depthHolesConveyor_.keyPoints.clear();
+    depthHolesConveyor_.rectangles.clear();
+    depthHolesConveyor_.outlines.clear();
 
     //!< Unpack the message
     unpackDepthMessage(depthCandidateHolesVector,
-      &this->depthHolesConveyor,
-      &this->pointCloudXYZ,
-      &this->interpolatedDepthImage);
+      &depthHolesConveyor_,
+      &pointCloudXYZ_,
+      &interpolatedDepthImage_);
 
     #ifdef DEBUG_SHOW
     if (HoleFusionParameters::debug_show_find_holes)
     {
       Visualization::showScaled(
         "interpolated depth image arrived in Hole Fusion node",
-        this->interpolatedDepthImage, 1);
+        interpolatedDepthImage_, 1);
     }
     #endif
 
     //!< check holes for debugging purposes
     DepthFilters::checkHoles(
-      this->interpolatedDepthImage,
-      this->pointCloudXYZ,
-      &this->depthHolesConveyor);
+      interpolatedDepthImage_,
+      pointCloudXYZ_,
+      &depthHolesConveyor_);
 
 
     #ifdef DEBUG_SHOW
@@ -158,9 +151,9 @@ namespace pandora_vision
       imgs.push_back(
         Visualization::showKeypoints(
           msg,
-          this->interpolatedDepthImage,
+          interpolatedDepthImage_,
           -1,
-          this->depthHolesConveyor.keyPoints)
+          depthHolesConveyor_.keyPoints)
         );
     }
     if(HoleFusionParameters::debug_show_find_holes)
@@ -170,7 +163,16 @@ namespace pandora_vision
     }
     #endif
 
-    numNodesReady++;
+    numNodesReady_++;
+
+    if (numNodesReady_ == 2)
+    {
+      numNodesReady_ = 0;
+
+      unlockSynchronizer();
+
+      processCandidateHoles();
+    }
 
     #ifdef DEBUG_TIME
     Timer::tick("depthCandidateHolesCallback");
@@ -201,24 +203,33 @@ namespace pandora_vision
 
     //!< Clear the current rgbHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
-    this->rgbHolesConveyor.keyPoints.clear();
-    this->rgbHolesConveyor.rectangles.clear();
-    this->rgbHolesConveyor.outlines.clear();
+    rgbHolesConveyor_.keyPoints.clear();
+    rgbHolesConveyor_.rectangles.clear();
+    rgbHolesConveyor_.outlines.clear();
 
     //!< Unpack the message
     unpackRgbMessage(rgbCandidateHolesVector,
-      &this->rgbHolesConveyor,
-      &this->rgbImage);
+      &rgbHolesConveyor_,
+      &rgbImage_);
 
     #ifdef DEBUG_SHOW
     if (HoleFusionParameters::debug_show_find_holes)
     {
       Visualization::showScaled(
-        "RGB image arrived in Hole Fusion node", this->rgbImage, 1);
+        "RGB image arrived in Hole Fusion node", rgbImage_, 1);
     }
     #endif
 
-    numNodesReady++;
+    numNodesReady_++;
+
+    if (numNodesReady_ == 2)
+    {
+      numNodesReady_ = 0;
+
+      unlockSynchronizer();
+
+      processCandidateHoles();
+    }
 
     #ifdef DEBUG_TIME
     Timer::tick("rgbCandidateHolesCallback");
@@ -295,37 +306,17 @@ namespace pandora_vision
    **/
   void HoleFusion::processCandidateHoles()
   {
-    while(true)
-    {
-      #ifdef DEBUG_SHOW
-      ROS_INFO ("numNodesReady: %d", numNodesReady);
-      #endif
+    #ifdef DEBUG_SHOW
+    ROS_INFO ("numNodesReady: %d", numNodesReady_);
+    #endif
 
-      //!< If not both sources are ready, sleep.
-      if (numNodesReady != 2)
-      {
-        try
-        {
-          boost::this_thread::sleep(boost::posix_time::milliseconds(500));
-        }
-        catch(boost::thread_interrupted&)
-        {
-          return;
-        }
-      }
-      else
-      {
-        #ifdef DEBUG_SHOW
-        ROS_INFO("Processing candidate holes");
-        #endif
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Processing candidate holes");
+    #endif
 
-        //!< Do some processing
+    //!< Do some processing
 
-        //!< Processing complete.
-        numNodesReady = 0;
-        unlockSynchronizer();
-      }
-    }
+    //!< Processing complete.
   }
 
 
