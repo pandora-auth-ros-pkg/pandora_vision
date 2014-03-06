@@ -62,7 +62,7 @@ namespace pandora_vision
       ros::NodeHandle nodeHandle_;
 
       //!< The parameters needed for the hole fusion node
-      HoleFusionParameters params;
+      HoleFusionParameters params_;
 
       //!< The ROS publisher that will be used for unlocking the
       //!< synchronizer_node
@@ -78,22 +78,22 @@ namespace pandora_vision
 
       //!< Indicates how many of the depth_node and rgb_node nodes have
       //!< received hole candidates and are ready to send them for processing
-      int numNodesReady;
+      int numNodesReady_;
 
       //!< The rgb received by the RGB node
-      cv::Mat rgbImage;
+      cv::Mat rgbImage_;
 
       //!< The point cloud received by the depth node
-      PointCloudXYZPtr pointCloudXYZ;
+      PointCloudXYZPtr pointCloudXYZ_;
 
       //!< The interpolated depth image received by the depth node
-      cv::Mat interpolatedDepthImage;
+      cv::Mat interpolatedDepthImage_;
 
       //!< The conveyor of hole candidates received by the depth node
-      HoleFilters::HolesConveyor depthHolesConveyor;
+      HoleFilters::HolesConveyor depthHolesConveyor_;
 
       //!< The conveyor of hole candidates received by the rgb node
-      HoleFilters::HolesConveyor rgbHolesConveyor;
+      HoleFilters::HolesConveyor rgbHolesConveyor_;
 
       /**
         @brief Requests from the synchronizer to process a new point cloud
