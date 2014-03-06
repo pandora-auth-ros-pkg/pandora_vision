@@ -135,6 +135,7 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("synchronizedCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 

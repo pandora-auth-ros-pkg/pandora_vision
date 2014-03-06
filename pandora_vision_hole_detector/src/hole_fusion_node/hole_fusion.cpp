@@ -133,38 +133,11 @@ namespace pandora_vision
     }
     #endif
 
-    //!< check holes for debugging purposes
-    DepthFilters::checkHoles(
-      interpolatedDepthImage_,
-      pointCloudXYZ_,
-      &depthHolesConveyor_);
-
-
-    #ifdef DEBUG_SHOW
-    std::vector<std::string> msgs;
-    std::vector<cv::Mat> imgs;
-    if(HoleFusionParameters::debug_show_find_holes) // Debug
-    {
-      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += STR(" : Final keypoints");
-      msgs.push_back(msg);
-      imgs.push_back(
-        Visualization::showKeypoints(
-          msg,
-          interpolatedDepthImage_,
-          -1,
-          depthHolesConveyor_.keyPoints)
-        );
-    }
-    if(HoleFusionParameters::debug_show_find_holes)
-    {
-      Visualization::multipleShow("depthCandidateHolesCallback function",
-        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size,1);
-    }
-    #endif
-
     numNodesReady_++;
 
+    //!< If both the RGB and the depth nodes are ready
+    //!< unlock the rgb_depth_synchronizer and process the candidate holes
+    //!< from both sources
     if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
@@ -222,6 +195,9 @@ namespace pandora_vision
 
     numNodesReady_++;
 
+    //!< If both the RGB and the depth nodes are ready
+    //!< unlock the rgb_depth_synchronizer and process the candidate holes
+    //!< from both sources
     if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
@@ -314,9 +290,47 @@ namespace pandora_vision
     ROS_INFO("Processing candidate holes");
     #endif
 
+    #ifdef DEBUG_TIME
+    Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
+    #endif
+
     //!< Do some processing
 
+    //!< check holes for debugging purposes
+    DepthFilters::checkHoles(
+      interpolatedDepthImage_,
+      pointCloudXYZ_,
+      &depthHolesConveyor_);
+
+
+    #ifdef DEBUG_SHOW
+    std::vector<std::string> msgs;
+    std::vector<cv::Mat> imgs;
+    if(HoleFusionParameters::debug_show_find_holes) // Debug
+    {
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Final keypoints");
+      msgs.push_back(msg);
+      imgs.push_back(
+        Visualization::showKeypoints(
+          msg,
+          interpolatedDepthImage_,
+          -1,
+          depthHolesConveyor_.keyPoints)
+        );
+    }
+    if(HoleFusionParameters::debug_show_find_holes)
+    {
+      Visualization::multipleShow("depthCandidateHolesCallback function",
+        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size,1);
+    }
+    #endif
     //!< Processing complete.
+
+    #ifdef DEBUG_TIME
+    Timer::tick("processCandidateHoles");
+    Timer::printAllMeansTree();
+    #endif
   }
 
 
