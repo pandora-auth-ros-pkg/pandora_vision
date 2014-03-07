@@ -275,8 +275,21 @@ namespace pandora_vision
 
 
   /**
-    @brief Waits for both hole sources(rgb and depth nodes) to have sent
-    their candidate holes and then it implements a strategy to combine
+    @brief Assimilates fragmented holes into existing whole ones
+    from either source (RGB or Depth). It checks whether a set of keypoints
+    reside in another source's set of bounding boxes with greater area.
+    If so, the latter keypoint etc are kept and the former one is deleted.
+    @return void
+   **/
+  void HoleFusion::mergeHoles()
+  {
+
+  }
+
+
+
+  /**
+    @brief Implements a strategy to combine
     information from both sources in order to accurately find valid holes
     @return void
    **/
@@ -361,16 +374,19 @@ namespace pandora_vision
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
-    //!< Unpack the interpolated depth image
-    MessageConversions::extractDepthImageFromMessageContainer(
-      holesMsg,
-      interpolatedDepthImage,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+    //!< If the depth node has detected holes
+    if (conveyor->keyPoints.size() > 0)
+    {
+      //!< Unpack the interpolated depth image
+      MessageConversions::extractDepthImageFromMessageContainer(
+        holesMsg,
+        interpolatedDepthImage,
+        sensor_msgs::image_encodings::TYPE_32FC1);
 
-    //!< Unpack the point cloud
-    MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
-      pointCloudXYZ);
-
+      //!< Unpack the point cloud
+      MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
+        pointCloudXYZ);
+    }
     #ifdef DEBUG_TIME
     Timer::tick("unpackDepthMessage");
     #endif
@@ -401,12 +417,15 @@ namespace pandora_vision
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
-    //!< Unpack the RGB image
-    MessageConversions::extractRgbImageFromMessageContainer(
-      holesMsg,
-      rgbImage,
-      sensor_msgs::image_encodings::TYPE_32FC3);
-
+    //!< If the RGB node has detected holes
+    if (conveyor->keyPoints.size() > 0)
+    {
+      //!< Unpack the RGB image
+      MessageConversions::extractRgbImageFromMessageContainer(
+        holesMsg,
+        rgbImage,
+        sensor_msgs::image_encodings::TYPE_32FC3);
+    }
     #ifdef DEBUG_TIME
     Timer::tick("unpackRgbMessage");
     #endif

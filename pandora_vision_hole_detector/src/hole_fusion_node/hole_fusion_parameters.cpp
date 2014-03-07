@@ -128,8 +128,9 @@ namespace pandora_vision
         this,_1, _2));
   }
 
-  void HoleFusionParameters::callback(pandora_vision_hole_detector::
-    hole_fusion_cfgConfig &config, uint32_t level)
+  void HoleFusionParameters::callback(
+    const pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
+    const uint32_t& level)
   {
     #ifdef DEBUG_SHOW
     ROS_INFO("HoleFusionParameters callback called");
