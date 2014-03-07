@@ -178,15 +178,6 @@ namespace pandora_vision
       void processCandidateHoles();
 
       /**
-        @brief Assimilates fragmented holes into existing whole ones
-        from either source (RGB or Depth). It checks whether a set of keypoints
-        reside in another source's set of bounding boxes with greater area.
-        If so, the latter keypoint etc are kept and the former one is deleted.
-        @return void
-       **/
-      void mergeHoles();
-
-      /**
         @brief Requests from the synchronizer to process a new point cloud
         @return void
        **/

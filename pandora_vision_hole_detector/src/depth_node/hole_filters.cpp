@@ -196,7 +196,7 @@ namespace pandora_vision
       for (unsigned int rectId = 0; rectId < inRectangles.size(); rectId++)
       {
         if (cv::pointPolygonTest(
-          inRectangles[rectId], inKeyPoints[keypointId].pt, false) > 0)
+            inRectangles[rectId], inKeyPoints[keypointId].pt, false) > 0)
         {
           keypointResidesInRectIds.push_back(rectId);
         }

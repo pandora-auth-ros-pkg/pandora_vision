@@ -45,15 +45,15 @@
 #include <math.h>
 
 /**
-@namespace vision
-@brief The main namespace for PANDORA vision
-**/
+  @namespace vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-  @class HoleDetector
-  @brief Provides the functionalities for detecting holes [functional]
-  **/
+    @class HoleDetector
+    @brief Provides the functionalities for detecting holes [functional]
+   **/
   class HoleFilters
   {
     public:
@@ -91,10 +91,10 @@ namespace pandora_vision
         @return void
        **/
       static void validateBlobs(
-          const std::vector<cv::KeyPoint>& keyPoints,
-          cv::Mat* denoisedDepthImageEdges,
-          const int& detectionMethod,
-          HolesConveyor* conveyor);
+        const std::vector<cv::KeyPoint>& keyPoints,
+        cv::Mat* denoisedDepthImageEdges,
+        const int& detectionMethod,
+        HolesConveyor* conveyor);
 
       /**
         @brief This functions takes as input arguments a keypoints vector of
@@ -118,11 +118,11 @@ namespace pandora_vision
         @return void
        **/
       static void validateKeypointsToRectangles(
-          const std::vector<cv::KeyPoint>& inKeyPoints,
-          const std::vector<std::vector<cv::Point2f> >& inRectangles,
-          const std::vector<float>& inRectanglesArea,
-          const std::vector<std::vector<cv::Point> >& inContours,
-          HolesConveyor* conveyor);
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point2f> >& inRectangles,
+        const std::vector<float>& inRectanglesArea,
+        const std::vector<std::vector<cv::Point> >& inContours,
+        HolesConveyor* conveyor);
   };
 
 }

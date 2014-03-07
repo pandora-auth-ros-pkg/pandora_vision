@@ -275,20 +275,6 @@ namespace pandora_vision
 
 
   /**
-    @brief Assimilates fragmented holes into existing whole ones
-    from either source (RGB or Depth). It checks whether a set of keypoints
-    reside in another source's set of bounding boxes with greater area.
-    If so, the latter keypoint etc are kept and the former one is deleted.
-    @return void
-   **/
-  void HoleFusion::mergeHoles()
-  {
-
-  }
-
-
-
-  /**
     @brief Implements a strategy to combine
     information from both sources in order to accurately find valid holes
     @return void
