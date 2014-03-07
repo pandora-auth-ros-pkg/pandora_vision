@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "rgb_node/rgb.h"
+#include "rgb_node_dummy/rgb.h"
 
 namespace pandora_vision
 {

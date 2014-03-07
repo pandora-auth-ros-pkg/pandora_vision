@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef RGB_NODE_H
-#define RGB_NODE_H
+#ifndef RGB_NODE_DUMMY_H
+#define RGB_NODE_DUMMY_H
 
 #include "depth_node/defines.h"
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
