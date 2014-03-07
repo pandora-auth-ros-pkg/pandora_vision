@@ -96,12 +96,6 @@ namespace pandora_vision
       HoleFilters::HolesConveyor rgbHolesConveyor_;
 
       /**
-        @brief Requests from the synchronizer to process a new point cloud
-        @return void
-       **/
-      void unlockSynchronizer();
-
-      /**
         @brief Callback for the candidate holes via the depth node
         @param[in] depthCandidateHolesVector
         [const vision_communications::DepthCandidateHolesVectorMsg&]
@@ -177,12 +171,26 @@ namespace pandora_vision
         HoleFilters::HolesConveyor* conveyor, cv::Mat* rgbImage);
 
       /**
-        @brief Waits for both hole sources(rgb and depth nodes) to have sent
-        their candidate holes and then it implements a strategy to combine
+        @brief Implements a strategy to combine
         information from both sources in order to accurately find valid holes
         @return void
        **/
       void processCandidateHoles();
+
+      /**
+        @brief Assimilates fragmented holes into existing whole ones
+        from either source (RGB or Depth). It checks whether a set of keypoints
+        reside in another source's set of bounding boxes with greater area.
+        If so, the latter keypoint etc are kept and the former one is deleted.
+        @return void
+       **/
+      void mergeHoles();
+
+      /**
+        @brief Requests from the synchronizer to process a new point cloud
+        @return void
+       **/
+      void unlockSynchronizer();
 
     public:
 

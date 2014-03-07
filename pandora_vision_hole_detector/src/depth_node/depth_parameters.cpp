@@ -127,8 +127,15 @@ namespace pandora_vision
     server.setCallback(boost::bind(&DepthParameters::callback, this,_1, _2));
   }
 
-  void DepthParameters::callback(pandora_vision_hole_detector::depth_cfgConfig
-    &config, uint32_t level)
+  /**
+    @brief The function called when a parateter is changed
+    @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
+    @param[in] level [const uint32_t] The level (?)
+    @return void
+   **/
+  void DepthParameters::callback(
+    const pandora_vision_hole_detector::depth_cfgConfig& config,
+    const uint32_t& level)
   {
     #ifdef DEBUG_SHOW
     ROS_INFO("DepthParameters callback called");
@@ -201,5 +208,14 @@ namespace pandora_vision
       config.debug_show_check_holes_size;
 
     DepthParameters::minimum_curve_points = config.minimum_curve_points;
+  }
+
+  /**
+    @brief Retrieve the interpolation method
+    @return int The interpolation method
+   **/
+  int DepthParameters::getInterpolationMethod()
+  {
+    return DepthParameters::interpolation_method;
   }
 }

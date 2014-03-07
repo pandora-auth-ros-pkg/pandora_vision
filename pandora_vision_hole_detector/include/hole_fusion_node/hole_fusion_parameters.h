@@ -54,8 +54,9 @@ namespace pandora_vision
     dynamic_reconfigure::Server<pandora_vision_hole_detector::
       hole_fusion_cfgConfig>:: CallbackType f;
 
-    void callback(pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
-      uint32_t level);
+    void callback(
+      const pandora_vision_hole_detector::hole_fusion_cfgConfig& config,
+      const uint32_t& level);
 
     //!< -------------------HoleFusionParameters-----------------------------//
 

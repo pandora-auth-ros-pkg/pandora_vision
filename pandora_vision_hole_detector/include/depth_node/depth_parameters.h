@@ -45,40 +45,12 @@
 namespace pandora_vision
 {
 
-  struct ParticleFilterIndividual
-  {
-    std::vector<float> genome;
-    float weight;
-    std::vector<std::pair<float,float> > limits;
-    void mutate(void);
-  };
-
-  class ParticleFilter
-  {
-    public:
-
-      ParticleFilter(){}
-
-      void initialize(unsigned int N,
-        std::vector<std::pair<float,float> > limits);
-
-      void print(void);
-
-      void show(cv::Mat& img);
-
-      void update(std::vector<cv::KeyPoint> kps);
-
-      void resample(void);
-
-      std::vector<ParticleFilterIndividual> population;
-      std::vector<ParticleFilterIndividual> populationTemp;
-
-
-  };
-
   struct DepthParameters
   {
 
+    /**
+      @brief The DepthParameters constructor
+     **/
     DepthParameters(void);
 
     dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
@@ -86,8 +58,20 @@ namespace pandora_vision
     dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>::
       CallbackType f;
 
-    void callback(pandora_vision_hole_detector::depth_cfgConfig &config,
-      uint32_t level);
+    /**
+      @brief The function called when a parateter is changed
+      @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
+      @param[in] level [const uint32_t] The level (?)
+      @return void
+     **/
+    void callback(const pandora_vision_hole_detector::depth_cfgConfig& config,
+      const uint32_t& level);
+
+    /**
+      @brief Retrieve the interpolation method
+      @return int The interpolation method
+     **/
+    int getInterpolationMethod();
 
     //!< -------------------DepthParameters-----------------------------//
 
