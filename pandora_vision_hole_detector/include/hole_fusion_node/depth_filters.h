@@ -109,8 +109,8 @@ namespace pandora_vision
         points the outline consists of
         @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
         The bounding boxes' vertices
-        @param[in] inflationsize [const int&] Grow the rectangle by inflationsize
-        as to acquire more points to check for plane existence.
+        @param[in] inflationsize [const int&] Grow the rectangle by
+        inflationsize as to acquire more points to check for plane existence.
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -123,45 +123,68 @@ namespace pandora_vision
         const int& inflationSize);
 
       /**
-        @brief  Given the bounding box of a blob, inflate it.
+        @brief Given the bounding box of a blob, inflate it.
         All the points that lie on the (edges of the) rectangle should
         also lie on exactly one plane for the blob to be a hole.
         @param[in] inImage [const cv::Mat&] The input depth image
         @param[in] initialPointCloud
         [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
         The original point cloud,  uninterpolated, undistorted.
-        @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
-        blobs
-        @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&] The
-        bounding boxes' vertices
-        @param[in] inflationsize [cosnt int&] grow the rectangle by inflationsize
-        as to acquire more points to check for plane existence.
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+        of blobs
+        @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&]
+        The bounding boxes' vertices
+        @param[in] inflationsize [cosnt int&] grow the rectangle by
+        inflationsize as to acquire more points to check for plane existence.
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
       static std::set<unsigned int> checkHolesRectangleOutline(
         const cv::Mat& inImage,
         const PointCloudXYZPtr& initialPointCloud,
-        const std::vector<cv::KeyPoint>& keyPoints,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& rectangles,
         const int& inflationSize);
 
       /**
-        @brief Apply a cascade-like hole checker. Each filter applied is
-        attached to an order which relates to the sequence of the overall
-        filter execution.
-        @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
-        @param[in] initialPointCloud
-        [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
-        The undistorted input point cloud
-        @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
-        contains the final valid holes
-        @return void
+        @brief Checks the homogenity of the gradient of depth in an area
+        enclosed by @param inOutlines
+        @param[in] interpolatedDepthImage [const cv::Mat&] The input depth image
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+        of blobs
+        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+        @param[out] msgs [std::vector<std::string>*] Debug messages
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities hinting to the certainty degree which with the
+        candidate hole is associated. While the returned set may be reduced in
+        size, the size of this vector is the same throughout and equal to the
+        number of keypoints found and published by the rgb node
+        @return std::set<unsigned int> The indices of valid (by this filter)
+        blobs
        **/
-      static void checkHoles(
+      static std::set<unsigned int> checkHolesDepthHomogenity(
         const cv::Mat& interpolatedDepthImage,
-        const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
-        HoleFilters::HolesConveyor* conveyor);
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point> >& inOutlines,
+        std::vector<std::string>* msgs,
+        std::vector<float>* probabilitiesVector);
+
+        /**
+          @brief Apply a cascade-like hole checker. Each filter applied is
+          attached to an order which relates to the sequence of the overall
+          filter execution.
+          @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
+          @param[in] initialPointCloud
+          [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
+          The undistorted input point cloud
+          @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+          contains the final valid holes
+          @return void
+         **/
+        static void checkHoles(
+          const cv::Mat& interpolatedDepthImage,
+          const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
+          HoleFilters::HolesConveyor* conveyor);
 
       /**
         @brief Apply a cascade-like hole checker. Each filter applied
