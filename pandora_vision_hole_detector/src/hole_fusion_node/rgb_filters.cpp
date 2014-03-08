@@ -168,7 +168,7 @@ namespace pandora_vision
 
           //!< Mean outline luminosity test
           if (cv::pointPolygonTest(
-              inflatedRectangles[i], cv::Point(rows,cols), false > 0))
+              inflatedRectangles[i], cv::Point(cols, rows), false > 0))
           {
             blobLuminosity += inImage.at<unsigned char>(rows, cols);
             blobDivisor += 1;

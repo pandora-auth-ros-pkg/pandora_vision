@@ -235,7 +235,7 @@ namespace pandora_vision
     The original point cloud acquired from the depth sensor
     @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
     blobs
-    @param[in] outlines [const std::vector<std::vector<cv::point> >&&] The
+    @param[in] inOutlines [const std::vector<std::vector<cv::point> >&&] The
     points the outline consists of
     @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&&]
     The bounding boxes' vertices
@@ -248,7 +248,7 @@ namespace pandora_vision
     const cv::Mat& inImage,
     const PointCloudXYZPtr& initialPointCloud,
     const std::vector<cv::KeyPoint>& keyPoints,
-    const std::vector<std::vector<cv::Point> >& outlines,
+    const std::vector<std::vector<cv::Point> >& inOutlines,
     const std::vector<std::vector<cv::Point2f> >& rectangles,
     const int& inflationSize)
   {
@@ -340,9 +340,9 @@ namespace pandora_vision
           rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
 
       //!< Draw the outline of the i-th valid blob
-      for(unsigned int j = 0; j < outlines[i].size(); j++)
+      for(unsigned int j = 0; j < inOutlines[i].size(); j++)
       {
-        canvas.at<uchar>(outlines[i][j].y, outlines[i][j].x) = 255;
+        canvas.at<uchar>(inOutlines[i][j].y, inOutlines[i][j].x) = 255;
       }
 
       //!< Draw the inflated rectangle that corresponds to it
@@ -432,7 +432,7 @@ namespace pandora_vision
     @param[in] inImage [const cv::Mat&] The input depth image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The original point cloud,  uninterpolated, undistorted.
-    @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
+    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
     blobs
     @param[in] rectangles [const std::vector<std::vector<cv::Point2f> >&] The
     bounding boxes' vertices
@@ -444,7 +444,7 @@ namespace pandora_vision
   std::set<unsigned int> DepthFilters::checkHolesRectangleOutline(
       const cv::Mat& inImage,
       const PointCloudXYZPtr& initialPointCloud,
-      const std::vector<cv::KeyPoint>& keyPoints,
+      const std::vector<cv::KeyPoint>& inKeyPoints,
       const std::vector<std::vector<cv::Point2f> >& rectangles,
       const int& inflationSize)
   {
@@ -469,8 +469,8 @@ namespace pandora_vision
 
       for (int j = 0; j < 4; j++)
       {
-        key_y = keyPoints[i].pt.y;
-        key_x = keyPoints[i].pt.x;
+        key_y = inKeyPoints[i].pt.y;
+        key_x = inKeyPoints[i].pt.x;
 
         vert_y = rectangles[i][j].y;
         vert_x = rectangles[i][j].x;
@@ -609,6 +609,95 @@ namespace pandora_vision
     return valid;
   }
 
+
+  /**
+    @brief Checks the homogenity of the gradient of depth in an area
+    enclosed by @param inOutlines
+    @param[in] interpolatedDepthImage [const cv::Mat&] The input depth image
+    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+    of blobs
+    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+    @param[out] msgs [std::vector<std::string>*] Debug messages
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities hinting to the certainty degree which with the
+    candidate hole is associated. While the returned set may be reduced in
+    size, the size of this vector is the same throughout and equal to the
+    number of keypoints found and published by the rgb node
+    @return std::set<unsigned int> The indices of valid (by this filter)
+    blobs
+   **/
+  std::set<unsigned int> DepthFilters::checkHolesDepthHomogenity(
+    const cv::Mat& interpolatedDepthImage,
+    const std::vector<cv::KeyPoint>& inKeyPoints,
+    const std::vector<std::vector<cv::Point> >& inOutlines,
+    std::vector<std::string>* msgs,
+    std::vector<float>* probabilitiesVector)
+  {
+    std::set<unsigned int> valid;
+
+    //!< Temporary cv::Mats
+    cv::Mat interpolatedDepthImageEdges;
+    cv::Mat visualizableDenoisedImage;
+    cv::Mat interpolatedTemp;
+
+    interpolatedDepthImage.copyTo(interpolatedTemp);
+
+    //!< Facilitate the edge detection by converting the 32FC1 image
+    //!< values to a range of 0-255
+    visualizableDenoisedImage = Visualization::scaleImageForVisualization
+      (interpolatedTemp, DepthParameters::scale_method);
+
+    //!< from now onwards every image is in the range of 0-255
+    EdgeDetection::applySobel(visualizableDenoisedImage,
+      &interpolatedDepthImageEdges);
+
+    //!< Threshold the interpolatedDepthImageEdges image
+    cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
+      DepthParameters::threshold_lower_value, 255, 3);
+
+    //!< make all non zero pixels have a value of 255
+    cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
+      0, 255, 0);
+
+    for (unsigned int o = 0; o < inOutlines.size(); o++)
+    {
+      int numBlacks = 0;
+      int numWhites = 0;
+      for (unsigned int rows = 0; rows < interpolatedDepthImage.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < interpolatedDepthImage.cols; cols++)
+        {
+          //!< Check whether the current point resides inside the given outline
+          if (cv::pointPolygonTest(
+              inOutlines[o], cv::Point(cols, rows), false) > 0)
+          {
+            if (interpolatedDepthImageEdges.at<unsigned char>(rows, cols) != 0)
+            {
+              numWhites++;
+            }
+            else
+            {
+              numBlacks++;
+            }
+          }
+        }
+      }
+
+      //!< If there is a variation in depth gradient inside the potential hole
+      if (numWhites != 0)
+      {
+        valid.insert(o);
+        probabilitiesVector->push_back(
+          (float) numWhites / (numWhites + numBlacks));
+      }
+      else
+      {
+        probabilitiesVector->push_back(0.0);
+      }
+    }
+
+    return valid;
+  }
 
 
   /**
