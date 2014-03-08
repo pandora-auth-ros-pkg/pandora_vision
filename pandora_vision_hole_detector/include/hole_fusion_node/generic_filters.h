@@ -53,12 +53,32 @@ namespace pandora_vision
    **/
   class GenericFilters
   {
+    private:
+
+      /**
+        @brief Assimilates the fragmented holes of @param assimilable into the
+        existing whole ones of @param assimilator. It checks whether the set of
+        assimilable's keypoints reside in the assimilator's set of bounding
+        boxes with greater area. If so, the latter keypoint etc are kept and
+        the former one is deleted.
+        @param[in][out] assimilator [const HoleFilters::HolesConveyor&]
+        The candidate holes conveyor that will potentially assimilate the
+        assimimable's holes
+        @param[in][out] assimilable [HoleFilters::HolesConveyor*]
+        The candidate holes conveyor whose holes will potentially by assimilated
+        by the assimilator
+        @return void
+       **/
+      static void assimilate(const HoleFilters::HolesConveyor& assimilator,
+        HoleFilters::HolesConveyor* assimilable);
+
     public:
       /**
         @brief Assimilates fragmented holes into existing whole ones
-        from either source (RGB or Depth). It checks whether a set of keypoints
-        reside in another source's set of bounding boxes with greater area.
-        If so, the latter keypoint etc are kept and the former one is deleted.
+        from either source (RGB or Depth). It checks whether a set of
+        keypoints reside in another source's set of bounding boxes with
+        greater area.  If so, the latter keypoint etc are kept and the former
+        one is deleted.
         @param[in][out] depthHolesConveyor [HoleFilters::HolesConveyor*]
         The candidate holes conveyor originated from the depth node
         @param[in][out] rgbHolesConveyor [HoleFilters::HolesConveyor*]

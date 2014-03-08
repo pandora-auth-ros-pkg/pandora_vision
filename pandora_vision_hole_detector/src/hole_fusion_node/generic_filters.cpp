@@ -59,106 +59,80 @@ namespace pandora_vision
     if (depthHolesConveyor->keyPoints.size() > 0 &&
       rgbHolesConveyor->keyPoints.size() > 0)
     {
-      //!< Validate depth's holes against the rgb ones
-      for (int r = 0; r < rgbHolesConveyor->keyPoints.size(); r++)
+      assimilate(*rgbHolesConveyor, depthHolesConveyor);
+
+      assimilate(*depthHolesConveyor, rgbHolesConveyor);
+    }
+
+  }
+
+
+
+  /**
+    @brief Assimilates the fragmented holes of @param assimilable into the
+    existing whole ones of @param assimilator. It checks whether the set of
+    assimilable's keypoints reside in the assimilator's set of bounding
+    boxes with greater area. If so, the latter keypoint etc are kept and
+    the former one is deleted.
+    @param[in][out] assimilator [const HoleFilters::HolesConveyor&]
+    The candidate holes conveyor that will potentially assimilate the
+    assimimable's holes
+    @param[in][out] assimilable [HoleFilters::HolesConveyor*]
+    The candidate holes conveyor whose holes will potentially by assimilated
+    by the assimilator
+    @return void
+   **/
+  void GenericFilters::assimilate(const HoleFilters::HolesConveyor& assimilator,
+    HoleFilters::HolesConveyor* assimilable)
+  {
+    //!< Validate depth's holes against the rgb ones
+    for (int i = 0; i < assimilator.keyPoints.size(); i++)
+    {
+      for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
       {
-        for (int d = depthHolesConveyor->keyPoints.size() - 1; d >= 0; d--)
+        //!< If an assimilable keypoint resides in an assimilator bounding box
+        //!< delete the keypoint along with its associated conveyor entries
+        if (cv::pointPolygonTest(assimilator.rectangles[i],
+            assimilable->keyPoints[j].pt, false) > 0)
         {
-          //!< If a depth keypoint resides in a rgb bounding box
-          //!< delete the keypoint along with its associated conveyor entries
-          if (cv::pointPolygonTest(rgbHolesConveyor->rectangles[r],
-              depthHolesConveyor->keyPoints[d].pt, false) > 0)
+          //!< Calculate the assimilator's bounding box area
+          float assimilatorRectangleWidthX = assimilator.rectangles[i][0].x
+            - assimilator.rectangles[i][1].x;
+          float assimilatorRectangleWidthY = assimilator.rectangles[i][0].y
+            - assimilator.rectangles[i][1].y;
+          float assimilatorRectangleHeightX = assimilator.rectangles[i][1].x
+            - assimilator.rectangles[i][2].x;
+          float assimilatorRectangleHeightY = assimilator.rectangles[i][1].y
+            - assimilator.rectangles[i][2].y;
+
+          float assimilatorBoxArea = sqrt(pow(assimilatorRectangleWidthX, 2)
+            + pow(assimilatorRectangleWidthY, 2)) *
+            sqrt(pow(assimilatorRectangleHeightX, 2)
+            + pow(assimilatorRectangleHeightY, 2));
+
+          //!< Calculate the assimilable's bounding box area
+          float assimilableRectangleWidthX = assimilable->rectangles[j][0].x
+            - assimilable->rectangles[j][1].x;
+          float assimilableRectangleWidthY = assimilable->rectangles[j][0].y
+            - assimilable->rectangles[j][1].y;
+          float assimilableRectangleHeightX = assimilable->rectangles[j][1].x
+            - assimilable->rectangles[j][2].x;
+          float assimilableRectangleHeightY = assimilable->rectangles[j][1].y
+            - assimilable->rectangles[j][2].y;
+
+          float assimilableBoxArea = sqrt(pow(assimilableRectangleWidthX, 2) +
+            pow(assimilableRectangleWidthY, 2)) *
+            sqrt(pow(assimilableRectangleHeightX, 2)
+            + pow(assimilableRectangleHeightY, 2));
+
+          if (assimilableBoxArea < assimilatorBoxArea)
           {
-            //!< Calculate the rgb's bounding box area
-            float rgbRectangleWidthX = rgbHolesConveyor->rectangles[r][0].x
-              - rgbHolesConveyor->rectangles[r][1].x;
-            float rgbRectangleWidthY = rgbHolesConveyor->rectangles[r][0].y
-              - rgbHolesConveyor->rectangles[r][1].y;
-            float rgbRectangleHeightX = rgbHolesConveyor->rectangles[r][1].x
-              - rgbHolesConveyor->rectangles[r][2].x;
-            float rgbRectangleHeightY = rgbHolesConveyor->rectangles[r][1].y
-              - rgbHolesConveyor->rectangles[r][2].y;
-
-            float rgbBoxArea = sqrt(pow(rgbRectangleWidthX, 2)
-              + pow(rgbRectangleWidthY, 2)) * sqrt(pow(rgbRectangleHeightX, 2)
-              + pow(rgbRectangleHeightY, 2));
-
-            //!< Calculate the depth's bounding box area
-            float depthRectangleWidthX = depthHolesConveyor->rectangles[d][0].x
-              - depthHolesConveyor->rectangles[d][1].x;
-            float depthRectangleWidthY = depthHolesConveyor->rectangles[d][0].y
-              - depthHolesConveyor->rectangles[d][1].y;
-            float depthRectangleHeightX = depthHolesConveyor->rectangles[d][1].x
-              - depthHolesConveyor->rectangles[d][2].x;
-            float depthRectangleHeightY = depthHolesConveyor->rectangles[d][1].y
-              - depthHolesConveyor->rectangles[d][2].y;
-
-            float depthBoxArea = sqrt(pow(depthRectangleWidthX, 2) +
-              pow(depthRectangleWidthY, 2)) * sqrt(pow(depthRectangleHeightX, 2)
-              + pow(depthRectangleHeightY, 2));
-
-            if (depthBoxArea < rgbBoxArea)
-            {
-              depthHolesConveyor->keyPoints.erase(
-                depthHolesConveyor->keyPoints.begin() + d);
-              depthHolesConveyor->outlines.erase(
-                depthHolesConveyor->outlines.begin() + d);
-              depthHolesConveyor->rectangles.erase(
-                depthHolesConveyor->rectangles.begin() + d);
-            }
-          }
-        }
-      }
-
-
-      //!< Validate RGB's holes against the depth ones
-      for (int d = 0; d < depthHolesConveyor->keyPoints.size(); d++)
-      {
-        for (int r = rgbHolesConveyor->keyPoints.size() - 1; r >= 0; r--)
-        {
-          //!< If a rgb keypoint resides in a depth's bounding box
-          //!< delete the keypoint along with its associated conveyor entries
-          if (cv::pointPolygonTest(depthHolesConveyor->rectangles[d],
-              rgbHolesConveyor->keyPoints[r].pt, false) > 0)
-          {
-            //!< Calculate the depth's bounding box area
-            float depthRectangleWidthX = depthHolesConveyor->rectangles[d][0].x
-              - depthHolesConveyor->rectangles[d][1].x;
-            float depthRectangleWidthY = depthHolesConveyor->rectangles[d][0].y
-              - depthHolesConveyor->rectangles[d][1].y;
-            float depthRectangleHeightX = depthHolesConveyor->rectangles[d][1].x
-              - depthHolesConveyor->rectangles[d][2].x;
-            float depthRectangleHeightY = depthHolesConveyor->rectangles[d][1].y
-              - depthHolesConveyor->rectangles[d][2].y;
-
-            float depthBoxArea = sqrt(pow(depthRectangleWidthX, 2) +
-              pow(depthRectangleWidthY, 2)) * sqrt(pow(depthRectangleHeightX, 2)
-              + pow(depthRectangleHeightY, 2));
-
-            //!< Calculate the rgb's bounding box area
-            float rgbRectangleWidthX = rgbHolesConveyor->rectangles[r][0].x
-              - rgbHolesConveyor->rectangles[r][1].x;
-            float rgbRectangleWidthY = rgbHolesConveyor->rectangles[r][0].y
-              - rgbHolesConveyor->rectangles[r][1].y;
-            float rgbRectangleHeightX = rgbHolesConveyor->rectangles[r][1].x
-              - rgbHolesConveyor->rectangles[r][2].x;
-            float rgbRectangleHeightY = rgbHolesConveyor->rectangles[r][1].y
-              - rgbHolesConveyor->rectangles[r][2].y;
-
-            float rgbBoxArea = sqrt(pow(rgbRectangleWidthX, 2)
-              + pow(rgbRectangleWidthY, 2)) * sqrt(pow(rgbRectangleHeightX, 2)
-              + pow(rgbRectangleHeightY, 2));
-
-
-            if (rgbBoxArea < depthBoxArea)
-            {
-              rgbHolesConveyor->keyPoints.erase(
-                rgbHolesConveyor->keyPoints.begin() + r);
-              rgbHolesConveyor->outlines.erase(
-                rgbHolesConveyor->outlines.begin() + r);
-              rgbHolesConveyor->rectangles.erase(
-                rgbHolesConveyor->rectangles.begin() + r);
-            }
+            assimilable->keyPoints.erase(
+              assimilable->keyPoints.begin() + j);
+            assimilable->outlines.erase(
+              assimilable->outlines.begin() + j);
+            assimilable->rectangles.erase(
+              assimilable->rectangles.begin() + j);
           }
         }
       }
