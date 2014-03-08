@@ -34,4 +34,55 @@
  *
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
+#ifndef RGB_FILTERS_H
+#define RGB_FILTERS_H
+
+#include <math.h>
+#include "depth_node/hole_filters.h"
+
+/**
+  @namespace vision
+  @brief The main namespace for PANDORA vision
+ **/
+namespace pandora_vision
+{
+  /**
+   @class RgbFilters
+   @brief Provides functionalities of hole filters relevant to RGB images
+   **/
+  class RgbFilters
+  {
+    public:
+
+      /**
+        @brief Checks for difference of mean value of luminosity between the
+        pixels that comprise the blob's bounding box edges and the points
+        inside the blob's outline.
+        @param[in] inImage [const cv::Mat&] The RGB image
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
+        of the candidate holes's keypoints
+        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
+        The vector of the candidate holes's bounding boxes
+        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+        The vector of the candidate holes's outline points
+        @param[in] inflationSize [cosnt int&] grow the rectangle by
+        inflationSize as to acquire more points to check for plane existence.
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities hinting to the certainty degree which with the
+        candidate hole is associated. While the returned set may be reduced in
+        size, the size of this vector is the same throughout and equal to the
+        number of keypoints found and published by the rgb node
+        @return std::set<unsigned int> The indices of valid (by this filter)
+        blobs
+       **/
+      std::set<unsigned int> checkHolesLuminosityDiff(
+        const cv::Mat& inImage,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point2f> >& inRectangles,
+        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const int& inflationSize,
+        std::vector<float>* probabilitiesVector);
+  };
+}
+#endif
 

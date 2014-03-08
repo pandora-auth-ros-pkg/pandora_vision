@@ -360,7 +360,7 @@ namespace pandora_vision
        * In order to construct a new point cloud
        * we need a priori knowledge of the valid points
        * of the input point cloud.
-       * */
+       **/
       int numValidVisitedPoints = 0;
       for(std::set<unsigned int>::iterator it = visitedPoints.begin();
           it != visitedPoints.end(); it++)
@@ -434,9 +434,9 @@ namespace pandora_vision
     The original point cloud,  uninterpolated, undistorted.
     @param[in] keyPoints [const std::vector<cv::KeyPoint>&] The keypoints of
     blobs
-    @param[in] rectangles [const std::vector<std::vector<cv::point2f> >&] The
+    @param[in] rectangles [const std::vector<std::vector<cv::Point2f> >&] The
     bounding boxes' vertices
-    @param[in] inflationsize [cosnt int&] grow the rectangle by inflationsize
+    @param[in] inflationSize [cosnt int&] grow the rectangle by inflationSize
     as to acquire more points to check for plane existence.
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
@@ -492,13 +492,6 @@ namespace pandora_vision
             cv::Point(round(vert_x - inflationSize * cos(theta)),
               round(vert_y - inflationSize * sin(theta))));
       } //!< end for rectangle's points
-
-      //!< if inflatedVerticesWithinImageLimits < 4 in the end,
-      //!< we won't need this point since the inflated rectangle
-      //!< will be discarded.
-      cv::Point potentialBrushfireBeginPoint(
-          round(vert_x - inflationSize / 2 * cos(theta)),
-          round(vert_y - inflationSize / 2 * sin(theta)));
 
       //!< If one or more vertices are out of bounds discard the whole
       //!< inflated rectangle

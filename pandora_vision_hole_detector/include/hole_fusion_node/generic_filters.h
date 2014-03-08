@@ -38,6 +38,7 @@
 #define GENERIC_FILTERS_H
 
 #include "depth_node/hole_filters.h"
+#include <math.h>
 
 /**
   @namespace vision
