@@ -389,11 +389,22 @@ namespace pandora_vision
       double blobToModelCorrelation = cv::compareHist(
         blobHistogram, inHistogram, 0);
 
+      //!< This blob is considered valid if there is a correlation between
+      //!< the histograms of the rectangle and the model histogram (inHistogram)
+      //!< greater than a threshold and, simultaneously, the blob's histogram
+      //!< is more loosely correlated to the model histogram than the
+      //!< rectangle's histogram is
       if (rectangleToModelCorrelation >=
         HoleFusionParameters::match_texture_threshold &&
         rectangleToModelCorrelation > blobToModelCorrelation)
       {
         finalIndices.insert(*validIterator);
+        probabilitiesVector->at(*validIterator) =
+          rectangleToModelCorrelation - blobToModelCorrelation;
+      }
+      else
+      {
+        probabilitiesVector->at(*validIterator) = 0.0;
       }
 
       //!< Increment the validIterator so that it points to the next element
