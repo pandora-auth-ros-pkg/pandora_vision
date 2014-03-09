@@ -96,16 +96,16 @@ namespace pandora_vision
 
         // check if the inflated vertex has gone out of bounds
         if (vert_x - inflationSize * cos(theta) < depthImage.cols &&
-            vert_x - inflationSize * cos(theta) > 0 &&
-            vert_y - inflationSize * sin(theta) < depthImage.rows &&
-            vert_y - inflationSize * sin(theta) > 0)
+          vert_x - inflationSize * cos(theta) > 0 &&
+          vert_y - inflationSize * sin(theta) < depthImage.rows &&
+          vert_y - inflationSize * sin(theta) > 0)
         {
           inflatedVerticesWithinImageLimits++;
         }
 
         inflatedVertices.push_back(
-            cv::Point(round(vert_x - inflationSize * cos(theta)),
-              round(vert_y - inflationSize * sin(theta))));
+          cv::Point(round(vert_x - inflationSize * cos(theta)),
+            round(vert_y - inflationSize * sin(theta))));
       } //!< end for rectangle's points
 
       //!< if one or more vertices are out of bounds discard the whole
@@ -141,8 +141,8 @@ namespace pandora_vision
       mean /= 4;
 
       float value = depthImage.at<float>(
-          inKeyPoints[validKeyPointsIndices[i]].pt.y,
-          inKeyPoints[validKeyPointsIndices[i]].pt.x) - mean;
+        inKeyPoints[validKeyPointsIndices[i]].pt.y,
+        inKeyPoints[validKeyPointsIndices[i]].pt.x) - mean;
 
       if(value > 0 && value < HoleFusionParameters::depth_difference)
       {
@@ -183,12 +183,12 @@ namespace pandora_vision
     {
       float mean = 0;
       float area = sqrt(
-          pow(inRectangles[i][0].x - inRectangles[i][1].x,2) +
-          pow(inRectangles[i][0].y - inRectangles[i][1].y,2));
+        pow(inRectangles[i][0].x - inRectangles[i][1].x,2) +
+        pow(inRectangles[i][0].y - inRectangles[i][1].y,2));
 
       area *= sqrt(
-          pow(inRectangles[i][1].x - inRectangles[i][2].x,2) +
-          pow(inRectangles[i][1].y - inRectangles[i][2].y,2));
+        pow(inRectangles[i][1].x - inRectangles[i][2].x,2) +
+        pow(inRectangles[i][1].y - inRectangles[i][2].y,2));
 
 
       for(unsigned int j = 0 ; j < inRectangles[i].size() ; j++)
@@ -289,24 +289,24 @@ namespace pandora_vision
 
         // check if the inflated vertex has gone out of bounds
         if (vert_x - inflationSize * cos(theta) < inImage.cols &&
-            vert_x - inflationSize * cos(theta) > 0 &&
-            vert_y - inflationSize * sin(theta) < inImage.rows &&
-            vert_y - inflationSize * sin(theta) > 0)
+          vert_x - inflationSize * cos(theta) > 0 &&
+          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) > 0)
         {
           inflatedVerticesWithinImageLimits++;
         }
 
         inflatedVertices.push_back(
-            cv::Point(round(vert_x - inflationSize * cos(theta)),
-              round(vert_y - inflationSize * sin(theta))));
+          cv::Point(round(vert_x - inflationSize * cos(theta)),
+            round(vert_y - inflationSize * sin(theta))));
       } // end for rectangle's points
 
       //!< if inflatedVerticesWithinImageLimits < 4 in the end,
       //!< we won't need this point since the inflated rectangle
       //!< will be discarded.
       cv::Point potentialBrushfireBeginPoint(
-          round(vert_x - inflationSize / 2 * cos(theta)),
-          round(vert_y - inflationSize / 2 * sin(theta)));
+        round(vert_x - inflationSize / 2 * cos(theta)),
+        round(vert_y - inflationSize / 2 * sin(theta)));
 
       //!< if one or more vertices are out of bounds
       //!< discard the whole inflated rectangle
@@ -330,6 +330,9 @@ namespace pandora_vision
      * and the inflated rectangle)
      * We will test if these points all lie on one plane.
      **/
+    //!< The indices of the valid (by this filter) keypoints
+    std::set<unsigned int> finalIndices;
+    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
 
@@ -337,7 +340,7 @@ namespace pandora_vision
       cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
-          rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
 
       //!< Draw the outline of the i-th valid blob
       for(unsigned int j = 0; j < inOutlines[i].size(); j++)
@@ -349,12 +352,12 @@ namespace pandora_vision
       for(int j = 0; j < 4; j++)
       {
         cv::line(canvas, inflatedRectangles[i][j],
-            inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
+          inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
       }
 
       std::set<unsigned int> visitedPoints;
       BlobDetection::brushfirePoint(brushfireBeginPoints[i],
-          &canvas, &visitedPoints);
+        &canvas, &visitedPoints);
 
       /**
        * In order to construct a new point cloud
@@ -363,11 +366,11 @@ namespace pandora_vision
        **/
       int numValidVisitedPoints = 0;
       for(std::set<unsigned int>::iterator it = visitedPoints.begin();
-          it != visitedPoints.end(); it++)
+        it != visitedPoints.end(); it++)
       {
         //!< if the point in the original point cloud is not missing (noise)
         if (!(initialPointCloud->points[*visitedPoints.find(*it)].x !=
-              initialPointCloud->points[*visitedPoints.find(*it)].x))
+            initialPointCloud->points[*visitedPoints.find(*it)].x))
         {
           numValidVisitedPoints++;
         }
@@ -387,11 +390,11 @@ namespace pandora_vision
 
       int pointCloudPointsIndex = 0;
       for(std::set<unsigned int>::iterator it = visitedPoints.begin();
-          it != visitedPoints.end(); it++)
+        it != visitedPoints.end(); it++)
       {
         //!< if the point in the original point cloud is not missing (noise)
         if (!(initialPointCloud->points[*visitedPoints.find(*it)].x !=
-              initialPointCloud->points[*visitedPoints.find(*it)].x))
+            initialPointCloud->points[*visitedPoints.find(*it)].x))
         {
           visitedPointsPointCloud->points[pointCloudPointsIndex].x =
             initialPointCloud->points[*visitedPoints.find(*it)].x;
@@ -406,21 +409,25 @@ namespace pandora_vision
         }
       }
 
-      //!< check if the visitedPointsPointCloud points are on a plane
+      //!< Check if the visitedPointsPointCloud points are on a plane
       int numPlanes = PlanesDetection::locatePlanes(visitedPointsPointCloud,
         false);
 
-      if (numPlanes != 1)
+      if (numPlanes == 1)
       {
-        valid.erase(i);
+        finalIndices.insert(*validIterator);
       }
+
+      //!< Increment the validIterator so that it points to the next element
+      //!< in the valid set
+      validIterator++;
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesBrushfireOutlineToRectangle");
     #endif
 
-    return valid;
+    return finalIndices;
   }
 
 
@@ -442,11 +449,11 @@ namespace pandora_vision
     blobs
    **/
   std::set<unsigned int> DepthFilters::checkHolesRectangleOutline(
-      const cv::Mat& inImage,
-      const PointCloudXYZPtr& initialPointCloud,
-      const std::vector<cv::KeyPoint>& inKeyPoints,
-      const std::vector<std::vector<cv::Point2f> >& rectangles,
-      const int& inflationSize)
+    const cv::Mat& inImage,
+    const PointCloudXYZPtr& initialPointCloud,
+    const std::vector<cv::KeyPoint>& inKeyPoints,
+    const std::vector<std::vector<cv::Point2f> >& rectangles,
+    const int& inflationSize)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesRectangleOutline","applyFilter");
@@ -481,16 +488,16 @@ namespace pandora_vision
 
         //!< check if the inflated vertex has gone out of bounds
         if (vert_x - inflationSize * cos(theta) < inImage.cols &&
-            vert_x - inflationSize * cos(theta) >= 0 &&
-            vert_y - inflationSize * sin(theta) < inImage.rows &&
-            vert_y - inflationSize * sin(theta) >= 0)
+          vert_x - inflationSize * cos(theta) >= 0 &&
+          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
         }
 
         inflatedVertices.push_back(
-            cv::Point(round(vert_x - inflationSize * cos(theta)),
-              round(vert_y - inflationSize * sin(theta))));
+          cv::Point(round(vert_x - inflationSize * cos(theta)),
+            round(vert_y - inflationSize * sin(theta))));
       } //!< end for rectangle's points
 
       //!< If one or more vertices are out of bounds discard the whole
@@ -512,21 +519,23 @@ namespace pandora_vision
      * the points that constitute the rectangle.
      * We will test if these points all lie on one plane.
      **/
+    //!< The indices of the valid (by this filter) keypoints
+    std::set<unsigned int> finalIndices;
+    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
-
       //!< The canvas image will hold the blobs' outlines, and their rectangles.
       cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
-          rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
 
 
       //!< Draw the inflated rectangle that corresponds to it
       for(int j = 0; j < 4; j++)
       {
         cv::line(canvas, inflatedRectangles[i][j],
-            inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
+          inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
       }
 
       std::set<unsigned int> visitedPoints;
@@ -549,11 +558,11 @@ namespace pandora_vision
        * */
       int numValidVisitedPoints = 0;
       for(std::set<unsigned int>::iterator it = visitedPoints.begin();
-          it != visitedPoints.end(); it++)
+        it != visitedPoints.end(); it++)
       {
         //!< If the point in the original point cloud is not missing (noise)
         if (!(initialPointCloud->points[*visitedPoints.find(*it)].x !=
-              initialPointCloud->points[*visitedPoints.find(*it)].x))
+            initialPointCloud->points[*visitedPoints.find(*it)].x))
         {
           numValidVisitedPoints++;
         }
@@ -573,11 +582,11 @@ namespace pandora_vision
 
       int pointCloudPointsIndex = 0;
       for(std::set<unsigned int>::iterator it = visitedPoints.begin();
-          it != visitedPoints.end(); it++)
+        it != visitedPoints.end(); it++)
       {
         //!< if the point in the original point cloud is not missing (noise)
         if (!(initialPointCloud->points[*visitedPoints.find(*it)].x !=
-              initialPointCloud->points[*visitedPoints.find(*it)].x))
+            initialPointCloud->points[*visitedPoints.find(*it)].x))
         {
           visitedPointsPointCloud->points[pointCloudPointsIndex].x =
             initialPointCloud->points[*visitedPoints.find(*it)].x;
@@ -594,19 +603,23 @@ namespace pandora_vision
 
       //!< Check if the visitedPointsPointCloud points are on a plane
       int numPlanes = PlanesDetection::locatePlanes(visitedPointsPointCloud,
-          false);
+        false);
 
-      if (numPlanes != 1)
+      if (numPlanes == 1)
       {
-        valid.erase(i);
+        finalIndices.insert(*validIterator);
       }
+
+      //!< Increment the validIterator so that it points to the next element
+      //!< in the valid set
+      validIterator++;
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesRectangleOutline");
     #endif
 
-    return valid;
+    return finalIndices;
   }
 
 
@@ -659,6 +672,9 @@ namespace pandora_vision
     cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
       0, 255, 0);
 
+    //!< Iterator over probabilitiesVector
+    std::vector<float>::iterator probabilitiesIterator =
+      probabilitiesVector->begin();
     for (unsigned int o = 0; o < inOutlines.size(); o++)
     {
       int numBlacks = 0;
@@ -687,13 +703,16 @@ namespace pandora_vision
       if (numWhites != 0)
       {
         valid.insert(o);
-        probabilitiesVector->push_back(
-          (float) numWhites / (numWhites + numBlacks));
+        probabilitiesVector->at(*probabilitiesIterator) =
+          (float) numWhites / (numWhites + numBlacks);
       }
       else
       {
-        probabilitiesVector->push_back(0.0);
+        probabilitiesVector->at(*probabilitiesIterator) = 0.0;
       }
+      //!< Increment the probabilitiesIterator so that it points to the
+      //!< next element in the probabilitiesVector vector
+      probabilitiesIterator++;
     }
 
     return valid;
@@ -772,20 +791,20 @@ namespace pandora_vision
 
 
   /**
-   @brief Apply a cascade-like hole checker. Each filter applied is attached
-   to an order which relates to the sequence of the overall filter execution.
-   @param[in] method [const unsigned int&] The filter identifier to execute
-   @param[in] img [const cv::Mat&] The input depth image
-   @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
-   original point cloud that corresponds to the input depth image
-   @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
-   holds the final holes' data
-   @param[in] inflationSize [const int&] The amount of pixels by which each
-   bounding box is inflated
-   @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which shows
-   the holes that are considered valid by each filter
-   @param[in][out] msgs [std::vector<std::string>*] Debug messages
-   @return void
+    @brief Apply a cascade-like hole checker. Each filter applied is attached
+    to an order which relates to the sequence of the overall filter execution.
+    @param[in] method [const unsigned int&] The filter identifier to execute
+    @param[in] img [const cv::Mat&] The input depth image
+    @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
+    original point cloud that corresponds to the input depth image
+    @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
+    holds the final holes' data
+    @param[in] inflationSize [const int&] The amount of pixels by which each
+    bounding box is inflated
+    @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which shows
+    the holes that are considered valid by each filter
+    @param[in][out] msgs [std::vector<std::string>*] Debug messages
+    @return void
    **/
   void DepthFilters::applyFilter(
     const unsigned int& method,
@@ -819,59 +838,59 @@ namespace pandora_vision
     {
       //!< Filter #1 (through difference of depth)------------------------------
       case 1 :
-      {
-        indexes = checkHolesDepthDiff(
-          img,
-          conveyor->keyPoints,
-          conveyor->rectangles,
-          &msgs_,
-          inflationSize);
-        windowMsg = "Filter: Depth difference";
-        break;
-      }
-      //!< Filter #2------------------------------------------------------------
-      //!< Inflate the bounding boxes by an inflation size.
-      //!< For a blob to be at least a potential hole, all the points that
-      //!< constitute the inflated rectangle should lie on exactly one plane.
+        {
+          indexes = checkHolesDepthDiff(
+            img,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            &msgs_,
+            inflationSize);
+          windowMsg = "Filter: Depth difference";
+          break;
+        }
+        //!< Filter #2------------------------------------------------------------
+        //!< Inflate the bounding boxes by an inflation size.
+        //!< For a blob to be at least a potential hole, all the points that
+        //!< constitute the inflated rectangle should lie on exactly one plane.
       case 2 :
-      {
-        indexes = checkHolesRectangleOutline(
-          img,
-          pointCloud,
-          conveyor->keyPoints,
-          conveyor->rectangles,
-          inflationSize);
-        windowMsg = "Filter: Outline of rectangle on plane";
-        break;
-      }
-      //!< Filter #3 (depth & area comparison)----------------------------------
+        {
+          indexes = checkHolesRectangleOutline(
+            img,
+            pointCloud,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            inflationSize);
+          windowMsg = "Filter: Outline of rectangle on plane";
+          break;
+        }
+        //!< Filter #3 (depth & area comparison)----------------------------------
       case 3 :
-      {
-        indexes = checkHolesDepthArea(
-          img,
-          conveyor->keyPoints,
-          conveyor->rectangles,
-          &msgs_);
-        windowMsg = "Filter: Area / Depth";
-        break;
-      }
-      //!< Filter #4------------------------------------------------------------
-      //!< Brushfire from blob outline to blob bounding box
-      //!< with an inflation size (inflates the rectangle by x pixels).
-      //!< If the points between the blob's outline and the inflated rectangle
-      //!< lie on one plane, this blob is a hole.
+        {
+          indexes = checkHolesDepthArea(
+            img,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            &msgs_);
+          windowMsg = "Filter: Area / Depth";
+          break;
+        }
+        //!< Filter #4------------------------------------------------------------
+        //!< Brushfire from blob outline to blob bounding box
+        //!< with an inflation size (inflates the rectangle by x pixels).
+        //!< If the points between the blob's outline and the inflated rectangle
+        //!< lie on one plane, this blob is a hole.
       case 4 :
-      {
-        indexes = checkHolesBrushfireOutlineToRectangle(
-          img,
-          pointCloud,
-          conveyor->keyPoints,
-          conveyor->outlines,
-          conveyor->rectangles,
-          inflationSize);
-        windowMsg = "Filter: Points around blob to plane";
-        break;
-      }
+        {
+          indexes = checkHolesBrushfireOutlineToRectangle(
+            img,
+            pointCloud,
+            conveyor->keyPoints,
+            conveyor->outlines,
+            conveyor->rectangles,
+            inflationSize);
+          windowMsg = "Filter: Points around blob to plane";
+          break;
+        }
     }
 
     for(std::set<unsigned int>::iterator it = indexes.begin() ;

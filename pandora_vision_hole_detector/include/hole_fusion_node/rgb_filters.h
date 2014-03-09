@@ -39,6 +39,7 @@
 
 #include <math.h>
 #include "depth_node/hole_filters.h"
+#include "hole_fusion_node/hole_fusion_parameters.h"
 
 /**
   @namespace vision
@@ -92,7 +93,7 @@ namespace pandora_vision
         histograms of the bounding box and the points inside the outline of the
         blob.
         @param[in] inImage [const cv::Mat&] The input RGB image
-        @param[in] inHistograms [const std::vector<cv::MatND>&]
+        @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
         of the candidate holes's keypoints
@@ -112,7 +113,7 @@ namespace pandora_vision
        **/
       static std::set<unsigned int> checkHolesTextureDiff(
         const cv::Mat& inImage,
-        const std::vector<cv::MatND>& inHistograms,
+        const cv::MatND& inHistogram,
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
         const std::vector<std::vector<cv::Point> >& inOutlines,
