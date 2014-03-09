@@ -70,7 +70,10 @@ namespace pandora_vision
   {
     std::set<unsigned int> valid;
 
+    //!< The vector holding all the points that constitute each inflated
+    //!< rectangle
     std::vector<std::vector<cv::Point> > inflatedRectangles;
+
     float key_y;
     float key_x;
     float vert_y;
@@ -124,17 +127,14 @@ namespace pandora_vision
       }
     } //!< end for rectangles
 
-    /**
-     * For each inflated rectangle, store in visitedPoints
-     * the points that constitute the rectangle.
-     **/
+
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
-      //!< The canvas image will hold the blobs' outlines, and their rectangles.
+      //!< The canvas image will hold the blobs' outlines
       cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
-        rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 
 
       //!< Draw the inflated rectangle that corresponds to it
@@ -203,5 +203,175 @@ namespace pandora_vision
     }
   }
 
+
+
+  /**
+    @brief Given a set of keypoints and their respective outline and
+    bounding box points, and a model histogram, this filter looks for near
+    equation between the histograms of the points that consist the bounding
+    box and the model histogram, and for major difference between the
+    histograms of the bounding box and the points inside the outline of the
+    blob.
+    @param[in] inImage [const cv::Mat&] The input RGB image
+    @param[in] inHistograms [const std::vector<cv::MatND>&]
+    The model histogram's H and S component
+    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
+    of the candidate holes's keypoints
+    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
+    The vector of the candidate holes's bounding boxes
+    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+    The vector of the candidate holes's outline points
+    @param[in] inflationSize [cosnt int&] grow the rectangle by
+    inflationSize as to acquire more points to check for plane existence.
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities hinting to the certainty degree which with the
+    candidate hole is associated. While the returned set may be reduced in
+    size, the size of this vector is the same throughout and equal to the
+    number of keypoints found and published by the rgb node
+    @return std::set<unsigned int> The indices of valid (by this filter)
+    blobs
+   **/
+  std::set<unsigned int> RgbFilters::checkHolesTextureDiff(
+    const cv::Mat& inImage,
+    const std::vector<cv::MatND>& inHistograms,
+    const std::vector<cv::KeyPoint>& inKeyPoints,
+    const std::vector<std::vector<cv::Point2f> >& inRectangles,
+    const std::vector<std::vector<cv::Point> >& inOutlines,
+    const int& inflationSize,
+    std::vector<float>* probabilitiesVector)
+  {
+    std::set<unsigned int> valid;
+
+    //!< inImage transformed from BGR format to HSV
+    cv::Mat inImageHSV;
+    cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
+
+
+    //!< The vector holding all the points that constitute each inflated
+    //!< rectangle
+    std::vector<std::vector<cv::Point> > inflatedRectangles;
+
+    float key_y;
+    float key_x;
+    float vert_y;
+    float vert_x;
+    double theta;
+    double keypointVertDist;
+
+    for (unsigned int i = 0; i < inRectangles.size(); i++)
+    {
+      std::vector<cv::Point> inflatedVertices;
+      int inflatedVerticesWithinImageLimits = 0;
+
+      for (int j = 0; j < 4; j++)
+      {
+        key_y = inKeyPoints[i].pt.y;
+        key_x = inKeyPoints[i].pt.x;
+
+        vert_y = inRectangles[i][j].y;
+        vert_x = inRectangles[i][j].x;
+
+        theta = atan2(key_y - vert_y, key_x - vert_x);
+
+        keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
+
+        //!< check if the inflated vertex has gone out of bounds
+        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
+          vert_x - inflationSize * cos(theta) >= 0 &&
+          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) >= 0)
+        {
+          inflatedVerticesWithinImageLimits++;
+        }
+
+        inflatedVertices.push_back(
+          cv::Point(round(vert_x - inflationSize * cos(theta)),
+            round(vert_y - inflationSize * sin(theta))));
+      } //!< end for rectangle's points
+
+      //!< If one or more vertices are out of bounds discard the whole
+      //!< inflated rectangle
+      if (inflatedVerticesWithinImageLimits < 4)
+      {
+        probabilitiesVector->at(i) = 0.0;
+        inflatedVertices.clear();
+        continue;
+      }
+      else
+      {
+        valid.insert(i);
+        inflatedRectangles.push_back(inflatedVertices);
+      }
+    } //!< end for rectangles
+
+
+    for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
+    {
+      //!< Create the masks needed for the histograms of the outline points
+      //!< and the points inside the blobs'outline
+      cv::Mat rectangleMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+      cv::RNG rng(12345);
+      cv::Scalar color = cv::Scalar(
+        rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+
+
+      //!< Draw the inflated rectangle that corresponds to it
+      for(int j = 0; j < 4; j++)
+      {
+        cv::line(rectangleMask, inflatedRectangles[i][j],
+          inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
+      }
+
+      //!< Draw the points inside the blob
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        {
+          if (cv::pointPolygonTest(
+              inflatedRectangles[i], cv::Point(cols, rows), false > 0))
+          {
+            blobMask.at<unsigned char>(rows, cols) = 255;
+          }
+        }
+      }
+      //!< Masks are now ready
+
+      //!< Histogram-related parameters
+      //!< Using 50 bins for hue and 60 for saturation
+      int h_bins = 50;
+      int s_bins = 60;
+      int histSize[] = { h_bins, s_bins };
+
+      //!< hue varies from 0 to 256, saturation from 0 to 180
+      float h_ranges[] = { 0, 256 };
+      float s_ranges[] = { 0, 180 };
+
+      const float* ranges[] = { h_ranges, s_ranges };
+
+      //!< Use the 0-th and 1-st channels
+      int channels[] = { 0, 1 };
+
+
+      //!< Produce and normalize the histogram for the
+      //!< inflated rectangle's points
+      cv::MatND rectangleHistogram;
+      cv::calcHist(&inImageHSV, 1, channels, rectangleMask, rectangleHistogram,
+        2, histSize, ranges, true, false);
+      cv::normalize(rectangleHistogram, rectangleHistogram, 0, 1,
+        cv::NORM_MINMAX, -1, cv::Mat());
+
+      //!< Produce and normalize the histogram for the
+      //!< points inside the outline of the blob
+      cv::MatND blobHistogram;
+      cv::calcHist(&inImageHSV, 1, channels, blobMask, blobHistogram,
+        2, histSize, ranges, true, false);
+      cv::normalize(blobHistogram, blobHistogram, 0, 1,
+        cv::NORM_MINMAX, -1, cv::Mat());
+
+    }
+  }
+  return valid;
 }
 

@@ -700,6 +700,7 @@ namespace pandora_vision
   }
 
 
+
   /**
     @brief Apply a cascade-like hole checker. Each filter applied is attached
     to an order which relates to the sequence of the overall filter execution.

@@ -127,12 +127,9 @@ namespace pandora_vision
 
           if (assimilableBoxArea < assimilatorBoxArea)
           {
-            assimilable->keyPoints.erase(
-              assimilable->keyPoints.begin() + j);
-            assimilable->outlines.erase(
-              assimilable->outlines.begin() + j);
-            assimilable->rectangles.erase(
-              assimilable->rectangles.begin() + j);
+            assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
+            assimilable->outlines.erase(assimilable->outlines.begin() + j);
+            assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
           }
         }
       }
