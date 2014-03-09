@@ -127,7 +127,9 @@ namespace pandora_vision
       }
     } //!< end for rectangles
 
-
+    //!< The indices of the valid (by this filter) keypoints
+    std::set<unsigned int> finalIndices;
+    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
       //!< The canvas image will hold the blobs' outlines
@@ -193,14 +195,19 @@ namespace pandora_vision
       if (meanBlobLuminosity > meanBoundingBoxLuminosity)
       {
         probabilitiesVector->at(*it) = 0.0;
-        valid.erase(i);
       }
       else
       {
+        finalIndices.insert(*validIterator);
         probabilitiesVector->at(*it) =
-          (1 - meanBlobLuminosity / meanBoundingBoxLuminosity);
+          1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
+
+      //!< Increment the validIterator so that it points to the next element
+      //!< in the valid set
+      validIterator++;
     }
+    return finalIndices;
   }
 
 
@@ -213,7 +220,7 @@ namespace pandora_vision
     histograms of the bounding box and the points inside the outline of the
     blob.
     @param[in] inImage [const cv::Mat&] The input RGB image
-    @param[in] inHistograms [const std::vector<cv::MatND>&]
+    @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
     of the candidate holes's keypoints
@@ -233,7 +240,7 @@ namespace pandora_vision
    **/
   std::set<unsigned int> RgbFilters::checkHolesTextureDiff(
     const cv::Mat& inImage,
-    const std::vector<cv::MatND>& inHistograms,
+    const cv::MatND& inHistogram,
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
     const std::vector<std::vector<cv::Point> >& inOutlines,
@@ -304,7 +311,9 @@ namespace pandora_vision
       }
     } //!< end for rectangles
 
-
+    //!< The indices of the valid (by this filter) keypoints
+    std::set<unsigned int> finalIndices;
+    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
       //!< Create the masks needed for the histograms of the outline points
@@ -340,8 +349,8 @@ namespace pandora_vision
 
       //!< Histogram-related parameters
       //!< Using 50 bins for hue and 60 for saturation
-      int h_bins = 50;
-      int s_bins = 60;
+      int h_bins = HoleFusionParameters::hue_bins;
+      int s_bins = HoleFusionParameters::saturation_bins;
       int histSize[] = { h_bins, s_bins };
 
       //!< hue varies from 0 to 256, saturation from 0 to 180
@@ -370,8 +379,30 @@ namespace pandora_vision
       cv::normalize(blobHistogram, blobHistogram, 0, 1,
         cv::NORM_MINMAX, -1, cv::Mat());
 
+      //!< Find the correlation between the model histogram and the histogram
+      //!< of the inflated rectangle
+      double rectangleToModelCorrelation= cv::compareHist(
+        rectangleHistogram, inHistogram, 0);
+
+      //!< Find the correlation between the model histogram and the histogram
+      //!< of the points inside the blob
+      double blobToModelCorrelation = cv::compareHist(
+        blobHistogram, inHistogram, 0);
+
+      if (rectangleToModelCorrelation >=
+        HoleFusionParameters::match_texture_threshold &&
+        rectangleToModelCorrelation > blobToModelCorrelation)
+      {
+        finalIndices.insert(*validIterator);
+      }
+
+      //!< Increment the validIterator so that it points to the next element
+      //!< in the valid set
+      validIterator++;
     }
+
+    return finalIndices;
   }
-  return valid;
 }
+
 

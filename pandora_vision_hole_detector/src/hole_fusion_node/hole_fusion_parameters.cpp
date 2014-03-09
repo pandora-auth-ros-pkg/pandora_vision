@@ -118,6 +118,12 @@ namespace pandora_vision
   int HoleFusionParameters::debug_show_check_holes_size = 1200;
 
   int HoleFusionParameters::minimum_curve_points = 1200;
+
+  //!< Texture parameters
+  //!< The threshold for texture matching
+  float HoleFusionParameters::match_texture_threshold = 0.5;
+  int HoleFusionParameters::hue_bins = 50;
+  int HoleFusionParameters::saturation_bins = 60;
   //!<----------------------------------------------------------------------!>//
 
   HoleFusionParameters::HoleFusionParameters(void)
@@ -240,5 +246,12 @@ namespace pandora_vision
 
     HoleFusionParameters::minimum_curve_points =
       config.minimum_curve_points;
+
+    HoleFusionParameters::match_texture_threshold =
+      config.match_texture_threshold;
+    HoleFusionParameters::hue_bins =
+      config.hue_bins;
+    HoleFusionParameters::saturation_bins =
+      config.saturation_bins;
   }
 }

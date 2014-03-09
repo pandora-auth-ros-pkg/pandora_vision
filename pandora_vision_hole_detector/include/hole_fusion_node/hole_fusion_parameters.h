@@ -153,6 +153,13 @@ namespace pandora_vision
 
     static int minimum_curve_points;
 
+    //!< Texture parameters
+    //!< The threshold for texture matching
+    static float match_texture_threshold;
+
+    static int hue_bins;
+    static int saturation_bins;
+
   };
 }
 
