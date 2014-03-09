@@ -47,8 +47,8 @@
 namespace pandora_vision
 {
   /**
-   @class RgbFilters
-   @brief Provides functionalities of hole filters relevant to RGB images
+    @class RgbFilters
+    @brief Provides functionalities of hole filters relevant to RGB images
    **/
   class RgbFilters
   {
@@ -75,8 +75,44 @@ namespace pandora_vision
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
-      std::set<unsigned int> checkHolesLuminosityDiff(
+      static std::set<unsigned int> checkHolesLuminosityDiff(
         const cv::Mat& inImage,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point2f> >& inRectangles,
+        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const int& inflationSize,
+        std::vector<float>* probabilitiesVector);
+
+
+      /**
+        @brief Given a set of keypoints and their respective outline and
+        bounding box points, and a model histogram, this filter looks for near
+        equation between the histograms of the points that consist the bounding
+        box and the model histogram, and for major difference between the
+        histograms of the bounding box and the points inside the outline of the
+        blob.
+        @param[in] inImage [const cv::Mat&] The input RGB image
+        @param[in] inHistograms [const std::vector<cv::MatND>&]
+        The model histogram's H and S component
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
+        of the candidate holes's keypoints
+        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
+        The vector of the candidate holes's bounding boxes
+        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+        The vector of the candidate holes's outline points
+        @param[in] inflationSize [cosnt int&] grow the rectangle by
+        inflationSize as to acquire more points to check for plane existence.
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities hinting to the certainty degree which with the
+        candidate hole is associated. While the returned set may be reduced in
+        size, the size of this vector is the same throughout and equal to the
+        number of keypoints found and published by the rgb node
+        @return std::set<unsigned int> The indices of valid (by this filter)
+        blobs
+       **/
+      static std::set<unsigned int> checkHolesTextureDiff(
+        const cv::Mat& inImage,
+        const std::vector<cv::MatND>& inHistograms,
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
         const std::vector<std::vector<cv::Point> >& inOutlines,
