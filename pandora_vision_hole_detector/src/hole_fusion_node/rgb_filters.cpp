@@ -170,7 +170,7 @@ namespace pandora_vision
 
           //!< Mean outline luminosity test
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false > 0))
+              inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobLuminosity += inImage.at<unsigned char>(rows, cols);
             blobDivisor += 1;
@@ -339,7 +339,7 @@ namespace pandora_vision
         for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false > 0))
+              inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobMask.at<unsigned char>(rows, cols) = 255;
           }
@@ -567,7 +567,7 @@ namespace pandora_vision
             rectanglePoints++;
           }
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false > 0))
+              inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobSum += backProject.at<unsigned char>(rows, cols);
             blobPoints++;
