@@ -36,6 +36,7 @@ include_directories(include
 ########################### holeFindNode ############################
 
 add_executable(hole_find_node
+            src/hole_node.cpp
 						src/hole_detection.cpp  
 						src/hole_detector.cpp 
 						src/texture_filter.cpp 
