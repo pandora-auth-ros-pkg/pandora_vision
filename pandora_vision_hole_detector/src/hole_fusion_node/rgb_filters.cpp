@@ -112,14 +112,16 @@ namespace pandora_vision
       cv::calcHist(&inImageHSV, 1, channels, blobMask, blobHistogram,
         2, histSize, ranges, true, false);
 
-      cv::imshow("blobHistogram", blobHistogram);
-      cv::waitKey(1);
+      /*
+       *cv::imshow("blobHistogram", blobHistogram);
+       *cv::waitKey(1);
+       */
 
       //!< Break the 180 X 256 into boxes of box_x X box_y (vertically by
       //!< horizontally). Measure how many non-zero points there are in each
       //!< box. If there are more than a threshold value, count that box as
       //!< an overall non zero box
-      int box_x = 10;
+      int box_x = 20;
       int box_y = 16;
 
       int overallNonZeroBoxes = 0;
@@ -152,8 +154,10 @@ namespace pandora_vision
       probabilitiesVector->at(i) =
         (float) overallNonZeroBoxes / (180 / box_x * 256 / box_y);
 
-      ROS_ERROR("probability: [%f %f] : %f",
-        inKeyPoints[i].pt.x, inKeyPoints[i].pt.y, probabilitiesVector->at(i));
+      /*
+       *ROS_ERROR("probability: [%f %f] : %f",
+       *  inKeyPoints[i].pt.x, inKeyPoints[i].pt.y, probabilitiesVector->at(i));
+       */
 
     }
 
@@ -269,15 +273,16 @@ namespace pandora_vision
           inflatedRectangles[i][(j + 1) % 4], color, 1, 8);
       }
 
+
       //!< Instead of applying the formula
       //!< Y = 0.299 * R + 0.587 * G + 0.114 * B to find the luminosity of each
       //!< pixel, turn the inImage into grayscale
       cv::Mat luminosityImage(inImage.size(), CV_8UC1);
       cv::cvtColor(inImage, luminosityImage, CV_BGR2GRAY);
 
-      float boundingBoxLuminosity = 0;
+      int boundingBoxLuminosity = 0;
       int boundingBoxDivisor = 0;
-      float blobLuminosity = 0;
+      int blobLuminosity = 0;
       int blobDivisor = 0;
       for (unsigned int rows = 0; rows < inImage.rows; rows++)
       {
@@ -287,7 +292,7 @@ namespace pandora_vision
           if (canvas.data[rows * inImage.cols + cols] != 0)
           {
             boundingBoxLuminosity +=
-              luminosityImage.at<unsigned char>(rows, cols);
+              (uint8_t)luminosityImage.at<unsigned char>(rows, cols);
             boundingBoxDivisor += 1;
           }
 
@@ -295,7 +300,8 @@ namespace pandora_vision
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
-            blobLuminosity += inImage.at<unsigned char>(rows, cols);
+            blobLuminosity +=
+              (uint8_t)luminosityImage.at<unsigned char>(rows, cols);
             blobDivisor += 1;
           }
         }
@@ -304,11 +310,11 @@ namespace pandora_vision
       //!< Mean luminosity of the points that the inflated rectangle is
       //consisted of, derived from the original bounding box of the blob
       float meanBoundingBoxLuminosity =
-        boundingBoxLuminosity / boundingBoxDivisor;
+        (float) boundingBoxLuminosity / boundingBoxDivisor;
 
       //!< Mean luminosity of the entire blob
       float meanBlobLuminosity =
-        blobLuminosity / blobDivisor;
+        (float) blobLuminosity / blobDivisor;
 
       std::set<unsigned int>::iterator it = valid.begin();
       std::advance(it, i);

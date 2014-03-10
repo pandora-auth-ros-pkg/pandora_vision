@@ -308,10 +308,12 @@ namespace pandora_vision
     std::vector<float> probabilitiesVector(
       depthHolesConveyor_.keyPoints.size(), 0.0);
 
-    colorHomogenityValid = RgbFilters::checkHolesColorHomogenity(
+    colorHomogenityValid = RgbFilters::checkHolesLuminosityDiff(
       Visualization::scaleImageForVisualization(rgbImage_ ,0),
       depthHolesConveyor_.keyPoints,
+      depthHolesConveyor_.rectangles,
       depthHolesConveyor_.outlines,
+      HoleFusionParameters::rectangle_inflation_size,
       &probabilitiesVector);
 
 
