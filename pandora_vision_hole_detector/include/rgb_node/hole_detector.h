@@ -34,3 +34,7 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+namespace pandora_vision
+{
+  
+}

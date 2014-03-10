@@ -154,7 +154,7 @@ ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
-################################# RgbNode ######################################
+################################# RgbNode dummy ######################################
 add_executable(rgb_node 
     src/rgb_node/hole_node.cpp
     src/rgb_node/hole_detection.cpp

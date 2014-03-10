@@ -1,4 +1,3 @@
-
 /*********************************************************************
 *
 * Software License Agreement (BSD License)
@@ -35,7 +34,19 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-namespace pandora_vision
+
+#include "rgb_node/hole_detection.h"
+
+/**
+  @brief Main function of the face node
+  @param argc [int] Number of input arguments
+  @param argv [char**] The input arguments
+  @return int : 0 for success
+ **/
+int main(int argc, char** argv)
 {
-  
+  ros::init(argc,argv,"rgb_node");
+  pandora_vision::HoleDetection hole_finder;
+  ros::spin();
+  return 0;
 }

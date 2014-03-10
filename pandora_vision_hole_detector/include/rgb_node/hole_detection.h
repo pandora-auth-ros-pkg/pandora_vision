@@ -35,3 +35,124 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+
+#ifndef HOLEDETECTION_H
+#define HOLEDETECTION_H
+
+#include "ros/ros.h"
+#include <ros/package.h>
+
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
+
+#include "state_client.h"
+
+#include <iostream>
+#include <stdlib.h>
+
+//!< Horizontal field of view in degrees 
+#define HFOV 61.14
+
+//!< vertical field of view in degrees
+#define VFOV 48  
+
+//!< default frame height
+#define DEFAULT_HEIGHT 480	
+
+//!< default frame width	
+#define DEFAULT_WIDTH	 640	
+
+namespace pandora_vision
+{
+  class HoleDetection
+  {
+    private:
+    
+    //!< The NodeHandle
+    ros::NodeHandle _nh;
+    
+    std::string packagePath;
+    
+    float ratioX;
+    float ratioY;
+      
+    //!< Horizontal field of view in rad
+    double hfov;		
+    //!< Vertical Field Of View (rad)
+    double vfov;		
+      
+    int frameWidth;		
+    int frameHeight;	
+      
+    std::string cameraName;
+      
+    //!< Frame processed by FaceDetector
+    cv::Mat	_holeFrame;					
+        
+    //!<FaceDetector frame timestamp
+    ros::Time _holeFrameTimestamp;	
+      
+    //!< The topic subscribed to for the camera
+    std::string imageTopic;
+    std::string cameraFrameId;
+  
+    //!< The subscriber that listens to the frame 
+    //!< topic advertised by the central node
+    image_transport::Subscriber _frameSubscriber;
+      
+    //!< Current state of robot
+    int curState;		
+    //!< Previous state of robot
+    int prevState;
+    
+     //!< Variable used for State Managing
+    bool holeNowON;
+        
+    /**
+     * @brief Get parameters referring to view and frame characteristics from
+     * launch file
+     * @return void
+    */  
+    void getGeneralParams();
+    
+    /**
+     * @brief This method uses a FaceDetector instance to detect all 
+     * present faces in a given frame
+     * @param timer [ros:TimerEvemt] the timer used to call 
+     * faceCallback
+     * @return void
+    */
+    void holeCallback(const ros::TimerEvent&);
+      
+    /**
+     * Function called when new ROS message appears, for front camera
+     * @param msg [const sensor_msgs::ImageConstPtr&] The message
+     * @return void
+    */
+    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+      
+    public:
+    
+    //!< The constructor
+    HoleDetection();
+    
+    //!< The destructor
+    virtual ~HoleDetection();
+    
+    /**
+     * @brief Node's state manager
+     * @param newState [int] The robot's new state
+     * @return void
+    */
+    void startTransition(int newState);
+      
+    /**
+     * @brief After completion of state transition
+     * @return void
+    */
+    void completeTransition(void);    
+  };
+}
+#endif
