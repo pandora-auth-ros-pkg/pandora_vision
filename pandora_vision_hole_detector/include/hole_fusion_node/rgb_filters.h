@@ -56,6 +56,30 @@ namespace pandora_vision
     public:
 
       /**
+        @brief Checks for color homogenity in a region where points are
+        constrained inside each @param inOutlines's elements. A candidate hole
+        is considered valid if its Hue plane histogram has above a certain
+        number of bins occupied.
+        @param[in] inImage [const cv::Mat&] The RGB image
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
+        of the candidate holes's keypoints
+        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+        The vector of the candidate holes's outline points
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities hinting to the certainty degree which with the
+        candidate hole is associated. While the returned set may be reduced in
+        size, the size of this vector is the same throughout and equal to the
+        number of keypoints found and published by the rgb node
+        @return std::set<unsigned int> The indices of valid (by this filter)
+        blobs
+       **/
+      static std::set<unsigned int> checkHolesColorHomogenity(
+        const cv::Mat& inImage,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
+        const std::vector<std::vector<cv::Point> >& inOutlines,
+        std::vector<float>* probabilitiesVector);
+
+      /**
         @brief Checks for difference of mean value of luminosity between the
         pixels that comprise the blob's bounding box edges and the points
         inside the blob's outline.
