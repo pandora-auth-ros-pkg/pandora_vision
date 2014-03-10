@@ -39,7 +39,7 @@
 
 #define DEBUG_MODE false
 
-namespace vision {
+namespace pandora_vision {
 
   QrCodeDetector::QrCodeDetector() : debug_publish(false)
   {

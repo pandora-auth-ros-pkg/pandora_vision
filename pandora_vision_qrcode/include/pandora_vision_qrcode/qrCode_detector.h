@@ -42,7 +42,7 @@
 #include <opencv2/opencv.hpp>
 #include <zbar.h>
 
-namespace vision {
+namespace pandora_vision {
 
   struct QrCode
   {

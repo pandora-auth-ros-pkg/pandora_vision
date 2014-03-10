@@ -53,10 +53,10 @@
 #include "qrCode_detector.h"
 
 //!< Horizontal field of view in degrees
-#define HFOV 61.14  //68
+#define HFOV 61.14  
 
 //!< vertical field of view in degrees 
-#define VFOV 48     //50
+#define VFOV 48     
 
 //!< default frame height
 #define DEFAULT_HEIGHT 480
@@ -64,7 +64,7 @@
 //!< default frame width
 #define DEFAULT_WIDTH 640
 
-namespace vision {
+namespace pandora_vision {
 
   class QrCodeDetection : public StateClient {
 
