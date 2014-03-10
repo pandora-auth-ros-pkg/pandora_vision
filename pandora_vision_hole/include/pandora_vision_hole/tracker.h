@@ -71,70 +71,71 @@
 #define OVERLAP_DILATION_ITERATIONS	3		// number of iterations the estimated blob's img will be dilated
 
 #define SEND_ALL	false
-
-//struct used in CamShift Tracker		
-typedef struct CamShiftThing
+namespace pandora_vision
 {
-	CvRect		trackRect;
-	uintptr_t	id;
-	double		area;
-	double 		probability;
-} CamShiftThing;
+  //struct used in CamShift Tracker		
+  typedef struct CamShiftThing
+  {
+    CvRect		trackRect;
+    uintptr_t	id;
+    double		area;
+    double 		probability;
+  } CamShiftThing;
 
-class Tracker
-{
-	
-	private:
-		
-		double chainId;
-		int frameNum;
-	
-	public:
-		//camShift images
-		IplImage* 				csBackproject;
-		IplImage* 				csImage;
-		IplImage* 				csHsv;
-		IplImage* 				csHue;
-		IplImage* 				csMask;
-		IplImage*				csAnd;
-													
-	
-		//camshift HSV parameters
-		int csVmin;
-		int csVmax;
-		int csSmin;
-		int csSmax;
-	
-		std::vector<TrackerChain*> 	chainList; 		// Holds all alive trackerChains
-		std::vector<Thing*>*			currentList;	// Contains Blobs that are given to Tracker as inputs
-		std::vector<Thing*>*			blobList;		// Contains Blob estimates that are going to be matched at the next matching operation
-		
-		IplImage** 				imageBuffer;
-		
-		std::vector<CamShiftThing> camShiftBlobs;	//Holds the blobs being tracked with CamShift method
-		
-		Tracker();
-		~Tracker();
-		
-		void track( std::vector<Thing*> *currentList, std::vector<Thing*> *destinationList, int count);			//Input list of blobs for each frame.
-		
-		double polyFit( CvPoint2D32f p1, 
-						CvPoint2D32f p2, 
-						CvPoint2D32f p3, 
-						double err);									//find the center of the estimated Blob
-		void findBlobEstimate();										//Estimate current in-frame position of previously matched blobs
-		
-		void createTrackerChains();
-		void checkTrackerChains();										//Delete all dead TrackerChains from chainList, and destroy all of their Things
-		
-		double calculateScore(Thing* a , Thing* b);
-		void calculateProbability();
-		
-		IplImage* camShiftTrack(IplImage* frame, IplImage* imgTexture, std::vector<Thing*>* blobs);
-		
-		void matchmake();												//match blobs. Return matches
-		void printInfo();
-		void fillImageBuffer();
-};
-
+  class Tracker
+  {
+    
+    private:
+      
+      double chainId;
+      int frameNum;
+    
+    public:
+      //camShift images
+      IplImage* 				csBackproject;
+      IplImage* 				csImage;
+      IplImage* 				csHsv;
+      IplImage* 				csHue;
+      IplImage* 				csMask;
+      IplImage*				csAnd;
+                            
+    
+      //camshift HSV parameters
+      int csVmin;
+      int csVmax;
+      int csSmin;
+      int csSmax;
+    
+      std::vector<TrackerChain*> 	chainList; 		// Holds all alive trackerChains
+      std::vector<Thing*>*			currentList;	// Contains Blobs that are given to Tracker as inputs
+      std::vector<Thing*>*			blobList;		// Contains Blob estimates that are going to be matched at the next matching operation
+      
+      IplImage** 				imageBuffer;
+      
+      std::vector<CamShiftThing> camShiftBlobs;	//Holds the blobs being tracked with CamShift method
+      
+      Tracker();
+      ~Tracker();
+      
+      void track( std::vector<Thing*> *currentList, std::vector<Thing*> *destinationList, int count);			//Input list of blobs for each frame.
+      
+      double polyFit( CvPoint2D32f p1, 
+              CvPoint2D32f p2, 
+              CvPoint2D32f p3, 
+              double err);									//find the center of the estimated Blob
+      void findBlobEstimate();										//Estimate current in-frame position of previously matched blobs
+      
+      void createTrackerChains();
+      void checkTrackerChains();										//Delete all dead TrackerChains from chainList, and destroy all of their Things
+      
+      double calculateScore(Thing* a , Thing* b);
+      void calculateProbability();
+      
+      IplImage* camShiftTrack(IplImage* frame, IplImage* imgTexture, std::vector<Thing*>* blobs);
+      
+      void matchmake();												//match blobs. Return matches
+      void printInfo();
+      void fillImageBuffer();
+  };
+}
 #endif

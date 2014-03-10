@@ -37,7 +37,8 @@
 
 #include "pandora_vision_hole/tracker.h"
 
-
+namespace pandora_vision
+{
 
 /**
  * Constructor
@@ -1140,4 +1141,5 @@ IplImage* Tracker::camShiftTrack(IplImage* frame, IplImage* imgTexture, std::vec
 	cvReleaseHist(&csHist);
 
 	return csImage;
+}
 }

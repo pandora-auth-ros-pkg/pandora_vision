@@ -32,21 +32,21 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Miltiadis-Alexios Papadopoulos
+ * Author: Despoina Paschalidou
  *********************************************************************/
-
-#include "pandora_vision_qrcode/qrCode_detection.h"
+ 
+ #include "pandora_vision_hole/hole_detection.h"
 
 /**
   @brief Main function of the kinect node
   @param argc [int] Number of input arguments
   @param argv [char**] The input arguments
   @return int : 0 for success
- **/
-int main(int argc, char** argv)
-{
-  ros::init(argc,argv,"QrCode_node");
-  pandora_vision::QrCodeDetection QrCodeDetection;
-  ros::spin();
-  return 0;
-}
+ **/  
+  int main(int argc, char** argv) 
+  {
+    ros::init(argc,argv,"hole_find_node");
+    pandora_vision::HoleFindNode holeFindNode;
+    ros::spin();
+    return 0;
+  }
