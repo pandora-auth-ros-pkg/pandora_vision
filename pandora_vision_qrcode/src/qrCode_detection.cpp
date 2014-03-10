@@ -37,7 +37,7 @@
 
 #include "pandora_vision_qrcode/qrCode_detection.h"
 
-namespace vision
+namespace pandora_vision
 {
   /**
     @brief Constructor
