@@ -47,6 +47,8 @@
 #include <depth_node/defines.h>
 #include "depth_node/depth_parameters.h"
 #include "hole_fusion_node/depth_filters.h"
+#include "hole_fusion_node/rgb_filters.h"
+#include "hole_fusion_node/generic_filters.h"
 #include "hole_fusion_node/hole_fusion_parameters.h"
 /**
   @namespace vision

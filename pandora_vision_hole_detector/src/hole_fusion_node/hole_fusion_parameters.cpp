@@ -122,11 +122,10 @@ namespace pandora_vision
   //!< Texture parameters
   //!< The threshold for texture matching
   float HoleFusionParameters::match_texture_threshold = 0.5;
-  int HoleFusionParameters::hue_bins = 50;
-  int HoleFusionParameters::saturation_bins = 60;
 
   //!<Color homogenity parameters
   int HoleFusionParameters::num_bins_threshold = 10;
+  int HoleFusionParameters::non_zero_points_in_box_blob_histogram = 0;
   //!<----------------------------------------------------------------------!>//
 
   HoleFusionParameters::HoleFusionParameters(void)
@@ -252,10 +251,9 @@ namespace pandora_vision
 
     HoleFusionParameters::match_texture_threshold =
       config.match_texture_threshold;
-    HoleFusionParameters::hue_bins =
-      config.hue_bins;
-    HoleFusionParameters::saturation_bins =
-      config.saturation_bins;
+
+    HoleFusionParameters::non_zero_points_in_box_blob_histogram =
+      config.non_zero_points_in_box_blob_histogram;
 
     HoleFusionParameters::num_bins_threshold =
       config.num_bins_threshold;
