@@ -39,6 +39,111 @@
 
 namespace pandora_vision
 {
+
+  /**
+    @brief Checks for color homogenity in a region where points are
+    constrained inside each @param inOutlines's elements. A candidate hole
+    is considered valid if its Hue plane histogram has above a certain
+    number of bins occupied.
+    @param[in] inImage [const cv::Mat&] The RGB image
+    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
+    of the candidate holes's keypoints
+    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
+    The vector of the candidate holes's outline points
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities hinting to the certainty degree which with the
+    candidate hole is associated. While the returned set may be reduced in
+    size, the size of this vector is the same throughout and equal to the
+    number of keypoints found and published by the rgb node
+    @return std::set<unsigned int> The indices of valid (by this filter)
+    blobs
+   **/
+  std::set<unsigned int> checkHolesColorHomogenity(
+    const cv::Mat& inImage,
+    const std::vector<cv::KeyPoint>& inKeyPoints,
+    const std::vector<std::vector<cv::Point> >& inOutlines,
+    std::vector<float>* probabilitiesVector)
+  {
+    std::set<unsigned int> valid;
+
+    //!< inImage transformed from BGR format to HSV
+    cv::Mat inImageHSV;
+    cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
+
+    for (unsigned int i = 0; i < inKeyPoints.size(); i++)
+    {
+      //!< Create the mask needed for the histogram of the
+      //!< points inside this blobs'outline
+      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+      //!< Draw the points inside the blob
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        {
+          if (cv::pointPolygonTest(
+              inOutlines[i], cv::Point(cols, rows), false) > 0)
+          {
+            blobMask.at<unsigned char>(rows, cols) = 255;
+          }
+        }
+      }
+      //!< Blob mask is now ready
+
+
+      //!< Declare the image that will hold only the hue plane of the inImageHSV
+      cv::Mat inImageHSVHue;
+      inImageHSVHue.create(inImageHSV.size(), inImageHSV.depth());
+
+      //!< Histogram-related parameters
+      int h_bins = HoleFusionParameters::hue_bins;
+      int histSize[] = { h_bins };
+
+      //!< hue varies from 0 to 180
+      float h_ranges[] = { 0, 180 };
+
+      const float* ranges[] = { h_ranges };
+
+      //!< Use the 0-th channel
+      int channels[] = { 0, 0 };
+
+      //!< Fill the inImageHSVHue with the hue plane of the inImageHSV
+      cv::mixChannels(&inImageHSV, 1, &inImageHSVHue, 1, channels, 1);
+
+      //!< Calculate the blob's histogram and normalize it to the range [0, 255]
+      cv::MatND blobHistogram;
+      cv::calcHist(&inImageHSV, 1, 0, blobMask, blobHistogram,
+        1, histSize, ranges, true, false);
+      cv::normalize(blobHistogram, blobHistogram, 0, 255,
+        cv::NORM_MINMAX, -1, cv::Mat());
+
+      int nonZeroBins = 0;
+      for (unsigned int i = 0; i < 256; i++)
+      {
+        if (blobHistogram.at<unsigned char>(i) !=0)
+        {
+          nonZeroBins++;
+        }
+      }
+
+      //!< If there are more bins occupied in the blobHistogram than a certain
+      //!< threshold, this blob is considered as a valid candidate hole
+      if (nonZeroBins > HoleFusionParameters::num_bins_threshold)
+      {
+        valid.insert(i);
+        probabilitiesVector->at(i) = (float) nonZeroBins / 256;
+      }
+      else
+      {
+        probabilitiesVector->at(i) = 0.0;
+      }
+    }
+
+    return valid;
+  }
+
+
+
   /**
     @brief Checks for difference of mean value of luminosity between the
     pixels that comprise the blob's bounding box edges and the points
@@ -348,14 +453,13 @@ namespace pandora_vision
       //!< Masks are now ready
 
       //!< Histogram-related parameters
-      //!< Using 50 bins for hue and 60 for saturation
       int h_bins = HoleFusionParameters::hue_bins;
       int s_bins = HoleFusionParameters::saturation_bins;
       int histSize[] = { h_bins, s_bins };
 
-      //!< hue varies from 0 to 256, saturation from 0 to 180
-      float h_ranges[] = { 0, 256 };
-      float s_ranges[] = { 0, 180 };
+      //!< hue varies from 0 to 179, saturation from 0 to 255
+      float h_ranges[] = { 0, 180 };
+      float s_ranges[] = { 0, 256 };
 
       const float* ranges[] = { h_ranges, s_ranges };
 
@@ -382,12 +486,12 @@ namespace pandora_vision
       //!< Find the correlation between the model histogram and the histogram
       //!< of the inflated rectangle
       double rectangleToModelCorrelation= cv::compareHist(
-        rectangleHistogram, inHistogram, 0);
+        rectangleHistogram, inHistogram, CV_COMP_CORREL);
 
       //!< Find the correlation between the model histogram and the histogram
       //!< of the points inside the blob
       double blobToModelCorrelation = cv::compareHist(
-        blobHistogram, inHistogram, 0);
+        blobHistogram, inHistogram, CV_COMP_CORREL);
 
       //!< This blob is considered valid if there is a correlation between
       //!< the histograms of the rectangle and the model histogram (inHistogram)
@@ -459,9 +563,9 @@ namespace pandora_vision
     cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
 
     //!< Histogram-related parameters
-    //!< hue varies from 0 to 256, saturation from 0 to 180
-    float h_ranges[] = { 0, 256 };
-    float s_ranges[] = { 0, 180 };
+    //!< hue varies from 0 to 179, saturation from 0 to 255
+    float h_ranges[] = { 0, 180 };
+    float s_ranges[] = { 0, 256 };
 
     const float* ranges[] = { h_ranges, s_ranges };
 
@@ -475,6 +579,10 @@ namespace pandora_vision
     cv::MatND backProject;
     cv::calcBackProject(&inImageHSV, 1, channels, inHistogram, backProject,
       ranges, 1, true);
+
+    //!< Is this needed?
+    //!<cv::normalize(backProject, backProject, 0, 1,
+    //!< cv::NORM_MINMAX, -1, cv::Mat());
 
     //!< The vector holding all the points that constitute each inflated
     //!< rectangle
@@ -563,13 +671,13 @@ namespace pandora_vision
         {
           if (rectangleMask.at<unsigned char>(rows, cols) != 0)
           {
-            rectangleSum += backProject.at<unsigned char>(rows, cols);
+            rectangleSum += backProject.at<float>(rows, cols);
             rectanglePoints++;
           }
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
-            blobSum += backProject.at<unsigned char>(rows, cols);
+            blobSum += backProject.at<float>(rows, cols);
             blobPoints++;
           }
         }

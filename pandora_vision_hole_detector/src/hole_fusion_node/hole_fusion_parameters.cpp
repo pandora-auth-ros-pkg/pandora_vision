@@ -124,6 +124,9 @@ namespace pandora_vision
   float HoleFusionParameters::match_texture_threshold = 0.5;
   int HoleFusionParameters::hue_bins = 50;
   int HoleFusionParameters::saturation_bins = 60;
+
+  //!<Color homogenity parameters
+  int HoleFusionParameters::num_bins_threshold = 10;
   //!<----------------------------------------------------------------------!>//
 
   HoleFusionParameters::HoleFusionParameters(void)
@@ -253,5 +256,8 @@ namespace pandora_vision
       config.hue_bins;
     HoleFusionParameters::saturation_bins =
       config.saturation_bins;
+
+    HoleFusionParameters::num_bins_threshold =
+      config.num_bins_threshold;
   }
 }

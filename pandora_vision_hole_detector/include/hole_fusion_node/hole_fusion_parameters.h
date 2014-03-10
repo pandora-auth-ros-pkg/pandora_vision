@@ -160,6 +160,9 @@ namespace pandora_vision
     static int hue_bins;
     static int saturation_bins;
 
+    //!< Color homogenity parameters
+    static int num_bins_threshold;
+
   };
 }
 
