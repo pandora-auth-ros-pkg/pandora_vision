@@ -43,7 +43,7 @@ namespace pandora_vision
   /**
     @brief Checks for color homogenity in a region where points are
     constrained inside each @param inOutlines's elements. A candidate hole
-    is considered valid if its Hue plane histogram has above a certain
+    is considered valid if its H-V histogram has above a certain
     number of bins occupied.
     @param[in] inImage [const cv::Mat&] The RGB image
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -58,12 +58,13 @@ namespace pandora_vision
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
-  std::set<unsigned int> checkHolesColorHomogenity(
+  std::set<unsigned int> RgbFilters::checkHolesColorHomogenity(
     const cv::Mat& inImage,
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point> >& inOutlines,
     std::vector<float>* probabilitiesVector)
   {
+    //!< The valid (by this filter) blobs' indices
     std::set<unsigned int> valid;
 
     //!< inImage transformed from BGR format to HSV
@@ -91,52 +92,69 @@ namespace pandora_vision
       //!< Blob mask is now ready
 
 
-      //!< Declare the image that will hold only the hue plane of the inImageHSV
-      cv::Mat inImageHSVHue;
-      inImageHSVHue.create(inImageHSV.size(), inImageHSV.depth());
-
       //!< Histogram-related parameters
-      int h_bins = HoleFusionParameters::hue_bins;
-      int histSize[] = { h_bins };
+      int h_bins = 180;
+      int v_bins = 256;
+      int histSize[] = { h_bins, v_bins };
 
-      //!< hue varies from 0 to 180
+      //!< hue varies from 0 to 179, saturation or value from 0 to 255
       float h_ranges[] = { 0, 180 };
+      float v_ranges[] = { 0, 256 };
 
-      const float* ranges[] = { h_ranges };
+      const float* ranges[] = { h_ranges, v_ranges };
 
-      //!< Use the 0-th channel
-      int channels[] = { 0, 0 };
+      //!< Use the 0-th and 2-nd channels - H and V
+      int channels[] = { 0, 1 };
 
-      //!< Fill the inImageHSVHue with the hue plane of the inImageHSV
-      cv::mixChannels(&inImageHSV, 1, &inImageHSVHue, 1, channels, 1);
 
-      //!< Calculate the blob's histogram and normalize it to the range [0, 255]
+      //!< Calculate the blob's histogram
       cv::MatND blobHistogram;
-      cv::calcHist(&inImageHSV, 1, 0, blobMask, blobHistogram,
-        1, histSize, ranges, true, false);
-      cv::normalize(blobHistogram, blobHistogram, 0, 255,
-        cv::NORM_MINMAX, -1, cv::Mat());
+      cv::calcHist(&inImageHSV, 1, channels, blobMask, blobHistogram,
+        2, histSize, ranges, true, false);
 
-      int nonZeroBins = 0;
-      for (unsigned int i = 0; i < 256; i++)
+      cv::imshow("blobHistogram", blobHistogram);
+      cv::waitKey(1);
+
+      //!< Break the 180 X 256 into boxes of box_x X box_y (vertically by
+      //!< horizontally). Measure how many non-zero points there are in each
+      //!< box. If there are more than a threshold value, count that box as
+      //!< an overall non zero box
+      int box_x = 10;
+      int box_y = 16;
+
+      int overallNonZeroBoxes = 0;
+      for (unsigned int rows = 0; rows < 180 / box_x; rows++)
       {
-        if (blobHistogram.at<unsigned char>(i) !=0)
+        for (unsigned int cols = 0; cols < 256 / box_y; cols++)
         {
-          nonZeroBins++;
+          int nonZeroInBox = 0;
+          for (unsigned int b_x = 0; b_x < box_x; b_x++)
+          {
+            for (unsigned int b_y = 0; b_y < box_y; b_y++)
+            {
+              if (blobHistogram.at<float>(
+                  rows * box_x + b_x, cols * box_y + b_y) != 0)
+              {
+                nonZeroInBox++;
+              }
+            }
+          }
+
+          if (nonZeroInBox >
+            HoleFusionParameters::non_zero_points_in_box_blob_histogram)
+          {
+            overallNonZeroBoxes++;
+          }
         }
       }
 
-      //!< If there are more bins occupied in the blobHistogram than a certain
-      //!< threshold, this blob is considered as a valid candidate hole
-      if (nonZeroBins > HoleFusionParameters::num_bins_threshold)
-      {
-        valid.insert(i);
-        probabilitiesVector->at(i) = (float) nonZeroBins / 256;
-      }
-      else
-      {
-        probabilitiesVector->at(i) = 0.0;
-      }
+      valid.insert(i);
+      probabilitiesVector->at(i) =
+        (float) overallNonZeroBoxes / (180 / box_x * 256 / box_y);
+
+      ROS_ERROR("probability: [%f %f] : %f",
+        inKeyPoints[i].pt.x, inKeyPoints[i].pt.y, probabilitiesVector->at(i));
+
     }
 
     return valid;
@@ -453,8 +471,8 @@ namespace pandora_vision
       //!< Masks are now ready
 
       //!< Histogram-related parameters
-      int h_bins = HoleFusionParameters::hue_bins;
-      int s_bins = HoleFusionParameters::saturation_bins;
+      int h_bins = 180;
+      int s_bins = 256;
       int histSize[] = { h_bins, s_bins };
 
       //!< hue varies from 0 to 179, saturation from 0 to 255

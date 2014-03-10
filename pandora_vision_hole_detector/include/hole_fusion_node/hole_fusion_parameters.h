@@ -157,11 +157,9 @@ namespace pandora_vision
     //!< The threshold for texture matching
     static float match_texture_threshold;
 
-    static int hue_bins;
-    static int saturation_bins;
-
     //!< Color homogenity parameters
     static int num_bins_threshold;
+    static int non_zero_points_in_box_blob_histogram;
 
   };
 }

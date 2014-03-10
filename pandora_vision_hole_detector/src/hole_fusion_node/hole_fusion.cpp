@@ -301,6 +301,19 @@ namespace pandora_vision
       pointCloudXYZ_,
       &depthHolesConveyor_);
 
+    //!< Valid candidate holes' indices by this filter
+    std::set<unsigned int> colorHomogenityValid;
+
+    //!< Initialize the probabilities vector
+    std::vector<float> probabilitiesVector(
+      depthHolesConveyor_.keyPoints.size(), 0.0);
+
+    colorHomogenityValid = RgbFilters::checkHolesColorHomogenity(
+      Visualization::scaleImageForVisualization(rgbImage_ ,0),
+      depthHolesConveyor_.keyPoints,
+      depthHolesConveyor_.outlines,
+      &probabilitiesVector);
+
 
     #ifdef DEBUG_SHOW
     std::vector<std::string> msgs;
