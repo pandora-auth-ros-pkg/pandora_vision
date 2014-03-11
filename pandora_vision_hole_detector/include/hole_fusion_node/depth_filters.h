@@ -67,6 +67,12 @@ namespace pandora_vision
         reasons
         @param[in] inflationSize [const int&] The number of pixels by which the
         bounding rectange will be inflated
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities, each position of which hints to the certainty degree
+        with which the associated candidate hole is associated.
+        While the returned set may be reduced in size, the size of this vector
+        is the same throughout and equal to the number of keypoints found and
+        published by the rgb node
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -75,7 +81,8 @@ namespace pandora_vision
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
         std::vector<std::string>* msgs,
-        const int& inflationSize);
+        const int& inflationSize,
+        std::vector<float>* probabilitiesVector);
 
       /**
         @brief Checks for valid holes by area / depth comparison
@@ -85,6 +92,12 @@ namespace pandora_vision
         The bounding boxes' vertices
         @param[in][out] msgs [std::vector<std::string>*] Messages for debug
         reasons
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities, each position of which hints to the certainty degree
+        with which the associated candidate hole is associated.
+        While the returned set may be reduced in size, the size of this vector
+        is the same throughout and equal to the number of keypoints found and
+        published by the rgb node
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -92,7 +105,8 @@ namespace pandora_vision
         const cv::Mat& depthImage,
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
-        std::vector<std::string>* msgs);
+        std::vector<std::string>* msgs,
+        std::vector<float>* probabilitiesVector);
 
       /**
         @brief Brushfire from a blobs's outline to its bounding box
@@ -111,6 +125,12 @@ namespace pandora_vision
         The bounding boxes' vertices
         @param[in] inflationsize [const int&] Grow the rectangle by
         inflationsize as to acquire more points to check for plane existence.
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities, each position of which hints to the certainty degree
+        with which the associated candidate hole is associated.
+        While the returned set may be reduced in size, the size of this vector
+        is the same throughout and equal to the number of keypoints found and
+        published by the rgb node
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -120,7 +140,8 @@ namespace pandora_vision
         const std::vector<cv::KeyPoint>& keyPoints,
         const std::vector<std::vector<cv::Point> >& outlines,
         const std::vector<std::vector<cv::Point2f> >& rectangles,
-        const int& inflationSize);
+        const int& inflationSize,
+        std::vector<float>* probabilitiesVector);
 
       /**
         @brief Given the bounding box of a blob, inflate it.
@@ -136,6 +157,12 @@ namespace pandora_vision
         The bounding boxes' vertices
         @param[in] inflationsize [cosnt int&] grow the rectangle by
         inflationsize as to acquire more points to check for plane existence.
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities, each position of which hints to the certainty degree
+        with which the associated candidate hole is associated.
+        While the returned set may be reduced in size, the size of this vector
+        is the same throughout and equal to the number of keypoints found and
+        published by the rgb node
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -144,7 +171,8 @@ namespace pandora_vision
         const PointCloudXYZPtr& initialPointCloud,
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& rectangles,
-        const int& inflationSize);
+        const int& inflationSize,
+        std::vector<float>* probabilitiesVector);
 
       /**
         @brief Checks the homogenity of the gradient of depth in an area
@@ -155,10 +183,11 @@ namespace pandora_vision
         @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
         @param[out] msgs [std::vector<std::string>*] Debug messages
         @param[out] probabilitiesVector [std::vector<float>*] A vector
-        of probabilities hinting to the certainty degree which with the
-        candidate hole is associated. While the returned set may be reduced in
-        size, the size of this vector is the same throughout and equal to the
-        number of keypoints found and published by the rgb node
+        of probabilities, each position of which hints to the certainty degree
+        with which the associated candidate hole is associated.
+        While the returned set may be reduced in size, the size of this vector
+        is the same throughout and equal to the number of keypoints found and
+        published by the rgb node
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -169,22 +198,31 @@ namespace pandora_vision
         std::vector<std::string>* msgs,
         std::vector<float>* probabilitiesVector);
 
-        /**
-          @brief Apply a cascade-like hole checker. Each filter applied is
-          attached to an order which relates to the sequence of the overall
-          filter execution.
-          @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
-          @param[in] initialPointCloud
-          [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
-          The undistorted input point cloud
-          @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
-          contains the final valid holes
-          @return void
-         **/
-        static void checkHoles(
-          const cv::Mat& interpolatedDepthImage,
-          const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
-          HoleFilters::HolesConveyor* conveyor);
+      /**
+        @brief Apply a cascade-like hole checker. Each filter applied is
+        attached to an order which relates to the sequence of the overall
+        filter execution.
+        @param[in] interpolatedDepthImage [const cv::Mat&] The denoised depth
+        image
+        @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
+        The undistorted input point cloud
+        @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+        contains the final valid holes
+        @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
+        A 2D vector of probabilities hinting to the certainty degree with
+        which each candidate hole is associated for every
+        active filter executed.
+        While the returned set may be reduced in size,
+        the size of this vector is the same throughout and equal to the number
+        of active filters by the number of keypoints found and
+        published by the rgb node.
+        @return void
+       **/
+      static void checkHoles(
+        const cv::Mat& interpolatedDepthImage,
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
+        HoleFilters::HolesConveyor* conveyor,
+        std::vector<std::vector<float> >* probabilitiesVector);
 
       /**
         @brief Apply a cascade-like hole checker. Each filter applied
@@ -198,6 +236,11 @@ namespace pandora_vision
         that holds the final holes' data
         @param[in] inflationSize [const int&] The amount of pixels by which each
         bounding box is inflated
+        @param[out] probabilitiesVector [std::vector<float>*] A vector
+        of probabilities hinting to the certainty degree with which each
+        candidate hole is associated. While the returned set may be reduced in
+        size, the size of this vector is the same throughout and equal to the
+        number of keypoints found and published by the rgb node.
         @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which
         shows the holes that are considered valid by each filter
         @param[in][out] msgs [std::vector<std::string>*] Debug messages
@@ -209,6 +252,7 @@ namespace pandora_vision
         const PointCloudXYZPtr& pointCloud,
         HoleFilters::HolesConveyor* conveyor,
         const int& inflationSize,
+        std::vector<float>* probabilitiesVector,
         std::vector<cv::Mat>* imgs,
         std::vector<std::string>* msgs);
   };
