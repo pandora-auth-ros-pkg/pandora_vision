@@ -45,7 +45,7 @@ namespace pandora_vision
     constrained inside each @param inOutlines's elements. A candidate hole
     is considered valid if its H-V histogram has above a certain
     number of bins occupied.
-    @param[in] inImage [const cv::Mat&] The RGB image
+    @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
     of the candidate holes's keypoints
     @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
@@ -67,20 +67,24 @@ namespace pandora_vision
     //!< The valid (by this filter) blobs' indices
     std::set<unsigned int> valid;
 
-    //!< inImage transformed from BGR format to HSV
+    //!< Scale the inImage in [0, 255] into inImage_
+    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
+      HoleFusionParameters::scale_method);
+
+    //!< inImage_  transformed from BGR format to HSV
     cv::Mat inImageHSV;
-    cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
+    cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
     for (unsigned int i = 0; i < inKeyPoints.size(); i++)
     {
       //!< Create the mask needed for the histogram of the
       //!< points inside this blobs'outline
-      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat blobMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
 
       //!< Draw the points inside the blob
-      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
         {
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
@@ -170,7 +174,7 @@ namespace pandora_vision
     @brief Checks for difference of mean value of luminosity between the
     pixels that comprise the blob's bounding box edges and the points
     inside the blob's outline.
-    @param[in] inImage [const cv::Mat&] The RGB image
+    @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
     of the candidate holes's keypoints
     @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
@@ -196,6 +200,10 @@ namespace pandora_vision
     std::vector<float>* probabilitiesVector)
   {
     std::set<unsigned int> valid;
+
+    //!< Scale the inImage in [0, 255]
+    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
+      HoleFusionParameters::scale_method);
 
     //!< The vector holding all the points that constitute each inflated
     //!< rectangle
@@ -226,9 +234,9 @@ namespace pandora_vision
         keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
 
         //!< check if the inflated vertex has gone out of bounds
-        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
+        if (vert_x - inflationSize * cos(theta) < inImage_.cols &&
           vert_x - inflationSize * cos(theta) >= 0 &&
-          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) < inImage_.rows &&
           vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
@@ -260,7 +268,7 @@ namespace pandora_vision
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
       //!< The canvas image will hold the blobs' outlines
-      cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat canvas = cv::Mat::zeros(inImage_.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
         rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
@@ -276,20 +284,20 @@ namespace pandora_vision
 
       //!< Instead of applying the formula
       //!< Y = 0.299 * R + 0.587 * G + 0.114 * B to find the luminosity of each
-      //!< pixel, turn the inImage into grayscale
-      cv::Mat luminosityImage(inImage.size(), CV_8UC1);
-      cv::cvtColor(inImage, luminosityImage, CV_BGR2GRAY);
+      //!< pixel, turn the inImage_ into grayscale
+      cv::Mat luminosityImage(inImage_.size(), CV_8UC1);
+      cv::cvtColor(inImage_, luminosityImage, CV_BGR2GRAY);
 
       int boundingBoxLuminosity = 0;
       int boundingBoxDivisor = 0;
       int blobLuminosity = 0;
       int blobDivisor = 0;
-      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
         {
           //!< Mean bounding box luminosity test
-          if (canvas.data[rows * inImage.cols + cols] != 0)
+          if (canvas.data[rows * inImage_.cols + cols] != 0)
           {
             boundingBoxLuminosity +=
               (uint8_t)luminosityImage.at<unsigned char>(rows, cols);
@@ -348,7 +356,7 @@ namespace pandora_vision
     box and the model histogram, and for major difference between the
     histograms of the bounding box and the points inside the outline of the
     blob.
-    @param[in] inImage [const cv::Mat&] The input RGB image
+    @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
     @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -378,9 +386,13 @@ namespace pandora_vision
   {
     std::set<unsigned int> valid;
 
+    //!< Scale the inImage in [0, 255] into inImage_
+    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
+      HoleFusionParameters::scale_method);
+
     //!< inImage transformed from BGR format to HSV
     cv::Mat inImageHSV;
-    cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
+    cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
 
     //!< The vector holding all the points that constitute each inflated
@@ -412,9 +424,9 @@ namespace pandora_vision
         keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
 
         //!< check if the inflated vertex has gone out of bounds
-        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
+        if (vert_x - inflationSize * cos(theta) < inImage_.cols &&
           vert_x - inflationSize * cos(theta) >= 0 &&
-          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) < inImage_.rows &&
           vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
@@ -447,8 +459,8 @@ namespace pandora_vision
     {
       //!< Create the masks needed for the histograms of the outline points
       //!< and the points inside the blobs'outline
-      cv::Mat rectangleMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
-      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat rectangleMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
+      cv::Mat blobMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
 
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
@@ -463,9 +475,9 @@ namespace pandora_vision
       }
 
       //!< Draw the points inside the blob
-      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
         {
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
@@ -552,7 +564,7 @@ namespace pandora_vision
     is for a candidate hole's bounding box points to have a high probability
     in the back project image, and for the points inside the candidate
     hole's outline to have a low probability in the back project image
-    @param[in] inImage [const cv::Mat&] The input RGB image
+    @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
     @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -582,9 +594,13 @@ namespace pandora_vision
   {
     std::set<unsigned int> valid;
 
+    //!< Scale the inImage in [0, 255] into inImage_
+    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
+      HoleFusionParameters::scale_method);
+
     //!< inImage transformed from BGR format to HSV
     cv::Mat inImageHSV;
-    cv::cvtColor(inImage, inImageHSV, cv::COLOR_BGR2HSV);
+    cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
     //!< Histogram-related parameters
     //!< hue varies from 0 to 179, saturation from 0 to 255
@@ -637,9 +653,9 @@ namespace pandora_vision
         keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
 
         //!< check if the inflated vertex has gone out of bounds
-        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
+        if (vert_x - inflationSize * cos(theta) < inImage_.cols &&
           vert_x - inflationSize * cos(theta) >= 0 &&
-          vert_y - inflationSize * sin(theta) < inImage.rows &&
+          vert_y - inflationSize * sin(theta) < inImage_.rows &&
           vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
@@ -671,7 +687,7 @@ namespace pandora_vision
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
       //!< Create the masks needed for the histograms of the outline points
-      cv::Mat rectangleMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat rectangleMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
 
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
@@ -689,9 +705,9 @@ namespace pandora_vision
       int rectanglePoints = 0;
       float blobSum = 0;
       int blobPoints = 0;
-      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
         {
           if (rectangleMask.at<unsigned char>(rows, cols) != 0)
           {

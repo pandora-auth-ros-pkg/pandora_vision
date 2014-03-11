@@ -60,7 +60,8 @@ namespace pandora_vision
         constrained inside each @param inOutlines's elements. A candidate hole
         is considered valid if its Hue plane histogram has above a certain
         number of bins occupied.
-        @param[in] inImage [const cv::Mat&] The RGB image
+        @param[in] inImage [const cv::Mat&] The RGB image in unscaled
+        format
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
         of the candidate holes's keypoints
         @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
@@ -83,7 +84,8 @@ namespace pandora_vision
         @brief Checks for difference of mean value of luminosity between the
         pixels that comprise the blob's bounding box edges and the points
         inside the blob's outline.
-        @param[in] inImage [const cv::Mat&] The RGB image
+        @param[in] inImage [const cv::Mat&] The RGB image in unscaled
+        format
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
         of the candidate holes's keypoints
         @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
@@ -116,7 +118,8 @@ namespace pandora_vision
         box and the model histogram, and for major difference between the
         histograms of the bounding box and the points inside the outline of the
         blob.
-        @param[in] inImage [const cv::Mat&] The input RGB image
+        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
+        format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -152,7 +155,8 @@ namespace pandora_vision
         is for a candidate hole's bounding box points to have a high probability
         in the back project image, and for the points inside the candidate
         hole's outline to have a low probability in the back project image
-        @param[in] inImage [const cv::Mat&] The input RGB image
+        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
+        format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector

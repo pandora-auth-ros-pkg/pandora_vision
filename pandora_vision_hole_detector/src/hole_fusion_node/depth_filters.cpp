@@ -672,9 +672,6 @@ namespace pandora_vision
     cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
       0, 255, 0);
 
-    //!< Iterator over probabilitiesVector
-    std::vector<float>::iterator probabilitiesIterator =
-      probabilitiesVector->begin();
     for (unsigned int o = 0; o < inOutlines.size(); o++)
     {
       int numBlacks = 0;
@@ -703,16 +700,16 @@ namespace pandora_vision
       if (numWhites != 0)
       {
         valid.insert(o);
-        probabilitiesVector->at(*probabilitiesIterator) =
+        probabilitiesVector->at(o) =
           (float) numWhites / (numWhites + numBlacks);
       }
       else
       {
-        probabilitiesVector->at(*probabilitiesIterator) = 0.0;
+        probabilitiesVector->at(o) = 0.0;
       }
-      //!< Increment the probabilitiesIterator so that it points to the
-      //!< next element in the probabilitiesVector vector
-      probabilitiesIterator++;
+
+      ROS_ERROR("probability [%f %f] : %f",
+        inKeyPoints[o].pt.x, inKeyPoints[o].pt.y, probabilitiesVector->at(o));
     }
 
     return valid;
