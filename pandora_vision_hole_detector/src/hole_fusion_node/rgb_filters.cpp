@@ -138,7 +138,7 @@ namespace pandora_vision
           {
             for (unsigned int b_y = 0; b_y < box_y; b_y++)
             {
-              if (blobHistogram.at<float>(
+              if (blobHistogram.at<unsigned char>(
                   rows * box_x + b_x, cols * box_y + b_y) != 0)
               {
                 nonZeroInBox++;
@@ -711,13 +711,13 @@ namespace pandora_vision
         {
           if (rectangleMask.at<unsigned char>(rows, cols) != 0)
           {
-            rectangleSum += backProject.at<float>(rows, cols);
+            rectangleSum += backProject.at<unsigned char>(rows, cols);
             rectanglePoints++;
           }
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
           {
-            blobSum += backProject.at<float>(rows, cols);
+            blobSum += backProject.at<unsigned char>(rows, cols);
             blobPoints++;
           }
         }

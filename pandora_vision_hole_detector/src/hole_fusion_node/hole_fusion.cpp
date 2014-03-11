@@ -295,27 +295,45 @@ namespace pandora_vision
 
     //!< Do some processing
 
+    //!< Initialize the probabilities 2D vector. But first we need to know
+    //!< how many rows the vector will accomodate
+    int numActiveFilters = 0;
+
+    if (HoleFusionParameters::run_checker_depth_diff > 0)
+    {
+      numActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
+    {
+      numActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_depth_area > 0)
+    {
+      numActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
+    {
+      numActiveFilters++;
+    }
+
+    std::vector<std::vector<float> > probabilitiesVector2D(numActiveFilters,
+      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
+
     //!< check holes for debugging purposes
     DepthFilters::checkHoles(
       interpolatedDepthImage_,
       pointCloudXYZ_,
-      &depthHolesConveyor_);
+      &depthHolesConveyor_,
+      &probabilitiesVector2D);
 
-    //!< Valid candidate holes' indices by this filter
-    std::set<unsigned int> depthHomogenityValid;
+    for (int i = 0; i < numActiveFilters; i++)
+    {
+      for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
+      {
+        ROS_ERROR("P[%d %d] = %f", i, j, probabilitiesVector2D[i][j]);
+      }
+    }
 
-    //!< Initialize the probabilities vector
-    std::vector<float> probabilitiesVector(
-      depthHolesConveyor_.keyPoints.size(), 0.0);
-
-    std::vector<std::string> msges (depthHolesConveyor_.keyPoints.size(), "");
-
-    depthHomogenityValid = DepthFilters::checkHolesDepthHomogenity(
-      interpolatedDepthImage_,
-      depthHolesConveyor_.keyPoints,
-      depthHolesConveyor_.outlines,
-      &msges,
-      &probabilitiesVector);
 
 
     #ifdef DEBUG_SHOW
