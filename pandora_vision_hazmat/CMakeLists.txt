@@ -37,6 +37,7 @@ include_directories(include
 )
 
 add_executable(hazmat_node 
+            src/hazmat_node.cpp
 						src/hazmat_detection.cpp
 						src/hazmat_detector.cpp
 						src/utils.cpp 
