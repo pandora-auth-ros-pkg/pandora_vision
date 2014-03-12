@@ -45,7 +45,7 @@
  **/
 int main(int argc, char** argv)
 {
-  ros::init(argc,argv,"face_node");
+  ros::init(argc, argv, "face_node");
   pandora_vision::FaceDetection face_finder;
   ros::spin();
   return 0;

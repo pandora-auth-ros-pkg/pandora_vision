@@ -32,31 +32,22 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Skartados Evangelos
+* Author:Despoina Paschalidou
 *********************************************************************/
 
-#ifndef TIMECALC_H
-#define TIMECALC_H
+#include "pandora_vision_face/skin_detection.h"
 
-#include <sys/time.h>
-
-#define USEC_PER_SEC 1000000L
-
-namespace pandora_vision
+/**
+  @brief Main function of the face node
+  @param argc [int] Number of input arguments
+  @param argv [char**] The input arguments
+  @return int : 0 for success
+ **/
+int main(int argc, char** argv)
 {
-class TimeCalculator
-{
-private:
-  struct timeval startTime;
-  struct timeval endTime;
-  long timeElapsed (struct timeval &t1, struct timeval &t2);
-
-public:
-  TimeCalculator();
-  virtual ~TimeCalculator();
-  void startTimer();
-  long endTimer();
-
-};
+  ros::init(argc, argv, "skin_node");
+  pandora_vision::SkinDetection skin_finder;
+  ros::spin();
+  return 0;
 }
-#endif
+

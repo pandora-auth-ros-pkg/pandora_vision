@@ -39,7 +39,6 @@
 #define  SKINDETECTION_H
 #include <iostream>
 #include <stdlib.h>
-#include <pthread.h>
 #include "ros/ros.h"
 #include <opencv/cvwimage.h>
 #include <sensor_msgs/Image.h>
@@ -51,90 +50,124 @@
 #include "skin_detector.h"
 #include "time_calculator.h"
 
-#define HFOV					61.14//68		//horizontal field of view in degrees : giwrgos 61.142
-#define VFOV					48  //50		//vertical field of view in degrees : giwrgos 47.79
-#define DEFAULT_HEIGHT			480		//default frame height
-#define DEFAULT_WIDTH			640		//default frame width
+//!< Horizontal field of view in degrees
+#define HFOV 61.14
+//!< Vertical field of view in degrees
+#define VFOV 48
+//!< Default frame height
+#define DEFAULT_HEIGHT 480
+//!< Default frame width
+#define DEFAULT_WIDTH	640
 
-class SkinDetection : public StateClient {
-	private:
+namespace pandora_vision
+{
+class SkinDetection : public StateClient
+{
+private:
 
-		//nodeHandle
-		ros::NodeHandle _nh;
-		SkinDetector*	_skinDetector;
-		float ratioX;
-		float ratioY;
-		
-		float hfov;		//horizontal Field Of View (rad)
-		float vfov;		
-		int frameWidth;		//frame width
-		int frameHeight;	//frame height
-		
-		cv::Mat		skinFrame;				// frame processed by SkinDetector
-		cv::Mat		extraFrame;				// frame processed by SkinDetector
-		
-		ros::Time		skinFrameTimestamp;		// SkinDetector frame timestamp
-		ros::Timer		skinTimer;				// Timer for frame callback
+  //nodeHandle
+  ros::NodeHandle _nh;
+  SkinDetector*	_skinDetector;
+  float ratioX;
+  float ratioY;
 
-		string imageTopic;
-		
-		//time durations for every callback Timer in spin() function
-		double skinTime;
-		
-		ros::Publisher _victimDirectionPublisher;
-		
-		//the subscriber that listens to the frame topic advertised by the central node
-		image_transport::Subscriber _frameSubscriber;
-		
-		//debug publishers for SkinDetector
-		image_transport::Publisher _skinSourcePublisher;
-		image_transport::Publisher _skinResultPublisher;
-		
-		// variables for changing in dummy msg mode for debugging
-		bool skinDummy;
-		// variables for changing in debug mode. Publish images for debugging
-		bool debugSkin;
-		
-		//variable used for State Managing
-		bool skinNowON;
+  float hfov;		//horizontal Field Of View (rad)
+  float vfov;
+  int frameWidth;		//frame width
+  int frameHeight;	//frame height
 
-		//mutex lock needed to prevent conflicts between
-		//updating skin frame and using it for skin detection
-		pthread_mutex_t	skinLock;
+  cv::Mat	skinFrame;				// frame processed by SkinDetector
+  cv::Mat	extraFrame;				// frame processed by SkinDetector
 
-		//service for counting  messages sent to dataFusion
-	
-	public:
-				
-		//constructor
-		SkinDetection();
-					
-		//destructor			
-		~SkinDetection();	
-		
-		//get parameters from launch file
-		void getGeneralParams();
-		void getSkinParams();
-		void getTimerParams();
-		
-		
-		//timer callbacks
-		//executes skin Detector when in state STATE_ARM_SEARCH_COMPLETED
-		void skinCallback(const ros::TimerEvent&);
-		
-		//get a new image
-		void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-		
-		void spin();
-		
-		//Implemented from StateClient
-		void startTransition(int newState);
-		void completeTransition(void);
-		
-		int curState;		//Current state of robot
-		int prevState;		//Previous state of robot
+  ros::Time	skinFrameTimestamp;		// SkinDetector frame timestamp
+  ros::Timer skinTimer;				// Timer for frame callback
+
+  string imageTopic;
+
+  //time durations for every callback Timer in spin() function
+  double skinTime;
+
+  ros::Publisher _victimDirectionPublisher;
+
+  //the subscriber that listens to the frame topic advertised by the central node
+  image_transport::Subscriber _frameSubscriber;
+
+  //debug publishers for SkinDetector
+  image_transport::Publisher _skinSourcePublisher;
+  image_transport::Publisher _skinResultPublisher;
+
+  // variables for changing in dummy msg mode for debugging
+  bool skinDummy;
+  // variables for changing in debug mode. Publish images for debugging
+  bool debugSkin;
+
+  //variable used for State Managing
+  bool skinNowON;
+
+public:
+
+  //!< constructor
+  SkinDetection();
+
+  //!< destructor
+  virtual ~SkinDetection();
+
+  /**
+    @brief Get parameters referring to the view and
+    frame characteristics
+    @return void
+  */
+  void getGeneralParams();
+
+  /**
+    @brief Get parameters referring to the skin detection algorithm
+    @return void
+  */
+  void getSkinParams();
+
+  /**
+    @brief Get parameters referring to the timer
+    @return void
+  */
+  void getTimerParams();
+
+  /**
+    @brief Get paths referring to the skin detection algorithm
+    @return void
+  */
+  void getSkinPaths();
+
+  /**
+    @brief This method uses a FaceDetector instance to detect all
+    present faces in a given frame
+    @return void
+  */
+  void skinCallback(const ros::TimerEvent&);
+
+  /**
+   @brief Function called when new ROS message appears, for camera
+   @param msg [const sensor_msgs::ImageConstPtr&] The message
+   @return void
+  */
+  void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+
+  /**
+    @brief Node's state manager
+    @param newState [int] The robot's new state
+    @return void
+  */
+  void startTransition(int newState);
+
+  /**
+    @brief After completion of state transition
+    @return void
+  */
+  void completeTransition(void);
+
+  int curState;		//Current state of robot
+  int prevState;		//Previous state of robot
 };
-
+}
 #endif
-		
-		
+
+

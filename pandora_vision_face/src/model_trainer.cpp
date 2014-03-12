@@ -52,80 +52,87 @@ using namespace cv;
 using namespace std;
 
 
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';') 
+static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';')
 {
-    boost::filesystem::path filePath(filename);
-    std::ifstream file(filename.c_str(), ifstream::in);
-    if (!file) {
-        string error_message = "No valid input file was given, please check the given filename.";
-        CV_Error(CV_StsBadArg, error_message);
+  boost::filesystem::path filePath(filename);
+  std::ifstream file(filename.c_str(), ifstream::in);
+  if (!file)
+  {
+    string error_message = "No valid input file was given, please check the given filename.";
+    CV_Error(CV_StsBadArg, error_message);
+  }
+  std::string line, url, path, classlabel;
+  while (getline(file, line))
+  {
+    std::stringstream liness(line);
+    std::getline(liness, url, separator);
+    std::getline(liness, path, separator);
+    std::getline(liness, classlabel);
+
+    boost::filesystem::path linePath(path);
+    boost::filesystem::path abs;
+
+    abs = boost::filesystem::absolute(linePath, filePath.parent_path());
+
+    if (!boost::filesystem::exists(path))
+    {
+      ROS_WARN("File not found, downloading now...");
+      std::string cmd = "wget " + url + " --no-check-certificate -nH --cut-dirs=3 --directory-prefix=" +
+                        abs.parent_path().string();
+      system(cmd.c_str());
     }
-    std::string line, url, path, classlabel;
-    while (getline(file, line)) {
-        std::stringstream liness(line);
-        std::getline(liness, url, separator);
-        std::getline(liness, path, separator);
-        std::getline(liness, classlabel);
-        
-        boost::filesystem::path linePath(path);
-        boost::filesystem::path abs;
-        
-        abs = boost::filesystem::absolute(linePath, filePath.parent_path());
-        
-        if (!boost::filesystem::exists(path)) {
-          ROS_WARN("File not found, downloading now...");
-          std::string cmd = "wget " + url + " --no-check-certificate -nH --cut-dirs=3 --directory-prefix=" +
-              abs.parent_path().string();
-          system(cmd.c_str());
-        }
-        
-        if(!path.empty() && !classlabel.empty()) {
-            images.push_back(imread(abs.string(), 0));
-            labels.push_back(atoi(classlabel.c_str()));
-        }
+
+    if(!path.empty() && !classlabel.empty())
+    {
+      images.push_back(imread(abs.string(), 0));
+      labels.push_back(atoi(classlabel.c_str()));
     }
+  }
 }
 
 int main()
 {
-   // These vectors hold the images and corresponding labels.
-    vector<cv::Mat> images;
-    vector<int> labels;
-    // Read in the data. This can fail if no valid
-    // input filename is given.
-    
-    std::string path_to_images = ros::package::getPath("pandora_vision_face") + "att_faces";
-    
-    std::string fn_csv = ros::package::getPath("pandora_vision_face") + "/data/csv.ext";
-    try {
-        read_csv(fn_csv, images, labels);
-    } catch (cv::Exception& e) {
-        cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
-        // nothing more we can do
-        exit(1);
-    }
-    int im_width = images[0].cols;
-    int im_height = images[0].rows;
-    std::cout<<"im_width = " <<im_width<<std::endl;
-    std::cout<<"im_height = " <<im_height<<std::endl;
-    cv::Mat testSample = images[images.size() - 1];
-    int testLabel = labels[labels.size() - 1];
-    images.pop_back();
-    labels.pop_back();
-  
-    Ptr<FaceRecognizer> model = createEigenFaceRecognizer(80);
-    model->train(images, labels);
-    // The following line predicts the label of a given
-    // test image:
-    int predictedLabel = model->predict(testSample);
-    
-    string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
-    cout << result_message << endl;
-    
-    std::string outFile(ros::package::getPath("pandora_vision_face") + "/data/model.xml");
-    
-    std::cout<<"Saving model to " << outFile << std::endl;
+  // These vectors hold the images and corresponding labels.
+  vector<cv::Mat> images;
+  vector<int> labels;
+  // Read in the data. This can fail if no valid
+  // input filename is given.
 
-    model->save(outFile); 
+  std::string path_to_images = ros::package::getPath("pandora_vision_face") + "att_faces";
+
+  std::string fn_csv = ros::package::getPath("pandora_vision_face") + "/data/csv.ext";
+  try
+  {
+    read_csv(fn_csv, images, labels);
+  }
+  catch (cv::Exception& e)
+  {
+    cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
+    // nothing more we can do
+    exit(1);
+  }
+  int im_width = images[0].cols;
+  int im_height = images[0].rows;
+  std::cout << "im_width = " << im_width << std::endl;
+  std::cout << "im_height = " << im_height << std::endl;
+  cv::Mat testSample = images[images.size() - 1];
+  int testLabel = labels[labels.size() - 1];
+  images.pop_back();
+  labels.pop_back();
+
+  Ptr<FaceRecognizer> model = createEigenFaceRecognizer(80);
+  model->train(images, labels);
+  // The following line predicts the label of a given
+  // test image:
+  int predictedLabel = model->predict(testSample);
+
+  string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
+  cout << result_message << endl;
+
+  std::string outFile(ros::package::getPath("pandora_vision_face") + "/data/model.xml");
+
+  std::cout << "Saving model to " << outFile << std::endl;
+
+  model->save(outFile);
 
 }

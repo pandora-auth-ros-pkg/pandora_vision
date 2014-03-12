@@ -42,7 +42,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
-#include <pthread.h>
 #include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
@@ -56,148 +55,148 @@
 #include "time_calculator.h"
 #include "state_client.h"
 
-//!< Horizontal field of view in degrees 
+//!< Horizontal field of view in degrees
 #define HFOV 61.14
 
 //!< vertical field of view in degrees
-#define VFOV 48  
+#define VFOV 48
 
 //!< default frame height
-#define DEFAULT_HEIGHT 480	
+#define DEFAULT_HEIGHT 480
 
-//!< default frame width	
-#define DEFAULT_WIDTH	 640		
+//!< default frame width
+#define DEFAULT_WIDTH	 640
 
-namespace pandora_vision 
+namespace pandora_vision
 {
-  class FaceDetection : public StateClient 
-  {	
-    private:
-      
-      //!< The NodeHandle
-      ros::NodeHandle _nh;
-      
-      FaceDetector*	_faceDetector;
-      
-      float ratioX;
-      float ratioY;
-      
-      //!< Horizontal field of view in rad
-      double hfov;		
-      
-      //!< Vertical Field Of View (rad)
-      double vfov;		
-      
-      int frameWidth;		
-      int frameHeight;	
-      
-      std::string cameraName;
-      
-      //!< Frame processed by FaceDetector
-      cv::Mat	faceFrame;					
-        
-      //!<FaceDetector frame timestamp
-      ros::Time faceFrameTimestamp;	
-      
-      //!< Timer used for FaceCallaback
-      ros::Timer faceTimer;       
+class FaceDetection : public StateClient
+{
+private:
 
-      //!< The topic subscribed to for the camera
-      std::string imageTopic;
-      std::string cameraFrameId;
-      
-      //!< time durations for every callback Timer 
-      double faceTime;
-      
-      //!< Publishers for FaceDetector result messages
-      ros::Publisher _victimDirectionPublisher;
-      
-      //!< The subscriber that listens to the frame 
-      //!< topic advertised by the central node
-      image_transport::Subscriber _frameSubscriber;
-      
-      //!< variables for changing in dummy msg mode for debugging
-      bool faceDummy;
-     
-      //!< Variable used for State Managing
-      bool faceNowON;
-      
-  
-      //!< parameters for the FaceDetector:
-      std::string cascade_path;
-      std::string model_path;
-      std::string model_url;
-      int bufferSize;
-      bool skinEnabled; 
-   
-      //!< Paths for Skin Detector
-      std::string skinHist;
-      std::string wallHist;
-      std::string wall2Hist;
-      std::string packagePath;
-      
-      //!< Current state of robot
-      int curState;		
-      //!< Previous state of robot
-      int prevState;		
-      
-      /**
-       * @brief Get parameters referring to view and frame characteristics from
-       * launch file
-       * @return void
-      */  
-      void getGeneralParams();
-      
-      /**
-       * @brief Get parameters referring to facedetection algorithm
-       * @return void
-      */
-      void getFaceParams();
-      
-      void getTimerParams();
-      
-      /**
-       * @brief This method uses a FaceDetector instance to detect all 
-       * present faces in a given frame
-       * @param timer [ros:TimerEvemt] the timer used to call 
-       * faceCallback
-       * @return void
-      */
-      void faceCallback(const ros::TimerEvent&);
-      
-      /**
-       * Function called when new ROS message appears, for front camera
-       * @param msg [const sensor_msgs::ImageConstPtr&] The message
-       * @return void
-      */
-      void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-      
-    public:
-          
-      //!< The Constructor
-      FaceDetection();
-            
-      //!< The Destructor			
-      virtual ~FaceDetection();	
-    
-      void createFaceMessage(vision_communications::FaceDirectionMsg &faceMessage);
-      void createDummyFaceMessage(float &center_x, float &center_y, vision_communications::FaceDirectionMsg &faceMessage);
-      
-      /**
-       * @brief Node's state manager
-       * @param newState [int] The robot's new state
-       * @return void
-      */
-      void startTransition(int newState);
-      
-      /**
-       * @brief After completion of state transition
-       * @return void
-      */
-      void completeTransition(void);
-      
-  };
+  //!< The NodeHandle
+  ros::NodeHandle _nh;
+
+  FaceDetector*	_faceDetector;
+
+  float ratioX;
+  float ratioY;
+
+  //!< Horizontal field of view in rad
+  double hfov;
+
+  //!< Vertical Field Of View (rad)
+  double vfov;
+
+  int frameWidth;
+  int frameHeight;
+
+  std::string cameraName;
+
+  //!< Frame processed by FaceDetector
+  cv::Mat	faceFrame;
+
+  //!<FaceDetector frame timestamp
+  ros::Time faceFrameTimestamp;
+
+  //!< Timer used for FaceCallaback
+  ros::Timer faceTimer;
+
+  //!< The topic subscribed to for the camera
+  std::string imageTopic;
+  std::string cameraFrameId;
+
+  //!< time durations for every callback Timer
+  double faceTime;
+
+  //!< Publishers for FaceDetector result messages
+  ros::Publisher _victimDirectionPublisher;
+
+  //!< The subscriber that listens to the frame
+  //!< topic advertised by the central node
+  image_transport::Subscriber _frameSubscriber;
+
+  //!< variables for changing in dummy msg mode for debugging
+  bool faceDummy;
+
+  //!< Variable used for State Managing
+  bool faceNowON;
+
+
+  //!< parameters for the FaceDetector:
+  std::string cascade_path;
+  std::string model_path;
+  std::string model_url;
+  int bufferSize;
+  bool skinEnabled;
+
+  //!< Paths for Skin Detector
+  std::string skinHist;
+  std::string wallHist;
+  std::string wall2Hist;
+  std::string packagePath;
+
+  //!< Current state of robot
+  int curState;
+  //!< Previous state of robot
+  int prevState;
+
+  /**
+   * @brief Get parameters referring to view and frame characteristics from
+   * launch file
+   * @return void
+  */
+  void getGeneralParams();
+
+  /**
+   * @brief Get parameters referring to facedetection algorithm
+   * @return void
+  */
+  void getFaceParams();
+
+  void getTimerParams();
+
+  /**
+   * @brief This method uses a FaceDetector instance to detect all
+   * present faces in a given frame
+   * @param timer [ros:TimerEvemt] the timer used to call
+   * faceCallback
+   * @return void
+  */
+  void faceCallback(const ros::TimerEvent&);
+
+  /**
+   * Function called when new ROS message appears, for front camera
+   * @param msg [const sensor_msgs::ImageConstPtr&] The message
+   * @return void
+  */
+  void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+
+public:
+
+  //!< The Constructor
+  FaceDetection();
+
+  //!< The Destructor
+  virtual ~FaceDetection();
+
+  void createFaceMessage(vision_communications::FaceDirectionMsg &faceMessage);
+  void createDummyFaceMessage(float &center_x, float &center_y, vision_communications::FaceDirectionMsg &faceMessage);
+
+  /**
+   * @brief Node's state manager
+   * @param newState [int] The robot's new state
+   * @return void
+  */
+  void startTransition(int newState);
+
+  /**
+   * @brief After completion of state transition
+   * @return void
+  */
+  void completeTransition(void);
+
+};
 }
 #endif
-		
-		
+
+
