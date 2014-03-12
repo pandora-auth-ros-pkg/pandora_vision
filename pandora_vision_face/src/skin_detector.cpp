@@ -37,373 +37,281 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include "pandora_vision_face/skin_detector.h"
-
-/**
- * Class Constructor
- * Loads the images representing the histogramms of skin and background areas.
- * The histogramms are 256X256, 8-bit, single-channel (binary) images.
- * The height axis of the histogramm represents the Cr channel of the
- * initial image and the width axis the Cb channel.
- * Each pixel represents the normalized number of times the corresponding
- * (Cr,Cb) component appears on the initial images. 
- * 
- * @param skinHist  string The name of the skin histogramm image. 
- * 		  wallHist  string The name of the wall histogramm image.
- * 		  wall2Hist string The name of the second type of wall histogramm image.
- */
-
-SkinDetector::SkinDetector( std::string skinHist, std::string wallHist, std::string wall2Hist )
-{	
-	imgHistogrammSkin  = cv::imread( skinHist.c_str()  ,  0 );
-	std::cout<<skinHist.c_str()<<"\n";
-	imgHistogrammWall  = cv::imread( wallHist.c_str()  ,  0 );
-	std::cout<<wallHist.c_str()<<"\n";
-	imgHistogrammWall2 = cv::imread( wall2Hist.c_str() ,  0 );
-	std::cout<<wall2Hist.c_str()<<"\n";
-	std::cout << "Created SkinDetector instance" << std::endl;
-}
-
-/**
- * Class Destructor
- * Releases the images that represent the histogramms. 
- */
-
-SkinDetector::~SkinDetector()
-{		
-	
-	std::cout << "Destroying SkinDetector instance" << std::endl;
-}
-
-/********************** init ******************************
- * Type:		PUBLIC
- * Description: 		
- * 				initiliazes all the pointers used for the
- * 				detection of skin blobs. 				  
- **********************************************************/
-
-void SkinDetector::init()
-{	
-			
-	contourCounter     = 0;	
-	contourCenter      = 0;
-	contourProbability = 0;
-	contourSize        = 0;		
-}
-
-/******************* deallocateMemory *********************
- * Type:		PUBLIC
- * Description: 		
- * 				releases all the pointers after the
- * 				detection of skin blobs is done. 				  
- **********************************************************/
-
-void SkinDetector::deallocateMemory()
+namespace pandora_vision
 {
-	delete [] contourCenter;
-	delete [] contourProbability;
-	delete [] contourSize;
-	
-}
+  /**
+   @brief Class Constructor
+   Loads the images representing the histogramms of skin and background areas.
+   The histogramms are 256X256, 8-bit, single-channel (binary) images.
+   The height axis of the histogramm represents the Cr channel of the
+   initial image and the width axis the Cb channel.
+   Each pixel represents the normalized number of times the corresponding
+   (Cr,Cb) component appears on the initial images. 
+   @param skinHist  string The name of the skin histogramm image. 
+    		  wallHist  string The name of the wall histogramm image.
+    		  wall2Hist string The name of the second type of wall histogramm image.
+  */
+  SkinDetector::SkinDetector( std::string skinHist, std::string wallHist, std::string wall2Hist )
+  {	
+    imgHistogrammSkin  = cv::imread( skinHist.c_str()  ,  0 );
+    std::cout<<skinHist.c_str()<<"\n";
+    imgHistogrammWall  = cv::imread( wallHist.c_str()  ,  0 );
+    std::cout<<wallHist.c_str()<<"\n";
+    imgHistogrammWall2 = cv::imread( wall2Hist.c_str() ,  0 );
+    std::cout<<wall2Hist.c_str()<<"\n";
+    std::cout << "Created SkinDetector instance" << std::endl;
+  }
 
-/*************** getImgContoursForFace ********************
- * Type:		PUBLIC
- * Description: 		
- * 				function used for the 
- * 				communication between SkinDetector and 
- * 				FaceDetector.
- * 
- * @return 		imgContours IplImage contains the areas 
- * 				which have been detected as skin blobs. 							  
- **********************************************************/
+  /**
+   @brief Class Destructor
+   Releases the images that represent the histogramms. 
+  */
+  SkinDetector::~SkinDetector()
+  {		
+    
+    std::cout << "Destroying SkinDetector instance" << std::endl;
+  }
 
-cv::Mat SkinDetector::getImgContoursForFace()
-{
-		cv::dilate( imgContours, imgContours, cv::Mat(), cv::Point(),6);
-		return imgContours;
-}
+  
+  /**
+   @brief Function that initializes all the pointers used
+   for the detection of skin blobs
+   @return void 
+  */
+  void SkinDetector::init()
+  {	
+    contourCounter     = 0;	
+    contourCenter      = 0;
+    contourProbability = 0;
+    contourSize        = 0;		
+  }
 
-/********************** detectSkin ************************
- * Type:		PUBLIC
- * Description: 		
- * 				function that given the already loaded 
- * 				histogramm images decides which areas
- * 				of the current image are skin blobs.
- * 
- * @param 		imgInput IplImage the current image
- * 				that must be checked for skin areas.							  
- **********************************************************/
+  
+  /**
+   @brief Function that releases all the pointers 
+   after the detection of skin blobs is done
+   @return void 
+  */ 
+  void SkinDetector::deallocateMemory()
+  {
+    delete [] contourCenter;
+    delete [] contourProbability;
+    delete [] contourSize;
+  }
 
-void SkinDetector::createCalculationImages(cv::Mat imgInput)
-{
-    imgSrc = imgInput.clone();	
-    imgThreshold.create(imageHeight,imageWidth,CV_8UC1);
-	
-    imgThresholdFiltered.create(imageHeight,imageWidth,CV_8UC1);
-	
-    imgContours.create(imageHeight,imageWidth,CV_8UC1);
-}
 
-bool SkinDetector::histogrammsLoadedCorrectly()
-{
-   if ( imgHistogrammSkin.empty() )
-   {
-       std::cout<<"couldn't load image histogramm_skin \n";
-       return false;
-   }
-	
-   if ( imgHistogrammWall.empty() )
-   {
-       std::cout<<"couldn't load image histogramm_wall \n";
-       return false;
-   }
-	
-   if ( imgHistogrammWall2.empty() )
-   {
-       std::cout<<"couldn't load image histogramm_wall2 \n";
-       return false;
-   }
+  /**
+   @brief Function used for the communication between SkinDetector
+   and FaceDetector insatnce
+   @return imgContours [cv::IplImage] contains the areas 
+   which have been detected as skin blobs. 
+  */ 
+  cv::Mat SkinDetector::getImgContoursForFace()
+  {
+      cv::dilate( imgContours, imgContours, cv::Mat(), cv::Point(),6);
+      return imgContours;
+  }
+
    
-   return true;
-}
-
-void SkinDetector::getCalculationParams(int& stepSrc, uchar* &dataSrc ,int& channels, 
-                                        int& stepThreshold, uchar* &dataHistogrammSkin, int& stepHistogrammSkin, 
-                                        uchar* &dataHistogrammWall, int& stepHistogrammWall, uchar* &dataHistogrammWall2, 
-                                        int& stepHistogrammWall2, uchar* &dataContours, int& stepContours)
-{
-    stepSrc = imgSrc.step;
-    dataSrc = (uchar *)imgSrc.data; 
-    channels = imgSrc.channels();
-	
-    stepThreshold = imgThreshold.step;
-	
-    dataHistogrammSkin = (uchar *)imgHistogrammSkin.data;
-    stepHistogrammSkin = imgHistogrammSkin.step;
-	
-    dataHistogrammWall = (uchar *) imgHistogrammWall.data;
-    stepHistogrammWall = imgHistogrammWall.step;
-	
-    dataHistogrammWall2 = (uchar *)imgHistogrammWall2.data;
-    stepHistogrammWall2 = imgHistogrammWall2.step;
+  /**
+   @brief Function that given the already loaded histogramm images
+   decided which areas of the current image are skin blobs
+   @return imgInput [cv::IplImage] the current image
+   that must be checked for skin areas.
+  */ 
+  void SkinDetector::createCalculationImages(cv::Mat imgInput)
+  {
+      imgSrc = imgInput.clone();	
+      imgThreshold.create(imageHeight,imageWidth,CV_8UC1);
     
-    dataContours	  = (uchar*)imgContours.data;
-    stepContours	  = imgContours.step;
+      imgThresholdFiltered.create(imageHeight,imageWidth,CV_8UC1);
     
-    imgThreshold=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
-    imgThresholdFiltered=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
-    imgContours=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
+      imgContours.create(imageHeight,imageWidth,CV_8UC1);
+  }
+  
+  /**
+   @brief Function that checks if histogramms are loaded correctly
+   @return [bool], true if all patterns are loaded correctly,
+   false if not
+  */ 
+  bool SkinDetector::histogrammsLoaded()
+  {
+     if ( imgHistogrammSkin.empty() )
+     {
+         std::cout<<"couldn't load image histogramm_skin \n";
+         return false;
+     }
     
+     if ( imgHistogrammWall.empty() )
+     {
+         std::cout<<"couldn't load image histogramm_wall \n";
+         return false;
+     }
     
-    int colorspace = CV_BGR2HSV;
-    //cvCvtColor(imgSrc,imgSrc, colorspace); // CV_RGB2HSV
-}
-
-void SkinDetector::scanForSkin(int stepSrc, uchar* dataSrc ,int channels, 
-                               int stepThreshold, uchar* dataHistogrammSkin, int stepHistogrammSkin, uchar* dataHistogrammWall, 
-                               int stepHistogrammWall, uchar* dataHistogrammWall2, int stepHistogrammWall2)
-{
-    // Convert imgSrc to cv::Mat
-    cv::Mat hsv;
-    hsv=imgSrc.clone();
+     if ( imgHistogrammWall2.empty() )
+     {
+         std::cout<<"couldn't load image histogramm_wall2 \n";
+         return false;
+     }
+     
+     return true;
+  }
+  
+  /**
+   @brief Function that calculates all necessary parameters
+   for skin detection 
+   @return void
+  */  
+  void SkinDetector::getCalculationParams(int& stepSrc, uchar* &dataSrc ,int& channels, 
+                                          int& stepThreshold, uchar* &dataHistogrammSkin, int& stepHistogrammSkin, 
+                                          uchar* &dataHistogrammWall, int& stepHistogrammWall, uchar* &dataHistogrammWall2, 
+                                          int& stepHistogrammWall2, uchar* &dataContours, int& stepContours)
+  {
+      stepSrc = imgSrc.step;
+      dataSrc = (uchar *)imgSrc.data; 
+      channels = imgSrc.channels();
     
+      stepThreshold = imgThreshold.step;
     
-    // Convert to HSV colorspace
-    cv::cvtColor( hsv, hsv, CV_BGR2HSV );
-    //~ cv::imshow("to Mat",imgThresholdMat);
-    //~ cvWaitKey(0);
+      dataHistogrammSkin = (uchar *)imgHistogrammSkin.data;
+      stepHistogrammSkin = imgHistogrammSkin.step;
     
-    // Threshold the image
-    cv::Mat imageThreshold;
-    cv::inRange(hsv, cv::Scalar(0, 58, 89), cv::Scalar(25, 173, 229), imageThreshold);
+      dataHistogrammWall = (uchar *) imgHistogrammWall.data;
+      stepHistogrammWall = imgHistogrammWall.step;
     
-    imgThreshold=imageThreshold.clone(); 
-    
+      dataHistogrammWall2 = (uchar *)imgHistogrammWall2.data;
+      stepHistogrammWall2 = imgHistogrammWall2.step;
+      
+      dataContours	  = (uchar*)imgContours.data;
+      stepContours	  = imgContours.step;
+      
+      imgThreshold=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
+      imgThresholdFiltered=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
+      imgContours=cv::Mat::zeros(imageHeight,imageWidth,CV_8UC1);
+      
+      //cvCvtColor(imgSrc,imgSrc, CV_BGR2HSV);
+  }
+  
+  /**
+   @brief Function that scans given frame and checks if skin is detected
+   @return void
+  */ 
+  void SkinDetector::scanForSkin(int stepSrc, uchar* dataSrc ,int channels, 
+                                 int stepThreshold, uchar* dataHistogrammSkin, int stepHistogrammSkin, uchar* dataHistogrammWall, 
+                                 int stepHistogrammWall, uchar* dataHistogrammWall2, int stepHistogrammWall2)
+  {
+      cv::Mat hsv;
+      hsv=imgSrc.clone();
+      cv::cvtColor( hsv, hsv, CV_BGR2HSV );
+      
+      // Threshold the image
+      cv::Mat imageThreshold;
+      cv::inRange(hsv, cv::Scalar(0, 58, 89), cv::Scalar(25, 173, 229), imageThreshold);
+      
+      imgThreshold=imageThreshold.clone(); 
+  }
+  
+  /**
+   @brief Function that calculates probability to have skin
+   in current frame
+   @return void
+  */ 
+  void SkinDetector::calculatePropability(uchar *dataContours, int stepContours)
+  {
+    //allocate memory dynamically to save the contours' properties
+    contourCenter      = new cv::Point[Contour.size()];
+    contourProbability = new float[Contour.size()];
+    contourSize        = new int[Contour.size()];
+    contourCounter = 0;
 
-//    cvShowImage("img",imgThreshold);
-//    cvWaitKey(0);
-}
-
-void SkinDetector::calculatePropability(uchar *dataContours, int stepContours)
-{
-            //allocate memory dynamically to save the contours' properties
-            contourCenter      = new cv::Point[Contour.size()];
-            contourProbability = new float[Contour.size()];
-            contourSize        = new int[Contour.size()];
-
-            contourCounter = 0;
-
-            //get contours' properties
-            for( int i = 0; i < Contour.size(); ++i )
-            {
-                    if( contourArea(Contour.at(i)) > sizeThreshold )
-                    {
-                            std::cout<<"IMGCONTOURS CHANGE"<<std::endl;
-                            cv::drawContours( imgContours, Contour, i, CV_RGB(255,255,255));
-                                                   
-                            contourSize[contourCounter] = int(contourArea( Contour.at(i))); 
-
-                            cv::Rect boundingRect = cv::boundingRect( cv::Mat(Contour[i]) );
-                            double boundingHeight = boundingRect.height;
-                            double boundingWidth = boundingRect.width;
-                            int startX = boundingRect.x;
-                            int endX = startX + boundingRect.width;
-                            int startY = boundingRect.y;
-                            int endY = startY + boundingRect.height;
-
-                            contourCenter[contourCounter] = cv::Point( ( startX + boundingWidth/2 ), ( startY + boundingHeight/2 ) );
-
-                            int positive = 0;
-                            int negative = 0;
-
-                            for (int j = startX; j < endX; j++)
-                            {
-                                    for ( int i = startY; i < endY; i++)
-                                    {
-                                            if (dataContours[i*stepContours+j]!=0) 
-                                            { 
-                                                    positive++; 
-                                            }
-                                            else
-                                            {
-                                                    negative++;
-                                            }
-                                    }
-                            }
-
-                            contourProbability[contourCounter] = (float) positive/(positive+negative);
-                            contourCounter++;
-                    }
-            }
-            for( int i = 0; i < contourCounter; i++ )
-		{ 
-            std::cout<<"CountourCenter = "<<"( "<<contourCenter[i].x<<" , "<< contourCenter[i].y<<" )"<<std::endl;
-			std::cout<<"CountourSize = "<<contourSize[i]<<std::endl;
-			std::cout<<"Propability = "<<contourProbability[i]<<std::endl<<std::endl;
-		}
-}
-
-int SkinDetector::detectSkin(cv::Mat imgInput)
-{
-        
-    imageHeight=imgInput.size().height;
-    imageWidth=imgInput.size().width;
-    
-    createCalculationImages(imgInput);
-
-    if ( histogrammsLoadedCorrectly())
+    //get contours' properties
+    for( int i = 0; i < Contour.size(); ++i )
     {
-        //std::cout<<"histogramm images loaded "<<std::endl;
+      if( contourArea(Contour.at(i)) > sizeThreshold )
+      {
+        std::cout<<"IMGCONTOURS CHANGE"<<std::endl;
+        cv::drawContours( imgContours, Contour, i, CV_RGB(255,255,255));
+        contourSize[contourCounter] = int(contourArea( Contour.at(i))); 
+
+        cv::Rect boundingRect = cv::boundingRect( cv::Mat(Contour[i]) );
+        double boundingHeight = boundingRect.height;
+        double boundingWidth = boundingRect.width;
+        int startX = boundingRect.x;
+        int endX = startX + boundingRect.width;
+        int startY = boundingRect.y;
+        int endY = startY + boundingRect.height;
+
+        contourCenter[contourCounter] = cv::Point( ( startX + boundingWidth/2 ), ( startY + boundingHeight/2 ) );
+
+        int positive = 0;
+        int negative = 0;
+        for (int j = startX; j < endX; j++)
+        {
+                for ( int i = startY; i < endY; i++)
+                {
+                        if (dataContours[i*stepContours+j]!=0) 
+                        { 
+                                positive++; 
+                        }
+                        else
+                        {
+                                negative++;
+                        }
+                }
+        }
+        contourProbability[contourCounter] = (float) positive/(positive+negative);
+        contourCounter++;
+      }
     }
-    else
-    {
+    for( int i = 0; i < contourCounter; i++ )
+    { 
+    std::cout<<"CountourCenter = "<<"( "<<contourCenter[i].x<<" , "<< contourCenter[i].y<<" )"<<std::endl;
+    std::cout<<"CountourSize = "<<contourSize[i]<<std::endl;
+    std::cout<<"Propability = "<<contourProbability[i]<<std::endl<<std::endl;
+    }
+}
+
+  int SkinDetector::detectSkin(cv::Mat imgInput)
+  {
+          
+      imageHeight=imgInput.size().height;
+      imageWidth=imgInput.size().width;
+      
+      createCalculationImages(imgInput);
+
+      if (!histogrammsLoaded())
+      {
         std::cout<<"Problem loading histogramm images"<<std::endl;
         return 1;
-    }
-    
-    int stepSrc, channels, stepThreshold, stepHistogrammSkin;
-    int stepContours, stepHistogrammWall, stepHistogrammWall2;
-    uchar *dataSrc, *dataHistogrammSkin, *dataHistogrammWall, *dataHistogrammWall2, *dataContours; 
-    
-    getCalculationParams(stepSrc, dataSrc, channels, 
-                                        stepThreshold, dataHistogrammSkin, stepHistogrammSkin, 
-                                        dataHistogrammWall, stepHistogrammWall, dataHistogrammWall2, 
-                                        stepHistogrammWall2, dataContours, stepContours);
-    
-    scanForSkin(stepSrc, dataSrc, channels, 
-                                        stepThreshold, dataHistogrammSkin, stepHistogrammSkin, 
-                                        dataHistogrammWall, stepHistogrammWall, dataHistogrammWall2, 
-                                        stepHistogrammWall2);
-    
-    cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS , cv::Size(3,3), cv::Point( -1, -1 ) );
-    cv::morphologyEx(imgThreshold, imgThresholdFiltered, cv::MORPH_OPEN, kernel,cv::Point(-1,-1),3);
-//    cvShowImage( "filtered", imgThresholdFiltered );
-//    cvWaitKey();
-			
-    //find all the contours of the image and keep those whose area is bigger than 300 pixels
-    std::vector<cv::Vec4i> hierarchy;
-    findContours( imgThresholdFiltered, Contour, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-    
-//    cvFillPoly(CvArr* img, CvPoint** pts, const int* npts, int contours, CvScalar color, int line_type=8, int shift=0 )
-//    CvPoint* points;
-//    cvCvtSeqToArray(Contour, points);
-//    cvFillPoly(imgThreshold, points,Contour[0, 2, random_color(&rng), line_type, 0);
-    if (!Contour.empty()) 
-    {
-        calculatePropability(dataContours, stepContours);
-    }
-//    cvShowImage("final",imgContours);
-//    cvWaitKey(0);
-    std::cout<<"contourCounter = "<<contourCounter<<std::endl;
-    return 0;	
-}
+      }
+      
+      int stepSrc, channels, stepThreshold, stepHistogrammSkin;
+      int stepContours, stepHistogrammWall, stepHistogrammWall2;
+      uchar *dataSrc, *dataHistogrammSkin, *dataHistogrammWall, *dataHistogrammWall2, *dataContours; 
+      
+      getCalculationParams(stepSrc, dataSrc, channels, 
+                                          stepThreshold, dataHistogrammSkin, stepHistogrammSkin, 
+                                          dataHistogrammWall, stepHistogrammWall, dataHistogrammWall2, 
+                                          stepHistogrammWall2, dataContours, stepContours);
+      
+      scanForSkin(stepSrc, dataSrc, channels, 
+                                          stepThreshold, dataHistogrammSkin, stepHistogrammSkin, 
+                                          dataHistogrammWall, stepHistogrammWall, dataHistogrammWall2, 
+                                          stepHistogrammWall2);
+      
+      cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS , cv::Size(3,3), cv::Point( -1, -1 ) );
+      cv::morphologyEx(imgThreshold, imgThresholdFiltered, cv::MORPH_OPEN, kernel,cv::Point(-1,-1),3);
+ 
+      std::vector<cv::Vec4i> hierarchy;
+      findContours( imgThresholdFiltered, Contour, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
-//~ int main ( int argc, char** argv )
-//~ {
-	//~ IplImage* img  = 0;
-       //~ std::string skinHist = "../../data/histogramms/histogramm_skin.jpg";
-       //~ std::string wallHist = "../../data/histogramms/histogramm_wall.jpg";       
-       //~ std::string wall2Hist = "../../data/histogramms/histogramm_wall2.jpg";
-//        
-//	int o=0;
-//	
-//	CvCapture* cap = cvCaptureFromCAM(0);
-//	
-//	CvSize b ;
-//	b.height=640;
-//	b.width=480;
-//	img  = cvCreateImage ( b, 8 , 1);
-//		
-//	cvNamedWindow("imgSrc",0);
-//	cvNamedWindow("imgTest",0);
-//	cvNamedWindow("Final",0);
-//	
-//	char c;
-//	
-//	SkinDetector detector(skinHist, wallHist, wall2Hist);
-//	char filename[20];
-//	
-//	int numOfFrame=0;	
-//	
-//	while(1)
-//	{	
-//            std::cout<<"Enter loop"<<std::endl;
-//		img = cvQueryFrame(cap);
-//		//img = cvLoadImage(argv[1]);
-//		cvShowImage( "imgSrc", img );
-//		numOfFrame++;
-//		if(!img)break;
-//		detector.init();
-//		
-//		std::cout<<"numOfFrame="<<numOfFrame<<std::endl;
-//		double t = ( double )cvGetTickCount();
-//		detector.detectSkin(img);
-//		t = (double)cvGetTickCount() - t;
-//		std::cout<<"detection time ="<< t/((double)cvGetTickFrequency()*1000.)<<"ms\n";
-//	
-//		for( int i = 0; i < detector.contourCounter; i++ )
-//		{ 
-//			std::cout<<"CountourCenter = "<<"( "<<detector.contourCenter[i].x<<" , "<< detector.contourCenter[i].y<<" )"<<std::endl;
-//			std::cout<<"CountourSize = "<<detector.contourSize[i]<<std::endl;
-//			std::cout<<"Propability = "<<detector.contourProbability[i]<<std::endl<<std::endl;
-//		}
-//                
-//		cvShowImage("imgTest",detector.imgThreshold);
-//		cvShowImage("Final",detector.imgContours);
-//		detector.deallocateMemory();
-//		
-//		c = cvWaitKey(33);
-//                std::cout<<"c = "<<c<<std::endl;
-//                std::cout<<"o = "<<o<<std::endl;
-//		if(c==27) break;
-//                
-//		if(c==115){
-//			sprintf(filename, "Img%d.jpg", o);
-//			cvSaveImage(filename, img);
-//			o++;
-//		}
-//		if (c==32){ c = cvWaitKey(0);}		
-//	 }
-//	
-//	cvReleaseCapture(&cap);
-//	return 1;	
-//~ }
+      if (!Contour.empty()) 
+      {
+          calculatePropability(dataContours, stepContours);
+      }
+ 
+      std::cout<<"contourCounter = "<<contourCounter<<std::endl;
+      return 0;	
+  }
+
+}

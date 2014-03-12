@@ -41,22 +41,22 @@
 namespace pandora_vision
 {
   /**
-   * @brief Class Constructor
-   * Initializes cascade_name and constants
-   * and allocates memory for sequence of elements
-   * @param cascade_path [std::string] the name of 
-   *        the cascade to be loaded
-   * @param model_path [std::string] the path to the model
-   *        to be loaded
-   * @param bufferSize [int] number of frames in the frame buffer
-   * @param skinEnabled [bool] enables the verification 
-   *        of face algorithm using the Skin detector
-   * @param mn parameter used in cvHaarDetect function
-   * @param minFaceDim parameter used in cvHaarDetect function
-   * @param skinHist Histogram - parameter to be passed in the Skin Detector
-   * @param wallHist Histogram - parameter to be passed in the Skin Detector
-   * @param wall2Hist Histogram - parameter to be passed in the Skin Detector
-   * @return void
+   @brief Class Constructor
+   Initializes cascade_name and constants
+   and allocates memory for sequence of elements
+   @param cascade_path [std::string] the name of 
+           the cascade to be loaded
+   @param model_path [std::string] the path to the model
+           to be loaded
+   @param bufferSize [int] number of frames in the frame buffer
+   @param skinEnabled [bool] enables the verification 
+           of face algorithm using the Skin detector
+   @param mn parameter used in cvHaarDetect function
+   @param minFaceDim parameter used in cvHaarDetect function
+   @param skinHist Histogram - parameter to be passed in the Skin Detector
+   @param wallHist Histogram - parameter to be passed in the Skin Detector
+   @param wall2Hist Histogram - parameter to be passed in the Skin Detector
+   @return void
   */
   FaceDetector::FaceDetector(std::string cascade_path,std::string model_path,
     int bufferSize, bool skinEnabled, std::string skinHist, 
@@ -89,9 +89,9 @@ namespace pandora_vision
   }
 
   /**
-   * Class Destructor
-   * Deallocates all memory used for storing sequences of faces,
-   * matrices and images
+   @brief Class Destructor
+   Deallocates all memory used for storing sequences of faces,
+   matrices and images
   */
   FaceDetector::~FaceDetector()
   {
@@ -112,12 +112,12 @@ namespace pandora_vision
   }
 
 
- /**
+  /**
     @brief Detects number of faces found in current frame.
-      The image buffer contributs to probability.
+    The image buffer contributs to probability.
     @param frameIN [cv::Mat] The frame to be scanned for faces
     @return Integer of the sum of faces found in all
-     rotations of the frame 
+    rotations of the frame 
   */
   int FaceDetector::findFaces(cv::Mat frame)
   {
@@ -169,7 +169,7 @@ namespace pandora_vision
       skinDetector->init();
 
       //!< When there is a problem with detectSkin() it returns 1
-      //!<in this case findFaces() returns -2
+      //!< in this case findFaces() returns -2
       if ( skinDetector->detectSkin( frame ) )
       {
         return -2;
@@ -180,65 +180,61 @@ namespace pandora_vision
 
     return facesNum;
   }
-/*
- * set probability according to skinDetector
- */
-void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea)
-{
-  float skinFactor = 0.;
-  float skinFaceRatio = 0.;
-  int skinPixelNum = 0;
-
-  //skinImg = skinDetector->getImgContoursForFace();
-  skinImg = skinDetector->imgThresholdFiltered;
-
-  // INITIAL CODE
-
-  skinPixelNum = round( cv::norm(skinImg,cv::NORM_L1,cv::noArray())/ 255.);
-//                cvShowImage("blob",skinImg);
-//                cvWaitKey(0);
-
-  bitwise_and( frame_buffer[now] , skinImg , tmp); //tmp now stores common skin-face pixels
-
-  if(totalArea==0)
+ 
+ 
+  /**
+    @brief Set probability accordint to skinDetector instance
+    @param frameIN [cv::Mat] The frame to be scanned for faces
+    @return Integer of the sum of faces found in all
+    rotations of the frame 
+  */ 
+  void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea)
   {
-    skinFaceRatio = 0.; // if no face was found, skinFaceRatio for this frame is 0
-  }
-  else
-  {
-    skinFaceRatio = round( cv::norm(tmp,cv::NORM_L1,cv::noArray())/ 255.) / (float)totalArea;
-  }
+    float skinFactor = 0.;
+    float skinFaceRatio = 0.;
+    int skinPixelNum = 0;
 
-  if (skinFaceRatio >= 0.01) {
-    skinFactor = 1.;
-  }
-  else if(skinFaceRatio >= 0.005 && skinFaceRatio < 0.01) {
-    skinFactor = 0.8;
-  }
-  else if(skinFaceRatio >= 0.001 && skinFaceRatio < 0.005) {
-    skinFactor = 0.7;
-  }
-  else if(skinFaceRatio >= 0.0005 && skinFaceRatio < 0.001) {
-    skinFactor = 0.4;
-  }
-  else
-  {
-    skinFactor = 0.;
-  }
+    //skinImg = skinDetector->getImgContoursForFace();
+    skinImg = skinDetector->imgThresholdFiltered;
+    skinPixelNum = round( cv::norm(skinImg,cv::NORM_L1,cv::noArray())/ 255.);
+    bitwise_and( frame_buffer[now] , skinImg , tmp); //tmp now stores common skin-face pixels
 
-  probability = 0.7 * probability + 0.3 * skinFactor;
-  std::cout << "skinFaceRatio: " << skinFaceRatio << std::endl;
-  std::cout << "skinFaceFactor: " << skinFactor << std::endl;
-  //debugging
-  if(isDebugMode)
-  {
-    skinImg = tmp.clone();
-    //cvShowImage("SkinOutput" , tmp);
-    //cout << "skinFaceRatio: " << skinFaceRatio << endl;
-  }
+    if(totalArea==0)
+    {
+      skinFaceRatio = 0.; // if no face was found, skinFaceRatio for this frame is 0
+    }
+    else
+    {
+      skinFaceRatio = round( cv::norm(tmp,cv::NORM_L1,cv::noArray())/ 255.) / (float)totalArea;
+    }
 
-  skinDetector->deallocateMemory();
-}
+    if (skinFaceRatio >= 0.01) 
+    {
+      skinFactor = 1.;
+    }
+    else if(skinFaceRatio >= 0.005 && skinFaceRatio < 0.01) 
+    {
+      skinFactor = 0.8;
+    }
+    else if(skinFaceRatio >= 0.001 && skinFaceRatio < 0.005) 
+    {
+      skinFactor = 0.7;
+    }
+    else if(skinFaceRatio >= 0.0005 && skinFaceRatio < 0.001) 
+    {
+      skinFactor = 0.4;
+    }
+    else
+    {
+      skinFactor = 0.;
+    }
+
+    probability = 0.7 * probability + 0.3 * skinFactor;
+    std::cout << "skinFaceRatio: " << skinFaceRatio << std::endl;
+    std::cout << "skinFaceFactor: " << skinFactor << std::endl;
+   
+    skinDetector->deallocateMemory();
+  }
 
   /**
     @brief Initializes frame and probability buffer
