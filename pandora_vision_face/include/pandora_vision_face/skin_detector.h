@@ -49,104 +49,104 @@
 #include <cv_bridge/cv_bridge.h>
 namespace pandora_vision
 {
-  class SkinDetector
-  { 
+class SkinDetector
+{
 
-    public:
-    
-      cv::Mat imgSrc;
-      cv::Mat imgHistogrammSkin;
-      cv::Mat imgHistogrammWall;
-      cv::Mat imgHistogrammWall2;
-      cv::Mat imgThreshold;
-      cv::Mat imgThresholdFiltered;
-      cv::Mat imgContours;
-      
-      std::vector< std::vector <cv::Point> > Contour;
-      
-      cv::Point* contourCenter;
-      
-      int contourCounter;
-      
-      float* contourProbability;
-      int* contourSize;
-      
-      int sizeThreshold;
-      
-      float imageHeight;
-      float imageWidth;
-      
-      //!< Constructor
-      SkinDetector(std::string skinHist, std::string wallHist, std::string wall2Hist );
-      
-      //!< Destructor
-      virtual ~SkinDetector();
-      
-      /**
-        @brief Function used for the communication between SkinDetector
-        and FaceDetector insatnce
-        @return imgContours [cv::IplImage] contains the areas 
-        which have been detected as skin blobs. 
-      */ 
-      cv::Mat getImgContoursForFace();
-      
-      /**
-        @brief Function that initializes all the pointers used
-        for the detection of skin blobs
-        @return void 
-      */
-      void init();
-      
-      
-      int detectSkin(cv::Mat imgInput);
-      
-      /**
-        @brief Function that releases all the pointers 
-        after the detection of skin blobs is done
-        @return void 
-      */ 
-      void deallocateMemory();
-      
-      /**
-        @brief Function that given the already loaded histogramm images
-        decided which areas of the current image are skin blobs
-        @return imgInput [cv::IplImage] the current image
-        that must be checked for skin areas.
-      */ 
-      void createCalculationImages(cv::Mat imgInput);
-      
-      /**
-        @brief Function that checks if histogramms are loaded correctly
-        @return [bool], true if all patterns are loaded correctly,
-        false if not
-      */ 
-      bool histogrammsLoaded();
-      
-      /**
-        @brief Function that calculates all necessary parameters
-        for skin detection 
-        @return void
-      */  
-      void getCalculationParams(int& stepSrc, uchar* &dataSrc ,int& channels, 
-                                         int& stepThreshold, uchar* &dataHistogrammSkin, int& stepHistogrammSkin, 
-                                         uchar* &dataHistogrammWall, int& stepHistogrammWall, uchar* &dataHistogrammWall2, 
-                                         int& stepHistogrammWall2, uchar* &dataContours, int& stepContours);
-                                         
-      /**
-        @brief Function that scans given frame and checks if skin is detected
-        @return void
-      */ 
-      void scanForSkin(int stepSrc, uchar* dataSrc ,int channels, 
-                               int stepThreshold, uchar* dataHistogrammSkin, int stepHistogrammSkin, 
-                               uchar* dataHistogrammWall, int stepHistogrammWall, uchar* dataHistogrammWall2, int stepHistogrammWall2);
-      
-      /**
-        @brief Function that calculates probability to have skin
-        in current frame
-        @return void
-      */ 
-      void calculatePropability(uchar *dataContours, int stepContours);
-  };
+public:
+
+  cv::Mat imgSrc;
+  cv::Mat imgHistogrammSkin;
+  cv::Mat imgHistogrammWall;
+  cv::Mat imgHistogrammWall2;
+  cv::Mat imgThreshold;
+  cv::Mat imgThresholdFiltered;
+  cv::Mat imgContours;
+
+  std::vector< std::vector <cv::Point> > Contour;
+
+  cv::Point* contourCenter;
+
+  int contourCounter;
+
+  float* contourProbability;
+  int* contourSize;
+
+  int sizeThreshold;
+
+  float imageHeight;
+  float imageWidth;
+
+  //!< Constructor
+  SkinDetector(std::string skinHist, std::string wallHist, std::string wall2Hist );
+
+  //!< Destructor
+  virtual ~SkinDetector();
+
+  /**
+    @brief Function used for the communication between SkinDetector
+    and FaceDetector insatnce
+    @return imgContours [cv::IplImage] contains the areas
+    which have been detected as skin blobs.
+  */
+  cv::Mat getImgContoursForFace();
+
+  /**
+    @brief Function that initializes all the pointers used
+    for the detection of skin blobs
+    @return void
+  */
+  void init();
+
+
+  int detectSkin(cv::Mat imgInput);
+
+  /**
+    @brief Function that releases all the pointers
+    after the detection of skin blobs is done
+    @return void
+  */
+  void deallocateMemory();
+
+  /**
+    @brief Function that given the already loaded histogramm images
+    decided which areas of the current image are skin blobs
+    @return imgInput [cv::IplImage] the current image
+    that must be checked for skin areas.
+  */
+  void createCalculationImages(cv::Mat imgInput);
+
+  /**
+    @brief Function that checks if histogramms are loaded correctly
+    @return [bool], true if all patterns are loaded correctly,
+    false if not
+  */
+  bool histogrammsLoaded();
+
+  /**
+    @brief Function that calculates all necessary parameters
+    for skin detection
+    @return void
+  */
+  void getCalculationParams(int& stepSrc, uchar* &dataSrc , int& channels,
+                            int& stepThreshold, uchar* &dataHistogrammSkin, int& stepHistogrammSkin,
+                            uchar* &dataHistogrammWall, int& stepHistogrammWall, uchar* &dataHistogrammWall2,
+                            int& stepHistogrammWall2, uchar* &dataContours, int& stepContours);
+
+  /**
+    @brief Function that scans given frame and checks if skin is detected
+    @return void
+  */
+  void scanForSkin(int stepSrc, uchar* dataSrc , int channels,
+                   int stepThreshold, uchar* dataHistogrammSkin, int stepHistogrammSkin,
+                   uchar* dataHistogrammWall, int stepHistogrammWall, uchar* dataHistogrammWall2, int stepHistogrammWall2);
+
+  /**
+    @brief Function that calculates probability to have skin
+    in current frame
+    @return void
+  */
+  void calculatePropability(uchar *dataContours, int stepContours);
+};
 }
 #endif
 
