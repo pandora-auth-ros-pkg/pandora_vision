@@ -695,6 +695,10 @@ namespace pandora_vision
     std::vector<std::string>* msgs,
     std::vector<float>* probabilitiesVector)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("checkHolesDepthHomogenity","applyFilter");
+    #endif
+
     std::set<unsigned int> valid;
 
     //!< Temporary cv::Mats
@@ -757,9 +761,12 @@ namespace pandora_vision
         probabilitiesVector->at(o) = 0.0;
       }
 
-      ROS_ERROR("probability [%f %f] : %f",
-        inKeyPoints[o].pt.x, inKeyPoints[o].pt.y, probabilitiesVector->at(o));
+      msgs->push_back(TOSTR(probabilitiesVector->at(o)));
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("checkHolesDepthHomogenity");
+    #endif
 
     return valid;
   }
@@ -817,6 +824,10 @@ namespace pandora_vision
     {
       filtersOrder[HoleFusionParameters::run_checker_brushfire_outline_to_rectangle]
         = 4;
+    }
+    if (HoleFusionParameters::run_checker_depth_homogenity > 0)
+    {
+      filtersOrder[HoleFusionParameters::run_checker_depth_homogenity] = 5;
     }
 
     std::vector<cv::Mat> imgs;
@@ -961,6 +972,18 @@ namespace pandora_vision
             probabilitiesVector);
           windowMsg = "Filter: Points around blob to plane";
           break;
+        }
+        //!< Filter #5 (Depth homogenity)-----------------------------------------
+        //!< All holes are considered valid except for those that are edgeless
+        //!< inside the area denoted by the conveyor->outlines points
+      case 5 :
+        {
+          indexes = checkHolesDepthHomogenity(
+            img,
+            conveyor->keyPoints,
+            conveyor->outlines,
+            &msgs_,
+            probabilitiesVector);
         }
     }
 

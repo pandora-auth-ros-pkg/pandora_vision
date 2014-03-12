@@ -55,6 +55,7 @@ namespace pandora_vision
     candidate hole is associated. While the returned set may be reduced in
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -62,7 +63,8 @@ namespace pandora_vision
     const cv::Mat& inImage,
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point> >& inOutlines,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     //!< The valid (by this filter) blobs' indices
     std::set<unsigned int> valid;
@@ -158,6 +160,8 @@ namespace pandora_vision
       probabilitiesVector->at(i) =
         (float) overallNonZeroBoxes / (180 / box_x * 256 / box_y);
 
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+
       /*
        *ROS_ERROR("probability: [%f %f] : %f",
        *  inKeyPoints[i].pt.x, inKeyPoints[i].pt.y, probabilitiesVector->at(i));
@@ -188,6 +192,7 @@ namespace pandora_vision
     candidate hole is associated. While the returned set may be reduced in
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -197,7 +202,8 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
     const std::vector<std::vector<cv::Point> >& inOutlines,
     const int& inflationSize,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     std::set<unsigned int> valid;
 
@@ -340,6 +346,8 @@ namespace pandora_vision
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
 
+      msgs->push_back(TOSTR(probabilitiesVector->at(*it)));
+
       //!< Increment the validIterator so that it points to the next element
       //!< in the valid set
       validIterator++;
@@ -372,6 +380,7 @@ namespace pandora_vision
     candidate hole is associated. While the returned set may be reduced in
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -382,7 +391,8 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
     const std::vector<std::vector<cv::Point> >& inOutlines,
     const int& inflationSize,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     std::set<unsigned int> valid;
 
@@ -547,6 +557,8 @@ namespace pandora_vision
         probabilitiesVector->at(*validIterator) = 0.0;
       }
 
+      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
+
       //!< Increment the validIterator so that it points to the next element
       //!< in the valid set
       validIterator++;
@@ -580,6 +592,7 @@ namespace pandora_vision
     candidate hole is associated. While the returned set may be reduced in
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -590,7 +603,8 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
     const std::vector<std::vector<cv::Point> >& inOutlines,
     const int& inflationSize,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     std::set<unsigned int> valid;
 
@@ -748,6 +762,8 @@ namespace pandora_vision
         probabilitiesVector->at(*validIterator) = 0.0;
       }
 
+      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
+
       //!< Increment the validIterator so that it points to the next element
       //!< in the valid set
       validIterator++;
@@ -755,4 +771,228 @@ namespace pandora_vision
 
     return finalIndices;
   }
+
+
+  /**
+    @brief Apply a cascade-like hole checker. Each filter applied is
+    attached to an order which relates to the sequence of the overall
+    filter execution.
+    @param[in] rgbImage [const cv::Mat&] The input rgb image
+    @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+    contains the final valid holes
+    @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
+    A 2D vector of probabilities hinting to the certainty degree with
+    which each candidate hole is associated for every
+    active filter executed.
+    While the returned set may be reduced in size,
+    the size of this vector is the same throughout and equal to the number
+    of active filters by the number of keypoints found and
+    published by the rgb node.
+    @return void
+   **/
+  void RgbFilters::checkHoles(
+    const cv::Mat& rgbImage,
+    const cv::MatND& inHistogram,
+    HoleFilters::HolesConveyor* conveyor,
+    std::vector<std::vector<float> >* probabilitiesVector)
+  {
+
+    std::set<unsigned int> indexes;
+    std::vector<std::string> finalMsgs;
+
+    std::map<int, int> filtersOrder;
+
+    if (HoleFusionParameters::run_checker_color_homogenity > 0)
+    {
+      filtersOrder[HoleFusionParameters::run_checker_color_homogenity ] = 1;
+    }
+    if (HoleFusionParameters::run_checker_luminosity_diff> 0)
+    {
+      filtersOrder[HoleFusionParameters::run_checker_luminosity_diff ] = 2;
+    }
+    if (HoleFusionParameters::run_checker_texture_diff> 0)
+    {
+      filtersOrder[HoleFusionParameters::run_checker_texture_diff] = 3;
+    }
+    if (HoleFusionParameters::run_checker_texture_backproject> 0)
+    {
+      filtersOrder[HoleFusionParameters::run_checker_texture_backproject] = 4;
+    }
+
+    std::vector<cv::Mat> imgs;
+    std::vector<std::string> msgs;
+
+    int counter = 0;
+    for (std::map<int, int>::iterator o_it = filtersOrder.begin();
+      o_it != filtersOrder.end(); ++o_it)
+    {
+      applyFilter(
+        o_it->second,
+        rgbImage,
+        conveyor,
+        HoleFusionParameters::rectangle_inflation_size,
+        inHistogram,
+        &probabilitiesVector->at(counter),
+        &imgs,
+        &msgs);
+
+      counter++;
+    } //!< o_it iterator ends
+
+    #ifdef DEBUG_SHOW
+    if(HoleFusionParameters::debug_show_check_holes) // Debug
+    {
+      Visualization::multipleShow("checkHoles functions", imgs, msgs, 1200, 1);
+    }
+    #endif
+  }
+
+
+  /**
+    @brief Apply a cascade-like hole checker. Each filter applied is attached
+    to an order which relates to the sequence of the overall filter execution.
+    @param[in] method [const unsigned int&] The filter identifier to execute
+    @param[in] img [const cv::Mat&] The input rgb image
+    @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
+    holds the final holes' data
+    @param[in] inflationSize [const int&] The amount of pixels by which each
+    bounding box is inflated
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities hinting to the certainty degree with which each
+    candidate hole is associated. While the returned set may be reduced in
+    size, the size of this vector is the same throughout and equal to the
+    number of keypoints found and published by the rgb node.
+    @param[in][out] imgs [std::vector<cv::Mat>*] A vector of images which shows
+    the holes that are considered valid by each filter
+    @param[in][out] msgs [std::vector<std::string>*] Debug messages
+    @return void
+   **/
+  void RgbFilters::applyFilter(
+    const unsigned int& method,
+    const cv::Mat& img,
+    HoleFilters::HolesConveyor* conveyor,
+    const int& inflationSize,
+    const cv::MatND& inHistogram,
+    std::vector<float>* probabilitiesVector,
+    std::vector<cv::Mat>* imgs,
+    std::vector<std::string>* msgs)
+  {
+
+    std::string windowMsg;
+    std::set<unsigned int> indexes;
+    std::vector<std::string> finalMsgs;
+    std::vector<std::string> msgs_;
+    std::vector<cv::KeyPoint> finalKeyPoints;
+    std::vector<std::vector<cv::Point2f> > finalRectangles;
+    std::vector<std::vector<cv::Point> > finalBlobsOutlineVector;
+
+    //!< Initialize structures
+    indexes.clear();
+    finalKeyPoints.clear();
+    finalRectangles.clear();
+    finalBlobsOutlineVector.clear();
+    finalMsgs.clear();
+    msgs_.clear();
+
+    switch(method)
+    {
+      //!< Filter #1 (Color homogenity inside blob)-----------------------------
+      case 1 :
+        {
+          indexes = checkHolesColorHomogenity(
+            img,
+            conveyor->keyPoints,
+            conveyor->outlines,
+            probabilitiesVector,
+            &msgs_);
+          windowMsg = "Filter: Color homogenity";
+          break;
+        }
+        //!< Filter #2 (Luminosity difference)----------------------------------
+        //!< Check for luminosity difference between the points that constitute
+        //!< the blob's bounding box and the points inside the blob's outline
+      case 2 :
+        {
+          indexes = checkHolesLuminosityDiff(
+            img,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            conveyor->outlines,
+            inflationSize,
+            probabilitiesVector,
+            &msgs_);
+          windowMsg = "Filter: Luminosity difference";
+          break;
+        }
+        //!< Filter #3 (Texture difference)-------------------------------------
+      case 3 :
+        {
+          indexes = checkHolesTextureDiff(
+            img,
+            inHistogram,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            conveyor->outlines,
+            inflationSize,
+            probabilitiesVector,
+            &msgs_);
+          windowMsg = "Filter: Texture difference";
+          break;
+        }
+        //!< Filter #4 (Back project model histogram)---------------------------
+      case 4 :
+        {
+          indexes = checkHolesTextureBackProject(
+            img,
+            inHistogram,
+            conveyor->keyPoints,
+            conveyor->rectangles,
+            conveyor->outlines,
+            inflationSize,
+            probabilitiesVector,
+            &msgs_);
+          windowMsg = "Filter: Texture back project";
+          break;
+        }
+    }
+
+    for(std::set<unsigned int>::iterator it = indexes.begin() ;
+      it != indexes.end() ; it++)
+    {
+      finalKeyPoints.push_back(conveyor->keyPoints[*it]);
+      finalRectangles.push_back(conveyor->rectangles[*it]);
+      finalBlobsOutlineVector.push_back(conveyor->outlines[*it]);
+
+      if(msgs_.size() == conveyor->keyPoints.size())
+      {
+        finalMsgs.push_back(msgs_[*it]);
+      }
+    }
+
+    conveyor->outlines = finalBlobsOutlineVector;
+    conveyor->rectangles = finalRectangles;
+    conveyor->keyPoints = finalKeyPoints;
+
+    #ifdef DEBUG_SHOW
+    if(HoleFusionParameters::debug_show_check_holes) // Debug
+    {
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" ") + windowMsg;
+      msgs->push_back(msg);
+
+      cv::Mat tmp;
+      tmp = Visualization::showHoles(
+        windowMsg.c_str(),
+        img,
+        -1,
+        conveyor->keyPoints,
+        conveyor->rectangles,
+        finalMsgs,
+        conveyor->outlines);
+
+      imgs->push_back(tmp);
+    }
+    #endif
+  }
+
 }
