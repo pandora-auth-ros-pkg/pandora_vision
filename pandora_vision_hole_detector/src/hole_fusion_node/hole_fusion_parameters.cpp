@@ -87,8 +87,14 @@ namespace pandora_vision
   int HoleFusionParameters::run_checker_depth_area = 3;
   int HoleFusionParameters::run_checker_brushfire_outline_to_rectangle = 4;
   int HoleFusionParameters::run_checker_outline_of_rectangle = 2;
+  int HoleFusionParameters::run_checker_depth_homogenity = 5;
   int HoleFusionParameters::rectangle_inflation_size = 20;
   float HoleFusionParameters::depth_difference = 0.4;
+
+  int HoleFusionParameters::run_checker_color_homogenity = 1;
+  int HoleFusionParameters::run_checker_luminosity_diff = 2;
+  int HoleFusionParameters::run_checker_texture_diff = 3;
+  int HoleFusionParameters::run_checker_texture_backproject = 4;
 
   //!< Plane detection
   int HoleFusionParameters::segmentation_method = 0;
@@ -199,6 +205,7 @@ namespace pandora_vision
       config.AB_to_MO_ratio;
     HoleFusionParameters::interpolation_method =
       config.interpolation_method;
+
     HoleFusionParameters::run_checker_depth_diff =
       config.run_checker_depth_diff;
     HoleFusionParameters::run_checker_outline_of_rectangle =
@@ -207,10 +214,23 @@ namespace pandora_vision
       config.run_checker_depth_area;
     HoleFusionParameters::run_checker_brushfire_outline_to_rectangle =
       config.run_checker_brushfire_outline_to_rectangle;
+    HoleFusionParameters::run_checker_depth_homogenity =
+      config.run_checker_depth_homogenity;
+
     HoleFusionParameters::rectangle_inflation_size =
       config.rectangle_inflation_size;
     HoleFusionParameters::depth_difference =
       config.depth_difference;
+
+    HoleFusionParameters::run_checker_color_homogenity =
+      config.run_checker_color_homogenity ;
+    HoleFusionParameters::run_checker_luminosity_diff =
+      config.run_checker_luminosity_diff;
+    HoleFusionParameters::run_checker_texture_diff =
+      config.run_checker_texture_diff;
+    HoleFusionParameters::run_checker_texture_backproject =
+      config.run_checker_texture_backproject;
+
     HoleFusionParameters::segmentation_method =
       config.segmentation_method;
     HoleFusionParameters::max_iterations =

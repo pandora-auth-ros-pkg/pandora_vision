@@ -121,8 +121,14 @@ namespace pandora_vision
     static int run_checker_depth_area;
     static int run_checker_brushfire_outline_to_rectangle;
     static int run_checker_outline_of_rectangle;
+    static int run_checker_depth_homogenity;
     static int rectangle_inflation_size;
     static float depth_difference;
+
+    static int run_checker_color_homogenity;
+    static int run_checker_luminosity_diff;
+    static int run_checker_texture_diff;
+    static int run_checker_texture_backproject;
 
     //!< Plane detection
     static int segmentation_method;

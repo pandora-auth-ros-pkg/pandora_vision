@@ -295,38 +295,78 @@ namespace pandora_vision
 
     //!< Do some processing
 
+/*
+ *    //!< Initialize the probabilities 2D vector. But first we need to know
+ *    //!< how many rows the vector will accomodate
+ *    int depthActiveFilters = 0;
+ *
+ *    if (HoleFusionParameters::run_checker_depth_diff > 0)
+ *    {
+ *      depthActiveFilters++;
+ *    }
+ *    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
+ *    {
+ *      depthActiveFilters++;
+ *    }
+ *    if (HoleFusionParameters::run_checker_depth_area > 0)
+ *    {
+ *      depthActiveFilters++;
+ *    }
+ *    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
+ *    {
+ *      depthActiveFilters++;
+ *    }
+ *    if (HoleFusionParameters::run_checker_depth_homogenity > 0)
+ *    {
+ *      depthActiveFilters++;
+ *    }
+ *
+ *    std::vector<std::vector<float> > probabilitiesVector2D(depthActiveFilters,
+ *      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
+ *
+ *    //!< check holes for debugging purposes
+ *    DepthFilters::checkHoles(
+ *      interpolatedDepthImage_,
+ *      pointCloudXYZ_,
+ *      &depthHolesConveyor_,
+ *      &probabilitiesVector2D);
+ */
+
     //!< Initialize the probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
-    int numActiveFilters = 0;
+    int rgbActiveFilters = 0;
 
-    if (HoleFusionParameters::run_checker_depth_diff > 0)
+    if (HoleFusionParameters::run_checker_color_homogenity > 0)
     {
-      numActiveFilters++;
+      rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
+    if (HoleFusionParameters::run_checker_luminosity_diff > 0)
     {
-      numActiveFilters++;
+      rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_depth_area > 0)
+    if (HoleFusionParameters::run_checker_texture_diff > 0)
     {
-      numActiveFilters++;
+      rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
+    if (HoleFusionParameters::run_checker_texture_backproject > 0)
     {
-      numActiveFilters++;
+      rgbActiveFilters++;
     }
 
-    std::vector<std::vector<float> > probabilitiesVector2D(numActiveFilters,
+
+    std::vector<std::vector<float> > probabilitiesVector2D(rgbActiveFilters,
       std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
 
+    cv::MatND woodHistogram;
+
     //!< check holes for debugging purposes
-    DepthFilters::checkHoles(
-      interpolatedDepthImage_,
-      pointCloudXYZ_,
+    RgbFilters::checkHoles(
+      rgbImage_,
+      woodHistogram,
       &depthHolesConveyor_,
       &probabilitiesVector2D);
 
-    for (int i = 0; i < numActiveFilters; i++)
+    for (int i = 0; i < rgbActiveFilters; i++)
     {
       for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
       {
