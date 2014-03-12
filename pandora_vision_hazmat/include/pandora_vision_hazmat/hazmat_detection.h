@@ -133,12 +133,6 @@ namespace pandora_vision
       void imageCallback(const sensor_msgs::ImageConstPtr& msg);
       
       /**
-      @brief Wrapper for ros::spin()
-      @return void
-      **/
-      void spin(void);
-      
-      /**
       @brief Implemented from state manager. Called when a new transition \
       happens
       @param newState [int] The new state of the system
