@@ -211,16 +211,28 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
   @return void
 **/
 
-void LandoltCDetector::applyMask(int rows, int cols)
+void LandoltCDetector::applyMask()
 {
 
   for (int i = 0; i < _fillColors.size(); i++)
   {
-    _mask = cv::Mat::zeros(rows, cols, CV_8UC1);
+    _mask = cv::Mat::zeros(_coloredContours.rows,_coloredContours.cols, CV_8UC1);
+    
     cv::inRange(_coloredContours, _fillColors[i], _fillColors[i], _mask);
-    cv::circle(_mask, _newCenters.at(i), 1, (255), -1);
+    
+    cv::Mat cropped=_mask(_rectangles[i]).clone();
+    
+    cv::Mat padded;
+    
+    cv::copyMakeBorder(cropped,padded,8,8,8,8,cv::BORDER_CONSTANT,cv::Scalar(0));
+    
+    cv::imshow("cropped",padded);
+    
+   // cv::circle(_mask, _newCenters.at(i), 1, (255), -1);
+   
     cv::waitKey(30);
-    cv::imshow("Mask", _mask);
+    
+    //cv::imshow("Mask", _mask);
   }
 }
 
@@ -267,13 +279,13 @@ void LandoltCDetector::findLandoltContours(cv::Mat& inImage, int rows, int cols,
     {
       if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 && prec < 0.43)
       {
-        std::cout << "Prec is : " << prec << std::endl;
+        //std::cout << "Prec is : " << prec << std::endl;
         cv::Rect bounding_rect = boundingRect((contours[i]));
         cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
         cv::drawContours(_coloredContours, contours, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
         _fillColors.push_back(color);
         _newCenters.push_back(mc[i]);
-        cv::imshow("Contours", _coloredContours);
+       // cv::imshow("Contours", _coloredContours);
         _rectangles.push_back(bounding_rect);
 
       }
@@ -324,10 +336,10 @@ void LandoltCDetector::begin(cv::Mat& input)
     cv::rectangle(input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
   }
 
-  applyMask(input.rows, input.cols);
+  applyMask();
 
   cv::imshow("Raw", input);
-  cv::imshow("Adaptive Threshold", binary);
+  //cv::imshow("Adaptive Threshold", binary);
   cv::waitKey(30);
 
   _centers.clear();
