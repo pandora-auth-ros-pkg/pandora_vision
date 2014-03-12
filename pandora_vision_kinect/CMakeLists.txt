@@ -45,6 +45,9 @@ add_library(kinect_node
 )
 target_link_libraries(kinect_node 
   ${catkin_LIBRARIES}
+)
+add_dependencies(kinect_node 
+  pandora_vision_kinect_gencfg
 )                        
 
 add_executable(pandora_kinect_node 
@@ -75,7 +78,7 @@ set_target_properties(pandora_kinect_node
 )
 
 add_dependencies(pandora_kinect_node 
-  vision_gencfg
+  pandora_vision_kinect_gencfg
   vision_communications_gencpp
   ${catkin_EXPORTED_TARGETS}
 ) 
