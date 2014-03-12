@@ -419,7 +419,7 @@ namespace pandora_vision
           //add the message to vector
           hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
                 
-          ROS_ERROR("[hazmatNode] : Hazmat found!");
+          ROS_INFO("[hazmatNode] : Hazmat found!");
           //check if eye chart
           if (a[i].pattern_num >hazmatNumber_)
           {
@@ -437,15 +437,6 @@ namespace pandora_vision
       }
       a.erase(a.begin(), a.end());
     }
-  }
-
-  /**
-  @brief Wrapper for ros::spin()
-  @return void
-  **/
-  void HazmatDetection::spin()
-  {
-    ros::spin();
   }
 
   /**
@@ -495,20 +486,5 @@ namespace pandora_vision
 } // namespace pandora_vision
 
 
-/**
- * @brief Node's main method
- * @param argc
- * @param argv
- * @return int
- */
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "hazmatNode");
 
-  pandora_vision::HazmatDetection* hazmatDetection = 
-    new pandora_vision::HazmatDetection();
-
-  hazmatDetection->spin();
-  return 0;
-}
 
