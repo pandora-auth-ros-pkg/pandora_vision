@@ -419,7 +419,7 @@ namespace pandora_vision
           //add the message to vector
           hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
                 
-          ROS_INFO("[hazmatNode] : Hazmat found!");
+          ROS_ERROR("[hazmatNode] : Hazmat found!");
           //check if eye chart
           if (a[i].pattern_num >hazmatNumber_)
           {
