@@ -114,11 +114,9 @@ public:
 
   /**
   @brief Mask for separating a LandoltC Contour to its components
-  @param rows [int] Number of rows of matrix
-  @param cols [int] Number of columns of matrix
   @return void
   **/
-  void applyMask(int rows, int cols);
+  void applyMask();
 
   /**
   @brief Thinning algorith using the Zhang-Suen method
