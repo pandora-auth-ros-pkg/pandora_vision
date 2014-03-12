@@ -32,8 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Aprilis George
-* 		  Despoina Paschalidou
+* Author: Despoina Paschalidou
 *********************************************************************/
 
 #include <opencv2/core/core.hpp>
@@ -48,17 +47,13 @@
 #include "ros/ros.h"
 #include <ros/package.h>
 
-using namespace cv;
-using namespace std;
-
-
-static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';')
+static void read_csv(const std::string& filename, std::vector<cv::Mat>& images, std::vector<int>& labels, char separator = ';')
 {
   boost::filesystem::path filePath(filename);
-  std::ifstream file(filename.c_str(), ifstream::in);
+  std::ifstream file(filename.c_str(), std::ifstream::in);
   if (!file)
   {
-    string error_message = "No valid input file was given, please check the given filename.";
+    std::string error_message = "No valid input file was given, please check the given filename.";
     CV_Error(CV_StsBadArg, error_message);
   }
   std::string line, url, path, classlabel;
@@ -84,7 +79,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 
     if(!path.empty() && !classlabel.empty())
     {
-      images.push_back(imread(abs.string(), 0));
+      images.push_back(cv::imread(abs.string(), 0));
       labels.push_back(atoi(classlabel.c_str()));
     }
   }
@@ -93,8 +88,8 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 int main()
 {
   // These vectors hold the images and corresponding labels.
-  vector<cv::Mat> images;
-  vector<int> labels;
+  std::vector<cv::Mat> images;
+  std::vector<int> labels;
   // Read in the data. This can fail if no valid
   // input filename is given.
 
@@ -107,7 +102,7 @@ int main()
   }
   catch (cv::Exception& e)
   {
-    cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
+    std::cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << std::endl;
     // nothing more we can do
     exit(1);
   }
@@ -120,14 +115,14 @@ int main()
   images.pop_back();
   labels.pop_back();
 
-  Ptr<FaceRecognizer> model = createEigenFaceRecognizer(80);
+  cv::Ptr<cv::FaceRecognizer> model = cv::createEigenFaceRecognizer(80);
   model->train(images, labels);
   // The following line predicts the label of a given
   // test image:
   int predictedLabel = model->predict(testSample);
 
-  string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
-  cout << result_message << endl;
+  std::string result_message = cv::format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
+  std::cout << result_message << std::endl;
 
   std::string outFile(ros::package::getPath("pandora_vision_face") + "/data/model.xml");
 
