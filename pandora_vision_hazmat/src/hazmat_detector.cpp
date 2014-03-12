@@ -48,11 +48,9 @@ namespace pandora_vision
     rows(480),
     cols(640)
   {
-
     param_path_ = package_path;
     setParameters();
     initDetector();
-    frameNum_ = 0;
   }
 
   /**
@@ -461,7 +459,7 @@ namespace pandora_vision
         {
           feats_[n][i].fwd_match = nbrs[0];
           tempvector.push_back(i);
-          m++;
+          m[0]++;
         }
       }
       free(nbrs);
@@ -648,49 +646,40 @@ namespace pandora_vision
     cv::Mat hazmatFrame)
   {
     std::vector<HazmatEpsilon> result;
-    frameNum_++;
+    
     IplImage* img = cvCreateImage( cv::Size(cols, rows), IPL_DEPTH_8U, 3 );
     IplImage* temp = new IplImage(hazmatFrame);
     img = cvCloneImage(temp);
-    
-    if(frameNum_ == 0)
-    {
-      initDetector();
-    }
-    else
-    {
-      result.erase(result.begin(), result.end());
-    }
+  
+    initDetector();
     
     // SIFT process of screenshot
     struct kd_node* kd_root;
     
-    if (!img)
+    if (! img)
     {
-      std::cout << "Could not load image" << std::endl;
+      ROS_ERROR("Could not load image");
     }
     
     struct feature* featShot;
 
     // Finds SIFT features in an image.
     int nShot = sift_features(img, &featShot);
-
     if (nShot > 0)
     {
       kd_root = kdtree_build( featShot, nShot );
       
       // Search screenshot for each pattern
       int n, i;
-
+      int m = 0;
       int max = -1, pat;
       for(n = 0 ; n < nPatterns_ ; n++)
       {
         // Find nearest neighboor for each feature in screenshot
-        int m = 0;
+        
         int testNum = nFeats_[n];
         std::vector <int> tempvector;
         tempvector = findFeature(&m, n, testNum, kd_root);
-            
         // Run RANSAC to find out a transformation that transforms patterns \
         into screenshot
         if( m > featureThreshold_ )
@@ -720,11 +709,10 @@ namespace pandora_vision
             
             if (!pattern_image.data)
             {
-              std::cout << "could not load pattern image" << std::endl;
+              ROS_ERROR("could not load pattern image");
             }
-            
-            calculateArea(H, pattern_image);
 
+            calculateArea(H, pattern_image);
             if (area_ >= minAreaThreshold_ && area_ <= maxAreaThreshold_)
             {
               float SAD = 0;
@@ -735,6 +723,7 @@ namespace pandora_vision
               //check if the final image's results is within thresholds
               if (votes_ > votingThreshold_)
               {
+                
                 float MO = ( SAD + SAD2 ) / 2;
                 if (MO < MOThreshold_)
                 {
@@ -829,11 +818,8 @@ namespace pandora_vision
       kdtree_release(kd_root);
       free(featShot);
     }
-    if(frameNum_ > 1)
-    {
-      frameNum_ = 0;
-      delete [] feats_;
-    }
+
+    delete [] feats_;
     delete temp;
     cvReleaseImage(&img);
     return result;

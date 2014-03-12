@@ -99,9 +99,6 @@ namespace pandora_vision
       
       int featureThreshold_;
       
-      int frameNum_;
-    
-    
     public:
     
       //shows how many patterns were found in the screenshot
