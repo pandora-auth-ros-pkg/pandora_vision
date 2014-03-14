@@ -66,7 +66,7 @@ namespace pandora_vision
 
     clientInitialize();
 
-    ROS_INFO("[Datamatrix_node] : Created QrCode Detection instance");
+    ROS_INFO("[Datamatrix_node] : Created Datamatrix Detection instance");
     
   }
   

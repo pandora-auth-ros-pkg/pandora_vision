@@ -49,6 +49,8 @@ namespace pandora_vision
     dec=NULL;
     reg=NULL;
     msg=NULL;
+    
+    ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
   
 
@@ -90,11 +92,7 @@ namespace pandora_vision
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
       if(msg != NULL) 
       {
-        std::cout <<"Output" << msg->output;
-        //~ fputs("output: \"", stdout);
-        //~ fwrite(msg->output, sizeof(unsigned char), msg->outputIdx, stdout);
-        //~ fputs("\"\n", stdout);
-        //~ dmtxMessageDestroy(&msg);
+        std::cout << msg->output <<std::endl;
       }
     }  
   
