@@ -35,13 +35,15 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef QRCODEDETECTOR_HPP
-#define QRCODEDETECTOR_HPP
+#ifndef DATAMATRIX_DETECTOR
+#define DATAMATRIX_DETECTOR
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <dmtx.h>
 
+#include <ros/ros.h>
+#include <ros/package.h>
 namespace pandora_vision 
 {
   class DatamatrixDetector

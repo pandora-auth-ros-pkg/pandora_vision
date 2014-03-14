@@ -9,9 +9,11 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     sensor_msgs
 )
+#~ find_package(DMTX REQUIRED)
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
+  ${DMTX_INCLUDE_DIRS}
 )
 
 add_executable(datamatrix_node 
@@ -22,9 +24,8 @@ add_executable(datamatrix_node
 add_dependencies(datamatrix_node 
     ${catkin_EXPORTED_TARGETS}
 )
-target_link_libraries(datamatrix_node
-   ${catkin_LIBRARIES}
-)
+target_link_libraries(datamatrix_node dmtx ${catkin_LIBRARIES} ${DMTX_LIBRARIES})
+
 
 
 

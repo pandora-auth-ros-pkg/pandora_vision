@@ -36,7 +36,6 @@
 *********************************************************************/
 
 #include <iostream>
-#include <stdlib.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -53,11 +52,17 @@
 #ifndef DATAMATRIX_DETECTION
 #define DATAMATRIX_DETECTION
 
-//!< default frame height
+//!< Default frame height
 #define DEFAULT_HEIGHT 480
 
-//!< default frame width
+//!< Default frame width
 #define DEFAULT_WIDTH 640
+
+//!< Default horizontal field of view in degrees
+#define HFOV 61.14
+
+//!< Default vertical field of view in degrees
+#define VFOV 48
 
 /**
   @namespace pandora_vision
@@ -82,6 +87,14 @@ namespace pandora_vision
     //!< pandora_vision_datamatrix package path
     std::string packagePath;
     
+    float ratioX;
+    float ratioY;
+
+    //!< Horizontal field of view in rad
+    double hfov;
+
+    //!< Vertical Field Of View (rad)
+    double vfov;
     int frameWidth;
     int frameHeight;
     
@@ -95,6 +108,9 @@ namespace pandora_vision
    
     //!< The topic subscribed to for the front camera
     std::string imageTopic;
+    
+    std::string cameraName;
+    std::string cameraFrameId;
     
     //!< Publishers for QrCodeDetector result messages
     ros::Publisher _datamatrixPublisher;
@@ -118,7 +134,7 @@ namespace pandora_vision
      * all present datamatrixes in a given frame
      * @return void
     */
-    void datamatrixCallback(std::string frame_id);
+    void datamatrixCallback();
           
      /**
       @brief Callback for the RGB Image

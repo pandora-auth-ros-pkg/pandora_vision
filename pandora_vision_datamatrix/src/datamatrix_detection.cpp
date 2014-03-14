@@ -48,6 +48,13 @@ namespace pandora_vision
     //!< Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
     
+    //!< Convert field of view from degrees to rads
+    hfov = hfov * CV_PI / 180;
+    vfov = vfov * CV_PI / 180;
+
+    ratioX = hfov / frameWidth;
+    ratioY = vfov / frameHeight;
+    
     //!< subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
@@ -84,48 +91,91 @@ namespace pandora_vision
   {
     
     packagePath = ros::package::getPath("pandora_vision_datamatrix");
-     
-    //!< Get the Height parameter if available;
-    if (_nh.hasParam("height"))
+    
+    //!< Get the camera to be used by hole node;
+    if (_nh.hasParam("camera_name"))
     {
-      _nh.getParam("height", frameHeight);
+      _nh.getParam("camera_name", cameraName);
+      ROS_DEBUG_STREAM("camera_name : " << cameraName);
+    }
+    else
+    {
+      ROS_DEBUG("[face_node] : Parameter frameHeight not found. Using Default");
+      cameraName = "camera";
+    }
+
+    //!< Get the Height parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/image_height"))
+    {
+      _nh.getParam("/" + cameraName + "/image_height", frameHeight);
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
     else
     {
-      ROS_DEBUG("[Datamatrix_node] : \
-          Parameter frameHeight not found. Using Default");
+      ROS_DEBUG("[face_node] : Parameter frameHeight not found. Using Default");
       frameHeight = DEFAULT_HEIGHT;
     }
 
-    //!< Get the listener's topic;
-    if (_nh.hasParam("imageTopic"))
-    {
-      _nh.getParam("imageTopic", imageTopic);
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else
-    {
-      ROS_DEBUG("[Datamatrix_node] : \
-            Parameter imageTopic not found.Using Default");
-      imageTopic = "/camera_head/image_raw";
-    }
-
     //!< Get the Width parameter if available;
-    if (_nh.hasParam("width"))
+    if (_nh.hasParam("/" + cameraName + "/image_width"))
     {
-      _nh.getParam("width", frameWidth);
+      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
     else
     {
-      ROS_DEBUG("[Datamatrix_node] : \
-          Parameter frameWidth not found. Using Default");
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
       frameWidth = DEFAULT_WIDTH;
     }
+
+    //!< Get the images's topic;
+    if (_nh.hasParam("/" + cameraName + "/topic_name"))
+    {
+      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
+      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+    }
+    else
+    {
+      ROS_DEBUG("[face_node] : Parameter imageTopic not found. Using Default");
+      imageTopic = "/camera_head/image_raw";
+    }
+
+    //!< Get the images's frame_id;
+    if (_nh.hasParam("/" + cameraName + "/camera_frame_id"))
+    {
+      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+    }
+    else
+    {
+      ROS_DEBUG("[face_node] : Parameter camera_frame_id not found. Using Default");
+      cameraFrameId = "/camera";
+    }
+
+    //!< Get the HFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/hfov"))
+    {
+      _nh.getParam("/" + cameraName + "/hfov", hfov);
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    }
+    else
+    {
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
+      hfov = HFOV;
+    }
+
+    //!< Get the VFOV parameter if available;
+    if (_nh.hasParam("/" + cameraName + "/vfov"))
+    {
+      _nh.getParam("/" + cameraName + "/vfov", vfov);
+      ROS_DEBUG_STREAM("VFOV : " << vfov);
+    }
+    else
+    {
+      ROS_DEBUG("[face_node] : Parameter frameWidth not found. Using Default");
+      vfov = VFOV;
+    }
   }
-  
-  
   
   /**
    * @brief Function called when new ROS message appears from camera
@@ -148,12 +198,7 @@ namespace pandora_vision
       return;
     }
 
-    if(!datamatrixNowON)
-    {
-      return;
-    }
-
-    datamatrixCallback("headCamera");
+    datamatrixCallback();
   }
   
   
@@ -164,10 +209,13 @@ namespace pandora_vision
    * @param frame_id [std::string] The frame id
    * @return void
   */
-  void DatamatrixDetection::datamatrixCallback(std::string frame_id)
+  void DatamatrixDetection::datamatrixCallback()
   {
-
-   
+    if(!datamatrixNowON)
+    {
+      return;
+    }
+    _datamatrixDetector.detect_datamatrix(datamatrixFrame);
   }
   
   /**

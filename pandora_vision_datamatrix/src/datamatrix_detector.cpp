@@ -88,11 +88,13 @@ namespace pandora_vision
     if(reg != NULL) 
     {
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
-      if(msg != NULL) {
-        fputs("output: \"", stdout);
-        fwrite(msg->output, sizeof(unsigned char), msg->outputIdx, stdout);
-        fputs("\"\n", stdout);
-        dmtxMessageDestroy(&msg);
+      if(msg != NULL) 
+      {
+        std::cout <<"Output" << msg->output;
+        //~ fputs("output: \"", stdout);
+        //~ fwrite(msg->output, sizeof(unsigned char), msg->outputIdx, stdout);
+        //~ fputs("\"\n", stdout);
+        //~ dmtxMessageDestroy(&msg);
       }
     }  
   
