@@ -323,7 +323,7 @@ namespace pandora_vision
       }
 
       //!< Mean luminosity of the points that the inflated rectangle is
-      //consisted of, derived from the original bounding box of the blob
+      //!< consisted of, derived from the original bounding box of the blob
       float meanBoundingBoxLuminosity =
         (float) boundingBoxLuminosity / boundingBoxDivisor / 255;
 
@@ -525,7 +525,7 @@ namespace pandora_vision
 
       const float* ranges[] = { h_ranges, s_ranges };
 
-      //!< Use the 0-th and 1-st channels
+      //!< Use the 0-th and 2-nd channels
       int channels[] = { 0, 2 };
 
 

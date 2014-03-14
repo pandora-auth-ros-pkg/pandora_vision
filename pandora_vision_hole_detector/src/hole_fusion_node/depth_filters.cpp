@@ -253,7 +253,9 @@ namespace pandora_vision
     @brief Brushfire from a blobs's outline to its bounding box
     with an inflation size (inflates the rectangle by inflationSize pixels).
     If the points between the blob's outline and the inflated rectangle
-    lie on one plane, this blob is a hole.
+    lie on one plane, this blob is a hole. Although all
+    planes are considered valid, the @param probabilitiesVector hint
+    to the validity of the candidate hole through this filter
     @param[in] inImage [const cv::Mat&] The input depth image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The original point cloud acquired from the depth sensor
@@ -271,6 +273,7 @@ namespace pandora_vision
     While the returned set may be reduced in size, the size of this vector
     is the same throughout and equal to the number of keypoints found and
     published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -281,7 +284,8 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point> >& inOutlines,
     const std::vector<std::vector<cv::Point2f> >& rectangles,
     const int& inflationSize,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesBrushfireOutlineToRectangle","applyFilter");
@@ -441,18 +445,27 @@ namespace pandora_vision
       }
 
       //!< Check if the visitedPointsPointCloud points are on a plane
+      std::vector<pcl::PointIndices::Ptr> inliersVector;
       int numPlanes = PlanesDetection::locatePlanes(visitedPointsPointCloud,
-        false);
+        false, &inliersVector);
 
-      if (numPlanes == 1)
+      //!< The probability (in all probability) of an inflated rectangle
+      //!< residing on one plane will be the ratio of
+      //!< (max points on one plane) / (all inflated rectangle points)
+      int maxPoints = 0;
+      for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
       {
-        finalIndices.insert(*validIterator);
-        probabilitiesVector->at(*validIterator) = 1.0;
+        if (inliersVector[iv]->indices.size() > maxPoints)
+        {
+          maxPoints = inliersVector[iv]->indices.size();
+        }
       }
-      else
-      {
-        probabilitiesVector->at(*validIterator) = 0.0;
-      }
+
+      finalIndices.insert(*validIterator);
+      probabilitiesVector->at(*validIterator) =
+        (float) maxPoints / pointCloudPointsIndex;
+
+      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
       //!< Increment the validIterator so that it points to the next element
       //!< in the valid set
@@ -471,7 +484,9 @@ namespace pandora_vision
   /**
     @brief  Given the bounding box of a blob, inflate it.
     All the points that lie on the (edges of the) rectangle should
-    also lie on exactly one plane for the blob to be a hole.
+    also lie on exactly one plane for the blob to be a hole. Although all
+    planes are considered valid, the @param probabilitiesVector hint
+    to the validity of the candidate hole through this filter
     @param[in] inImage [const cv::Mat&] The input depth image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The original point cloud,  uninterpolated, undistorted.
@@ -487,6 +502,7 @@ namespace pandora_vision
     While the returned set may be reduced in size, the size of this vector
     is the same throughout and equal to the number of keypoints found and
     published by the rgb node
+    @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
     @return std::set<unsigned int> The indices of valid (by this filter)
     blobs
    **/
@@ -496,7 +512,8 @@ namespace pandora_vision
     const std::vector<cv::KeyPoint>& inKeyPoints,
     const std::vector<std::vector<cv::Point2f> >& rectangles,
     const int& inflationSize,
-    std::vector<float>* probabilitiesVector)
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesRectangleOutline","applyFilter");
@@ -645,18 +662,27 @@ namespace pandora_vision
       }
 
       //!< Check if the visitedPointsPointCloud points are on a plane
+      std::vector<pcl::PointIndices::Ptr> inliersVector;
       int numPlanes = PlanesDetection::locatePlanes(visitedPointsPointCloud,
-        false);
+        false, &inliersVector);
 
-      if (numPlanes == 1)
+      //!< The probability (in all probability) of an inflated rectangle
+      //!< residing on one plane will be the ratio of
+      //!< (max points on one plane) / (all inflated rectangle points)
+      int maxPoints = 0;
+      for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
       {
-        finalIndices.insert(*validIterator);
-        probabilitiesVector->at(*validIterator) = 1.0;
+        if (inliersVector[iv]->indices.size() > maxPoints)
+        {
+          maxPoints = inliersVector[iv]->indices.size();
+        }
       }
-      else
-      {
-        probabilitiesVector->at(*validIterator) = 0.0;
-      }
+
+      finalIndices.insert(*validIterator);
+      probabilitiesVector->at(*validIterator) =
+        (float) maxPoints / pointCloudPointsIndex;
+
+      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
       //!< Increment the validIterator so that it points to the next element
       //!< in the valid set
@@ -942,7 +968,8 @@ namespace pandora_vision
             conveyor->keyPoints,
             conveyor->rectangles,
             inflationSize,
-            probabilitiesVector);
+            probabilitiesVector,
+            &msgs_);
 
           windowMsg = "Filter: Outline of rectangle on plane";
           break;
@@ -974,7 +1001,8 @@ namespace pandora_vision
             conveyor->outlines,
             conveyor->rectangles,
             inflationSize,
-            probabilitiesVector);
+            probabilitiesVector,
+            &msgs_);
 
           windowMsg = "Filter: Points around blob to plane";
           break;
