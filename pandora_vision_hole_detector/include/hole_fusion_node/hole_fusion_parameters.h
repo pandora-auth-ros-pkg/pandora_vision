@@ -167,6 +167,11 @@ namespace pandora_vision
     static int num_bins_threshold;
     static int non_zero_points_in_box_blob_histogram;
 
+    //!< Histogram parameters
+    static int number_of_hue_bins;
+    static int number_of_saturation_bins;
+    static int number_of_value_bins;
+
   };
 }
 

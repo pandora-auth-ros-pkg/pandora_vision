@@ -800,7 +800,7 @@ namespace pandora_vision
     std::vector<std::vector<float> >* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHoles","findHoles");
+    Timer::start("checkHoles", "findHoles");
     #endif
 
     std::set<unsigned int> indexes;
@@ -853,7 +853,8 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     if(HoleFusionParameters::debug_show_check_holes) // Debug
     {
-      Visualization::multipleShow("checkHoles functions", imgs, msgs, 1200, 1);
+      Visualization::multipleShow("depth checkHoles functions",
+        imgs, msgs, 1200, 1);
     }
     #endif
     #ifdef DEBUG_TIME
@@ -896,6 +897,7 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("applyFilter","checkHoles");
     #endif
+
     std::string windowMsg;
     std::set<unsigned int> indexes;
     std::vector<std::string> finalMsgs;
@@ -924,10 +926,11 @@ namespace pandora_vision
             &msgs_,
             inflationSize,
             probabilitiesVector);
+
           windowMsg = "Filter: Depth difference";
           break;
         }
-        //!< Filter #2------------------------------------------------------------
+        //!< Filter #2----------------------------------------------------------
         //!< Inflate the bounding boxes by an inflation size.
         //!< For a blob to be at least a potential hole, all the points that
         //!< constitute the inflated rectangle should lie on exactly one plane.
@@ -940,10 +943,11 @@ namespace pandora_vision
             conveyor->rectangles,
             inflationSize,
             probabilitiesVector);
+
           windowMsg = "Filter: Outline of rectangle on plane";
           break;
         }
-        //!< Filter #3 (depth & area comparison)----------------------------------
+        //!< Filter #3 (depth & area comparison)--------------------------------
       case 3 :
         {
           indexes = checkHolesDepthArea(
@@ -952,10 +956,11 @@ namespace pandora_vision
             conveyor->rectangles,
             &msgs_,
             probabilitiesVector);
+
           windowMsg = "Filter: Area / Depth";
           break;
         }
-        //!< Filter #4------------------------------------------------------------
+        //!< Filter #4----------------------------------------------------------
         //!< Brushfire from blob outline to blob bounding box
         //!< with an inflation size (inflates the rectangle by x pixels).
         //!< If the points between the blob's outline and the inflated rectangle
@@ -970,10 +975,11 @@ namespace pandora_vision
             conveyor->rectangles,
             inflationSize,
             probabilitiesVector);
+
           windowMsg = "Filter: Points around blob to plane";
           break;
         }
-        //!< Filter #5 (Depth homogenity)-----------------------------------------
+        //!< Filter #5 (Depth homogenity)---------------------------------------
         //!< All holes are considered valid except for those that are edgeless
         //!< inside the area denoted by the conveyor->outlines points
       case 5 :
@@ -984,6 +990,9 @@ namespace pandora_vision
             conveyor->outlines,
             &msgs_,
             probabilitiesVector);
+
+          windowMsg = "Filter: Depth homogenity";
+          break;
         }
     }
 
