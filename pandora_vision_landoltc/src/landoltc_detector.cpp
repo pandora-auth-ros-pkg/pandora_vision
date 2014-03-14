@@ -230,7 +230,9 @@ void LandoltCDetector::applyMask()
     
    // cv::circle(_mask, _newCenters.at(i), 1, (255), -1);
    
+
     cv::waitKey(20);
+
     
     //cv::imshow("Mask", _mask);
   }
