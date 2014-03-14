@@ -101,7 +101,7 @@ void LandoltCDetector::findRotationA(cv::Mat& in,int i)
   
   if(angle<0)
   {
-		angle+=3.14159265359;
+	  angle+=3.14159265359;
   }
   
   int len=std::max(in.cols,in.rows);
@@ -118,10 +118,10 @@ void LandoltCDetector::findRotationA(cv::Mat& in,int i)
        
   for(int x=0;x<paddedptr.cols/2;x++)
   {
-		for(int y=0;y<paddedptr.rows;y++)
-    {
-			left.at<uchar>(y,x)=paddedptr.at<uchar>(y,x);
-    }
+	  for(int y=0;y<paddedptr.rows;y++)
+	  {
+		  left.at<uchar>(y,x)=paddedptr.at<uchar>(y,x);
+	  }
   }
   
   cv::imshow("left",left);
@@ -135,10 +135,10 @@ void LandoltCDetector::findRotationA(cv::Mat& in,int i)
 }
 
 /**
-	@brief Rasterize line between two points
-	@param A [cv::Point] The start point of a line
-	@param B [cv::Point] The end point of a line
-	@return void
+  @brief Rasterize line between two points
+  @param A [cv::Point] The start point of a line
+  @param B [cv::Point] The end point of a line
+  @return void
 **/
 
 void LandoltCDetector::rasterizeLine(cv::Point A, cv::Point B)
@@ -295,12 +295,12 @@ void LandoltCDetector::applyMask()
 }
 
 /**
-	@brief Finds LandoltC Contours on RGB Frames
-	@param inImage [cv::Mat&] Input Image
-	@param rows [int] Number of rows of matrix
-	@param cols [int] Number of columns of matrix
-	@param ref [std::vector<cv::Point>] Vector containing contour points of reference image
-	@return void
+  @brief Finds LandoltC Contours on RGB Frames
+  @param inImage [cv::Mat&] Input Image
+  @param rows [int] Number of rows of matrix
+  @param cols [int] Number of columns of matrix
+  @param ref [std::vector<cv::Point>] Vector containing contour points of reference image
+  @return void
 **/
 
 void LandoltCDetector::findLandoltContours(cv::Mat& inImage, int rows, int cols, std::vector<cv::Point> ref)
@@ -352,9 +352,9 @@ void LandoltCDetector::findLandoltContours(cv::Mat& inImage, int rows, int cols,
 }
 
 /**
-	@brief Function called from ImageCallBack that Initiates LandoltC search in the frame
-	@param input [cv::Mat&] Matrix containing the frame received from the camera
-	@return void
+  @brief Function called from ImageCallBack that Initiates LandoltC search in the frame
+  @param input [cv::Mat&] Matrix containing the frame received from the camera
+  @return void
 **/
 
 void LandoltCDetector::begin(cv::Mat& input)
@@ -408,9 +408,9 @@ void LandoltCDetector::begin(cv::Mat& input)
 }
 
 /**
-	@brief Thinning algorith using the Zhang-Suen method
-	@param in [cv::Mat&] Matrix containing the frame to thin
-	@return void
+  @brief Thinning algorith using the Zhang-Suen method
+  @param in [cv::Mat&] Matrix containing the frame to thin
+  @return void
 **/
 
 void LandoltCDetector::thinning(cv::Mat& in)
@@ -433,10 +433,10 @@ void LandoltCDetector::thinning(cv::Mat& in)
 }
 
 /**
-	@brief Thinning iteration call from the thinning function
-	@param in [cv::Mat&] Matrix containing the frame to thin
-	@param iter [int] Number of iteration with values 1-2
-	@return void
+  @brief Thinning iteration call from the thinning function
+  @param in [cv::Mat&] Matrix containing the frame to thin
+  @param iter [int] Number of iteration with values 1-2
+  @return void
 **/
 void LandoltCDetector::thinningIter(cv::Mat& in, int iter)
 {
