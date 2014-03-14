@@ -280,10 +280,6 @@ namespace pandora_vision
     } //!< end for rectangles
 
 
-    //!< The indices of the valid (by this filter) keypoints
-    std::set<unsigned int> finalIndices;
-    std::set<unsigned int>::iterator validIterator = valid.begin();
-
     //!< For each inflated rectangle, calculate the luminosity of
     //!< (1) the points between the blob's outline and the edges of the
     //!< inflated rectangle and
@@ -331,36 +327,28 @@ namespace pandora_vision
       float meanBlobLuminosity =
         (float) blobLuminosity / blobDivisor / 255;
 
-      std::set<unsigned int>::iterator it = valid.begin();
-      std::advance(it, i);
 
       //!< If the luminosity of the inside of the candidate hole is greater
       //!< than the luminosity of the points beyond it and restricted by the
       //!< edges of its bounding box, it surely is not a hole
       if (meanBlobLuminosity > meanBoundingBoxLuminosity)
       {
-        probabilitiesVector->at(*it) = 0.0;
+        probabilitiesVector->at(i) = 0.0;
       }
       else
       {
-        finalIndices.insert(*validIterator);
-
-        probabilitiesVector->at(*it) =
+        probabilitiesVector->at(i) =
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(*it)));
-
-      //!< Increment the validIterator so that it points to the next element
-      //!< in the valid set
-      validIterator++;
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesLuminosityDiff");
     #endif
 
-    return finalIndices;
+    return valid;
   }
 
 
@@ -447,9 +435,9 @@ namespace pandora_vision
         keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
 
         //!< check if the inflated vertex has gone out of bounds
-        if (vert_x - inflationSize * cos(theta) < inImage_.cols &&
+        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
           vert_x - inflationSize * cos(theta) >= 0 &&
-          vert_y - inflationSize * sin(theta) < inImage_.rows &&
+          vert_y - inflationSize * sin(theta) < inImage.rows &&
           vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
@@ -476,10 +464,6 @@ namespace pandora_vision
     } //!< end for rectangles
 
 
-    //!< The indices of the valid (by this filter) keypoints
-    std::set<unsigned int> finalIndices;
-    std::set<unsigned int>::iterator validIterator = valid.begin();
-
     //!< For each inflated rectangle, calculate the non-zero masks of
     //!< (1) the points between the blob's outline and the edges of the
     //!< inflated rectangle and
@@ -488,16 +472,16 @@ namespace pandora_vision
     {
       //!< Create the masks needed for the histograms of the outline points
       //!< and the points inside the blobs'outline
-      cv::Mat blobToRectangleMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
-      cv::Mat blobMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
+      cv::Mat blobToRectangleMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
+      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
 
 
       //!< Draw the points inside the blob (blobMask)
       //!< and the points between the blob the
       //!< inflated rectangle that corresponds to it (blobToRectangleMask)
-      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
@@ -552,6 +536,9 @@ namespace pandora_vision
       double blobToModelCorrelation = cv::compareHist(
         blobHistogram, inHistogram, CV_COMP_CORREL);
 
+      ROS_ERROR("R2M: %f", (float)rectangleToModelCorrelation);
+      ROS_ERROR("B2M: %f", (float)blobToModelCorrelation);
+
       //!< This blob is considered valid if there is a correlation between
       //!< blobToRectangleHistogram and the model histogram
       //!< (inHistogram)
@@ -562,27 +549,22 @@ namespace pandora_vision
         HoleFusionParameters::match_texture_threshold &&
         rectangleToModelCorrelation > blobToModelCorrelation)
       {
-        finalIndices.insert(*validIterator);
-        probabilitiesVector->at(*validIterator) =
+        probabilitiesVector->at(i) =
           rectangleToModelCorrelation - blobToModelCorrelation;
       }
       else
       {
-        probabilitiesVector->at(*validIterator) = 0.0;
+        probabilitiesVector->at(i) = 0.0;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
-
-      //!< Increment the validIterator so that it points to the next element
-      //!< in the valid set
-      validIterator++;
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesTextureDiff");
     #endif
 
-    return finalIndices;
+    return valid;
   }
 
 
@@ -719,10 +701,6 @@ namespace pandora_vision
     } //!< end for rectangles
 
 
-    //!< The indices of the valid (by this filter) keypoints
-    std::set<unsigned int> finalIndices;
-    std::set<unsigned int>::iterator validIterator = valid.begin();
-
     //!< For each inflated rectangle, calculate the probabilities of
     //!< (1) the points between the blob's outline and the edges of the
     //!< inflated rectangle and
@@ -771,29 +749,24 @@ namespace pandora_vision
       //!< inside the blob's outline
       if (rectangleMatchProbability > blobMatchProbability)
       {
-        probabilitiesVector->at(*validIterator) =
+        probabilitiesVector->at(i) =
           rectangleMatchProbability - blobMatchProbability;
-
-        finalIndices.insert(*validIterator);
       }
       else
       {
-        probabilitiesVector->at(*validIterator) = 0.0;
+        probabilitiesVector->at(i) = 0.0;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
-
-      //!< Increment the validIterator so that it points to the next element
-      //!< in the valid set
-      validIterator++;
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesTextureBackProject");
     #endif
 
-    return finalIndices;
+    return valid;
   }
+
 
 
   /**
