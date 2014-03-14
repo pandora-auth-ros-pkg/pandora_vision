@@ -9,7 +9,24 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     sensor_msgs
 )
-#~ find_package(DMTX REQUIRED)
+
+message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+find_package(DMTX REQUIRED)
+
+catkin_package(
+    DEPENDS
+    CATKIN_DEPENDS
+      roscpp
+      state_manager
+      state_manager_communications
+      cv_bridge
+      image_transport
+      sensor_msgs
+    INCLUDE_DIRS
+      include
+    LIBRARIES 
+)
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
@@ -24,7 +41,10 @@ add_executable(datamatrix_node
 add_dependencies(datamatrix_node 
     ${catkin_EXPORTED_TARGETS}
 )
-target_link_libraries(datamatrix_node dmtx ${catkin_LIBRARIES} ${DMTX_LIBRARIES})
+target_link_libraries(datamatrix_node 
+    ${catkin_LIBRARIES} 
+    ${DMTX_LIBRARIES}
+)
 
 
 
