@@ -85,13 +85,13 @@ void LandoltCDetector::initializeReferenceImage(std::string path)
 
 void LandoltCDetector::findRotationA(cv::Mat& in,int i)
 {
-	std::vector<std::vector<cv::Point> > left_contours;
-	
-	cv::Mat paddedptr;
-	
-	cv::Moments moment;
-	
-	moment=cv::moments(in,true);
+  std::vector<std::vector<cv::Point> > left_contours;
+
+  cv::Mat paddedptr;
+
+  cv::Moments moment;
+
+  moment=cv::moments(in,true);
   
   double y=2*moment.mu11;
   
