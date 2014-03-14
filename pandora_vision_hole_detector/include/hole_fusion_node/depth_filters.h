@@ -112,7 +112,9 @@ namespace pandora_vision
         @brief Brushfire from a blobs's outline to its bounding box
         with an inflation size (inflates the rectangle by inflationSize pixels).
         If the points between the blob's outline and the inflated rectangle
-        lie on one plane, this blob is a hole.
+        lie on one plane, this blob is a hole. Although all
+        planes are considered valid, the @param probabilitiesVector hint
+        to the validity of the candidate hole through this filter
         @param[in] inImage [const cv::Mat&] The input depth image
         @param[in] initialPointCloud
         [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
@@ -131,6 +133,8 @@ namespace pandora_vision
         While the returned set may be reduced in size, the size of this vector
         is the same throughout and equal to the number of keypoints found and
         published by the rgb node
+        @param[in][out] msgs [std::vector<std::string>*] Messages for
+        debug reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -141,12 +145,15 @@ namespace pandora_vision
         const std::vector<std::vector<cv::Point> >& outlines,
         const std::vector<std::vector<cv::Point2f> >& rectangles,
         const int& inflationSize,
-        std::vector<float>* probabilitiesVector);
+        std::vector<float>* probabilitiesVector,
+        std::vector<std::string>* msgs);
 
       /**
         @brief Given the bounding box of a blob, inflate it.
         All the points that lie on the (edges of the) rectangle should
-        also lie on exactly one plane for the blob to be a hole.
+        also lie on exactly one plane for the blob to be a hole. Although all
+        planes are considered valid, the @param probabilitiesVector hint
+        to the validity of the candidate hole through this filter
         @param[in] inImage [const cv::Mat&] The input depth image
         @param[in] initialPointCloud
         [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
@@ -163,6 +170,8 @@ namespace pandora_vision
         While the returned set may be reduced in size, the size of this vector
         is the same throughout and equal to the number of keypoints found and
         published by the rgb node
+        @param[in][out] msgs [std::vector<std::string>*] Messages for
+        debug reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -172,7 +181,8 @@ namespace pandora_vision
         const std::vector<cv::KeyPoint>& inKeyPoints,
         const std::vector<std::vector<cv::Point2f> >& rectangles,
         const int& inflationSize,
-        std::vector<float>* probabilitiesVector);
+        std::vector<float>* probabilitiesVector,
+        std::vector<std::string>* msgs);
 
       /**
         @brief Checks the homogenity of the gradient of depth in an area

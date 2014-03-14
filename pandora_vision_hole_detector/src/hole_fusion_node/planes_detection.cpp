@@ -46,10 +46,15 @@ namespace pandora_vision
     planes we wish to locate
     @param[in] applyVoxelFilter [const bool&] Apply the voxel filter or not
     on the input cloud.
+    @param[out] inliersVector [std::vector<pcl::PointIndices::Ptr>*]
+    A vector of pointers to a pcl::PointIndices struct where point indices
+    are stored. In pandora's context, it is used to calculate the maximum
+    ratio of points lying on a plane
     @return The number of planes detected in inputCloud.
    **/
   int PlanesDetection::locatePlanes(const PointCloudXYZPtr& inputCloud,
-      const bool& applyVoxelFilter)
+      const bool& applyVoxelFilter,
+      std::vector<pcl::PointIndices::Ptr>* inliersVector)
   {
     #ifdef DEBUG_TIME
     Timer::start("locatePlanes", "checkHolesRectangleOutline");
@@ -68,17 +73,16 @@ namespace pandora_vision
 
     std::vector<PointCloudXYZPtr> planesVectorOut;
     std::vector<pcl::ModelCoefficients> coefficientsVectorOut;
-    std::vector<pcl::PointIndices::Ptr> inliersVector;
 
     if (HoleFusionParameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
-          &planesVectorOut, &coefficientsVectorOut, &inliersVector);
+          &planesVectorOut, &coefficientsVectorOut, inliersVector);
     }
     else if (HoleFusionParameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
-          &planesVectorOut, &coefficientsVectorOut, &inliersVector);
+          &planesVectorOut, &coefficientsVectorOut, inliersVector);
     }
 
     #ifdef DEBUG_TIME
