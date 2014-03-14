@@ -53,7 +53,7 @@
 #include "motion_detector.h"
 
 
-#include "state_client.h"
+#include "state_manager/state_client.h"
 
 #include <iostream>
 #include <stdlib.h>
