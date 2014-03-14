@@ -91,7 +91,7 @@ void LandoltCDetector::findRotationA(cv::Mat& in,int i)
 	
 	cv::Moments moment;
 	
-  moment=cv::moments(in,true);
+	moment=cv::moments(in,true);
   
   double y=2*moment.mu11;
   
