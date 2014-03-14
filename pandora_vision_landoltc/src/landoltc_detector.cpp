@@ -54,9 +54,9 @@ LandoltCDetector::~LandoltCDetector()
 }
 
 /**
-@brief Function for the initialization of the reference image
-@param void
-@return void
+	@brief Function for the initialization of the reference image
+	@param void
+	@return void
 **/
 void LandoltCDetector::initializeReferenceImage(std::string path)
 {
@@ -76,10 +76,69 @@ void LandoltCDetector::initializeReferenceImage(std::string path)
 }
 
 /**
-@brief Rasterize line between two points
-@param A [cv::Point] The start point of a line
-@param B [cv::Point] The end point of a line
-@return void
+  @brief Calculation of rotation based on moments.Precision is good for a
+  distance up to 30cm from the camera
+  @param input [cv::Mat&] Matrix containing the padded frame
+  @param input [int] Index of C being processed
+  @return void
+**/
+
+void LandoltCDetector::findRotationA(cv::Mat& in,int i)
+{
+	std::vector<std::vector<cv::Point> > left_contours;
+	
+	cv::Mat paddedptr;
+	
+	cv::Moments moment;
+	
+  moment=cv::moments(in,true);
+  
+  double y=2*moment.mu11;
+  
+  double x=moment.mu20-moment.mu02;
+  
+  double angle = 0.5*atan2(y,x);
+  
+  if(angle<0)
+  {
+		angle+=3.14159265359;
+  }
+  
+  int len=std::max(in.cols,in.rows);
+  
+  double theta=180*(angle-3.14159265359/2)/3.14159265359;
+  
+  cv::Point2f pt(len/2.,len/2.);
+  
+  cv::Mat r=cv::getRotationMatrix2D(pt,theta,1.0);
+  
+  cv::warpAffine(in,paddedptr,r,cv::Size(len,len));
+  
+  cv::Mat left=cv::Mat::zeros(paddedptr.rows,paddedptr.cols,CV_8UC1);
+       
+  for(int x=0;x<paddedptr.cols/2;x++)
+  {
+		for(int y=0;y<paddedptr.rows;y++)
+    {
+			left.at<uchar>(y,x)=paddedptr.at<uchar>(y,x);
+    }
+  }
+  
+  cv::imshow("left",left);
+       
+  cv::findContours(left,left_contours,cv::RETR_TREE,cv::CHAIN_APPROX_SIMPLE);
+  
+  if(left_contours.size()==2) angle+=3.14159265359;
+      
+  std::cout<<"Angle of " <<i<<" is: "<<(angle*(180/3.14159265359))<<std::endl;
+  
+}
+
+/**
+	@brief Rasterize line between two points
+	@param A [cv::Point] The start point of a line
+	@param B [cv::Point] The end point of a line
+	@return void
 **/
 
 void LandoltCDetector::rasterizeLine(cv::Point A, cv::Point B)
@@ -129,12 +188,12 @@ void LandoltCDetector::rasterizeLine(cv::Point A, cv::Point B)
 }
 
 /**
- @brief Finds Centers based on gradient
- @param rows [int] Number of rows of matrix
- @param cols [int] Number of columns of matrix
- @param grX [float*] X gradient component
- @param grY [float*] Y gradient component
- @return void
+  @brief Finds Centers based on gradient
+  @param rows [int] Number of rows of matrix
+  @param cols [int] Number of columns of matrix
+  @param grX [float*] X gradient component
+  @param grY [float*] Y gradient component
+  @return void
 **/
 
 void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
@@ -195,7 +254,7 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
           center.x = x;
           center.y = y;
           _centers.push_back(center);
-          std::cout << "Bullseye " << bullcount++ << " xy " << center.x << "," << center.y << std::endl;
+         // std::cout << "Bullseye " << bullcount++ << " xy " << center.x << "," << center.y << std::endl;
         }
       }
     }
@@ -226,25 +285,22 @@ void LandoltCDetector::applyMask()
     
     cv::copyMakeBorder(cropped,padded,8,8,8,8,cv::BORDER_CONSTANT,cv::Scalar(0));
     
-    cv::imshow("cropped",padded);
+    cv::imshow("padded",padded); 
     
-   // cv::circle(_mask, _newCenters.at(i), 1, (255), -1);
-   
+    findRotationA(padded,i);
 
     cv::waitKey(20);
 
-    
-    //cv::imshow("Mask", _mask);
   }
 }
 
 /**
-@brief Finds LandoltC Contours on RGB Frames
-@param inImage [cv::Mat&] Input Image
-@param rows [int] Number of rows of matrix
-@param cols [int] Number of columns of matrix
-@param ref [std::vector<cv::Point>] Vector containing contour points of reference image
-@return void
+	@brief Finds LandoltC Contours on RGB Frames
+	@param inImage [cv::Mat&] Input Image
+	@param rows [int] Number of rows of matrix
+	@param cols [int] Number of columns of matrix
+	@param ref [std::vector<cv::Point>] Vector containing contour points of reference image
+	@return void
 **/
 
 void LandoltCDetector::findLandoltContours(cv::Mat& inImage, int rows, int cols, std::vector<cv::Point> ref)
@@ -296,9 +352,9 @@ void LandoltCDetector::findLandoltContours(cv::Mat& inImage, int rows, int cols,
 }
 
 /**
-@brief Function called from ImageCallBack that Initiates LandoltC search in the frame
-@param input [cv::Mat&] Matrix containing the frame received from the camera
-@return void
+	@brief Function called from ImageCallBack that Initiates LandoltC search in the frame
+	@param input [cv::Mat&] Matrix containing the frame received from the camera
+	@return void
 **/
 
 void LandoltCDetector::begin(cv::Mat& input)
@@ -352,9 +408,9 @@ void LandoltCDetector::begin(cv::Mat& input)
 }
 
 /**
-@brief Thinning algorith using the Zhang-Suen method
-@param in [cv::Mat&] Matrix containing the frame to thin
-@return void
+	@brief Thinning algorith using the Zhang-Suen method
+	@param in [cv::Mat&] Matrix containing the frame to thin
+	@return void
 **/
 
 void LandoltCDetector::thinning(cv::Mat& in)
@@ -377,10 +433,10 @@ void LandoltCDetector::thinning(cv::Mat& in)
 }
 
 /**
-@brief Thinning iteration call from the thinning function
-@param in [cv::Mat&] Matrix containing the frame to thin
-@param iter [int] Number of iteration with values 1-2
-@return void
+	@brief Thinning iteration call from the thinning function
+	@param in [cv::Mat&] Matrix containing the frame to thin
+	@param iter [int] Number of iteration with values 1-2
+	@return void
 **/
 void LandoltCDetector::thinningIter(cv::Mat& in, int iter)
 {

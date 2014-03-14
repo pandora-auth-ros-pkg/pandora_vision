@@ -139,6 +139,17 @@ public:
   @return void
   **/
   void begin(cv::Mat& input);
+  
+  /**
+  @brief Calculation of rotation based on moments.Precision is good for a
+  distance up to 30cm from the camera
+  @param input [cv::Mat&] Matrix containing the padded frame
+  @param input [int] Index of C being processed
+  @return void
+	**/
+  
+  void findRotationA(cv::Mat& in,int i);  
+  
 
 };
 }
