@@ -54,9 +54,9 @@ LandoltCDetector::~LandoltCDetector()
 }
 
 /**
-	@brief Function for the initialization of the reference image
-	@param void
-	@return void
+  @brief Function for the initialization of the reference image
+  @param void
+  @return void
 **/
 void LandoltCDetector::initializeReferenceImage(std::string path)
 {
@@ -457,8 +457,10 @@ void LandoltCDetector::thinningIter(cv::Mat& in, int iter)
 
       int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
 
-      int A = (p2 == 0 && p3 == 1) + (p3 == 0 && p4 == 1) + (p4 == 0 && p5 == 1) + (p5 == 0 && p6 == 1)
-              + (p6 == 0 && p7 == 1) + (p7 == 0 && p8 == 1) + (p8 == 0 && p9 == 1) + (p9 == 0 && p2 == 1);
+      int A = (p2 == 0 && p3 == 1) + (p3 == 0 && p4 == 1) + (p4 == 0 && p5 == 1)
+      + (p5 == 0 && p6 == 1)
+      + (p6 == 0 && p7 == 1) + (p7 == 0 && p8 == 1) + (p8 == 0 && p9 == 1)
+      + (p9 == 0 && p2 == 1);
 
       if(iter == 1)
       {
