@@ -84,11 +84,11 @@ namespace pandora_vision
         std::vector<std::string>* msgs);
 
       /**
-        @brief Checks for difference of mean value of luminosity between the
-        pixels that comprise the blob's bounding box edges and the points
-        inside the blob's outline.
-        @param[in] inImage [const cv::Mat&] The RGB image in unscaled
-        format
+        @brief Checks for difference in mean value of luminosity between
+        (1) the pixels in between the blob's bounding box edges and the points
+        outside the blob's outline and
+        (2) the points inside the blob's outline.
+        @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
         of the candidate holes's keypoints
         @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
@@ -102,8 +102,8 @@ namespace pandora_vision
         candidate hole is associated. While the returned set may be reduced in
         size, the size of this vector is the same throughout and equal to the
         number of keypoints found and published by the rgb node
-        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
-        reasons
+        @param[in][out] msgs [std::vector<std::string>*] Messages for
+        debug reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -118,14 +118,14 @@ namespace pandora_vision
 
 
       /**
-        @brief Given a set of keypoints and their respective outline and
+        @brief Given a set of keypoints, their respective outline and
         bounding box points, and a model histogram, this filter looks for near
-        equation between the histograms of the points that consist the bounding
-        box and the model histogram, and for major difference between the
+        equation between the histograms of the points between the blob's
+        outline and the bounding box's edges and the model histogram,
+        and for major difference between the
         histograms of the bounding box and the points inside the outline of the
         blob.
-        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
-        format
+        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -141,8 +141,7 @@ namespace pandora_vision
         candidate hole is associated. While the returned set may be reduced in
         size, the size of this vector is the same throughout and equal to the
         number of keypoints found and published by the rgb node
-        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
-        reasons
+        @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -157,11 +156,12 @@ namespace pandora_vision
         std::vector<std::string>* msgs);
 
       /**
-        @brief Given a set of keypoints and their respective outline and
+        @brief Given a set of keypoints, their respective outline and
         bounding box points, and a model histogram, this filter creates the
         back project of the @param inImage based on @param inHistogram and
         exports a vector of probabilities, that is a vector of how probable it
-        is for a candidate hole's bounding box points to have a high probability
+        is for a candidate hole's points between the blob's outline points
+        and the bounding box's edges to have a high probability
         in the back project image, and for the points inside the candidate
         hole's outline to have a low probability in the back project image
         @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
@@ -181,8 +181,8 @@ namespace pandora_vision
         candidate hole is associated. While the returned set may be reduced in
         size, the size of this vector is the same throughout and equal to the
         number of keypoints found and published by the rgb node
-        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
-        reasons
+        @param[in][out] msgs [std::vector<std::string>*] Messages for
+        debug reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/

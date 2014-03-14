@@ -50,6 +50,9 @@ namespace pandora_vision
 
     ros::Duration(0.5).sleep();
 
+    //!< Calculate the histogram cv::MatND needed for texture comparing
+    getWallsHistogram();
+
     //!< Initialize the numNodesReady variable
     numNodesReady_ = 0;
 
@@ -275,6 +278,84 @@ namespace pandora_vision
 
 
   /**
+    @brief Computes a cv::MatND histogram from images loaded in directory
+    ${pandora_vision_hole_detector}/src/wall_pictures and stores it in
+    a private member variable so as to be used in texture comparing
+    @parameters void
+    @return void
+   **/
+  void HoleFusion::getWallsHistogram()
+  {
+    //!< The path to the package where the wall pictures directory lies in
+    std::string packagePath =
+      ros::package::getPath("pandora_vision_hole_detector");
+
+    //!< The actual wall pictures directory
+    std::string wallPicturesPath = packagePath + "/src/wall_pictures/";
+
+    int fileLength;
+
+    //!< The number of wall picture files inside the wallPicturesPath directory
+    int numPictures = 0;
+    struct dirent *pDirent;
+    DIR *pDir;
+
+    pDir = opendir(wallPicturesPath.c_str());
+    if (pDir != NULL)
+    {
+      while ((pDirent = readdir(pDir)) != NULL)
+      {
+        fileLength = strlen(pDirent->d_name);
+        if (strcmp (".png", &(pDirent->d_name[fileLength - 4])) == 0)
+        {
+          numPictures++;
+        }
+      }
+      closedir (pDir);
+    }
+
+    //!< Read the pictures inside the wallPicturesPath, convert them to HSV
+    //!< and calculate their histogram
+    cv::Mat* wallImagesHSV = new cv::Mat[numPictures];
+    for(int i = 0; i < numPictures; i++)
+    {
+      char temp_name[250];
+
+      std::string temp = wallPicturesPath +"%d.png";
+
+      sprintf(temp_name, temp.c_str(), i);
+
+      cv::cvtColor(
+        Visualization::scaleImageForVisualization(cv::imread(temp_name),
+          HoleFusionParameters::scale_method),
+        wallImagesHSV[i], cv::COLOR_BGR2HSV);
+    }
+
+    //!< Histogram-related parameters
+    int h_bins = HoleFusionParameters::number_of_hue_bins;
+    int s_bins = HoleFusionParameters::number_of_saturation_bins;
+    int histSize[] = { h_bins, s_bins };
+
+    //!< hue varies from 0 to 179, saturation from 0 to 255
+    float h_ranges[] = { 0, 180 };
+    float s_ranges[] = { 0, 256 };
+
+    const float* ranges[] = { h_ranges, s_ranges };
+
+    //!< Use the 0-th and 1-st channels
+    int channels[] = { 0, 2 };
+
+    //!< Calculate the histogram for the walls and store it in the class's
+    //!< private member wallsHistogram_
+    cv::calcHist(wallImagesHSV, numPictures, channels, cv::Mat(),
+      wallsHistogram_, 2, histSize, ranges, true, false);
+
+    delete[] wallImagesHSV;
+  }
+
+
+
+  /**
     @brief Implements a strategy to combine
     information from both sources in order to accurately find valid holes
     @return void
@@ -295,42 +376,41 @@ namespace pandora_vision
 
     //!< Do some processing
 
-/*
- *    //!< Initialize the probabilities 2D vector. But first we need to know
- *    //!< how many rows the vector will accomodate
- *    int depthActiveFilters = 0;
- *
- *    if (HoleFusionParameters::run_checker_depth_diff > 0)
- *    {
- *      depthActiveFilters++;
- *    }
- *    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
- *    {
- *      depthActiveFilters++;
- *    }
- *    if (HoleFusionParameters::run_checker_depth_area > 0)
- *    {
- *      depthActiveFilters++;
- *    }
- *    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
- *    {
- *      depthActiveFilters++;
- *    }
- *    if (HoleFusionParameters::run_checker_depth_homogenity > 0)
- *    {
- *      depthActiveFilters++;
- *    }
- *
- *    std::vector<std::vector<float> > probabilitiesVector2D(depthActiveFilters,
- *      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
- *
- *    //!< check holes for debugging purposes
- *    DepthFilters::checkHoles(
- *      interpolatedDepthImage_,
- *      pointCloudXYZ_,
- *      &depthHolesConveyor_,
- *      &probabilitiesVector2D);
- */
+    //!< Initialize the probabilities 2D vector. But first we need to know
+    //!< how many rows the vector will accomodate
+    int depthActiveFilters = 0;
+
+    if (HoleFusionParameters::run_checker_depth_diff > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_depth_area > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (HoleFusionParameters::run_checker_depth_homogenity > 0)
+    {
+      depthActiveFilters++;
+    }
+
+    std::vector<std::vector<float> > depthProbabilitiesVector2D(
+      depthActiveFilters,
+      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
+
+    //!< check holes for debugging purposes
+    DepthFilters::checkHoles(
+      interpolatedDepthImage_,
+      pointCloudXYZ_,
+      &depthHolesConveyor_,
+      &depthProbabilitiesVector2D);
 
     //!< Initialize the probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
@@ -354,25 +434,25 @@ namespace pandora_vision
     }
 
 
-    std::vector<std::vector<float> > probabilitiesVector2D(rgbActiveFilters,
+    std::vector<std::vector<float> > rgbProbabilitiesVector2D(rgbActiveFilters,
       std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
-
-    cv::MatND woodHistogram;
 
     //!< check holes for debugging purposes
     RgbFilters::checkHoles(
       rgbImage_,
-      woodHistogram,
+      wallsHistogram_,
       &depthHolesConveyor_,
-      &probabilitiesVector2D);
+      &rgbProbabilitiesVector2D);
 
-    for (int i = 0; i < rgbActiveFilters; i++)
-    {
-      for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
-      {
-        ROS_ERROR("P[%d %d] = %f", i, j, probabilitiesVector2D[i][j]);
-      }
-    }
+    /*
+     *for (int i = 0; i < rgbActiveFilters; i++)
+     *{
+     *  for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
+     *  {
+     *    ROS_ERROR("P[%d %d] = %f", i, j, probabilitiesVector2D[i][j]);
+     *  }
+     *}
+     */
 
 
 

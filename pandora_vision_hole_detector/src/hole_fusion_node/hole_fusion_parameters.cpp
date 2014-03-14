@@ -132,6 +132,11 @@ namespace pandora_vision
   //!<Color homogenity parameters
   int HoleFusionParameters::num_bins_threshold = 10;
   int HoleFusionParameters::non_zero_points_in_box_blob_histogram = 0;
+
+  //!< Histogram parameters
+  int HoleFusionParameters::number_of_hue_bins = 30;
+  int HoleFusionParameters::number_of_saturation_bins = 32;
+  int HoleFusionParameters::number_of_value_bins = 30;
   //!<----------------------------------------------------------------------!>//
 
   HoleFusionParameters::HoleFusionParameters(void)
@@ -277,5 +282,12 @@ namespace pandora_vision
 
     HoleFusionParameters::num_bins_threshold =
       config.num_bins_threshold;
+
+    HoleFusionParameters::number_of_hue_bins =
+      config.number_of_hue_bins;
+    HoleFusionParameters::number_of_saturation_bins =
+      config.number_of_saturation_bins;
+    HoleFusionParameters::number_of_value_bins =
+      config.number_of_value_bins;
   }
 }
