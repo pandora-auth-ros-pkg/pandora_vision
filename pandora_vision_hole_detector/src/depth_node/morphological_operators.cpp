@@ -100,47 +100,47 @@ namespace pandora_vision
       {
         for(unsigned int j = 1 ; j < img->cols - 1 ; j++)
         {
-          if(img->at<unsigned char>(i,j) != 0) //!< That's foreground
+          if(img->at<unsigned char>(i, j) != 0) //!< That's foreground
           {
             //!< Check for all adjacent
-            if(img->at<unsigned char>(i + 1,j + 1) == 0)
+            if(img->at<unsigned char>(i + 1, j + 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i + 1,j) == 0)
+            if(img->at<unsigned char>(i + 1, j) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i + 1,j - 1) == 0)
+            if(img->at<unsigned char>(i + 1, j - 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i,j + 1) == 0)
+            if(img->at<unsigned char>(i, j + 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i,j - 1) == 0)
+            if(img->at<unsigned char>(i, j - 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i - 1,j - 1) == 0)
+            if(img->at<unsigned char>(i - 1, j - 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i - 1,j) == 0)
+            if(img->at<unsigned char>(i - 1, j) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
-            if(img->at<unsigned char>(i - 1,j + 1) == 0)
+            if(img->at<unsigned char>(i - 1, j + 1) == 0)
             {
-              helper.at<unsigned char>(i,j) = 0;
+              helper.at<unsigned char>(i, j) = 0;
               continue;
             }
           }
@@ -366,7 +366,7 @@ namespace pandora_vision
         {
           for (unsigned int cols = 1; cols < outImage->cols - 1; cols++)
           {
-            if(outImage->at<unsigned char>(rows,cols) == 0)
+            if(outImage->at<unsigned char>(rows, cols) == 0)
             {
               if (kernelCheck(kernels[kernelId], *outImage,
                   cv::Point(cols, rows)))
@@ -558,7 +558,7 @@ namespace pandora_vision
         {
           for (unsigned int cols = 1; cols < img->cols - 1; cols++)
           {
-            if(img->at<unsigned char>(rows,cols) != 0)
+            if(img->at<unsigned char>(rows, cols) != 0)
             {
               if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
@@ -648,7 +648,7 @@ namespace pandora_vision
         {
           for (unsigned int cols = 1; cols < img->cols - 1; cols++)
           {
-            if(img->at<unsigned char>(rows,cols) != 0)
+            if(img->at<unsigned char>(rows, cols) != 0)
             {
               if (kernelCheck(kernels[kernelId], *img, cv::Point(cols, rows)))
               {
@@ -680,7 +680,7 @@ namespace pandora_vision
   void Morphology::pruningStrictIterative(cv::Mat* img, const int& steps)
   {
     #ifdef DEBUG_TIME
-    Timer::start("pruningStrictIterative","denoiseEdges");
+    Timer::start("pruningStrictIterative", "denoiseEdges");
     #endif
 
     static const unsigned int nOfKernels = 9;
@@ -729,12 +729,12 @@ namespace pandora_vision
     {
       for (unsigned int cols = 1; cols < img->cols - 1; cols++)
       {
-        if(img->at<unsigned char>(rows,cols) != 0)
+        if(img->at<unsigned char>(rows, cols) != 0)
         {
           //!< Check for initial stuff
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(cols,rows)))
+            if(kernelCheck(kernels[i], *img, cv::Point(cols, rows)))
             {
               current.insert(rows * img->cols + cols);
               break;
@@ -758,13 +758,13 @@ namespace pandora_vision
         x = *it / img->cols;
         y = *it % img->cols;
 
-        img->at<unsigned char>(x,y) = 0;
+        img->at<unsigned char>(x, y) = 0;
 
         if(img->at<unsigned char>(x - 1, y - 1) != 0)
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1, x - 1)))
             {
               isRunning = true;
               next.insert( (x - 1) * img->cols + (y - 1) );
@@ -776,7 +776,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y, x - 1)))
             {
               isRunning = true;
               next.insert( (x - 1) * img->cols + (y) );
@@ -788,7 +788,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x - 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1, x - 1)))
             {
               isRunning = true;
               next.insert( (x - 1) * img->cols + (y + 1) );
@@ -800,7 +800,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1, x)))
             {
               isRunning = true;
               next.insert( (x) * img->cols + (y - 1) );
@@ -812,7 +812,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1, x)))
             {
               isRunning = true;
               next.insert( (x) * img->cols + (y + 1) );
@@ -824,7 +824,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y - 1,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y - 1, x + 1)))
             {
               isRunning = true;
               next.insert( (x + 1) * img->cols + (y - 1) );
@@ -836,7 +836,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y, x + 1)))
             {
               isRunning = true;
               next.insert( (x + 1) * img->cols + (y) );
@@ -848,7 +848,7 @@ namespace pandora_vision
         {
           for(unsigned int i = 0 ; i < nOfKernels ; i++)
           {
-            if(kernelCheck(kernels[i], *img, cv::Point(y + 1,x + 1)))
+            if(kernelCheck(kernels[i], *img, cv::Point(y + 1, x + 1)))
             {
               isRunning = true;
               next.insert( (x + 1) * img->cols + (y + 1) );
@@ -867,4 +867,5 @@ namespace pandora_vision
     Timer::tick("pruningStrictIterative");
     #endif
   }
-}
+
+} // namespace pandora_vision

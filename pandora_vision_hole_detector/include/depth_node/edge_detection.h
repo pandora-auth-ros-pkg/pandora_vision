@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_EDGE_DETECTION
-#define KINECT_EDGE_DETECTION
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_EDGE_DETECTION_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_EDGE_DETECTION_H_
 
 #include "depth_node/morphological_operators.h"
 
@@ -154,7 +154,7 @@ namespace pandora_vision
         @return void
        **/
       static void connectPairs(cv::Mat* inImage,
-          const std::vector<std::pair<GraphNode,GraphNode> >& pairs,
+          const std::vector<std::pair<GraphNode, GraphNode> >& pairs,
           const int& method);
 
       /**
@@ -184,7 +184,7 @@ namespace pandora_vision
         @return edgePoints [std::pair<GraphNode, GraphNode>*] The curve's pair
         of end points
        **/
-      static std::pair<GraphNode,GraphNode> findNeighs(cv::Mat* img,
+      static std::pair<GraphNode, GraphNode> findNeighs(cv::Mat* img,
         const int& x_, const int& y_, std::set<unsigned int>* ret);
 
       /**
@@ -198,6 +198,6 @@ namespace pandora_vision
       static void getShapesClearBorder (cv::Mat* inImage);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_EDGE_DETECTION_H_

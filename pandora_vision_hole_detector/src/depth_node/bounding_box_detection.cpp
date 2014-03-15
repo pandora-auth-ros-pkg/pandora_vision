@@ -60,7 +60,7 @@ namespace pandora_vision
     std::vector<std::vector<cv::Point2f> >* outRectangles)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findRotatedBoundingBoxesFromOutline","validateBlobs");
+    Timer::start("findRotatedBoundingBoxesFromOutline", "validateBlobs");
     #endif
 
     //!< Find the rotated rectangles for each blob based on its outline
@@ -123,4 +123,4 @@ namespace pandora_vision
     Timer::tick("findRotatedBoundingBoxesFromOutline");
     #endif
   }
-}
+} // namespace pandora_vision

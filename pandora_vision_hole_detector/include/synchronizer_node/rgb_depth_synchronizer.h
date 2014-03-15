@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef RBG_DEPTH_SYNCHRONIZER_H
-#define RBG_DEPTH_SYNCHRONIZER_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H_
 
 #include <depth_node/defines.h>
 #include <std_msgs/Empty.h>
@@ -107,5 +107,7 @@ namespace pandora_vision
        **/
       ~RgbDepthSynchronizer(void);
   };
-}
-#endif
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H_

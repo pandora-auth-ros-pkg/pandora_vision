@@ -97,7 +97,7 @@ namespace pandora_vision
     inImage.copyTo(*outImage);
     //!< in the end, only pixels adjacent to the edge of the
     //!< image are left black
-    while (interpolationIteration(outImage));
+    while (interpolationIteration(outImage)){}
 
     #ifdef DEBUG_TIME
     Timer::tick("interpolation");
@@ -283,7 +283,7 @@ namespace pandora_vision
       cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
-    Timer::start("brushfireNear","performNoiseElimination");
+    Timer::start("brushfireNear", "performNoiseElimination");
     #endif
 
     inImage.copyTo(*outImage);
@@ -291,13 +291,13 @@ namespace pandora_vision
 
     for(unsigned int i = 0 ; i < outImage->rows ; i++)
     {
-      outImage->at<float>(i,0) = 1;
+      outImage->at<float>(i, 0) = 1;
       outImage->at<float>(i, outImage->cols-1) = 1;
     }
-    for(unsigned int i = 0 ; i<outImage->cols ; i++)
+    for(unsigned int i = 0 ; i < outImage->cols ; i++)
     {
-      outImage->at<float>(0,i) = 1;
-      outImage->at<float>(outImage->rows -1 ,i) = 1;
+      outImage->at<float>(0, i) = 1;
+      outImage->at<float>(outImage->rows -1, i) = 1;
     }
     while(!finished)
     {
@@ -307,7 +307,7 @@ namespace pandora_vision
       {
         for(unsigned int j = 1 ; j< outImage->cols - 1 ; j++)
         {
-          if(outImage->at<float>(i,j) == 0)  //!< Found black
+          if(outImage->at<float>(i, j) == 0)  //!< Found black
           {
             brushfireNearStep(outImage, i * outImage->cols + j);
             finished = false;
@@ -344,24 +344,24 @@ namespace pandora_vision
     unsigned int x = index / image->cols;
     unsigned int y = index % image->cols;
 
-    std::vector<unsigned int> current,next;
+    std::vector<unsigned int> current, next;
     std::set<unsigned int> visited;
 
     current.push_back(x * image->cols + y);
     visited.insert(x * image->cols + y);
 
-    while(current.size()!=0)
+    while(current.size() != 0)
     {
-      for(unsigned int i = 0 ; i < current.size() ; i++)
+      for(unsigned int i = 0; i < current.size(); i++)
       {
         for(int m = -1 ; m < 2 ; m++)
         {
           for(int n = -1 ; n < 2 ; n++)
           {
-            x = (int)current[i] / image->cols + m;
-            y = (int)current[i] % image->cols + n;
+            x = static_cast<int>current[i] / image->cols + m;
+            y = static_cast<int>current[i] % image->cols + n;
 
-            if((image->at<float>(x,y) == 0) &&
+            if((image->at<float>(x, y) == 0) &&
               visited.find(x * image->cols + y) == visited.end())
             {
               next.push_back(x * image->cols + y);
@@ -379,40 +379,40 @@ namespace pandora_vision
     float val = 0;
 
     for(std::set<unsigned int>::iterator it = visited.begin();
-      it!=visited.end(); it++)
+      it != visited.end(); it++)
     {
       x = *it / image->cols;
       y = *it % image->cols;
 
-      val = image->at<float>(x-1,y+1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x-1, y+1);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x-1,y-1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x-1, y-1);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x-1,y);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x-1, y);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x+1,y+1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x+1, y+1);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x+1,y-1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x+1, y-1);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x+1,y);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x+1, y);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x,y-1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x, y-1);
+      if(val < lower && val != 0) lower = val;
 
-      val = image->at<float>(x,y+1);
-      if(val < lower && val!=0) lower = val;
+      val = image->at<float>(x, y+1);
+      if(val < lower && val != 0) lower = val;
     }
 
     for(std::set<unsigned int>::iterator it = visited.begin();
-        it!=visited.end(); it++)
+        it != visited.end(); it++)
     {
-      image->at<float>(*it / image->cols,*it % image->cols) = lower;
+      image->at<float>(*it / image->cols, *it % image->cols) = lower;
     }
 
     #ifdef DEBUG_TIME
@@ -442,7 +442,7 @@ namespace pandora_vision
     {
       for(unsigned int j = 0 ; j < image.cols ; j++)
       {
-        float d = image.at<float>(i,j);
+        float d = image.at<float>(i, j);
         if(d == 0)
         {
           blacks++;
@@ -460,17 +460,17 @@ namespace pandora_vision
     {
       for(unsigned int j = 0 ; j < image.cols ; j++)
       {
-        float d = image.at<float>(i,j);
+        float d = image.at<float>(i, j);
         if(d != 0)
         {
-          std += pow(d - mean,2);
+          std += pow(d - mean, 2);
         }
       }
     }
 
     std /= image.rows * image.cols - blacks + 1;
     std = sqrt(std);
-    bper = (float)blacks / (image.rows * image.cols);
+    bper = static_cast<float>blacks / (image.rows * image.cols);
 
     DepthParameters::interpolation_method = 15;
     if(bper > 0.7)  //!< Choose close
@@ -502,7 +502,7 @@ namespace pandora_vision
       cv::Mat* outImage)
   {
     #ifdef DEBUG_TIME
-    Timer::start("transformNoiseToWhite","performNoiseElimination");
+    Timer::start("transformNoiseToWhite", "performNoiseElimination");
     #endif
 
     inImage.copyTo(*outImage);
@@ -511,13 +511,13 @@ namespace pandora_vision
     {
       for(unsigned int j = 0 ; j < inImage.cols ; j++)
       {
-        if(inImage.at<float>(i,j) != 0)
+        if(inImage.at<float>(i, j) != 0)
         {
-          outImage->at<float>(i,j) = 4.0;
+          outImage->at<float>(i, j) = 4.0;
         }
         else
         {
-          outImage->at<float>(i,j) = 0.0;
+          outImage->at<float>(i, j) = 0.0;
         }
       }
     }
@@ -525,4 +525,5 @@ namespace pandora_vision
     Timer::tick("transformNoiseToWhite");
     #endif
   }
-}
+
+} // namespace pandora_vision

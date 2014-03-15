@@ -84,20 +84,20 @@ namespace pandora_vision
 
     for(int i = 0; i < 1; i++)
     {
-      cv::KeyPoint keypoint(i,i, 1);
+      cv::KeyPoint keypoint(i, i, 1);
       rgbHolesConveyor.keyPoints.push_back(keypoint);
 
       for (int v = 0; v < 4; v++)
       {
-        float k = (float)v;
-        cv::Point vertex(k,k);
+        float k = static_cast<float> v;
+        cv::Point vertex(k, k);
         rectangles.push_back(vertex);
       }
       rgbHolesConveyor.rectangles.push_back(rectangles);
 
       for (int o = 0; o < 10; o++)
       {
-        cv::Point2f outline(o,o);
+        cv::Point2f outline(o, o);
         outlines.push_back(outline);
       }
       rgbHolesConveyor.outlines.push_back(outlines);
@@ -151,4 +151,5 @@ namespace pandora_vision
     //!< sensor_msgs/Image interpolatedDepthImage
     rgbCandidateHolesMsg->rgbImage = rgbImage;
   }
-}
+
+} // namespace pandora_vision

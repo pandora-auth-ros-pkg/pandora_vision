@@ -299,4 +299,5 @@ namespace pandora_vision
 
     return rgbImage;
   }
-}
+
+} // namespace pandora_vision

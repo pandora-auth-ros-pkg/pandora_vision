@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef MESSAGE_CONVERSIONS_H
-#define MESSAGE_CONVERSIONS_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H_
 
 #include "depth_node/defines.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
@@ -153,5 +153,7 @@ namespace pandora_vision
       static cv::Mat pointCloudToRGBImage(
         const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage);
   };
-}
-#endif
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H_

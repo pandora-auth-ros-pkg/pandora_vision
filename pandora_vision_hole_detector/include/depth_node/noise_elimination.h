@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_NOISE_ELIMINATION
-#define KINECT_NOISE_ELIMINATION
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_NOISE_ELIMINATION_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_NOISE_ELIMINATION_H_
 
 #include "depth_node/morphological_operators.h"
 
@@ -118,7 +118,8 @@ namespace pandora_vision
         (index = y * cols + x)
         @return void
        **/
-      static void brushfireNearStep(cv::Mat* image, const unsigned int& index);
+      static void brushfireNearStep(cv::Mat* image,
+        const unsigned int& index);
 
       /**
         @brief Changes the interpolation method according to the image's values
@@ -137,6 +138,6 @@ namespace pandora_vision
           cv::Mat* outImage);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_NOISE_ELIMINATION_H_

@@ -303,7 +303,7 @@ namespace pandora_vision
     pDir = opendir(wallPicturesPath.c_str());
     if (pDir != NULL)
     {
-      while ((pDirent = readdir(pDir)) != NULL)
+      while ((pDirent = readdir_r(pDir)) != NULL)
       {
         fileLength = strlen(pDirent->d_name);
         if (strcmp (".png", &(pDirent->d_name[fileLength - 4])) == 0)
@@ -475,7 +475,7 @@ namespace pandora_vision
     if(HoleFusionParameters::debug_show_find_holes)
     {
       Visualization::multipleShow("depthCandidateHolesCallback function",
-        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size,1);
+        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size, 1);
     }
     #endif
     //!< Processing complete.
@@ -586,4 +586,5 @@ namespace pandora_vision
     std_msgs::Empty unlockMsg;
     unlockPublisher_.publish(unlockMsg);
   }
-}
+
+} // namespace pandora_vision

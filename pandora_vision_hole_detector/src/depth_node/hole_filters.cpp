@@ -60,7 +60,7 @@ namespace pandora_vision
     HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
-    Timer::start("validateBlobs","findHoles");
+    Timer::start("validateBlobs", "findHoles");
     #endif
 
     switch(detectionMethod)
@@ -185,7 +185,7 @@ namespace pandora_vision
     HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
-    Timer::start("validateKeypointsToRectangles","validateBlobs");
+    Timer::start("validateKeypointsToRectangles", "validateBlobs");
     #endif
     for (unsigned int keypointId = 0;
       keypointId < inKeyPoints.size(); keypointId++)
@@ -245,5 +245,6 @@ namespace pandora_vision
     Timer::tick("validateKeypointsToRectangles");
     #endif
   }
-}
+
+} // namespace pandora_vision
 

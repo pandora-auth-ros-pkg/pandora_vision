@@ -66,11 +66,11 @@ namespace pandora_vision
     rows = sqdim;
     cols = imgs.size() / rows + (((imgs.size() % rows) != 0) ? 1 : 0);
 
-    unsigned int winCols = ((float)maxSize) / cols;
-    float scale = ((float) winCols) / imgs[0].cols;
+    unsigned int winCols = (static_cast<float> maxSize) / cols;
+    float scale = (static_cast<float> winCols) / imgs[0].cols;
 
     unsigned int finalRows, finalCols;
-    finalRows = rows * ((float)imgs[0].rows * scale);
+    finalRows = rows * (static_cast<float> imgs[0].rows * scale);
     finalCols = winCols * cols;
 
     cv::Mat big(rows * imgs[0].rows, cols * imgs[0].cols, CV_8UC3);
@@ -87,24 +87,24 @@ namespace pandora_vision
         {
           if(imgs[im].channels() == 1)
           {
-            big.at<cv::Vec3b>(startRow + i,startCol + j)[0] =
-              imgs[im].at<unsigned char>(i,j);
-            big.at<cv::Vec3b>(startRow + i,startCol + j)[1] =
-              imgs[im].at<unsigned char>(i,j);
-            big.at<cv::Vec3b>(startRow + i,startCol + j)[2] =
-              imgs[im].at<unsigned char>(i,j);
+            big.at<cv::Vec3b>(startRow + i, startCol + j)[0] =
+              imgs[im].at<unsigned char>(i, j);
+            big.at<cv::Vec3b>(startRow + i, startCol + j)[1] =
+              imgs[im].at<unsigned char>(i, j);
+            big.at<cv::Vec3b>(startRow + i, startCol + j)[2] =
+              imgs[im].at<unsigned char>(i, j);
           }
           else
           {
-            big.at<cv::Vec3b>(startRow + i,startCol + j) =
-              imgs[im].at<cv::Vec3b>(i,j);
+            big.at<cv::Vec3b>(startRow + i, startCol + j) =
+              imgs[im].at<cv::Vec3b>(i, j);
           }
         }
       }
 
       cv::putText(big, titles[im].c_str(),
-        cvPoint(startCol + 10,startRow + 20),
-        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,255,0), 1, CV_AA);
+        cvPoint(startCol + 10, startRow + 20),
+        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 255, 0), 1, CV_AA);
     }
 
     for(unsigned int i = 1 ; i <= rows - 1 ; i++)
@@ -125,7 +125,7 @@ namespace pandora_vision
 
     //!< Final resize
     cv::Mat resized(finalRows, finalCols, CV_8UC3);
-    cv::resize(big,resized,cv::Size(finalCols,finalRows));
+    cv::resize(big, resized, cv::Size(finalCols, finalRows));
     show(title, resized, ms);
   }
 
@@ -230,12 +230,12 @@ namespace pandora_vision
         cv::line(img,
           cvPoint(outlineVector[i][j].x - 1, outlineVector[i][j].y - 1),
           cvPoint(outlineVector[i][j].x + 1, outlineVector[i][j].y + 1),
-          cv::Scalar(0,255,0), 1, 8 , CV_AA);
+          cv::Scalar(0, 255, 0), 1, 8 , CV_AA);
 
         cv::line(img,
           cvPoint(outlineVector[i][j].x - 1, outlineVector[i][j].y + 1),
           cvPoint(outlineVector[i][j].x + 1, outlineVector[i][j].y - 1),
-          cv::Scalar(0,255,0), 1, 8);
+          cv::Scalar(0, 255, 0), 1, 8);
       }
     }
 
@@ -249,8 +249,8 @@ namespace pandora_vision
       if(msgs.size() == bounding_boxes.size())
       {
         cv::putText(img, msgs[i].c_str(),
-          cvPoint(keypoints[i].pt.x - 20,keypoints[i].pt.y - 20),
-          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255,50,50), 1, CV_AA);
+          cvPoint(keypoints[i].pt.x - 20, keypoints[i].pt.y - 20),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255, 50, 50), 1, CV_AA);
       }
     }
 
@@ -258,13 +258,13 @@ namespace pandora_vision
     {
       cv::putText(img,
         (TOSTR(hz)+std::string("Hz")).c_str(),
-        cvPoint(20,20),
-        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,0,255), 1, CV_AA);
+        cvPoint(20, 20),
+        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 0, 255), 1, CV_AA);
     }
 
     if(ms >= 0)
     {
-      Visualization::show(windowTitle.c_str(),img,ms);
+      Visualization::show(windowTitle.c_str(), img, ms);
     }
 
     return img;
@@ -294,7 +294,7 @@ namespace pandora_vision
 
     if(ms >= 0)
     {
-      Visualization::show(windowTitle.c_str(),img,ms);
+      Visualization::show(windowTitle.c_str(), img, ms);
     }
 
     return img;
@@ -320,5 +320,5 @@ namespace pandora_vision
     cv::waitKey(ms);
   }
 
-}
+} // namespace pandora_vision
 

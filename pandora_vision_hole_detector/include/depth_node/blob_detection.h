@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_BLOB_DETECTION
-#define KINECT_BLOB_DETECTION
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BLOB_DETECTION_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BLOB_DETECTION_H_
 
 #include "depth_node/morphological_operators.h"
 
@@ -129,6 +129,6 @@ namespace pandora_vision
 
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BLOB_DETECTION_H_

@@ -159,4 +159,5 @@ namespace pandora_vision
     Timer::tick("holeFusionCallback");
     #endif
   }
-}
+
+} // namespace pandora_vision

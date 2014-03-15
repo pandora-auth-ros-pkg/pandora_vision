@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_MORPHOLOGY
-#define KINECT_MORPHOLOGY
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_MORPHOLOGICAL_OPERATORS_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_MORPHOLOGICAL_OPERATORS_H_
 
 #include "depth_node/visualization.h"
 
@@ -158,6 +158,6 @@ namespace pandora_vision
       static void pruningStrictIterative(cv::Mat* inImage, const int& steps);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_MORPHOLOGICAL_OPERATORS_H_
