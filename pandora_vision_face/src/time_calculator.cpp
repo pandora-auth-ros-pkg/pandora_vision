@@ -35,7 +35,6 @@
 * Author: Skartados Evangelos
 *********************************************************************/
 
-#include <iostream>
 
 #include "pandora_vision_face/time_calculator.h"
 
@@ -45,9 +44,9 @@ TimeCalculator::TimeCalculator() {}
 
 TimeCalculator::~TimeCalculator() {}
 
-long TimeCalculator::timeElapsed (struct timeval &t1, struct timeval &t2)
+int32_t TimeCalculator::timeElapsed (struct timeval &t1, struct timeval &t2)
 {
-  long sec, usec;
+  int32_t sec, usec;
 
   sec = t2.tv_sec - t1.tv_sec;
 
@@ -67,7 +66,7 @@ void TimeCalculator::startTimer()
   gettimeofday (&startTime, &tz);
 }
 
-long TimeCalculator::endTimer()
+int32_t TimeCalculator::endTimer()
 {
   struct timezone tz;
   gettimeofday (&endTime, &tz);
