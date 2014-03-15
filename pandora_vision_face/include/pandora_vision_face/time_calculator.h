@@ -39,7 +39,8 @@
 #define PANDORA_VISION_FACE_TIME_CALCULATOR_H 
 
 #include <sys/time.h>
-
+#include <stdint.h>
+#include <iostream>
 #define USEC_PER_SEC 1000000L
 
 namespace pandora_vision
@@ -49,13 +50,13 @@ class TimeCalculator
 private:
   struct timeval startTime;
   struct timeval endTime;
-  long timeElapsed (struct timeval &t1, struct timeval &t2);
+  int32_t timeElapsed (struct timeval &t1, struct timeval &t2);
 
 public:
   TimeCalculator();
   virtual ~TimeCalculator();
   void startTimer();
-  long endTimer();
+  int32_t endTimer();
 
 };
 }// namespace pandora_vision
