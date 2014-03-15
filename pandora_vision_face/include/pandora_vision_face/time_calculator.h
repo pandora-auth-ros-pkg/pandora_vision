@@ -50,7 +50,7 @@ class TimeCalculator
 private:
   struct timeval startTime;
   struct timeval endTime;
-  int32_t timeElapsed (struct timeval &t1, struct timeval &t2);
+  int32_t timeElapsed (const struct timeval &t1, const struct timeval &t2);
 
 public:
   TimeCalculator();
