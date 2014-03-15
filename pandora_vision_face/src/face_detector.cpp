@@ -175,7 +175,7 @@ int FaceDetector::findFaces(cv::Mat frame)
     {
       return -2;
     }
-    //compareWithSkinDetector(probability, tmp, totalArea);
+    //~ compareWithSkinDetector(&probability, tmp, &totalArea);
   }
   now = (now + 1) % _bufferSize; //prepare index for next frame
 
@@ -189,7 +189,7 @@ int FaceDetector::findFaces(cv::Mat frame)
   @return Integer of the sum of faces found in all
   rotations of the frame
 */
-void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea)
+void FaceDetector::compareWithSkinDetector(float *probability, cv::Mat tmp, int *totalArea)
 {
   float skinFactor = 0.;
   float skinFaceRatio = 0.;
@@ -198,17 +198,18 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
   //skinImg = skinDetector->getImgContoursForFace();
   skinImg = skinDetector->imgThresholdFiltered;
   skinPixelNum = round( cv::norm(skinImg, cv::NORM_L1, cv::noArray()) / 255.);
-  bitwise_and( frame_buffer[now] , skinImg , tmp); //tmp now stores common skin-face pixels
+  //!< tmp now stores common skin-face pixels
+  bitwise_and( frame_buffer[now] , skinImg , tmp); 
 
   if(totalArea == 0)
   {
-    // if no face was found, skinFaceRatio for this frame is 0
+    //!< if no face was found, skinFaceRatio for this frame is 0
     skinFaceRatio = 0.; 
   }
   else
   {
     skinFaceRatio = round( cv::norm(tmp, cv::NORM_L1, 
-      cv::noArray()) / 255.) / static_cast<float>(totalArea);
+    cv::noArray()) / 255.) / static_cast<float>(*totalArea);
   }
 
   if (skinFaceRatio >= 0.01)
@@ -231,8 +232,7 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
   {
     skinFactor = 0.;
   }
-
-  probability = 0.7 * probability + 0.3 * skinFactor;
+  *probability = (*probability) * 0.7 + 0.3 * skinFactor;
   std::cout << "skinFaceRatio: " << skinFaceRatio << std::endl;
   std::cout << "skinFaceFactor: " << skinFactor << std::endl;
 

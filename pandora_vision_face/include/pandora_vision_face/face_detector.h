@@ -122,7 +122,7 @@ private:
   int detectFace(cv::Mat img);
 
   void createRectangles(cv::Mat tmp);
-  void compareWithSkinDetector(float &probability, cv::Mat tmp, int &totalArea);
+  void compareWithSkinDetector(float *probability, cv::Mat tmp, int *totalArea);
 
 public:
 
