@@ -35,8 +35,8 @@
 * Author: Skartados Evangelos
 *********************************************************************/
 
-#ifndef TIMECALC_H
-#define TIMECALC_H
+#ifndef PANDORA_VISION_FACE_TIME_CALCULATOR_H 
+#define PANDORA_VISION_FACE_TIME_CALCULATOR_H 
 
 #include <sys/time.h>
 
@@ -58,5 +58,5 @@ public:
   long endTimer();
 
 };
-}
-#endif
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_FACE_TIME_CALCULATOR_H

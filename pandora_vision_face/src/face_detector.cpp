@@ -149,8 +149,9 @@ int FaceDetector::findFaces(cv::Mat frame)
   }
   else
   {
-    probability_buffer[now] = round( cv::norm(tmp, cv::NORM_L1,
-                                     cv::noArray()) / 255.) / (float)totalArea;
+    probability_buffer[now] = round( 
+      cv::norm(tmp, cv::NORM_L1, 
+        cv::noArray()) / 255.) / static_cast<float>(totalArea);
   }
   //!< clear value from last scan
   probability = 0.;
@@ -201,11 +202,13 @@ void FaceDetector::compareWithSkinDetector(float &probability, cv::Mat tmp, int 
 
   if(totalArea == 0)
   {
-    skinFaceRatio = 0.; // if no face was found, skinFaceRatio for this frame is 0
+    // if no face was found, skinFaceRatio for this frame is 0
+    skinFaceRatio = 0.; 
   }
   else
   {
-    skinFaceRatio = round( cv::norm(tmp, cv::NORM_L1, cv::noArray()) / 255.) / (float)totalArea;
+    skinFaceRatio = round( cv::norm(tmp, cv::NORM_L1, 
+      cv::noArray()) / 255.) / static_cast<float>(totalArea);
   }
 
   if (skinFaceRatio >= 0.01)
@@ -431,7 +434,7 @@ cv::Mat FaceDetector::frameRotate(cv::Mat frame, float thAngle)
 
   //!< Calculate rotation matrix
   cv::Mat matRotation = getRotationMatrix2D(
-                          cv::Point( iImageCenterX, iImageCenterY ), (thAngle - 180), 1.1 );
+              cv::Point( iImageCenterX, iImageCenterY ), (thAngle - 180), 1.1 );
 
   cv::Mat rotated_frame;
   cv::warpAffine( frame, rotated_frame, matRotation, rotated_frame.size() );
@@ -439,4 +442,4 @@ cv::Mat FaceDetector::frameRotate(cv::Mat frame, float thAngle)
   return rotated_frame;
 }
 
-}
+}// namespace pandora_vision

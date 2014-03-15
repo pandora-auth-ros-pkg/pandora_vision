@@ -73,4 +73,4 @@ long TimeCalculator::endTimer()
   gettimeofday (&endTime, &tz);
   return timeElapsed(startTime, endTime);
 }
-}
+}//namespace pandora_vision
