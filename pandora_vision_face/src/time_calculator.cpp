@@ -44,7 +44,7 @@ TimeCalculator::TimeCalculator() {}
 
 TimeCalculator::~TimeCalculator() {}
 
-int32_t TimeCalculator::timeElapsed (struct timeval &t1, struct timeval &t2)
+int32_t TimeCalculator::timeElapsed (const struct timeval &t1, const struct timeval &t2)
 {
   int32_t sec, usec;
 
