@@ -78,8 +78,8 @@ void LandoltCDetector::initializeReferenceImage(std::string path)
 /**
   @brief Calculation of rotation based on moments.Precision is good for a
   distance up to 30cm from the camera
-  @param input [cv::Mat&] Matrix containing the padded frame
-  @param input [int] Index of C being processed
+  @param in [const cv::Mat&] Matrix containing the padded frame
+  @param i [int] Index of C being processed
   @return void
 **/
 
@@ -265,8 +265,6 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
 
 /**
   @brief Mask for separating a LandoltC Contour to its components
-  @param rows [int] Number of rows of matrix
-  @param cols [int] Number of columns of matrix
   @return void
 **/
 
@@ -300,7 +298,7 @@ void LandoltCDetector::applyMask()
 
 /**
   @brief Finds LandoltC Contours on RGB Frames
-  @param inImage [cv::Mat&] Input Image
+  @param inImage [const cv::Mat&] Input Image
   @param rows [int] Number of rows of matrix
   @param cols [int] Number of columns of matrix
   @param ref [std::vector<cv::Point>] Vector containing contour points of reference image
@@ -357,7 +355,7 @@ void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int
 
 /**
   @brief Function called from ImageCallBack that Initiates LandoltC search in the frame
-  @param input [cv::Mat&] Matrix containing the frame received from the camera
+  @param input [cv::Mat*] Matrix containing the frame received from the camera
   @return void
 **/
 
@@ -413,7 +411,7 @@ void LandoltCDetector::begin(cv::Mat* input)
 
 /**
   @brief Thinning algorith using the Zhang-Suen method
-  @param in [cv::Mat&] Matrix containing the frame to thin
+  @param in [cv::Mat*] Matrix containing the frame to thin
   @return void
 **/
 
@@ -436,7 +434,7 @@ void LandoltCDetector::thinning(cv::Mat* in)
 
 /**
   @brief Thinning iteration call from the thinning function
-  @param in [cv::Mat&] Matrix containing the frame to thin
+  @param in [cv::Mat*] Matrix containing the frame to thin
   @param iter [int] Number of iteration with values 1-2
   @return void
 **/

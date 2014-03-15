@@ -80,7 +80,7 @@ public:
 
   /**
   @brief Function for the initialization of the reference image
-  @param void
+  @param path [std::string] The path of the reference image
   @return void
   **/
   void initializeReferenceImage(std::string path);
@@ -105,7 +105,7 @@ public:
 
   /**
   @brief Finds LandoltC Contours on RGB Frames
-  @param inImage [cv::Mat&] Input Image
+  @param inImage [const cv::Mat&] Input Image
   @param rows [int] Number of rows of matrix
   @param cols [int] Number of columns of matrix
   @param ref [std::vector<cv::Point>] Vector containing contour points of reference image
@@ -121,14 +121,14 @@ public:
 
   /**
   @brief Thinning algorith using the Zhang-Suen method
-  @param in [cv::Mat&] Matrix containing the frame to thin
+  @param in [cv::Mat*] Matrix containing the frame to thin
   @return void
   **/
   void thinning(cv::Mat* in);
 
   /**
   @brief Thinning iteration call from the thinning function
-  @param in [cv::Mat&] Matrix containing the frame to thin
+  @param in [cv::Mat*] Matrix containing the frame to thin
   @param iter [int] Number of iteration with values 1-2
   @return void
   **/
@@ -136,7 +136,7 @@ public:
 
   /**
   @brief Function called for the initiation of LandoltC search in the frame
-  @param input [cv::Mat&] Matrix containing the frame received from the camera
+  @param input [cv::Mat*] Matrix containing the frame received from the camera
   @return void
   **/
   void begin(cv::Mat* input);
@@ -144,8 +144,8 @@ public:
   /**
   @brief Calculation of rotation based on moments.Precision is good for a
   distance up to 30cm from the camera
-  @param input [cv::Mat&] Matrix containing the padded frame
-  @param input [int] Index of C being processed
+  @param in [const cv::Mat&] Matrix containing the padded frame
+  @param i [int] Index of C being processed
   @return void
   **/
   
