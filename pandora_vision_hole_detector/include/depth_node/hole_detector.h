@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_HOLE_DETECTOR
-#define KINECT_HOLE_DETECTOR
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_HOLE_DETECTOR_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_HOLE_DETECTOR_H_
 
 #include "depth_node/hole_filters.h"
 
@@ -69,6 +69,6 @@ namespace pandora_vision
       static HoleFilters::HolesConveyor findHoles(cv::Mat depthImage,
         cv::Mat& interpolatedDepthImage);
   };
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_HOLE_DETECTOR_H_

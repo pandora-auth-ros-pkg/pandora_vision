@@ -190,7 +190,8 @@ namespace pandora_vision
     cv::Mat edges;
     inImage.copyTo(edges);
 
-    cv::Laplacian(edges, *outImage, ddepth, 1, scale, delta, cv::BORDER_DEFAULT);
+    cv::Laplacian(edges, *outImage, ddepth, 1, scale, delta,
+      cv::BORDER_DEFAULT);
     convertScaleAbs(*outImage, *outImage);
 
     #ifdef DEBUG_TIME
@@ -214,7 +215,7 @@ namespace pandora_vision
 
     int rows = inImage->rows;
     int cols = inImage->cols;
-    std::set<unsigned int> current,next,visited;
+    std::set<unsigned int> current, next, visited;
 
     for(unsigned int i = 0 ; i < rows ; i++)  //!< Border blacken
     {
@@ -508,7 +509,7 @@ namespace pandora_vision
     @return void
    **/
   void EdgeDetection::connectPairs(cv::Mat* inImage,
-      const std::vector<std::pair<GraphNode,GraphNode> >& pairs,
+      const std::vector<std::pair<GraphNode, GraphNode> >& pairs,
       const int& method)
   {
 
@@ -527,7 +528,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_TIME
-    Timer::start("connectPairs","denoiseEdges");
+    Timer::start("connectPairs", "denoiseEdges");
     #endif
 
     if (method == 0)
@@ -829,11 +830,11 @@ namespace pandora_vision
   void EdgeDetection::denoiseEdges(cv::Mat* img)
   {
     #ifdef DEBUG_TIME
-    Timer::start("denoiseEdges","computeEdges");
+    Timer::start("denoiseEdges", "computeEdges");
     #endif
 
     #ifdef DEBUG_TIME
-    Timer::start("Sector #1","denoiseEdges");
+    Timer::start("Sector #1", "denoiseEdges");
     #endif
 
     cv::Mat temp;
@@ -871,7 +872,7 @@ namespace pandora_vision
 
     //!< Perform thinning
     cv::Mat thinnedImg;
-    Morphology::thinning(temp, &thinnedImg,100);
+    Morphology::thinning(temp, &thinnedImg, 100);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_denoise_edges) // Debug
@@ -892,7 +893,7 @@ namespace pandora_vision
     Timer::tick("Sector #1");
     #endif
     #ifdef DEBUG_TIME
-    Timer::start("Sector #2","denoiseEdges");
+    Timer::start("Sector #2", "denoiseEdges");
     #endif
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_denoise_edges) // Debug
@@ -909,20 +910,20 @@ namespace pandora_vision
     //!< Eliminate closed shapes
     for(unsigned int i = 0 ; i < img->rows ; i++)
     {
-      thinnedImg.at<unsigned char>(i,0) = 0;
+      thinnedImg.at<unsigned char>(i, 0) = 0;
       thinnedImg.at<unsigned char>(i, img->cols - 1) = 0;
     }
     for(unsigned int i = 0 ; i < img->cols ; i++)
     {
-      thinnedImg.at<unsigned char>(0,i) = 0;
-      thinnedImg.at<unsigned char>(img->rows - 1,i) = 0;
+      thinnedImg.at<unsigned char>(0, i) = 0;
+      thinnedImg.at<unsigned char>(img->rows - 1, i) = 0;
     }
 
     // Must throw away the closed lines
     cv::Mat closedLines;
     thinnedImg.copyTo(closedLines);
 
-    Morphology::pruningStrictIterative(&closedLines,1000);
+    Morphology::pruningStrictIterative(&closedLines, 1000);
 
     thinnedImg = thinnedImg - closedLines;
 
@@ -956,7 +957,7 @@ namespace pandora_vision
     #endif
 
     std::vector<std::set<unsigned int> > lines;
-    std::vector<std::pair<GraphNode,GraphNode> > farPts;
+    std::vector<std::pair<GraphNode, GraphNode> > farPts;
     bool hasFinished = false;
 
     while(!hasFinished)
@@ -966,10 +967,10 @@ namespace pandora_vision
       {
         for(unsigned int j = 1 ; j < thinnedImg.cols - 1; j++)
         {
-          if(thinnedImg.at<unsigned char> (i,j) != 0)
+          if(thinnedImg.at<unsigned char> (i, j) != 0)
           {
             std::set<unsigned int> ret;
-            std::pair<GraphNode,GraphNode> pts =
+            std::pair<GraphNode, GraphNode> pts =
               findNeighs(&thinnedImg, i, j, &ret);
             if(ret.size() > DepthParameters::minimum_curve_points)
             {
@@ -1072,18 +1073,18 @@ namespace pandora_vision
     @return edgePoints [std::pair<GraphNode, GraphNode>*] The curve's pair of
     end points
    **/
-  std::pair<GraphNode,GraphNode> EdgeDetection::findNeighs(
+  std::pair<GraphNode, GraphNode> EdgeDetection::findNeighs(
       cv::Mat* img, const int& x_, const int& y_, std::set<unsigned int>* ret)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findNeighs","denoiseEdges");
+    Timer::start("findNeighs", "denoiseEdges");
     #endif
 
     std::vector<unsigned int> current, next;
     std::set<unsigned int> currs;
     std::vector<GraphNode*> nodes;
     std::vector<GraphNode*> originCurr, originNext;
-    GraphNode* father = new GraphNode(x_,y_);
+    GraphNode* father = new GraphNode(x_, y_);
 
     ret->insert(x_ * img->cols + y_);
     current.push_back(x_ * img->cols + y_);
@@ -1101,9 +1102,9 @@ namespace pandora_vision
         std::vector<unsigned int> currNext;
         int x = current[i] / img->cols;
         int y = current[i] % img->cols;
-        img->at<unsigned char>(x,y) = 0;
+        img->at<unsigned char>(x, y) = 0;
         unsigned int counter = 0;
-        if(img->at<unsigned char>(x - 1,y - 1) != 0 &&
+        if(img->at<unsigned char>(x - 1, y - 1) != 0 &&
             currs.find((x-1) * img->cols + y - 1) == currs.end() &&
             ret->find((x-1) * img->cols + y - 1) == ret->end())
         {
@@ -1111,9 +1112,9 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x-1) * img->cols + y - 1);
-          counter ++;
+          counter++;
         }
-        if(img->at<unsigned char>(x - 1,y) != 0 &&
+        if(img->at<unsigned char>(x - 1, y) != 0 &&
             currs.find((x-1) * img->cols + y) == currs.end() &&
             ret->find((x-1) * img->cols + y) == ret->end())
         {
@@ -1121,9 +1122,9 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x-1) * img->cols + y);
-          counter ++;
+          counter++;
         }
-        if(img->at<unsigned char>(x - 1,y + 1) != 0 &&
+        if(img->at<unsigned char>(x - 1, y + 1) != 0 &&
             currs.find((x-1) * img->cols + y + 1) == currs.end() &&
             ret->find((x-1) * img->cols + y + 1) == ret->end())
         {
@@ -1131,10 +1132,10 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x-1) * img->cols + y + 1);
-          counter ++;
+          counter++;
         }
 
-        if(img->at<unsigned char>(x,y - 1) != 0 &&
+        if(img->at<unsigned char>(x, y - 1) != 0 &&
             currs.find((x) * img->cols + y - 1) == currs.end() &&
             ret->find((x) * img->cols + y - 1) == ret->end())
         {
@@ -1142,9 +1143,9 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x) * img->cols + y - 1);
-          counter ++;
+          counter++;
         }
-        if(img->at<unsigned char>(x,y + 1) != 0 &&
+        if(img->at<unsigned char>(x, y + 1) != 0 &&
             currs.find((x) * img->cols + y + 1) == currs.end() &&
             ret->find((x) * img->cols + y + 1) == ret->end())
         {
@@ -1152,10 +1153,10 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x) * img->cols + y + 1);
-          counter ++;
+          counter++;
         }
 
-        if(img->at<unsigned char>(x + 1,y - 1) != 0 &&
+        if(img->at<unsigned char>(x + 1, y - 1) != 0 &&
             currs.find((x+1) * img->cols + y - 1) == currs.end() &&
             ret->find((x+1) * img->cols + y - 1) == ret->end())
         {
@@ -1163,9 +1164,9 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x+1) * img->cols + y - 1);
-          counter ++;
+          counter++;
         }
-        if(img->at<unsigned char>(x + 1,y) != 0 &&
+        if(img->at<unsigned char>(x + 1, y) != 0 &&
             currs.find((x+1) * img->cols + y) == currs.end() &&
             ret->find((x+1) * img->cols + y) == ret->end())
         {
@@ -1173,9 +1174,9 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x+1) * img->cols + y);
-          counter ++;
+          counter++;
         }
-        if(img->at<unsigned char>(x + 1,y + 1) != 0 &&
+        if(img->at<unsigned char>(x + 1, y + 1) != 0 &&
             currs.find((x+1) * img->cols + y + 1) == currs.end() &&
             ret->find((x+1) * img->cols + y + 1) == ret->end())
         {
@@ -1183,12 +1184,12 @@ namespace pandora_vision
           originNext.push_back(originCurr[i]);
           currNext.push_back(originNext.size() - 1);
           ret->insert((x+1) * img->cols + y + 1);
-          counter ++;
+          counter++;
         }
 
         if(counter == 0)  //!< This is edge
         {
-          GraphNode* temp = new GraphNode(x,y);
+          GraphNode* temp = new GraphNode(x, y);
           nodes.push_back(temp);
 
           originCurr[i]->connections.push_back(temp);
@@ -1201,7 +1202,7 @@ namespace pandora_vision
         }
         else if(counter >= 2) //!< This is joint
         {
-          GraphNode* temp = new GraphNode(x,y);
+          GraphNode* temp = new GraphNode(x, y);
           nodes.push_back(temp);
           originCurr[i]->connections.push_back(temp);
           temp->connections.push_back(originCurr[i]);
@@ -1226,7 +1227,7 @@ namespace pandora_vision
       originCurr.swap(originNext);
     }
 
-    std::pair<GraphNode,GraphNode> edgePoints;
+    std::pair<GraphNode, GraphNode> edgePoints;
     //!< If it is small avoid the fuzz
     if(ret->size() < DepthParameters::minimum_curve_points)
     {
@@ -1238,15 +1239,15 @@ namespace pandora_vision
 
     for(unsigned int i = 0 ; i < nodes.size(); i++)
     {
-      std::vector<GraphNode*> current,next;
-      std::map<GraphNode*,int> dists;
+      std::vector<GraphNode*> current, next;
+      std::map<GraphNode*, int> dists;
       std::set<GraphNode*> visited;
 
       current.push_back(nodes[i]);
       visited.insert(nodes[i]);
       for(unsigned int kk = 0 ; kk < nodes.size() ; kk++)
       {
-        dists.insert(std::pair<GraphNode*,int>(nodes[i],0));
+        dists.insert(std::pair<GraphNode*, int>(nodes[i], 0));
       }
       while(current.size() != 0)
       {
@@ -1317,7 +1318,7 @@ namespace pandora_vision
     }
     #endif
     #ifdef DEBUG_TIME
-    Timer::start("getShapesClearBorder","denoiseEdges");
+    Timer::start("getShapesClearBorder", "denoiseEdges");
     #endif
 
     //!< Invert the image to facilitate floodfill's operation
@@ -1336,7 +1337,7 @@ namespace pandora_vision
       }
     }
 
-    cv::floodFill(*inImage, cv::Point(0,0), 0);
+    cv::floodFill(*inImage, cv::Point(0, 0), 0);
 
     Morphology::dilation(inImage, 1);
 
@@ -1387,7 +1388,7 @@ namespace pandora_vision
               bordersImage.at<unsigned char>(rows, cols) == 0)
           {
             if (Morphology::kernelCheck(kernels[kernelId], *inImage,
-                  cv::Point(cols,rows)))
+                  cv::Point(cols, rows)))
             {
               bordersImage.at<unsigned char>(rows, cols) = 255;
             }
@@ -1419,4 +1420,4 @@ namespace pandora_vision
     #endif
   }
 
-}
+} // namespace pandora_vision

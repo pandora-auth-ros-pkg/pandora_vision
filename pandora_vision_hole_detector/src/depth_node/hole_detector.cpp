@@ -57,7 +57,7 @@ namespace pandora_vision
     cv::Mat& interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findHoles","inputCloudCallback");
+    Timer::start("findHoles", "inputCloudCallback");
     #endif
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
@@ -187,8 +187,8 @@ namespace pandora_vision
     }
     if(DepthParameters::debug_show_find_holes)
     {
-      Visualization::multipleShow("findHoles function",imgs,msgs,
-        DepthParameters::debug_show_find_holes_size,1);
+      Visualization::multipleShow("findHoles function", imgs, msgs,
+        DepthParameters::debug_show_find_holes_size, 1);
     }
     #endif
 
@@ -207,5 +207,6 @@ namespace pandora_vision
 
     return conveyor;
   }
-}
+
+} // namespace pandora_vision
 

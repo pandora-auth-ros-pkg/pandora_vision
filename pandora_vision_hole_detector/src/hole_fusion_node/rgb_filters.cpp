@@ -163,8 +163,8 @@ namespace pandora_vision
 
       valid.insert(i);
 
-      probabilitiesVector->at(i) =
-        (float) overallNonZeroBoxes / (h_bins / box_x * v_bins / box_y);
+      probabilitiesVector->at(i) = static_cast<float> overallNonZeroBoxes /
+        (h_bins / box_x * v_bins / box_y);
 
       msgs->push_back(TOSTR(probabilitiesVector->at(i)));
 
@@ -213,7 +213,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesLuminosityDiff","applyFilter");
+    Timer::start("checkHolesLuminosityDiff", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -321,11 +321,11 @@ namespace pandora_vision
       //!< Mean luminosity of the points that the inflated rectangle is
       //!< consisted of, derived from the original bounding box of the blob
       float meanBoundingBoxLuminosity =
-        (float) boundingBoxLuminosity / boundingBoxDivisor / 255;
+        static_cast<float> boundingBoxLuminosity / boundingBoxDivisor / 255;
 
       //!< Mean luminosity of the entire blob
       float meanBlobLuminosity =
-        (float) blobLuminosity / blobDivisor / 255;
+        static_cast<float> blobLuminosity / blobDivisor / 255;
 
 
       //!< If the luminosity of the inside of the candidate hole is greater
@@ -392,7 +392,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesTextureDiff","applyFilter");
+    Timer::start("checkHolesTextureDiff", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -489,7 +489,7 @@ namespace pandora_vision
             blobMask.at<unsigned char>(rows, cols) = 255;
           }
           else if(cv::pointPolygonTest(
-              inflatedRectangles[i], cv::Point(cols,rows), false) > 0)
+              inflatedRectangles[i], cv::Point(cols, rows), false) > 0)
           {
             blobToRectangleMask.at<unsigned char>(rows, cols) = 255;
           }
@@ -536,8 +536,8 @@ namespace pandora_vision
       double blobToModelCorrelation = cv::compareHist(
         blobHistogram, inHistogram, CV_COMP_CORREL);
 
-      ROS_ERROR("R2M: %f", (float)rectangleToModelCorrelation);
-      ROS_ERROR("B2M: %f", (float)blobToModelCorrelation);
+      ROS_ERROR("R2M: %f", static_cast<float> rectangleToModelCorrelation);
+      ROS_ERROR("B2M: %f", static_cast<float> blobToModelCorrelation);
 
       //!< This blob is considered valid if there is a correlation between
       //!< blobToRectangleHistogram and the model histogram
@@ -608,7 +608,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesTextureBackProject","applyFilter");
+    Timer::start("checkHolesTextureBackProject", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -882,7 +882,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("applyFilter","checkHoles");
+    Timer::start("applyFilter", "checkHoles");
     #endif
 
     std::string windowMsg;
@@ -1005,4 +1005,4 @@ namespace pandora_vision
     #endif
   }
 
-}
+} // namespace pandora_vision

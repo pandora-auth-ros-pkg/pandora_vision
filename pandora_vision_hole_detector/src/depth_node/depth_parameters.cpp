@@ -124,7 +124,7 @@ namespace pandora_vision
   {
     ros::NodeHandle _nodeHandle;
 
-    server.setCallback(boost::bind(&DepthParameters::callback, this,_1, _2));
+    server.setCallback(boost::bind(&DepthParameters::callback, this, _1, _2));
   }
 
   /**
@@ -210,6 +210,8 @@ namespace pandora_vision
     DepthParameters::minimum_curve_points = config.minimum_curve_points;
   }
 
+
+
   /**
     @brief Retrieve the interpolation method
     @return int The interpolation method
@@ -218,4 +220,5 @@ namespace pandora_vision
   {
     return DepthParameters::interpolation_method;
   }
-}
+
+} // namespace pandora_vision

@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef DEPTH_PARAMETERS
-#define DEPTH_PARAMETERS
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEPTH_PARAMETERS_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEPTH_PARAMETERS_H_
 
 #include "depth_node/defines.h"
 #include <dynamic_reconfigure/server.h>
@@ -169,6 +169,6 @@ namespace pandora_vision
     static int minimum_curve_points;
 
   };
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEPTH_PARAMETERS_H_

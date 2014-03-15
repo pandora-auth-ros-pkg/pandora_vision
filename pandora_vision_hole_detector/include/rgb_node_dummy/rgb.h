@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef RGB_NODE_DUMMY_H
-#define RGB_NODE_DUMMY_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_
 
 #include "depth_node/defines.h"
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
@@ -80,5 +80,7 @@ namespace pandora_vision
       //!< Destructor
       ~Rgb(void);
   };
-}
-#endif
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_

@@ -66,7 +66,7 @@ namespace pandora_vision
     std::vector<float>* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesDepthDiff","applyFilter");
+    Timer::start("checkHolesDepthDiff", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -143,7 +143,7 @@ namespace pandora_vision
           mean = -40000.0;  //!< Invalid value
           break;
         }
-        mean += depthImage.at<float>(y,x);
+        mean += depthImage.at<float>(y, x);
       }
       mean /= 4;
 
@@ -195,39 +195,39 @@ namespace pandora_vision
     std::vector<float>* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesDepthArea","applyFilter");
+    Timer::start("checkHolesDepthArea", "applyFilter");
     #endif
     std::set<unsigned int> valid;
     for(unsigned int i = 0 ; i < inKeyPoints.size() ; i++)
     {
       float mean = 0;
       float area = sqrt(
-        pow(inRectangles[i][0].x - inRectangles[i][1].x,2) +
-        pow(inRectangles[i][0].y - inRectangles[i][1].y,2));
+        pow(inRectangles[i][0].x - inRectangles[i][1].x, 2) +
+        pow(inRectangles[i][0].y - inRectangles[i][1].y, 2));
 
       area *= sqrt(
-        pow(inRectangles[i][1].x - inRectangles[i][2].x,2) +
-        pow(inRectangles[i][1].y - inRectangles[i][2].y,2));
+        pow(inRectangles[i][1].x - inRectangles[i][2].x, 2) +
+        pow(inRectangles[i][1].y - inRectangles[i][2].y, 2));
 
 
-      for(unsigned int j = 0 ; j < inRectangles[i].size() ; j++)
+      for(unsigned int j = 0; j < inRectangles[i].size(); j++)
       {
         int x = inRectangles[i][j].x;
         int y = inRectangles[i][j].y;
-        mean += depthImage.at<float>(y,x);
+        mean += depthImage.at<float>(y, x);
       }
       mean /= inRectangles[i].size();
 
       //!< Cubic fitting  --- Small hole
       //!< Normal : -18480  * x^3+87260.3 * x^2-136846 * x+74094
-      float vlow = -18480.0 * pow(mean,3) + 87260.3 * pow(mean,2) -
+      float vlow = -18480.0 * pow(mean, 3) + 87260.3 * pow(mean, 2) -
         136846 * mean + 68500.0 - area;
       //!< Exponential fitting --- Small hole
       //!< Normal : -23279.4  * x^3+112218 * x^2-182162 * x+105500
-      float vhigh = -23279.4 * pow(mean,3) + 112218.0 * pow(mean,2) -
+      float vhigh = -23279.4 * pow(mean, 3) + 112218.0 * pow(mean, 2) -
         182162.0 * mean + 112500 - area;
 
-      msgs->push_back(TOSTR(vlow)+std::string(",")+TOSTR(vhigh));
+      msgs->push_back(TOSTR(vlow) + std::string(",") + TOSTR(vhigh));
 
       if(vlow < 0 && vhigh > 0)
       {
@@ -288,7 +288,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesBrushfireOutlineToRectangle","applyFilter");
+    Timer::start("checkHolesBrushfireOutlineToRectangle", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -375,7 +375,7 @@ namespace pandora_vision
       cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
-        rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 
       //!< Draw the outline of the i-th valid blob
       for(unsigned int j = 0; j < inOutlines[i].size(); j++)
@@ -463,7 +463,7 @@ namespace pandora_vision
 
       finalIndices.insert(*validIterator);
       probabilitiesVector->at(*validIterator) =
-        (float) maxPoints / pointCloudPointsIndex;
+        static_cast<float> maxPoints / pointCloudPointsIndex;
 
       msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
@@ -516,7 +516,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesRectangleOutline","applyFilter");
+    Timer::start("checkHolesRectangleOutline", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -588,7 +588,7 @@ namespace pandora_vision
       cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
       cv::RNG rng(12345);
       cv::Scalar color = cv::Scalar(
-        rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 
 
       //!< Draw the inflated rectangle that corresponds to it
@@ -680,7 +680,7 @@ namespace pandora_vision
 
       finalIndices.insert(*validIterator);
       probabilitiesVector->at(*validIterator) =
-        (float) maxPoints / pointCloudPointsIndex;
+        static_cast<float> maxPoints / pointCloudPointsIndex;
 
       msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
@@ -722,7 +722,7 @@ namespace pandora_vision
     std::vector<float>* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesDepthHomogenity","applyFilter");
+    Timer::start("checkHolesDepthHomogenity", "applyFilter");
     #endif
 
     std::set<unsigned int> valid;
@@ -780,7 +780,7 @@ namespace pandora_vision
       {
         valid.insert(o);
         probabilitiesVector->at(o) =
-          (float) numWhites / (numWhites + numBlacks);
+          static_cast<float> numWhites / (numWhites + numBlacks);
       }
       else
       {
@@ -848,8 +848,8 @@ namespace pandora_vision
     }
     if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
     {
-      filtersOrder[HoleFusionParameters::run_checker_brushfire_outline_to_rectangle]
-        = 4;
+      filtersOrder[HoleFusionParameters::
+        run_checker_brushfire_outline_to_rectangle] = 4;
     }
     if (HoleFusionParameters::run_checker_depth_homogenity > 0)
     {
@@ -921,7 +921,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("applyFilter","checkHoles");
+    Timer::start("applyFilter", "checkHoles");
     #endif
 
     std::string windowMsg;
@@ -1066,5 +1066,5 @@ namespace pandora_vision
     #endif
   }
 
-}
+} // namespace pandora_vision
 

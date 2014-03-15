@@ -144,7 +144,7 @@ namespace pandora_vision
     ros::NodeHandle _nodeHandle;
 
     server.setCallback(boost::bind(&HoleFusionParameters::callback,
-        this,_1, _2));
+        this, _1, _2));
   }
 
   void HoleFusionParameters::callback(
@@ -228,7 +228,7 @@ namespace pandora_vision
       config.depth_difference;
 
     HoleFusionParameters::run_checker_color_homogenity =
-      config.run_checker_color_homogenity ;
+      config.run_checker_color_homogenity;
     HoleFusionParameters::run_checker_luminosity_diff =
       config.run_checker_luminosity_diff;
     HoleFusionParameters::run_checker_texture_diff =
@@ -290,4 +290,5 @@ namespace pandora_vision
     HoleFusionParameters::number_of_value_bins =
       config.number_of_value_bins;
   }
-}
+
+} // namespace pandora_vision

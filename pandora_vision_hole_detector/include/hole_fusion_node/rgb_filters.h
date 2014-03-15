@@ -34,8 +34,8 @@
  *
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
-#ifndef RGB_FILTERS_H
-#define RGB_FILTERS_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
 
 #include <math.h>
 #include "depth_node/hole_filters.h"
@@ -249,6 +249,8 @@ namespace pandora_vision
         std::vector<cv::Mat>* imgs,
         std::vector<std::string>* msgs);
   };
-}
-#endif
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
 

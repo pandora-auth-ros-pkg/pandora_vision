@@ -34,8 +34,8 @@
  *
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
-#ifndef GENERIC_FILTERS_H
-#define GENERIC_FILTERS_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_GENERIC_FILTERS_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_GENERIC_FILTERS_H_
 
 #include "depth_node/hole_filters.h"
 #include <math.h>
@@ -89,6 +89,8 @@ namespace pandora_vision
         HoleFilters::HolesConveyor* depthHolesConveyor,
         HoleFilters::HolesConveyor* rgbHolesConveyor);
   };
-}
-#endif
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_GENERIC_FILTERS_H_
 

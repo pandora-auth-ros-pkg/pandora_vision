@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef PLANES_DETECTION_H
-#define PLANES_DETECTION_H
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_PLANES_DETECTION_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_PLANES_DETECTION_H_
 
 #include "hole_fusion_node/hole_fusion_parameters.h"
 
@@ -143,6 +143,6 @@ namespace pandora_vision
         (const PointCloudXYZPtr& cloudIn);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_PLANES_DETECTION_H_
