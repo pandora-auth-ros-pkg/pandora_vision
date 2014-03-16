@@ -69,14 +69,20 @@ namespace pandora_vision
     Timer::start("checkHolesDepthDiff", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
 
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
 
-    //!< since not all rectangles may not make it, store the indices
+    //!< Since not all rectangles may make it, store the indices
     //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
     std::vector<unsigned int> validKeyPointsIndices;
+
     std::vector<cv::KeyPoint> validKeyPoints;
+
     float key_y;
     float key_x;
     float vert_y;
@@ -153,13 +159,16 @@ namespace pandora_vision
 
       if(value > 0 && value < HoleFusionParameters::depth_difference)
       {
-        valid.insert(validKeyPointsIndices[i]);
         probabilitiesVector->at(validKeyPointsIndices[i]) = 1.0;
       }
       else
       {
         probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
+
+      //!< Every keypoint is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
       msgs->push_back(TOSTR(value));
     }
 
@@ -197,7 +206,10 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("checkHolesDepthArea", "applyFilter");
     #endif
+
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
+
     for(unsigned int i = 0 ; i < inKeyPoints.size() ; i++)
     {
       float mean = 0;
@@ -227,17 +239,19 @@ namespace pandora_vision
       float vhigh = -23279.4 * pow(mean, 3) + 112218.0 * pow(mean, 2) -
         182162.0 * mean + 112500 - area;
 
-      msgs->push_back(TOSTR(vlow) + std::string(",") + TOSTR(vhigh));
-
       if(vlow < 0 && vhigh > 0)
       {
-        valid.insert(i);
         probabilitiesVector->at(i) = 1.0;
       }
       else
       {
         probabilitiesVector->at(i) = 0.0;
       }
+
+      //!< Every keypoint is considered valid, with a suited probability
+      valid.insert(i);
+
+      msgs->push_back(TOSTR(vlow) + std::string(",") + TOSTR(vhigh));
     }
 
     #ifdef DEBUG_TIME
@@ -291,8 +305,16 @@ namespace pandora_vision
     Timer::start("checkHolesBrushfireOutlineToRectangle", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
 
+    //!< Since not all rectangles may make it, store the indices
+    //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
+    std::vector<unsigned int> validKeyPointsIndices;
+
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
     float key_y;
     float key_x;
@@ -352,11 +374,12 @@ namespace pandora_vision
       }
       else
       {
-        valid.insert(i);
+        validKeyPointsIndices.push_back(i);
         inflatedRectangles.push_back(inflatedVertices);
         brushfireBeginPoints.push_back(potentialBrushfireBeginPoint);
       }
     } //!< end for rectangles
+
 
     /**
      * For each inflated rectangle, store in visitedPoints
@@ -458,10 +481,14 @@ namespace pandora_vision
         }
       }
 
-      probabilitiesVector->at(i) =
+      //!< Every keypoint with an inflated rectangle inside the image's bounds
+      //!< is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
+      probabilitiesVector->at(validKeyPointsIndices[i]) =
         static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+      msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
@@ -511,9 +538,18 @@ namespace pandora_vision
     Timer::start("checkHolesRectangleOutline", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
 
+    //!< Since not all rectangles may make it, store the indices
+    //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
+    std::vector<unsigned int> validKeyPointsIndices;
+
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
+
     float key_y;
     float key_x;
     float vert_y;
@@ -561,7 +597,7 @@ namespace pandora_vision
       }
       else
       {
-        valid.insert(i);
+        validKeyPointsIndices.push_back(i);
         inflatedRectangles.push_back(inflatedVertices);
       }
     } //!< end for rectangles
@@ -667,10 +703,14 @@ namespace pandora_vision
         }
       }
 
-      probabilitiesVector->at(i) =
+      //!< Every keypoint with an inflated rectangle inside the image's bounds
+      //!< is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
+      probabilitiesVector->at(validKeyPointsIndices[i]) =
         static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+      msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
@@ -710,6 +750,7 @@ namespace pandora_vision
     Timer::start("checkHolesDepthHomogenity", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
 
     //!< Temporary cv::Mats
@@ -760,16 +801,8 @@ namespace pandora_vision
         }
       }
 
-      //!< If there is a variation in depth gradient inside the potential hole
-      if (numWhites != 0)
-      {
-        probabilitiesVector->at(o) =
-          static_cast<float>(numWhites) / (numWhites + numBlacks);
-      }
-      else
-      {
-        probabilitiesVector->at(o) = 0.0;
-      }
+      probabilitiesVector->at(o) =
+        static_cast<float>(numWhites) / (numWhites + numBlacks);
 
       valid.insert(o);
 
@@ -873,6 +906,7 @@ namespace pandora_vision
     Timer::tick("checkHoles");
     #endif
   }
+
 
 
   /**
