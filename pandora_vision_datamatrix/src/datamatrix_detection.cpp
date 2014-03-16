@@ -228,7 +228,7 @@ namespace pandora_vision
     curState = newState;
 
     //!< check if datamatrix algorithm should be running now
-    datamatrixNowON	=
+    datamatrixNowON =
       (curState ==
        state_manager_communications::robotModeMsg::MODE_EXPLORATION)
       || (curState ==
@@ -248,7 +248,7 @@ namespace pandora_vision
       return;
     }
 
-    prevState=curState;
+    prevState = curState;
 
     //!< this needs to be called everytime a node finishes transition
     transitionComplete(curState);
@@ -263,4 +263,4 @@ namespace pandora_vision
     ROS_INFO("[Datamatrix_node] : Transition Complete");
   }
   
-} 
+}// namespace pandora_vision

@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef DATAMATRIX_DETECTOR
-#define DATAMATRIX_DETECTOR
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H 
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H 
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -44,6 +44,7 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
+
 namespace pandora_vision 
 {
   class DatamatrixDetector
@@ -79,5 +80,5 @@ namespace pandora_vision
     void detect_datamatrix(cv::Mat image);
     
   };  
-}
-#endif
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H

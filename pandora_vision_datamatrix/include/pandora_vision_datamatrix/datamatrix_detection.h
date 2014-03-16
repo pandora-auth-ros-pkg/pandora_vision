@@ -47,10 +47,10 @@
 #include <sensor_msgs/image_encodings.h>
 #include "state_manager/state_client.h"
 
-#include "datamatrix_detector.h"
+#include "pandora_vision_datamatrix/datamatrix_detector.h"
 
-#ifndef DATAMATRIX_DETECTION
-#define DATAMATRIX_DETECTION
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTION_H 
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTION_H 
 
 //!< Default frame height
 #define DEFAULT_HEIGHT 480
@@ -104,7 +104,7 @@ namespace pandora_vision
     cv::Mat datamatrixFrame;
 
     //!< MotionDetector frame timestamp
-    ros::Time	datamatrixFrameTimestamp;  
+    ros::Time datamatrixFrameTimestamp;  
    
     //!< The topic subscribed to for the front camera
     std::string imageTopic;
@@ -177,5 +177,5 @@ namespace pandora_vision
       void completeTransition(void);
 
   };
-}
-#endif
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTION_H
