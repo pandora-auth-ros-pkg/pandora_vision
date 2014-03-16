@@ -161,6 +161,7 @@ namespace pandora_vision
         }
       }
 
+      //!< Every keypoint is considered valid, with a suited probability
       valid.insert(i);
 
       probabilitiesVector->at(i) = static_cast<float> (overallNonZeroBoxes) /
@@ -216,14 +217,20 @@ namespace pandora_vision
     Timer::start("checkHolesLuminosityDiff", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
+
+    //!< Since not all rectangles may make it, store the indices
+    //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
+    std::vector<unsigned int> validKeyPointsIndices;
 
     //!< Scale the inImage in [0, 255]
     cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
       HoleFusionParameters::scale_method);
 
-    //!< The vector holding all the points that constitute each inflated
-    //!< rectangle
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
 
     float key_y;
@@ -274,7 +281,7 @@ namespace pandora_vision
       }
       else
       {
-        valid.insert(i);
+        validKeyPointsIndices.push_back(i);
         inflatedRectangles.push_back(inflatedVertices);
       }
     } //!< end for rectangles
@@ -333,15 +340,19 @@ namespace pandora_vision
       //!< edges of its bounding box, it surely is not a hole
       if (meanBlobLuminosity > meanBoundingBoxLuminosity)
       {
-        probabilitiesVector->at(i) = 0.0;
+        probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
       else
       {
-        probabilitiesVector->at(i) =
+        probabilitiesVector->at(validKeyPointsIndices[i]) =
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+      //!< Every keypoint of a valid inflated rectangle
+      //!< is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
+      msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
@@ -395,7 +406,14 @@ namespace pandora_vision
     Timer::start("checkHolesTextureDiff", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
+
+    //!< Since not all rectangles may make it, store the indices
+    //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
+    std::vector<unsigned int> validKeyPointsIndices;
+
 
     //!< Scale the inImage in [0, 255] into inImage_
     cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
@@ -406,8 +424,8 @@ namespace pandora_vision
     cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
 
-    //!< The vector holding all the points that constitute each inflated
-    //!< rectangle
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
 
     float key_y;
@@ -458,7 +476,7 @@ namespace pandora_vision
       }
       else
       {
-        valid.insert(i);
+        validKeyPointsIndices.push_back(i);
         inflatedRectangles.push_back(inflatedVertices);
       }
     } //!< end for rectangles
@@ -549,15 +567,19 @@ namespace pandora_vision
         HoleFusionParameters::match_texture_threshold &&
         rectangleToModelCorrelation > blobToModelCorrelation)
       {
-        probabilitiesVector->at(i) =
+        probabilitiesVector->at(validKeyPointsIndices[i]) =
           rectangleToModelCorrelation - blobToModelCorrelation;
       }
       else
       {
-        probabilitiesVector->at(i) = 0.0;
+        probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+      //!< Every keypoint of a valid inflated rectangle
+      //!< is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
+      msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
@@ -566,6 +588,7 @@ namespace pandora_vision
 
     return valid;
   }
+
 
 
   /**
@@ -611,7 +634,13 @@ namespace pandora_vision
     Timer::start("checkHolesTextureBackProject", "applyFilter");
     #endif
 
+    //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
+
+    //!< Since not all rectangles may make it, store the indices
+    //!< of the original keypoints that correspond to valid inflated rectangles
+    //!< in the validKeyPointsIndices vector
+    std::vector<unsigned int> validKeyPointsIndices;
 
     //!< Scale the inImage in [0, 255] into inImage_
     cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
@@ -643,8 +672,8 @@ namespace pandora_vision
       Visualization::show("backProject", backProject, 1);
     #endif
 
-    //!< The vector holding all the points that constitute each inflated
-    //!< rectangle
+    //!< Store the vertices of the inside-of-image-bounds inflated bounding
+    //!< rectangles in the inflatedRectangles vector
     std::vector<std::vector<cv::Point> > inflatedRectangles;
 
     float key_y;
@@ -695,7 +724,7 @@ namespace pandora_vision
       }
       else
       {
-        valid.insert(i);
+        validKeyPointsIndices.push_back(i);
         inflatedRectangles.push_back(inflatedVertices);
       }
     } //!< end for rectangles
@@ -749,15 +778,19 @@ namespace pandora_vision
       //!< inside the blob's outline
       if (rectangleMatchProbability > blobMatchProbability)
       {
-        probabilitiesVector->at(i) =
+        probabilitiesVector->at(validKeyPointsIndices[i]) =
           rectangleMatchProbability - blobMatchProbability;
       }
       else
       {
-        probabilitiesVector->at(i) = 0.0;
+        probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
+      //!< Every keypoint of a valid inflated rectangle
+      //!< is considered valid, with a suited probability
+      valid.insert(validKeyPointsIndices[i]);
+
+      msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
