@@ -162,29 +162,29 @@ bool SkinDetector::histogrammsLoaded()
  for skin detection
  @return void
 */
-void SkinDetector::getCalculationParams(int& stepSrc, uchar* &dataSrc , 
-  int& channels, int& stepThreshold, uchar* &dataHistogrammSkin, 
-  int& stepHistogrammSkin, uchar* &dataHistogrammWall, int& stepHistogrammWall, 
-  uchar* &dataHistogrammWall2, int& stepHistogrammWall2, uchar* &dataContours, 
-  int& stepContours)
+void SkinDetector::getCalculationParams(int *stepSrc, uchar* &dataSrc , 
+  int *channels, int *stepThreshold, uchar* &dataHistogrammSkin, 
+  int *stepHistogrammSkin, uchar* &dataHistogrammWall, int *stepHistogrammWall, 
+  uchar* &dataHistogrammWall2, int *stepHistogrammWall2, uchar* &dataContours, 
+  int *stepContours)
 {
-  stepSrc = imgSrc.step;
+  *stepSrc = imgSrc.step;
   dataSrc = reinterpret_cast<uchar *>(imgSrc.data);
-  channels = imgSrc.channels();
+  *channels = imgSrc.channels();
 
-  stepThreshold = imgThreshold.step;
+  *stepThreshold = imgThreshold.step;
 
   dataHistogrammSkin = reinterpret_cast<uchar *>(imgHistogrammSkin.data);
-  stepHistogrammSkin = imgHistogrammSkin.step;
+  *stepHistogrammSkin = imgHistogrammSkin.step;
 
   dataHistogrammWall = reinterpret_cast<uchar *>(imgHistogrammWall.data);
-  stepHistogrammWall = imgHistogrammWall.step;
+  *stepHistogrammWall = imgHistogrammWall.step;
 
   dataHistogrammWall2 = reinterpret_cast<uchar *>(imgHistogrammWall2.data);
-  stepHistogrammWall2 = imgHistogrammWall2.step;
+  *stepHistogrammWall2 = imgHistogrammWall2.step;
 
   dataContours = reinterpret_cast<uchar *>(imgContours.data);
-  stepContours = imgContours.step;
+  *stepContours = imgContours.step;
 
   imgThreshold = cv::Mat::zeros(imageHeight, imageWidth, CV_8UC1);
   imgThresholdFiltered = cv::Mat::zeros(imageHeight, imageWidth, CV_8UC1);
@@ -296,10 +296,10 @@ int SkinDetector::detectSkin(cv::Mat imgInput)
   int stepContours, stepHistogrammWall, stepHistogrammWall2;
   uchar *dataSrc, *dataHistogrammSkin, *dataHistogrammWall, *dataHistogrammWall2, *dataContours;
 
-  getCalculationParams(stepSrc, dataSrc, channels,
-                       stepThreshold, dataHistogrammSkin, stepHistogrammSkin,
-                       dataHistogrammWall, stepHistogrammWall, dataHistogrammWall2,
-                       stepHistogrammWall2, dataContours, stepContours);
+  getCalculationParams(&stepSrc, dataSrc, &channels,
+            &stepThreshold, dataHistogrammSkin, &stepHistogrammSkin,
+            dataHistogrammWall, &stepHistogrammWall, dataHistogrammWall2,
+            &stepHistogrammWall2, dataContours, &stepContours);
 
   scanForSkin(stepSrc, dataSrc, channels,
               stepThreshold, dataHistogrammSkin, stepHistogrammSkin,
