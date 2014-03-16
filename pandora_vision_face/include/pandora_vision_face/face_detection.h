@@ -180,7 +180,7 @@ public:
   virtual ~FaceDetection();
 
   void createFaceMessage(vision_communications::FaceDirectionMsg &faceMessage);
-  void createDummyFaceMessage(float &center_x, float &center_y, 
+  void createDummyFaceMessage(float *center_x, float *center_y, 
     vision_communications::FaceDirectionMsg &faceMessage);
 
   /**
