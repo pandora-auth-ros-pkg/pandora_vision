@@ -388,7 +388,7 @@ void FaceDetection::faceCallback(const ros::TimerEvent&)
 
   if (faceDummy)
   {
-    createDummyFaceMessage(center_x, center_y, faceMessage);
+    createDummyFaceMessage(&center_x, &center_y, faceMessage);
   }
   else
   {
@@ -402,16 +402,16 @@ void FaceDetection::faceCallback(const ros::TimerEvent&)
  * @param faceMessage
  * @return void
 */
-void FaceDetection::createDummyFaceMessage(float &center_x,
-    float &center_y, vision_communications::FaceDirectionMsg &faceMessage )
+void FaceDetection::createDummyFaceMessage(float *center_x,
+    float *center_y, vision_communications::FaceDirectionMsg &faceMessage )
 {
   for( int i = 0; i < 3; i++)
   {
-    center_x = ratioX * ( 300 - frameWidth / 2 );
-    center_y = -1 * ratioY * ( 200 + frameHeight / 2 );
+    *center_x = ratioX * ( 300 - frameWidth / 2 );
+    *center_y = -1 * ratioY * ( 200 + frameHeight / 2 );
 
-    faceMessage.yaw = center_x;
-    faceMessage.pitch = center_y;
+    faceMessage.yaw = *center_x;
+    faceMessage.pitch = *center_y;
     faceMessage.header.frame_id = "Face";
     faceMessage.probability = 1;
     faceMessage.header.stamp = ros::Time::now();
