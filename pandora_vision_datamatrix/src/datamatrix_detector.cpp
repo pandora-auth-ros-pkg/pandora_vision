@@ -45,10 +45,10 @@ namespace pandora_vision
   **/
   DatamatrixDetector::DatamatrixDetector()
   {
-    img=NULL;
-    dec=NULL;
-    reg=NULL;
-    msg=NULL;
+    img = NULL;
+    dec = NULL;
+    reg = NULL;
+    msg = NULL;
     
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
@@ -97,4 +97,4 @@ namespace pandora_vision
     }  
   
   }
-}
+}// namespace pandora_vision
