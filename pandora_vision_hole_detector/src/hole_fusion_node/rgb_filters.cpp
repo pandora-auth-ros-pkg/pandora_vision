@@ -163,7 +163,7 @@ namespace pandora_vision
 
       valid.insert(i);
 
-      probabilitiesVector->at(i) = static_cast<float> overallNonZeroBoxes /
+      probabilitiesVector->at(i) = static_cast<float> (overallNonZeroBoxes) /
         (h_bins / box_x * v_bins / box_y);
 
       msgs->push_back(TOSTR(probabilitiesVector->at(i)));
@@ -321,11 +321,11 @@ namespace pandora_vision
       //!< Mean luminosity of the points that the inflated rectangle is
       //!< consisted of, derived from the original bounding box of the blob
       float meanBoundingBoxLuminosity =
-        static_cast<float> boundingBoxLuminosity / boundingBoxDivisor / 255;
+        static_cast<float> (boundingBoxLuminosity) / boundingBoxDivisor / 255;
 
       //!< Mean luminosity of the entire blob
       float meanBlobLuminosity =
-        static_cast<float> blobLuminosity / blobDivisor / 255;
+        static_cast<float> (blobLuminosity) / blobDivisor / 255;
 
 
       //!< If the luminosity of the inside of the candidate hole is greater
@@ -536,8 +536,8 @@ namespace pandora_vision
       double blobToModelCorrelation = cv::compareHist(
         blobHistogram, inHistogram, CV_COMP_CORREL);
 
-      ROS_ERROR("R2M: %f", static_cast<float> rectangleToModelCorrelation);
-      ROS_ERROR("B2M: %f", static_cast<float> blobToModelCorrelation);
+      ROS_ERROR("R2M: %f", static_cast<float> (rectangleToModelCorrelation));
+      ROS_ERROR("B2M: %f", static_cast<float> (blobToModelCorrelation));
 
       //!< This blob is considered valid if there is a correlation between
       //!< blobToRectangleHistogram and the model histogram

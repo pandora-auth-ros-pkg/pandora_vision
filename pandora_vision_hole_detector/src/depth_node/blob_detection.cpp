@@ -68,12 +68,14 @@ namespace pandora_vision
       std::vector<cv::Point> keypointOutline;
 
       current.insert(
-          static_cast<int>round(inKeyPoints[keypointId].pt.y) * edgesImage->cols
-        + static_cast<int>round(inKeyPoints[keypointId].pt.x));
+          static_cast<int>(
+            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       visited.insert(
-          static_cast<int>round(inKeyPoints[keypointId].pt.y) * edgesImage->cols
-        + static_cast<int>round(inKeyPoints[keypointId].pt.x));
+          static_cast<int>(
+            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       while (current.size() != 0)
       {
@@ -116,7 +118,7 @@ namespace pandora_vision
         next.clear();
       }
 
-      blobsArea->push_back(static_cast<float>visited.size());
+      blobsArea->push_back(static_cast<float>(visited.size()));
       blobsOutlineVector->push_back(keypointOutline);
     }
 
@@ -150,10 +152,10 @@ namespace pandora_vision
 
     std::set<unsigned int> current, next;
 
-    current.insert(static_cast<int>round(inPoint.y) * inImage->cols
-      + static_cast<int>round(inPoint.x));
-    visited->insert(static_cast<int>round(inPoint.y) * inImage->cols
-      + static_cast<int>round(inPoint.x));
+    current.insert(static_cast<int>(round(inPoint.y) * inImage->cols)
+      + static_cast<int>(round(inPoint.x)));
+    visited->insert(static_cast<int>(round(inPoint.y) * inImage->cols)
+      + static_cast<int>(round(inPoint.x)));
 
     while (current.size() != 0)
     {
