@@ -365,9 +365,6 @@ namespace pandora_vision
      * and the inflated rectangle)
      * We will test if these points all lie on one plane.
      **/
-    //!< The indices of the valid (by this filter) keypoints
-    std::set<unsigned int> finalIndices;
-    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
 
@@ -461,22 +458,17 @@ namespace pandora_vision
         }
       }
 
-      finalIndices.insert(*validIterator);
-      probabilitiesVector->at(*validIterator) =
+      probabilitiesVector->at(i) =
         static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
-
-      //!< Increment the validIterator so that it points to the next element
-      //!< in the valid set
-      validIterator++;
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesBrushfireOutlineToRectangle");
     #endif
 
-    return finalIndices;
+    return valid;
   }
 
 
@@ -579,9 +571,6 @@ namespace pandora_vision
      * the points that constitute the rectangle.
      * We will test if these points all lie on one plane.
      **/
-    //!< The indices of the valid (by this filter) keypoints
-    std::set<unsigned int> finalIndices;
-    std::set<unsigned int>::iterator validIterator = valid.begin();
     for (unsigned int i = 0; i < inflatedRectangles.size(); i++)
     {
       //!< The canvas image will hold the blobs' outlines, and their rectangles.
@@ -678,15 +667,10 @@ namespace pandora_vision
         }
       }
 
-      finalIndices.insert(*validIterator);
-      probabilitiesVector->at(*validIterator) =
+      probabilitiesVector->at(i) =
         static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
-
-      //!< Increment the validIterator so that it points to the next element
-      //!< in the valid set
-      validIterator++;
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
@@ -695,6 +679,7 @@ namespace pandora_vision
 
     return finalIndices;
   }
+
 
 
   /**
