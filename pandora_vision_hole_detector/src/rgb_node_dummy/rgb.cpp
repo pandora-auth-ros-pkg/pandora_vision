@@ -89,7 +89,7 @@ namespace pandora_vision
 
       for (int v = 0; v < 4; v++)
       {
-        float k = static_cast<float> v;
+        float k = static_cast<float>(v);
         cv::Point vertex(k, k);
         rectangles.push_back(vertex);
       }

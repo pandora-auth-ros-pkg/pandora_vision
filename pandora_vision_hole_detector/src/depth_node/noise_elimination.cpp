@@ -358,8 +358,8 @@ namespace pandora_vision
         {
           for(int n = -1 ; n < 2 ; n++)
           {
-            x = static_cast<int>current[i] / image->cols + m;
-            y = static_cast<int>current[i] % image->cols + n;
+            x = static_cast<int>(current[i]) / image->cols + m;
+            y = static_cast<int>(current[i]) % image->cols + n;
 
             if((image->at<float>(x, y) == 0) &&
               visited.find(x * image->cols + y) == visited.end())
@@ -470,7 +470,7 @@ namespace pandora_vision
 
     std /= image.rows * image.cols - blacks + 1;
     std = sqrt(std);
-    bper = static_cast<float>blacks / (image.rows * image.cols);
+    bper = static_cast<float>(blacks) / (image.rows * image.cols);
 
     DepthParameters::interpolation_method = 15;
     if(bper > 0.7)  //!< Choose close

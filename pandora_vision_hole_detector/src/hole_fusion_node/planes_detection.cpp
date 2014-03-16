@@ -222,7 +222,7 @@ namespace pandora_vision
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
     int i = 0;
-    int nr_points = static_cast<int> cloudIn->points.size();
+    int nr_points = static_cast<int> (cloudIn->points.size());
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >
@@ -359,7 +359,7 @@ namespace pandora_vision
     ne.compute (*cloud_normals);
 
     int i = 0;
-    int nr_points = static_cast<int> cloudIn->points.size();
+    int nr_points = static_cast<int> (cloudIn->points.size());
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >

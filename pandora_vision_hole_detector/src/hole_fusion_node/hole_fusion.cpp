@@ -297,21 +297,27 @@ namespace pandora_vision
 
     //!< The number of wall picture files inside the wallPicturesPath directory
     int numPictures = 0;
-    struct dirent *pDirent;
-    DIR *pDir;
 
-    pDir = opendir(wallPicturesPath.c_str());
-    if (pDir != NULL)
+    struct dirent* result = NULL;
+
+    long int nameMax = pathconf(wallPicturesPath.c_str(), _PC_NAME_MAX);
+    long int len = offsetof(struct dirent, d_name) + nameMax + 1;
+    struct dirent *theDir = static_cast<struct dirent*>(malloc(len));
+
+    DIR *directory;
+
+    directory = opendir(wallPicturesPath.c_str());
+    if (theDir != NULL)
     {
-      while ((pDirent = readdir_r(pDir)) != NULL)
+      while ((readdir_r(directory, theDir, &result)) == 0 && result!= NULL)
       {
-        fileLength = strlen(pDirent->d_name);
-        if (strcmp (".png", &(pDirent->d_name[fileLength - 4])) == 0)
+        fileLength = strlen(theDir->d_name);
+        if (strcmp (".png", &(theDir->d_name[fileLength - 4])) == 0)
         {
           numPictures++;
         }
       }
-      closedir (pDir);
+      closedir (directory);
     }
 
     //!< Read the pictures inside the wallPicturesPath, convert them to HSV

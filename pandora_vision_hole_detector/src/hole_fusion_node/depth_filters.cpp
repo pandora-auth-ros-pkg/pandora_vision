@@ -463,7 +463,7 @@ namespace pandora_vision
 
       finalIndices.insert(*validIterator);
       probabilitiesVector->at(*validIterator) =
-        static_cast<float> maxPoints / pointCloudPointsIndex;
+        static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
       msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
@@ -680,7 +680,7 @@ namespace pandora_vision
 
       finalIndices.insert(*validIterator);
       probabilitiesVector->at(*validIterator) =
-        static_cast<float> maxPoints / pointCloudPointsIndex;
+        static_cast<float> (maxPoints) / pointCloudPointsIndex;
 
       msgs->push_back(TOSTR(probabilitiesVector->at(*validIterator)));
 
@@ -778,14 +778,15 @@ namespace pandora_vision
       //!< If there is a variation in depth gradient inside the potential hole
       if (numWhites != 0)
       {
-        valid.insert(o);
         probabilitiesVector->at(o) =
-          static_cast<float> numWhites / (numWhites + numBlacks);
+          static_cast<float>(numWhites) / (numWhites + numBlacks);
       }
       else
       {
         probabilitiesVector->at(o) = 0.0;
       }
+
+      valid.insert(o);
 
       msgs->push_back(TOSTR(probabilitiesVector->at(o)));
     }

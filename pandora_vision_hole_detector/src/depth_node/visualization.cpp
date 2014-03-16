@@ -66,11 +66,11 @@ namespace pandora_vision
     rows = sqdim;
     cols = imgs.size() / rows + (((imgs.size() % rows) != 0) ? 1 : 0);
 
-    unsigned int winCols = (static_cast<float> maxSize) / cols;
-    float scale = (static_cast<float> winCols) / imgs[0].cols;
+    unsigned int winCols = (static_cast<float>(maxSize)) / cols;
+    float scale = (static_cast<float>(winCols)) / imgs[0].cols;
 
     unsigned int finalRows, finalCols;
-    finalRows = rows * (static_cast<float> imgs[0].rows * scale);
+    finalRows = rows * (static_cast<float>(imgs[0].rows) * scale);
     finalCols = winCols * cols;
 
     cv::Mat big(rows * imgs[0].rows, cols * imgs[0].cols, CV_8UC3);
