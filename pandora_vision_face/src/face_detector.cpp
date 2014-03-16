@@ -126,22 +126,20 @@ int FaceDetector::findFaces(cv::Mat frame)
   tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
   initFrameProbBuffers(frame);
-  //~ createRectangles(tmp);
+  createRectangles(&tmp);
 
   //!< Clear vector of faces before using it for the current frame
   faces_total.erase (faces_total.begin(), faces_total.begin() +
                      faces_total.size());
 
   int facesNum = detectFace(frame);
-  ROS_INFO_STREAM("Number of faces found " << facesNum);
 
   int totalArea = 0;
-
   if(facesNum)
   {
     totalArea = round( cv::norm(tmp, cv::NORM_L1, cv::noArray()) / 255.);
   }
-
+ 
   if(totalArea == 0)
   {
     //!< if no face was found, probability for this frame is 0
@@ -155,15 +153,14 @@ int FaceDetector::findFaces(cv::Mat frame)
   }
   //!< clear value from last scan
   probability = 0.;
-
   //!< calculate probability
   for(int i = 0 ; i < _bufferSize ; i++)
   {
     probability += (probability_buffer[i]);
   }
   probability = probability / _bufferSize;
-
-  //!< Compare Probability with Skin Output
+  
+  //!< Compaprobabilityre Probability with Skin Output
   if(isSkinDetectorEnabled )
   {
     std::cout << "Skin detector enabled" << std::endl;
@@ -269,7 +266,7 @@ void FaceDetector::initFrameProbBuffers(cv::Mat frame)
   @param frameIN [cv::Mat] The frame to be scanned for faces
   @return void
 */
-void FaceDetector::createRectangles(cv::Mat tmp)
+void FaceDetector::createRectangles(cv::Mat *tmp)
 {
   cv::Rect faceRect;
   cv::Point start;
@@ -278,8 +275,8 @@ void FaceDetector::createRectangles(cv::Mat tmp)
   {
     faceRect = faces_total.at(i);
     start = cv::Point( faceRect.x , faceRect.y );
-    end = cv::Point( faceRect.x + faceRect.width, faceRect.y + faceRect.height );
-    cv::rectangle(tmp, start, end, cv::Scalar(255, 255, 255, 0), CV_FILLED);
+    end = cv::Point( faceRect.x + faceRect.width, faceRect.y + faceRect.height);
+    cv::rectangle(*tmp, start, end, cv::Scalar(255, 255, 255, 0), CV_FILLED);
   }
 }
 
