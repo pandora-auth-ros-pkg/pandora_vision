@@ -162,10 +162,10 @@ bool SkinDetector::histogrammsLoaded()
  for skin detection
  @return void
 */
-void SkinDetector::getCalculationParams(int *stepSrc, uchar* &dataSrc , 
-  int *channels, int *stepThreshold, uchar* &dataHistogrammSkin, 
-  int *stepHistogrammSkin, uchar* &dataHistogrammWall, int *stepHistogrammWall, 
-  uchar* &dataHistogrammWall2, int *stepHistogrammWall2, uchar* &dataContours, 
+void SkinDetector::getCalculationParams(int *stepSrc, uchar *dataSrc , 
+  int *channels, int *stepThreshold, uchar *dataHistogrammSkin, 
+  int *stepHistogrammSkin, uchar *dataHistogrammWall, int *stepHistogrammWall, 
+  uchar *dataHistogrammWall2, int *stepHistogrammWall2, uchar *dataContours, 
   int *stepContours)
 {
   *stepSrc = imgSrc.step;
