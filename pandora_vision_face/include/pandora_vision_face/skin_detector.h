@@ -127,11 +127,11 @@ public:
     for skin detection
     @return void
   */
-  void getCalculationParams(int& stepSrc, uchar* &dataSrc , int& channels,
-      int& stepThreshold, uchar* &dataHistogrammSkin, int& stepHistogrammSkin,
-      uchar* &dataHistogrammWall, int& stepHistogrammWall, 
-      uchar* &dataHistogrammWall2, int& stepHistogrammWall2, 
-      uchar* &dataContours, int& stepContours);
+  void getCalculationParams(int *stepSrc, uchar* &dataSrc , int *channels,
+      int *stepThreshold, uchar* &dataHistogrammSkin, int *stepHistogrammSkin,
+      uchar* &dataHistogrammWall, int *stepHistogrammWall, 
+      uchar* &dataHistogrammWall2, int *stepHistogrammWall2, 
+      uchar* &dataContours, int *stepContours);
 
   /**
     @brief Function that scans given frame and checks if skin is detected
