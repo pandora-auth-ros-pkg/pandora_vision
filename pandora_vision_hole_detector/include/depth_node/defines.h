@@ -88,7 +88,7 @@
 #define DEBUG_TIME
 
 //!< Transforms a float number to string
-#define TOSTR( x )      dynamic_cast< std::ostringstream & >( \
+#define TOSTR( x )      static_cast< std::ostringstream & >( \
                         ( std::ostringstream() << std::dec << x ) ).str()
 
 //!< Takes the file name from an absolute path
