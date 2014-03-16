@@ -388,11 +388,11 @@ void FaceDetection::faceCallback(const ros::TimerEvent&)
 
   if (faceDummy)
   {
-    createDummyFaceMessage(&center_x, &center_y, faceMessage);
+    createDummyFaceMessage(&center_x, &center_y, &faceMessage);
   }
   else
   {
-    createFaceMessage(faceMessage);
+    createFaceMessage(&faceMessage);
   }
 }
 /**
@@ -403,19 +403,19 @@ void FaceDetection::faceCallback(const ros::TimerEvent&)
  * @return void
 */
 void FaceDetection::createDummyFaceMessage(float *center_x,
-    float *center_y, vision_communications::FaceDirectionMsg &faceMessage )
+    float *center_y, vision_communications::FaceDirectionMsg *faceMessage )
 {
   for( int i = 0; i < 3; i++)
   {
     *center_x = ratioX * ( 300 - frameWidth / 2 );
     *center_y = -1 * ratioY * ( 200 + frameHeight / 2 );
 
-    faceMessage.yaw = *center_x;
-    faceMessage.pitch = *center_y;
-    faceMessage.header.frame_id = "Face";
-    faceMessage.probability = 1;
-    faceMessage.header.stamp = ros::Time::now();
-    _victimDirectionPublisher.publish(faceMessage);
+    faceMessage->yaw = *center_x;
+    faceMessage->pitch = *center_y;
+    faceMessage->header.frame_id = "Face";
+    faceMessage->probability = 1;
+    faceMessage->header.stamp = ros::Time::now();
+    _victimDirectionPublisher.publish(*faceMessage);
 
   }
 }
@@ -428,7 +428,7 @@ void FaceDetection::createDummyFaceMessage(float *center_x,
  * @return void
 */
 void FaceDetection::createFaceMessage(
-  vision_communications::FaceDirectionMsg &faceMessage)
+  vision_communications::FaceDirectionMsg *faceMessage)
 {
   //!< start the detection process
   int facesNum = _faceDetector->findFaces(faceFrame);
@@ -449,15 +449,15 @@ void FaceDetection::createFaceMessage(
     //!< Send a message for every face found in the frame
     for(int i = 0 ; i < facesNum ; i++)
     {
-      faceMessage.yaw = ratioX * ( facesTable[i * 4] -
+      faceMessage->yaw = ratioX * ( facesTable[i * 4] -
                                    static_cast<double>(frameWidth) / 2 );
-      faceMessage.pitch = -ratioY * ( facesTable[i * 4 + 1] -
+      faceMessage->pitch = -ratioY * ( facesTable[i * 4 + 1] -
                                     static_cast<double>(frameHeight) / 2 );
-      faceMessage.header.frame_id = cameraFrameId;
-      faceMessage.probability = _faceDetector->getProbability();
-      faceMessage.header.stamp = ros::Time::now();
+      faceMessage->header.frame_id = cameraFrameId;
+      faceMessage->probability = _faceDetector->getProbability();
+      faceMessage->header.stamp = ros::Time::now();
       ROS_INFO("[face_node]:Face found");
-      _victimDirectionPublisher.publish(faceMessage);
+      _victimDirectionPublisher.publish(*faceMessage);
     }
     delete facesTable;
   }
