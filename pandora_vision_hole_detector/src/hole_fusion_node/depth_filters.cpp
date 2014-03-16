@@ -677,7 +677,7 @@ namespace pandora_vision
     Timer::tick("checkHolesRectangleOutline");
     #endif
 
-    return finalIndices;
+    return valid;
   }
 
 

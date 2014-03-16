@@ -300,8 +300,8 @@ namespace pandora_vision
 
     struct dirent* result = NULL;
 
-    long int nameMax = pathconf(wallPicturesPath.c_str(), _PC_NAME_MAX);
-    long int len = offsetof(struct dirent, d_name) + nameMax + 1;
+    int nameMax = pathconf(wallPicturesPath.c_str(), _PC_NAME_MAX);
+    int len = offsetof(struct dirent, d_name) + nameMax + 1;
     struct dirent *theDir = static_cast<struct dirent*>(malloc(len));
 
     DIR *directory;
