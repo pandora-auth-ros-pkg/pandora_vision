@@ -44,7 +44,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <dmtx.h>
-
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 
@@ -60,17 +63,21 @@ namespace pandora_vision
   {
     private:
     
+    ros::NodeHandle _nh;
+    
     DmtxMessage *msg;
     DmtxImage *img;
     DmtxDecode *dec;
     DmtxRegion *reg;
     
     cv::Mat datamatrix_frame;
+    cv::Mat debug_frame;
     
     DataMatrixQode datamatrix_qode;
       
     public:
     
+    image_transport::Publisher _datamatrixPublisher;
     /**
       @brief Default Constructor
       @return void
@@ -85,18 +92,25 @@ namespace pandora_vision
     
     /**
       @brief Detects datamatrixes and stores them in a vector.
-      @param frame [cv::Mat] The image in which the datamatrixess are detected
+      @param frame [cv::Mat] The image in which the datamatrixes are detected
       @return void
     **/
     void detect_datamatrix(cv::Mat image);
     
     /**
     @brief Function that finds the position of datamatrixe's center
-    @param frame [cv::Mat] The image in which the QRs are detected
+    @param frame [cv::Mat] The image in which the datamatrixes are detected
     @return void
-   */
+    */
     void locate_datamatrix(cv::Mat image);
     
+    /**
+    @brief Function that creates view for debugging purposes.
+    @param frame [cv::Mat] The image in which the datamatrixes are detected
+    @return debyg_frcame [cv::Mat], frame with rotated rectangle
+    and center of it
+    */
+    void debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector);
   };  
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H

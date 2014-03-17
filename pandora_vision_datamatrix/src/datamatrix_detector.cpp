@@ -50,6 +50,8 @@ namespace pandora_vision
     reg = NULL;
     msg = NULL;
     
+    _datamatrixPublisher = 
+        image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
     datamatrix_qode.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
@@ -107,9 +109,7 @@ namespace pandora_vision
         //!< Find datamatrixe's center exact position
         locate_datamatrix(image);
       }
-     
     }
-
   }
   
   /**
@@ -140,14 +140,42 @@ namespace pandora_vision
     datamatrixVector.push_back(corner4);
     datamatrixVector.push_back(corner3);
     
-    cv::line(image, corner1, corner2, cv::Scalar(0, 255, 0), 3);
-    cv::line(image, corner2, corner3, cv::Scalar(255, 0, 0), 3);
-    cv::line(image, corner3, corner4, cv::Scalar(0, 0, 255), 3);
-    cv::line(image, corner4, corner1, cv::Scalar(255, 255, 0), 3);
+    cv::RotatedRect calculatedRect;
+    calculatedRect = minAreaRect(datamatrixVector);
     
+    datamatrix_qode.datamatrix_center.y = calculatedRect.center.y;
+    datamatrix_qode.datamatrix_center.x = calculatedRect.center.x;
     
-    cv::imshow("Image window", image);
-    cv::waitKey(30);
-
+    debug_show(image, datamatrixVector);
+  }
+  
+  /**
+    @brief Function that creates view for debugging purposes.
+    @param frame [cv::Mat] The image in which the datamatrixes are detected
+    @return debyg_frcame [cv::Mat], frame with rotated rectangle
+    and center of it
+  */
+  void DatamatrixDetector::debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector)
+  {
+    image.copyTo(debug_frame);
+    cv::line(debug_frame, datamatrixVector.at(0), datamatrixVector.at(1), cv::Scalar(0, 255, 0), 3);
+    cv::line(debug_frame, datamatrixVector.at(1), datamatrixVector.at(2), cv::Scalar(255, 0, 0), 3);
+    cv::line(debug_frame, datamatrixVector.at(2), datamatrixVector.at(3), cv::Scalar(0, 0, 255), 3);
+    cv::line(debug_frame, datamatrixVector.at(3), datamatrixVector.at(0), cv::Scalar(255, 255, 0), 3);
+    
+    cv::RotatedRect calculatedRect;
+    calculatedRect = minAreaRect(datamatrixVector);
+    for (int i = 0; i < 4; i++)
+    {
+      line(debug_frame, datamatrixVector[i], datamatrixVector[(i+1)%4], cv::Scalar(255, 0, 0));
+    }
+    cv::circle(debug_frame, calculatedRect.center, 4, cv::Scalar(0,0,255),8,8);
+    ROS_INFO_STREAM("Angle given by minAreaRect:"<<calculatedRect.angle);
+    cvtColor(debug_frame, debug_frame, CV_BGR2GRAY);
+    cv_bridge::CvImage datamatrixMSg;
+    datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
+    datamatrixMSg.image = debug_frame.clone();
+    _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
+    
   }
 }// namespace pandora_vision
