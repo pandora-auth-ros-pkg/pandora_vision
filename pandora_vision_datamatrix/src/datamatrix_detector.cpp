@@ -126,12 +126,12 @@ namespace pandora_vision
     
     p00.X = p00.Y = p01.X = p10.Y = 0.0;
     p01.Y = p10.X = p11.X = p11.Y = 1.0;
-		
+
     dmtxMatrix3VMultiplyBy(&p00, reg->fit2raw);
     dmtxMatrix3VMultiplyBy(&p10, reg->fit2raw);
     dmtxMatrix3VMultiplyBy(&p11, reg->fit2raw);
     dmtxMatrix3VMultiplyBy(&p01, reg->fit2raw);
-		
+
     cv::Point2f corner1(p00.X, image.rows - p00.Y);
     cv::Point2f corner2(p10.X, image.rows - p10.Y);
     cv::Point2f corner3(p11.X, image.rows - p11.Y);
@@ -173,8 +173,8 @@ namespace pandora_vision
     {
       line(debug_frame, datamatrixVector[i], datamatrixVector[(i+1)%4], cv::Scalar(255, 0, 0));
     }
-    cv::circle(debug_frame, calculatedRect.center, 4, cv::Scalar(0,0,255),8,8);
-    ROS_INFO_STREAM("Angle given by minAreaRect:"<<calculatedRect.angle);
+    cv::circle(debug_frame, calculatedRect.center, 4, cv::Scalar(0, 0, 255), 8, 8);
+    ROS_INFO_STREAM("Angle given by minAreaRect:" << calculatedRect.angle);
     cvtColor(debug_frame, debug_frame, CV_BGR2GRAY);
     cv_bridge::CvImage datamatrixMSg;
     datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
