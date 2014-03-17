@@ -34,57 +34,71 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef EDGEDETECTION_H
-#define EDGEDETECTION_H
+#ifndef TEXTUREFILTER_H
+#define TEXTUREFILTER_H
 
 #include "ros/ros.h"
+#include <ros/package.h>
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include <iostream>
 
 namespace pandora_vision
 {
-  class EdgeDetector
+  class TextureDetector
   {
+    std::string packagePath;
+    int frameHeight;
+    int frameWidth;
+    //!< Relative path to walls
+    std::string pathToWalls;
+        
+    //!< Current frame to be processed
+    cv::Mat holeFrame;
+    //!< Calculated histogramm according to given images
+    cv::MatND histogramm;
+    //!< Current frame after backprojection
+    cv::Mat backprojectedFrame;
     
     public:
-    //!< Constructor
-    EdgeDetector();
-    
-    //!<Destruuctor
-    virtual ~EdgeDetector();
+    /**
+     @brief Class constructor 
+    */ 
+    TextureDetector();
     
     /**
-      @brief Applies the Canny edge transform
-      @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-      @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
-      @return void
-    **/ 
-    void applyCanny(const cv::Mat inImage, cv::Mat* outImage);
+     @brief Destructor
+    */ 
+    virtual ~TextrureDetector();
     
     /**
-      @brief Applies the Sobel edge transform
-      @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-      @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
-      @return void
-    **/
-    void applySobel (const cv::Mat inImage, cv::Mat* outImage);
+     @brief Get parameters referring to view and frame characteristics
+     from launch file 
+     @return void
+    */ 
+    void getGeneralParams();
     
     /**
-      @brief Applies the Scharr edge transform
-      @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-      @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
+      @brief Function for calculating histogramms for texture recognition
       @return void
-    **/
-    void applyScharr (const cv::Mat inImage, cv::Mat* outImage);
+    */
+    void  calculateTexture();
+  
+    /**
+      @brief Function for calculating HS histogramm
+      @param vector of images corresponding to walls
+      @return histogramm [cv::MatND] 
+    */
+    cv::MatND get_hist(std::vector<cv::Mat> walls);
     
     /**
-      @brief Applies the Laplacian edge transform
-      @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-      @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
-      @return void
-   **/
-    void applyLaplacian (const cv::Mat inImage, cv::Mat* outImage);
-  };
+      @brief Function for calculating applying backprojection in input image
+      @param hist [cv::MatND] calculated histogramm from input images
+      @param frame [cv::Mat] current frame to be processed
+      @return backprojectedframe [cv::Mat] image after backprojection is
+      applied
+    */
+    cv::Mat applyBackprojection(cv::MatND hist,cv::Mat frame);
+  } 
 }
 #endif
