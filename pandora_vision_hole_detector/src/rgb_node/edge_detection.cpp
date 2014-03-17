@@ -59,7 +59,7 @@ namespace pandora_vision
   {
     //!< appropriate values for scale, delta and ddepth
     int scale = 1;
-    int delta = 0; //!< the value for the non-edges
+    int delta = 0;
     int ddepth = CV_16S;
 
     cv::Mat edges;
@@ -96,9 +96,9 @@ namespace pandora_vision
   {
     cv::Mat detected_edges;
     cv::Mat dst;
-    int ratio = 3;
-    int kernel_size = 3;
-    int lowThreshold = 100;
+    int ratio = RgbParameters::canny_ratio;
+    int kernel_size = RgbParameters::canny_kernel_size;
+    int lowThreshold = RgbParameters::canny_low_threshold;
     
     cv::Mat edges;
     inImage.copyTo(edges);
@@ -107,7 +107,9 @@ namespace pandora_vision
     edges.copyTo(*outImage);
     
     //!< Reduce noise with a kernel 3x3
-    cv::blur(*outImage, detected_edges, cv::Size(kernel_size, kernel_size));
+    cv::blur(*outImage, detected_edges, cv::Size(
+         RgbParameters::canny_blur_noise_kernel_size,
+         RgbParameters::canny_blur_noise_kernel_size));
 
     //!< Canny detector
     cv::Canny(detected_edges, detected_edges, lowThreshold,

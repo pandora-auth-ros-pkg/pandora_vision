@@ -42,6 +42,8 @@
 #include "opencv/highgui.h"
 #include <iostream>
 
+#include "rgb_node/rgb_parameters.h"
+
 namespace pandora_vision
 {
   class EdgeDetector
