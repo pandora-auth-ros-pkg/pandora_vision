@@ -34,6 +34,8 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+#include "rgb_node/texture_filter.h"
+
 namespace pandora_vision
 {
   
@@ -45,14 +47,14 @@ namespace pandora_vision
     getGeneralParams();
     
     pathToWalls=packagePath+ "/walls/";
-    calculatrTexture();
+    calculateTexture();
     ROS_INFO("[rgb_node]: Textrure detector instance created");
   }
     
   /**
     @brief Destructor
   */ 
-  virtual TextureDetector::~TextrureDetector()
+  TextureDetector::~TextureDetector()
   {
     ROS_INFO("[rgb_node]: Textrure detector instance deleted");
   }
@@ -97,7 +99,7 @@ namespace pandora_vision
   */
   void  TextureDetector::calculateTexture()
   {
-    std::vector<cv::Mat> walls
+    std::vector<cv::Mat> walls;
     for(int i=0;i<6;i++)
     {
       char temp_name[250];
@@ -116,10 +118,10 @@ namespace pandora_vision
   */
   cv::MatND TextureDetector::get_hist(std::vector<cv::Mat> walls)
   {
-    std::vector<cv::Mat> hsvWalls;
-    for(int i=0;i<walls.size();i++)
-      cvtColor(walls[i], hsvWalls[i], CV_BGR2HSV);
-
+    cv::Mat* hsv=new cv::Mat[14];
+    for(int i=0;i<6;i++)
+      cvtColor(walls[i], hsv[i], CV_BGR2HSV);
+  
     /// Quantize the hue to 30 levels
     /// and the saturation to 32 levels
     int hbins = 30, sbins = 32;
