@@ -50,6 +50,7 @@ namespace pandora_vision
     reg = NULL;
     msg = NULL;
     
+    datamatrix_qode.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
   
@@ -59,6 +60,11 @@ namespace pandora_vision
    */
   DatamatrixDetector::~DatamatrixDetector()
   {
+    //!< Deallocate memory
+    dmtxMessageDestroy(&msg);
+    dmtxDecodeDestroy(&dec);
+    dmtxImageDestroy(&img);  
+    dmtxRegionDestroy(&reg);
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance destroyed");
   }
   
@@ -70,6 +76,10 @@ namespace pandora_vision
    */
   void DatamatrixDetector::detect_datamatrix(cv::Mat image)
   {
+    img = NULL;
+    dec = NULL;
+    reg = NULL;
+    msg = NULL;
     //!< creates and initializes a new DmtxImage structure using pixel 
     //!< data provided  by  the calling application. 
     img = dmtxImageCreate(image.data, image.cols, image.rows, 
@@ -93,8 +103,51 @@ namespace pandora_vision
       if(msg != NULL) 
       {
         std::cout << msg->output <<std::endl;
+        datamatrix_qode.message.assign((const char*) msg->output, msg->outputIdx);
+        //!< Find datamatrixe's center exact position
+        locate_datamatrix(image);
       }
-    }  
+     
+    }
+
+  }
   
+  /**
+    @brief Function that finds the position of datamatrixe's center
+    @param frame [cv::Mat] The image in which the QRs are detected
+    @return void
+   */
+  void DatamatrixDetector::locate_datamatrix(cv::Mat image)
+  {
+    DmtxVector2 p00, p10, p11, p01;
+    std::vector<cv::Point2f> datamatrixVector;
+    
+    p00.X = p00.Y = p01.X = p10.Y = 0.0;
+    p01.Y = p10.X = p11.X = p11.Y = 1.0;
+		
+    dmtxMatrix3VMultiplyBy(&p00, reg->fit2raw);
+    dmtxMatrix3VMultiplyBy(&p10, reg->fit2raw);
+    dmtxMatrix3VMultiplyBy(&p11, reg->fit2raw);
+    dmtxMatrix3VMultiplyBy(&p01, reg->fit2raw);
+		
+    cv::Point2f corner1(p00.X, image.rows - p00.Y);
+    cv::Point2f corner2(p10.X, image.rows - p10.Y);
+    cv::Point2f corner3(p11.X, image.rows - p11.Y);
+    cv::Point2f corner4(p01.X, image.rows - p01.Y);
+    
+    datamatrixVector.push_back(corner1);
+    datamatrixVector.push_back(corner2);
+    datamatrixVector.push_back(corner4);
+    datamatrixVector.push_back(corner3);
+    
+    cv::line(image, corner1, corner2, cv::Scalar(0, 255, 0), 3);
+    cv::line(image, corner2, corner3, cv::Scalar(255, 0, 0), 3);
+    cv::line(image, corner3, corner4, cv::Scalar(0, 0, 255), 3);
+    cv::line(image, corner4, corner1, cv::Scalar(255, 255, 0), 3);
+    
+    
+    cv::imshow("Image window", image);
+    cv::waitKey(30);
+
   }
 }// namespace pandora_vision
