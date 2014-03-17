@@ -46,7 +46,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
-#include "state_client.h"
+#include "state_manager/state_client.h"
 
 #include <iostream>
 #include <stdlib.h>

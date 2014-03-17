@@ -7,8 +7,8 @@
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
-*  are met:
 *
+*  are met:
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -34,49 +34,37 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef BLOBEXTRACTION_H
-#define BLOBEXTRACTION_H
 
-#include "ros/ros.h"
-#include <ros/package.h>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <iostream>
-
-#include "rgb_node/rgb_parameters.h"
-
-//!< Default frame height
-#define DEFAULT_HEIGHT 480
-//!< Default frame width
-#define DEFAULT_WIDTH 640
+#ifndef RGB_PARAMETERS
+#define RGB_PARAMETERS
 
 namespace pandora_vision
 {
-  class BlobDetector
+  struct RgbParameters
   {
+    //!< Canny parameters
+    static int canny_ratio;
+    static int canny_kernel_size;
+    static int canny_low_threshold;
+    static int canny_blur_noise_kernel_size;
     
-    public:
-    
-    /**
-      @brief Class constructor
-    */ 
-    BlobDetector();
-    
-    /**
-      @brief Class destructor
-    */
-    virtual ~BlobDetector();
-    
-    /**
-      @brief Detects blobs in an image
-      @param[in] frame [const cv::Mat&] The input image
-      @param[out] keyPointsOut [std::vector<cv::KeyPoint>*] The ouput
-      @return void
-    */
-    void detectBlobs(const cv::Mat& frame,
-      std::vector<cv::KeyPoint>* keyPointsOut);
-  };  
-}
+    //!< Sobel parameters
+    static int sobel_scale;
+    static int sobel_delta;
+ 
+    //!< Blob detection parameters
+    static int blob_min_threshold;
+    static int blob_max_threshold;
+    static int blob_threshold_step;
+    static int blob_min_area;
+    static int blob_max_area;
+    static double blob_min_convexity;
+    static double blob_max_convexity;
+    static double blob_min_inertia_ratio;
+    static double blob_max_circularity;
+    static double blob_min_circularity;
+    static bool blob_filter_by_color;
+    static bool blob_filter_by_circularity;
+  };
+}  
 #endif
