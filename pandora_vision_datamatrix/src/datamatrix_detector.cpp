@@ -52,7 +52,7 @@ namespace pandora_vision
     
     _datamatrixPublisher = 
         image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
-    datamatrix_qode.message = "";
+    detected_datamatrix.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
   
@@ -78,6 +78,8 @@ namespace pandora_vision
    */
   void DatamatrixDetector::detect_datamatrix(cv::Mat image)
   {
+    datamatrix_list.clear();
+    
     img = NULL;
     dec = NULL;
     reg = NULL;
@@ -104,10 +106,10 @@ namespace pandora_vision
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
       if(msg != NULL) 
       {
-        std::cout << msg->output <<std::endl;
-        datamatrix_qode.message.assign((const char*) msg->output, msg->outputIdx);
+        detected_datamatrix.message.assign((const char*) msg->output, msg->outputIdx);
         //!< Find datamatrixe's center exact position
         locate_datamatrix(image);
+        datamatrix_list.push_back(detected_datamatrix);
       }
     }
   }
@@ -143,10 +145,12 @@ namespace pandora_vision
     cv::RotatedRect calculatedRect;
     calculatedRect = minAreaRect(datamatrixVector);
     
-    datamatrix_qode.datamatrix_center.y = calculatedRect.center.y;
-    datamatrix_qode.datamatrix_center.x = calculatedRect.center.x;
+    detected_datamatrix.datamatrix_center.y = calculatedRect.center.y;
+    detected_datamatrix.datamatrix_center.x = calculatedRect.center.x;
     
-    debug_show(image, datamatrixVector);
+    #if DEBUG_MODE
+      debug_show(image, datamatrixVector);
+    #endif
   }
   
   /**
@@ -178,4 +182,15 @@ namespace pandora_vision
     _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
     
   }
+  
+   /**
+    @brief Function that returns a list of all detected
+    datamatrixes in current frame.
+    @return vector of DataMatrixQode reffering to
+    all detected datamatrixes in current frame
+    */
+    std::vector<DataMatrixQode> DatamatrixDetector::get_detected_datamatrix()
+    {
+      return datamatrix_list;
+    }
 }// namespace pandora_vision
