@@ -240,7 +240,7 @@ namespace pandora_vision
           static_cast<double>(frameWidth) / 2);
       datamatrixcodeVectorMsg.dataMatrixAlerts.push_back(datamatrixcodeMsg);
 
-      ROS_INFO("Datamatrix found.");
+      ROS_INFO("[Datamatrix_node]:Datamatrix found.");
     }
 
     if(datamatrixcodeVectorMsg.dataMatrixAlerts.size() > 0)
