@@ -59,7 +59,12 @@ namespace pandora_vision
     //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
         imageTopic, 1, &DatamatrixDetection::imageCallback, this);
-   
+     
+    //!< Declare publisher and advertise topic
+    //!< where algorithm results are posted
+    _datamatrixCodePublisher =
+      _nh.advertise<vision_communications::DataMatrixAlertsVectorMsg>("datamatrix_alert", 10, true);
+      
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -215,7 +220,33 @@ namespace pandora_vision
     {
       return;
     }
+    //!< Create message of DatamatrixCode Detector
+    vision_communications::DataMatrixAlertsVectorMsg datamatrixcodeVectorMsg;
+    vision_communications::DataMatrixAlertMsg datamatrixcodeMsg;
+    datamatrixcodeVectorMsg.header.frame_id = cameraFrameId;
+    datamatrixcodeVectorMsg.header.stamp = ros::Time::now();
+
     _datamatrixDetector.detect_datamatrix(datamatrixFrame);
+    std::vector<DataMatrixQode> list_datamatrixes = _datamatrixDetector.get_detected_datamatrix();
+    
+    for(int i = 0; i < static_cast<int>(list_datamatrixes.size()); i++)
+    {
+      datamatrixcodeMsg.datamatrixContent = list_datamatrixes[i].message;
+      datamatrixcodeMsg.yaw = ratioX *
+        (list_datamatrixes[i].datamatrix_center.x - 
+          static_cast<double>(frameWidth) / 2);
+      datamatrixcodeMsg.pitch = -ratioY *
+        (list_datamatrixes[i].datamatrix_center.y - 
+          static_cast<double>(frameWidth) / 2);
+      datamatrixcodeVectorMsg.dataMatrixAlerts.push_back(datamatrixcodeMsg);
+
+      ROS_INFO("Datamatrix found.");
+    }
+
+    if(datamatrixcodeVectorMsg.dataMatrixAlerts.size() > 0)
+    {
+      _datamatrixCodePublisher.publish(datamatrixcodeVectorMsg);
+    }
   }
   
   /**

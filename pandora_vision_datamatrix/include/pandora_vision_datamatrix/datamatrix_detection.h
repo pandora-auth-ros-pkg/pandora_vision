@@ -46,7 +46,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include "state_manager/state_client.h"
-
+#include "vision_communications/DataMatrixAlertsVectorMsg.h"
 #include "pandora_vision_datamatrix/datamatrix_detector.h"
 
 #ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTION_H 
@@ -113,7 +113,7 @@ namespace pandora_vision
     std::string cameraFrameId;
     
     //!< Publishers for QrCodeDetector result messages
-    ros::Publisher _datamatrixPublisher;
+    ros::Publisher _datamatrixCodePublisher;
 
     //!< The subscriber that listens to the frame topic advertised 
     //!< by the central node for the front camera

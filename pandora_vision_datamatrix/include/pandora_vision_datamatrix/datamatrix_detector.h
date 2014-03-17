@@ -51,6 +51,8 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
+#define DEBUG_MODE false
+
 namespace pandora_vision 
 {
   struct DataMatrixQode
@@ -73,8 +75,11 @@ namespace pandora_vision
     cv::Mat datamatrix_frame;
     cv::Mat debug_frame;
     
-    DataMatrixQode datamatrix_qode;
-      
+    DataMatrixQode detected_datamatrix;
+    
+    //!< List of detected datamatrixes
+    std::vector<DataMatrixQode> datamatrix_list;  
+    
     public:
     
     image_transport::Publisher _datamatrixPublisher;
@@ -107,10 +112,18 @@ namespace pandora_vision
     /**
     @brief Function that creates view for debugging purposes.
     @param frame [cv::Mat] The image in which the datamatrixes are detected
-    @return debyg_frcame [cv::Mat], frame with rotated rectangle
+    @return debug_frame [cv::Mat], frame with rotated rectangle
     and center of it
     */
     void debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector);
+    
+    /**
+    @brief Function that returns a list of all detected
+    datamatrixes in current frame.
+    @return vector of DataMatrixQode reffering to
+    all detected datamatrixes in current frame
+    */
+    std::vector<DataMatrixQode> get_detected_datamatrix();
   };  
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
