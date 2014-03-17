@@ -43,13 +43,22 @@
 #include "opencv/highgui.h"
 #include <iostream>
 
+//!< Default frame height
+#define DEFAULT_HEIGHT 480
+//!< Default frame width
+#define DEFAULT_WIDTH 640
+
 namespace pandora_vision
 {
   class TextureDetector
   {
+    //!< nodeHandle
+    ros::NodeHandle _nh;
+  
     std::string packagePath;
     int frameHeight;
     int frameWidth;
+    std::string cameraName;
     //!< Relative path to walls
     std::string pathToWalls;
         
@@ -69,7 +78,7 @@ namespace pandora_vision
     /**
      @brief Destructor
     */ 
-    virtual ~TextrureDetector();
+    virtual ~TextureDetector();
     
     /**
      @brief Get parameters referring to view and frame characteristics
@@ -82,7 +91,7 @@ namespace pandora_vision
       @brief Function for calculating histogramms for texture recognition
       @return void
     */
-    void  calculateTexture();
+    void calculateTexture();
   
     /**
       @brief Function for calculating HS histogramm
@@ -99,6 +108,13 @@ namespace pandora_vision
       applied
     */
     cv::Mat applyBackprojection(cv::MatND hist,cv::Mat frame);
-  } 
+    
+    /**
+      @brief Function that applies backprogected image in current frame
+      in order to find out which part of it belong to the given texture
+      @return void
+    */ 
+    void applyTexture();
+  }; 
 }
 #endif
