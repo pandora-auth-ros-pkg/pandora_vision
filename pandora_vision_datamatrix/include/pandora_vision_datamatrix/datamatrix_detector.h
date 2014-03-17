@@ -39,7 +39,10 @@
 #define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H 
 
 #include <iostream>
+#include <stdlib.h>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <dmtx.h>
 
 #include <ros/ros.h>
@@ -47,17 +50,25 @@
 
 namespace pandora_vision 
 {
+  struct DataMatrixQode
+  {
+    cv::Point2f datamatrix_center;
+    std::string message;
+  };
+  
   class DatamatrixDetector
   {
     private:
     
-    DmtxImage      *img;
-    DmtxDecode     *dec;
-    DmtxRegion     *reg;
-    DmtxMessage    *msg;
+    DmtxMessage *msg;
+    DmtxImage *img;
+    DmtxDecode *dec;
+    DmtxRegion *reg;
     
     cv::Mat datamatrix_frame;
     
+    DataMatrixQode datamatrix_qode;
+      
     public:
     
     /**
@@ -78,6 +89,13 @@ namespace pandora_vision
       @return void
     **/
     void detect_datamatrix(cv::Mat image);
+    
+    /**
+    @brief Function that finds the position of datamatrixe's center
+    @param frame [cv::Mat] The image in which the QRs are detected
+    @return void
+   */
+    void locate_datamatrix(cv::Mat image);
     
   };  
 }// namespace pandora_vision
