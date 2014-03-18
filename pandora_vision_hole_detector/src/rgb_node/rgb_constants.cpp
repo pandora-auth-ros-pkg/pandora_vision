@@ -7,8 +7,8 @@
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
-*  are met:
 *
+*  are met:
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -34,45 +34,39 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef RGB_NODE_BLOB_EXTRACTION_H 
-#define RGB_NODE_BLOB_EXTRACTION_H 
-
-#include "ros/ros.h"
-#include <ros/package.h>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <iostream>
 
 #include "rgb_node/rgb_constants.h"
 
-
 namespace pandora_vision
 {
-  class BlobDetector
-  {
-    
-    public:
-    
-    /**
-      @brief Class constructor
-    */ 
-    BlobDetector();
-    
-    /**
-      @brief Class destructor
-    */
-    virtual ~BlobDetector();
-    
-    /**
-      @brief Detects blobs in an image
-      @param[in] frame [const cv::Mat&] The input image
-      @param[out] keyPointsOut [std::vector<cv::KeyPoint>*] The ouput
-      @return void
-    */
-    void detectBlobs(const cv::Mat& frame,
-      std::vector<cv::KeyPoint>* keyPointsOut);
-  };  
-}// namespace pandora_vision
-#endif  // RGB_NODE_BLOB_EXTRACTION_H
+  //!Frame characteristics (frameWidth,frameHeight,
+  //!horizontal field of view, vertical field of view)
+  int RgbParameters::frameWidth = 640;
+  int RgbParameters::frameHeight = 480;
+  int RgbParameters::hfov = 61.14;
+  int RgbParameters::vfov = 48;
+  
+  //!< Canny parameters
+  int RgbParameters::canny_ratio = 3;
+  int RgbParameters::canny_kernel_size = 3;
+  int RgbParameters::canny_low_threshold = 1000;
+  int RgbParameters::canny_blur_noise_kernel_size = 3;
+  
+  //!< Sobel parameters
+  int RgbParameters::sobel_scale = 1;
+  int RgbParameters::sobel_delta = 0;
+  
+  //!< Blob detection parameters
+  int RgbParameters::blob_min_threshold = 0;
+  int RgbParameters::blob_max_threshold = 1255;
+  int RgbParameters::blob_threshold_step = 5;
+  int RgbParameters::blob_min_area = 550;
+  int RgbParameters::blob_max_area = 8000;
+  double RgbParameters::blob_min_convexity = 0.6;
+  double RgbParameters::blob_max_convexity = 100;
+  double RgbParameters::blob_min_inertia_ratio = 0;
+  double RgbParameters::blob_max_circularity = 1.0;
+  double RgbParameters::blob_min_circularity = 0.3;
+  bool RgbParameters::blob_filter_by_color = false;
+  bool RgbParameters::blob_filter_by_circularity = true;
+}// namespace pandora_vision 

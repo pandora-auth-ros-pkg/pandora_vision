@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef HOLEDETECTION_H
-#define HOLEDETECTION_H
+#ifndef RGB_NODE_HOLE_DETECTION_H 
+#define RGB_NODE_HOLE_DETECTION_H 
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -51,17 +51,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-//!< Horizontal field of view in degrees 
-#define HFOV 61.14
-
-//!< vertical field of view in degrees
-#define VFOV 48  
-
-//!< default frame height
-#define DEFAULT_HEIGHT 480	
-
-//!< default frame width	
-#define DEFAULT_WIDTH	 640	
+#include "rgb_node/rgb_constants.h"
 
 namespace pandora_vision
 {
@@ -78,20 +68,20 @@ namespace pandora_vision
     float ratioY;
       
     //!< Horizontal field of view in rad
-    double hfov;		
+    double hfov;
     //!< Vertical Field Of View (rad)
-    double vfov;		
+    double vfov;
       
-    int frameWidth;		
-    int frameHeight;	
+    int frameWidth;
+    int frameHeight;
       
     std::string cameraName;
       
     //!< Frame processed by FaceDetector
-    cv::Mat	_holeFrame;					
+    cv::Mat _holeFrame;
         
     //!<FaceDetector frame timestamp
-    ros::Time _holeFrameTimestamp;	
+    ros::Time _holeFrameTimestamp;
       
     //!< The topic subscribed to for the camera
     std::string imageTopic;
@@ -102,7 +92,7 @@ namespace pandora_vision
     image_transport::Subscriber _frameSubscriber;
       
     //!< Current state of robot
-    int curState;		
+    int curState;
     //!< Previous state of robot
     int prevState;
     
@@ -153,5 +143,5 @@ namespace pandora_vision
     */
     void completeTransition(void);    
   };
-}
-#endif
+}//namespace pandora_vision
+#endif  // RGB_NODE_HOLE_DETECTION_H

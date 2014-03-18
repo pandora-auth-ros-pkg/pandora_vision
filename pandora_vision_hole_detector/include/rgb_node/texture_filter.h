@@ -34,8 +34,8 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef TEXTUREFILTER_H
-#define TEXTUREFILTER_H
+#ifndef RGB_NODE_TEXTURE_FILTER_H 
+#define RGB_NODE_TEXTURE_FILTER_H 
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -43,10 +43,7 @@
 #include "opencv/highgui.h"
 #include <iostream>
 
-//!< Default frame height
-#define DEFAULT_HEIGHT 480
-//!< Default frame width
-#define DEFAULT_WIDTH 640
+#include "rgb_node/rgb_constants.h"
 
 namespace pandora_vision
 {
@@ -107,7 +104,7 @@ namespace pandora_vision
       @return backprojectedframe [cv::Mat] image after backprojection is
       applied
     */
-    cv::Mat applyBackprojection(cv::MatND hist,cv::Mat frame);
+    cv::Mat applyBackprojection(cv::MatND hist, cv::Mat frame);
     
     /**
       @brief Function that applies backprogected image in current frame
@@ -116,5 +113,5 @@ namespace pandora_vision
     */ 
     void applyTexture();
   }; 
-}
-#endif
+}// namespace pandora_vision
+#endif  // RGB_NODE_TEXTURE_FILTER_H
