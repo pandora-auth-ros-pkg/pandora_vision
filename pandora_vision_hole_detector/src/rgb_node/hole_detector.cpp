@@ -72,4 +72,4 @@ namespace pandora_vision
     
      _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
   }
-}
+}// namespace pandora_vision
