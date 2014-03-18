@@ -41,12 +41,12 @@ namespace pandora_vision
   //!< Constructor
   EdgeDetector::EdgeDetector()
   {
-    ROS_INFO("[hole_node]: Edge detector instance created");
+    ROS_INFO("[rgb_node]: Edge detector instance created");
   }
   
   EdgeDetector::~EdgeDetector()
   {
-    ROS_INFO("[hole_node]: Edge detector instance destroyed");
+    ROS_INFO("[rgb_node]: Edge detector instance destroyed");
   }  
   
   /**
