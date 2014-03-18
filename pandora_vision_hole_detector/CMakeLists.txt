@@ -111,7 +111,6 @@ add_dependencies(synchronizer_node
   vision_gencfg
   vision_communications_gencpp
   ${catkin_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
 )
 
 
@@ -127,7 +126,7 @@ add_library(hole_fusion_lib
   src/depth_node/timer.cpp
   src/depth_node/visualization.cpp
 )
-  ${catkin_LIBRARIES}
+
 target_link_libraries(hole_fusion_lib
   ${catkin_LIBRARIES}
 )
@@ -149,12 +148,10 @@ target_link_libraries(hole_fusion_node
 add_dependencies(hole_fusion_node
   vision_gencfg
   vision_communications_gencpp
-${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
-################################# RgbNode dummy ######################################
+################################# RgbNode ######################################
 add_executable(rgb_node 
     src/rgb_node/hole_node.cpp
     src/rgb_node/hole_detection.cpp
@@ -198,8 +195,6 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/rgb_node/texture_filter.cpp
   src/rgb_node/blob_extraction.cpp
   src/rgb_node/rgb_constants.cpp
-  
-            
 )
 
 ################################# ROSLINT ######################################
@@ -262,7 +257,7 @@ src/hole_fusion_node/rgb_filters.cpp
 
 include/message_conversions.h
 src/message_conversions.cpp
-<Merge Conflict>
+
 
 ## synchronizer_node ##
 
