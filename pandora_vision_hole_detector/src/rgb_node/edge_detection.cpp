@@ -176,4 +176,127 @@ namespace pandora_vision
     cv::Laplacian(edges, *outImage, ddepth, 1, scale, delta, cv::BORDER_DEFAULT);
     convertScaleAbs(*outImage, *outImage);
   }
+  
+  /**
+    @brief Applies contamination to the edges image. It keeps only the edges\
+    that are not iteratively neighbors to the image's limits
+    @param[in][out] inImage [cv::Mat*] Input image in CV_8UC1 format
+    @return void
+   **/
+  void EdgeDetector::applyEdgeContamination (cv::Mat* inImage)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("applyEdgeContamination", "denoiseEdges");
+    #endif
+
+    int rows = inImage->rows;
+    int cols = inImage->cols;
+    std::set<unsigned int> current,next,visited;
+
+    for(unsigned int i = 0 ; i < rows ; i++)  //!< Border blacken
+    {
+      inImage->data[i * inImage->cols] = 0;
+      inImage->data[i * inImage->cols + cols - 1] = 0;
+    }
+
+    for(unsigned int j = 0 ; j < cols ; j++)  //!< Border blacken
+    {
+      inImage->data[j] = 0;
+      inImage->data[(rows - 1) * inImage->cols + j] = 0;
+    }
+
+    for(unsigned int i = 1 ; i < rows - 1 ; i++)  //!< Find outer white borders
+    {
+      if(inImage->data[i * inImage->cols + 1] > 0)
+      {
+        current.insert(i * cols + 1);
+        inImage->data[i * inImage->cols + 1] = 0;
+      }
+      if(inImage->data[i * inImage->cols + cols - 2] > 0)
+      {
+        current.insert(i * cols + cols - 2);
+        inImage->data[i * inImage->cols + cols - 2] = 0;
+      }
+    }
+
+    for(unsigned int j = 1 ; j < cols - 1 ; j++)  //!< Find outer white borders
+    {
+      if(inImage->data[1 * inImage->cols + j] > 0)
+      {
+        current.insert(1 * cols + j);
+        inImage->data[1 * inImage->cols + j] = 0;
+      }
+
+      if(inImage->data[(rows - 2) * inImage->cols + j] > 0)
+      {
+        current.insert((rows - 2) * cols + j);
+        inImage->data[(rows - 2) * inImage->cols + j] = 0;
+      }
+    }
+
+    while(current.size() != 0)  //!< Iterative contamination
+    {
+      for(std::set<unsigned int>::iterator i = current.begin() ;
+          i != current.end() ; i++)
+      {
+        int x = *i / cols;
+        int y = *i % cols;
+
+        if(inImage->data[(x - 1) * inImage->cols + y - 1] != 0)
+        {
+          next.insert((x - 1) * cols + y - 1);
+          inImage->data[(x - 1) * inImage->cols + y - 1] = 0;
+        }
+
+        if(inImage->data[(x - 1) * inImage->cols + y] != 0)
+        {
+          next.insert((x - 1) * cols + y);
+          inImage->data[(x - 1) * inImage->cols + y] = 0;
+        }
+
+        if(inImage->data[(x - 1) * inImage->cols + y + 1] != 0)
+        {
+          next.insert((x - 1) * cols + y + 1);
+          inImage->data[(x - 1) * inImage->cols + y + 1] = 0;
+        }
+
+        if(inImage->data[x * inImage->cols + y + 1] != 0)
+        {
+          next.insert(x * cols + y + 1);
+          inImage->data[x * inImage->cols + y + 1] = 0;
+        }
+
+        if(inImage->data[x * inImage->cols + y - 1] != 0)
+        {
+          next.insert(x * cols + y - 1);
+          inImage->data[x * inImage->cols + y - 1] = 0;
+        }
+
+        if(inImage->data[(x + 1) * inImage->cols + y - 1] != 0)
+        {
+          next.insert((x + 1) * cols + y - 1);
+          inImage->data[(x + 1) * inImage->cols + y - 1] = 0;
+        }
+
+        if(inImage->data[(x + 1) * inImage->cols + y] != 0)
+        {
+          next.insert((x + 1) * cols + y);
+          inImage->data[(x + 1) * inImage->cols + y] = 0;
+        }
+
+        if(inImage->data[(x + 1) * inImage->cols + y + 1] != 0)
+        {
+          next.insert((x + 1) * cols + y + 1);
+          inImage->data[(x + 1) * inImage->cols + y + 1] = 0;
+        }
+      }
+      current.swap(next);
+      next.clear();
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyEdgeContamination");
+    #endif
+  }
+
 }// namespace pandora_vision
