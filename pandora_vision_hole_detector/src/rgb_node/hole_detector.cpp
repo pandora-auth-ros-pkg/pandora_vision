@@ -71,10 +71,32 @@ namespace pandora_vision
     _textureDetector.applyTexture(holeFrame, &backprojectedFrame);
     
     //! Apply in current frame Canny edge detection algorithm
-    //~ _edgeDetector.applyCanny(holeFrame, &edgesFrame);
-    //~ 
-    //~ ROS_INFO("edgedetector created");
-    //~ 
+    _edgeDetector.applySobel(backprojectedFrame, &edgesFrame);
+   
+    debug_show(holeFrame, backprojectedFrame, edgesFrame);
     //~ _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+  }
+  
+  /**
+    @brief Function for debbuging reasons,shows histogramm and 
+    current frame after backprojection is applied
+    @param holeFrame [cv::Mat] the currrent frame to be processed
+    @param backprojectedFrame [cv::Mat] current frame after backprojection,
+    this parameter is returned
+    @param edgesFrame [cv::Mat] current frame after edge detection algorithm
+    is applied 
+    @return void
+  */
+  void HoleDetector::debug_show(cv::Mat holeFrame, 
+      cv::Mat backprojectedFrame, cv::Mat edgesFrame)
+  {
+    ros::Time timeBegin = ros::Time::now();
+    while( ros::Time::now()-timeBegin < ros::Duration(1))
+    {
+       cv::imshow(" Current frame", holeFrame);
+       cv::imshow(" Frame after backprojection ", backprojectedFrame);
+       cv::imshow(" Frame after edge detection ", edgesFrame);
+       cv::waitKey(10);
+    }
   }
 }// namespace pandora_vision

@@ -64,8 +64,6 @@ namespace pandora_vision
 
     cv::Mat edges;
     inImage.copyTo(edges);
-    //!<convert image to grayscale
-    cvtColor( edges, edges, CV_RGB2GRAY );
     
     //!< Generate grad_x and grad_y
     cv::Mat grad_x, grad_y;
@@ -102,8 +100,6 @@ namespace pandora_vision
     
     cv::Mat edges;
     inImage.copyTo(edges);
-    //!< Convert image to grayscale
-    cvtColor(edges, edges, CV_BGR2GRAY );
     edges.copyTo(*outImage);
     
     //!< Reduce noise with a kernel 3x3

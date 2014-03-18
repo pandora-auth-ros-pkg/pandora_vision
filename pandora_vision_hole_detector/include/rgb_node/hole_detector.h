@@ -83,6 +83,20 @@ namespace pandora_vision
      @return void
     */ 
     void findHoles(cv::Mat holeFrame);
+    
+     /**
+      @brief Function for debbuging reasons,shows histogramm and 
+      current frame after backprojection is applied
+      @param holeFrame [cv::Mat] the currrent frame to be processed
+      @param backprojectedFrame [cv::Mat] current frame after backprojection,
+      this parameter is returned
+      @param edgesFrame [cv::Mat] current frame after edge detection algorithm
+      is applied 
+      @return void
+    */
+    void debug_show(cv::Mat holeFrame, 
+      cv::Mat backprojectedFrame, cv::Mat edgesFrame);
+
   };
 }// namespace pandora_vision
 #endif  // RGB_NODE_HOLE_DETECTOR_H

@@ -49,7 +49,7 @@ namespace pandora_vision
   //!< Canny parameters
   int RgbParameters::canny_ratio = 3;
   int RgbParameters::canny_kernel_size = 3;
-  int RgbParameters::canny_low_threshold = 1000;
+  int RgbParameters::canny_low_threshold = 100;
   int RgbParameters::canny_blur_noise_kernel_size = 3;
   
   //!< Sobel parameters
@@ -69,4 +69,7 @@ namespace pandora_vision
   double RgbParameters::blob_min_circularity = 0.3;
   bool RgbParameters::blob_filter_by_color = false;
   bool RgbParameters::blob_filter_by_circularity = true;
+  
+  //! Debug flags
+  bool RgbParameters::debug_enable=false;
 }// namespace pandora_vision 
