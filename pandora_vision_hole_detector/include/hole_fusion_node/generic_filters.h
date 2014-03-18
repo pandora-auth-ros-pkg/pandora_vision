@@ -69,8 +69,13 @@ namespace pandora_vision
         by the assimilator
         @return void
        **/
-      static void assimilate(const HoleFilters::HolesConveyor& assimilator,
+      static void assimilateUnilaterally(
+        const HoleFilters::HolesConveyor& assimilator,
         HoleFilters::HolesConveyor* assimilable);
+
+      static void merge(
+        HoleFilters::HolesConveyor* depthHolesConveyor,
+        HoleFilters::HolesConveyor* rgbHolesConveyor);
 
     public:
       /**
@@ -85,7 +90,7 @@ namespace pandora_vision
         The candidate holes conveyor originated from the rgb node
         @return void
        **/
-      static void mergeHoles(
+      static void assimilateBilaterally(
         HoleFilters::HolesConveyor* depthHolesConveyor,
         HoleFilters::HolesConveyor* rgbHolesConveyor);
   };
