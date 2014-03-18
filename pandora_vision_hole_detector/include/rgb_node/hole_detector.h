@@ -95,7 +95,9 @@ namespace pandora_vision
       @return void
     */
     void debug_show(cv::Mat holeFrame, 
-      cv::Mat backprojectedFrame, cv::Mat edgesFrame);
+      cv::Mat backprojectedFrame, cv::Mat edgesFrame, std::vector<cv::KeyPoint> detectedkeyPoints);
+    
+
 
   };
 }// namespace pandora_vision

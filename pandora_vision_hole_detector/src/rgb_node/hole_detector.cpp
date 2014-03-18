@@ -72,9 +72,11 @@ namespace pandora_vision
     
     //! Apply in current frame Canny edge detection algorithm
     _edgeDetector.applySobel(backprojectedFrame, &edgesFrame);
-   
-    debug_show(holeFrame, backprojectedFrame, edgesFrame);
-    //~ _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+    _edgeDetector.applyEdgeContamination(&edgesFrame);
+    
+    _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+    
+    debug_show(holeFrame, backprojectedFrame, edgesFrame, detectedkeyPoints);
   }
   
   /**
@@ -88,14 +90,16 @@ namespace pandora_vision
     @return void
   */
   void HoleDetector::debug_show(cv::Mat holeFrame, 
-      cv::Mat backprojectedFrame, cv::Mat edgesFrame)
+      cv::Mat backprojectedFrame, cv::Mat edgesFrame, std::vector<cv::KeyPoint> keypoints)
   {
     ros::Time timeBegin = ros::Time::now();
     while( ros::Time::now()-timeBegin < ros::Duration(1))
     {
        cv::imshow(" Current frame", holeFrame);
        cv::imshow(" Frame after backprojection ", backprojectedFrame);
-       cv::imshow(" Frame after edge detection ", edgesFrame);
+       cv::drawKeypoints(edgesFrame, keypoints, edgesFrame, CV_RGB(255, 0, 0),
+        cv::DrawMatchesFlags::DEFAULT);
+      cv::imshow("Blobs",edgesFrame );
        cv::waitKey(10);
     }
   }

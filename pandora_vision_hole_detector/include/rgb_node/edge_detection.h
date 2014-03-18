@@ -86,6 +86,15 @@ namespace pandora_vision
       @return void
    **/
     void applyLaplacian (const cv::Mat inImage, cv::Mat* outImage);
+    
+    /**
+      @brief Applies contamination to the edges image. It keeps only the edges\
+      that are not iteratively neighbors to the image's limits
+      @param[in][out] inImage [cv::Mat*] Input image in CV_8UC1 format
+      @return void
+    **/
+    void applyEdgeContamination (cv::Mat* inImage);
+  
   };
 }// namespace pandora_vision
 #endif  // RGB_NODE_EDGE_DETECTION_H
