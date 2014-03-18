@@ -131,7 +131,7 @@ namespace pandora_vision
       DepthParameters::bounding_box_detection_method,
       &conveyor);
 
-    #ifdef DEBUG_SHOW
+    #ifdef SHOW_DEBUG_IMAGE
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Blobs");
       msgs.push_back(msg);
