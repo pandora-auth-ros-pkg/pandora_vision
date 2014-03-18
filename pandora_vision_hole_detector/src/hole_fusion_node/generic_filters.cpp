@@ -50,7 +50,7 @@ namespace pandora_vision
     The candidate holes conveyor originated from the rgb node
     @return void
    **/
-  void GenericFilters::mergeHoles(
+  void GenericFilters::assimilateBilaterally(
     HoleFilters::HolesConveyor* depthHolesConveyor,
     HoleFilters::HolesConveyor* rgbHolesConveyor)
   {
@@ -59,9 +59,9 @@ namespace pandora_vision
     if (depthHolesConveyor->keyPoints.size() > 0 &&
       rgbHolesConveyor->keyPoints.size() > 0)
     {
-      assimilate(*rgbHolesConveyor, depthHolesConveyor);
+      assimilateUnilaterally(*rgbHolesConveyor, depthHolesConveyor);
 
-      assimilate(*depthHolesConveyor, rgbHolesConveyor);
+      assimilateUnilaterally(*depthHolesConveyor, rgbHolesConveyor);
     }
 
   }
@@ -82,7 +82,8 @@ namespace pandora_vision
     by the assimilator
     @return void
    **/
-  void GenericFilters::assimilate(const HoleFilters::HolesConveyor& assimilator,
+  void GenericFilters::assimilateUnilaterally(
+    const HoleFilters::HolesConveyor& assimilator,
     HoleFilters::HolesConveyor* assimilable)
   {
     //!< Validate depth's holes against the rgb ones
@@ -134,6 +135,14 @@ namespace pandora_vision
         }
       }
     }
+  }
+
+
+
+  void GenericFilters::merge(HoleFilters::HolesConveyor* depthHolesConveyor,
+    HoleFilters::HolesConveyor* rgbHolesConveyor)
+  {
+
   }
 
 } // namespace pandora_vision
