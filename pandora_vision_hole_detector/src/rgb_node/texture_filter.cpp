@@ -105,11 +105,9 @@ namespace pandora_vision
     std::vector<cv::Mat> walls;
     for(int i = 0; i < 6; i++)
     {
-      char temp_name[250];
-      std::string temp;
-      temp = pathToWalls+"%d.png";
-      sprintf(temp_name, temp.c_str(), i);
-      walls[i] = cv::imread(temp_name);
+      std::ostringstream out;
+      out<< pathToWalls << i << ".png";
+      walls.push_back(cv::imread(out.str()));
     }
     histogramm = get_hist(walls);
   }
@@ -169,11 +167,10 @@ namespace pandora_vision
     /// apply backprojected image
     cv::threshold(backproj, backproj, 45, max_BINARY_value, 0);
     cv::Mat kernel = 
-          getStructuringElement(cv::MORPH_CROSS , cv::Size(3, 3), 
+          getStructuringElement(cv::MORPH_ELLIPSE , cv::Size(3, 3), 
           cv::Point( -1, -1 ));
     cv::morphologyEx(backproj, backproj, cv::MORPH_CLOSE, 
-        kernel, cv::Point(-1, -1), 15);
-
+        kernel, cv::Point(-1, -1), 10);
     return backproj;
   }
   
@@ -188,8 +185,35 @@ namespace pandora_vision
   void TextureDetector::applyTexture(cv::Mat holeFrame, 
     cv::Mat* backprojectedFrame)
   {
-    cv::Mat backprojection = cv::Mat::zeros(frameHeight, frameWidth, CV_8UC1);
+    cv::Mat backprojection = 
+        cv::Mat::zeros(RgbParameters::frameHeight, 
+        RgbParameters::frameWidth, CV_8UC1);
     backprojection = applyBackprojection(histogramm, holeFrame).clone();
-    bitwise_and( holeFrame, backprojection, *backprojectedFrame);
+    cvtColor(holeFrame, holeFrame, CV_BGR2GRAY);
+    
+    //~ bitwise_and( holeFrame, backprojection, *backprojectedFrame);
+    debug_show(holeFrame, backprojection, *backprojectedFrame);
+  }
+  
+  /**
+    @brief Function for debbuging reasons,shows histogramm and 
+    current frame after backprojection is applied
+    @param holeFrame [cv::Mat] the currrent frame to be processed
+    @param backprojection [cv::Mat] calculated backprojection 
+    @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+    this parameter is returned
+    @return void
+  */
+  void TextureDetector::debug_show(cv::Mat holeFrame, 
+      cv::Mat backprojection, cv::Mat backprojectedFrame)
+  {
+    ros::Time timeBegin = ros::Time::now();
+    while( ros::Time::now()-timeBegin < ros::Duration(1))
+    {
+       cv::imshow(" Current frame", holeFrame);
+       cv::imshow(" Backprojection", backprojection);
+       cv::imshow(" Frame after backprojection ", backprojectedFrame);
+       cv::waitKey(10);
+    }
   }
 }// namespace pandora_vision

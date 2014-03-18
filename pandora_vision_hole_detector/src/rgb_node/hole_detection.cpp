@@ -61,7 +61,7 @@ namespace pandora_vision
     _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
       imageTopic, 1, &HoleDetection::imageCallback, this);
     
-    ROS_INFO("[hole_node] : Created Hole Detection instance");
+    ROS_INFO("[rgb_node] : Created Hole Detection instance");
   }
   
    /**
@@ -69,7 +69,7 @@ namespace pandora_vision
   */
   HoleDetection::~HoleDetection()
   {
-    ROS_DEBUG("[hole_node] : Destroying Hole Detection instance");
+    ROS_DEBUG("[rgb_node] : Destroying Hole Detection instance");
   }
   
   /**
@@ -180,9 +180,9 @@ namespace pandora_vision
 
     if (_holeFrame.empty() )
     {
-      ROS_ERROR("[hole_node] : No more Frames");
+      ROS_ERROR("[rgb_node] : No more Frames");
       return;
-    }
+    }  
     
     holeCallback();
   }

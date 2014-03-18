@@ -43,6 +43,9 @@ namespace pandora_vision
   */ 
   HoleDetector::HoleDetector()
   {
+    backprojectedFrame = cv::Mat::zeros(RgbParameters::frameHeight, 
+        RgbParameters::frameWidth, CV_8UC1);
+    
     ROS_INFO("[rgb_node]: HoleDetector instance created");
   }
   
@@ -68,8 +71,10 @@ namespace pandora_vision
     _textureDetector.applyTexture(holeFrame, &backprojectedFrame);
     
     //! Apply in current frame Canny edge detection algorithm
-    _edgeDetector.applyCanny(holeFrame, &edgesFrame);
-    
-     _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+    //~ _edgeDetector.applyCanny(holeFrame, &edgesFrame);
+    //~ 
+    //~ ROS_INFO("edgedetector created");
+    //~ 
+    //~ _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
   }
 }// namespace pandora_vision

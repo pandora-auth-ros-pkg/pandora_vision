@@ -42,6 +42,7 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include <iostream>
+#include <sstream>
 
 #include "rgb_node/rgb_constants.h"
 
@@ -111,6 +112,18 @@ namespace pandora_vision
       @return void
     */ 
     void applyTexture(cv::Mat holeFrame, cv::Mat* backprojectedFrame);
+    
+   /**
+    @brief Function for debbuging reasons,shows histogramm and 
+    current frame after backprojection is applied
+    @param holeFrame [cv::Mat] the currrent frame to be processed
+    @param backprojection [cv::Mat] calculated backprojection 
+    @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+    this parameter is returned
+    @return void
+  */
+    void debug_show(cv::Mat holeFrame,  
+      cv::Mat backprojection, cv::Mat backprojectedFrame);
   }; 
 }// namespace pandora_vision
 #endif  // RGB_NODE_TEXTURE_FILTER_H
