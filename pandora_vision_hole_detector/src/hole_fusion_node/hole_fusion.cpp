@@ -291,7 +291,7 @@ namespace pandora_vision
       ros::package::getPath("pandora_vision_hole_detector");
 
     //!< The actual wall pictures directory
-    std::string wallPicturesPath = packagePath + "/src/wall_pictures/";
+    std::string wallPicturesPath = packagePath + "/walls/";
 
     int fileLength;
 
