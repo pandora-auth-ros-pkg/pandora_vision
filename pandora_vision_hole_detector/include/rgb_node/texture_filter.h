@@ -46,6 +46,8 @@
 
 #include "rgb_node/rgb_constants.h"
 
+#include "rgb_node/from_depth/hole_filters.h"
+
 namespace pandora_vision
 {
   class TextureDetector

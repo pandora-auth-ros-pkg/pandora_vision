@@ -38,33 +38,24 @@
 #ifndef RGB_NODE_HOLE_DETECTOR_H 
 #define RGB_NODE_HOLE_DETECTOR_H 
 
+#define SHOW_DEBUG_IMAGE
+#define DEBUG_SHOW
+
 #include "rgb_node/rgb_constants.h"
 #include "rgb_node/texture_filter.h"
-#include "rgb_node/edge_detection.h"
-#include "rgb_node/blob_extraction.h"
+
 namespace pandora_vision
 {
   class HoleDetector
   {
-    //! Current frame after backprojection
-    cv::Mat backprojectedFrame;
-    //! Current frame after edge detection algorithm
-    cv::Mat edgesFrame;
     
-    //! Instance of class EdgeDetector, that finds edges in current frame
-    EdgeDetector _edgeDetector;
+    DepthParameters params;
+
     
     //! Instance of class TextureDetector, that applies texture in current 
     //! frame in order to isolate pixels of the image, where we have walls
     TextureDetector _textureDetector;
-    
-    //! Instance of class BlobDetector, that locates the centers of
-    //! blobs in current image
-    BlobDetector _blobDetector;
-    
-    //! Kyepoints of blobs in current frame
-    std::vector<cv::KeyPoint> detectedkeyPoints;
-    
+
     public:
     /**
      @brief Class constructor
@@ -82,22 +73,7 @@ namespace pandora_vision
      @param holeFrame [cv::Mat] current frame to be processed
      @return void
     */ 
-    void findHoles(cv::Mat holeFrame);
-    
-     /**
-      @brief Function for debbuging reasons,shows histogramm and 
-      current frame after backprojection is applied
-      @param holeFrame [cv::Mat] the currrent frame to be processed
-      @param backprojectedFrame [cv::Mat] current frame after backprojection,
-      this parameter is returned
-      @param edgesFrame [cv::Mat] current frame after edge detection algorithm
-      is applied 
-      @return void
-    */
-    void debug_show(cv::Mat holeFrame, 
-      cv::Mat backprojectedFrame, cv::Mat edgesFrame, std::vector<cv::KeyPoint> detectedkeyPoints);
-    
-
+    HoleFilters::HolesConveyor findHoles(cv::Mat holeFrame);
 
   };
 }// namespace pandora_vision

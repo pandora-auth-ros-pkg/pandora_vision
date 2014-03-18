@@ -166,11 +166,8 @@ namespace pandora_vision
     int const max_BINARY_value = 255;
     /// apply backprojected image
     cv::threshold(backproj, backproj, 45, max_BINARY_value, 0);
-    cv::Mat kernel = 
-          getStructuringElement(cv::MORPH_ELLIPSE , cv::Size(3, 3), 
-          cv::Point( -1, -1 ));
-    cv::morphologyEx(backproj, backproj, cv::MORPH_CLOSE, 
-        kernel, cv::Point(-1, -1), 10);
+
+    Morphology::dilation(&backproj, 3, false);
     return backproj;
   }
   

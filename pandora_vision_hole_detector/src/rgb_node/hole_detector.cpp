@@ -43,8 +43,8 @@ namespace pandora_vision
   */ 
   HoleDetector::HoleDetector()
   {
-    backprojectedFrame = cv::Mat::zeros(RgbParameters::frameHeight, 
-        RgbParameters::frameWidth, CV_8UC1);
+    //~ backprojectedFrame = cv::Mat::zeros(RgbParameters::frameHeight, 
+        //~ RgbParameters::frameWidth, CV_8UC1);
     
     ROS_INFO("[rgb_node]: HoleDetector instance created");
   }
@@ -63,44 +63,95 @@ namespace pandora_vision
    @param holeFrame [cv::Mat] current frame to be processed
    @return void
   */ 
-  void HoleDetector::findHoles(cv::Mat holeFrame)
+  HoleFilters::HolesConveyor HoleDetector::findHoles(cv::Mat holeFrame)
   {
     //! Find pixels in current frame where there is the same texture
     //! according to the given histogramm and calculate
+    std::vector<cv::KeyPoint> detectedkeyPoints;
+    cv::Mat temp, backprojectedFrame;
+   
+    #ifdef SHOW_DEBUG_IMAGE
+      std::string msg;
+      std::vector<cv::Mat> imgs;
+      std::vector<std::string> msgs;
+    #endif
+    
+    #ifdef SHOW_DEBUG_IMAGE
+      cv::Mat before_blur;
+      holeFrame.copyTo(before_blur);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Initial Depth";
+      msgs.push_back(msg);
+      imgs.push_back(before_blur);
+    #endif
+    
+    backprojectedFrame = cv::Mat::zeros(holeFrame.size().height, 
+        holeFrame.size().width, CV_8UC1);
+    holeFrame.copyTo(temp);
+    
+    cv::Mat after_blur;
+    holeFrame.copyTo(after_blur); 
+    cv::blur(holeFrame, after_blur, cv::Size(7,7));
+    
+    #ifdef SHOW_DEBUG_IMAGE
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : After blur";
+      msgs.push_back(msg);
+      imgs.push_back(after_blur);
+    #endif
     //! backprojection of current frame
     _textureDetector.applyTexture(holeFrame, &backprojectedFrame);
     
+    #ifdef SHOW_DEBUG_IMAGE
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : After texture";
+      msgs.push_back(msg);
+      imgs.push_back(backprojectedFrame);
+    #endif
     //! Apply in current frame Canny edge detection algorithm
-    _edgeDetector.applySobel(backprojectedFrame, &edgesFrame);
-    _edgeDetector.applyEdgeContamination(&edgesFrame);
+    EdgeDetection::applySobel(backprojectedFrame, &temp);
     
-    _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+    EdgeDetection::denoiseEdges(&temp);
     
-    debug_show(holeFrame, backprojectedFrame, edgesFrame, detectedkeyPoints);
+    #ifdef SHOW_DEBUG_IMAGE
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : After denoising";
+      msgs.push_back(msg);
+      imgs.push_back(temp);
+    #endif
+    
+    BlobDetection::detectBlobs(temp, &detectedkeyPoints);
+    
+    //!< The final vectors of keypoints, rectangles and blobs' outlines.
+    struct HoleFilters::HolesConveyor conveyor;
+    
+    HoleFilters::validateBlobs(
+      detectedkeyPoints,
+      &temp,
+      DepthParameters::bounding_box_detection_method,
+      &conveyor);
+
+    #ifdef DEBUG_SHOW
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Blobs");
+      msgs.push_back(msg);
+      imgs.push_back(
+        Visualization::showHoles(
+          msg,
+          before_blur,
+          -1,
+          conveyor.keyPoints,
+          conveyor.rectangles,
+          std::vector<std::string>(),
+          conveyor.outlines)
+        );
+    #endif
+
+    #ifdef SHOW_DEBUG_IMAGE
+      Visualization::multipleShow("RGB node",imgs,msgs,1600,1);
+    #endif
+    
+    return conveyor;
   }
-  
-  /**
-    @brief Function for debbuging reasons,shows histogramm and 
-    current frame after backprojection is applied
-    @param holeFrame [cv::Mat] the currrent frame to be processed
-    @param backprojectedFrame [cv::Mat] current frame after backprojection,
-    this parameter is returned
-    @param edgesFrame [cv::Mat] current frame after edge detection algorithm
-    is applied 
-    @return void
-  */
-  void HoleDetector::debug_show(cv::Mat holeFrame, 
-      cv::Mat backprojectedFrame, cv::Mat edgesFrame, std::vector<cv::KeyPoint> keypoints)
-  {
-    ros::Time timeBegin = ros::Time::now();
-    while( ros::Time::now()-timeBegin < ros::Duration(1))
-    {
-       cv::imshow(" Current frame", holeFrame);
-       cv::imshow(" Frame after backprojection ", backprojectedFrame);
-       cv::drawKeypoints(edgesFrame, keypoints, edgesFrame, CV_RGB(255, 0, 0),
-        cv::DrawMatchesFlags::DEFAULT);
-      cv::imshow("Blobs",edgesFrame );
-       cv::waitKey(10);
-    }
-  }
+
 }// namespace pandora_vision
