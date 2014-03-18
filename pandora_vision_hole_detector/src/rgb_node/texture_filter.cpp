@@ -47,7 +47,10 @@ namespace pandora_vision
     getGeneralParams();
     
     pathToWalls = packagePath+ "/walls/";
+    //! Calculate histogramm according to a given set of
+    //! images 
     calculateTexture();
+    
     ROS_INFO("[rgb_node]: Textrure detector instance created");
   }
     
