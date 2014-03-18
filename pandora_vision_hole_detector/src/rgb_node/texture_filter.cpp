@@ -177,12 +177,16 @@ namespace pandora_vision
   /**
    @brief Function that applies backprogected image in current frame
    in order to find out which part of it belong to the given texture
+   @param holeFrame [cv::Mat] the currrent frame to be processed
+   @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+   this parameter is returned
    @return void
   */ 
-  void TextureDetector::applyTexture()
+  void TextureDetector::applyTexture(cv::Mat holeFrame, 
+    cv::Mat* backprojectedFrame)
   {
     cv::Mat backprojection = cv::Mat::zeros(frameHeight, frameWidth, CV_8UC1);
     backprojection = applyBackprojection(histogramm, holeFrame).clone();
-    bitwise_and( holeFrame, backprojection, backprojectedFrame);
+    bitwise_and( holeFrame, backprojection, *backprojectedFrame);
   }
 }// namespace pandora_vision

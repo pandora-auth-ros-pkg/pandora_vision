@@ -59,12 +59,8 @@ namespace pandora_vision
     //!< Relative path to walls
     std::string pathToWalls;
         
-    //!< Current frame to be processed
-    cv::Mat holeFrame;
     //!< Calculated histogramm according to given images
     cv::MatND histogramm;
-    //!< Current frame after backprojection
-    cv::Mat backprojectedFrame;
     
     public:
     /**
@@ -109,9 +105,12 @@ namespace pandora_vision
     /**
       @brief Function that applies backprogected image in current frame
       in order to find out which part of it belong to the given texture
+      @param holeFrame [cv::Mat] the currrent frame to be processed
+      @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+      this parameter is returned
       @return void
     */ 
-    void applyTexture();
+    void applyTexture(cv::Mat holeFrame, cv::Mat* backprojectedFrame);
   }; 
 }// namespace pandora_vision
 #endif  // RGB_NODE_TEXTURE_FILTER_H
