@@ -32,47 +32,48 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
-#ifndef RGB_NODE_BLOB_EXTRACTION_H 
-#define RGB_NODE_BLOB_EXTRACTION_H 
 
-#include "ros/ros.h"
-#include <ros/package.h>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <iostream>
+#ifndef KINECT_BOUNDING_BOX_DETECTION
+#define KINECT_BOUNDING_BOX_DETECTION
 
-#include "rgb_node/rgb_constants.h"
+#include "depth_node/morphological_operators.h"
 
-
+/**
+@namespace vision
+@brief The main namespace for PANDORA vision
+**/
 namespace pandora_vision
 {
-  class BlobDetector
+  /**
+  @class BoundingBoxDetection
+  @brief Provides methods for bounding box detection
+  **/
+  class BoundingBoxDetection
   {
-    
     public:
-    
-    /**
-      @brief Class constructor
-    */ 
-    BlobDetector();
-    
-    /**
-      @brief Class destructor
-    */
-    virtual ~BlobDetector();
-    
-    /**
-      @brief Detects blobs in an image
-      @param[in] frame [const cv::Mat&] The input image
-      @param[out] keyPointsOut [std::vector<cv::KeyPoint>*] The ouput
-      @return void
-    */
-    void detectBlobs(const cv::Mat& frame,
-      std::vector<cv::KeyPoint>* keyPointsOut);
-  };  
-}// namespace pandora_vision
-#endif  // RGB_NODE_BLOB_EXTRACTION_H
+
+      /**
+        @brief Finds rotated bounding boxes from blob outlines
+        @param inImage [const cv::Mat&] The input image
+        @param blobsOutlineVector [std::vector<std::vector<cv::Point> >&]
+        The outline points of the blobs
+        @param blobsArea [const std::vector<float>&] The blobs' area
+        @param outImage [cv::Mat*] The output image
+        @param outRectangles [std::vector< std::vector<cv::Point2f> >*] The
+        rectangles of the bounding boxes
+        @return void
+       **/
+      static void findRotatedBoundingBoxesFromOutline(
+        const cv::Mat& inImage,
+        const std::vector<std::vector<cv::Point> >& blobsOutlineVector,
+        const std::vector<float>& blobsArea,
+        cv::Mat* outImage,
+        std::vector< std::vector<cv::Point2f> >* outRectangles);
+
+  };
+
+}
+
+#endif
