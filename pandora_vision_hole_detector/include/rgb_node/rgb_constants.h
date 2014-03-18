@@ -42,24 +42,24 @@ namespace pandora_vision
 {
   struct RgbParameters
   {
-    //!Frame characteristics (frameWidth,frameHeight,
-    //!horizontal field of view, vertical field of view)
+    //! Frame characteristics (frameWidth,frameHeight,
+    //! horizontal field of view, vertical field of view)
     static int frameWidth;
     static int frameHeight;
     static int hfov;
     static int vfov;
   
-    //!< Canny parameters
+    //! Canny parameters
     static int canny_ratio;
     static int canny_kernel_size;
     static int canny_low_threshold;
     static int canny_blur_noise_kernel_size;
     
-    //!< Sobel parameters
+    //! Sobel parameters
     static int sobel_scale;
     static int sobel_delta;
  
-    //!< Blob detection parameters
+    //! Blob detection parameters
     static int blob_min_threshold;
     static int blob_max_threshold;
     static int blob_threshold_step;
@@ -72,6 +72,9 @@ namespace pandora_vision
     static double blob_min_circularity;
     static bool blob_filter_by_color;
     static bool blob_filter_by_circularity;
+    
+    //! Debug flags
+    static bool debug_enable;
   };
 }// namespace pandora_vision
 #endif  // RGB_NODE_RGB_CONSTANTS_H

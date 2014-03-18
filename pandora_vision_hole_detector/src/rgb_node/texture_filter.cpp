@@ -188,11 +188,13 @@ namespace pandora_vision
     cv::Mat backprojection = 
         cv::Mat::zeros(RgbParameters::frameHeight, 
         RgbParameters::frameWidth, CV_8UC1);
-    backprojection = applyBackprojection(histogramm, holeFrame).clone();
+    *backprojectedFrame = applyBackprojection(histogramm, holeFrame).clone();
     cvtColor(holeFrame, holeFrame, CV_BGR2GRAY);
     
-    //~ bitwise_and( holeFrame, backprojection, *backprojectedFrame);
-    debug_show(holeFrame, backprojection, *backprojectedFrame);
+    bitwise_and( holeFrame, *backprojectedFrame, backprojection);
+    
+    if(RgbParameters::debug_enable) 
+      debug_show(holeFrame, *backprojectedFrame, backprojection);
   }
   
   /**
