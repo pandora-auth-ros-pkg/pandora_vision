@@ -93,13 +93,14 @@ namespace pandora_vision
     cv::Mat out; 
     std::vector< std::vector <cv::Point> > contours;
     std::vector< std::vector <cv::Point> > approxContours;
-    cv::drawKeypoints( frame, keyPoints, out, CV_RGB(0,255,255), cv::DrawMatchesFlags::DEFAULT);
+    cv::drawKeypoints( frame, keyPoints, out, 
+        CV_RGB(0, 255, 255), cv::DrawMatchesFlags::DEFAULT);
     approxContours.resize( contours.size() );
     for( int i = 0; i < contours.size(); ++i )
     {
       cv::approxPolyDP( cv::Mat(contours[i]), approxContours[i], 4, 1 );
-      cv::drawContours( out, contours, i, CV_RGB(255,0,255));
-      cv::drawContours( out, approxContours, i, CV_RGB(255,0,255));
+      cv::drawContours( out, contours, i, CV_RGB(255, 0, 255));
+      cv::drawContours( out, approxContours, i, CV_RGB(255, 0, 255));
     }
   
     for (int keypointId = 0; keypointId < keyPoints.size(); keypointId++)
@@ -115,4 +116,4 @@ namespace pandora_vision
     }
   }
 
-}
+}// namespace pandora_vision

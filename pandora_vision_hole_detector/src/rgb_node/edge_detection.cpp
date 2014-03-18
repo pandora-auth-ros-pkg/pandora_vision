@@ -58,8 +58,8 @@ namespace pandora_vision
   void EdgeDetector::applySobel (const cv::Mat inImage, cv::Mat* outImage)
   {
     //!< appropriate values for scale, delta and ddepth
-    int scale = 1;
-    int delta = 0;
+    int scale = RgbParameters::sobel_scale;
+    int delta = RgbParameters::sobel_delta;
     int ddepth = CV_16S;
 
     cv::Mat edges;
@@ -180,4 +180,4 @@ namespace pandora_vision
     cv::Laplacian(edges, *outImage, ddepth, 1, scale, delta, cv::BORDER_DEFAULT);
     convertScaleAbs(*outImage, *outImage);
   }
-}
+}// namespace pandora_vision

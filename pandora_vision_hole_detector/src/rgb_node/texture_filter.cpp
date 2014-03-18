@@ -46,7 +46,7 @@ namespace pandora_vision
   {
     getGeneralParams();
     
-    pathToWalls=packagePath+ "/walls/";
+    pathToWalls = packagePath+ "/walls/";
     calculateTexture();
     ROS_INFO("[rgb_node]: Textrure detector instance created");
   }
@@ -76,7 +76,7 @@ namespace pandora_vision
     }
     else
     {
-      frameHeight = DEFAULT_HEIGHT;
+      frameHeight = RgbParameters::frameHeight;
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
 
@@ -88,7 +88,7 @@ namespace pandora_vision
     }
     else
     {
-      frameWidth = DEFAULT_WIDTH;
+      frameWidth = RgbParameters::frameWidth;
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
   }
@@ -100,15 +100,15 @@ namespace pandora_vision
   void  TextureDetector::calculateTexture()
   {
     std::vector<cv::Mat> walls;
-    for(int i=0;i<6;i++)
+    for(int i = 0; i < 6; i++)
     {
       char temp_name[250];
       std::string temp;
-      temp=pathToWalls+"%d.png";
-      sprintf(temp_name,temp.c_str(),i);
-      walls[i]=cv::imread(temp_name);
+      temp = pathToWalls+"%d.png";
+      sprintf(temp_name, temp.c_str(), i);
+      walls[i] = cv::imread(temp_name);
     }
-    histogramm=get_hist(walls);
+    histogramm = get_hist(walls);
   }
   
   /**
@@ -118,8 +118,8 @@ namespace pandora_vision
   */
   cv::MatND TextureDetector::get_hist(std::vector<cv::Mat> walls)
   {
-    cv::Mat* hsv=new cv::Mat[14];
-    for(int i=0;i<6;i++)
+    cv::Mat* hsv = new cv::Mat[14];
+    for(int i = 0; i < 6; i++)
       cvtColor(walls[i], hsv[i], CV_BGR2HSV);
   
     /// Quantize the hue to 30 levels
@@ -135,7 +135,8 @@ namespace pandora_vision
     cv::MatND hist;
     /// We compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
-    cv::calcHist(hsv ,6, channels, cv::Mat(),hist, 2, histSize, ranges,true, false );
+    cv::calcHist(hsv, 6, channels, cv::Mat(), hist, 2, 
+          histSize, ranges, true, false );
     return hist;
   }
   
@@ -146,12 +147,13 @@ namespace pandora_vision
     @return backprojectedframe [cv::Mat] image after backprojection is
     applied
   */
-  cv::Mat TextureDetector::applyBackprojection(cv::MatND hist,cv::Mat holeFrame)
+  cv::Mat TextureDetector::applyBackprojection(cv::MatND hist,
+        cv::Mat holeFrame)
   {
     cv::Mat hsv;
-    cvtColor(holeFrame, hsv,CV_BGR2HSV);
+    cvtColor(holeFrame, hsv, CV_BGR2HSV);
     /// Get Backprojection 
-    cv::Mat backproj=cv::Mat::zeros(frameHeight,frameWidth,CV_8UC1);
+    cv::Mat backproj = cv::Mat::zeros(frameHeight, frameWidth, CV_8UC1);
     /// hue varies from 0 to 180
     float hranges[] = { 0, 180 };
     /// saturation varies from 0 to 80
@@ -159,12 +161,15 @@ namespace pandora_vision
    
     const float* ranges[] = { hranges, sranges};
     int channels[] = {0, 1};
-    cv::calcBackProject( &hsv, 1,channels , hist, backproj, ranges, 1, true );
+    cv::calcBackProject( &hsv, 1, channels , hist, backproj, ranges, 1, true );
     int const max_BINARY_value = 255;
     /// apply backprojected image
-    cv::threshold(backproj, backproj,45, max_BINARY_value,0);
-    cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS , cv::Size(3,3), cv::Point( -1, -1 ) );
-    cv::morphologyEx(backproj, backproj, cv::MORPH_CLOSE, kernel,cv::Point(-1,-1),15);
+    cv::threshold(backproj, backproj, 45, max_BINARY_value, 0);
+    cv::Mat kernel = 
+          getStructuringElement(cv::MORPH_CROSS , cv::Size(3, 3), 
+          cv::Point( -1, -1 ));
+    cv::morphologyEx(backproj, backproj, cv::MORPH_CLOSE, 
+        kernel, cv::Point(-1, -1), 15);
 
     return backproj;
   }
@@ -176,8 +181,8 @@ namespace pandora_vision
   */ 
   void TextureDetector::applyTexture()
   {
-    cv::Mat backprojection=cv::Mat::zeros(frameHeight,frameWidth,CV_8UC1);
-    backprojection=applyBackprojection(histogramm,holeFrame).clone();
+    cv::Mat backprojection = cv::Mat::zeros(frameHeight, frameWidth, CV_8UC1);
+    backprojection = applyBackprojection(histogramm, holeFrame).clone();
     bitwise_and( holeFrame, backprojection, backprojectedFrame);
   }
-}
+}// namespace pandora_vision

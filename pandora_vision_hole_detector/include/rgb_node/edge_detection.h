@@ -34,15 +34,14 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef EDGEDETECTION_H
-#define EDGEDETECTION_H
+#ifndef RGB_NODE_EDGE_DETECTION_H 
+#define RGB_NODE_EDGE_DETECTION_H 
 
 #include "ros/ros.h"
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include <iostream>
-
-#include "rgb_node/rgb_parameters.h"
+#include "rgb_node/rgb_constants.h"
 
 namespace pandora_vision
 {
@@ -88,5 +87,5 @@ namespace pandora_vision
    **/
     void applyLaplacian (const cv::Mat inImage, cv::Mat* outImage);
   };
-}
-#endif
+}// namespace pandora_vision
+#endif  // RGB_NODE_EDGE_DETECTION_H
