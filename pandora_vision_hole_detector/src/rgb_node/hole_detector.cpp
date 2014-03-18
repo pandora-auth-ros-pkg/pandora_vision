@@ -34,7 +34,42 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+#include "rgb_node/hole_detector.h"
+
 namespace pandora_vision
 {
+  /**
+   @brief Class constructor
+  */ 
+  HoleDetector::HoleDetector()
+  {
+    ROS_INFO("[rgb_node]: HoleDetector instance created");
+  }
   
+  /**
+   @brief Class destructor
+  */
+  HoleDetector::~HoleDetector()
+  {
+    ROS_INFO("[rgb_node]: HoleDetector instance destroyed");
+  } 
+  
+  /**
+   @brief Function that locates the position of potentional holes
+   in current frame.
+   @param holeFrame [cv::Mat] current frame to be processed
+   @return void
+  */ 
+  void HoleDetector::findHoles(cv::Mat holeFrame)
+  {
+    //! Find pixels in current frame where there is the same texture
+    //! according to the given histogramm and calculate
+    //! backprojection of current frame
+    _textureDetector.applyTexture(holeFrame, &backprojectedFrame);
+    
+    //! Apply in current frame Canny edge detection algorithm
+    _edgeDetector.applyCanny(holeFrame, &edgesFrame);
+    
+     _blobDetector.detectBlobs(edgesFrame, &detectedkeyPoints);
+  }
 }

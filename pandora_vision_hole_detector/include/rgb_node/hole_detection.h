@@ -52,6 +52,7 @@
 #include <stdlib.h>
 
 #include "rgb_node/rgb_constants.h"
+#include "rgb_node/hole_detector.h"
 
 namespace pandora_vision
 {
@@ -96,29 +97,33 @@ namespace pandora_vision
     //!< Previous state of robot
     int prevState;
     
-     //!< Variable used for State Managing
+    //!< Variable used for State Managing
     bool holeNowON;
+    
+    //!< Class HoleDetector instance that finds and locates tha position
+    //!< potentional holes in current frame
+    HoleDetector _holeDetector;
         
     /**
-     * @brief Get parameters referring to view and frame characteristics from
-     * launch file
-     * @return void
+      @brief Get parameters referring to view and frame characteristics from
+      launch file
+      @return void
     */  
     void getGeneralParams();
     
     /**
-     * @brief This method uses a FaceDetector instance to detect all 
-     * present faces in a given frame
-     * @param timer [ros:TimerEvemt] the timer used to call 
-     * faceCallback
-     * @return void
+      @brief This method uses a FaceDetector instance to detect all 
+      present faces in a given frame
+      @param timer [ros:TimerEvemt] the timer used to call 
+      faceCallback
+      @return void
     */
-    void holeCallback(const ros::TimerEvent&);
+    void holeCallback();
       
     /**
-     * Function called when new ROS message appears, for front camera
-     * @param msg [const sensor_msgs::ImageConstPtr&] The message
-     * @return void
+      Function called when new ROS message appears, for front camera
+      @param msg [const sensor_msgs::ImageConstPtr&] The message
+      @return void
     */
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
       
@@ -129,19 +134,6 @@ namespace pandora_vision
     
     //!< The destructor
     virtual ~HoleDetection();
-    
-    /**
-     * @brief Node's state manager
-     * @param newState [int] The robot's new state
-     * @return void
-    */
-    void startTransition(int newState);
-      
-    /**
-     * @brief After completion of state transition
-     * @return void
-    */
-    void completeTransition(void);    
   };
 }//namespace pandora_vision
 #endif  // RGB_NODE_HOLE_DETECTION_H

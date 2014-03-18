@@ -60,12 +60,6 @@ namespace pandora_vision
     //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
       imageTopic, 1, &HoleDetection::imageCallback, this);
-
-    //!< Initialize states - robot starts in STATE_OFF
-    curState = state_manager_communications::robotModeMsg::MODE_OFF;
-    prevState =state_manager_communications::robotModeMsg::MODE_OFF;
-    
-    //~ clientInitialize();
     
     ROS_INFO("[hole_node] : Created Hole Detection instance");
   }
@@ -80,7 +74,7 @@ namespace pandora_vision
   
   /**
     @brief Get parameters referring to the view and 
-    *frame characteristics
+    frame characteristics
     @return void
   **/
   void HoleDetection::getGeneralParams()
@@ -173,10 +167,10 @@ namespace pandora_vision
   }
   
   /**
-   * @brief Function called when new ROS message appears, for camera
-   * @param msg [const sensor_msgs::ImageConstPtr&] The message
-   * @return void
-   */
+    @brief Function called when new ROS message appears, for camera
+    @param msg [const sensor_msgs::ImageConstPtr&] The message
+    @return void
+  */
   void HoleDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImagePtr in_msg;
@@ -189,5 +183,19 @@ namespace pandora_vision
       ROS_ERROR("[hole_node] : No more Frames");
       return;
     }
+    
+    holeCallback();
   }
+  
+  /**
+    @brief This method uses a FaceDetector instance to detect all 
+    present faces in a given frame
+    @param timer [ros:TimerEvemt] the timer used to call 
+    faceCallback
+    @return void
+  */
+  void HoleDetection::holeCallback()
+  {
+    _holeDetector.findHoles(_holeFrame);
+  } 
 }// namespace pandora_vision
