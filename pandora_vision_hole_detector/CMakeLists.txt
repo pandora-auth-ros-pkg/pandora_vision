@@ -159,15 +159,15 @@ add_executable(rgb_node
     src/rgb_node/texture_filter.cpp
     src/rgb_node/rgb_constants.cpp
     
-    src/rgb_node/from_depth/hole_filters.cpp
-    src/rgb_node/from_depth/noise_elimination.cpp
-    src/rgb_node/from_depth/edge_detection.cpp
-    src/rgb_node/from_depth/blob_detection.cpp
-    src/rgb_node/from_depth/bounding_box_detection.cpp
-    src/rgb_node/from_depth/morphological_operators.cpp
-    src/rgb_node/from_depth/visualization.cpp
-    src/rgb_node/from_depth/depth_parameters.cpp
-    src/rgb_node/from_depth/timer.cpp
+    src/rgb_node/hole_filters.cpp
+    src/rgb_node/noise_elimination.cpp
+    src/rgb_node/edge_detection.cpp
+    src/rgb_node/blob_detection.cpp
+    src/rgb_node/bounding_box_detection.cpp
+    src/rgb_node/morphological_operators.cpp
+    src/rgb_node/visualization.cpp
+    src/rgb_node/depth_parameters.cpp
+    src/rgb_node/timer.cpp
     
 )
 target_link_libraries(rgb_node ${catkin_LIBRARIES} )

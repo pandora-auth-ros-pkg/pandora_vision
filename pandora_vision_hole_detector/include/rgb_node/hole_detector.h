@@ -38,7 +38,7 @@
 #ifndef RGB_NODE_HOLE_DETECTOR_H 
 #define RGB_NODE_HOLE_DETECTOR_H 
 
-//~ #define SHOW_DEBUG_IMAGE
+#define SHOW_DEBUG_IMAGE
 
 #include "rgb_node/rgb_constants.h"
 #include "rgb_node/texture_filter.h"

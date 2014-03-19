@@ -38,10 +38,10 @@
 #ifndef DEPTH_NODE_HOLE_FILTERS
 #define DEPTH_NODE_HOLE_FILTERS
 
-#include "rgb_node/from_depth/noise_elimination.h"
-#include "rgb_node/from_depth/edge_detection.h"
-#include "rgb_node/from_depth/blob_detection.h"
-#include "rgb_node/from_depth/bounding_box_detection.h"
+#include "rgb_node/noise_elimination.h"
+#include "rgb_node/edge_detection.h"
+#include "rgb_node/blob_detection.h"
+#include "rgb_node/bounding_box_detection.h"
 #include <math.h>
 
 /**
