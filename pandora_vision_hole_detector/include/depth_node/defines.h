@@ -34,8 +34,8 @@
 *
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
-#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEFINES_H_
-#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEFINES_H_
+#ifndef DEPTH_NODE_DEFINES_H
+#define DEPTH_NODE_DEFINES_H
 
 #include <iostream>
 #include <fstream>
@@ -114,4 +114,4 @@ namespace pandora_vision
   typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudXYZRGBPtr;
 } // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_DEFINES_H_
+#endif  // DEPTH_NODE_DEFINES_H

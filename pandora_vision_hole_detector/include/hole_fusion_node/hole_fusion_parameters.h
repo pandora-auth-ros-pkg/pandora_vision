@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H_
-#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H_
+#ifndef HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H
+#define HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H
 
 #include "depth_node/defines.h"
 #include <dynamic_reconfigure/server.h>
@@ -171,8 +171,8 @@ namespace pandora_vision
     static int number_of_hue_bins;
     static int number_of_saturation_bins;
     static int number_of_value_bins;
-
   };
+
 } //namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H_
+#endif  // HOLE_FUSION_NODE_HOLE_FUSION_PARAMETERS_H

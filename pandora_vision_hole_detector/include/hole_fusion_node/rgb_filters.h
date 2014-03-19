@@ -34,8 +34,8 @@
  *
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
-#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
-#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
+#ifndef HOLE_FUSION_NODE_RGB_FILTERS_H
+#define HOLE_FUSION_NODE_RGB_FILTERS_H
 
 #include <math.h>
 #include "depth_node/hole_filters.h"
@@ -125,7 +125,8 @@ namespace pandora_vision
         and for major difference between the
         histograms of the bounding box and the points inside the outline of the
         blob.
-        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
+        @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
+        format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
@@ -141,7 +142,8 @@ namespace pandora_vision
         candidate hole is associated. While the returned set may be reduced in
         size, the size of this vector is the same throughout and equal to the
         number of keypoints found and published by the rgb node
-        @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
+        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
+        reasons
         @return std::set<unsigned int> The indices of valid (by this filter)
         blobs
        **/
@@ -252,5 +254,5 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_RGB_FILTERS_H_
+#endif  // HOLE_FUSION_NODE_RGB_FILTERS_H
 
