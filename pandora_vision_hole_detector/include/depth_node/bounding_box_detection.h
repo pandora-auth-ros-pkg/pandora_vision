@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BOUNDING_BOX_DETECTION_H_
-#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BOUNDING_BOX_DETECTION_H_
+#ifndef DEPTH_NODE_BOUNDING_BOX_DETECTION_H
+#define DEPTH_NODE_BOUNDING_BOX_DETECTION_H
 
 #include "depth_node/morphological_operators.h"
 
@@ -76,4 +76,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_DEPTH_NODE_BOUNDING_BOX_DETECTION_H_
+#endif  // DEPTH_NODE_BOUNDING_BOX_DETECTION_H

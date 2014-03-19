@@ -35,8 +35,8 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_DEPTH_FILTERS_H_
-#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_DEPTH_FILTERS_H_
+#ifndef HOLE_FUSION_NODE_DEPTH_FILTERS_H
+#define HOLE_FUSION_NODE_DEPTH_FILTERS_H
 
 #include "depth_node/hole_filters.h"
 #include "hole_fusion_node/planes_detection.h"
@@ -269,4 +269,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_HOLE_FUSION_NODE_DEPTH_FILTERS_H_
+#endif  // HOLE_FUSION_NODE_DEPTH_FILTERS_H
