@@ -91,19 +91,20 @@ namespace pandora_vision
   
     /**
       @brief Function for calculating HS histogramm
-      @param vector of images corresponding to walls
-      @return histogramm [cv::MatND] 
+      @param walls [vector<cv::Mat>] vector of images corresponding to walls
+      @return void
     */
-    cv::MatND get_hist(std::vector<cv::Mat> walls);
+    void calculateHistogramm(std::vector<cv::Mat> walls);
+
     
     /**
       @brief Function for calculating applying backprojection in input image
-      @param hist [cv::MatND] calculated histogramm from input images
       @param frame [cv::Mat] current frame to be processed
-      @return backprojectedframe [cv::Mat] image after backprojection is
+      @param backprojectedframe [cv::Mat*] image after backprojection is
       applied
+      @return void
     */
-    cv::Mat applyBackprojection(cv::MatND hist, cv::Mat frame);
+    void applyBackprojection(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
     
     /**
       @brief Function that applies backprogected image in current frame
@@ -113,7 +114,7 @@ namespace pandora_vision
       this parameter is returned
       @return void
     */ 
-    void applyTexture(cv::Mat holeFrame, cv::Mat* backprojectedFrame);
+    void applyTexture(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
     
    /**
     @brief Function for debbuging reasons,shows histogramm and 

@@ -109,15 +109,15 @@ namespace pandora_vision
       out<< pathToWalls << i << ".png";
       walls.push_back(cv::imread(out.str()));
     }
-    histogramm = get_hist(walls);
+    calculateHistogramm(walls);
   }
   
   /**
     @brief Function for calculating HS histogramm
     @param walls [vector<cv::Mat>] vector of images corresponding to walls
-    @return histogramm [cv::MatND] 
+    @return void
   */
-  cv::MatND TextureDetector::get_hist(std::vector<cv::Mat> walls)
+  void TextureDetector::calculateHistogramm(std::vector<cv::Mat> walls)
   {
     cv::Mat* hsv = new cv::Mat[14];
     for(int i = 0; i < 6; i++)
@@ -133,28 +133,25 @@ namespace pandora_vision
     /// 255 (pure spectrum color)
     float sranges[] = { 0, 256 };
     const float* ranges[] = { hranges, sranges };
-    cv::MatND hist;
     /// We compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
-    cv::calcHist(hsv, 6, channels, cv::Mat(), hist, 2, 
+    cv::calcHist(hsv, 6, channels, cv::Mat(), histogramm, 2, 
           histSize, ranges, true, false );
-    return hist;
   }
   
   /**
     @brief Function for calculating applying backprojection in input image
-    @param hist [cv::MatND] calculated histogramm from input images
     @param frame [cv::Mat] current frame to be processed
-    @return backprojectedframe [cv::Mat] image after backprojection is
+    @param backprojectedframe [cv::Mat*] image after backprojection is
     applied
+    @return void
   */
-  cv::Mat TextureDetector::applyBackprojection(cv::MatND hist,
-        cv::Mat holeFrame)
+  void TextureDetector::applyBackprojection(cv::Mat* holeFrame, 
+    cv::Mat* backprojectedFrame)
   {
     cv::Mat hsv;
-    cvtColor(holeFrame, hsv, CV_BGR2HSV);
-    /// Get Backprojection 
-    cv::Mat backproj = cv::Mat::zeros(frameHeight, frameWidth, CV_8UC1);
+    cvtColor(*holeFrame, hsv, CV_BGR2HSV);
+
     /// hue varies from 0 to 180
     float hranges[] = { 0, 180 };
     /// saturation varies from 0 to 80
@@ -162,13 +159,15 @@ namespace pandora_vision
    
     const float* ranges[] = { hranges, sranges};
     int channels[] = {0, 1};
-    cv::calcBackProject( &hsv, 1, channels , hist, backproj, ranges, 1, true );
+    cv::calcBackProject( &hsv, 1, channels , histogramm, 
+        *backprojectedFrame, ranges, 1, true );
     int const max_BINARY_value = 255;
-    /// apply backprojected image
-    cv::threshold(backproj, backproj, 45, max_BINARY_value, 0);
-
-    Morphology::dilation(&backproj, 3, false);
-    return backproj;
+    cv::Mat temp;
+    backprojectedFrame->copyTo(temp);
+    /// apply thresholds in backprojected image
+    cv::threshold(temp, temp, 45, max_BINARY_value, 0);
+    Morphology::dilation(&temp, 3, false);
+    temp.copyTo(*backprojectedFrame);
   }
   
   /**
@@ -179,19 +178,21 @@ namespace pandora_vision
    this parameter is returned
    @return void
   */ 
-  void TextureDetector::applyTexture(cv::Mat holeFrame, 
+  void TextureDetector::applyTexture(cv::Mat* holeFrame, 
     cv::Mat* backprojectedFrame)
   {
     cv::Mat backprojection = 
         cv::Mat::zeros(RgbParameters::frameHeight, 
         RgbParameters::frameWidth, CV_8UC1);
-    *backprojectedFrame = applyBackprojection(histogramm, holeFrame).clone();
-    cvtColor(holeFrame, holeFrame, CV_BGR2GRAY);
+        
+    applyBackprojection(holeFrame, backprojectedFrame);
     
-    bitwise_and( holeFrame, *backprojectedFrame, backprojection);
+    cvtColor(*holeFrame, *holeFrame, CV_BGR2GRAY);
+    
+    bitwise_and( *holeFrame, *backprojectedFrame, backprojection);
     
     if(RgbParameters::debug_enable) 
-      debug_show(holeFrame, *backprojectedFrame, backprojection);
+      debug_show(*holeFrame, *backprojectedFrame, backprojection);
   }
   
   /**
