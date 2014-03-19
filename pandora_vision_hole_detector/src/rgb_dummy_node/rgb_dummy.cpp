@@ -32,152 +32,88 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
-#include "rgb_node/hole_detection.h"
+
+#include "rgb_dummy_node/rgb_dummy.h"
 
 namespace pandora_vision
 {
-  /**
-    @brief Constructor
-  **/
-  HoleDetection::HoleDetection(): _nh(), holeNowON(false)
+  //!< Constructor
+  Rgb::Rgb(void)
   {
-    //!< Get general parameters for image processing
-    getGeneralParams();
-
-    //!< Convert field of view from degrees to rads
-    hfov = hfov * CV_PI / 180;
-    vfov = vfov * CV_PI / 180;
-
-    ratioX = hfov / frameWidth;
-    ratioY = vfov / frameHeight;
-
-    //!< Memory will allocated in the imageCallback
-    _holeFrame= cv::Mat::zeros(frameWidth, frameHeight, CV_8UC3);
+    ros::Duration(0.5).sleep();
 
     //!< Subscribe to the RGB image published by the
     //!< rgb_depth_synchronizer node
-    _frameSubscriber = _nh.subscribe(
+    rgbImageSubscriber_= nodeHandle_.subscribe(
       "/synchronized/camera/rgb/image_raw", 1,
-      &HoleDetection::imageCallback, this);
+      &Rgb::rgbImageCallback, this);
+
 
     //!< Advertise the candidate holes found by the depth node
-    rgbCandidateHolesPublisher_ = _nh.advertise
+    rgbCandidateHolesPublisher_ = nodeHandle_.advertise
       <vision_communications::RgbCandidateHolesVectorMsg>(
       "/synchronized/camera/rgb/candidate_holes", 1000);
 
-    ROS_INFO("[rgb_node] : Created Hole Detection instance");
+    ROS_INFO("RGB node initiated");
   }
 
-   /**
-    @brief Destructor
-  */
-  HoleDetection::~HoleDetection()
+
+  //!< Destructor
+  Rgb::~Rgb(void)
   {
-    ROS_DEBUG("[rgb_node] : Destroying Hole Detection instance");
-  }
-
-  /**
-    @brief Get parameters referring to the view and
-    frame characteristics
-    @return void
-  **/
-  void HoleDetection::getGeneralParams()
-  {
-    packagePath = ros::package::getPath("pandora_vision_hole_detector");
-
-    //!< Get the camera to be used by hole node;
-    if (_nh.hasParam("camera_name"))
-    {
-      _nh.getParam("camera_name", cameraName);
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    }
-    else
-    {
-      cameraName = "camera";
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    }
-
-    //!< Get the Height parameter if available;
-    if (_nh.hasParam("/" + cameraName + "/image_height"))
-    {
-      _nh.getParam("/" + cameraName + "/image_height", frameHeight);
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    }
-    else
-    {
-      frameHeight = _holeFrame.rows;
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    }
-
-    //!< Get the Width parameter if available;
-    if (_nh.hasParam("/" + cameraName + "/image_width"))
-    {
-      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-    else
-    {
-      frameWidth = _holeFrame.cols;
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-
-    //!< Get the images's topic;
-    if (_nh.hasParam("/" + cameraName + "/topic_name"))
-    {
-      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else
-    {
-      imageTopic = "/camera/rgb/image_color";
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-
-    //!< Get the images's frame_id;
-    if (_nh.hasParam("/" + cameraName + "/camera_frame_id"))
-    {
-      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-    }
-    else
-    {
-      cameraFrameId = "/camera";
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-    }
+    ROS_INFO("RGB node terminated");
   }
 
   /**
-    @brief Function called when new ROS message appears, for camera
-    @param msg [const sensor_msgs::ImageConstPtr&] The message
+    @brief Callback for the rgbImage acquired through the
+    rgb_depth_synchronizer node
+    @param[in] rgbImage [const sensor_msgs::Image&] The RGB image
     @return void
-  */
-  void HoleDetection::imageCallback(const sensor_msgs::Image& msg)
+   **/
+  void Rgb::rgbImageCallback(const sensor_msgs::Image& inImage)
   {
-    cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    _holeFrame = in_msg->image.clone();
-    _holeFrameTimestamp = msg.header.stamp;
+    #ifdef DEBUG_SHOW
+    ROS_INFO("RGB node callback");
+    #endif
 
-    if (_holeFrame.empty() )
+    HoleFilters::HolesConveyor rgbHolesConveyor;
+    std::vector<cv::Point2f> rectangles;
+    std::vector<cv::Point> outlines;
+
+    for(int i = 0; i < 1; i++)
     {
-      ROS_ERROR("[rgb_node] : No more Frames");
-      return;
+      cv::KeyPoint keypoint(i, i, 1);
+      rgbHolesConveyor.keyPoints.push_back(keypoint);
+
+      for (int v = 0; v < 4; v++)
+      {
+        float k = static_cast<float>(v);
+        cv::Point vertex(k, k);
+        rectangles.push_back(vertex);
+      }
+      rgbHolesConveyor.rectangles.push_back(rectangles);
+
+      for (int o = 0; o < 10; o++)
+      {
+        cv::Point2f outline(o, o);
+        outlines.push_back(outline);
+      }
+      rgbHolesConveyor.outlines.push_back(outlines);
     }
-
-
-    HoleFilters::HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
 
     vision_communications::RgbCandidateHolesVectorMsg rgbCandidateHolesMsg;
-
-    createCandidateHolesMessage(conveyor, msg, &rgbCandidateHolesMsg,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+    createCandidateHolesMessage(rgbHolesConveyor,
+      inImage, &rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_32FC1);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
   }
 
-  void HoleDetection::createCandidateHolesMessage(
+
+
+
+  void Rgb::createCandidateHolesMessage(
     const HoleFilters::HolesConveyor& conveyor,
     const sensor_msgs::Image& rgbImage,
     vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
@@ -216,4 +152,4 @@ namespace pandora_vision
     rgbCandidateHolesMsg->rgbImage = rgbImage;
   }
 
-}// namespace pandora_vision
+} // namespace pandora_vision

@@ -35,7 +35,7 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "depth_node/visualization.h"
+#include "rgb_node/visualization.h"
 
 namespace pandora_vision
 {
@@ -218,7 +218,7 @@ namespace pandora_vision
     const float& hz)
   {
     cv::Mat img = scaleImageForVisualization(inImage,
-      DepthParameters::scale_method);
+      RgbParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(0, 255, 0),
       cv::DrawMatchesFlags::DEFAULT);
@@ -287,7 +287,7 @@ namespace pandora_vision
     const std::vector<cv::KeyPoint>& keypoints)
   {
     cv::Mat img = scaleImageForVisualization(inImage,
-      DepthParameters::scale_method);
+      RgbParameters::scale_method);
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(255, 0, 0),
       cv::DrawMatchesFlags::DEFAULT);
@@ -316,7 +316,7 @@ namespace pandora_vision
     const int& ms)
   {
     cv::imshow(windowTitle, scaleImageForVisualization(inImage,
-        DepthParameters::scale_method));
+        RgbParameters::scale_method));
     cv::waitKey(ms);
   }
 

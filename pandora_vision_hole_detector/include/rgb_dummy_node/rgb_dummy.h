@@ -7,8 +7,8 @@
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
-*
 *  are met:
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -32,49 +32,55 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef RGB_NODE_RGB_CONSTANTS_H 
-#define RGB_NODE_RGB_CONSTANTS_H 
+#ifndef PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_
+#define PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_
+
+#include "depth_node/defines.h"
+#include "vision_communications/RgbCandidateHolesVectorMsg.h"
+#include "depth_node/hole_filters.h"
+#include "message_conversions/message_conversions.h"
 
 namespace pandora_vision
 {
-  struct RgbParameters
+  class Rgb
   {
-    //! Frame characteristics (frameWidth,frameHeight,
-    //! horizontal field of view, vertical field of view)
-    static int frameWidth;
-    static int frameHeight;
-    static int hfov;
-    static int vfov;
-  
-    //! Canny parameters
-    static int canny_ratio;
-    static int canny_kernel_size;
-    static int canny_low_threshold;
-    static int canny_blur_noise_kernel_size;
-    
-    //! Sobel parameters
-    static int sobel_scale;
-    static int sobel_delta;
- 
-    //! Blob detection parameters
-    static int blob_min_threshold;
-    static int blob_max_threshold;
-    static int blob_threshold_step;
-    static int blob_min_area;
-    static int blob_max_area;
-    static double blob_min_convexity;
-    static double blob_max_convexity;
-    static double blob_min_inertia_ratio;
-    static double blob_max_circularity;
-    static double blob_min_circularity;
-    static bool blob_filter_by_color;
-    static bool blob_filter_by_circularity;
-    
-    //! Debug flags
-    static bool debug_enable;
+    private:
+
+      //!< The ROS node handle
+      ros::NodeHandle nodeHandle_;
+
+      //!< The ROS subscriber for acquisition of the RGB image through the
+      //depth sensor
+      ros::Subscriber rgbImageSubscriber_;
+
+      //!< The ROS publisher ofcandidate holes
+      ros::Publisher rgbCandidateHolesPublisher_;
+
+      /**
+        @brief Callback for the rgbImage acquired through the
+        rgb_depth_synchronizer node
+        @param[in] rgbImage [const sensor_msgs::Image&] The RGB image
+        @return void
+       **/
+      void rgbImageCallback(const sensor_msgs::Image& inImage);
+
+      void createCandidateHolesMessage(
+        const HoleFilters::HolesConveyor& conveyor,
+        const sensor_msgs::Image& rgbImage,
+        vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
+        const std::string& encoding);
+
+    public:
+        //!< Constructor
+        Rgb(void);
+
+      //!< Destructor
+      ~Rgb(void);
   };
-}// namespace pandora_vision
-#endif  // RGB_NODE_RGB_CONSTANTS_H
+
+} // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_DETECTOR_INCLUDE_RGB_NODE_DUMMY_RGB_H_

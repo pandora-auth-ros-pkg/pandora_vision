@@ -38,39 +38,39 @@
 
 namespace pandora_vision
 {
-  
+
   /**
-     @brief Class constructor 
-  */ 
+     @brief Class constructor
+  */
   TextureDetector::TextureDetector()
   {
     getGeneralParams();
-    
+
     pathToWalls = packagePath+ "/walls/";
     //! Calculate histogramm according to a given set of
-    //! images 
+    //! images
     calculateTexture();
-    
+
     ROS_INFO("[rgb_node]: Textrure detector instance created");
   }
-    
+
   /**
     @brief Destructor
-  */ 
+  */
   TextureDetector::~TextureDetector()
   {
     ROS_INFO("[rgb_node]: Textrure detector instance deleted");
   }
-  
+
   /**
     @brief Get parameters referring to view and frame characteristics
-    from launch file 
+    from launch file
     @return void
-  */ 
+  */
   void TextureDetector::getGeneralParams()
   {
     packagePath = ros::package::getPath("pandora_vision_hole_detector");
-    
+
     //!< Get the Height parameter if available;
     if (_nh.hasParam("/" + cameraName + "/image_height"))
     {
@@ -79,7 +79,7 @@ namespace pandora_vision
     }
     else
     {
-      frameHeight = RgbParameters::frameHeight;
+      frameHeight = 480;
       ROS_DEBUG_STREAM("height : " << frameHeight);
     }
 
@@ -91,11 +91,11 @@ namespace pandora_vision
     }
     else
     {
-      frameWidth = RgbParameters::frameWidth;
+      frameWidth = 640;
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
   }
-    
+
   /**
     @brief Function for calculating histogramms for texture recognition
     @return void
@@ -111,7 +111,7 @@ namespace pandora_vision
     }
     calculateHistogramm(walls);
   }
-  
+
   /**
     @brief Function for calculating HS histogramm
     @param walls [vector<cv::Mat>] vector of images corresponding to walls
@@ -122,7 +122,7 @@ namespace pandora_vision
     cv::Mat* hsv = new cv::Mat[14];
     for(int i = 0; i < 6; i++)
       cvtColor(walls[i], hsv[i], CV_BGR2HSV);
-  
+
     /// Quantize the hue to 30 levels
     /// and the saturation to 32 levels
     int hbins = 30, sbins = 32;
@@ -135,10 +135,10 @@ namespace pandora_vision
     const float* ranges[] = { hranges, sranges };
     /// We compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
-    cv::calcHist(hsv, 6, channels, cv::Mat(), histogramm, 2, 
+    cv::calcHist(hsv, 6, channels, cv::Mat(), histogramm, 2,
           histSize, ranges, true, false );
   }
-  
+
   /**
     @brief Function for calculating applying backprojection in input image
     @param frame [cv::Mat] current frame to be processed
@@ -146,7 +146,7 @@ namespace pandora_vision
     applied
     @return void
   */
-  void TextureDetector::applyBackprojection(cv::Mat* holeFrame, 
+  void TextureDetector::applyBackprojection(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
     cv::Mat hsv;
@@ -156,10 +156,10 @@ namespace pandora_vision
     float hranges[] = { 0, 180 };
     /// saturation varies from 0 to 80
     float sranges[] = { 0, 120 };
-   
+
     const float* ranges[] = { hranges, sranges};
     int channels[] = {0, 1};
-    cv::calcBackProject( &hsv, 1, channels , histogramm, 
+    cv::calcBackProject( &hsv, 1, channels , histogramm,
         *backprojectedFrame, ranges, 1, true );
     int const max_BINARY_value = 255;
     cv::Mat temp;
@@ -169,7 +169,7 @@ namespace pandora_vision
     Morphology::dilation(&temp, 3, false);
     temp.copyTo(*backprojectedFrame);
   }
-  
+
   /**
    @brief Function that applies backprogected image in current frame
    in order to find out which part of it belong to the given texture
@@ -177,34 +177,31 @@ namespace pandora_vision
    @param backprojectedFrame [cv::Mat*] current frame after backprojection,
    this parameter is returned
    @return void
-  */ 
-  void TextureDetector::applyTexture(cv::Mat* holeFrame, 
+  */
+  void TextureDetector::applyTexture(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
-    cv::Mat backprojection = 
-        cv::Mat::zeros(RgbParameters::frameHeight, 
-        RgbParameters::frameWidth, CV_8UC1);
-        
+    cv::Mat backprojection =
+        cv::Mat::zeros(480,
+        640, CV_8UC1);
+
     applyBackprojection(holeFrame, backprojectedFrame);
-    
+
     cvtColor(*holeFrame, *holeFrame, CV_BGR2GRAY);
-    
+
     bitwise_and( *holeFrame, *backprojectedFrame, backprojection);
-    
-    if(RgbParameters::debug_enable) 
-      debug_show(*holeFrame, *backprojectedFrame, backprojection);
   }
-  
+
   /**
-    @brief Function for debbuging reasons,shows histogramm and 
+    @brief Function for debbuging reasons,shows histogramm and
     current frame after backprojection is applied
     @param holeFrame [cv::Mat] the currrent frame to be processed
-    @param backprojection [cv::Mat] calculated backprojection 
+    @param backprojection [cv::Mat] calculated backprojection
     @param backprojectedFrame [cv::Mat*] current frame after backprojection,
     this parameter is returned
     @return void
   */
-  void TextureDetector::debug_show(cv::Mat holeFrame, 
+  void TextureDetector::debug_show(cv::Mat holeFrame,
       cv::Mat backprojection, cv::Mat backprojectedFrame)
   {
     ros::Time timeBegin = ros::Time::now();

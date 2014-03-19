@@ -126,7 +126,7 @@ namespace pandora_vision
         if (inImage->at<float>(i, j) == 0)
         {
           marker.at<float>(i, j) =
-            interpolateZeroPixel(*inImage, i, j, flag);
+            interpolateZeroPixel(*inImage, i, j, &flag);
         }
       }
     }
@@ -193,7 +193,7 @@ namespace pandora_vision
     @param[in] inImage [const cv::Mat &] The input depth image
     @param[in] row [const int&] The row index of the pixel of interest
     @param[in] col [const int&] The column index of the pixel of interest
-    @param[in][out] endFlag [bool] True indicates that there are pixels
+    @param[in][out] endFlag [bool*] True indicates that there are pixels
     left with zero value
     @return void
    **/
@@ -201,7 +201,7 @@ namespace pandora_vision
     const cv::Mat& inImage,
     const int& row,
     const int& col,
-    bool& endFlag)
+    bool* endFlag)
   {
     float sumValueOfNonZeroPixels = 0;
     int countOfNonZeroPixels = 0;
@@ -219,49 +219,49 @@ namespace pandora_vision
     {
       sumValueOfNonZeroPixels += p2;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p3 != 0)
     {
       sumValueOfNonZeroPixels += p3;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p4 != 0)
     {
       sumValueOfNonZeroPixels += p4;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p5 != 0)
     {
       sumValueOfNonZeroPixels += p5;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p6 != 0)
     {
       sumValueOfNonZeroPixels += p6;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p7 != 0)
     {
       sumValueOfNonZeroPixels += p7;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p8 != 0)
     {
       sumValueOfNonZeroPixels += p8;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (p9 != 0)
     {
       sumValueOfNonZeroPixels += p9;
       countOfNonZeroPixels++;
-      endFlag = true;
+      *endFlag = true;
     }
     if (countOfNonZeroPixels > 0)
     {

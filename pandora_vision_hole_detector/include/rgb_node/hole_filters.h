@@ -35,8 +35,8 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef DEPTH_NODE_HOLE_FILTERS
-#define DEPTH_NODE_HOLE_FILTERS
+#ifndef RGB_NODE_HOLE_FILTERS_H
+#define RGB_NODE_HOLE_FILTERS_H
 
 #include "rgb_node/noise_elimination.h"
 #include "rgb_node/edge_detection.h"
@@ -125,6 +125,6 @@ namespace pandora_vision
         HolesConveyor* conveyor);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // RGB_NODE_HOLE_FILTERS_H

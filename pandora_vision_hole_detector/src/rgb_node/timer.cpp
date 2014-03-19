@@ -1,4 +1,4 @@
-#include "depth_node/timer.h"
+#include "rgb_node/timer.h"
 
 std::map<std::string,double> Timer::times = std::map<std::string,double>();
 std::map<std::string,double> Timer::max_time = std::map<std::string,double>();

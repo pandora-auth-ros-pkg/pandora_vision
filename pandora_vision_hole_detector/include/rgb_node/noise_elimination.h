@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_NOISE_ELIMINATION
-#define KINECT_NOISE_ELIMINATION
+#ifndef RGB_NODE_NOISE_ELIMINATION_H
+#define RGB_NODE_NOISE_ELIMINATION_H
 
-#include "depth_node/morphological_operators.h"
+#include "rgb_node/morphological_operators.h"
 
 /**
   @namespace vision
@@ -137,6 +137,6 @@ namespace pandora_vision
           cv::Mat* outImage);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // RGB_NODE_NOISE_ELIMINATION_H

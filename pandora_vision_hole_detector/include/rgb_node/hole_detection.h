@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef RGB_NODE_HOLE_DETECTION_H 
-#define RGB_NODE_HOLE_DETECTION_H 
+#ifndef RGB_NODE_HOLE_DETECTION_H
+#define RGB_NODE_HOLE_DETECTION_H
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -51,7 +51,6 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "rgb_node/rgb_constants.h"
 #include "rgb_node/hole_detector.h"
 
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
@@ -61,82 +60,84 @@ namespace pandora_vision
   class HoleDetection
   {
     private:
-      
+
       //!< The NodeHandle
       ros::NodeHandle _nh;
-      
+
       std::string packagePath;
-      
+
       float ratioX;
       float ratioY;
-        
+
       //!< Horizontal field of view in rad
       double hfov;
       //!< Vertical Field Of View (rad)
       double vfov;
-        
+
       int frameWidth;
       int frameHeight;
-        
+
       std::string cameraName;
-        
+
       //!< Frame processed by FaceDetector
       cv::Mat _holeFrame;
-          
+
       //!<FaceDetector frame timestamp
       ros::Time _holeFrameTimestamp;
-        
+
       //!< The topic subscribed to for the camera
       std::string imageTopic;
       std::string cameraFrameId;
-      
+
       //!< The ROS subscriber for acquisition of the RGB image through the
       //depth sensor
       ros::Subscriber _frameSubscriber;
-      
+
       //!< The ROS publisher ofcandidate holes
       ros::Publisher rgbCandidateHolesPublisher_;
-        
+
       //!< Current state of robot
       int curState;
       //!< Previous state of robot
       int prevState;
-      
+
       //!< Variable used for State Managing
       bool holeNowON;
-      
+
       //!< Class HoleDetector instance that finds and locates tha position
       //!< potentional holes in current frame
       HoleDetector _holeDetector;
-          
+
       /**
         @brief Get parameters referring to view and frame characteristics from
         launch file
         @return void
-      */  
+      */
       void getGeneralParams();
-        
+
       /**
         Function called when new ROS message appears, for front camera
         @param msg [const sensor_msgs::ImageConstPtr&] The message
         @return void
       */
       void imageCallback(const sensor_msgs::Image& inImage);
-      
+
       void createCandidateHolesMessage(
           const HoleFilters::HolesConveyor& conveyor,
           const sensor_msgs::Image& rgbImage,
-          vision_communications::RgbCandidateHolesVectorMsg* 
+          vision_communications::RgbCandidateHolesVectorMsg*
             rgbCandidateHolesMsg,
           const std::string& encoding);
-      
+
     public:
-    
+
       //!< The constructor
       HoleDetection();
-      
+
       //!< The destructor
       virtual ~HoleDetection();
   };
-}//namespace pandora_vision
+
+} //namespace pandora_vision
+
 #endif  // RGB_NODE_HOLE_DETECTION_H

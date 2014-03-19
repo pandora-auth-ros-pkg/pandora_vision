@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/blob_detection.h"
+#include "rgb_node/blob_detection.h"
 
 namespace pandora_vision
 {
@@ -221,23 +221,23 @@ namespace pandora_vision
 
     cv::SimpleBlobDetector::Params params;
 
-    params.minThreshold = DepthParameters::blob_min_threshold; //40;
-    params.maxThreshold = DepthParameters::blob_max_threshold; //60;
-    params.thresholdStep = DepthParameters::blob_threshold_step;
+    params.minThreshold = RgbParameters::blob_min_threshold; //40;
+    params.maxThreshold = RgbParameters::blob_max_threshold; //60;
+    params.thresholdStep = RgbParameters::blob_threshold_step;
 
-    params.minArea = DepthParameters::blob_min_area;
-    params.maxArea = DepthParameters::blob_max_area;
+    params.minArea = RgbParameters::blob_min_area;
+    params.maxArea = RgbParameters::blob_max_area;
 
-    params.minConvexity = DepthParameters::blob_min_convexity; //0.6;
-    params.maxConvexity = DepthParameters::blob_max_convexity;
+    params.minConvexity = RgbParameters::blob_min_convexity; //0.6;
+    params.maxConvexity = RgbParameters::blob_max_convexity;
 
-    params.minInertiaRatio = DepthParameters::blob_min_inertia_ratio;//0.5;
+    params.minInertiaRatio = RgbParameters::blob_min_inertia_ratio;//0.5;
 
-    params.maxCircularity = DepthParameters::blob_max_circularity;
-    params.minCircularity = DepthParameters::blob_min_circularity; //0.3;
+    params.maxCircularity = RgbParameters::blob_max_circularity;
+    params.minCircularity = RgbParameters::blob_min_circularity; //0.3;
 
-    params.filterByColor = DepthParameters::blob_filter_by_color;
-    params.filterByCircularity = DepthParameters::blob_filter_by_circularity;
+    params.filterByColor = RgbParameters::blob_filter_by_color;
+    params.filterByCircularity = RgbParameters::blob_filter_by_circularity;
 
     cv::SimpleBlobDetector blobDetector(params);
     blobDetector.create("SimpleBlob");
