@@ -35,36 +35,34 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef DEPTH_PARAMETERS
-#define DEPTH_PARAMETERS
+#ifndef RGB_PARAMETERS_H
+#define RGB_PARAMETERS_H
 
-#include "depth_node/defines.h"
+#include "rgb_node/defines.h"
 #include <dynamic_reconfigure/server.h>
-#include <pandora_vision_hole_detector/depth_cfgConfig.h>
+#include <pandora_vision_hole_detector/rgb_cfgConfig.h>
 
 namespace pandora_vision
 {
-
-  struct DepthParameters
+  struct RgbParameters
   {
-
     /**
-      @brief The DepthParameters constructor
+      @brief The RgbParameters constructor
      **/
-    DepthParameters(void);
+    RgbParameters(void);
 
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>
       server;
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>::
+    dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>::
       CallbackType f;
 
     /**
       @brief The function called when a parateter is changed
-      @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
+      @param[in] config [const pandora_vision_hole_detector::rgb_cfgConfig&]
       @param[in] level [const uint32_t] The level (?)
       @return void
      **/
-    void callback(const pandora_vision_hole_detector::depth_cfgConfig& config,
+    void callback(const pandora_vision_hole_detector::rgb_cfgConfig& config,
       const uint32_t& level);
 
     /**
@@ -76,7 +74,7 @@ namespace pandora_vision
     //!< -------------------DepthParameters-----------------------------//
 
     //!< Subscriber of kinect parameter changing
-    ros::Subscriber     _parameterChangingSubscriber;
+    ros::Subscriber _parameterChangingSubscriber;
 
     //!< Kanny parameters
     static int kanny_ratio;
@@ -167,8 +165,8 @@ namespace pandora_vision
     static int debug_show_check_holes_size;
 
     static int minimum_curve_points;
-
   };
-}
 
-#endif
+} // namespace pandora_vision
+
+#endif  // RGB_PARAMETERS_H

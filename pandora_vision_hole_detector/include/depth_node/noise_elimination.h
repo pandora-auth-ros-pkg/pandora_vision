@@ -95,12 +95,12 @@ namespace pandora_vision
         @param[in] inImage [const cv::Mat &] The input depth image
         @param[in] row [const int&] The row index of the pixel of interest
         @param[in] col [const int&] The column index of the pixel of interest
-        @param[in][out] endFlag [bool] True indicates that there are pixels
+        @param[in][out] endFlag [bool*] True indicates that there are pixels
         left with zero value
         @return void
        **/
       static float interpolateZeroPixel(const cv::Mat& inImage,
-          const int& row, const int& col, bool& endFlag);
+          const int& row, const int& col, bool* endFlag);
 
       /**
         @brief Interpolates the noise produced by kinect. The black blobs take
@@ -114,12 +114,11 @@ namespace pandora_vision
       /**
         @brief Iteration for the interpolateNoise_brushNear function
         @param[in][out] image [cv::Mat*] The input image
-        @param index [const unsigned int&] Where to start the brushfire algorithm
-        (index = y * cols + x)
+        @param index [const unsigned int&] Where to start the brushfire
+        algorithm (index = y * cols + x)
         @return void
        **/
-      static void brushfireNearStep(cv::Mat* image,
-        const unsigned int& index);
+      static void brushfireNearStep(cv::Mat* image, const unsigned int& index);
 
       /**
         @brief Changes the interpolation method according to the image's values

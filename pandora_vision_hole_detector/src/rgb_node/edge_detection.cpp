@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/edge_detection.h"
+#include "rgb_node/edge_detection.h"
 
 namespace pandora_vision
 {
@@ -54,14 +54,14 @@ namespace pandora_vision
     inImage.copyTo(*outImage);
     cv::Mat detected_edges;
     cv::Mat dst;
-    int ratio = DepthParameters::kanny_ratio;
-    int kernel_size = DepthParameters::kanny_kernel_size;
-    int lowThreshold = DepthParameters::kanny_low_threshold;
+    int ratio = RgbParameters::kanny_ratio;
+    int kernel_size = RgbParameters::kanny_kernel_size;
+    int lowThreshold = RgbParameters::kanny_low_threshold;
 
     //!< Reduce noise with a kernel 3x3
     cv::blur(*outImage, detected_edges, cv::Size(
-          DepthParameters::kanny_blur_noise_kernel_size,
-          DepthParameters::kanny_blur_noise_kernel_size));
+          RgbParameters::kanny_blur_noise_kernel_size,
+          RgbParameters::kanny_blur_noise_kernel_size));
 
     //!< Canny detector
     cv::Canny(detected_edges, detected_edges, lowThreshold,
@@ -472,14 +472,14 @@ namespace pandora_vision
     //!< Facilitate the edge detection by converting the 32FC1 image \
     values to a range of 0-255
       visualizableDenoisedImage = Visualization::scaleImageForVisualization
-      (tempImg, DepthParameters::scale_method);
+      (tempImg, RgbParameters::scale_method);
 
     //!< from now onwards every image is in the range of 0-255
     EdgeDetection::applySobel
       (visualizableDenoisedImage, &denoisedDepthImageEdges);
 
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
-        DepthParameters::threshold_lower_value, 255, 3);
+        RgbParameters::threshold_lower_value, 255, 3);
 
     //!< make all non zero pixels have a value of 255
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
@@ -515,7 +515,7 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if(DepthParameters::debug_show_connect_pairs) // Debug
+    if(RgbParameters::debug_show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection before";
@@ -644,7 +644,7 @@ namespace pandora_vision
           //!< If the curve is close to a straight line,
           //!< do not connect pair[i].first and pair[i].second
           if (pairsDistance >=
-              DepthParameters::AB_to_MO_ratio * outlineBisectorPointDist)
+              RgbParameters::AB_to_MO_ratio * outlineBisectorPointDist)
           {
             continue;
           }
@@ -781,7 +781,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_connect_pairs) // Debug
+    if(RgbParameters::debug_show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection after";
@@ -790,7 +790,7 @@ namespace pandora_vision
       inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(DepthParameters::debug_show_connect_pairs) // Debug
+    if(RgbParameters::debug_show_connect_pairs) // Debug
     {
       Visualization::multipleShow("connectPairs function", imgs, msgs, 1200, 1);
     }
@@ -811,8 +811,8 @@ namespace pandora_vision
     Timer::start("enhanceContrast");
     #endif
 
-    inImage.convertTo(*outImage, -1, DepthParameters::contrast_enhance_alpha,
-        DepthParameters::contrast_enhance_beta);
+    inImage.convertTo(*outImage, -1, RgbParameters::contrast_enhance_alpha,
+        RgbParameters::contrast_enhance_beta);
 
     #ifdef DEBUG_TIME
     Timer::tick("enhanceContrast");
@@ -843,7 +843,7 @@ namespace pandora_vision
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
 
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Initial Edges";
@@ -858,7 +858,7 @@ namespace pandora_vision
     Morphology::dilation(&temp, 2);
 
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After 2 steps of dilation";
@@ -874,7 +874,7 @@ namespace pandora_vision
     Morphology::thinning(temp, &thinnedImg,100);
 
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After thinning";
@@ -895,7 +895,7 @@ namespace pandora_vision
     Timer::start("Sector #2","denoiseEdges");
     #endif
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After edge contamination";
@@ -927,7 +927,7 @@ namespace pandora_vision
     thinnedImg = thinnedImg - closedLines;
 
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : The closed shapes";
@@ -938,7 +938,7 @@ namespace pandora_vision
     }
     #endif
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Without closed shapes";
@@ -971,7 +971,7 @@ namespace pandora_vision
             std::set<unsigned int> ret;
             std::pair<GraphNode,GraphNode> pts =
               findNeighs(&thinnedImg, i, j, &ret);
-            if(ret.size() > DepthParameters::minimum_curve_points)
+            if(ret.size() > RgbParameters::minimum_curve_points)
             {
               lines.push_back(ret);
               farPts.push_back(pts);
@@ -1006,7 +1006,7 @@ namespace pandora_vision
     Timer::start("Sector #4");
     #endif
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After connection of distant edges";
@@ -1021,7 +1021,7 @@ namespace pandora_vision
     thinnedImg = thinnedImg + closedLines;
 
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After re-insertion of closed shapes";
@@ -1040,7 +1040,7 @@ namespace pandora_vision
     Timer::tick("Sector #4");
     #endif
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After pruning and dilation";
@@ -1049,10 +1049,10 @@ namespace pandora_vision
       img->copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(DepthParameters::debug_show_denoise_edges) // Debug
+    if(RgbParameters::debug_show_denoise_edges) // Debug
     {
       Visualization::multipleShow("denoiseEdges function", imgs, msgs,
-          DepthParameters::debug_show_denoise_edges_size, 1);
+          RgbParameters::debug_show_denoise_edges_size, 1);
     }
     #endif
     #ifdef DEBUG_TIME
@@ -1228,7 +1228,7 @@ namespace pandora_vision
 
     std::pair<GraphNode,GraphNode> edgePoints;
     //!< If it is small avoid the fuzz
-    if(ret->size() < DepthParameters::minimum_curve_points)
+    if(ret->size() < RgbParameters::minimum_curve_points)
     {
       return edgePoints;
     }
@@ -1306,7 +1306,7 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
+    if(RgbParameters::debug_show_get_shapes_clear_border) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Before clear blorders";
@@ -1402,7 +1402,7 @@ namespace pandora_vision
     Timer::tick("getShapesClearBorder");
     #endif
     #ifdef DEBUG_SHOW
-    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
+    if(RgbParameters::debug_show_get_shapes_clear_border) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After clear borders";
@@ -1411,7 +1411,7 @@ namespace pandora_vision
       inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if(DepthParameters::debug_show_get_shapes_clear_border) // Debug
+    if(RgbParameters::debug_show_get_shapes_clear_border) // Debug
     {
       Visualization::multipleShow("getShapesClearBorder function", imgs, msgs,
           1200, 1);

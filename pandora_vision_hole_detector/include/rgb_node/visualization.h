@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_VISUALIZATION
-#define KINECT_VISUALIZATION
+#ifndef RGB_NODE_VISUALIZATION_H
+#define RGB_NODE_VISUALIZATION_H
 
-#include "depth_node/depth_parameters.h"
+#include "rgb_node/rgb_parameters.h"
 
 /**
   @namespace vision
@@ -146,8 +146,8 @@ namespace pandora_vision
         const std::string& windowTitle,
         const cv::Mat& inImage,
         const int& ms);
-
   };
-}
 
-#endif
+} // namespace pandora_vision
+
+#endif  // RGB_NODE_VISUALIZATION_H

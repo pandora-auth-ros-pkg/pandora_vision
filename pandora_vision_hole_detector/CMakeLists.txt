@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 generate_dynamic_reconfigure_options(
   cfg/hole_fusion_cfg.cfg
   cfg/depth_cfg.cfg
+  cfg/rgb_cfg.cfg
 )
 
 catkin_package(
@@ -151,14 +152,37 @@ add_dependencies(hole_fusion_node
   ${catkin_EXPORTED_TARGETS}
 )
 
+
+################################# RgbDummyNode #################################
+add_executable(rgb_dummy_node
+  src/rgb_dummy_node/rgb_dummy_node.cpp
+  src/rgb_dummy_node/rgb_dummy.cpp
+  src/depth_node/hole_filters.cpp
+  src/message_conversions/message_conversions.cpp
+  src/depth_node/noise_elimination.cpp
+  src/depth_node/edge_detection.cpp
+  src/depth_node/blob_detection.cpp
+  src/depth_node/bounding_box_detection.cpp
+  src/depth_node/timer.cpp
+  src/depth_node/depth_parameters.cpp
+  src/depth_node/morphological_operators.cpp
+  src/depth_node/visualization.cpp
+  )
+
+target_link_libraries(rgb_dummy_node ${catkin_LIBRARIES} )
+
+add_dependencies(rgb_dummy_node
+    vision_communications_gencpp
+    ${catkin_EXPORTED_TARGETS}
+)
+
 ################################# RgbNode ######################################
-add_executable(rgb_node 
+add_executable(rgb_node
     src/rgb_node/hole_node.cpp
     src/rgb_node/hole_detection.cpp
     src/rgb_node/hole_detector.cpp
     src/rgb_node/texture_filter.cpp
-    src/rgb_node/rgb_constants.cpp
-    
+
     src/rgb_node/hole_filters.cpp
     src/rgb_node/noise_elimination.cpp
     src/rgb_node/edge_detection.cpp
@@ -166,12 +190,13 @@ add_executable(rgb_node
     src/rgb_node/bounding_box_detection.cpp
     src/rgb_node/morphological_operators.cpp
     src/rgb_node/visualization.cpp
-    src/rgb_node/depth_parameters.cpp
+    src/rgb_node/rgb_parameters.cpp
     src/rgb_node/timer.cpp
-    
+
 )
 target_link_libraries(rgb_node ${catkin_LIBRARIES} )
-add_dependencies(rgb_node 
+
+add_dependencies(rgb_node
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
@@ -179,10 +204,10 @@ add_dependencies(rgb_node
 #~ To check lint : catkin_make roslint_pandora_vision_hole_detector
 set(ROSLINT_CPP_OPTS
     "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string, -runtime/printf, -readability/streams")
-    
+
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-            
+
   include/rgb_node/hole_detection.h
   include/rgb_node/hole_detector.h
   include/rgb_node/edge_detection.h

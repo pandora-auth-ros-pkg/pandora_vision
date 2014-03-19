@@ -40,42 +40,39 @@ namespace pandora_vision
 {
   /**
    @brief Class constructor
-  */ 
+  */
   HoleDetector::HoleDetector()
   {
-    //~ backprojectedFrame = cv::Mat::zeros(RgbParameters::frameHeight, 
-        //~ RgbParameters::frameWidth, CV_8UC1);
-    
     ROS_INFO("[rgb_node]: HoleDetector instance created");
   }
-  
+
   /**
    @brief Class destructor
   */
   HoleDetector::~HoleDetector()
   {
     ROS_INFO("[rgb_node]: HoleDetector instance destroyed");
-  } 
-  
+  }
+
   /**
    @brief Function that locates the position of potentional holes
    in current frame.
    @param holeFrame [cv::Mat] current frame to be processed
    @return void
-  */ 
+  */
   HoleFilters::HolesConveyor HoleDetector::findHoles(cv::Mat holeFrame)
   {
     //! Find pixels in current frame where there is the same texture
     //! according to the given histogramm and calculate
     std::vector<cv::KeyPoint> detectedkeyPoints;
     cv::Mat temp, backprojectedFrame;
-   
+
     #ifdef SHOW_DEBUG_IMAGE
       std::string msg;
       std::vector<cv::Mat> imgs;
       std::vector<std::string> msgs;
     #endif
-    
+
     #ifdef SHOW_DEBUG_IMAGE
       cv::Mat before_blur;
       holeFrame.copyTo(before_blur);
@@ -84,25 +81,25 @@ namespace pandora_vision
       msgs.push_back(msg);
       imgs.push_back(before_blur);
     #endif
-    
-    backprojectedFrame = cv::Mat::zeros(holeFrame.size().height, 
+
+    backprojectedFrame = cv::Mat::zeros(holeFrame.size().height,
         holeFrame.size().width, CV_8UC1);
     holeFrame.copyTo(temp);
-    
+
     cv::Mat after_blur;
-    holeFrame.copyTo(after_blur); 
+    holeFrame.copyTo(after_blur);
     cv::blur(holeFrame, after_blur, cv::Size(7,7));
-    
+
     #ifdef SHOW_DEBUG_IMAGE
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After blur";
       msgs.push_back(msg);
       imgs.push_back(after_blur);
     #endif
-    
+
     //! backprojection of current frame
     _textureDetector.applyTexture(&holeFrame, &backprojectedFrame);
-    
+
     #ifdef SHOW_DEBUG_IMAGE
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After texture";
@@ -111,25 +108,25 @@ namespace pandora_vision
     #endif
     //! Apply in current frame Canny edge detection algorithm
     EdgeDetection::applySobel(backprojectedFrame, &temp);
-    
+
     EdgeDetection::denoiseEdges(&temp);
-    
+
     #ifdef SHOW_DEBUG_IMAGE
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After denoising";
       msgs.push_back(msg);
       imgs.push_back(temp);
     #endif
-    
+
     BlobDetection::detectBlobs(temp, &detectedkeyPoints);
-    
+
     //!< The final vectors of keypoints, rectangles and blobs' outlines.
     struct HoleFilters::HolesConveyor conveyor;
-    
+
     HoleFilters::validateBlobs(
       detectedkeyPoints,
       &temp,
-      DepthParameters::bounding_box_detection_method,
+      RgbParameters::bounding_box_detection_method,
       &conveyor);
 
     #ifdef SHOW_DEBUG_IMAGE
@@ -151,7 +148,7 @@ namespace pandora_vision
     #ifdef SHOW_DEBUG_IMAGE
       Visualization::multipleShow("RGB node",imgs,msgs,1600,1);
     #endif
-    
+
     return conveyor;
   }
 

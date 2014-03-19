@@ -38,7 +38,7 @@
 #ifndef KINECT_BLOB_DETECTION
 #define KINECT_BLOB_DETECTION
 
-#include "depth_node/morphological_operators.h"
+#include "rgb_node/morphological_operators.h"
 
 /**
   @namespace vision

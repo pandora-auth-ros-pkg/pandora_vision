@@ -35,7 +35,7 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "depth_node/hole_filters.h"
+#include "rgb_node/hole_filters.h"
 
 namespace pandora_vision
 {
@@ -94,7 +94,7 @@ namespace pandora_vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than DepthParameters::bounding_box_min_area_threshold
+        //!< be greater than RgbParameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles(
             keyPoints,
             rectangles,
@@ -111,7 +111,7 @@ namespace pandora_vision
 
         BlobDetection::raycastKeypoint(keyPoints,
             denoisedDepthImageEdges,
-            DepthParameters::raycast_keypoint_partitions,
+            RgbParameters::raycast_keypoint_partitions,
             &blobsOutlineVector,
             &blobsArea);
 
@@ -134,7 +134,7 @@ namespace pandora_vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than DepthParameters::bounding_box_min_area_threshold
+        //!< be greater than RgbParameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles(
             keyPoints,
             rectangles,

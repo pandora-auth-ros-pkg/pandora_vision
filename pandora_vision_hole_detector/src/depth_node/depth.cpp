@@ -115,7 +115,7 @@ namespace pandora_vision
     //!< Finds possible holes
     cv::Mat interpolatedDepthImage;
     HoleFilters::HolesConveyor holes = HoleDetector::findHoles(depthImage,
-      interpolatedDepthImage);
+      &interpolatedDepthImage);
 
     //!< Create the candidate holes message
     vision_communications::DepthCandidateHolesVectorMsg depthCandidateHolesMsg;

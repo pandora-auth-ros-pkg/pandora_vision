@@ -73,11 +73,19 @@ namespace pandora_vision
     //!< The valid (by this filter) blobs' indices
     std::set<unsigned int> valid;
 
-    //!< Scale the inImage in [0, 255] into inImage_
-    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
-      HoleFusionParameters::scale_method);
+    //!< Scale the inImage in [0, 255] into inImage_ if not already
+    cv::Mat inImage_;
+    if (inImage.type() != CV_8UC3)
+    {
+      inImage_ = Visualization::scaleImageForVisualization(inImage,
+        HoleFusionParameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(inImage_);
+    }
 
-    //!< inImage_  transformed from BGR format to HSV
+    //!< inImage_ transformed from BGR format to HSV
     cv::Mat inImageHSV;
     cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
@@ -85,12 +93,12 @@ namespace pandora_vision
     {
       //!< Create the mask needed for the histogram of the
       //!< points inside this blobs'outline
-      cv::Mat blobMask = cv::Mat::zeros(inImage_.size(), CV_8UC1);
+      cv::Mat blobMask = cv::Mat::zeros(inImage.size(), CV_8UC1);
 
       //!< Draw the points inside the blob
-      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
               inOutlines[i], cv::Point(cols, rows), false) > 0)
@@ -225,9 +233,17 @@ namespace pandora_vision
     //!< in the validKeyPointsIndices vector
     std::vector<unsigned int> validKeyPointsIndices;
 
-    //!< Scale the inImage in [0, 255]
-    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
-      HoleFusionParameters::scale_method);
+    //!< Scale the inImage in [0, 255] into inImage_ if not already
+    cv::Mat inImage_;
+    if (inImage.type() != CV_8UC3)
+    {
+      inImage_ = Visualization::scaleImageForVisualization(inImage,
+        HoleFusionParameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(inImage_);
+    }
 
     //!< Store the vertices of the inside-of-image-bounds inflated bounding
     //!< rectangles in the inflatedRectangles vector
@@ -258,9 +274,9 @@ namespace pandora_vision
         keypointVertDist = sqrt(pow(key_x -vert_x, 2) + pow(key_y -vert_x, 2));
 
         //!< check if the inflated vertex has gone out of bounds
-        if (vert_x - inflationSize * cos(theta) < inImage_.cols &&
+        if (vert_x - inflationSize * cos(theta) < inImage.cols &&
           vert_x - inflationSize * cos(theta) >= 0 &&
-          vert_y - inflationSize * sin(theta) < inImage_.rows &&
+          vert_y - inflationSize * sin(theta) < inImage.rows &&
           vert_y - inflationSize * sin(theta) >= 0)
         {
           inflatedVerticesWithinImageLimits++;
@@ -303,9 +319,9 @@ namespace pandora_vision
       int boundingBoxDivisor = 0;
       int blobLuminosity = 0;
       int blobDivisor = 0;
-      for (unsigned int rows = 0; rows < inImage_.rows; rows++)
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
       {
-        for (unsigned int cols = 0; cols < inImage_.cols; cols++)
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           //!< Mean outline luminosity test
           if (cv::pointPolygonTest(
@@ -415,9 +431,17 @@ namespace pandora_vision
     std::vector<unsigned int> validKeyPointsIndices;
 
 
-    //!< Scale the inImage in [0, 255] into inImage_
-    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
-      HoleFusionParameters::scale_method);
+    //!< Scale the inImage in [0, 255] into inImage_ if not already
+    cv::Mat inImage_;
+    if (inImage.type() != CV_8UC3)
+    {
+      inImage_ = Visualization::scaleImageForVisualization(inImage,
+        HoleFusionParameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(inImage_);
+    }
 
     //!< inImage transformed from BGR format to HSV
     cv::Mat inImageHSV;
@@ -642,9 +666,17 @@ namespace pandora_vision
     //!< in the validKeyPointsIndices vector
     std::vector<unsigned int> validKeyPointsIndices;
 
-    //!< Scale the inImage in [0, 255] into inImage_
-    cv::Mat inImage_ = Visualization::scaleImageForVisualization(inImage,
-      HoleFusionParameters::scale_method);
+    //!< Scale the inImage in [0, 255] into inImage_ if not already
+    cv::Mat inImage_;
+    if (inImage.type() != CV_8UC3)
+    {
+      inImage_ = Visualization::scaleImageForVisualization(inImage,
+        HoleFusionParameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(inImage_);
+    }
 
     //!< inImage transformed from BGR format to HSV
     cv::Mat inImageHSV;

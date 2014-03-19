@@ -35,45 +35,46 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef RGB_NODE_HOLE_DETECTOR_H 
-#define RGB_NODE_HOLE_DETECTOR_H 
+#ifndef RGB_NODE_HOLE_DETECTOR_H
+#define RGB_NODE_HOLE_DETECTOR_H
 
 #define SHOW_DEBUG_IMAGE
 
-#include "rgb_node/rgb_constants.h"
 #include "rgb_node/texture_filter.h"
 
 namespace pandora_vision
 {
   class HoleDetector
   {
-    
-    DepthParameters params;
 
-    
-    //! Instance of class TextureDetector, that applies texture in current 
+    RgbParameters params;
+
+
+    //! Instance of class TextureDetector, that applies texture in current
     //! frame in order to isolate pixels of the image, where we have walls
     TextureDetector _textureDetector;
 
     public:
     /**
      @brief Class constructor
-    */ 
+    */
     HoleDetector();
-    
+
     /**
      @brief Class destructor
-    */ 
+    */
     virtual ~HoleDetector();
-    
+
     /**
      @brief Function that locates the position of potentional holes
      in current frame.
      @param holeFrame [cv::Mat] current frame to be processed
      @return void
-    */ 
+    */
     HoleFilters::HolesConveyor findHoles(cv::Mat holeFrame);
 
   };
-}// namespace pandora_vision
+
+} // namespace pandora_vision
+
 #endif  // RGB_NODE_HOLE_DETECTOR_H

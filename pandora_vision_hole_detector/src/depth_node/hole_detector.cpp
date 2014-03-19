@@ -48,13 +48,14 @@ namespace pandora_vision
 
   /**
     @brief Finds the holes provided a depth image in CV_32FC1 format
-    @param[in] depthImage [cv::Mat] The depth image in CV_32FC1 format
-    @param[out] interpolatedDepthImage [cv::Mat&] The denoised
+    @param[in] depthImage [const cv::Mat&] The depth image in CV_32FC1
+    format
+    @param[out] interpolatedDepthImage [cv::Mat*] The denoised
     depth image in CV_32FC1 format
     @return std::vector<cv::Point2f> Centers of the possible holes
    **/
-  HoleFilters::HolesConveyor HoleDetector::findHoles(cv::Mat depthImage,
-    cv::Mat& interpolatedDepthImage)
+  HoleFilters::HolesConveyor HoleDetector::findHoles(const cv::Mat& depthImage,
+    cv::Mat* interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("findHoles", "inputCloudCallback");
@@ -73,9 +74,8 @@ namespace pandora_vision
     #endif
 
     //!< Perform noise elimination (black pixels removed)
-    //cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImage,
-        &interpolatedDepthImage);
+        interpolatedDepthImage);
 
     #ifdef DEBUG_SHOW
     if(DepthParameters::debug_show_find_holes) // Debug
@@ -84,14 +84,14 @@ namespace pandora_vision
       msg += " : Interpolated depth image";
       msgs.push_back(msg);
       cv::Mat tmp = Visualization::scaleImageForVisualization(
-        interpolatedDepthImage, 0);
+        *interpolatedDepthImage, 0);
       imgs.push_back(tmp);
     }
     #endif
 
     //!< Edge computation
     cv::Mat denoisedDepthImageEdges;
-    EdgeDetection::computeEdges(interpolatedDepthImage,
+    EdgeDetection::computeEdges(*interpolatedDepthImage,
         &denoisedDepthImageEdges);
 
     #ifdef DEBUG_SHOW
@@ -106,8 +106,8 @@ namespace pandora_vision
     }
     #endif
 
-    //!< Find blobs in the edges image. Each blob is represented as \
-    a keypoint which is the center of the blob found.
+    //!< Find blobs in the edges image. Each blob is represented as
+    //!< a keypoint which is the center of the blob found
     std::vector<cv::KeyPoint> keyPoints;
     BlobDetection::detectBlobs(denoisedDepthImageEdges, &keyPoints);
 
@@ -151,7 +151,7 @@ namespace pandora_vision
       imgs.push_back(
         Visualization::showHoles(
           msg,
-          interpolatedDepthImage,
+          *interpolatedDepthImage,
           -1,
           conveyor.keyPoints,
           conveyor.rectangles,
@@ -180,7 +180,7 @@ namespace pandora_vision
       imgs.push_back(
         Visualization::showKeypoints(
           msg,
-          interpolatedDepthImage,
+          *interpolatedDepthImage,
           -1,
           conveyor.keyPoints)
       );

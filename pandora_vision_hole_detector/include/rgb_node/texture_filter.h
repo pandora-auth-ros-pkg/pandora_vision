@@ -34,8 +34,8 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef RGB_NODE_TEXTURE_FILTER_H 
-#define RGB_NODE_TEXTURE_FILTER_H 
+#ifndef RGB_NODE_TEXTURE_FILTER_H
+#define RGB_NODE_TEXTURE_FILTER_H
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -43,8 +43,6 @@
 #include "opencv/highgui.h"
 #include <iostream>
 #include <sstream>
-
-#include "rgb_node/rgb_constants.h"
 
 #include "rgb_node/hole_filters.h"
 
@@ -54,41 +52,41 @@ namespace pandora_vision
   {
     //!< nodeHandle
     ros::NodeHandle _nh;
-  
+
     std::string packagePath;
     int frameHeight;
     int frameWidth;
     std::string cameraName;
     //!< Relative path to walls
     std::string pathToWalls;
-        
+
     //!< Calculated histogramm according to given images
     cv::MatND histogramm;
-    
+
     public:
     /**
-     @brief Class constructor 
-    */ 
+     @brief Class constructor
+    */
     TextureDetector();
-    
+
     /**
      @brief Destructor
-    */ 
+    */
     virtual ~TextureDetector();
-    
+
     /**
      @brief Get parameters referring to view and frame characteristics
-     from launch file 
+     from launch file
      @return void
-    */ 
+    */
     void getGeneralParams();
-    
+
     /**
       @brief Function for calculating histogramms for texture recognition
       @return void
     */
     void calculateTexture();
-  
+
     /**
       @brief Function for calculating HS histogramm
       @param walls [vector<cv::Mat>] vector of images corresponding to walls
@@ -96,7 +94,7 @@ namespace pandora_vision
     */
     void calculateHistogramm(std::vector<cv::Mat> walls);
 
-    
+
     /**
       @brief Function for calculating applying backprojection in input image
       @param frame [cv::Mat] current frame to be processed
@@ -105,7 +103,7 @@ namespace pandora_vision
       @return void
     */
     void applyBackprojection(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
-    
+
     /**
       @brief Function that applies backprogected image in current frame
       in order to find out which part of it belong to the given texture
@@ -113,20 +111,20 @@ namespace pandora_vision
       @param backprojectedFrame [cv::Mat*] current frame after backprojection,
       this parameter is returned
       @return void
-    */ 
+    */
     void applyTexture(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
-    
+
    /**
-    @brief Function for debbuging reasons,shows histogramm and 
+    @brief Function for debbuging reasons,shows histogramm and
     current frame after backprojection is applied
     @param holeFrame [cv::Mat] the currrent frame to be processed
-    @param backprojection [cv::Mat] calculated backprojection 
+    @param backprojection [cv::Mat] calculated backprojection
     @param backprojectedFrame [cv::Mat*] current frame after backprojection,
     this parameter is returned
     @return void
   */
-    void debug_show(cv::Mat holeFrame,  
+    void debug_show(cv::Mat holeFrame,
       cv::Mat backprojection, cv::Mat backprojectedFrame);
-  }; 
+  };
 }// namespace pandora_vision
 #endif  // RGB_NODE_TEXTURE_FILTER_H

@@ -38,7 +38,7 @@
 #ifndef KINECT_MORPHOLOGY
 #define KINECT_MORPHOLOGY
 
-#include "depth_node/visualization.h"
+#include "rgb_node/visualization.h"
 
 /**
   @namespace vision

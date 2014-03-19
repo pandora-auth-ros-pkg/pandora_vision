@@ -34,37 +34,12 @@
 *
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
-#ifndef KINECT_NODE_DEFINES
-#define KINECT_NODE_DEFINES
+#ifndef RGB_NODE_DEFINES_H
+#define RGB_NODE_DEFINES_H
 
 #include <iostream>
 #include <fstream>
 #include <cmath>
-
-#include <pcl/PCLPointCloud2.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/ModelCoefficients.h>
-#include <pcl/point_types.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/filters/filter.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/surface/concave_hull.h>
-#include <pcl/filters/project_inliers.h>
-#include <pcl/common/time.h>
-#include <pcl/features/integral_image_normal.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/segmentation/planar_region.h>
-#include <pcl/segmentation/organized_multi_plane_segmentation.h>
-#include <pcl/segmentation/organized_connected_component_segmentation.h>
-#include <pcl/geometry/polygon_operations.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/kdtree/kdtree.h>
 
 #include "ros/ros.h"
 
@@ -75,13 +50,12 @@
 #include <cv_bridge/cv_bridge.h>
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include "sensor_msgs/PointCloud2.h"
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include "std_msgs/String.h"
 
-#include "depth_node/timer.h"
+#include "rgb_node/timer.h"
 
 #define DEBUG_SHOW
 //~ #define DEBUG_PRINT
@@ -104,14 +78,7 @@
 **/
 namespace pandora_vision
 {
-  typedef pcl::PCLPointCloud2 PointCloud;
-  typedef pcl::PCLPointCloud2::Ptr PointCloudPtr;
 
-  typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
-  typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudXYZPtr;
-
-  typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudXYZRGB;
-  typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudXYZRGBPtr;
 }
 
-#endif
+#endif  // RGB_NODE_DEFINES_H
