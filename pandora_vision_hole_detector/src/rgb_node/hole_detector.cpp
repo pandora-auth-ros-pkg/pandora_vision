@@ -99,8 +99,9 @@ namespace pandora_vision
       msgs.push_back(msg);
       imgs.push_back(after_blur);
     #endif
+    
     //! backprojection of current frame
-    _textureDetector.applyTexture(holeFrame, &backprojectedFrame);
+    _textureDetector.applyTexture(&holeFrame, &backprojectedFrame);
     
     #ifdef SHOW_DEBUG_IMAGE
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
