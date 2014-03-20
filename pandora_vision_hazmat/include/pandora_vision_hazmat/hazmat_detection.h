@@ -81,7 +81,7 @@ namespace pandora_vision
       //publisher
       ros::Publisher hazmatPublisher_;
 
-      image_transport::Subscriber sub_;
+      ros::Subscriber sub_;
       
       // variables for changing in dummy msg mode for debugging
       bool hazmatDummy_;
@@ -127,10 +127,10 @@ namespace pandora_vision
       
       /**
       @brief Callback for a new image
-      @param msg [const sensor_msgs::ImageConstPtr&] The new image
+      @param msg [const sensor_msgs::Image&] The new image
       @return void
       **/
-      void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+      void imageCallback(const sensor_msgs::Image& msg);
       
       /**
       @brief Implemented from state manager. Called when a new transition \

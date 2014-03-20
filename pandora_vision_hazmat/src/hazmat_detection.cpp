@@ -67,7 +67,7 @@ namespace pandora_vision
       <vision_communications::HazmatAlertsVectorMsg>("hazmat_alert", 10);
 
     //subscribe to input image's topic
-    sub_ = image_transport::ImageTransport(nh_).subscribe
+    sub_ = nh_.subscribe
       (imageTopic_, 1, &HazmatDetection::imageCallback, this);
 
     //initialize states - robot starts in STATE_OFF 
@@ -331,23 +331,17 @@ namespace pandora_vision
 
   /**
   @brief Callback for a new image
-  @param msg [const sensor_msgs::ImageConstPtr&] The new image
+  @param msg [const sensor_msgs::Image&] The new image
   @return void
   **/
-  void HazmatDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+  void HazmatDetection::imageCallback(const sensor_msgs::Image& msg)
   {
-    //update image contents
-    //sensor_msgs::CvBridge bridge;
-    //hazmatFrame = bridge.imgMsgToCv(msg, "bgr8");
-    //hazmatFrameTimestamp_ = msg->header.stamp;
     
     cv_bridge::CvImagePtr in_msg;
-    
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    
     cv::Mat temp = in_msg->image.clone();
     hazmatFrame_ = new IplImage(temp);
-    hazmatFrameTimestamp_ = msg->header.stamp;
+    hazmatFrameTimestamp_ = msg.header.stamp;
     
     if ( hazmatFrame_.empty() )
     {               

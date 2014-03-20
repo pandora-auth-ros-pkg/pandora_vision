@@ -70,8 +70,7 @@ namespace pandora_vision
     }
 
     //!< Subscribe to input image's topic
-    _frameSubscriber = 
-      image_transport::ImageTransport(_nh).subscribe(imageTopic , 1,
+    _frameSubscriber = _nh.subscribe(imageTopic , 1,
         &MotionDetection::imageCallback, this );
 
     //!< Initialize states - robot starts in STATE_OFF 
@@ -245,12 +244,12 @@ namespace pandora_vision
    @param msg [const sensor_msgs::ImageConstPtr&] The message
    @return void
   */
-  void MotionDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+  void MotionDetection::imageCallback(const sensor_msgs::Image& msg)
   {
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     motionFrame = in_msg->image.clone();
-    motionFrameTimestamp = msg->header.stamp;
+    motionFrameTimestamp = msg.header.stamp;
 
     if ( motionFrame.empty() )
     {               
@@ -296,7 +295,7 @@ namespace pandora_vision
     {
       motionMessage.header.frame_id = cameraFrameId;
       motionMessage.header.stamp = ros::Time::now();
-      ROS_INFO_STREAM( "Motion found with probability: "<< motionMessage.probability);
+      ROS_INFO_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
       _motionPublisher.publish(motionMessage);
     }
 

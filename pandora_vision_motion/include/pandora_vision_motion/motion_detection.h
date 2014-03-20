@@ -93,7 +93,7 @@ namespace pandora_vision
       ros::Publisher _motionPublisher;
       
       //the subscriber that listens to the frame topic advertised by the central node
-      image_transport::Subscriber _frameSubscriber;
+      ros::Subscriber _frameSubscriber;
       
       //debug publisher for MotionDetector
       image_transport::Publisher _motionDiffPublisher;
@@ -146,10 +146,10 @@ namespace pandora_vision
 
        /**
          @brief Function called when new ROS message appears, for front camera
-         @param msg [const sensor_msgs::ImageConstPtr&] The message
+         @param msg [const sensor_msgs::Image&] The message
          @return void
       */
-      void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+      void imageCallback(const sensor_msgs::Image& msg);
       
       /**
         @brief Node's state manager
