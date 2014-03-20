@@ -56,7 +56,7 @@ namespace pandora_vision
     private:
       
       //nodeHandle
-      ros::NodeHandle nh_;
+      ros::NodeHandle _nh;
       HazmatEpsilonDetector* hazmatDetector_;
       float ratioX_;
       float ratioY_;
