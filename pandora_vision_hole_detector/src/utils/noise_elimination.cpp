@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/noise_elimination.h"
+#include "utils/noise_elimination.h"
 
 namespace pandora_vision
 {
@@ -55,7 +55,7 @@ namespace pandora_vision
 
     chooseInterpolationMethod(inImage);
 
-    switch(DepthParameters::interpolation_method)
+    switch(Parameters::interpolation_method)
     {
       case 0: //!< Thinning-like interpolation
       {
@@ -472,18 +472,18 @@ namespace pandora_vision
     std = sqrt(std);
     bper = static_cast<float>(blacks) / (image.rows * image.cols);
 
-    DepthParameters::interpolation_method = 15;
+    Parameters::interpolation_method = 15;
     if(bper > 0.7)  //!< Choose close
     {
-      DepthParameters::interpolation_method = 2;
+      Parameters::interpolation_method = 2;
     }
     else if(mean < 0.7)
     {
-      DepthParameters::interpolation_method = 1;
+      Parameters::interpolation_method = 1;
     }
     else
     {
-      DepthParameters::interpolation_method = 0;
+      Parameters::interpolation_method = 0;
     }
     #ifdef DEBUG_TIME
     Timer::tick("chooseInterpolationMethod");

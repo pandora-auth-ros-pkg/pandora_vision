@@ -39,19 +39,17 @@
 #define HOLE_FUSION_NODE_HOLE_FUSION_H
 
 #include <dirent.h>
-#include <boost/thread.hpp>
 #include <ros/package.h>
 #include <std_msgs/Empty.h>
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
 #include "vision_communications/CandidateHoleMsg.h"
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
-#include "message_conversions/message_conversions.h"
-#include <depth_node/defines.h>
-#include "depth_node/depth_parameters.h"
+#include "utils/message_conversions.h"
+#include <utils/defines.h>
+#include "utils/parameters.h"
 #include "hole_fusion_node/depth_filters.h"
 #include "hole_fusion_node/rgb_filters.h"
 #include "hole_fusion_node/generic_filters.h"
-#include "hole_fusion_node/hole_fusion_parameters.h"
 /**
   @namespace vision
   @brief The main namespace for PANDORA vision
@@ -64,9 +62,6 @@ namespace pandora_vision
 
       //!< The ROS node handle
       ros::NodeHandle nodeHandle_;
-
-      //!< The parameters needed for the hole fusion node
-      HoleFusionParameters params_;
 
       //!< The ROS publisher that will be used for unlocking the
       //!< synchronizer_node
@@ -101,6 +96,25 @@ namespace pandora_vision
 
       //!< A histogramm for the texture of walls
       cv::MatND wallsHistogram_;
+
+      //!< The dynamic reconfigure (hole fusion's) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+        hole_fusion_cfgConfig> server;
+
+      //!< The dynamic reconfigure (hole fusion's) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+        hole_fusion_cfgConfig>:: CallbackType f;
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config
+        [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
+        @param[in] level [const uint32_t] The level (?)
+        @return void
+       **/
+      void parametersCallback(
+        const pandora_vision_hole_detector::hole_fusion_cfgConfig& config,
+        const uint32_t& level);
 
       /**
         @brief Callback for the candidate holes via the depth node

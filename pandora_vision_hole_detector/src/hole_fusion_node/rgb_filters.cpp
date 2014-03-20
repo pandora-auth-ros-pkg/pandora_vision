@@ -78,7 +78,7 @@ namespace pandora_vision
     if (inImage.type() != CV_8UC3)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
-        HoleFusionParameters::scale_method);
+        Parameters::scale_method);
     }
     else
     {
@@ -162,7 +162,7 @@ namespace pandora_vision
           }
 
           if (nonZeroInBox >
-            HoleFusionParameters::non_zero_points_in_box_blob_histogram)
+            Parameters::non_zero_points_in_box_blob_histogram)
           {
             overallNonZeroBoxes++;
           }
@@ -238,7 +238,7 @@ namespace pandora_vision
     if (inImage.type() != CV_8UC3)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
-        HoleFusionParameters::scale_method);
+        Parameters::scale_method);
     }
     else
     {
@@ -436,7 +436,7 @@ namespace pandora_vision
     if (inImage.type() != CV_8UC3)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
-        HoleFusionParameters::scale_method);
+        Parameters::scale_method);
     }
     else
     {
@@ -541,8 +541,8 @@ namespace pandora_vision
 
 
       //!< Histogram-related parameters
-      int h_bins = HoleFusionParameters::number_of_hue_bins;
-      int s_bins = HoleFusionParameters::number_of_saturation_bins;
+      int h_bins = Parameters::number_of_hue_bins;
+      int s_bins = Parameters::number_of_saturation_bins;
       int histSize[] = { h_bins, s_bins };
 
       //!< hue varies from 0 to 179, saturation from 0 to 255
@@ -588,7 +588,7 @@ namespace pandora_vision
       //!< is more loosely correlated to the model histogram than the
       //!< blobToRectangleHistogram is
       if (rectangleToModelCorrelation >=
-        HoleFusionParameters::match_texture_threshold &&
+        Parameters::match_texture_threshold &&
         rectangleToModelCorrelation > blobToModelCorrelation)
       {
         probabilitiesVector->at(validKeyPointsIndices[i]) =
@@ -671,7 +671,7 @@ namespace pandora_vision
     if (inImage.type() != CV_8UC3)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
-        HoleFusionParameters::scale_method);
+        Parameters::scale_method);
     }
     else
     {
@@ -866,21 +866,21 @@ namespace pandora_vision
 
     std::map<int, int> filtersOrder;
 
-    if (HoleFusionParameters::run_checker_color_homogenity > 0)
+    if (Parameters::run_checker_color_homogenity > 0)
     {
-      filtersOrder[HoleFusionParameters::run_checker_color_homogenity ] = 1;
+      filtersOrder[Parameters::run_checker_color_homogenity ] = 1;
     }
-    if (HoleFusionParameters::run_checker_luminosity_diff> 0)
+    if (Parameters::run_checker_luminosity_diff> 0)
     {
-      filtersOrder[HoleFusionParameters::run_checker_luminosity_diff ] = 2;
+      filtersOrder[Parameters::run_checker_luminosity_diff ] = 2;
     }
-    if (HoleFusionParameters::run_checker_texture_diff> 0)
+    if (Parameters::run_checker_texture_diff> 0)
     {
-      filtersOrder[HoleFusionParameters::run_checker_texture_diff] = 3;
+      filtersOrder[Parameters::run_checker_texture_diff] = 3;
     }
-    if (HoleFusionParameters::run_checker_texture_backproject> 0)
+    if (Parameters::run_checker_texture_backproject> 0)
     {
-      filtersOrder[HoleFusionParameters::run_checker_texture_backproject] = 4;
+      filtersOrder[Parameters::run_checker_texture_backproject] = 4;
     }
 
     std::vector<cv::Mat> imgs;
@@ -894,7 +894,7 @@ namespace pandora_vision
         o_it->second,
         rgbImage,
         conveyor,
-        HoleFusionParameters::rectangle_inflation_size,
+        Parameters::rectangle_inflation_size,
         inHistogram,
         &probabilitiesVector->at(counter),
         &imgs,
@@ -904,7 +904,7 @@ namespace pandora_vision
     } //!< o_it iterator ends
 
     #ifdef DEBUG_SHOW
-    if(HoleFusionParameters::debug_show_check_holes) // Debug
+    if(Parameters::debug_show_check_holes) // Debug
     {
       Visualization::multipleShow("rgb checkHoles functions",
         imgs, msgs, 1200, 1);
@@ -1046,7 +1046,7 @@ namespace pandora_vision
     conveyor->keyPoints = finalKeyPoints;
 
     #ifdef DEBUG_SHOW
-    if(HoleFusionParameters::debug_show_check_holes) // Debug
+    if(Parameters::debug_show_check_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" ") + windowMsg;

@@ -35,7 +35,7 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "rgb_node/hole_filters.h"
+#include "utils/hole_filters.h"
 
 namespace pandora_vision
 {
@@ -60,7 +60,7 @@ namespace pandora_vision
     HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
-    Timer::start("validateBlobs","findHoles");
+    Timer::start("validateBlobs", "findHoles");
     #endif
 
     switch(detectionMethod)
@@ -94,7 +94,7 @@ namespace pandora_vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than RgbParameters::bounding_box_min_area_threshold
+        //!< be greater than Parameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles(
             keyPoints,
             rectangles,
@@ -111,7 +111,7 @@ namespace pandora_vision
 
         BlobDetection::raycastKeypoint(keyPoints,
             denoisedDepthImageEdges,
-            RgbParameters::raycast_keypoint_partitions,
+            Parameters::raycast_keypoint_partitions,
             &blobsOutlineVector,
             &blobsArea);
 
@@ -134,7 +134,7 @@ namespace pandora_vision
 
         //!< Correlate each keypoint with each rectangle found.
         //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than RgbParameters::bounding_box_min_area_threshold
+        //!< be greater than Parameters::bounding_box_min_area_threshold
         validateKeypointsToRectangles(
             keyPoints,
             rectangles,
@@ -185,7 +185,7 @@ namespace pandora_vision
     HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
-    Timer::start("validateKeypointsToRectangles","validateBlobs");
+    Timer::start("validateKeypointsToRectangles", "validateBlobs");
     #endif
     for (unsigned int keypointId = 0;
       keypointId < inKeyPoints.size(); keypointId++)
@@ -245,5 +245,6 @@ namespace pandora_vision
     Timer::tick("validateKeypointsToRectangles");
     #endif
   }
-}
+
+} // namespace pandora_vision
 

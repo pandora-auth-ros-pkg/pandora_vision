@@ -38,7 +38,7 @@
 #ifndef HOLE_FUSION_NODE_DEPTH_FILTERS_H
 #define HOLE_FUSION_NODE_DEPTH_FILTERS_H
 
-#include "depth_node/hole_filters.h"
+#include "utils/hole_filters.h"
 #include "hole_fusion_node/planes_detection.h"
 #include <math.h>
 

@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "message_conversions/message_conversions.h"
+#include "utils/message_conversions.h"
 
 /**
   @namespace vision

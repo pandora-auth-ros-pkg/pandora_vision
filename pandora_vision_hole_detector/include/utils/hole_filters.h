@@ -35,13 +35,13 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef RGB_NODE_HOLE_FILTERS_H
-#define RGB_NODE_HOLE_FILTERS_H
+#ifndef UTILS_HOLE_FILTERS_H
+#define UTILS_HOLE_FILTERS_H
 
-#include "rgb_node/noise_elimination.h"
-#include "rgb_node/edge_detection.h"
-#include "rgb_node/blob_detection.h"
-#include "rgb_node/bounding_box_detection.h"
+#include "utils/noise_elimination.h"
+#include "utils/edge_detection.h"
+#include "utils/blob_detection.h"
+#include "utils/bounding_box_detection.h"
 #include <math.h>
 
 /**
@@ -127,4 +127,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // RGB_NODE_HOLE_FILTERS_H
+#endif  // UTILS_HOLE_FILTERS_H

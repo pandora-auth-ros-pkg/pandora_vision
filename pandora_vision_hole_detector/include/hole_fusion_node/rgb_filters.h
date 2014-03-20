@@ -38,8 +38,8 @@
 #define HOLE_FUSION_NODE_RGB_FILTERS_H
 
 #include <math.h>
-#include "depth_node/hole_filters.h"
-#include "hole_fusion_node/hole_fusion_parameters.h"
+#include "utils/hole_filters.h"
+#include "utils/parameters.h"
 
 /**
   @namespace vision

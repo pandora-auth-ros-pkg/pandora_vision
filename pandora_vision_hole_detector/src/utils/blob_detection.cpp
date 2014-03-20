@@ -35,7 +35,7 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "rgb_node/blob_detection.h"
+#include "utils/blob_detection.h"
 
 namespace pandora_vision
 {
@@ -56,7 +56,7 @@ namespace pandora_vision
     std::vector<float>* blobsArea)
   {
     #ifdef DEBUG_TIME
-    Timer::start("brushfireKeypoint","validateBlobs");
+    Timer::start("brushfireKeypoint", "validateBlobs");
     #endif
 
     unsigned char* ptr = edgesImage->ptr();
@@ -68,12 +68,14 @@ namespace pandora_vision
       std::vector<cv::Point> keypointOutline;
 
       current.insert(
-          (int)round(inKeyPoints[keypointId].pt.y) * edgesImage->cols
-        + (int)round(inKeyPoints[keypointId].pt.x));
+          static_cast<int>(
+            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       visited.insert(
-          (int)round(inKeyPoints[keypointId].pt.y) * edgesImage->cols
-        + (int)round(inKeyPoints[keypointId].pt.x));
+          static_cast<int>(
+            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       while (current.size() != 0)
       {
@@ -85,8 +87,8 @@ namespace pandora_vision
           {
             for (int n = -1; n < 2; n++)
             {
-              int x = (int)(*it) % edgesImage->cols + m;
-              int y = (int)(*it) / edgesImage->cols + n;
+              int x = static_cast<int>(*it) % edgesImage->cols + m;
+              int y = static_cast<int>(*it) / edgesImage->cols + n;
               int ind = y * edgesImage->cols + x;
 
               if (x < 0 ||
@@ -105,7 +107,7 @@ namespace pandora_vision
 
               if (v != 0)
               {
-                keypointOutline.push_back(cv::Point(x,y));
+                keypointOutline.push_back(cv::Point(x, y));
               }
 
               visited.insert(ind);
@@ -116,7 +118,7 @@ namespace pandora_vision
         next.clear();
       }
 
-      blobsArea->push_back((float)visited.size());
+      blobsArea->push_back(static_cast<float>(visited.size()));
       blobsOutlineVector->push_back(keypointOutline);
     }
 
@@ -150,10 +152,10 @@ namespace pandora_vision
 
     std::set<unsigned int> current, next;
 
-    current.insert((int)round(inPoint.y) * inImage->cols
-      + (int)round(inPoint.x));
-    visited->insert((int)round(inPoint.y) * inImage->cols
-      + (int)round(inPoint.x));
+    current.insert(static_cast<int>(round(inPoint.y) * inImage->cols)
+      + static_cast<int>(round(inPoint.x)));
+    visited->insert(static_cast<int>(round(inPoint.y) * inImage->cols)
+      + static_cast<int>(round(inPoint.x)));
 
     while (current.size() != 0)
     {
@@ -173,8 +175,8 @@ namespace pandora_vision
             //!< 1-pixel border
             if (abs(m) + abs(n) < 2)
             {
-              int x = (int)(*it) % inImage->cols + m;
-              int y = (int)(*it) / inImage->cols + n;
+              int x = static_cast<int>(*it) % inImage->cols + m;
+              int y = static_cast<int>(*it) / inImage->cols + n;
 
               int ind = y * inImage->cols + x;
 
@@ -216,28 +218,28 @@ namespace pandora_vision
       std::vector<cv::KeyPoint>* keyPointsOut)
   {
     #ifdef DEBUG_TIME
-    Timer::start("detectBlobs","findHoles");
+    Timer::start("detectBlobs", "findHoles");
     #endif
 
     cv::SimpleBlobDetector::Params params;
 
-    params.minThreshold = RgbParameters::blob_min_threshold; //40;
-    params.maxThreshold = RgbParameters::blob_max_threshold; //60;
-    params.thresholdStep = RgbParameters::blob_threshold_step;
+    params.minThreshold = Parameters::blob_min_threshold; //40;
+    params.maxThreshold = Parameters::blob_max_threshold; //60;
+    params.thresholdStep = Parameters::blob_threshold_step;
 
-    params.minArea = RgbParameters::blob_min_area;
-    params.maxArea = RgbParameters::blob_max_area;
+    params.minArea = Parameters::blob_min_area;
+    params.maxArea = Parameters::blob_max_area;
 
-    params.minConvexity = RgbParameters::blob_min_convexity; //0.6;
-    params.maxConvexity = RgbParameters::blob_max_convexity;
+    params.minConvexity = Parameters::blob_min_convexity; //0.6;
+    params.maxConvexity = Parameters::blob_max_convexity;
 
-    params.minInertiaRatio = RgbParameters::blob_min_inertia_ratio;//0.5;
+    params.minInertiaRatio = Parameters::blob_min_inertia_ratio;//0.5;
 
-    params.maxCircularity = RgbParameters::blob_max_circularity;
-    params.minCircularity = RgbParameters::blob_min_circularity; //0.3;
+    params.maxCircularity = Parameters::blob_max_circularity;
+    params.minCircularity = Parameters::blob_min_circularity; //0.3;
 
-    params.filterByColor = RgbParameters::blob_filter_by_color;
-    params.filterByCircularity = RgbParameters::blob_filter_by_circularity;
+    params.filterByColor = Parameters::blob_filter_by_color;
+    params.filterByCircularity = Parameters::blob_filter_by_circularity;
 
     cv::SimpleBlobDetector blobDetector(params);
     blobDetector.create("SimpleBlob");
@@ -288,7 +290,7 @@ namespace pandora_vision
       std::vector<float>* blobsArea)
   {
     #ifdef DEBUG_TIME
-    Timer::start("raycastKeypoint","validateBlobs");
+    Timer::start("raycastKeypoint", "validateBlobs");
     #endif
 
     unsigned char* ptr = edgesImage->ptr();
@@ -322,7 +324,7 @@ namespace pandora_vision
               if (v != 0)
               {
                 outlineFound = true;
-                keypointOutline.push_back(cv::Point(x,y));
+                keypointOutline.push_back(cv::Point(x, y));
               }
             }
           }
@@ -342,7 +344,7 @@ namespace pandora_vision
         //!< O is the keypoint and A, B any two successive outline points
         float lengthOA = sqrt(
             pow(inKeyPoints[keypointId].pt.x - keypointOutline[t].x, 2)
-            + pow(inKeyPoints[keypointId].pt.y - keypointOutline[t].y,2));
+            + pow(inKeyPoints[keypointId].pt.y - keypointOutline[t].y, 2));
         float lengthOB = sqrt(
             pow(inKeyPoints[keypointId].pt.x
               - keypointOutline[(t + 1) % partitions].x, 2)
@@ -417,8 +419,8 @@ namespace pandora_vision
                 for (int n = -1; n < 2; n++)
                 {
 
-                  int x = (int)(*it) % inImage->cols + m;
-                  int y = (int)(*it) / inImage->cols + n;
+                  int x = static_cast<int>(*it) % inImage->cols + m;
+                  int y = static_cast<int>(*it) / inImage->cols + n;
 
                   if (x < 0 || y < 0 ||
                       x > inImage->cols - 1 || y > inImage->rows - 1)
@@ -432,7 +434,7 @@ namespace pandora_vision
                   if ((nV != 0) && visited.find(nInd) == visited.end())
                   {
                     next.insert(nInd);
-                    curve.push_back(cv::Point(y,x));
+                    curve.push_back(cv::Point(y, x));
                   }
 
                   visited.insert(nInd);
@@ -459,4 +461,4 @@ namespace pandora_vision
     Timer::tick("getClosedCurves");
     #endif
   }
-}
+} // namespace pandora_vision

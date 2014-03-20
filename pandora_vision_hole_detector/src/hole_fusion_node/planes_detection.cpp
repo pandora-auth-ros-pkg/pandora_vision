@@ -74,12 +74,12 @@ namespace pandora_vision
     std::vector<PointCloudXYZPtr> planesVectorOut;
     std::vector<pcl::ModelCoefficients> coefficientsVectorOut;
 
-    if (HoleFusionParameters::segmentation_method == 0)
+    if (Parameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
           &planesVectorOut, &coefficientsVectorOut, inliersVector);
     }
-    else if (HoleFusionParameters::segmentation_method == 1)
+    else if (Parameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
           &planesVectorOut, &coefficientsVectorOut, inliersVector);
@@ -147,12 +147,12 @@ namespace pandora_vision
 
     std::vector<pcl::PointIndices::Ptr> inliersVector;
 
-    if (HoleFusionParameters::segmentation_method == 0)
+    if (Parameters::segmentation_method == 0)
     {
       locatePlanesUsingSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, &inliersVector);
     }
-    else if (HoleFusionParameters::segmentation_method == 1)
+    else if (Parameters::segmentation_method == 1)
     {
       locatePlanesUsingNormalsSACSegmentation(inCloud,
         planesVectorOut, coefficientsVectorOut, &inliersVector);
@@ -204,12 +204,12 @@ namespace pandora_vision
     //!< Mandatory
     seg.setModelType (pcl::SACMODEL_PLANE);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (HoleFusionParameters::max_iterations);
+    seg.setMaxIterations (Parameters::max_iterations);
 
     //!< Maybe a value needs to be set dynamically here, depending on
     //!< the distance of the kinect to the plane.
     seg.setDistanceThreshold(
-      HoleFusionParameters::point_to_plane_distance_threshold);
+      Parameters::point_to_plane_distance_threshold);
 
     //!< Create the filtering object
     pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -226,7 +226,7 @@ namespace pandora_vision
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >
-      HoleFusionParameters::num_points_to_exclude * nr_points)
+      Parameters::num_points_to_exclude * nr_points)
     {
       //!< Segment the largest planar component from the remaining cloud
       seg.setInputCloud (cloudIn);
@@ -334,12 +334,12 @@ namespace pandora_vision
     seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
     seg.setNormalDistanceWeight(0.01);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (HoleFusionParameters::max_iterations);
+    seg.setMaxIterations (Parameters::max_iterations);
 
     //!< Maybe a value needs to be set dynamically here,
     //!< depending on the distance of the kinect to the plane.
     seg.setDistanceThreshold(
-      HoleFusionParameters::point_to_plane_distance_threshold);
+      Parameters::point_to_plane_distance_threshold);
 
     //!< Create the filtering object
     pcl::ExtractIndices<pcl::PointXYZ> extract;
@@ -363,7 +363,7 @@ namespace pandora_vision
     //!< While 100 x num_points_to_exclude % of the original
     //!< cloud is still there
     while (cloudIn->points.size () >
-        HoleFusionParameters::num_points_to_exclude * nr_points)
+        Parameters::num_points_to_exclude * nr_points)
     {
       //!< Segment the largest planar component from the
       //!< remaining cloud

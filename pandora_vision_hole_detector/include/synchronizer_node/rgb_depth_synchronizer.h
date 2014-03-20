@@ -38,7 +38,7 @@
 #ifndef SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 #define SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 
-#include <depth_node/defines.h>
+#include <utils/defines.h>
 #include <std_msgs/Empty.h>
 
 /**
@@ -94,6 +94,7 @@ namespace pandora_vision
         @return void
        **/
       void holeFusionCallback(const std_msgs::Empty& lockMsg);
+
 
     public:
 

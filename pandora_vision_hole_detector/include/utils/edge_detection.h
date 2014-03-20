@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef DEPTH_NODE_EDGE_DETECTION_H
-#define DEPTH_NODE_EDGE_DETECTION_H
+#ifndef UTILS_EDGE_DETECTION_H
+#define UTILS_EDGE_DETECTION_H
 
-#include "depth_node/morphological_operators.h"
+#include "utils/morphological_operators.h"
 
 /**
   @namespace vision
@@ -200,4 +200,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // DEPTH_NODE_EDGE_DETECTION_H
+#endif  // UTILS_EDGE_DETECTION_H

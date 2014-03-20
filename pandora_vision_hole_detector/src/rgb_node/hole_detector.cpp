@@ -126,7 +126,7 @@ namespace pandora_vision
     HoleFilters::validateBlobs(
       detectedkeyPoints,
       &temp,
-      RgbParameters::bounding_box_detection_method,
+      Parameters::bounding_box_detection_method,
       &conveyor);
 
     #ifdef SHOW_DEBUG_IMAGE

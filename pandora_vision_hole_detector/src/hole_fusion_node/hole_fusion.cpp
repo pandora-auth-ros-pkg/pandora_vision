@@ -73,6 +73,12 @@ namespace pandora_vision
       "/synchronized/camera/rgb/candidate_holes", 1,
       &HoleFusion::rgbCandidateHolesCallback, this);
 
+    //!< The dynamic reconfigure (hole fusion's) parameter's callback
+    server.setCallback(boost::bind(&HoleFusion::parametersCallback,
+        this, _1, _2));
+
+
+
     ROS_INFO("HoleFusion node initiated");
 
     //!< Start the synchronizer
@@ -128,7 +134,7 @@ namespace pandora_vision
       &interpolatedDepthImage_);
 
     #ifdef DEBUG_SHOW
-    if (HoleFusionParameters::debug_show_find_holes)
+    if (Parameters::debug_show_find_holes)
     {
       Visualization::showScaled(
         "interpolated depth image arrived in Hole Fusion node",
@@ -189,7 +195,7 @@ namespace pandora_vision
       &rgbImage_);
 
     #ifdef DEBUG_SHOW
-    if (HoleFusionParameters::debug_show_find_holes)
+    if (Parameters::debug_show_find_holes)
     {
       Visualization::showScaled(
         "RGB image arrived in Hole Fusion node", rgbImage_, 1);
@@ -333,13 +339,13 @@ namespace pandora_vision
 
       cv::cvtColor(
         Visualization::scaleImageForVisualization(cv::imread(temp_name),
-          HoleFusionParameters::scale_method),
+          Parameters::scale_method),
         wallImagesHSV[i], cv::COLOR_BGR2HSV);
     }
 
     //!< Histogram-related parameters
-    int h_bins = HoleFusionParameters::number_of_hue_bins;
-    int s_bins = HoleFusionParameters::number_of_saturation_bins;
+    int h_bins = Parameters::number_of_hue_bins;
+    int s_bins = Parameters::number_of_saturation_bins;
     int histSize[] = { h_bins, s_bins };
 
     //!< hue varies from 0 to 179, saturation from 0 to 255
@@ -386,23 +392,23 @@ namespace pandora_vision
     //!< how many rows the vector will accomodate
     int depthActiveFilters = 0;
 
-    if (HoleFusionParameters::run_checker_depth_diff > 0)
+    if (Parameters::run_checker_depth_diff > 0)
     {
       depthActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_outline_of_rectangle > 0)
+    if (Parameters::run_checker_outline_of_rectangle > 0)
     {
       depthActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_depth_area > 0)
+    if (Parameters::run_checker_depth_area > 0)
     {
       depthActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_brushfire_outline_to_rectangle > 0)
+    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
     {
       depthActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_depth_homogenity > 0)
+    if (Parameters::run_checker_depth_homogenity > 0)
     {
       depthActiveFilters++;
     }
@@ -422,19 +428,19 @@ namespace pandora_vision
     //!< how many rows the vector will accomodate
     int rgbActiveFilters = 0;
 
-    if (HoleFusionParameters::run_checker_color_homogenity > 0)
+    if (Parameters::run_checker_color_homogenity > 0)
     {
       rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_luminosity_diff > 0)
+    if (Parameters::run_checker_luminosity_diff > 0)
     {
       rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_texture_diff > 0)
+    if (Parameters::run_checker_texture_diff > 0)
     {
       rgbActiveFilters++;
     }
-    if (HoleFusionParameters::run_checker_texture_backproject > 0)
+    if (Parameters::run_checker_texture_backproject > 0)
     {
       rgbActiveFilters++;
     }
@@ -465,7 +471,7 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     std::vector<std::string> msgs;
     std::vector<cv::Mat> imgs;
-    if(HoleFusionParameters::debug_show_find_holes) // Debug
+    if(Parameters::debug_show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Final keypoints");
@@ -478,10 +484,10 @@ namespace pandora_vision
           depthHolesConveyor_.keyPoints)
         );
     }
-    if(HoleFusionParameters::debug_show_find_holes)
+    if(Parameters::debug_show_find_holes)
     {
       Visualization::multipleShow("depthCandidateHolesCallback function",
-        imgs, msgs, HoleFusionParameters::debug_show_find_holes_size, 1);
+        imgs, msgs, Parameters::debug_show_find_holes_size, 1);
     }
     #endif
     //!< Processing complete.
@@ -591,6 +597,158 @@ namespace pandora_vision
 
     std_msgs::Empty unlockMsg;
     unlockPublisher_.publish(unlockMsg);
+  }
+
+  /**
+    @brief The function called when a parameter is changed
+    @param[in] config
+    [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
+    @param[in] level [const uint32_t] The level (?)
+    @return void
+   **/
+  void HoleFusion::parametersCallback(
+    const pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
+    const uint32_t& level)
+  {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Parameters callback called");
+    #endif
+
+    Parameters::kanny_ratio =
+      config.kanny_ratio;
+    Parameters::kanny_kernel_size =
+      config.kanny_kernel_size;
+    Parameters::kanny_low_threshold =
+      config.kanny_low_threshold;
+    Parameters::kanny_blur_noise_kernel_size =
+      config.kanny_blur_noise_kernel_size;
+    Parameters::contrast_enhance_beta =
+      config.contrast_enhance_beta;
+    Parameters::contrast_enhance_alpha =
+      config.contrast_enhance_alpha;
+    Parameters::threshold_lower_value =
+      config.threshold_lower_value;
+    Parameters::adaptive_max_value =
+      config.adaptive_max_value;
+    Parameters::adaptive_method =
+      config.adaptive_method;
+    Parameters::adaptive_block_size =
+      config.adaptive_block_size;
+    Parameters::adaptive_c_value =
+      config.adaptive_c_value;
+    Parameters::blob_min_threshold =
+      config.blob_min_threshold;
+    Parameters::blob_max_threshold =
+      config.blob_max_threshold;
+    Parameters::blob_threshold_step =
+      config.blob_threshold_step;
+    Parameters::blob_min_area =
+      config.blob_min_area;
+    Parameters::blob_max_area =
+      config.blob_max_area;
+    Parameters::blob_min_convexity =
+      config.blob_min_convexity;
+    Parameters::blob_max_convexity =
+      config.blob_max_convexity;
+    Parameters::blob_min_inertia_ratio =
+      config.blob_min_inertia_ratio;
+    Parameters::blob_max_circularity =
+      config.blob_max_circularity;
+    Parameters::blob_min_circularity =
+      config.blob_min_circularity;
+    Parameters::blob_filter_by_color =
+      config.blob_filter_by_color;
+    Parameters::blob_filter_by_circularity =
+      config.blob_filter_by_circularity;
+    Parameters::bounding_box_min_area_threshold =
+      config.bounding_box_min_area_threshold;
+    Parameters::bounding_box_detection_method =
+      config.bounding_box_detection_method;
+    Parameters::raycast_keypoint_partitions =
+      config.raycast_keypoint_partitions;
+    Parameters::AB_to_MO_ratio =
+      config.AB_to_MO_ratio;
+    Parameters::interpolation_method =
+      config.interpolation_method;
+
+    Parameters::run_checker_depth_diff =
+      config.run_checker_depth_diff;
+    Parameters::run_checker_outline_of_rectangle =
+      config.run_checker_outline_of_rectangle;
+    Parameters::run_checker_depth_area =
+      config.run_checker_depth_area;
+    Parameters::run_checker_brushfire_outline_to_rectangle =
+      config.run_checker_brushfire_outline_to_rectangle;
+    Parameters::run_checker_depth_homogenity =
+      config.run_checker_depth_homogenity;
+
+    Parameters::rectangle_inflation_size =
+      config.rectangle_inflation_size;
+    Parameters::depth_difference =
+      config.depth_difference;
+
+    Parameters::run_checker_color_homogenity =
+      config.run_checker_color_homogenity;
+    Parameters::run_checker_luminosity_diff =
+      config.run_checker_luminosity_diff;
+    Parameters::run_checker_texture_diff =
+      config.run_checker_texture_diff;
+    Parameters::run_checker_texture_backproject =
+      config.run_checker_texture_backproject;
+
+    Parameters::segmentation_method =
+      config.segmentation_method;
+    Parameters::max_iterations =
+      config.max_iterations;
+    Parameters::num_points_to_exclude =
+      config.num_points_to_exclude;
+    Parameters::point_to_plane_distance_threshold =
+      config.point_to_plane_distance_threshold;
+    Parameters::scale_method =
+      config.scale_method;
+    Parameters::debug_show_find_holes =
+      config.debug_show_find_holes;
+    Parameters::debug_show_find_holes_size =
+      config.debug_show_find_holes_size;
+    Parameters::debug_time_find_holes =
+      config.debug_time_find_holes;
+    Parameters::debug_show_denoise_edges =
+      config.debug_show_denoise_edges;
+    Parameters::debug_show_denoise_edges_size =
+      config.debug_show_denoise_edges_size;
+    Parameters::debug_show_connect_pairs =
+      config.debug_show_connect_pairs;
+    Parameters::debug_show_connect_pairs_size =
+      config.debug_show_connect_pairs_size;
+
+    Parameters::debug_show_get_shapes_clear_border  =
+      config.debug_show_get_shapes_clear_border;
+    Parameters::debug_show_get_shapes_clear_border_size =
+      config.debug_show_get_shapes_clear_border_size;
+
+    Parameters::debug_show_check_holes =
+      config.debug_show_check_holes;
+    Parameters::debug_show_check_holes_size =
+      config.debug_show_check_holes_size;
+
+    Parameters::minimum_curve_points =
+      config.minimum_curve_points;
+
+    Parameters::match_texture_threshold =
+      config.match_texture_threshold;
+
+    Parameters::non_zero_points_in_box_blob_histogram =
+      config.non_zero_points_in_box_blob_histogram;
+
+    Parameters::num_bins_threshold =
+      config.num_bins_threshold;
+
+    Parameters::number_of_hue_bins =
+      config.number_of_hue_bins;
+    Parameters::number_of_saturation_bins =
+      config.number_of_saturation_bins;
+    Parameters::number_of_value_bins =
+      config.number_of_value_bins;
   }
 
 } // namespace pandora_vision

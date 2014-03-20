@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef RGB_NODE_BOUNDING_BOX_DETECTION_H
-#define RGB_NODE_BOUNDING_BOX_DETECTION_H
+#ifndef UTILS_BOUNDING_BOX_DETECTION_H
+#define UTILS_BOUNDING_BOX_DETECTION_H
 
-#include "rgb_node/morphological_operators.h"
+#include "utils/morphological_operators.h"
 
 /**
 @namespace vision
@@ -74,6 +74,6 @@ namespace pandora_vision
 
   };
 
-}
+} // namespace pandora_vision
 
-#endif  // RGB_NODE_BOUNDING_BOX_DETECTION_H
+#endif  // UTILS_BOUNDING_BOX_DETECTION_H
