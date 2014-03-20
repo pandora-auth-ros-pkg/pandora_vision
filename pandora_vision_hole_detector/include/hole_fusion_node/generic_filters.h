@@ -57,9 +57,9 @@ namespace pandora_vision
 
       /**
         @brief Assimilates the fragmented holes of @param assimilable into the
-        existing whole ones of @param assimilator. It checks whether the each
-        entry of the set of assimilable's bounding box vertices reside inside
-        the assimilator's set of bounding boxes. If so, the latter keypoint
+        existing whole ones of @param assimilator. It checks whether each
+        entry of the set of assimilable's outline points reside inside
+        the assimilator's set of outlines. If so, the latter keypoint
         etc are kept unchanged and the former one is deleted.
         @param[in][out] assimilator [const HoleFilters::HolesConveyor&]
         The candidate holes conveyor that will potentially assimilate the

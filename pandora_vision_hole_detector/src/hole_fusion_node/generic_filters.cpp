@@ -68,9 +68,9 @@ namespace pandora_vision
 
   /**
     @brief Assimilates the fragmented holes of @param assimilable into the
-    existing whole ones of @param assimilator. It checks whether the each
-    entry of the set of assimilable's bounding box vertices reside inside
-    the assimilator's set of bounding boxes. If so, the latter keypoint
+    existing whole ones of @param assimilator. It checks whether each
+    entry of the set of assimilable's outline points reside inside
+    the assimilator's set of outlines. If so, the latter keypoint
     etc are kept unchanged and the former one is deleted.
     @param[in][out] assimilator [const HoleFilters::HolesConveyor&]
     The candidate holes conveyor that will potentially assimilate the
@@ -89,26 +89,32 @@ namespace pandora_vision
     {
       for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
       {
-        //!< Are all the vertices of assimilable inside the
-        //!< assimilator's bounding box?
-        bool allAssimilableVerticesInAssimilator = true;
-        for (int av = 0; av < assimilable->rectangles[j].size(); av++)
+        //!< Are all the outline points of assimilable inside the
+        //!< assimilator's outline?
+        bool allAssimilableOutlinePointsInAssimilator = true;
+        for (int av = 0; av < assimilable->outlines[j].size(); av++)
         {
-          if (cv::pointPolygonTest(assimilator.rectangles[i],
-              assimilable->rectangles[j][av], false) < 0)
+          if (cv::pointPolygonTest(assimilator.outlines[i],
+              assimilable->outlines[j][av], false) < 0)
           {
-            allAssimilableVerticesInAssimilator = false;
+            allAssimilableOutlinePointsInAssimilator = false;
             break;
           }
         }
 
-        //!< If all of assimilable's vertices reside inside the assimilator's
-        //!< bounding box delete the keypoint along with its
+        //!< If all of assimilable's outline points reside inside the
+        //!< assimilator's outline delete the keypoint along with its
         //!< associated conveyor entries
-        if (allAssimilableVerticesInAssimilator)
+        if (allAssimilableOutlinePointsInAssimilator)
         {
           assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
+
+          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
+            assimilable->outlines[j].end());
           assimilable->outlines.erase(assimilable->outlines.begin() + j);
+
+          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
+            assimilable->rectangles[j].end());
           assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
         }
       }
@@ -302,7 +308,11 @@ namespace pandora_vision
           //!< The assimilable has now been merged with the assimilator,
           //!< so delete it. So long, assimilable
           assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
+          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
+            assimilable->outlines[j].end());
           assimilable->outlines.erase(assimilable->outlines.begin() + j);
+          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
+            assimilable->rectangles[j].end());
           assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
         }
       }
