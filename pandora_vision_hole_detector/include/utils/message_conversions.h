@@ -38,7 +38,7 @@
 #ifndef MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H
 #define MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H
 
-#include "depth_node/defines.h"
+#include "utils/defines.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
 

@@ -38,7 +38,7 @@
 #ifndef DEPTH_NODE_HOLE_DETECTOR_H
 #define DEPTH_NODE_HOLE_DETECTOR_H
 
-#include "depth_node/hole_filters.h"
+#include "utils/hole_filters.h"
 
 /**
   @namespace vision
@@ -70,6 +70,7 @@ namespace pandora_vision
       static HoleFilters::HolesConveyor findHoles(const cv::Mat& depthImage,
         cv::Mat* interpolatedDepthImage);
   };
+
 } // namespace pandora_vision
 
 #endif  // DEPTH_NODE_HOLE_DETECTOR_H

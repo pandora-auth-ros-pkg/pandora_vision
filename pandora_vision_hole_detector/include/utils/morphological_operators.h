@@ -35,10 +35,10 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef KINECT_MORPHOLOGY
-#define KINECT_MORPHOLOGY
+#ifndef UTILS_MORPHOLOGICAL_OPERATORS_H
+#define UTILS_MORPHOLOGICAL_OPERATORS_H
 
-#include "rgb_node/visualization.h"
+#include "utils/visualization.h"
 
 /**
   @namespace vision
@@ -52,8 +52,6 @@ namespace pandora_vision
    **/
   class Morphology
   {
-
-
     public:
 
       /**
@@ -158,6 +156,6 @@ namespace pandora_vision
       static void pruningStrictIterative(cv::Mat* inImage, const int& steps);
   };
 
-}
+} // namespace pandora_vision
 
-#endif
+#endif  // UTILS_MORPHOLOGICAL_OPERATORS_H

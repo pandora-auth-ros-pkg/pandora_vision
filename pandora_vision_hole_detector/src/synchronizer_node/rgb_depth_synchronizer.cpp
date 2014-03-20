@@ -36,7 +36,7 @@
 *********************************************************************/
 
 #include "synchronizer_node/rgb_depth_synchronizer.h"
-#include "message_conversions/message_conversions.h"
+#include "utils/message_conversions.h"
 
 namespace pandora_vision
 {

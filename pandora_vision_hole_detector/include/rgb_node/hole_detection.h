@@ -40,20 +40,19 @@
 
 #include "ros/ros.h"
 #include <ros/package.h>
-
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
-#include "state_manager/state_client.h"
-
 #include <iostream>
 #include <stdlib.h>
 
-#include "rgb_node/hole_detector.h"
 
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
+#include "state_manager/state_client.h"
+#include "utils/parameters.h"
+#include "rgb_node/hole_detector.h"
 
 namespace pandora_vision
 {
@@ -108,6 +107,12 @@ namespace pandora_vision
       //!< potentional holes in current frame
       HoleDetector _holeDetector;
 
+      //!< The dynamic reconfigure (RGB) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig> server;
+
+      //!< The dynamic reconfigure (RGB) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>::CallbackType f;
+
       /**
         @brief Get parameters referring to view and frame characteristics from
         launch file
@@ -126,8 +131,18 @@ namespace pandora_vision
           const HoleFilters::HolesConveyor& conveyor,
           const sensor_msgs::Image& rgbImage,
           vision_communications::RgbCandidateHolesVectorMsg*
-            rgbCandidateHolesMsg,
+          rgbCandidateHolesMsg,
           const std::string& encoding);
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config [const pandora_vision_hole_detector::rgb_cfgConfig&]
+        @param[in] level [const uint32_t] The level (?)
+        @return void
+       **/
+      void parametersCallback(
+        const pandora_vision_hole_detector::rgb_cfgConfig& config,
+        const uint32_t& level);
 
     public:
 

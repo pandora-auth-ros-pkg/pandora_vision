@@ -44,7 +44,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "rgb_node/hole_filters.h"
+#include "utils/hole_filters.h"
 
 namespace pandora_vision
 {

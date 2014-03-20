@@ -35,48 +35,22 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef DEPTH_NODE_DEPTH_PARAMETERS_H
-#define DEPTH_NODE_DEPTH_PARAMETERS_H
+#ifndef UTILS_PARAMETERS_H
+#define UTILS_PARAMETERS_H
 
-#include "depth_node/defines.h"
+#include "utils/defines.h"
+#include "utils/parameters.h"
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole_detector/depth_cfgConfig.h>
+#include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
+#include <pandora_vision_hole_detector/rgb_cfgConfig.h>
 
 namespace pandora_vision
 {
-
-  struct DepthParameters
+  struct Parameters
   {
-
-    /**
-      @brief The DepthParameters constructor
-     **/
-    DepthParameters(void);
-
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
-      server;
-    dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>::
-      CallbackType f;
-
-    /**
-      @brief The function called when a parateter is changed
-      @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
-      @param[in] level [const uint32_t] The level (?)
-      @return void
-     **/
-    void callback(const pandora_vision_hole_detector::depth_cfgConfig& config,
-      const uint32_t& level);
-
-    /**
-      @brief Retrieve the interpolation method
-      @return int The interpolation method
-     **/
-    int getInterpolationMethod();
-
-    //!< -------------------DepthParameters-----------------------------//
-
     //!< Subscriber of kinect parameter changing
-    ros::Subscriber     _parameterChangingSubscriber;
+    ros::Subscriber _parameterChangingSubscriber;
 
     //!< Kanny parameters
     static int kanny_ratio;
@@ -110,11 +84,13 @@ namespace pandora_vision
 
     //!< Bounding boxes parameters
     static int bounding_box_min_area_threshold;
+
     //!< The bounding box detection method
     //!< 0 for detecting by means of brushfire starting\
     //from the keypoint of the blob
     //!< 1 for detecting by means of contours around the edges of the blob
     static int bounding_box_detection_method;
+
     //!< When using raycast instead of brushfire to find the (approximate here)
     //!< outline of blobs, raycast_keypoint_partitions dictates the number of
     //!< rays, or equivalently, the number of partitions in which the blob is
@@ -123,6 +99,7 @@ namespace pandora_vision
 
     //<! Loose ends connection parameters
     static int AB_to_MO_ratio;
+
     //!< Interpolation parameters
     //
     //!< The interpolation method for noise removal
@@ -136,8 +113,14 @@ namespace pandora_vision
     static int run_checker_depth_area;
     static int run_checker_brushfire_outline_to_rectangle;
     static int run_checker_outline_of_rectangle;
+    static int run_checker_depth_homogenity;
     static int rectangle_inflation_size;
     static float depth_difference;
+
+    static int run_checker_color_homogenity;
+    static int run_checker_luminosity_diff;
+    static int run_checker_texture_diff;
+    static int run_checker_texture_backproject;
 
     //!< Plane detection
     static int segmentation_method;
@@ -168,7 +151,20 @@ namespace pandora_vision
 
     static int minimum_curve_points;
 
+    //!< Texture parameters
+    //!< The threshold for texture matching
+    static float match_texture_threshold;
+
+    //!< Color homogenity parameters
+    static int num_bins_threshold;
+    static int non_zero_points_in_box_blob_histogram;
+
+    //!< Histogram parameters
+    static int number_of_hue_bins;
+    static int number_of_saturation_bins;
+    static int number_of_value_bins;
   };
+
 } // namespace pandora_vision
 
-#endif  // DEPTH_NODE_DEPTH_PARAMETERS_H
+#endif  // UTILS_PARAMETERS_H

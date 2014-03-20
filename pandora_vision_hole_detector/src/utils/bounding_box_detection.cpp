@@ -35,13 +35,13 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#include "depth_node/bounding_box_detection.h"
+#include "utils/bounding_box_detection.h"
 
 namespace pandora_vision
 {
   /**
     @brief Finds rotated bounding boxes from blob outlines. The blob's area
-    must be larger than DepthParameters::bounding_box_min_area_threshold.
+    must be larger than Parameters::bounding_box_min_area_threshold.
     The blob and its bounding rectangle must be inside the image's limits.
     @param[in] inImage [const cv::Mat&] The input image
     @param[in] blobsOutlineVector [const std::vector<std::vector<cv::Point> >&]
@@ -67,7 +67,7 @@ namespace pandora_vision
     std::vector<cv::RotatedRect> minRect;
     for(unsigned int i = 0; i < blobsOutlineVector.size(); i++)
     {
-      if(blobsArea[i] >= DepthParameters::bounding_box_min_area_threshold)
+      if(blobsArea[i] >= Parameters::bounding_box_min_area_threshold)
       {
         minRect.push_back(minAreaRect(cv::Mat(blobsOutlineVector[i])));
       }
