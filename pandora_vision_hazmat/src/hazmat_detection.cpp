@@ -43,7 +43,7 @@ namespace pandora_vision
   @brief Default constructor
   @return void
   **/
-  HazmatDetection::HazmatDetection(void) :nh_()
+  HazmatDetection::HazmatDetection(void) :_nh()
   {
 
     // Get General Parameters, such as frame width & height , camera id
@@ -63,11 +63,11 @@ namespace pandora_vision
     hazmatFrame_ = cv::Mat( frameWidth_, frameHeight_, CV_8U );
       
     // Declare publisher and advertise topic where algorithm results are posted
-    hazmatPublisher_ = nh_.advertise
+    hazmatPublisher_ = _nh.advertise
       <vision_communications::HazmatAlertsVectorMsg>("hazmat_alert", 10);
 
     //subscribe to input image's topic
-    sub_ = nh_.subscribe
+    sub_ = _nh.subscribe
       (imageTopic_, 1, &HazmatDetection::imageCallback, this);
 
     //initialize states - robot starts in STATE_OFF 
@@ -100,9 +100,9 @@ namespace pandora_vision
   {
     packagePath_ = ros::package::getPath("pandora_vision_hazmat");
   
-    if (nh_.hasParam("hazmatDummy"))
+    if (_nh.hasParam("hazmatDummy"))
     {
-      nh_.getParam("hazmatDummy_", hazmatDummy_);
+      _nh.getParam("hazmatDummy_", hazmatDummy_);
       ROS_DEBUG("hazmatDummy_ : %d", hazmatDummy_);
     }
     else 
@@ -112,9 +112,9 @@ namespace pandora_vision
     }
   
     //get the store location of the image
-    if (nh_.hasParam("saveImagePath_"))
+    if (_nh.hasParam("saveImagePath_"))
     {
-      nh_.getParam("saveImagePath_", saveImagePath_);
+      _nh.getParam("saveImagePath_", saveImagePath_);
       ROS_DEBUG_STREAM("path : " << saveImagePath_);
     }
     else
@@ -125,8 +125,8 @@ namespace pandora_vision
     }
   
     //!< Get the camera to be used by qr node;
-    if (nh_.hasParam("camera_name")) {
-      nh_.getParam("camera_name", cameraName);
+    if (_nh.hasParam("camera_name")) {
+      _nh.getParam("camera_name", cameraName);
       ROS_DEBUG_STREAM("camera_name : " << cameraName);
     }
     else {
@@ -135,9 +135,9 @@ namespace pandora_vision
       cameraName = "camera";
     }
     //!< Get the Height parameter if available;
-    if (nh_.hasParam("/" + cameraName + "/image_height"))
+    if (_nh.hasParam("/" + cameraName + "/image_height"))
     {
-    nh_.getParam("/" + cameraName + "/image_height", frameHeight_);
+    _nh.getParam("/" + cameraName + "/image_height", frameHeight_);
       ROS_DEBUG_STREAM("height : " << frameHeight_);
     }
     else
@@ -148,9 +148,9 @@ namespace pandora_vision
     }
 
     //!< Get the Width parameter if available;
-    if (nh_.hasParam("/" + cameraName + "/image_width"))
+    if (_nh.hasParam("/" + cameraName + "/image_width"))
     {
-      nh_.getParam("/" + cameraName + "/image_width", frameWidth_);
+      _nh.getParam("/" + cameraName + "/image_width", frameWidth_);
       ROS_DEBUG_STREAM("width : " << frameWidth_);
     }
     else
@@ -161,9 +161,9 @@ namespace pandora_vision
     }
 
     //!< Get the listener's topic;
-    if (nh_.hasParam("/" + cameraName + "/topic_name"))
+    if (_nh.hasParam("/" + cameraName + "/topic_name"))
     {
-      nh_.getParam("/" + cameraName + "/topic_name", imageTopic_);
+      _nh.getParam("/" + cameraName + "/topic_name", imageTopic_);
     }
     else 
     {
@@ -173,8 +173,8 @@ namespace pandora_vision
     }
 
     //!< Get the images's frame_id;
-    if (nh_.hasParam("/" + cameraName + "/camera_frame_id")) {
-      nh_.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
+    if (_nh.hasParam("/" + cameraName + "/camera_frame_id")) {
+      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
       ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
     }
     else 
@@ -185,8 +185,8 @@ namespace pandora_vision
     }
     
     //!< Get the HFOV parameter if available;
-    if (nh_.hasParam("/" + cameraName + "/hfov")) {
-      nh_.getParam("/" + cameraName + "/hfov", hfov_);
+    if (_nh.hasParam("/" + cameraName + "/hfov")) {
+      _nh.getParam("/" + cameraName + "/hfov", hfov_);
       ROS_DEBUG_STREAM("HFOV : " << hfov_);
     }
     else {
@@ -196,8 +196,8 @@ namespace pandora_vision
     }
     
     //!< Get the VFOV parameter if available;
-    if (nh_.hasParam("/" + cameraName + "/vfov")) {
-      nh_.getParam("/" + cameraName + "/vfov", vfov_);
+    if (_nh.hasParam("/" + cameraName + "/vfov")) {
+      _nh.getParam("/" + cameraName + "/vfov", vfov_);
       ROS_DEBUG_STREAM("VFOV : " << vfov_);
     }
     else {
@@ -216,9 +216,9 @@ namespace pandora_vision
   {
     // Get the test parameter if available;
     int colorVariance;
-    if (nh_.hasParam("colorVariance")) 
+    if (_nh.hasParam("colorVariance")) 
     {
-      nh_.getParam("colorVariance", colorVariance);
+      _nh.getParam("colorVariance", colorVariance);
     }
     else 
     {
@@ -228,9 +228,9 @@ namespace pandora_vision
     }
 
     double votingThreshold;
-    if (nh_.hasParam("votingThreshold")) 
+    if (_nh.hasParam("votingThreshold")) 
     {
-      nh_.getParam("votingThreshold", votingThreshold);
+      _nh.getParam("votingThreshold", votingThreshold);
     }
     else 
     {
@@ -241,9 +241,9 @@ namespace pandora_vision
 
     //get the minimum area threshold of the hazmat in the image
     double minAreaThreshold;
-    if (nh_.hasParam("minAreaThreshold")) 
+    if (_nh.hasParam("minAreaThreshold")) 
     {
-      nh_.getParam("minAreaThreshold", minAreaThreshold);
+      _nh.getParam("minAreaThreshold", minAreaThreshold);
     }
     else 
     {
@@ -254,9 +254,9 @@ namespace pandora_vision
 
     //get the maximum area threshold of the hazmat in the image
     double maxAreaThreshold;
-    if (nh_.hasParam("maxAreaThreshold")) 
+    if (_nh.hasParam("maxAreaThreshold")) 
     {
-      nh_.getParam("maxAreaThreshold", maxAreaThreshold);
+      _nh.getParam("maxAreaThreshold", maxAreaThreshold);
     }
     else 
     {
@@ -267,9 +267,9 @@ namespace pandora_vision
 
     //get the sidelenght parameter of the rectangle in which to test for colour
     int sideLength;
-    if (nh_.hasParam("sideLength")) 
+    if (_nh.hasParam("sideLength")) 
     {
-      nh_.getParam("sideLength", sideLength);
+      _nh.getParam("sideLength", sideLength);
     }
     else 
     {
@@ -280,9 +280,9 @@ namespace pandora_vision
 
     //get the minimum number of features threshold
     int featureThreshold;
-    if (nh_.hasParam("featureThreshold")) 
+    if (_nh.hasParam("featureThreshold")) 
     {
-      nh_.getParam("featureThreshold", featureThreshold);
+      _nh.getParam("featureThreshold", featureThreshold);
     }
     else 
     {
@@ -293,9 +293,9 @@ namespace pandora_vision
 
     //how many hazmats i have to search for
     int hazmatNumber_;
-    if (nh_.hasParam("hazmatNumber_")) 
+    if (_nh.hasParam("hazmatNumber_")) 
     {
-      nh_.getParam("hazmatNumber_", hazmatNumber_);
+      _nh.getParam("hazmatNumber_", hazmatNumber_);
     }
     else 
     {
@@ -306,9 +306,9 @@ namespace pandora_vision
 
     //get the MO threshold
     double MOThreshold;
-    if (nh_.hasParam("MOThreshold")) 
+    if (_nh.hasParam("MOThreshold")) 
     {
-      nh_.getParam("MOThreshold", MOThreshold);
+      _nh .getParam("MOThreshold", MOThreshold);
     }
     else 
     {

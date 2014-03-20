@@ -241,7 +241,7 @@ namespace pandora_vision
 
   /**
    @brief Function called when new ROS message appears, for front camera
-   @param msg [const sensor_msgs::ImageConstPtr&] The message
+   @param msg [const sensor_msgs::Image&] The message
    @return void
   */
   void MotionDetection::imageCallback(const sensor_msgs::Image& msg)
