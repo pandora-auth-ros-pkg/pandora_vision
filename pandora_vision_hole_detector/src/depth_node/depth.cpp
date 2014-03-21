@@ -328,20 +328,20 @@ namespace pandora_vision
     ROS_INFO("Parameters callback called");
     #endif
 
+    //!< Kanny parameters
     Parameters::kanny_ratio = config.kanny_ratio;
     Parameters::kanny_kernel_size = config.kanny_kernel_size;
     Parameters::kanny_low_threshold = config.kanny_low_threshold;
     Parameters::kanny_blur_noise_kernel_size =
       config.kanny_blur_noise_kernel_size;
 
-    Parameters::contrast_enhance_beta = config.contrast_enhance_beta;
     Parameters::contrast_enhance_alpha = config.contrast_enhance_alpha;
-    Parameters::threshold_lower_value = config.threshold_lower_value;
-    Parameters::adaptive_max_value = config.adaptive_max_value;
-    Parameters::adaptive_method = config.adaptive_method;
-    Parameters::adaptive_block_size = config.adaptive_block_size;
-    Parameters::adaptive_c_value = config.adaptive_c_value;
+    Parameters::contrast_enhance_beta = config.contrast_enhance_beta;
 
+    //!< Threshold parameters
+    Parameters::threshold_lower_value = config.threshold_lower_value;
+
+    //!< Blob detection parameters
     Parameters::blob_min_threshold = config.blob_min_threshold;
     Parameters::blob_max_threshold = config.blob_max_threshold;
     Parameters::blob_threshold_step = config.blob_threshold_step;
@@ -356,39 +356,46 @@ namespace pandora_vision
     Parameters::blob_filter_by_circularity =
       config.blob_filter_by_circularity;
 
+    //!< Bounding boxes parameters
     Parameters::bounding_box_min_area_threshold =
       config.bounding_box_min_area_threshold;
+
+    //!< The bounding box detection method
+    //!< 0 for detecting by means of brushfire starting
+    //!< from the keypoint of the blob
+    //!< 1 for detecting by means of contours around the edges of the blob
     Parameters::bounding_box_detection_method =
       config.bounding_box_detection_method;
 
+    //!< When using raycast instead of brushfire to find the (approximate here)
+    //!< outline of blobs, raycast_keypoint_partitions dictates the number of
+    //!< rays, or equivalently, the number of partitions in which the blob is
+    //!< partitioned in search of the blob's borders
     Parameters::raycast_keypoint_partitions =
       config.raycast_keypoint_partitions;
+
+    //<! Loose ends connection parameters
     Parameters::AB_to_MO_ratio = config.AB_to_MO_ratio;
+    Parameters::minimum_curve_points = config.minimum_curve_points;
+
+    //!< The interpolation method for noise removal
+    //!< 0 for averaging the pixel's neighbor values
+    //!< 1 for brushfire near
+    //!< 2 for brushfire far
     Parameters::interpolation_method = config.interpolation_method;
 
-    Parameters::run_checker_depth_diff = config.run_checker_depth_diff;
-    Parameters::run_checker_outline_of_rectangle =
-      config.run_checker_outline_of_rectangle;
-    Parameters::run_checker_depth_area = config.run_checker_depth_area;
-    Parameters::run_checker_brushfire_outline_to_rectangle =
-      config.run_checker_brushfire_outline_to_rectangle;
-    Parameters::rectangle_inflation_size = config.rectangle_inflation_size;
-    Parameters::depth_difference = config.depth_difference;
-    Parameters::segmentation_method = config.segmentation_method;
-    Parameters::max_iterations = config.max_iterations;
-    Parameters::num_points_to_exclude = config.num_points_to_exclude;
-    Parameters::point_to_plane_distance_threshold =
-      config.point_to_plane_distance_threshold;
-
+    //!< Method to scale the CV_32FC1 image to CV_8UC1
     Parameters::scale_method = config.scale_method;
 
+    //!< Debug
     Parameters::debug_show_find_holes = config.debug_show_find_holes;
     Parameters::debug_show_find_holes_size =
       config.debug_show_find_holes_size;
-    Parameters::debug_time_find_holes = config.debug_time_find_holes;
+
     Parameters::debug_show_denoise_edges = config.debug_show_denoise_edges;
     Parameters::debug_show_denoise_edges_size =
       config.debug_show_denoise_edges_size;
+
     Parameters::debug_show_connect_pairs = config.debug_show_connect_pairs;
     Parameters::debug_show_connect_pairs_size =
       config.debug_show_connect_pairs_size;
@@ -398,11 +405,6 @@ namespace pandora_vision
     Parameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
 
-    Parameters::debug_show_check_holes = config.debug_show_check_holes;
-    Parameters::debug_show_check_holes_size =
-      config.debug_show_check_holes_size;
-
-    Parameters::minimum_curve_points = config.minimum_curve_points;
   }
 
 } // namespace pandora_vision
