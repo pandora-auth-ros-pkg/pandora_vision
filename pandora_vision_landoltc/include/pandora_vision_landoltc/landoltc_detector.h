@@ -166,12 +166,12 @@ public:
   
   /**
   @brief Function for calculating the neighbours of pixels considering
-  8-connectiviyty
+  8-connectivity
   @param index [unsigned int] Index of pixel in matrix
   @param in [cv::Mat&] Input Image
   @return void
   **/    
-  void find8Neights(unsigned int index,cv::Mat& in);
+  void find8Neights(unsigned int index, const cv::Mat& in);
   
 
 };
