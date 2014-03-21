@@ -75,7 +75,7 @@ namespace pandora_vision
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
     cv::Mat inImage_;
-    if (inImage.type() != CV_8UC3)
+    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
         Parameters::scale_method);
@@ -235,7 +235,7 @@ namespace pandora_vision
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
     cv::Mat inImage_;
-    if (inImage.type() != CV_8UC3)
+    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
         Parameters::scale_method);
@@ -433,7 +433,7 @@ namespace pandora_vision
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
     cv::Mat inImage_;
-    if (inImage.type() != CV_8UC3)
+    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
         Parameters::scale_method);
@@ -668,7 +668,7 @@ namespace pandora_vision
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
     cv::Mat inImage_;
-    if (inImage.type() != CV_8UC3)
+    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
     {
       inImage_ = Visualization::scaleImageForVisualization(inImage,
         Parameters::scale_method);
@@ -701,7 +701,7 @@ namespace pandora_vision
       ranges, 1, true);
 
     #ifdef DEBUG_SHOW
-      Visualization::show("backProject", backProject, 1);
+      //Visualization::show("backProject", backProject, 1);
     #endif
 
     //!< Store the vertices of the inside-of-image-bounds inflated bounding

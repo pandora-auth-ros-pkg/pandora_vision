@@ -286,8 +286,15 @@ namespace pandora_vision
     const int& ms,
     const std::vector<cv::KeyPoint>& keypoints)
   {
-    cv::Mat img = scaleImageForVisualization(inImage,
-      Parameters::scale_method);
+    cv::Mat img;
+    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
+    {
+      img = scaleImageForVisualization(inImage, Parameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(img);
+    }
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(255, 0, 0),
       cv::DrawMatchesFlags::DEFAULT);

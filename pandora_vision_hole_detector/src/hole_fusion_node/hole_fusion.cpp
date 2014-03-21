@@ -133,15 +133,6 @@ namespace pandora_vision
       &pointCloudXYZ_,
       &interpolatedDepthImage_);
 
-    #ifdef DEBUG_SHOW
-    if (Parameters::debug_show_find_holes)
-    {
-      Visualization::showScaled(
-        "interpolated depth image arrived in Hole Fusion node",
-        interpolatedDepthImage_, 1);
-    }
-    #endif
-
     numNodesReady_++;
 
     //!< If both the RGB and the depth nodes are ready
@@ -193,14 +184,6 @@ namespace pandora_vision
     unpackRgbMessage(rgbCandidateHolesVector,
       &rgbHolesConveyor_,
       &rgbImage_);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::debug_show_find_holes)
-    {
-      Visualization::showScaled(
-        "RGB image arrived in Hole Fusion node", rgbImage_, 1);
-    }
-    #endif
 
     numNodesReady_++;
 
@@ -375,10 +358,6 @@ namespace pandora_vision
   void HoleFusion::processCandidateHoles()
   {
     #ifdef DEBUG_SHOW
-    ROS_INFO ("numNodesReady: %d", numNodesReady_);
-    #endif
-
-    #ifdef DEBUG_SHOW
     ROS_INFO("Processing candidate holes");
     #endif
 
@@ -424,6 +403,18 @@ namespace pandora_vision
       &depthHolesConveyor_,
       &depthProbabilitiesVector2D);
 
+    if (depthHolesConveyor_.keyPoints.size() > 0)
+    {
+      ROS_ERROR("Depth : Candidate Holes' probabilities");
+      for (int i = 0; i < depthActiveFilters; i++)
+      {
+        for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
+        {
+          ROS_ERROR("P[%d %d] = %f", i, j, depthProbabilitiesVector2D[i][j]);
+        }
+      }
+    }
+
     //!< Initialize the probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
     int rgbActiveFilters = 0;
@@ -447,49 +438,40 @@ namespace pandora_vision
 
 
     std::vector<std::vector<float> > rgbProbabilitiesVector2D(rgbActiveFilters,
-      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
+      std::vector<float>(rgbHolesConveyor_.keyPoints.size(), 0.0));
 
     //!< check holes for debugging purposes
     RgbFilters::checkHoles(
       rgbImage_,
       wallsHistogram_,
-      &depthHolesConveyor_,
+      &rgbHolesConveyor_,
       &rgbProbabilitiesVector2D);
 
-    /*
-     *for (int i = 0; i < rgbActiveFilters; i++)
-     *{
-     *  for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
-     *  {
-     *    ROS_ERROR("P[%d %d] = %f", i, j, probabilitiesVector2D[i][j]);
-     *  }
-     *}
-     */
+    if (rgbHolesConveyor_.keyPoints.size() > 0)
+    {
+      ROS_ERROR("RGB: Candidate Holes' probabilities");
+      for (int i = 0; i < rgbActiveFilters; i++)
+      {
+        for (int j = 0; j < rgbHolesConveyor_.keyPoints.size(); j++)
+        {
+          ROS_ERROR("P[%d %d] = %f", i, j, rgbProbabilitiesVector2D[i][j]);
+        }
+      }
+    }
 
 
 
     #ifdef DEBUG_SHOW
-    std::vector<std::string> msgs;
-    std::vector<cv::Mat> imgs;
     if(Parameters::debug_show_find_holes) // Debug
     {
-      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += STR(" : Final keypoints");
-      msgs.push_back(msg);
-      imgs.push_back(
-        Visualization::showKeypoints(
-          msg,
-          interpolatedDepthImage_,
-          -1,
-          depthHolesConveyor_.keyPoints)
-        );
-    }
-    if(Parameters::debug_show_find_holes)
-    {
-      Visualization::multipleShow("depthCandidateHolesCallback function",
-        imgs, msgs, Parameters::debug_show_find_holes_size, 1);
+      Visualization::showKeypoints("Depth : Final KeyPoints",
+        interpolatedDepthImage_, 1, depthHolesConveyor_.keyPoints);
+
+      Visualization::showKeypoints("RGB : Final KeyPoints",
+        rgbImage_, 1, rgbHolesConveyor_.keyPoints);
     }
     #endif
+
     //!< Processing complete.
 
     #ifdef DEBUG_TIME
@@ -526,19 +508,16 @@ namespace pandora_vision
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
-    //!< If the depth node has detected holes
-    if (conveyor->keyPoints.size() > 0)
-    {
-      //!< Unpack the interpolated depth image
-      MessageConversions::extractDepthImageFromMessageContainer(
-        holesMsg,
-        interpolatedDepthImage,
-        sensor_msgs::image_encodings::TYPE_32FC1);
+    //!< Unpack the interpolated depth image
+    MessageConversions::extractDepthImageFromMessageContainer(
+      holesMsg,
+      interpolatedDepthImage,
+      sensor_msgs::image_encodings::TYPE_32FC1);
 
-      //!< Unpack the point cloud
-      MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
-        pointCloudXYZ);
-    }
+    //!< Unpack the point cloud
+    MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
+      pointCloudXYZ);
+
     #ifdef DEBUG_TIME
     Timer::tick("unpackDepthMessage");
     #endif
@@ -569,15 +548,12 @@ namespace pandora_vision
     //!< Recreate the conveyor
     fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
 
-    //!< If the RGB node has detected holes
-    if (conveyor->keyPoints.size() > 0)
-    {
-      //!< Unpack the RGB image
-      MessageConversions::extractRgbImageFromMessageContainer(
-        holesMsg,
-        rgbImage,
-        sensor_msgs::image_encodings::TYPE_8UC3);
-    }
+    //!< Unpack the RGB image
+    MessageConversions::extractRgbImageFromMessageContainer(
+      holesMsg,
+      rgbImage,
+      sensor_msgs::image_encodings::TYPE_8UC3);
+
     #ifdef DEBUG_TIME
     Timer::tick("unpackRgbMessage");
     #endif
