@@ -203,10 +203,12 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
   cv::imshow("paddedptr", paddedptr); 
   
   cv::waitKey(30); 
-  
+    
   _edges = 0;
   
   _edgePoints.clear();
+  
+  delete[] pts;
   
   
 }
