@@ -46,7 +46,7 @@ LandoltCDetector::LandoltCDetector()
 
   _threshold = 90;
   
-  _edges=0;
+  _edges = 0;
 }
 
 //!< Destructor
@@ -149,7 +149,7 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
 {
   cv::Mat paddedptr;
         
-  paddedptr=in.clone();
+  paddedptr = in.clone();
         
   thinning(&paddedptr);
   
@@ -169,42 +169,42 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
     }
   }
   
-  for(int j=0;j<limit;j++) 
+  for(int j = 0; j < limit; j++) 
   {
-    find8Neights(pts[j],paddedptr);    
+    find8Neights(pts[j], paddedptr);    
   }
   
-  for(int k=0;k<_edgePoints.size();k++)  
+  for(int k = 0; k < _edgePoints.size(); k++)  
   {
-    cv::circle(paddedptr,_edgePoints.at(k),2,255,-1,8,0);
+    cv::circle(paddedptr, _edgePoints.at(k), 2, 255, -1, 8, 0);
   }
   
-  if(_edgePoints.size()==2)
+  if(_edgePoints.size() == 2)
   {
     int yc=(_edgePoints.at(0).y+_edgePoints.at(1).y)/2;
     int xc=(_edgePoints.at(0).x+_edgePoints.at(1).x)/2;
     
-    cv::Point gapCenter(xc,yc);
+    cv::Point gapCenter(xc, yc);
     
-    cv::circle(paddedptr,gapCenter,1,255,-1,8,0);
+    cv::circle(paddedptr, gapCenter, 1, 255, -1, 8, 0);
         
-    cv::Point center(paddedptr.cols/2,paddedptr.rows/2);
+    cv::Point center(paddedptr.cols/2, paddedptr.rows/2);
     
-    cv::circle(paddedptr,center,1,255,-1,8,0);
+    cv::circle(paddedptr, center, 1, 255, -1, 8, 0);
   
-    double angle=atan2(gapCenter.y-center.y,gapCenter.x-center.x);
+    double angle = atan2(gapCenter.y-center.y, gapCenter.x-center.x);
     
-    if(angle<0) angle+=2*3.14159265359;
+    if(angle < 0) angle+=2*3.14159265359;
     
-    std::cout<<"Angle of " << i <<" is : "<<angle*(180/3.14159265359)<<std::endl;
+    std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
     
   }
   
-  cv::imshow("paddedptr",paddedptr); 
+  cv::imshow("paddedptr", paddedptr); 
   
   cv::waitKey(30); 
   
-  _edges=0;
+  _edges = 0;
   
   _edgePoints.clear();
   
@@ -213,30 +213,30 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
 
 /**
   @brief Function for calculating the neighbours of pixels considering
-  8-connectiviyty
+  8-connectivity
   @param index [unsigned int] Index of pixel in matrix
   @param in [cv::Mat&] Input Image
   @return void
 **/    
 
-void LandoltCDetector::find8Neights(unsigned int index,cv::Mat& in)
+void LandoltCDetector::find8Neights(unsigned int index, const cv::Mat& in)
 {
-  unsigned int y=index/in.cols;
-  unsigned int x=index%in.cols;
+  unsigned int y = index/in.cols;
+  unsigned int x = index%in.cols;
 
-  unsigned char p1=in.at<unsigned char>(y-1,x);
-  unsigned char p2=in.at<unsigned char>(y-1,x+1);
-  unsigned char p3=in.at<unsigned char>(y,x+1);
-  unsigned char p4=in.at<unsigned char>(y+1,x+1);
-  unsigned char p5=in.at<unsigned char>(y+1,x);
-  unsigned char p6=in.at<unsigned char>(y+1,x-1);
-  unsigned char p7=in.at<unsigned char>(y,x-1);
-  unsigned char p8=in.at<unsigned char>(y-1,x-1);
+  unsigned char p1 = in.at<unsigned char>(y-1, x);
+  unsigned char p2 = in.at<unsigned char>(y-1, x+1);
+  unsigned char p3 = in.at<unsigned char>(y, x+1);
+  unsigned char p4 = in.at<unsigned char>(y+1, x+1);
+  unsigned char p5 = in.at<unsigned char>(y+1, x);
+  unsigned char p6 = in.at<unsigned char>(y+1, x-1);
+  unsigned char p7 = in.at<unsigned char>(y, x-1);
+  unsigned char p8 = in.at<unsigned char>(y-1, x-1);
      
-  if(p1+p2+p3+p4+p5+p6+p7+p8==255) 
+  if(p1+p2+p3+p4+p5+p6+p7+p8 == 255) 
   {
     _edges++;
-    _edgePoints.push_back(cv::Point(x,y));    
+    _edgePoints.push_back(cv::Point(x, y));    
   }
 }     
   
@@ -394,7 +394,7 @@ void LandoltCDetector::applyMask()
     
     //findRotationA(padded, i);
     
-    findRotationB(padded,i);
+    findRotationB(padded, i);
     
     cv::imshow("padded", padded);
 
