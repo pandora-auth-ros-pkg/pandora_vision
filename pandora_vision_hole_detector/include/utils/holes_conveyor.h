@@ -32,48 +32,32 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou
+ * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef RGB_NODE_HOLE_DETECTOR_H
-#define RGB_NODE_HOLE_DETECTOR_H
+#ifndef UTILS_HOLES_CONVEYOR_H
+#define UTILS_HOLES_CONVEYOR_H
 
-#define SHOW_DEBUG_IMAGE
-
-#include "utils/hole_filters.h"
-#include "rgb_node/texture_filter.h"
+#include "utils/defines.h"
 
 namespace pandora_vision
 {
-  class HoleDetector
+  /**
+    @brief The structure that represents holes found.
+    @param keyPoints [std::vector<cv::KeyPoint>] The vector of the
+    holes' keypoints
+    @param rectangles [std::vector< std::vector<cv::Point2f> >] The
+    vector of the holes' rotated bounding boxes vertices
+    @param outlines [std::vector<std::vector<cv::Point> >] The
+    vector of the holes' outlines
+   **/
+  struct HolesConveyor
   {
-    //! Instance of class TextureDetector, that applies texture in current
-    //! frame in order to isolate pixels of the image, where we have walls
-    TextureDetector _textureDetector;
-
-
-    public:
-
-    /**
-      @brief Class constructor
-      */
-    HoleDetector();
-
-    /**
-      @brief Class destructor
-      */
-    virtual ~HoleDetector();
-
-    /**
-      @brief Function that locates the position of potentional holes
-      in current frame.
-      @param holeFrame [cv::Mat] current frame to be processed
-      @return void
-      */
-    HolesConveyor findHoles(cv::Mat holeFrame);
-
+    std::vector<cv::KeyPoint> keyPoints;
+    std::vector< std::vector<cv::Point2f> > rectangles;
+    std::vector<std::vector<cv::Point> > outlines;
   };
 
-} // namespace pandora_vision
+}
 
-#endif  // RGB_NODE_HOLE_DETECTOR_H
+#endif  // namespace pandora_vision

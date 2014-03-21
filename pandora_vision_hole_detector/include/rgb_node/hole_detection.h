@@ -38,17 +38,15 @@
 #ifndef RGB_NODE_HOLE_DETECTION_H
 #define RGB_NODE_HOLE_DETECTION_H
 
+#include <iostream>
+#include <stdlib.h>
+
 #include "ros/ros.h"
 #include <ros/package.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
-
-#include <iostream>
-#include <stdlib.h>
-
-
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
 #include "state_manager/state_client.h"
 #include "utils/parameters.h"
@@ -128,7 +126,7 @@ namespace pandora_vision
       void imageCallback(const sensor_msgs::Image& inImage);
 
       void createCandidateHolesMessage(
-          const HoleFilters::HolesConveyor& conveyor,
+          const HolesConveyor& conveyor,
           const sensor_msgs::Image& rgbImage,
           vision_communications::RgbCandidateHolesVectorMsg*
           rgbCandidateHolesMsg,

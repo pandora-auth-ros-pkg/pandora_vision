@@ -42,6 +42,7 @@
 #include "utils/edge_detection.h"
 #include "utils/blob_detection.h"
 #include "utils/bounding_box_detection.h"
+#include "utils/holes_conveyor.h"
 #include <math.h>
 
 /**
@@ -57,23 +58,6 @@ namespace pandora_vision
   class HoleFilters
   {
     public:
-
-      /**
-        @brief The structure that represents the overall holes found.
-        @param keyPoints [std::vector<cv::KeyPoint>] The vector of the
-        holes' keypoints
-        @param rectangles [std::vector< std::vector<cv::Point2f> >] The
-        vector of the holes' rotated bounding boxes vertices
-        @param outlines [std::vector<std::vector<cv::Point> >] The
-        vector of the holes' outlines
-       **/
-      struct HolesConveyor
-      {
-        std::vector<cv::KeyPoint> keyPoints;
-        std::vector< std::vector<cv::Point2f> > rectangles;
-        std::vector<std::vector<cv::Point> > outlines;
-      };
-
 
       /**
         @brief Given a set of keypoints and an edges image, this function

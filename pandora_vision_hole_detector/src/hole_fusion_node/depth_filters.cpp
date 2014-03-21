@@ -826,7 +826,7 @@ namespace pandora_vision
     image
     @param[in] initialPointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr]
     The undistorted input point cloud
-    @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+    @param[in][out] conveyor [HolesConveyor*] A struct that
     contains the final valid holes
     @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
     A 2D vector of probabilities hinting to the certainty degree with
@@ -841,7 +841,7 @@ namespace pandora_vision
   void DepthFilters::checkHoles(
     const cv::Mat& interpolatedDepthImage,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr& initialPointCloud,
-    HoleFilters::HolesConveyor* conveyor,
+    HolesConveyor* conveyor,
     std::vector<std::vector<float> >* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
@@ -916,7 +916,7 @@ namespace pandora_vision
     @param[in] img [const cv::Mat&] The input depth image
     @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
     original point cloud that corresponds to the input depth image
-    @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
+    @param[in][out] conveyor [HolesConveyor*] The structure that
     holds the final holes' data
     @param[in] inflationSize [const int&] The amount of pixels by which each
     bounding box is inflated
@@ -934,7 +934,7 @@ namespace pandora_vision
     const unsigned int& method,
     const cv::Mat& img,
     const PointCloudXYZPtr& pointCloud,
-    HoleFilters::HolesConveyor* conveyor,
+    HolesConveyor* conveyor,
     const int& inflationSize,
     std::vector<float>* probabilitiesVector,
     std::vector<cv::Mat>* imgs,

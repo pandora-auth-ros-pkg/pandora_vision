@@ -839,7 +839,7 @@ namespace pandora_vision
     attached to an order which relates to the sequence of the overall
     filter execution.
     @param[in] rgbImage [const cv::Mat&] The input rgb image
-    @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+    @param[in][out] conveyor [HolesConveyor*] A struct that
     contains the final valid holes
     @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
     A 2D vector of probabilities hinting to the certainty degree with
@@ -854,7 +854,7 @@ namespace pandora_vision
   void RgbFilters::checkHoles(
     const cv::Mat& rgbImage,
     const cv::MatND& inHistogram,
-    HoleFilters::HolesConveyor* conveyor,
+    HolesConveyor* conveyor,
     std::vector<std::vector<float> >* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
@@ -922,7 +922,7 @@ namespace pandora_vision
     to an order which relates to the sequence of the overall filter execution.
     @param[in] method [const unsigned int&] The filter identifier to execute
     @param[in] img [const cv::Mat&] The input rgb image
-    @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure that
+    @param[in][out] conveyor [HolesConveyor*] The structure that
     holds the final holes' data
     @param[in] inflationSize [const int&] The amount of pixels by which each
     bounding box is inflated
@@ -939,7 +939,7 @@ namespace pandora_vision
   void RgbFilters::applyFilter(
     const unsigned int& method,
     const cv::Mat& img,
-    HoleFilters::HolesConveyor* conveyor,
+    HolesConveyor* conveyor,
     const int& inflationSize,
     const cv::MatND& inHistogram,
     std::vector<float>* probabilitiesVector,

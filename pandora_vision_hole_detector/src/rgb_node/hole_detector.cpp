@@ -60,7 +60,7 @@ namespace pandora_vision
    @param holeFrame [cv::Mat] current frame to be processed
    @return void
   */
-  HoleFilters::HolesConveyor HoleDetector::findHoles(cv::Mat holeFrame)
+  HolesConveyor HoleDetector::findHoles(cv::Mat holeFrame)
   {
     //! Find pixels in current frame where there is the same texture
     //! according to the given histogramm and calculate
@@ -121,7 +121,7 @@ namespace pandora_vision
     BlobDetection::detectBlobs(temp, &detectedkeyPoints);
 
     //!< The final vectors of keypoints, rectangles and blobs' outlines.
-    struct HoleFilters::HolesConveyor conveyor;
+    struct HolesConveyor conveyor;
 
     HoleFilters::validateBlobs(
       detectedkeyPoints,

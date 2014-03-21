@@ -37,7 +37,7 @@
 #ifndef HOLE_FUSION_NODE_GENERIC_FILTERS_H
 #define HOLE_FUSION_NODE_GENERIC_FILTERS_H
 
-#include "utils/hole_filters.h"
+#include "utils/holes_conveyor.h"
 #include <math.h>
 
 /**
@@ -61,20 +61,20 @@ namespace pandora_vision
         entry of the set of assimilable's outline points reside inside
         the assimilator's set of outlines. If so, the latter keypoint
         etc are kept unchanged and the former one is deleted.
-        @param[in][out] assimilator [const HoleFilters::HolesConveyor&]
+        @param[in][out] assimilator [const HolesConveyor&]
         The candidate holes conveyor that will potentially assimilate the
         assimimable's holes
-        @param[in][out] assimilable [HoleFilters::HolesConveyor*]
+        @param[in][out] assimilable [HolesConveyor*]
         The candidate holes conveyor whose holes will potentially by assimilated
         by the assimilator
         @return void
        **/
       static void assimilateUnilaterally(
-        const HoleFilters::HolesConveyor& assimilator,
-        HoleFilters::HolesConveyor* assimilable);
+        const HolesConveyor& assimilator,
+        HolesConveyor* assimilable);
 
       /**
-        @brief Given two HoleFilters::HolesConveyor* structs, one with the
+        @brief Given two HolesConveyor* structs, one with the
         potential of assimilating the other (assimilator) and the other with the
         potential of being assimilated by the other (assimilable), the purpose
         of this function is to identify blobs that are overlapping each other
@@ -85,47 +85,47 @@ namespace pandora_vision
         by the size of the assimilator, while the assimilator's
         new keypoint will be the mean of the two keypoints. The assimilable
         then is rendered useless and deleted.
-        @param[in][out] assimilator [HoleFilters::HolesConveyor*]
+        @param[in][out] assimilator [HolesConveyor*]
         The holes conveyor whose candidate holes will potentially
         assimilate candidate holes of @param assimilable
-        @param[in][out] assimilable [HoleFilters::HolesConveyor*]
+        @param[in][out] assimilable [HolesConveyor*]
         The holes conveyor whose candidate holes will potentially
         will be assimilated by candidate holes of @param assimilator
         @return void
        **/
       static void mergeUnilaterally(
-        HoleFilters::HolesConveyor* assimilator,
-        HoleFilters::HolesConveyor* assimilable);
+        HolesConveyor* assimilator,
+        HolesConveyor* assimilable);
 
     public:
       /**
         @brief Assimilates fragmented holes into existing whole ones
         from either source (RGB or Depth).
-        @param[in][out] depthHolesConveyor [HoleFilters::HolesConveyor*]
+        @param[in][out] depthHolesConveyor [HolesConveyor*]
         The candidate holes conveyor originated from the depth node
-        @param[in][out] rgbHolesConveyor [HoleFilters::HolesConveyor*]
+        @param[in][out] rgbHolesConveyor [HolesConveyor*]
         The candidate holes conveyor originated from the rgb node
         @return void
        **/
       static void assimilateBilaterally(
-        HoleFilters::HolesConveyor* depthHolesConveyor,
-        HoleFilters::HolesConveyor* rgbHolesConveyor);
+        HolesConveyor* depthHolesConveyor,
+        HolesConveyor* rgbHolesConveyor);
 
       /**
-        @brief Given the RGB and Depth HoleFilters::HolesConveyor* structs,
+        @brief Given the RGB and Depth HolesConveyor* structs,
         the purpose of this function is to identify blobs that are overlapping
         each other but none of them is entirely inside the other, and merge
         them in one candidate hole: the one whose bounding rectangle has
         the greater area.
-        @param[in][out] depthHolesConveyor [HoleFilters::HolesConveyor*]
+        @param[in][out] depthHolesConveyor [HolesConveyor*]
         The candidate holes conveyor originated from the depth node
-        @param[in][out] rgbHolesConveyor [HoleFilters::HolesConveyor*]
+        @param[in][out] rgbHolesConveyor [HolesConveyor*]
         The candidate holes conveyor originated from the rgb node
         @return void
        **/
       static void mergeBilaterally(
-        HoleFilters::HolesConveyor* depthHolesConveyor,
-        HoleFilters::HolesConveyor* rgbHolesConveyor);
+        HolesConveyor* depthHolesConveyor,
+        HolesConveyor* rgbHolesConveyor);
   };
 
 } // namespace pandora_vision

@@ -38,8 +38,9 @@
 #define HOLE_FUSION_NODE_RGB_FILTERS_H
 
 #include <math.h>
-#include "utils/hole_filters.h"
+#include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
+#include "utils/visualization.h"
 
 /**
   @namespace vision
@@ -203,7 +204,7 @@ namespace pandora_vision
         attached to an order which relates to the sequence of the overall
         filter execution.
         @param[in] rgbImage [const cv::Mat&] The input rgb image
-        @param[in][out] conveyor [HoleFilters::HolesConveyor*] A struct that
+        @param[in][out] conveyor [HolesConveyor*] A struct that
         contains the final valid holes
         @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
         A 2D vector of probabilities hinting to the certainty degree with
@@ -218,7 +219,7 @@ namespace pandora_vision
       static void checkHoles(
         const cv::Mat& rgbImage,
         const cv::MatND& inHistogram,
-        HoleFilters::HolesConveyor* conveyor,
+        HolesConveyor* conveyor,
         std::vector<std::vector<float> >* probabilitiesVector);
 
       /**
@@ -244,7 +245,7 @@ namespace pandora_vision
       static void applyFilter(
         const unsigned int& method,
         const cv::Mat& img,
-        HoleFilters::HolesConveyor* conveyor,
+        HolesConveyor* conveyor,
         const int& inflationSize,
         const cv::MatND& inHistogram,
         std::vector<float>* probabilitiesVector,
