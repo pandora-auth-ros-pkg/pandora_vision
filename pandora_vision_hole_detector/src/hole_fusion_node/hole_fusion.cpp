@@ -576,7 +576,7 @@ namespace pandora_vision
       MessageConversions::extractRgbImageFromMessageContainer(
         holesMsg,
         rgbImage,
-        sensor_msgs::image_encodings::TYPE_32FC3);
+        sensor_msgs::image_encodings::TYPE_8UC3);
     }
     #ifdef DEBUG_TIME
     Timer::tick("unpackRgbMessage");
