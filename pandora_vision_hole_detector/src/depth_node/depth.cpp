@@ -117,7 +117,7 @@ namespace pandora_vision
 
     //!< Finds possible holes
     cv::Mat interpolatedDepthImage;
-    HoleFilters::HolesConveyor holes = HoleDetector::findHoles(depthImage,
+    HolesConveyor holes = HoleDetector::findHoles(depthImage,
       &interpolatedDepthImage);
 
     //!< Create the candidate holes message
@@ -144,7 +144,7 @@ namespace pandora_vision
   /**
     @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
     message
-    @param[in] conveyor [HoleFilters::HolesConveyor&] A struct containing
+    @param[in] conveyor [HolesConveyor&] A struct containing
     vectors of the holes' keypoints, bounding rectangles' vertices
     and blobs' outlines
     @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
@@ -156,7 +156,7 @@ namespace pandora_vision
     @return void
    **/
   void PandoraKinect::createCandidateHolesMessage(
-    const HoleFilters::HolesConveyor& conveyor,
+    const HolesConveyor& conveyor,
     const cv::Mat& interpolatedDepthImage,
     const PointCloudXYZPtr& pointCloudXYZPtr,
     vision_communications::DepthCandidateHolesVectorMsg* depthCandidateHolesMsg,

@@ -52,9 +52,9 @@ namespace pandora_vision
     format
     @param[out] interpolatedDepthImage [cv::Mat*] The denoised
     depth image in CV_32FC1 format
-    @return std::vector<cv::Point2f> Centers of the possible holes
+    @return HolesConveyor The struct that contains the holes
    **/
-  HoleFilters::HolesConveyor HoleDetector::findHoles(const cv::Mat& depthImage,
+  HolesConveyor HoleDetector::findHoles(const cv::Mat& depthImage,
     cv::Mat* interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
@@ -125,7 +125,7 @@ namespace pandora_vision
     #endif
 
     //!< The final vectors of keypoints, rectangles and blobs' outlines.
-    struct HoleFilters::HolesConveyor conveyor;
+    struct HolesConveyor conveyor;
 
     /**
       Get me blobs that their center point is inside the image,

@@ -34,6 +34,7 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+
 #include "rgb_node/hole_detection.h"
 
 namespace pandora_vision
@@ -171,7 +172,7 @@ namespace pandora_vision
     }
 
 
-    HoleFilters::HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
+    HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
 
     vision_communications::RgbCandidateHolesVectorMsg rgbCandidateHolesMsg;
 
@@ -182,7 +183,7 @@ namespace pandora_vision
   }
 
   void HoleDetection::createCandidateHolesMessage(
-    const HoleFilters::HolesConveyor& conveyor,
+    const HolesConveyor& conveyor,
     const sensor_msgs::Image& rgbImage,
     vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
     const std::string& encoding)

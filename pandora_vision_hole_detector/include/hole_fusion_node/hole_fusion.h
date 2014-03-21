@@ -45,8 +45,9 @@
 #include "vision_communications/CandidateHoleMsg.h"
 #include "vision_communications/RgbCandidateHolesVectorMsg.h"
 #include "utils/message_conversions.h"
-#include <utils/defines.h>
+#include "utils/defines.h"
 #include "utils/parameters.h"
+#include "utils/visualization.h"
 #include "hole_fusion_node/depth_filters.h"
 #include "hole_fusion_node/rgb_filters.h"
 #include "hole_fusion_node/generic_filters.h"
@@ -89,10 +90,10 @@ namespace pandora_vision
       cv::Mat interpolatedDepthImage_;
 
       //!< The conveyor of hole candidates received by the depth node
-      HoleFilters::HolesConveyor depthHolesConveyor_;
+      HolesConveyor depthHolesConveyor_;
 
       //!< The conveyor of hole candidates received by the rgb node
-      HoleFilters::HolesConveyor rgbHolesConveyor_;
+      HolesConveyor rgbHolesConveyor_;
 
       //!< A histogramm for the texture of walls
       cv::MatND wallsHistogram_;
@@ -141,20 +142,20 @@ namespace pandora_vision
         rgbCandidateHolesVector);
 
       /**
-        @brief Recreates the HoleFilters::HolesConveyor struct for the
+        @brief Recreates the HolesConveyor struct for the
         candidate holes from the
         vision_communications::CandidateHolerMsg message
         @param[in]candidateHolesVector
         [const std::vector<vision_communications::CandidateHoleMsg>&]
         The input candidate holes
-        @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+        @param[out] conveyor [HolesConveyor*] The output conveyor
         struct
         @return void
        **/
       void fromCandidateHoleMsgToConveyor(
         const std::vector<vision_communications::CandidateHoleMsg>&
         candidateHolesVector,
-        HoleFilters::HolesConveyor* conveyor);
+        HolesConveyor* conveyor);
 
       /**
         @brief Computes a cv::MatND histogram from images loaded in directory
@@ -166,13 +167,13 @@ namespace pandora_vision
       void getWallsHistogram();
 
       /**
-        @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+        @brief Unpacks the the HolesConveyor struct for the
         candidate holes, the interpolated depth image and the point cloud
         from the vision_communications::DepthCandidateHolesVectorMsg message
         @param[in] holesMsg
         [vision_communications::DepthCandidateHolesVectorMsg&] The input
         candidate holes message obtained through the depth node
-        @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+        @param[out] conveyor [HolesConveyor*] The output conveyor
         struct
         @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
         @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
@@ -181,24 +182,24 @@ namespace pandora_vision
        **/
       void unpackDepthMessage(
         const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
-        HoleFilters::HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
+        HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
         cv::Mat* interpolatedDepthImage);
 
       /**
-        @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+        @brief Unpacks the the HolesConveyor struct for the
         candidate holes, the RGB image
         from the vision_communications::DepthCandidateHolesVectorMsg message
         @param[in] holesMsg
         [vision_communications::RgbCandidateHolesVectorMsg&] The input
         candidate holes message obtained throught the RGB node
-        @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+        @param[out] conveyor [HolesConveyor*] The output conveyor
         struct
         @param[out] rgbImage [cv::Mat*] The output RGB image
         @return void
        **/
       void unpackRgbMessage(
         const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
-        HoleFilters::HolesConveyor* conveyor, cv::Mat* rgbImage);
+        HolesConveyor* conveyor, cv::Mat* rgbImage);
 
       /**
         @brief Implements a strategy to combine

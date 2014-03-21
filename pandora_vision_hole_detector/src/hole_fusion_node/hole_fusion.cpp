@@ -224,20 +224,20 @@ namespace pandora_vision
 
 
   /**
-    @brief Recreates the HoleFilters::HolesConveyor struct for the
+    @brief Recreates the HolesConveyor struct for the
     candidate holes from the
     vision_communications::CandidateHolerMsg message
     @param[in]candidateHolesVector
     [const std::vector<vision_communications::CandidateHoleMsg>&]
     The input candidate holes
-    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+    @param[out] conveyor [HolesConveyor*] The output conveyor
     struct
     @return void
    **/
   void HoleFusion::fromCandidateHoleMsgToConveyor(
     const std::vector<vision_communications::CandidateHoleMsg>&
     candidateHolesVector,
-    HoleFilters::HolesConveyor* conveyor)
+    HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("fromCandidateHoleMsgToConveyor");
@@ -501,13 +501,13 @@ namespace pandora_vision
 
 
   /**
-    @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+    @brief Unpacks the the HolesConveyor struct for the
     candidate holes, the interpolated depth image and the point cloud
     from the vision_communications::DepthCandidateHolesVectorMsg message
     @param[in] holesMsg
     [vision_communications::DepthCandidateHolesVectorMsg&] The input
     candidate holes message obtained through the depth node
-    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+    @param[out] conveyor [HolesConveyor*] The output conveyor
     struct
     @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
     @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
@@ -516,7 +516,7 @@ namespace pandora_vision
    **/
   void HoleFusion::unpackDepthMessage(
     const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
-    HoleFilters::HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
+    HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
     cv::Mat* interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
@@ -547,20 +547,20 @@ namespace pandora_vision
 
 
   /**
-    @brief Unpacks the the HoleFilters::HolesConveyor struct for the
+    @brief Unpacks the the HolesConveyor struct for the
     candidate holes, the RGB image
     from the vision_communications::DepthCandidateHolesVectorMsg message
     @param[in] holesMsg
     [vision_communications::RgbCandidateHolesVectorMsg&] The input
     candidate holes message obtained throught the RGB node
-    @param[out] conveyor [HoleFilters::HolesConveyor*] The output conveyor
+    @param[out] conveyor [HolesConveyor*] The output conveyor
     struct
     @param[out] rgbImage [cv::Mat*] The output RGB image
     @return void
    **/
   void HoleFusion::unpackRgbMessage(
     const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
-    HoleFilters::HolesConveyor* conveyor, cv::Mat* rgbImage)
+    HolesConveyor* conveyor, cv::Mat* rgbImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("unpackRgbMessage", "rgbCandidateHolesCallback");

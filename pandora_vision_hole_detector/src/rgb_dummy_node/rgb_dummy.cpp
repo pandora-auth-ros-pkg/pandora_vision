@@ -78,7 +78,7 @@ namespace pandora_vision
     ROS_INFO("RGB node callback");
     #endif
 
-    HoleFilters::HolesConveyor rgbHolesConveyor;
+    HolesConveyor rgbHolesConveyor;
     std::vector<cv::Point2f> rectangles;
     std::vector<cv::Point> outlines;
 
@@ -114,7 +114,7 @@ namespace pandora_vision
 
 
   void Rgb::createCandidateHolesMessage(
-    const HoleFilters::HolesConveyor& conveyor,
+    const HolesConveyor& conveyor,
     const sensor_msgs::Image& rgbImage,
     vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
     const std::string& encoding)
