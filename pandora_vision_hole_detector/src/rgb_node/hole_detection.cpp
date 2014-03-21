@@ -177,7 +177,7 @@ namespace pandora_vision
     vision_communications::RgbCandidateHolesVectorMsg rgbCandidateHolesMsg;
 
     createCandidateHolesMessage(conveyor, msg, &rgbCandidateHolesMsg,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+      sensor_msgs::image_encodings::TYPE_8UC3);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
   }
