@@ -63,6 +63,10 @@ private:
   std::vector<cv::Point> _newCenters;
   //!<Vector containing contour points of reference C
   std::vector<std::vector<cv::Point> > _refContours;
+  //!<Vector containing edge points of C, found using findRotationB function
+  std::vector<cv::Point> _edgePoints;
+  //!<Value representing the number of edges found, again using finRotationB function  
+  int _edges;
   //!<2D Matrix containing "votes" of each pixel, used for finding the centers
   cv::Mat _voting;
   //!<2D Matrix containing landoltsC's, each colored with a unique color
@@ -148,8 +152,26 @@ public:
   @param i [int] Index of C being processed
   @return void
   **/
-  
   void findRotationA(const cv::Mat& in, int i);  
+  
+  /**
+  @brief Calculation of rotation based on thinning.Precision is good for a
+  distance up to 50cm from the camera, gives more accurate results than the first
+  method but it's slower.
+  @param in [const cv::Mat&] Matrix containing the padded frame
+  @param i [int] Index of C being processed
+  @return void
+  **/  
+  void findRotationB(const cv::Mat&in, int i);
+  
+  /**
+  @brief Function for calculating the neighbours of pixels considering
+  8-connectiviyty
+  @param index [unsigned int] Index of pixel in matrix
+  @param in [cv::Mat&] Input Image
+  @return void
+  **/    
+  void find8Neights(unsigned int index,cv::Mat& in);
   
 
 };

@@ -45,6 +45,8 @@ LandoltCDetector::LandoltCDetector()
   _minDiff = 60;
 
   _threshold = 90;
+  
+  _edges=0;
 }
 
 //!< Destructor
@@ -133,6 +135,111 @@ void LandoltCDetector::findRotationA(const cv::Mat& in, int i)
   std::cout << "Angle of " << i <<" is: " << (angle*(180/3.14159265359)) << std::endl;
   
 }
+
+/**
+  @brief Calculation of rotation based on thinning.Precision is good for a
+  distance up to 50cm from the camera, gives more accurate results than the first
+  method but it's slower.
+  @param in [const cv::Mat&] Matrix containing the padded frame
+  @param i [int] Index of C being processed
+  @return void
+**/  
+
+void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
+{
+  cv::Mat paddedptr;
+        
+  paddedptr=in.clone();
+        
+  thinning(&paddedptr);
+  
+  unsigned int *pts =new unsigned int[paddedptr.cols * paddedptr.rows];
+        
+  int limit = 0;
+
+  for (unsigned int rows = 1; rows < paddedptr.rows - 1; rows++)
+  {
+    for (unsigned int cols = 1; cols < paddedptr.cols - 1; cols++)
+    {
+      if(paddedptr.data[rows * paddedptr.cols + cols] !=0)
+      {
+          pts[limit]= rows * paddedptr.cols + cols;
+          limit++;          
+      }
+    }
+  }
+  
+  for(int j=0;j<limit;j++) 
+  {
+    find8Neights(pts[j],paddedptr);    
+  }
+  
+  for(int k=0;k<_edgePoints.size();k++)  
+  {
+    cv::circle(paddedptr,_edgePoints.at(k),2,255,-1,8,0);
+  }
+  
+  if(_edgePoints.size()==2)
+  {
+    int yc=(_edgePoints.at(0).y+_edgePoints.at(1).y)/2;
+    int xc=(_edgePoints.at(0).x+_edgePoints.at(1).x)/2;
+    
+    cv::Point gapCenter(xc,yc);
+    
+    cv::circle(paddedptr,gapCenter,1,255,-1,8,0);
+        
+    cv::Point center(paddedptr.cols/2,paddedptr.rows/2);
+    
+    cv::circle(paddedptr,center,1,255,-1,8,0);
+  
+    double angle=atan2(gapCenter.y-center.y,gapCenter.x-center.x);
+    
+    if(angle<0) angle+=2*3.14159265359;
+    
+    std::cout<<"Angle of " << i <<" is : "<<angle*(180/3.14159265359)<<std::endl;
+    
+  }
+  
+  cv::imshow("paddedptr",paddedptr); 
+  
+  cv::waitKey(30); 
+  
+  _edges=0;
+  
+  _edgePoints.clear();
+  
+  
+}
+
+/**
+  @brief Function for calculating the neighbours of pixels considering
+  8-connectiviyty
+  @param index [unsigned int] Index of pixel in matrix
+  @param in [cv::Mat&] Input Image
+  @return void
+**/    
+
+void LandoltCDetector::find8Neights(unsigned int index,cv::Mat& in)
+{
+  unsigned int y=index/in.cols;
+  unsigned int x=index%in.cols;
+
+  unsigned char p1=in.at<unsigned char>(y-1,x);
+  unsigned char p2=in.at<unsigned char>(y-1,x+1);
+  unsigned char p3=in.at<unsigned char>(y,x+1);
+  unsigned char p4=in.at<unsigned char>(y+1,x+1);
+  unsigned char p5=in.at<unsigned char>(y+1,x);
+  unsigned char p6=in.at<unsigned char>(y+1,x-1);
+  unsigned char p7=in.at<unsigned char>(y,x-1);
+  unsigned char p8=in.at<unsigned char>(y-1,x-1);
+     
+  if(p1+p2+p3+p4+p5+p6+p7+p8==255) 
+  {
+    _edges++;
+    _edgePoints.push_back(cv::Point(x,y));    
+  }
+}     
+  
 
 /**
   @brief Rasterize line between two points
@@ -285,13 +392,13 @@ void LandoltCDetector::applyMask()
     
     //cv::imshow("padded", padded); 
     
-    findRotationA(padded, i);
+    //findRotationA(padded, i);
     
-    thinning(&padded);
+    findRotationB(padded,i);
     
     cv::imshow("padded", padded);
 
-    cv::waitKey(20);
+    //cv::waitKey(200);
 
   }
 }
