@@ -146,7 +146,7 @@ namespace pandora_vision
     #endif
 
     #ifdef SHOW_DEBUG_IMAGE
-      Visualization::multipleShow("RGB node",imgs,msgs,1600,1);
+      //Visualization::multipleShow("RGB node",imgs,msgs,800,1);
     #endif
 
     return conveyor;

@@ -38,6 +38,7 @@
 #define HOLE_FUSION_NODE_GENERIC_FILTERS_H
 
 #include "utils/holes_conveyor.h"
+#include "utils/defines.h"
 #include <math.h>
 
 /**

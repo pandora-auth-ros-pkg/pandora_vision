@@ -753,19 +753,14 @@ namespace pandora_vision
     //!< The returned set of valid keypoint indices
     std::set<unsigned int> valid;
 
-    //!< Temporary cv::Mats
-    cv::Mat interpolatedDepthImageEdges;
-    cv::Mat visualizableDenoisedImage;
-    cv::Mat interpolatedTemp;
-
-    interpolatedDepthImage.copyTo(interpolatedTemp);
-
     //!< Facilitate the edge detection by converting the 32FC1 image
     //!< values to a range of 0-255
+    cv::Mat visualizableDenoisedImage;
     visualizableDenoisedImage = Visualization::scaleImageForVisualization
-      (interpolatedTemp, Parameters::scale_method);
+      (interpolatedDepthImage, Parameters::scale_method);
 
     //!< from now onwards every image is in the range of 0-255
+    cv::Mat interpolatedDepthImageEdges;
     EdgeDetection::applySobel(visualizableDenoisedImage,
       &interpolatedDepthImageEdges);
 

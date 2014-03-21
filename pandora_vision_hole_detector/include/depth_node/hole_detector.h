@@ -38,6 +38,8 @@
 #ifndef DEPTH_NODE_HOLE_DETECTOR_H
 #define DEPTH_NODE_HOLE_DETECTOR_H
 
+#define SHOW_DEBUG_IMAGE
+
 #include "utils/holes_conveyor.h"
 #include "utils/hole_filters.h"
 
