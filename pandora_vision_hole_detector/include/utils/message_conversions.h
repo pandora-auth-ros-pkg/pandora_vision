@@ -35,8 +35,8 @@
 * Authors: Alexandros Filotheou, Manos Tsardoulias
 *********************************************************************/
 
-#ifndef MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H
-#define MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H
+#ifndef UTILS_MESSAGE_CONVERSIONS_H
+#define UTILS_MESSAGE_CONVERSIONS_H
 
 #include "utils/defines.h"
 #include "vision_communications/DepthCandidateHolesVectorMsg.h"
@@ -156,4 +156,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // MESSAGE_CONVERSIONS_MESSAGE_CONVERSIONS_H
+#endif  // UTILS_MESSAGE_CONVERSIONS_H

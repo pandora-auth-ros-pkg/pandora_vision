@@ -49,9 +49,6 @@ namespace pandora_vision
 {
   struct Parameters
   {
-    //!< Subscriber of kinect parameter changing
-    ros::Subscriber _parameterChangingSubscriber;
-
     //!< Kanny parameters
     static int kanny_ratio;
     static int kanny_kernel_size;
@@ -63,10 +60,6 @@ namespace pandora_vision
 
     //!< Threshold parameters
     static int threshold_lower_value;
-    static int adaptive_max_value;
-    static int adaptive_method;
-    static int adaptive_block_size;
-    static int adaptive_c_value;
 
     //!< Blob detection parameters
     static int blob_min_threshold;
@@ -86,8 +79,8 @@ namespace pandora_vision
     static int bounding_box_min_area_threshold;
 
     //!< The bounding box detection method
-    //!< 0 for detecting by means of brushfire starting\
-    //from the keypoint of the blob
+    //!< 0 for detecting by means of brushfire starting
+    //!< from the keypoint of the blob
     //!< 1 for detecting by means of contours around the edges of the blob
     static int bounding_box_detection_method;
 
@@ -99,9 +92,10 @@ namespace pandora_vision
 
     //<! Loose ends connection parameters
     static int AB_to_MO_ratio;
+    static int minimum_curve_points;
 
-    //!< Interpolation parameters
-    //
+    ////!< Interpolation parameters
+
     //!< The interpolation method for noise removal
     //!< 0 for averaging the pixel's neighbor values
     //!< 1 for brushfire near
@@ -134,7 +128,6 @@ namespace pandora_vision
     //!< Debug
     static bool debug_show_find_holes;
     static int debug_show_find_holes_size;
-    static bool debug_time_find_holes;
 
     static bool debug_show_denoise_edges;
     static int debug_show_denoise_edges_size;
@@ -149,7 +142,6 @@ namespace pandora_vision
     static bool debug_show_check_holes;
     static int debug_show_check_holes_size;
 
-    static int minimum_curve_points;
 
     //!< Texture parameters
     //!< The threshold for texture matching
