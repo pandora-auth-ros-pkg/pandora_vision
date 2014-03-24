@@ -464,11 +464,31 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_find_holes) // Debug
     {
-      Visualization::showKeypoints("Depth : Final KeyPoints",
-        interpolatedDepthImage_, 1, depthHolesConveyor_.keyPoints);
+/*
+ *      Visualization::showKeypoints("Depth : Final KeyPoints",
+ *        interpolatedDepthImage_, 1, depthHolesConveyor_.keyPoints);
+ *
+ *      Visualization::showKeypoints("RGB : Final KeyPoints",
+ *        rgbImage_, 1, rgbHolesConveyor_.keyPoints);
+ */
+      std::vector<std::string> finalMsgs;
+      Visualization::showHoles(
+        "Depth : Final KeyPoints",
+        interpolatedDepthImage_,
+        1,
+        depthHolesConveyor_.keyPoints,
+        depthHolesConveyor_.rectangles,
+        finalMsgs,
+        depthHolesConveyor_.outlines);
 
-      Visualization::showKeypoints("RGB : Final KeyPoints",
-        rgbImage_, 1, rgbHolesConveyor_.keyPoints);
+      Visualization::showHoles(
+        "RGB: Final KeyPoints",
+        rgbImage_,
+        1,
+        rgbHolesConveyor_.keyPoints,
+        rgbHolesConveyor_.rectangles,
+        finalMsgs,
+        rgbHolesConveyor_.outlines);
     }
     #endif
 

@@ -217,8 +217,16 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point> >& outlineVector,
     const float& hz)
   {
-    cv::Mat img = scaleImageForVisualization(inImage,
-      Parameters::scale_method);
+    cv::Mat img;
+    if (inImage.type() != CV_8UC1 || inImage.type() != CV_8UC3)
+    {
+      img = scaleImageForVisualization(inImage,
+        Parameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(img);
+    }
 
     cv::drawKeypoints(img, keypoints, img, CV_RGB(0, 255, 0),
       cv::DrawMatchesFlags::DEFAULT);
@@ -322,7 +330,8 @@ namespace pandora_vision
     const cv::Mat& inImage,
     const int& ms)
   {
-    cv::imshow(windowTitle, scaleImageForVisualization(inImage,
+    cv::imshow(
+      windowTitle, scaleImageForVisualization(inImage,
         Parameters::scale_method));
     cv::waitKey(ms);
   }
