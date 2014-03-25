@@ -66,84 +66,84 @@ namespace pandora_vision
     switch(detectionMethod)
     {
       case 0:
-      {
-        std::vector<std::vector<cv::Point> > blobsOutlineVector;
-        std::vector<float> blobsArea;
+        {
+          std::vector<std::vector<cv::Point> > blobsOutlineVector;
+          std::vector<float> blobsArea;
 
-        BlobDetection::brushfireKeypoint(keyPoints,
+          BlobDetection::brushfireKeypoint(keyPoints,
             denoisedDepthImageEdges,
             &blobsOutlineVector,
             &blobsArea);
 
-        //!< For each outline found, find the rotated rectangle
-        //!< with the least area that encloses it.
-        cv::Mat inputDenoisedDepthImageEdges;
-        denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
+          //!< For each outline found, find the rotated rectangle
+          //!< with the least area that encloses it.
+          cv::Mat inputDenoisedDepthImageEdges;
+          denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
 
-        cv::Mat rectanglesImage;
-        std::vector< std::vector<cv::Point2f> > rectangles;
+          cv::Mat rectanglesImage;
+          std::vector< std::vector<cv::Point2f> > rectangles;
 
-        //!< Given the outline of the blob, find the least area rotated bounding
-        //!< box that encloses it
-        BoundingBoxDetection::findRotatedBoundingBoxesFromOutline(
+          //!< Given the outline of the blob, find the least area
+          //!< rotated bounding box that encloses it
+          BoundingBoxDetection::findRotatedBoundingBoxesFromOutline(
             inputDenoisedDepthImageEdges,
             blobsOutlineVector,
             blobsArea,
             &rectanglesImage,
             &rectangles);
 
-        //!< Correlate each keypoint with each rectangle found.
-        //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than Parameters::bounding_box_min_area_threshold
-        validateKeypointsToRectangles(
+          //!< Correlate each keypoint with each rectangle found.
+          //!< Keep in mind that for a blob to be a potential hole, its area
+          //!< must be greater than Parameters::bounding_box_min_area_threshold
+          validateKeypointsToRectangles(
             keyPoints,
             rectangles,
             blobsArea,
             blobsOutlineVector,
             conveyor);
 
-        break;
-      }
+          break;
+        }
       case 1:
-      {
-        std::vector<std::vector<cv::Point> > blobsOutlineVector;
-        std::vector<float> blobsArea;
+        {
+          std::vector<std::vector<cv::Point> > blobsOutlineVector;
+          std::vector<float> blobsArea;
 
-        BlobDetection::raycastKeypoint(keyPoints,
+          BlobDetection::raycastKeypoint(keyPoints,
             denoisedDepthImageEdges,
             Parameters::raycast_keypoint_partitions,
             &blobsOutlineVector,
             &blobsArea);
 
-        //!< For each outline found, find the rotated rectangle
-        //!< with the least area that encloses it.
-        cv::Mat inputDenoisedDepthImageEdges;
-        denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
+          //!< For each outline found, find the rotated rectangle
+          //!< with the least area that encloses it.
+          cv::Mat inputDenoisedDepthImageEdges;
+          denoisedDepthImageEdges->copyTo(inputDenoisedDepthImageEdges);
 
-        cv::Mat rectanglesImage;
-        std::vector< std::vector<cv::Point2f> > rectangles;
+          cv::Mat rectanglesImage;
+          std::vector< std::vector<cv::Point2f> > rectangles;
 
-        //!< Given the outline of the blob, find the least area rotated bounding
-        //!< box that encloses it
-        BoundingBoxDetection::findRotatedBoundingBoxesFromOutline(
+          //!< Given the outline of the blob, find the least area
+          //!< rotated bounding box that encloses it
+          BoundingBoxDetection::findRotatedBoundingBoxesFromOutline(
             inputDenoisedDepthImageEdges,
             blobsOutlineVector,
             blobsArea,
             &rectanglesImage,
             &rectangles);
 
-        //!< Correlate each keypoint with each rectangle found.
-        //!< Keep in mind that for a blob to be a potential hole, its area must
-        //!< be greater than Parameters::bounding_box_min_area_threshold
-        validateKeypointsToRectangles(
+          //!< Correlate each keypoint with each rectangle found.
+          //!< Keep in mind that for a blob to be a potential hole, its area
+          //!< must be greater than Parameters::bounding_box_min_area_threshold
+          validateKeypointsToRectangles(
             keyPoints,
             rectangles,
             blobsArea,
             blobsOutlineVector,
             conveyor);
 
-        break;
-      }
+          break;
+        }
     }
     /* The end product here is a struct (conveyor) of keypoints,
      * a set of rectangles that enclose them  and the outline of
