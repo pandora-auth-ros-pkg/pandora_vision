@@ -1321,26 +1321,7 @@ namespace pandora_vision
     Timer::start("getShapesClearBorder", "denoiseEdges");
     #endif
 
-    //!< Invert the image to facilitate floodfill's operation
-    for (unsigned int rows = 0; rows < inImage->rows; rows++)
-    {
-      for (unsigned int cols = 0; cols < inImage->cols; cols++)
-      {
-        if (inImage->at<unsigned char>(rows, cols) == 0)
-        {
-          inImage->at<unsigned char>(rows, cols) = 255;
-        }
-        else
-        {
-          inImage->at<unsigned char>(rows, cols) = 0;
-        }
-      }
-    }
-
-    cv::floodFill(*inImage, cv::Point(0, 0), 0);
-
-    Morphology::dilation(inImage, 1);
-
+    //!< Kernel for obtaining boundary pixels
     static const char kernels[8][3][3] = {
       { {0, 2, 2},
         {2, 1, 2},
@@ -1375,6 +1356,108 @@ namespace pandora_vision
         {2, 2, 2} }
     };
 
+    //!< Invert the image to facilitate floodfill's operation
+    for (unsigned int rows = 0; rows < inImage->rows; rows++)
+    {
+      for (unsigned int cols = 0; cols < inImage->cols; cols++)
+      {
+        if (inImage->at<unsigned char>(rows, cols) == 0)
+        {
+          inImage->at<unsigned char>(rows, cols) = 255;
+        }
+        else
+        {
+          inImage->at<unsigned char>(rows, cols) = 0;
+        }
+      }
+    }
+
+
+    //!< A vector that holds floodfill images needed for the final output
+    std::vector<cv::Mat> floodfillsVector;
+
+    //!< First floodfill operation
+    cv::floodFill(*inImage, cv::Point(0, 0), 0);
+
+    //!< Push the first floodfill operation's result
+    //!< back into the floodfillsVector
+    cv::Mat firstFloodFill;
+    inImage->copyTo(firstFloodFill);
+    floodfillsVector.push_back(firstFloodFill);
+
+
+    //!< Termination flag
+    bool isFloodFillFinished = false;
+
+    //!< The total number of images needed to obtain a clear result
+    int numImages = 0;
+
+    while(!isFloodFillFinished)
+    {
+      //!< Invert the image to facilitate floodfill's operation
+      for (unsigned int rows = 0; rows < inImage->rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < inImage->cols; cols++)
+        {
+          if (inImage->at<unsigned char>(rows, cols) == 0)
+          {
+            inImage->at<unsigned char>(rows, cols) = 255;
+          }
+          else
+          {
+            inImage->at<unsigned char>(rows, cols) = 0;
+          }
+        }
+      }
+
+      //!< Second floodfill operation
+      cv::floodFill(*inImage, cv::Point(0, 0), 0);
+
+
+      //!< The prunedFloodFill image will act as termination check
+      //!< If it is filled with zeros, that means that there are no
+      //!< closed shapes in the floodfill's image.
+      //!< If not, we need to iterate the floodfill procedure
+      cv::Mat prunedFloodFill;
+      inImage->copyTo(prunedFloodFill);
+      Morphology::pruningStrictIterative(&prunedFloodFill, 1000);
+
+      //!< Check the prunedFloodFill image for the numerosity of zeros
+      //!< If there are non-zero pixels, reiterate
+      cv::Mat pruneDiff;
+      cv::compare(prunedFloodFill, cv::Mat::zeros(inImage->size(), CV_8UC1),
+        pruneDiff, cv::CMP_NE);
+
+      if (cv::countNonZero(pruneDiff) != 0)
+      {
+        numImages++;
+
+        //!< Push the second floodfill operation's result
+        //!< back into the floodfillsVector
+        cv::Mat nFloodFill;
+        inImage->copyTo(nFloodFill);
+        floodfillsVector.push_back(nFloodFill);
+      }
+      else
+      {
+        isFloodFillFinished = true;
+      }
+    }
+
+    //!< The final floodfill-ed image
+    cv::Mat finalFloodFill = floodfillsVector[0];
+    bool sign = false;
+    for (int i = 2; i < floodfillsVector.size(); i += 2)
+    {
+      finalFloodFill = finalFloodFill +
+        (sign == true ? 1 : -1) * floodfillsVector[i];
+      sign = (sign == false);
+    }
+
+    //!< Dilate once to get rid of pesky borders
+    Morphology::dilation(&finalFloodFill, 1);
+
+    //!< The floodfill's edges - region borders
     cv::Mat bordersImage = cv::Mat(inImage->rows, inImage->cols, CV_8UC1,
         cv::Scalar::all(0));
 
@@ -1384,10 +1467,10 @@ namespace pandora_vision
       {
         for (unsigned int cols = 1; cols < inImage->cols - 1; cols++)
         {
-          if (inImage->at<unsigned char>(rows, cols) != 0 &&
+          if (finalFloodFill.at<unsigned char>(rows, cols) != 0 &&
               bordersImage.at<unsigned char>(rows, cols) == 0)
           {
-            if (Morphology::kernelCheck(kernels[kernelId], *inImage,
+            if (Morphology::kernelCheck(kernels[kernelId], finalFloodFill,
                   cv::Point(cols, rows)))
             {
               bordersImage.at<unsigned char>(rows, cols) = 255;
