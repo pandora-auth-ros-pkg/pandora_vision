@@ -365,6 +365,13 @@ namespace pandora_vision
     Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
     #endif
 
+    #ifdef DEBUG_SHOW
+    ROS_ERROR("===========================================");
+    ROS_ERROR("#Depth keypoints : %zu", depthHolesConveyor_.keyPoints.size());
+    ROS_ERROR("#RGB keypoints : %zu", rgbHolesConveyor_.keyPoints.size());
+    ROS_ERROR("-------------------------------------------");
+    #endif
+
     //!< Do some processing
 
     //!< Initialize the probabilities 2D vector. But first we need to know
@@ -403,17 +410,23 @@ namespace pandora_vision
       &depthHolesConveyor_,
       &depthProbabilitiesVector2D);
 
+    #ifdef DEBUG_SHOW
     if (depthHolesConveyor_.keyPoints.size() > 0)
     {
       ROS_ERROR("Depth : Candidate Holes' probabilities");
-      for (int i = 0; i < depthActiveFilters; i++)
+      for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
       {
-        for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
+        std::string probsString;
+        for (int i = 0; i < depthActiveFilters; i++)
         {
-          ROS_ERROR("P[%d %d] = %f", i, j, depthProbabilitiesVector2D[i][j]);
+          probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
         }
+
+        ROS_ERROR("P_%d = %s", j, probsString.c_str());
+        ROS_ERROR("------------------");
       }
     }
+    #endif
 
     //!< Initialize the probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
@@ -447,39 +460,53 @@ namespace pandora_vision
       &rgbHolesConveyor_,
       &rgbProbabilitiesVector2D);
 
+    #ifdef DEBUG_SHOW
+    ROS_ERROR("-------------------------------------------");
     if (rgbHolesConveyor_.keyPoints.size() > 0)
     {
       ROS_ERROR("RGB: Candidate Holes' probabilities");
-      for (int i = 0; i < rgbActiveFilters; i++)
+      for (int j = 0; j < rgbHolesConveyor_.keyPoints.size(); j++)
       {
-        for (int j = 0; j < rgbHolesConveyor_.keyPoints.size(); j++)
+        std::string probsString;
+        for (int i = 0; i < rgbActiveFilters; i++)
         {
-          ROS_ERROR("P[%d %d] = %f", i, j, rgbProbabilitiesVector2D[i][j]);
+          probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
         }
+
+        ROS_ERROR("P_%d = %s", j, probsString.c_str());
+        ROS_ERROR("------------------");
       }
     }
-
+    #endif
 
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_find_holes) // Debug
     {
-/*
- *      Visualization::showKeypoints("Depth : Final KeyPoints",
- *        interpolatedDepthImage_, 1, depthHolesConveyor_.keyPoints);
- *
- *      Visualization::showKeypoints("RGB : Final KeyPoints",
- *        rgbImage_, 1, rgbHolesConveyor_.keyPoints);
- */
-      std::vector<std::string> finalMsgs;
+      //!< Push back the identities of each keypoint originated from
+      //!< depth analysis
+      std::vector<std::string> depthMsgs;
+      for (int i = 0; i < depthHolesConveyor_.keyPoints.size(); i++)
+      {
+        depthMsgs.push_back(TOSTR(i));
+      }
+
       Visualization::showHoles(
         "Depth : Final KeyPoints",
         interpolatedDepthImage_,
         1,
         depthHolesConveyor_.keyPoints,
         depthHolesConveyor_.rectangles,
-        finalMsgs,
+        depthMsgs,
         depthHolesConveyor_.outlines);
+
+      //!< Push back the identities of each keypoint originated from
+      //!< RGB analysis
+      std::vector<std::string> rgbMsgs;
+      for (int i = 0; i < rgbHolesConveyor_.keyPoints.size(); i++)
+      {
+        rgbMsgs.push_back(TOSTR(i));
+      }
 
       Visualization::showHoles(
         "RGB: Final KeyPoints",
@@ -487,7 +514,7 @@ namespace pandora_vision
         1,
         rgbHolesConveyor_.keyPoints,
         rgbHolesConveyor_.rectangles,
-        finalMsgs,
+        rgbMsgs,
         rgbHolesConveyor_.outlines);
     }
     #endif
