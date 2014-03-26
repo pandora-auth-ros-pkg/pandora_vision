@@ -68,13 +68,13 @@ namespace pandora_vision
       std::vector<cv::Point> keypointOutline;
 
       current.insert(
-          static_cast<int>(
-            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        static_cast<int>(
+          round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
         + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       visited.insert(
-          static_cast<int>(
-            round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
+        static_cast<int>(
+          round(inKeyPoints[keypointId].pt.y) * edgesImage->cols)
         + static_cast<int>(round(inKeyPoints[keypointId].pt.x)));
 
       while (current.size() != 0)
@@ -92,9 +92,9 @@ namespace pandora_vision
               int ind = y * edgesImage->cols + x;
 
               if (x < 0 ||
-                  y < 0 ||
-                  x > edgesImage->cols - 1 ||
-                  y > edgesImage->rows - 1)
+                y < 0 ||
+                x > edgesImage->cols - 1 ||
+                y > edgesImage->rows - 1)
               {
                 continue;
               }
@@ -318,6 +318,14 @@ namespace pandora_vision
               int x = inKeyPoints[keypointId].pt.x + m + counter * cos(theta);
               int y = inKeyPoints[keypointId].pt.y + n + counter * sin(theta);
 
+              //!< If the ray point is not within image borders, proceed
+              if (x < 0 || y < 0 ||
+                x > edgesImage->cols - 1 ||
+                y > edgesImage->rows - 1)
+              {
+                continue;
+              }
+
               int ind = y * edgesImage->cols + x;
               char v = ptr[ind];
 
@@ -329,42 +337,43 @@ namespace pandora_vision
             }
           }
         }
-
-        theta += thetaIncrement;
       }
 
-      blobsOutlineVector->push_back(keypointOutline);
-
-      //!< Calculate each blob's approximate area by heron's formula
-      //!< https://en.wikipedia.org/wiki/Heron's_formula
-      float area = 0.0;
-      for (unsigned int t = 0; t < partitions; t++)
-      {
-        //!< calculate the area of each triangle found
-        //!< O is the keypoint and A, B any two successive outline points
-        float lengthOA = sqrt(
-            pow(inKeyPoints[keypointId].pt.x - keypointOutline[t].x, 2)
-            + pow(inKeyPoints[keypointId].pt.y - keypointOutline[t].y, 2));
-        float lengthOB = sqrt(
-            pow(inKeyPoints[keypointId].pt.x
-              - keypointOutline[(t + 1) % partitions].x, 2)
-            + pow(inKeyPoints[keypointId].pt.y
-              - keypointOutline[(t + 1) % partitions].y, 2));
-        float lengthAB = sqrt(
-            pow(keypointOutline[t].x
-              - keypointOutline[(t + 1) % partitions].x, 2)
-            + pow(keypointOutline[t].y
-              - keypointOutline[(t + 1) % partitions].y, 2));
-        float perimeter = lengthOA + lengthOB + lengthAB;
-
-        area += sqrt(perimeter
-            * (perimeter - lengthOA)
-            * (perimeter - lengthOB)
-            * (perimeter - lengthAB));
-      }
-
-      blobsArea->push_back(area);
+      theta += thetaIncrement;
     }
+
+    blobsOutlineVector->push_back(keypointOutline);
+
+    //!< Calculate each blob's approximate area by heron's formula
+    //!< https://en.wikipedia.org/wiki/Heron's_formula
+    float area = 0.0;
+    for (unsigned int t = 0; t < partitions; t++)
+    {
+      //!< calculate the area of each triangle found
+      //!< O is the keypoint and A, B any two successive outline points
+      float lengthOA = sqrt(
+        pow(inKeyPoints[keypointId].pt.x - keypointOutline[t].x, 2)
+        + pow(inKeyPoints[keypointId].pt.y - keypointOutline[t].y, 2));
+      float lengthOB = sqrt(
+        pow(inKeyPoints[keypointId].pt.x
+          - keypointOutline[(t + 1) % partitions].x, 2)
+        + pow(inKeyPoints[keypointId].pt.y
+          - keypointOutline[(t + 1) % partitions].y, 2));
+      float lengthAB = sqrt(
+        pow(keypointOutline[t].x
+          - keypointOutline[(t + 1) % partitions].x, 2)
+        + pow(keypointOutline[t].y
+          - keypointOutline[(t + 1) % partitions].y, 2));
+      float perimeter = lengthOA + lengthOB + lengthAB;
+
+      area += sqrt(perimeter
+        * (perimeter - lengthOA)
+        * (perimeter - lengthOB)
+        * (perimeter - lengthAB));
+    }
+
+    blobsArea->push_back(area);
+  }
 
     #ifdef DEBUG_TIME
     Timer::tick("raycastKeypoint");
