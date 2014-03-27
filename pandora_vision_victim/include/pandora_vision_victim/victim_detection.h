@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_FACE_FACE_DETECTION_H 
-#define PANDORA_VISION_FACE_FACE_DETECTION_H 
+#ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
+#define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
 #include <iostream>
 #include <stdlib.h>
