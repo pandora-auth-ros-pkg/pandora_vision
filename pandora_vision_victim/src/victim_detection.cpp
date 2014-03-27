@@ -32,8 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: George Aprilis
-* 		  Despoina Paschalidou
+* Author: Despoina Paschalidou
 *********************************************************************/
 
 #include "pandora_vision_victim/victim_detection.h"
