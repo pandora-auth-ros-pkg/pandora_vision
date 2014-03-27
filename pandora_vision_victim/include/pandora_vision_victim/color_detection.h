@@ -37,6 +37,9 @@
 #ifndef PANDORA_VISION_VICTIM_COLOR_DETECTION_H 
 #define PANDORA_VISION_VICTIM_COLOR_DETECTION_H 
 
+#include "math.h"
+#include <opencv2/opencv.hpp>
+#include <iostream>
 #include "ros/ros.h"
 
 namespace pandora_vision
@@ -51,6 +54,55 @@ namespace pandora_vision
     
     //!Destructor
     virtual ~ColorDetection();
+    
+    /**
+     * @brief This is the main function which calls all other for the computation
+    */ 
+    void findColorFeatures();
+    
+    /**
+     * @brief This function returns the histogram of one color component from 
+     * the src image.
+     * @param planes [cv::Mat] contains the pixel values of a color component.
+     * @param bins [int] num of bins where the histogram will be divided.
+     * @param histRange [const float*] the range of the histogram.
+     * @return [cv::Mat] the calculated histogram.
+    */ 
+    cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
+    
+    /**
+     * @brief This function computes the average and standard deviation value of every
+     * color component(HSV) and returns a feature vector.
+     * @param hsv_planes [std::vector<cv::Mat>] contains the pixel values of the color components.
+     * @return [std::vector<double>] the calculated histogram.
+    */ 
+    std::vector<double> computeMeanStdHSV(std::vector<cv::Mat> hsv_planes);
+    
+    /**
+     * @brief This function computes the dominant Color and it's density value in a color component.
+     * @param img [cv::Mat] the source image
+     * @param hist [cv::Mat] the histogram of one color component of the image.
+     * @param histsize [int] the size of the histogram
+     * @param value [double&] the dominant color value (to be returned).
+     * @param density [double&] the dominant color density (to be returned).
+    */ 
+    void findDominantColor(cv::Mat img, cv::Mat hist, int histsize, double& value, double& density);
+    
+    /**
+     * @brief This function computes the Dft coefficients . 
+     * @param img [cv::Mat] the source image
+     * @return [std::vector<double>] the feature vector with the 6 first Dft coefficients.
+    */
+    std::vector<double> computeDFT(cv::Mat img);
+    
+     /**
+     * @brief This function computes the color angles of the image and the normalized intensity std . 
+     * @param img [cv::Mat] the source image
+     * @return [std::vector<double>] the feature vector with the 3 color angles and normalizes intensity std.
+    */
+    std::vector<double> computeColorAngles(cv::Mat img);
+
+
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_COLOR_DETECTION_H   
