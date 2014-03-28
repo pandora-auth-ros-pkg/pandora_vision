@@ -46,9 +46,14 @@ namespace pandora_vision
   
     //!< Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
-
+   
     motionFrame = cv::Mat(cv::Size(frameWidth, frameHeight), CV_8UC3);
-
+    
+    
+    //!< The dynamic reconfigure (depth) parameter's callback
+    server.setCallback(boost::bind(&MotionDetection::parametersCallback,
+        this, _1, _2));
+        
     //!< Declare publisher and advertise topic where 
     //!< algorithm results are posted
     _motionPublisher = 
@@ -238,6 +243,29 @@ namespace pandora_vision
   void MotionDetection::completeTransition(void)
   {
     ROS_INFO("[motion_node] : Transition Complete");
+  }
+  
+  /**
+    @brief The function called when a parameter is changed
+    @param[in] config [const pandora_vision_motion::motion_cfgConfig&]
+    @param[in] level [const uint32_t] The level (?)
+    @return void
+  **/
+  void MotionDetection::parametersCallback(
+    const pandora_vision_motion::motion_cfgConfig& config,
+    const uint32_t& level)
+  {
+    //!< Background segmentation parameters
+    MotionParameters::history = config.history;
+    MotionParameters::varThreshold = config.varThreshold;
+    MotionParameters::bShadowDetection = config.bShadowDetection;
+    MotionParameters::nmixtures = config.nmixtures;
+    
+    //!< Threshold parameters
+    MotionParameters::diff_threshold = config.diff_threshold;
+    MotionParameters::motion_high_thres= config.motion_high_thres;
+    MotionParameters::motion_low_thres= config.motion_low_thres;
+    
   }
 }// namespace pandora_vision
 

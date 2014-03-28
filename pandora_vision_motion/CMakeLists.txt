@@ -11,9 +11,14 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     image_transport
     sensor_msgs
+    dynamic_reconfigure
     roslint
 )
 
+
+generate_dynamic_reconfigure_options(
+  cfg/motion_cfg.cfg
+)
 
 catkin_package(
     DEPENDS
@@ -25,6 +30,7 @@ catkin_package(
       cv_bridge
       image_transport
       sensor_msgs
+      dynamic_reconfigure
       roslint
     INCLUDE_DIRS
       include
@@ -42,7 +48,9 @@ add_executable(motion_node
     src/motion_parameters.cpp
 )
 target_link_libraries(motion_node ${catkin_LIBRARIES} )
-add_dependencies(motion_node 
+add_dependencies(motion_node
+    vision_gencfg 
+    pandora_vision_motion_gencfg
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
