@@ -32,24 +32,18 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author:  George Aprilis
+* Author:  Despoina Paschalidou
 *********************************************************************/
 
 #include "pandora_vision_motion/motion_detection.h"
 namespace pandora_vision
 {
-
   /**
     @brief Constructor
   **/
   MotionDetection::MotionDetection() : _nh()
   {
-    //!< Initialize motion detector
-    _motionDetector = new MotionDetector();
-
-    //!< Get Motion Detector Parameters
-    getMotionParams();
-
+  
     //!< Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
 
@@ -60,28 +54,18 @@ namespace pandora_vision
     _motionPublisher = 
       _nh.advertise<vision_communications::MotionMsg>("motion", 10);
 
-    //!< Advertise topics for debugging if we are in debug mode
-    if (debugMotion)
-    {
-      _motionDiffPublisher = 
-        image_transport::ImageTransport(_nh).advertise("debug_motionDiff", 1);
-      _motionFrmPublisher =
-        image_transport::ImageTransport(_nh).advertise("debug_motionFrm", 1);
-    }
-
     //!< Subscribe to input image's topic
     _frameSubscriber = _nh.subscribe(imageTopic , 1,
         &MotionDetection::imageCallback, this );
-
+    
     //!< Initialize states - robot starts in STATE_OFF 
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
-    //!< initialize state Managing Variables
-    motionNowON = false;
-      
     clientInitialize();
-      
+    
+     motionNowON = false;  
+    
     ROS_INFO("[Motion_node] : Created Motion Detection instance");
   }
 
@@ -90,8 +74,7 @@ namespace pandora_vision
   */
   MotionDetection::~MotionDetection()
   {
-    delete _motionDetector;
-    ROS_INFO("[motion_node] : Destroying Motion Detection instance");
+    ROS_INFO("[Motion_node] : Destroying Motion Detection instance");
   }
 
   /**
@@ -100,31 +83,7 @@ namespace pandora_vision
    @return void
   */
   void MotionDetection::getGeneralParams()
-  {
-    // Get the motionDummy parameter if available;
-    if (_nh.hasParam("motionDummy")) 
-    {
-      _nh.getParam("motionDummy", motionDummy);
-      ROS_DEBUG("motionDummy: %d", motionDummy);
-    }
-    else 
-    {
-      ROS_DEBUG("[motion_node] : Parameter motionDummy not found. Using Default");
-      motionDummy = false;
-    }
-    
-    // Get the debugMotion parameter if available;
-    if (_nh.hasParam("debugMotion")) 
-    {
-      _nh.getParam("debugMotion", debugMotion);
-      ROS_DEBUG_STREAM("debugMotion : " << debugMotion);
-    }
-    else 
-    {
-      ROS_DEBUG("[motion_node] : Parameter debugMotion not found. Using Default");
-      debugMotion = true;
-    }
-    
+  {    
     //!< Get the camera to be used by hole node;
     if (_nh.hasParam("camera_name")) 
     {
@@ -187,59 +146,6 @@ namespace pandora_vision
   }
 
   /**
-    @brief Get parameters referring to motion detection algorithm
-    @return void
-  */
-  void MotionDetection::getMotionParams()
-  {
-    //!< Get the buffer size parameter if available;
-    if (_nh.hasParam("motionBuffer")) 
-    {
-      _nh.getParam("motionBuffer", _motionDetector->N);
-      ROS_DEBUG_STREAM("motionBuffer : " << _motionDetector->N);
-    }
-    else 
-    {
-      ROS_DEBUG("[motion_node] : Parameter motionBuffer not found. Using Default");
-      _motionDetector->N = 4;
-    }
-
-    //!< Get the difference threshold parameter if available;
-    if (_nh.hasParam("motionDiffThres")) 
-    {
-      _nh.getParam("motionDiffThres", _motionDetector->diff_threshold);
-      ROS_DEBUG_STREAM("motionDiffThres : " << _motionDetector->diff_threshold);
-
-    }
-    else 
-    {
-      ROS_DEBUG("[motion_node] : Parameter motionDiffThres not found. Using Default");
-      _motionDetector->diff_threshold = 45;
-    }
-
-    //!< Get the motion high threshold parameter if available;
-    if (_nh.hasParam("motionHighThres")) 
-    {
-      _nh.getParam("motionHighThres", _motionDetector->motion_high_thres);
-      ROS_DEBUG_STREAM("motionHighThres : " << _motionDetector->motion_high_thres);
-    }
-    else {
-      ROS_DEBUG("[motion_node] : Parameter motionHighThres not found. Using Default");
-      _motionDetector->motion_high_thres = 7500;
-    }
-
-    //!< Get the motion low threshold parameter if available;
-    if (_nh.hasParam("motionLowThres")) {
-      _nh.getParam("motionLowThres", _motionDetector->motion_low_thres);
-      ROS_DEBUG_STREAM("motionLowThres : " << _motionDetector->motion_low_thres);
-    }
-    else {
-      ROS_DEBUG("[motion_node] : Parameter motionLowThres not found. Using Default");
-      _motionDetector->motion_low_thres = 200;
-    }
-  }
-
-  /**
    @brief Function called when new ROS message appears, for front camera
    @param msg [const sensor_msgs::Image&] The message
    @return void
@@ -274,8 +180,7 @@ namespace pandora_vision
     }
     //!< Create message of Motion Detector
     vision_communications::MotionMsg motionMessage;
-    //do detection and examine result cases
-    switch (_motionDetector->detectMotion(motionFrame))
+    switch (_motionDetector.detectMotion(motionFrame))
     {
       case 0:
         motionMessage.probability = 0;
@@ -298,29 +203,8 @@ namespace pandora_vision
       ROS_INFO_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
       _motionPublisher.publish(motionMessage);
     }
-
-    if (debugMotion)
-    {
-      publish_debug_images();
-    }
   }
 
-  /**
-   @brief Publishing debug images
-   @return void
-   */
-  void MotionDetection::publish_debug_images()
-  {
-    cv_bridge::CvImage motionDiff;
-    motionDiff.encoding = sensor_msgs::image_encodings::MONO8;
-    motionDiff.image    = _motionDetector->getDiffImg().clone();
-    _motionDiffPublisher.publish(motionDiff.toImageMsg());
-
-    cv_bridge::CvImage motionFrm;
-    motionFrm.encoding = sensor_msgs::image_encodings::BGR8;
-    motionFrm.image    = motionFrame.clone();
-    _motionFrmPublisher.publish(motionFrm.toImageMsg());
-  }
 
   /**
    @brief Node's state manager
@@ -333,13 +217,6 @@ namespace pandora_vision
     //!< Check if motion algorithm should be running now
     motionNowON = ( curState == 
       state_manager_communications::robotModeMsg::MODE_DF_HOLD );
-
-    //!< Everytime state changes, Motion Detector needs to be reset so that 
-    //!< it will discard frames from previous calls in buffer.
-    if(motionNowON)
-    {
-      _motionDetector->resetFlagCounter();
-    }
 
     //!< Shutdown if the robot is switched off
     if (curState == 
