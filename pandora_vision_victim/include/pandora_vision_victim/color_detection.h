@@ -58,7 +58,7 @@ namespace pandora_vision
      * @brief This is the main function which calls all other for the 
      * computation of the color features.
     */ 
-    void findColorFeatures();
+    void findColorFeatures(cv::Mat src);
     
     /**
      * @brief This function returns the histogram of one color component from 

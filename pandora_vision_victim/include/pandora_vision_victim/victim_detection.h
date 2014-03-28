@@ -52,6 +52,7 @@
 #include "vision_communications/FaceDirectionMsg.h"
 #include "state_manager/state_client.h"
 
+#include "pandora_vision_victim/color_detection.h"
 //!< Horizontal field of view in degrees
 #define HFOV 61.14
 
@@ -96,7 +97,10 @@ private:
   //!< The topic subscribed to for the camera
   std::string imageTopic;
   std::string cameraFrameId;
-
+  
+  
+  ColorDetection _colorDetection;
+ 
   //!< Publishers for FaceDetector result messages
   ros::Publisher _victimDirectionPublisher;
 

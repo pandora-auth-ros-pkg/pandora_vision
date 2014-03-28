@@ -45,7 +45,7 @@ namespace pandora_vision
   ColorDetection::ColorDetection()
   {
    
-   ROS_INFO("[victim_node] : Created color detection instance"); 
+   ROS_INFO("[victim_node] : Created Color detection instance"); 
   }
   
   /**
@@ -61,83 +61,86 @@ namespace pandora_vision
    * of the color features.
   */ 
   
-  void ColorDetection::findColorFeatures()
+  void ColorDetection::findColorFeatures(cv::Mat src)
 {
-  cv::Mat src;
+  
   cv::Mat hsv;
   
+  
   //!< Read the image
-  src = cv::imread("positive142.jpg", 1 );
-  cv::imshow("Source Image", src);
+ 
+    //src = cv::imread("positive142.jpg", 1 );
+    //cv::imshow("Source Image", src);
+    
+    //!< Transform it to HSV
+    cvtColor( src, hsv, CV_BGR2HSV );
+    
+    //!< Separate the image in 3 places (H,S,V) one for each channel
+    std::vector<cv::Mat> hsv_planes;
+    split( hsv, hsv_planes );
+
+    //!< Establish the number of bins
+    int h_bins = 180; 
+    int s_bins = 256;
+    int v_bins = 256;
+
+    //!< Set the ranges ( for H,S,V) 
+    float h_ranges[] = { 0, 180 };
+    float s_ranges[] = { 0, 256 };
+    float v_ranges[] = { 0, 256 };
+
+    const float* h_histRange = { h_ranges };
+    const float* s_histRange = { s_ranges };
+    const float* v_histRange = { v_ranges };
+
+    bool uniform = true; 
+    bool accumulate = false;
+
+    //!< Creation of 3 Mat objects to save each histogramm
+    cv::Mat h_hist, s_hist, v_hist;
+
+    h_hist = computeHist(hsv_planes[0], h_bins, h_histRange);
+    s_hist = computeHist(hsv_planes[1], s_bins, s_histRange);
+    v_hist = computeHist(hsv_planes[2], v_bins, v_histRange);
+    
+    //!< Compute mean and std value of every color component
+    std::vector<double> meanStdHSV(6);
+    meanStdHSV = computeMeanStdHSV(hsv_planes);
+
+    std::cout << "Mean and Standard Deviation of HSV" << std::endl;
+    for (int ii = 0; ii < meanStdHSV.size(); ii++)
+      std::cout << meanStdHSV[ii] << std::endl;
+
+    //!< Find the dominant color component and their density values
+    std::vector<double>dominantVal(6);
+    findDominantColor(src, h_hist, h_bins, &dominantVal[0], &dominantVal[1] );
+    findDominantColor(src, s_hist, s_bins, &dominantVal[2], &dominantVal[3] );
+    findDominantColor(src, v_hist, v_bins, &dominantVal[4], &dominantVal[5] );
+     
+    std::cout<< "Dominant values and Densities of every colorcom HSV"<< std::endl;
+    for (int ii = 0; ii < dominantVal.size(); ii++)
+      std::cout << dominantVal[ii] << std::endl;
+     
+    //!< Compute the modules of first 6 components of a Fourier transform of the 
+    //!< image components H(hue) and S(saturation).
+    std::vector<double>huedft(6);
+    std::vector<double>satdft(6);
+    huedft = computeDFT(hsv_planes[0]);
+    satdft = computeDFT(hsv_planes[1]);
+     
+    std::cout<< "6 first Dft of Hue"<< std::endl;
+    for (int ii= 0; ii< huedft.size(); ii++)
+      std::cout<< huedft[ii]<< std::endl;
+    std::cout<< "6 first Dft of Sat"<< std::endl;
+    for (int ii = 0; ii< satdft.size(); ii++)
+      std::cout<< satdft[ii]<< std::endl;
+    
+    //!< Compute the colour angles of rgb color components
+    std::vector<double>ColorAnglesAndStd = computeColorAngles(src);
+    std::cout << "Color Angles and normalized intensity std" << std::endl;
+    for (int ii = 0; ii< ColorAnglesAndStd.size(); ii++)
+      std::cout << ColorAnglesAndStd[ii] << std::endl;
   
-  //!< Transform it to HSV
-  cvtColor( src, hsv, CV_BGR2HSV );
-  
-  //!< Separate the image in 3 places (H,S,V) one for each channel
-  std::vector<cv::Mat> hsv_planes;
-  split( hsv, hsv_planes );
-
-  //!< Establish the number of bins
-  int h_bins = 180; 
-  int s_bins = 256;
-  int v_bins = 256;
-
-  //!< Set the ranges ( for H,S,V) 
-  float h_ranges[] = { 0, 180 };
-  float s_ranges[] = { 0, 256 };
-  float v_ranges[] = { 0, 256 };
-
-  const float* h_histRange = { h_ranges };
-  const float* s_histRange = { s_ranges };
-  const float* v_histRange = { v_ranges };
-
-  bool uniform = true; 
-  bool accumulate = false;
-
-  //!< Creation of 3 Mat objects to save each histogramm
-  cv::Mat h_hist, s_hist, v_hist;
-
-  h_hist = computeHist(hsv_planes[0], h_bins, h_histRange);
-  s_hist = computeHist(hsv_planes[1], s_bins, s_histRange);
-  v_hist = computeHist(hsv_planes[2], v_bins, v_histRange);
-  
-  //!< Compute mean and std value of every color component
-  std::vector<double> meanStdHSV(6);
-  meanStdHSV = computeMeanStdHSV(hsv_planes);
-
-  std::cout << "Mean and Standard Deviation of HSV" << std::endl;
-  for (int ii = 0; ii < meanStdHSV.size(); ii++)
-    std::cout << meanStdHSV[ii] << std::endl;
-
-  //!< Find the dominant color component and their density values
-  std::vector<double>dominantVal(6);
-  findDominantColor(src, h_hist, h_bins, &dominantVal[0], &dominantVal[1] );
-  findDominantColor(src, s_hist, s_bins, &dominantVal[2], &dominantVal[3] );
-  findDominantColor(src, v_hist, v_bins, &dominantVal[4], &dominantVal[5] );
-   
-  std::cout<< "Dominant values and Densities of every color comp HSV"<< std::endl;
-  for (int ii = 0; ii < dominantVal.size(); ii++)
-    std::cout << dominantVal[ii] << std::endl;
-   
-  //!< Compute the modules of first 6 components of a Fourier transform of the 
-  //!< image components H(hue) and S(saturation).
-  std::vector<double>huedft(6);
-  std::vector<double>satdft(6);
-  huedft = computeDFT(hsv_planes[0]);
-  satdft = computeDFT(hsv_planes[1]);
-   
-  std::cout<< "6 first Dft of Hue"<< std::endl;
-  for (int ii= 0; ii< huedft.size(); ii++)
-    std::cout<< huedft[ii]<< std::endl;
-  std::cout<< "6 first Dft of Sat"<< std::endl;
-  for (int ii = 0; ii< satdft.size(); ii++)
-    std::cout<< satdft[ii]<< std::endl;
-  
-  //!< Compute the colour angles of rgb color components
-  std::vector<double>ColorAnglesAndStd = computeColorAngles(src);
-  std::cout << "Color Angles and normalized intensity std" << std::endl;
-  for (int ii = 0; ii< ColorAnglesAndStd.size(); ii++)
-    std::cout << ColorAnglesAndStd[ii] << std::endl;
 }
   /**
    * @brief This function returns the histogram of one color component from 
