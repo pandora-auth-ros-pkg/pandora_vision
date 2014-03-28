@@ -273,8 +273,8 @@ namespace pandora_vision
 
 
   /**
-    @brief Interpolates the noise produced by kinect. The black blobs take
-    the depth value of the closest neighbour obstacles.
+    @brief Interpolates the noise produced by the depth sensor.
+    The black blobs take the depth value of the closest neighbour obstacles.
     @param[in] inImage [const cv::Mat&] The input image
     @param[out] outImage [cv::Mat*] The output image
     @return void
@@ -289,16 +289,19 @@ namespace pandora_vision
     inImage.copyTo(*outImage);
     bool finished = false;
 
+    //!< Assign the image borders a non zero value
     for(unsigned int i = 0 ; i < outImage->rows ; i++)
     {
       outImage->at<float>(i, 0) = 1;
-      outImage->at<float>(i, outImage->cols-1) = 1;
+      outImage->at<float>(i, outImage->cols - 1) = 1;
     }
+
     for(unsigned int i = 0 ; i < outImage->cols ; i++)
     {
       outImage->at<float>(0, i) = 1;
-      outImage->at<float>(outImage->rows -1, i) = 1;
+      outImage->at<float>(outImage->rows - 1, i) = 1;
     }
+
     while(!finished)
     {
       finished = true;
@@ -307,13 +310,14 @@ namespace pandora_vision
       {
         for(unsigned int j = 1 ; j< outImage->cols - 1 ; j++)
         {
-          if(outImage->at<float>(i, j) == 0)  //!< Found black
+          if(outImage->at<float>(i, j) == 0.0)  //!< Found black
           {
             brushfireNearStep(outImage, i * outImage->cols + j);
             finished = false;
             break;
           }
         }
+
         if(!finished)
         {
           break;
@@ -514,10 +518,6 @@ namespace pandora_vision
         if(inImage.at<float>(i, j) != 0)
         {
           outImage->at<float>(i, j) = 4.0;
-        }
-        else
-        {
-          outImage->at<float>(i, j) = 0.0;
         }
       }
     }

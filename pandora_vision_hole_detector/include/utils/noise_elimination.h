@@ -103,8 +103,8 @@ namespace pandora_vision
           const int& row, const int& col, bool* endFlag);
 
       /**
-        @brief Interpolates the noise produced by kinect. The black blobs take
-        the depth value of the closest neighbour obstacles.
+        @brief Interpolates the noise produced by the depth sensor.
+        The black blobs take the depth value of the closest neighbour obstacles.
         @param[in] inImage [const cv::Mat&] The input image
         @param[out] outImage [cv::Mat*] The output image
         @return void
