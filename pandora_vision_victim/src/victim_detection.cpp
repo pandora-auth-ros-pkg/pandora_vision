@@ -193,6 +193,7 @@ void VictimDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("[victim_node] : No more Frames ");
     return;
   }
+  victimCallback();
 }
 
 /**
@@ -204,9 +205,11 @@ void VictimDetection::victimCallback()
 {
   if(!victimNowON)
   {
+    ROS_INFO("VICTIMNOWNOTON");
     return;
   }
-
+  ROS_INFO("VICTIMNOWON");
+  _colorDetection.findColorFeatures(victimFrame);
 }
 
 
