@@ -37,6 +37,8 @@
 
 #ifndef PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
 #define PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
+#include <dynamic_reconfigure/server.h>
+#include <pandora_vision_motion/motion_cfgConfig.h>
 
 namespace pandora_vision
 {

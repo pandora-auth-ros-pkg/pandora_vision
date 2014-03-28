@@ -51,7 +51,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include "pandora_vision_motion/motion_detector.h"
-
+#include "pandora_vision_motion/motion_parameters.h"
 #include "state_manager/state_client.h"
 
 #include <iostream>
@@ -94,6 +94,23 @@ namespace pandora_vision
       /// Variable used for State Managing
       bool motionNowON;
       
+      //!< The dynamic reconfigure (motion's) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>
+        server;
+      //!< The dynamic reconfigure (depth) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>
+        ::CallbackType f;  
+      
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config [const pandora_vision_motion::motion_cfgConfig&]
+        @param[in] level [const uint32_t] The level (?)
+        @return void
+      **/
+      void parametersCallback(
+        const pandora_vision_motion::motion_cfgConfig& config,
+        const uint32_t& level);
+         
     public:
           
       /**
