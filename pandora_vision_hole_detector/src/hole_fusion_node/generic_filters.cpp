@@ -124,6 +124,196 @@ namespace pandora_vision
 
 
   /**
+    @brief Connects nearby holes. Holes' outlines do not intersect.
+    @param[in][out] assimilator [HolesConveyor*] The holes conveyor
+    that will act as the assimilator of holes
+    @param[in][out] assimilable [HolesConveyor*] The holes conveyor
+    that will act as the assimilable
+    @param [in] pointCloud [const PointCloudXYZPtr&] The point cloud
+    needed in order to specify which holes are going to be connected
+    by criterion of distance
+    @return void
+   **/
+  void GenericFilters::connectUnilaterally(HolesConveyor* assimilator,
+    HolesConveyor* assimilable, const PointCloudXYZPtr& pointCloudXYZ)
+  {
+
+    //!< Validate the assimilable's holes against the assimilator's ones
+    for (int i = 0; i < assimilator->keyPoints.size(); i++)
+    {
+      for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
+      {
+        //!< Are all the assimilable's outline points outside
+        //!< the assimilator's bounding box?
+        int numAssimilableOutlinePointsInAssimilator = 0;
+
+        //!< The real min distance (in meters) between two points of the
+        //!< assimilator's and assimilable's outlines
+        double minOutlinesDistance = 10000.0;
+
+        for (int av = 0; av < assimilable->outlines[j].size(); av++)
+        {
+          if (cv::pointPolygonTest(assimilator->outlines[i],
+              assimilable->outlines[j][av], false) > 0)
+          {
+            numAssimilableOutlinePointsInAssimilator++;
+          }
+
+          //!< The assimilable's current outline point x,y,z coordinates
+          //!< measured by the depth sensor
+          float assimilableOutlinePointX = pointCloudXYZ->points[
+            static_cast<int>(assimilable->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilable->outlines[j][av].y)].x;
+
+          float assimilableOutlinePointY = pointCloudXYZ->points[
+            static_cast<int>(assimilable->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilable->outlines[j][av].y)].y;
+
+          float assimilableOutlinePointZ = pointCloudXYZ->points[
+            static_cast<int>(assimilable->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilable->outlines[j][av].y)].z;
+
+
+          //!< The assimilator's current outline point x,y,z coordinates
+          //!< measured by the depth sensor
+          float assimilatorOutlinePointX = pointCloudXYZ->points[
+            static_cast<int>(assimilator->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilator->outlines[j][av].y)].x;
+
+          float assimilatorOutlinePointY = pointCloudXYZ->points[
+            static_cast<int>(assimilator->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilator->outlines[j][av].y)].y;
+
+          float assimilatorOutlinePointZ = pointCloudXYZ->points[
+            static_cast<int>(assimilator->outlines[j][av].x)
+            + pointCloudXYZ->width *
+            static_cast<int>(assimilator->outlines[j][av].y)].z;
+
+
+          //!< The current outline points distance
+          float outlinePointsDistance = sqrt(
+            pow(assimilableOutlinePointX - assimilatorOutlinePointX, 2) +
+            pow(assimilableOutlinePointY - assimilatorOutlinePointY, 2) +
+            pow(assimilableOutlinePointZ - assimilatorOutlinePointZ, 2));
+
+          if (outlinePointsDistance < minOutlinesDistance)
+          {
+            minOutlinesDistance = outlinePointsDistance;
+          }
+        }
+
+        //!< If not all of assimilable's outline points
+        //!< are outside the assimilator's outline,
+        //!< or the minimum distance between the assimilator's and assimilable's
+        //!< outlines is greater than a distance thrshold,
+        //!< this assimilable is not a candidate to be connected with
+        //!< the assimilator
+        if (numAssimilableOutlinePointsInAssimilator != 0 ||
+          minOutlinesDistance > Parameters::connect_holes_min_distance)
+        {
+          continue;
+        }
+
+
+        //!< Calculate the assimilator's bounding box area
+        float assimilatorRectangleWidthX = assimilator->rectangles[i][0].x
+          - assimilator->rectangles[i][1].x;
+        float assimilatorRectangleWidthY = assimilator->rectangles[i][0].y
+          - assimilator->rectangles[i][1].y;
+        float assimilatorRectangleHeightX = assimilator->rectangles[i][1].x
+          - assimilator->rectangles[i][2].x;
+        float assimilatorRectangleHeightY = assimilator->rectangles[i][1].y
+          - assimilator->rectangles[i][2].y;
+
+        float assimilatorBoxArea = sqrt(pow(assimilatorRectangleWidthX, 2)
+          + pow(assimilatorRectangleWidthY, 2)) *
+          sqrt(pow(assimilatorRectangleHeightX, 2)
+            + pow(assimilatorRectangleHeightY, 2));
+
+        //!< Calculate the assimilable's bounding box area
+        float assimilableRectangleWidthX = assimilable->rectangles[j][0].x
+          - assimilable->rectangles[j][1].x;
+        float assimilableRectangleWidthY = assimilable->rectangles[j][0].y
+          - assimilable->rectangles[j][1].y;
+        float assimilableRectangleHeightX = assimilable->rectangles[j][1].x
+          - assimilable->rectangles[j][2].x;
+        float assimilableRectangleHeightY = assimilable->rectangles[j][1].y
+          - assimilable->rectangles[j][2].y;
+
+        float assimilableBoxArea = sqrt(pow(assimilableRectangleWidthX, 2) +
+          pow(assimilableRectangleWidthY, 2)) *
+          sqrt(pow(assimilableRectangleHeightX, 2)
+            + pow(assimilableRectangleHeightY, 2));
+
+
+        //!< If the assimilable's area is smaller than the assimilator's,
+        //!< connect the assimilator with the assimilable,
+        //!< replacing the assimilator and delete the assimilable
+        if (assimilableBoxArea < assimilatorBoxArea)
+        {
+          //!< Viewing the two outlines as sets,
+          //!< the final outline should not have the intersection
+          //!< of the two sets.
+          std::vector<cv::Point> assimilatorOutline;
+          std::vector<cv::Point> assimilableOutline;
+
+
+          //!< The assimilator's outline will be the sum of the outline points
+          //!< that are not located inside each other
+          assimilator->outlines[i].insert(assimilator->outlines[i].end(),
+            assimilable->outlines[j].begin(), assimilable->outlines[j].end());
+
+
+          //!< The assimilable's new least area rotated bounding box will be the
+          //!< one that encloses the new (merged) outline points
+          cv::RotatedRect substituteRotatedRectangle =
+            minAreaRect(assimilator->outlines[i]);
+
+          //!< Obtain the four vertices of the new rotated rectangle
+          cv::Point2f substituteVerticesArray[4];
+          substituteRotatedRectangle.points(substituteVerticesArray);
+
+          //!< Same as substituteVerticesArray array, but vector
+          std::vector<cv::Point2f> substituteVerticesVector;
+
+          //!< Store the four vertices to the substituteVerticesVector
+          for(int v = 0; v < 4; v++)
+          {
+            substituteVerticesVector.push_back(substituteVerticesArray[v]);
+          }
+
+          //!< Replace the assimilator's vertices with the new vertices
+          assimilator->rectangles[i] = substituteVerticesVector;
+
+
+          //!< The overall candidate hole's keypoint
+          assimilator->keyPoints[i].pt.x = (assimilator->keyPoints[i].pt.x +
+            assimilable->keyPoints[j].pt.x) / 2;
+          assimilator->keyPoints[i].pt.y = (assimilator->keyPoints[i].pt.y +
+            assimilable->keyPoints[j].pt.y) / 2;
+
+          //!< The assimilable has now been merged with the assimilator,
+          //!< so delete it. So long, assimilable
+          assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
+          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
+            assimilable->outlines[j].end());
+          assimilable->outlines.erase(assimilable->outlines.begin() + j);
+          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
+            assimilable->rectangles[j].end());
+          assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
+        }
+      }
+    }
+  }
+
+
+
+  /**
     @brief Given the RGB and Depth HolesConveyor* structs,
     the purpose of this function is to identify blobs that are overlapping
     each other but none of them is entirely inside the other, and merge
@@ -193,7 +383,7 @@ namespace pandora_vision
           }
         }
 
-        //!< If zero or all of assimilable's outine points
+        //!< If zero or all of assimilable's outline points
         //!< are inside the assimilator's outline, this assimilable is
         //!< not a candidate to be merged by the assimilator
         if (numAssimilableOutlinePointsInAssimilator == 0 ||

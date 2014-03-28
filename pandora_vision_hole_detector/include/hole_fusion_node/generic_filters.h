@@ -39,6 +39,7 @@
 
 #include "utils/holes_conveyor.h"
 #include "utils/defines.h"
+#include "utils/parameters.h"
 #include <math.h>
 
 /**
@@ -111,6 +112,20 @@ namespace pandora_vision
       static void assimilateBilaterally(
         HolesConveyor* depthHolesConveyor,
         HolesConveyor* rgbHolesConveyor);
+
+      /**
+        @brief Connects nearby holes. Holes' outlines do not intersect.
+        @param[in][out] assimilator [HolesConveyor*] The holes conveyor
+        that will act as the assimilator of holes
+        @param[in][out] assimilable [HolesConveyor*] The holes conveyor
+        that will act as the assimilable
+        @param [in] pointCloud [const PointCloudXYZPtr&] The point cloud
+        needed in order to specify which holes are going to be connected
+        by criterion of distance
+        @return void
+       **/
+      static void connectUnilaterally(HolesConveyor* assimilator,
+        HolesConveyor* assimilable, const PointCloudXYZPtr& pointCloud);
 
       /**
         @brief Given the RGB and Depth HolesConveyor* structs,

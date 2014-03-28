@@ -148,4 +148,7 @@ namespace pandora_vision
   int Parameters::number_of_saturation_bins = 32;
   int Parameters::number_of_value_bins = 30;
 
+  //!< Holes connection - merger
+  float Parameters::connect_holes_min_distance = 0.1;
+
 } // namespace pandora_vision
