@@ -52,3 +52,18 @@ if(MODEL_ENABLE_TRAIN)
   target_link_libraries(model_train ${catkin_LIBRARIES} )
 endif()
 
+#~ To check lint : catkin_make roslint_pandora_vision_victim
+set(ROSLINT_CPP_OPTS 
+    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string")
+    
+FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
+  RELATIVE ${PROJECT_SOURCE_DIR} 
+            
+  include/color_detection.h
+  src/color_detection.cpp
+  
+            
+)
+roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
+
+
