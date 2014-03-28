@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_motion)
 
+set(CMAKE_BUILD_TYPE Release)
+
 find_package(catkin REQUIRED COMPONENTS 
     roscpp
     vision_communications
@@ -37,6 +39,7 @@ add_executable(motion_node
     src/motion_node.cpp
     src/motion_detection.cpp
     src/motion_detector.cpp
+    src/motion_parameters.cpp
 )
 target_link_libraries(motion_node ${catkin_LIBRARIES} )
 add_dependencies(motion_node 
@@ -53,10 +56,10 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
             
   include/motion_detection.h
   include/motion_detector.h
+  include/motion_parameters.h
   src/motion_detector.cpp
   src/motion_detection.cpp
-  
-            
+  src/motion_parameters.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
