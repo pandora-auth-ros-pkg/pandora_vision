@@ -89,36 +89,84 @@ namespace pandora_vision
     {
       for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
       {
-        //!< Are all the outline points of assimilable inside the
-        //!< assimilator's outline?
-        bool allAssimilableOutlinePointsInAssimilator = true;
-        for (int av = 0; av < assimilable->outlines[j].size(); av++)
-        {
-          if (cv::pointPolygonTest(assimilator.outlines[i],
-              assimilable->outlines[j][av], false) < 0)
-          {
-            allAssimilableOutlinePointsInAssimilator = false;
-            break;
-          }
-        }
-
         //!< If all of assimilable's outline points reside inside the
         //!< assimilator's outline delete the keypoint along with its
         //!< associated conveyor entries
-        if (allAssimilableOutlinePointsInAssimilator)
+        if (isCapableOfAssimilating(assimilator.outlines[i],
+            assimilable->outlines[j]))
         {
-          assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
-
-          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
-            assimilable->outlines[j].end());
-          assimilable->outlines.erase(assimilable->outlines.begin() + j);
-
-          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
-            assimilable->rectangles[j].end());
-          assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
+          assimilateOnce(j, assimilable);
         }
       }
     }
+  }
+
+
+
+  /**
+    @brief Indicates whether a hole assigned the role of the assimilator
+    is capable of assimilating another hole assigned the role of
+    the assimilable. It checks whether the assimilable's outline
+    points reside entirely inside the assimilator's outline.
+    @param[in] assimilatorOutline [const std::vector<cv::Point>&]
+    The assimilator's hole bounding rectangle
+    @param[in] assimilableOutline [const std::vector<cv::Point>&]
+    The assimilable's hole outline points
+    @return [bool] True if all of the outline points of the assimilable
+    hole are inside the outline of the assimilator
+   **/
+  bool GenericFilters::isCapableOfAssimilating(
+    const std::vector<cv::Point>& assimilatorOutline,
+    const std::vector<cv::Point>& assimilableOutline)
+  {
+    //!< Are all the outline points of assimilable inside the
+    //!< assimilator's outline?
+    bool allAssimilableOutlinePointsInAssimilator = true;
+    for (int av = 0; av < assimilableOutline.size(); av++)
+    {
+      if (cv::pointPolygonTest(assimilatorOutline,
+          assimilableOutline[av], false) < 0)
+      {
+        allAssimilableOutlinePointsInAssimilator = false;
+        break;
+      }
+    }
+    return allAssimilableOutlinePointsInAssimilator;
+  }
+
+
+
+  /**
+    @brief Intended to use after the check of the
+    isCapableOfAssimilating function, this function carries the burden
+    of having to delete a hole entry from its HolesConveyor struct,
+    thus being its executor
+    @param[in] keyPointId [const int&]
+    @param[in][out] assimilable [HolesConveyor*] The holes conveyor
+    from which the keypoint, outline and bounding rectangle entries
+    will be deleted
+    @return void
+   **/
+  void GenericFilters::assimilateOnce(const int& keyPointId,
+    HolesConveyor* assimilable)
+  {
+    //!< Delete the keypoint from the conveyor
+    assimilable->keyPoints.erase(
+      assimilable->keyPoints.begin() + keyPointId);
+
+    //!< Delete each outline point from its respective vector
+    assimilable->outlines[keyPointId].erase(
+      assimilable->outlines[keyPointId].begin(),
+      assimilable->outlines[keyPointId].end());
+    //!< Delete the outline vector entry alltogether
+    assimilable->outlines.erase(assimilable->outlines.begin() + keyPointId);
+
+    //!< Delete each rectangle point from its respective vector
+    assimilable->rectangles[keyPointId].erase(
+      assimilable->rectangles[keyPointId].begin(),
+      assimilable->rectangles[keyPointId].end());
+    //!< Delete the rectangle vector entry alltogether
+    assimilable->rectangles.erase(assimilable->rectangles.begin() + keyPointId);
   }
 
 

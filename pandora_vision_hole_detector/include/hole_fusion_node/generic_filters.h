@@ -76,6 +76,37 @@ namespace pandora_vision
         HolesConveyor* assimilable);
 
       /**
+        @brief Indicates whether a hole assigned the role of the assimilator
+        is capable of assimilating another hole assigned the role of
+        the assimilable. It checks whether the assimilable's outline
+        points reside entirely inside the assimilator's outline.
+        @param[in] assimilatorOutline [const std::vector<cv::Point>&]
+        The assimilator's hole bounding rectangle
+        @param[in] assimilableOutline [const std::vector<cv::Point>&]
+        The assimilable's hole outline points
+        @return [bool] True if all of the outline points of the assimilable
+        hole are inside the outline of the assimilator
+       **/
+      static bool isCapableOfAssimilating(
+        const std::vector<cv::Point>& assimilatorOutline,
+        const std::vector<cv::Point>& assimilableOutline);
+
+      /**
+        @brief Intended to use after the check of the
+        isCapableOfAssimilating function, this function carries the burden
+        of having to delete a hole entry from its HolesConveyor struct,
+        thus being its executor
+        @param[in] keyPointId [const int&] The identifier of the hole inside
+        the HolesConveyor struct
+        @param[in][out] assimilable [HolesConveyor*] The holes conveyor
+        from which the keypoint, outline and bounding rectangle entries
+        will be deleted
+        @return void
+       **/
+      static void assimilateOnce(const int& keyPointId,
+        HolesConveyor* assimilable);
+
+      /**
         @brief Given two HolesConveyor* structs, one with the
         potential of assimilating the other (assimilator) and the other with the
         potential of being assimilated by the other (assimilable), the purpose
