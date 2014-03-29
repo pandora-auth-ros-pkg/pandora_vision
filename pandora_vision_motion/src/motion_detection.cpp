@@ -247,7 +247,7 @@ namespace pandora_vision
   /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_motion::motion_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
+    @param[in] level [const uint32_t] The level 
     @return void
   **/
   void MotionDetection::parametersCallback(
