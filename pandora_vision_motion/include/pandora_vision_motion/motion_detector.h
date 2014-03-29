@@ -43,29 +43,30 @@
 #include <iostream>
 #include <vector>
 #include "pandora_vision_motion/motion_parameters.h"
-#define SHOW_DEBUG_IMAGE
+
+//~ #define SHOW_DEBUG_IMAGE
 
 namespace pandora_vision 
 {
   class MotionDetector
   {
     private:
-    /// Current frame to be processed
+    //!< Current frame to be processed
     cv::Mat frame;
-    /// Background image
+    //!< Background image
     cv::Mat background;
-    /// Foreground mask
+    //!< Foreground mask
     cv::Mat foreground;
     
-    /// Class instance for Gaussian Mixture-based backgound 
-    /// and foreground segmentation 
+    //!< Class instance for Gaussian Mixture-based backgound 
+    //!< and foreground segmentation 
     cv::BackgroundSubtractorMOG2 bg;
     
     public:
     
-    /// Number of pixels, that differ from current frame and background 
+    //!< Number of pixels, that differ from current frame and background 
     int countDiff;
-    /// Identifier of motion type
+    //!< Identifier of motion type
     int typeOfMovement;
     
     /**
