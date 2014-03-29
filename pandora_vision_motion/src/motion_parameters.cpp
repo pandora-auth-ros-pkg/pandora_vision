@@ -40,6 +40,7 @@
 namespace pandora_vision
 {
   
+  //!< Background segmentation parameters
   /// Length of the history according to which we calculate background image
   int MotionParameters::history = 10;
   /// Threshold of the sqaured Mahalanobis distance to decide whether
@@ -49,7 +50,8 @@ namespace pandora_vision
   bool MotionParameters::bShadowDetection = true;
   /// Maximum allowed number of mixture components
   int MotionParameters::nmixtures = 3;
-    
+  
+  //!< Threshold parameters  
   /// Threshold between pixel (grayscale) values to be considered "different" 
   /// between 2 frames
   int MotionParameters::diff_threshold = 45;

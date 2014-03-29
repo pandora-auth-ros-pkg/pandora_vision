@@ -44,21 +44,15 @@ namespace pandora_vision
 {
   struct MotionParameters
   {
-    /// Length of the history according to which we calculate background image
+    //!< Background segmentation parameters
     static int history;
-    /// Threshold of the sqaured Mahalanobis distance to decide whether
-    /// it is well described by the background model
     static int varThreshold;
-    /// Parameter defining whether shadow detection should be enabled
     static bool bShadowDetection;
-    /// Maximum allowed number of mixture components
     static int nmixtures;
     
-    /// Threshold between pixel (grayscale) values to be considered "different" between 2 frames
+    //!< Threshold parameters
     static int diff_threshold;
-    /// Evaluation threshold: higher value means a lot of movement
     static double motion_high_thres;
-    /// Evaluation threshold: higher value means a little movement - less means no movement at all
     static double motion_low_thres;
     
   };

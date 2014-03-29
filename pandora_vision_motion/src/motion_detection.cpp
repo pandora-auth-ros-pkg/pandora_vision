@@ -49,7 +49,6 @@ namespace pandora_vision
    
     motionFrame = cv::Mat(cv::Size(frameWidth, frameHeight), CV_8UC3);
     
-    
     //!< The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&MotionDetection::parametersCallback,
         this, _1, _2));
@@ -69,7 +68,7 @@ namespace pandora_vision
 
     clientInitialize();
     
-     motionNowON = false;  
+    motionNowON = false;  
     
     ROS_INFO("[Motion_node] : Created Motion Detection instance");
   }
