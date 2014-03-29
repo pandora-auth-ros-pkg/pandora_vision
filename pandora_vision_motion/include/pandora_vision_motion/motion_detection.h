@@ -100,10 +100,24 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>
         ::CallbackType f;  
       
+       /**
+        @brief This method uses a MotionDetector instance to detect motion
+        in current frame.
+        @return void
+      */
+      void motionCallback();
+
+       /**
+        @brief Function called when new ROS message appears, for front camera
+        @param msg [const sensor_msgs::Image&] The message
+        @return void
+      */
+      void imageCallback(const sensor_msgs::Image& msg);
+      
       /**
         @brief The function called when a parameter is changed
         @param[in] config [const pandora_vision_motion::motion_cfgConfig&]
-        @param[in] level [const uint32_t] The level (?)
+        @param[in] level [const uint32_t] The level 
         @return void
       **/
       void parametersCallback(
@@ -128,20 +142,6 @@ namespace pandora_vision
         @return void
       */
       void getGeneralParams();
-      
-      /**
-        @brief This method uses a MotionDetector instance to detect motion
-        in current frame.
-        @return void
-      */
-      void motionCallback();
-
-       /**
-        @brief Function called when new ROS message appears, for front camera
-        @param msg [const sensor_msgs::Image&] The message
-        @return void
-      */
-      void imageCallback(const sensor_msgs::Image& msg);
       
       /**
         @brief Node's state manager
