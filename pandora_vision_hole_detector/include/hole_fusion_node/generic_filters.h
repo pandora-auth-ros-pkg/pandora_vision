@@ -80,16 +80,22 @@ namespace pandora_vision
         is capable of assimilating another hole assigned the role of
         the assimilable. It checks whether the assimilable's outline
         points reside entirely inside the assimilator's outline.
-        @param[in] assimilatorOutline [const std::vector<cv::Point>&]
-        The assimilator's hole bounding rectangle
-        @param[in] assimilableOutline [const std::vector<cv::Point>&]
-        The assimilable's hole outline points
+        @param[in] assimilatorId [const int&] The index of the specific hole
+        inside the assimilator HolesConveyor
+        @paramp[in] assimilator [const HolesConveyor&] The HolesConveyor struct
+        that acts as the assimilator
+        @param[in] assimilableId [const int&] The index of the specific hole
+        inside the assimilable HolesConveyor
+        @paramp[in] assimilable [const HolesConveyor&] The HolesConveyor struct
+        that acts as the assimilable
         @return [bool] True if all of the outline points of the assimilable
         hole are inside the outline of the assimilator
        **/
       static bool isCapableOfAssimilating(
-        const std::vector<cv::Point>& assimilatorOutline,
-        const std::vector<cv::Point>& assimilableOutline);
+        const int& assimilatorId,
+        const HolesConveyor& assimilator,
+        const int& assimilableId,
+        const HolesConveyor& assimilable);
 
       /**
         @brief Intended to use after the check of the
@@ -106,29 +112,7 @@ namespace pandora_vision
       static void assimilateOnce(const int& keyPointId,
         HolesConveyor* assimilable);
 
-      /**
-        @brief Given two HolesConveyor* structs, one with the
-        potential of assimilating the other (assimilator) and the other with the
-        potential of being assimilated by the other (assimilable), the purpose
-        of this function is to identify blobs that are overlapping each other
-        but none of them is entirely inside the other, while the assimilator's
-        bounding box is greater than that of the assimilable's.
-        If this is true for a given assimilator and assimilable,
-        the assimilator will grow rectangle-wise and outline-wise
-        by the size of the assimilator, while the assimilator's
-        new keypoint will be the mean of the two keypoints. The assimilable
-        then is rendered useless and deleted.
-        @param[in][out] assimilator [HolesConveyor*]
-        The holes conveyor whose candidate holes will potentially
-        assimilate candidate holes of @param assimilable
-        @param[in][out] assimilable [HolesConveyor*]
-        The holes conveyor whose candidate holes will potentially
-        will be assimilated by candidate holes of @param assimilator
-        @return void
-       **/
-      static void mergeUnilaterally(
-        HolesConveyor* assimilator,
-        HolesConveyor* assimilable);
+
 
     public:
       /**
@@ -170,9 +154,83 @@ namespace pandora_vision
         The candidate holes conveyor originated from the rgb node
         @return void
        **/
-      static void mergeBilaterally(
+      static void amalgamateBilaterally(
         HolesConveyor* depthHolesConveyor,
         HolesConveyor* rgbHolesConveyor);
+
+      /**
+        @brief Given two HolesConveyor* structs, one with the
+        potential of amalgamating the other (amalgamator) and the other with the
+        potential of being amalgamated by the other (amalgamatable), the purpose
+        of this function is to identify blobs that are overlapping each other
+        but none of them is entirely inside the other, while the amalgamator's
+        bounding box is greater than that of the amalgamatable's.
+        If this is true for a given amalgamator and amalgamatable,
+        the amalgamator will grow rectangle-wise and outline-wise
+        by the size of the amalgamator, while the amalgamator's
+        new keypoint will be the mean of the two keypoints. The amalgamatable
+        then is rendered useless and deleted.
+        @param[in][out] amalgamator [HolesConveyor*]
+        The holes conveyor whose candidate holes will potentially
+        assimilate candidate holes of @param amalgamatable
+        @param[in][out] amalgamatable [HolesConveyor*]
+        The holes conveyor whose candidate holes will potentially
+        will be assimilated by candidate holes of @paramamalgamator
+        @return void
+       **/
+      static void amalgamateUnilaterally(
+        HolesConveyor* amalgamator,
+        HolesConveyor* amalgamatable);
+
+      /**
+        @brief Indicates whether a hole assigned the role of the amalgamator
+        is capable of amalgamating another hole assigned the role of
+        the amalgamatable. The amalgamator is capable of amalgamating the
+        amalgamatable if and only if the amalgatamable's outline
+        points intersect with the amalgamator's outline, and the bounding
+        rectangle of the amalgamator is larger in area than the bounding
+        rectangle of the amalgamatable
+        @param[in] amalgamatorId [const int&] The index of the specific hole
+        that acts as the amalgamator inside the amalgamator HolesConveyor
+        @param[in] amalgamator [const HolesConveyor&] The HolesConveyor that
+        acts as the amalgamator struct
+        @param[in] amalgamatableId [const int&] The index of the specific hole
+        that acts as the amalgamatable inside the amalgamatable HolesConveyor
+        @param[in] amalgamatable [const HolesConveyor&] The HolesConveyor that
+        acts as the amalgamatavle struct
+        @return [bool] True if the amalgamator is capable of amalgamating
+        the amalgamatable
+       **/
+      static bool isCapableOfAmalgamating(const int& amalgamatorId,
+        const HolesConveyor& amalgamator,
+        const int& amalgamatableId,
+        const HolesConveyor& amalgamatable);
+
+      /**
+        @brief Intended to use after the check of the
+        isCapableOfAmalgamating function, this function carries the burden
+        of having to delete a hole entry from its HolesConveyor amalgamatable
+        struct, thus being its executor,
+        and modifying the HolesConveyor amalgamator struct entry so that it
+        it has absorbed the amalgamatable hole in terms of keypoint location,
+        outline unification and bounding rectangle inclusion of the
+        amalgamatable's outline
+        @param[in] amalgamatorId [const int&] The identifier of the hole inside
+        the HolesConveyor amalgamator struct
+        @param[in][out] amalgamator [HolesConveyor*] The holes conveyor
+        whose keypoint, outline and bounding rectangle entries
+        will be modified
+        @param[in] amalgamatableId [const int&] The identifier of the hole
+        inside the HolesConveyor amalgamatable struct
+        @param[in][out] amalgamatable [HolesConveyor*] The holes conveyor
+        whose keypoint, outline and bounding rectangle entries
+        will be deleted
+        @return void
+       **/
+      static void amalgamateOnce(const int& amalgamatorId,
+        HolesConveyor* amalgamator,
+        const int& amalgamatableId,
+        HolesConveyor* amalgamatable);
   };
 
 } // namespace pandora_vision

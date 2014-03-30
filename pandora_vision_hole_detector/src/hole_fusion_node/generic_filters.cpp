@@ -92,8 +92,7 @@ namespace pandora_vision
         //!< If all of assimilable's outline points reside inside the
         //!< assimilator's outline delete the keypoint along with its
         //!< associated conveyor entries
-        if (isCapableOfAssimilating(assimilator.outlines[i],
-            assimilable->outlines[j]))
+        if (isCapableOfAssimilating(i, assimilator, j, *assimilable))
         {
           assimilateOnce(j, assimilable);
         }
@@ -108,24 +107,30 @@ namespace pandora_vision
     is capable of assimilating another hole assigned the role of
     the assimilable. It checks whether the assimilable's outline
     points reside entirely inside the assimilator's outline.
-    @param[in] assimilatorOutline [const std::vector<cv::Point>&]
-    The assimilator's hole bounding rectangle
-    @param[in] assimilableOutline [const std::vector<cv::Point>&]
-    The assimilable's hole outline points
+    @param[in] assimilatorId [const int&] The index of the specific hole
+    inside the assimilator HolesConveyor
+    @paramp[in] assimilator [const HolesConveyor&] The HolesConveyor struct
+    that acts as the assimilator
+    @param[in] assimilableId [const int&] The index of the specific hole
+    inside the assimilable HolesConveyor
+    @paramp[in] assimilable [const HolesConveyor&] The HolesConveyor struct
+    that acts as the assimilable
     @return [bool] True if all of the outline points of the assimilable
     hole are inside the outline of the assimilator
    **/
   bool GenericFilters::isCapableOfAssimilating(
-    const std::vector<cv::Point>& assimilatorOutline,
-    const std::vector<cv::Point>& assimilableOutline)
+    const int& assimilatorId,
+    const HolesConveyor& assimilator,
+    const int& assimilableId,
+    const HolesConveyor& assimilable)
   {
     //!< Are all the outline points of assimilable inside the
     //!< assimilator's outline?
     bool allAssimilableOutlinePointsInAssimilator = true;
-    for (int av = 0; av < assimilableOutline.size(); av++)
+    for (int av = 0; av < assimilable.outlines[assimilableId].size(); av++)
     {
-      if (cv::pointPolygonTest(assimilatorOutline,
-          assimilableOutline[av], false) < 0)
+      if (cv::pointPolygonTest(assimilator.outlines[assimilatorId],
+          assimilable.outlines[assimilableId][av], false) < 0)
       {
         allAssimilableOutlinePointsInAssimilator = false;
         break;
@@ -141,7 +146,8 @@ namespace pandora_vision
     isCapableOfAssimilating function, this function carries the burden
     of having to delete a hole entry from its HolesConveyor struct,
     thus being its executor
-    @param[in] keyPointId [const int&]
+    @param[in] keyPointId [const int&] The identifier of the hole inside
+    the HolesConveyor struct
     @param[in][out] assimilable [HolesConveyor*] The holes conveyor
     from which the keypoint, outline and bounding rectangle entries
     will be deleted
@@ -158,6 +164,7 @@ namespace pandora_vision
     assimilable->outlines[keyPointId].erase(
       assimilable->outlines[keyPointId].begin(),
       assimilable->outlines[keyPointId].end());
+
     //!< Delete the outline vector entry alltogether
     assimilable->outlines.erase(assimilable->outlines.begin() + keyPointId);
 
@@ -165,6 +172,7 @@ namespace pandora_vision
     assimilable->rectangles[keyPointId].erase(
       assimilable->rectangles[keyPointId].begin(),
       assimilable->rectangles[keyPointId].end());
+
     //!< Delete the rectangle vector entry alltogether
     assimilable->rectangles.erase(assimilable->rectangles.begin() + keyPointId);
   }
@@ -373,7 +381,7 @@ namespace pandora_vision
     The candidate holes conveyor originated from the rgb node
     @return void
    **/
-  void GenericFilters::mergeBilaterally(
+  void GenericFilters::amalgamateBilaterally(
     HolesConveyor* depthHolesConveyor,
     HolesConveyor* rgbHolesConveyor)
   {
@@ -382,9 +390,9 @@ namespace pandora_vision
     if (depthHolesConveyor->keyPoints.size() > 0 &&
       rgbHolesConveyor->keyPoints.size() > 0)
     {
-      mergeUnilaterally(rgbHolesConveyor, depthHolesConveyor);
+      amalgamateUnilaterally(rgbHolesConveyor, depthHolesConveyor);
 
-      mergeUnilaterally(depthHolesConveyor, rgbHolesConveyor);
+      amalgamateUnilaterally(depthHolesConveyor, rgbHolesConveyor);
     }
   }
 
@@ -392,169 +400,263 @@ namespace pandora_vision
 
   /**
     @brief Given two HolesConveyor* structs, one with the
-    potential of assimilating the other (assimilator) and the other with the
-    potential of being assimilated by the other (assimilable), the purpose
+    potential of amalgamating the other (amalgamator) and the other with the
+    potential of being amalgamated by the other (amalgamatable), the purpose
     of this function is to identify blobs that are overlapping each other
-    but none of them is entirely inside the other, while the assimilator's
-    bounding box is greater than that of the assimilable's.
-    If this is true for a given assimilator and assimilable,
-    the assimilator will grow rectangle-wise and outline-wise
-    by the size of the assimilator, while the assimilator's
-    new keypoint will be the mean of the two keypoints. The assimilable
+    but none of them is entirely inside the other, while the amalgamator's
+    bounding box is greater than that of the amalgamatable's.
+    If this is true for a given amalgamator and amalgamatable,
+    the amalgamator will grow rectangle-wise and outline-wise
+    by the size of the amalgamator, while the amalgamator's
+    new keypoint will be the mean of the two keypoints. The amalgamatable
     then is rendered useless and deleted.
-    @param[in][out] assimilator [HolesConveyor*]
+    @param[in][out] amalgamator [HolesConveyor*]
     The holes conveyor whose candidate holes will potentially
-    assimilate candidate holes of @param assimilable
-    @param[in][out] assimilable [HolesConveyor*]
+    assimilate candidate holes of @param amalgamatable
+    @param[in][out] amalgamatable [HolesConveyor*]
     The holes conveyor whose candidate holes will potentially
-    will be assimilated by candidate holes of @param assimilator
+    will be assimilated by candidate holes of @paramamalgamator
     @return void
    **/
-  void GenericFilters::mergeUnilaterally(
-    HolesConveyor* assimilator,
-    HolesConveyor* assimilable)
+  void GenericFilters::amalgamateUnilaterally(
+    HolesConveyor* amalgamator,
+    HolesConveyor* amalgamatable)
   {
-    //!< Validate the assimilable's holes against the assimilator's ones
-    for (int i = 0; i < assimilator->keyPoints.size(); i++)
+    //!< Validate the amalgamatable's holes against the amalgamator's ones
+    for (int i = 0; i < amalgamator->keyPoints.size(); i++)
     {
-      for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
+      for (int j = amalgamatable->keyPoints.size() - 1; j >= 0; j--)
       {
-        //!< Are all the assimilable's outline points inside
-        //!< the assimilator's bounding box? If not all but some, continue
-        int numAssimilableOutlinePointsInAssimilator = 0;
-        for (int av = 0; av < assimilable->outlines[j].size(); av++)
+        //!< If the amalgamatable's area is smaller than the amalgamator's,
+        //!< merge the amalgamator with the amalgamatable into theamalgamator
+        //!< and delete the amalgamatable
+        if (isCapableOfAmalgamating(i, *amalgamator, j, *amalgamatable))
         {
-          if (cv::pointPolygonTest(assimilator->outlines[i],
-              assimilable->outlines[j][av], false) > 0)
-          {
-            numAssimilableOutlinePointsInAssimilator++;
-          }
-        }
-
-        //!< If zero or all of assimilable's outline points
-        //!< are inside the assimilator's outline, this assimilable is
-        //!< not a candidate to be merged by the assimilator
-        if (numAssimilableOutlinePointsInAssimilator == 0 ||
-          numAssimilableOutlinePointsInAssimilator ==
-          assimilable->outlines[j].size())
-        {
-          continue;
-        }
-
-
-        //!< Calculate the assimilator's bounding box area
-        float assimilatorRectangleWidthX = assimilator->rectangles[i][0].x
-          - assimilator->rectangles[i][1].x;
-        float assimilatorRectangleWidthY = assimilator->rectangles[i][0].y
-          - assimilator->rectangles[i][1].y;
-        float assimilatorRectangleHeightX = assimilator->rectangles[i][1].x
-          - assimilator->rectangles[i][2].x;
-        float assimilatorRectangleHeightY = assimilator->rectangles[i][1].y
-          - assimilator->rectangles[i][2].y;
-
-        float assimilatorBoxArea = sqrt(pow(assimilatorRectangleWidthX, 2)
-          + pow(assimilatorRectangleWidthY, 2)) *
-          sqrt(pow(assimilatorRectangleHeightX, 2)
-            + pow(assimilatorRectangleHeightY, 2));
-
-        //!< Calculate the assimilable's bounding box area
-        float assimilableRectangleWidthX = assimilable->rectangles[j][0].x
-          - assimilable->rectangles[j][1].x;
-        float assimilableRectangleWidthY = assimilable->rectangles[j][0].y
-          - assimilable->rectangles[j][1].y;
-        float assimilableRectangleHeightX = assimilable->rectangles[j][1].x
-          - assimilable->rectangles[j][2].x;
-        float assimilableRectangleHeightY = assimilable->rectangles[j][1].y
-          - assimilable->rectangles[j][2].y;
-
-        float assimilableBoxArea = sqrt(pow(assimilableRectangleWidthX, 2) +
-          pow(assimilableRectangleWidthY, 2)) *
-          sqrt(pow(assimilableRectangleHeightX, 2)
-            + pow(assimilableRectangleHeightY, 2));
-
-
-        //!< If the assimilable's area is smaller than the assimilator's,
-        //!< merge the assimilator with the assimilable into the assimilator
-        //!< and delete the assimilable
-        if (assimilableBoxArea < assimilatorBoxArea)
-        {
-          //!< Viewing the two outlines as sets,
-          //!< the final outline should not have the intersection
-          //!< of the two sets.
-          std::vector<cv::Point> assimilatorOutline;
-          std::vector<cv::Point> assimilableOutline;
-
-          //!< Add all the assimilable's outline points that are not located
-          //!< inside the assimilator's outline, to the assimilableOutline
-          //!< vector
-          for (int o = 0; o < assimilable->outlines[j].size(); o++)
-          {
-            if (pointPolygonTest(assimilator->outlines[i],
-                assimilable->outlines[j][o], false) <= 0)
-            {
-              assimilableOutline.push_back(assimilable->outlines[j][o]);
-            }
-          }
-
-          //!< Add all the assimilator's outline points that are not located
-          //!< inside the assimilable's outline, to the assimilatorOutline
-          //!< vector
-          for (int o = 0; o < assimilator->outlines[i].size(); o++)
-          {
-            if (pointPolygonTest(assimilable->outlines[j],
-                assimilator->outlines[i][o], false) <= 0)
-            {
-              assimilatorOutline.push_back(assimilator->outlines[i][o]);
-            }
-          }
-
-          //!< The assimilator's outline will be the sum of the outline points
-          //!< that are not located inside each other
-          assimilator->outlines[i] = assimilatorOutline;
-          assimilator->outlines[i].insert(assimilator->outlines[i].end(),
-            assimilableOutline.begin(), assimilableOutline.end());
-
-
-          //!< The assimilable's new least area rotated bounding box will be the
-          //!< one that encloses the new (merged) outline points
-          cv::RotatedRect substituteRotatedRectangle =
-            minAreaRect(assimilator->outlines[i]);
-
-          //!< Obtain the four vertices of the new rotated rectangle
-          cv::Point2f substituteVerticesArray[4];
-          substituteRotatedRectangle.points(substituteVerticesArray);
-
-          //!< Same as substituteVerticesArray array, but vector
-          std::vector<cv::Point2f> substituteVerticesVector;
-
-          //!< Store the four vertices to the substituteVerticesVector
-          for(int v = 0; v < 4; v++)
-          {
-            substituteVerticesVector.push_back(substituteVerticesArray[v]);
-          }
-
-          //!< Replace the assimilator's vertices with the new vertices
-          assimilator->rectangles[i] = substituteVerticesVector;
-
-
-          //!< The overall candidate hole's keypoint
-          assimilator->keyPoints[i].pt.x = (assimilator->keyPoints[i].pt.x +
-            assimilable->keyPoints[j].pt.x) / 2;
-          assimilator->keyPoints[i].pt.y = (assimilator->keyPoints[i].pt.y +
-            assimilable->keyPoints[j].pt.y) / 2;
-
-          //!< The assimilable has now been merged with the assimilator,
-          //!< so delete it. So long, assimilable
-          assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
-          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
-            assimilable->outlines[j].end());
-          assimilable->outlines.erase(assimilable->outlines.begin() + j);
-          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
-            assimilable->rectangles[j].end());
-          assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
+          amalgamateOnce(i, amalgamator, j, amalgamatable);
         }
       }
     }
+  }
+
+
+
+  /**
+    @brief Indicates whether a hole assigned the role of the amalgamator
+    is capable of amalgamating another hole assigned the role of
+    the amalgamatable. The amalgamator is capable of amalgamating the
+    amalgamatable if and only if the amalgatamable's outline
+    points intersect with the amalgamator's outline, and the bounding
+    rectangle of the amalgamator is larger in area than the bounding
+    rectangle of the amalgamatable
+    @param[in] amalgamatorId [const int&] The index of the specific hole
+    that acts as the amalgamator inside the amalgamator HolesConveyor
+    @param[in] amalgamator [const HolesConveyor&] The HolesConveyor that
+    acts as the amalgamator struct
+    @param[in] amalgamatableId [const int&] The index of the specific hole
+    that acts as the amalgamatable inside the amalgamatable HolesConveyor
+    @param[in] amalgamatable [const HolesConveyor&] The HolesConveyor that
+    acts as the amalgamatavle struct
+    @return [bool] True if the amalgamator is capable of amalgamating
+    the amalgamatable
+   **/
+  bool GenericFilters::isCapableOfAmalgamating(
+    const int& amalgamatorId,
+    const HolesConveyor& amalgamator,
+    const int& amalgamatableId,
+    const HolesConveyor& amalgamatable)
+  {
+    //!< Are all the assimilable's outline points inside
+    //!< the assimilator's bounding box? If not all but some, continue
+    int numAmalgamatableOutlinePointsInAmalgamator= 0;
+    for (int av = 0; av < amalgamatable.outlines[amalgamatableId].size(); av++)
+    {
+      if (cv::pointPolygonTest(amalgamator.outlines[amalgamatorId],
+          amalgamatable.outlines[amalgamatableId][av], false) > 0)
+      {
+        numAmalgamatableOutlinePointsInAmalgamator++;
+      }
+    }
+
+    //!< If zero or all of amalgamatable's outline points
+    //!< are inside the amalgamator's outline, this amalgamatable is
+    //!< not a candidate to be amalgamated by the amalgamator
+    if (numAmalgamatableOutlinePointsInAmalgamator == 0 ||
+      numAmalgamatableOutlinePointsInAmalgamator ==
+      amalgamatable.outlines[amalgamatableId].size())
+    {
+      return false;
+    }
+
+
+    //!< Calculate the amalgamator's bounding box area
+    float amalgamatorRectangleWidthX =
+      amalgamator.rectangles[amalgamatorId][0].x
+      - amalgamator.rectangles[amalgamatorId][1].x;
+    float amalgamatorRectangleWidthY =
+      amalgamator.rectangles[amalgamatorId][0].y
+      - amalgamator.rectangles[amalgamatorId][1].y;
+
+    float amalgamatorRectangleHeightX =
+      amalgamator.rectangles[amalgamatorId][1].x
+      - amalgamator.rectangles[amalgamatorId][2].x;
+    float amalgamatorRectangleHeightY =
+      amalgamator.rectangles[amalgamatorId][1].y
+      - amalgamator.rectangles[amalgamatorId][2].y;
+
+    float amalgamatorBoxArea = sqrt(pow(amalgamatorRectangleWidthX, 2)
+      + pow(amalgamatorRectangleWidthY, 2)) *
+      sqrt(pow(amalgamatorRectangleHeightX, 2)
+        + pow(amalgamatorRectangleHeightY, 2));
+
+
+    //!< Calculate the amalgamatable's bounding box area
+    float amalgamatableRectangleWidthX =
+      amalgamatable.rectangles[amalgamatableId][0].x
+      - amalgamatable.rectangles[amalgamatableId][1].x;
+    float amalgamatableRectangleWidthY =
+      amalgamatable.rectangles[amalgamatableId][0].y
+      - amalgamatable.rectangles[amalgamatableId][1].y;
+
+    float amalgamatableRectangleHeightX =
+      amalgamatable.rectangles[amalgamatableId][1].x
+      - amalgamatable.rectangles[amalgamatableId][2].x;
+    float amalgamatableRectangleHeightY =
+      amalgamatable.rectangles[amalgamatableId][1].y
+      - amalgamatable.rectangles[amalgamatableId][2].y;
+
+    float amalgamatableBoxArea = sqrt(pow(amalgamatableRectangleWidthX, 2) +
+      pow(amalgamatableRectangleWidthY, 2)) *
+      sqrt(pow(amalgamatableRectangleHeightX, 2)
+        + pow(amalgamatableRectangleHeightY, 2));
+
+
+    //!< If the amalgatamable's area is smaller than the assimilator's,
+    //!< this amalgamator is capable of amalgamating the amalgamatable
+    return (amalgamatableBoxArea < amalgamatorBoxArea);
+  }
+
+
+
+  /**
+    @brief Intended to use after the check of the
+    isCapableOfAmalgamating function, this function carries the burden
+    of having to delete a hole entry from its HolesConveyor amalgamatable
+    struct, thus being its executor,
+    and modifying the HolesConveyor amalgamator struct entry so that it
+    it has absorbed the amalgamatable hole in terms of keypoint location,
+    outline unification and bounding rectangle inclusion of the
+    amalgamatable's outline
+    @param[in] amalgamatorId [const int&] The identifier of the hole inside
+    the HolesConveyor amalgamator struct
+    @param[in][out] amalgamator [HolesConveyor*] The holes conveyor
+    whose keypoint, outline and bounding rectangle entries
+    will be modified
+    @param[in] amalgamatableId [const int&] The identifier of the hole inside
+    the HolesConveyor amalgamatable struct
+    @param[in][out] amalgamatable [HolesConveyor*] The holes conveyor
+    whose keypoint, outline and bounding rectangle entries
+    will be deleted
+    @return void
+   **/
+  void GenericFilters::amalgamateOnce(const int& amalgamatorId,
+    HolesConveyor* amalgamator,
+    const int& amalgamatableId,
+    HolesConveyor* amalgamatable)
+  {
+    //!< Viewing the two outlines as sets,
+    //!< the final outline should not have the intersection
+    //!< of the two sets.
+    std::vector<cv::Point> amalgamatorOutline;
+    std::vector<cv::Point> amalgamatableOutline;
+
+    //!< Add all the amalgamatable's outline points that are not located
+    //!< inside the amalgamator's outline, to the amalgamatableOutline
+    //!< vector
+    for (int o = 0; o < amalgamatable->outlines[amalgamatableId].size(); o++)
+    {
+      if (pointPolygonTest(amalgamator->outlines[amalgamatorId],
+          amalgamatable->outlines[amalgamatableId][o], false) <= 0)
+      {
+        amalgamatableOutline.push_back(
+          amalgamatable->outlines[amalgamatableId][o]);
+      }
+    }
+
+    //!< Add all the amalgamator's outline points that are not located
+    //!< inside the amalgamatable's outline, to the amalgamatorOutline
+    //!< vector
+    for (int o = 0; o < amalgamator->outlines[amalgamatorId].size(); o++)
+    {
+      if (pointPolygonTest(amalgamatable->outlines[amalgamatableId],
+          amalgamator->outlines[amalgamatorId][o], false) <= 0)
+      {
+        amalgamatorOutline.push_back(amalgamator->outlines[amalgamatorId][o]);
+      }
+    }
+
+    //!< The amalgamator's outline will be the sum of the outline points
+    //!< that are not located inside each other
+    amalgamator->outlines[amalgamatorId] = amalgamatorOutline;
+    amalgamator->outlines[amalgamatorId].insert(
+      amalgamator->outlines[amalgamatorId].end(),
+      amalgamatableOutline.begin(), amalgamatableOutline.end());
+
+
+    //!< The amalgamatable's new least area rotated bounding box will be the
+    //!< one that encloses the new (merged) outline points
+    cv::RotatedRect substituteRotatedRectangle =
+      minAreaRect(amalgamator->outlines[amalgamatorId]);
+
+    //!< Obtain the four vertices of the new rotated rectangle
+    cv::Point2f substituteVerticesArray[4];
+    substituteRotatedRectangle.points(substituteVerticesArray);
+
+    //!< Same as substituteVerticesArray array, but vector
+    std::vector<cv::Point2f> substituteVerticesVector;
+
+    //!< Store the four vertices to the substituteVerticesVector
+    for(int v = 0; v < 4; v++)
+    {
+      substituteVerticesVector.push_back(substituteVerticesArray[v]);
+    }
+
+    //!< Replace the amalgamator's vertices with the new vertices
+    amalgamator->rectangles[amalgamatorId] = substituteVerticesVector;
+
+
+    //!< The overall candidate hole's keypoint
+    amalgamator->keyPoints[amalgamatorId].pt.x =
+      (amalgamator->keyPoints[amalgamatorId].pt.x +
+       amalgamatable->keyPoints[amalgamatableId].pt.x) / 2;
+
+    amalgamator->keyPoints[amalgamatorId].pt.y =
+      (amalgamator->keyPoints[amalgamatorId].pt.y +
+       amalgamatable->keyPoints[amalgamatableId].pt.y) / 2;
+
+    //!< The amalgamatable has now been merged with the amalgamator,
+    //!< so delete it. So long, amalgamatable
+
+    //!< Delete the keypoint from the conveyor
+    amalgamatable->keyPoints.erase(
+      amalgamatable->keyPoints.begin() + amalgamatableId);
+
+    //!< Delete each outline point from its respective vector
+    amalgamatable->outlines[amalgamatableId].erase(
+      amalgamatable->outlines[amalgamatableId].begin(),
+      amalgamatable->outlines[amalgamatableId].end());
+
+    //!< Delete the outline vector entry alltogether
+    amalgamatable->outlines.erase(
+      amalgamatable->outlines.begin() + amalgamatableId);
+
+    //!< Delete each rectangle point from its respective vector
+    amalgamatable->rectangles[amalgamatableId].erase(
+      amalgamatable->rectangles[amalgamatableId].begin(),
+      amalgamatable->rectangles[amalgamatableId].end());
+
+    //!< Delete the rectangle vector entry alltogether
+    amalgamatable->rectangles.erase(
+      amalgamatable->rectangles.begin() + amalgamatableId);
   }
 
 } // namespace pandora_vision
