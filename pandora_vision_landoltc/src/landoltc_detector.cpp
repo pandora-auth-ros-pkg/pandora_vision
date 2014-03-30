@@ -64,10 +64,12 @@ void LandoltCDetector::initializeReferenceImage(std::string path)
 {
   //!<Loading reference image passed as argument to main
   cv::Mat ref;
-  std::cout << path << std::endl;
+  //std::cout << path << std::endl;
+  ROS_DEBUG_STREAM("path: " << path);
   ref = cv::imread(path);
   if (!ref.data)
-    std::cout << "Pattern image not loaded" << std::endl;
+    //std::cout << "Pattern image not loaded" << std::endl;
+    ROS_DEBUG("Pattern image not loaded");
 
   //!< Turning to gray and binarizing ref image
 
@@ -132,7 +134,8 @@ void LandoltCDetector::findRotationA(const cv::Mat& in, int i)
   
   if(left_contours.size() == 2) angle+=3.14159265359;
       
-  std::cout << "Angle of " << i <<" is: " << (angle*(180/3.14159265359)) << std::endl;
+  //std::cout << "Angle of " << i <<" is: " << (angle*(180/3.14159265359)) << std::endl;
+  ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
   
 }
 
@@ -196,7 +199,9 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
     
     if(angle < 0) angle+=2*3.14159265359;
     
-    std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
+    //std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
+    ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+
     
   }
   
