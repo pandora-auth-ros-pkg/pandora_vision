@@ -365,14 +365,133 @@ namespace pandora_vision
     Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
     #endif
 
+    //!< Merge the conveyors from the RGB and Depth sources
+    HolesConveyor rgbdHolesConveyor;
+    HolesConveyorUtils::fuse(depthHolesConveyor_, rgbHolesConveyor_,
+      &rgbdHolesConveyor);
+
+
+    #ifdef DEBUG_TIME
+    Timer::tick("processCandidateHoles");
+    Timer::printAllMeansTree();
+    #endif
+  }
+
+
+
+  /**
+    @brief Unpacks the the HolesConveyor struct for the
+    candidate holes, the interpolated depth image and the point cloud
+    from the vision_communications::DepthCandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [vision_communications::DepthCandidateHolesVectorMsg&] The input
+    candidate holes message obtained through the depth node
+    @param[out] conveyor [HolesConveyor*] The output conveyor
+    struct
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
+    @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
+    depth image
+    @return void
+   **/
+  void HoleFusion::unpackDepthMessage(
+    const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
+    HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
+    cv::Mat* interpolatedDepthImage)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("unpackDepthMessage", "depthCandidateHolesCallback");
+    #endif
+
+    //!< Recreate the conveyor
+    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
+
+    //!< Unpack the interpolated depth image
+    MessageConversions::extractDepthImageFromMessageContainer(
+      holesMsg,
+      interpolatedDepthImage,
+      sensor_msgs::image_encodings::TYPE_32FC1);
+
+    //!< Unpack the point cloud
+    MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
+      pointCloudXYZ);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackDepthMessage");
+    #endif
+  }
+
+
+
+  /**
+    @brief Unpacks the the HolesConveyor struct for the
+    candidate holes, the RGB image
+    from the vision_communications::DepthCandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [vision_communications::RgbCandidateHolesVectorMsg&] The input
+    candidate holes message obtained throught the RGB node
+    @param[out] conveyor [HolesConveyor*] The output conveyor
+    struct
+    @param[out] rgbImage [cv::Mat*] The output RGB image
+    @return void
+   **/
+  void HoleFusion::unpackRgbMessage(
+    const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
+    HolesConveyor* conveyor, cv::Mat* rgbImage)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("unpackRgbMessage", "rgbCandidateHolesCallback");
+    #endif
+
+    //!< Recreate the conveyor
+    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
+
+    //!< Unpack the RGB image
+    MessageConversions::extractRgbImageFromMessageContainer(
+      holesMsg,
+      rgbImage,
+      sensor_msgs::image_encodings::TYPE_8UC3);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackRgbMessage");
+    #endif
+  }
+
+
+
+  /**
+    @brief Requests from the synchronizer to process a new point cloud
+    @return void
+   **/
+  void HoleFusion::unlockSynchronizer()
+  {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Sending unlock message");
+    #endif
+
+    std_msgs::Empty unlockMsg;
+    unlockPublisher_.publish(unlockMsg);
+  }
+
+
+
+  /**
+    @brief Runs candidate holes obtained through Depth and RGB analysis
+    through selected filters, from a respective viewpoint (keypoints
+    obtained through Depth analysis are checked against Depth-based
+    filters, etc). Probabilities for each candidate hole and filter
+    are printed in the console, with an order specified by the
+    hole_fusion_cfg of the dynamic reconfigure utility
+    @param void
+    @return void
+   **/
+  void HoleFusion::viewRespectiveProbabilities()
+  {
     #ifdef DEBUG_SHOW
     ROS_ERROR("===========================================");
     ROS_ERROR("#Depth keypoints : %zu", depthHolesConveyor_.keyPoints.size());
     ROS_ERROR("#RGB keypoints : %zu", rgbHolesConveyor_.keyPoints.size());
     ROS_ERROR("-------------------------------------------");
     #endif
-
-    //!< Do some processing
 
     //!< Initialize the probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
@@ -518,109 +637,9 @@ namespace pandora_vision
         rgbHolesConveyor_.outlines);
     }
     #endif
-
-    //!< Processing complete.
-
-    #ifdef DEBUG_TIME
-    Timer::tick("processCandidateHoles");
-    Timer::printAllMeansTree();
-    #endif
   }
 
 
-
-  /**
-    @brief Unpacks the the HolesConveyor struct for the
-    candidate holes, the interpolated depth image and the point cloud
-    from the vision_communications::DepthCandidateHolesVectorMsg message
-    @param[in] holesMsg
-    [vision_communications::DepthCandidateHolesVectorMsg&] The input
-    candidate holes message obtained through the depth node
-    @param[out] conveyor [HolesConveyor*] The output conveyor
-    struct
-    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
-    @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
-    depth image
-    @return void
-   **/
-  void HoleFusion::unpackDepthMessage(
-    const vision_communications::DepthCandidateHolesVectorMsg& holesMsg,
-    HolesConveyor* conveyor, PointCloudXYZPtr* pointCloudXYZ,
-    cv::Mat* interpolatedDepthImage)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("unpackDepthMessage", "depthCandidateHolesCallback");
-    #endif
-
-    //!< Recreate the conveyor
-    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
-
-    //!< Unpack the interpolated depth image
-    MessageConversions::extractDepthImageFromMessageContainer(
-      holesMsg,
-      interpolatedDepthImage,
-      sensor_msgs::image_encodings::TYPE_32FC1);
-
-    //!< Unpack the point cloud
-    MessageConversions::extractPointCloudXYZFromMessageContainer(holesMsg,
-      pointCloudXYZ);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("unpackDepthMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Unpacks the the HolesConveyor struct for the
-    candidate holes, the RGB image
-    from the vision_communications::DepthCandidateHolesVectorMsg message
-    @param[in] holesMsg
-    [vision_communications::RgbCandidateHolesVectorMsg&] The input
-    candidate holes message obtained throught the RGB node
-    @param[out] conveyor [HolesConveyor*] The output conveyor
-    struct
-    @param[out] rgbImage [cv::Mat*] The output RGB image
-    @return void
-   **/
-  void HoleFusion::unpackRgbMessage(
-    const vision_communications::RgbCandidateHolesVectorMsg& holesMsg,
-    HolesConveyor* conveyor, cv::Mat* rgbImage)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("unpackRgbMessage", "rgbCandidateHolesCallback");
-    #endif
-
-    //!< Recreate the conveyor
-    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
-
-    //!< Unpack the RGB image
-    MessageConversions::extractRgbImageFromMessageContainer(
-      holesMsg,
-      rgbImage,
-      sensor_msgs::image_encodings::TYPE_8UC3);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("unpackRgbMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Requests from the synchronizer to process a new point cloud
-    @return void
-   **/
-  void HoleFusion::unlockSynchronizer()
-  {
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Sending unlock message");
-    #endif
-
-    std_msgs::Empty unlockMsg;
-    unlockPublisher_.publish(unlockMsg);
-  }
 
   /**
     @brief The function called when a parameter is changed

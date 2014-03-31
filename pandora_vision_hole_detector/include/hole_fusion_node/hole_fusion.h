@@ -209,6 +209,18 @@ namespace pandora_vision
       void processCandidateHoles();
 
       /**
+        @brief Runs candidate holes obtained through Depth and RGB analysis
+        through selected filters, from a respective viewpoint (keypoints
+        obtained through Depth analysis are checked against Depth-based
+        filters, etc). Probabilities for each candidate hole and filter
+        are printed in the console, with an order specified by the
+        hole_fusion_cfg of the dynamic reconfigure utility
+        @param void
+        @return void
+       **/
+      void viewRespectiveProbabilities();
+
+      /**
         @brief Requests from the synchronizer to process a new point cloud
         @return void
        **/

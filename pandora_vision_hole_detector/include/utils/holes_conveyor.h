@@ -58,6 +58,34 @@ namespace pandora_vision
     std::vector<std::vector<cv::Point> > outlines;
   };
 
+
+  /**
+    @Class HoleConveyor
+    @brief Provides methods pertinent to the HolesConveyor struct
+   **/
+  class HolesConveyorUtils
+  {
+    public:
+
+      /**
+        @brief Copies one HolesConveyor struct to another
+        @param[in] src [const HolesConveyor&] The source struct
+        @param[out] dst [HolesConveyor*] The destination struct
+        @return void
+       **/
+      static void copyTo(const HolesConveyor& src, HolesConveyor* dst);
+
+      /**
+        @brief Given two sources of struct HolesConveyor, this function
+        fuses them into one struct.
+        @param[in] srcA [const HolesConveyor&] The first HolesConveyor source
+        @param[in] srcB [const HolesConveyor&] The second HolesConveyor source
+        @param[out] dst [HolesConveyor*] The final struct
+       **/
+      static void fuse(const HolesConveyor& srcA,
+        const HolesConveyor& srcB, HolesConveyor* dst);
+  };
+
 }
 
 #endif  // namespace pandora_vision
