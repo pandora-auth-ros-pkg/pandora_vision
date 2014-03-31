@@ -205,9 +205,10 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
     
   }
   
-  cv::imshow("paddedptr", paddedptr); 
-  
-  cv::waitKey(30); 
+  #ifdef SHOW_DEBUG_IMAGE
+    cv::imshow("paddedptr", paddedptr); 
+    cv::waitKey(30); 
+  #endif
     
   _edges = 0;
   
@@ -403,10 +404,10 @@ void LandoltCDetector::applyMask()
     
     findRotationB(padded, i);
     
-    cv::imshow("padded", padded);
-
-    //cv::waitKey(200);
-
+    #ifdef SHOW_DEBUG_IMAGE
+      cv::imshow("padded", padded);
+      //cv::waitKey(200);
+    #endif
   }
 }
 
@@ -511,10 +512,12 @@ void LandoltCDetector::begin(cv::Mat* input)
   }
 
   applyMask();
-
-  cv::imshow("Raw", *input);
-  //cv::imshow("Adaptive Threshold", binary);
-  cv::waitKey(20);
+  
+  #ifdef SHOW_DEBUG_IMAGE
+    cv::imshow("Raw", *input);
+    //cv::imshow("Adaptive Threshold", binary);
+    cv::waitKey(20);
+  #endif
 
   _centers.clear();
   _newCenters.clear();

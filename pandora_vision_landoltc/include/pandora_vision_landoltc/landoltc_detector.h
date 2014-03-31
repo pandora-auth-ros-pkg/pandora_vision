@@ -43,6 +43,8 @@
 #include <iostream>
 #include <stdlib.h>
 
+//~ #define SHOW_DEBUG_IMAGE
+
 namespace pandora_vision
 {
 class LandoltCDetector

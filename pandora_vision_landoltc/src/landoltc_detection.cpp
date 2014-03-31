@@ -168,7 +168,6 @@ void LandoltCDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   if ( landoltCFrame.empty() )
   {
     ROS_ERROR("[landoltc_node] : No more Frames");
-    ros::shutdown();
     return;
   }
 
