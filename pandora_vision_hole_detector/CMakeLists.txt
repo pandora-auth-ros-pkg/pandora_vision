@@ -126,6 +126,7 @@ add_library(hole_fusion_lib
   src/utils/hole_filters.cpp
   src/utils/morphological_operators.cpp
   src/utils/timer.cpp
+  src/utils/holes_conveyor.cpp
   src/utils/visualization.cpp
 )
 

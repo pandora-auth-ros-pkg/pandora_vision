@@ -368,6 +368,7 @@ namespace pandora_vision
   }
 
 
+
   /**
     @brief Intended to use after the check of the
     isCapableOfConnecting function, this function carries the burden
