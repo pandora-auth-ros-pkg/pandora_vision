@@ -108,11 +108,11 @@ namespace pandora_vision
     the assimilable. It checks whether the assimilable's outline
     points reside entirely inside the assimilator's outline.
     @param[in] assimilatorId [const int&] The index of the specific hole
-    inside the assimilator HolesConveyor
+    inside the assimilators HolesConveyor
     @paramp[in] assimilator [const HolesConveyor&] The HolesConveyor struct
     that acts as the assimilator
     @param[in] assimilableId [const int&] The index of the specific hole
-    inside the assimilable HolesConveyor
+    inside the assimilables HolesConveyor
     @paramp[in] assimilable [const HolesConveyor&] The HolesConveyor struct
     that acts as the assimilable
     @return [bool] True if all of the outline points of the assimilable
@@ -160,6 +160,7 @@ namespace pandora_vision
     assimilable->keyPoints.erase(
       assimilable->keyPoints.begin() + keyPointId);
 
+
     //!< Delete each outline point from its respective vector
     assimilable->outlines[keyPointId].erase(
       assimilable->outlines[keyPointId].begin(),
@@ -167,6 +168,7 @@ namespace pandora_vision
 
     //!< Delete the outline vector entry alltogether
     assimilable->outlines.erase(assimilable->outlines.begin() + keyPointId);
+
 
     //!< Delete each rectangle point from its respective vector
     assimilable->rectangles[keyPointId].erase(
@@ -180,191 +182,290 @@ namespace pandora_vision
 
 
   /**
-    @brief Connects nearby holes. Holes' outlines do not intersect.
-    @param[in][out] assimilator [HolesConveyor*] The holes conveyor
-    that will act as the assimilator of holes
-    @param[in][out] assimilable [HolesConveyor*] The holes conveyor
-    that will act as the assimilable
+    @brief Connects nearby holes with a proximity criterion.
+    Holes' outlines do not intersect.
+    @param[in][out] connector [HolesConveyor*] The holes conveyor
+    that will act as the connector of holes
+    @param[in][out] connectable [HolesConveyor*] The holes conveyor
+    that will act as the connectable
     @param [in] pointCloud [const PointCloudXYZPtr&] The point cloud
     needed in order to specify which holes are going to be connected
     by criterion of distance
     @return void
    **/
-  void GenericFilters::connectUnilaterally(HolesConveyor* assimilator,
-    HolesConveyor* assimilable, const PointCloudXYZPtr& pointCloudXYZ)
+  void GenericFilters::connectUnilaterally(HolesConveyor* connector,
+    HolesConveyor* connectable, const PointCloudXYZPtr& pointCloudXYZ)
   {
-
-    //!< Validate the assimilable's holes against the assimilator's ones
-    for (int i = 0; i < assimilator->keyPoints.size(); i++)
+    //!< Validate the connectable's holes against the connector's ones
+    for (int i = 0; i < connector->keyPoints.size(); i++)
     {
-      for (int j = assimilable->keyPoints.size() - 1; j >= 0; j--)
+      for (int j = connectable->keyPoints.size() - 1; j >= 0; j--)
       {
-        //!< Are all the assimilable's outline points outside
-        //!< the assimilator's bounding box?
-        int numAssimilableOutlinePointsInAssimilator = 0;
-
-        //!< The real min distance (in meters) between two points of the
-        //!< assimilator's and assimilable's outlines
-        double minOutlinesDistance = 10000.0;
-
-        for (int av = 0; av < assimilable->outlines[j].size(); av++)
+        //!< If the connectable is able to be connected with the connectable,
+        //!< connect the connector with the connectable,
+        //!< replacing the connector and deleting the connectable
+        if (isCapableOfConnecting(
+            i, *connector, j, *connectable, pointCloudXYZ))
         {
-          if (cv::pointPolygonTest(assimilator->outlines[i],
-              assimilable->outlines[j][av], false) > 0)
-          {
-            numAssimilableOutlinePointsInAssimilator++;
-          }
-
-          //!< The assimilable's current outline point x,y,z coordinates
-          //!< measured by the depth sensor
-          float assimilableOutlinePointX = pointCloudXYZ->points[
-            static_cast<int>(assimilable->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilable->outlines[j][av].y)].x;
-
-          float assimilableOutlinePointY = pointCloudXYZ->points[
-            static_cast<int>(assimilable->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilable->outlines[j][av].y)].y;
-
-          float assimilableOutlinePointZ = pointCloudXYZ->points[
-            static_cast<int>(assimilable->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilable->outlines[j][av].y)].z;
-
-
-          //!< The assimilator's current outline point x,y,z coordinates
-          //!< measured by the depth sensor
-          float assimilatorOutlinePointX = pointCloudXYZ->points[
-            static_cast<int>(assimilator->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilator->outlines[j][av].y)].x;
-
-          float assimilatorOutlinePointY = pointCloudXYZ->points[
-            static_cast<int>(assimilator->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilator->outlines[j][av].y)].y;
-
-          float assimilatorOutlinePointZ = pointCloudXYZ->points[
-            static_cast<int>(assimilator->outlines[j][av].x)
-            + pointCloudXYZ->width *
-            static_cast<int>(assimilator->outlines[j][av].y)].z;
-
-
-          //!< The current outline points distance
-          float outlinePointsDistance = sqrt(
-            pow(assimilableOutlinePointX - assimilatorOutlinePointX, 2) +
-            pow(assimilableOutlinePointY - assimilatorOutlinePointY, 2) +
-            pow(assimilableOutlinePointZ - assimilatorOutlinePointZ, 2));
-
-          if (outlinePointsDistance < minOutlinesDistance)
-          {
-            minOutlinesDistance = outlinePointsDistance;
-          }
-        }
-
-        //!< If not all of assimilable's outline points
-        //!< are outside the assimilator's outline,
-        //!< or the minimum distance between the assimilator's and assimilable's
-        //!< outlines is greater than a distance thrshold,
-        //!< this assimilable is not a candidate to be connected with
-        //!< the assimilator
-        if (numAssimilableOutlinePointsInAssimilator != 0 ||
-          minOutlinesDistance > Parameters::connect_holes_min_distance)
-        {
-          continue;
-        }
-
-
-        //!< Calculate the assimilator's bounding box area
-        float assimilatorRectangleWidthX = assimilator->rectangles[i][0].x
-          - assimilator->rectangles[i][1].x;
-        float assimilatorRectangleWidthY = assimilator->rectangles[i][0].y
-          - assimilator->rectangles[i][1].y;
-        float assimilatorRectangleHeightX = assimilator->rectangles[i][1].x
-          - assimilator->rectangles[i][2].x;
-        float assimilatorRectangleHeightY = assimilator->rectangles[i][1].y
-          - assimilator->rectangles[i][2].y;
-
-        float assimilatorBoxArea = sqrt(pow(assimilatorRectangleWidthX, 2)
-          + pow(assimilatorRectangleWidthY, 2)) *
-          sqrt(pow(assimilatorRectangleHeightX, 2)
-            + pow(assimilatorRectangleHeightY, 2));
-
-        //!< Calculate the assimilable's bounding box area
-        float assimilableRectangleWidthX = assimilable->rectangles[j][0].x
-          - assimilable->rectangles[j][1].x;
-        float assimilableRectangleWidthY = assimilable->rectangles[j][0].y
-          - assimilable->rectangles[j][1].y;
-        float assimilableRectangleHeightX = assimilable->rectangles[j][1].x
-          - assimilable->rectangles[j][2].x;
-        float assimilableRectangleHeightY = assimilable->rectangles[j][1].y
-          - assimilable->rectangles[j][2].y;
-
-        float assimilableBoxArea = sqrt(pow(assimilableRectangleWidthX, 2) +
-          pow(assimilableRectangleWidthY, 2)) *
-          sqrt(pow(assimilableRectangleHeightX, 2)
-            + pow(assimilableRectangleHeightY, 2));
-
-
-        //!< If the assimilable's area is smaller than the assimilator's,
-        //!< connect the assimilator with the assimilable,
-        //!< replacing the assimilator and delete the assimilable
-        if (assimilableBoxArea < assimilatorBoxArea)
-        {
-          //!< Viewing the two outlines as sets,
-          //!< the final outline should not have the intersection
-          //!< of the two sets.
-          std::vector<cv::Point> assimilatorOutline;
-          std::vector<cv::Point> assimilableOutline;
-
-
-          //!< The assimilator's outline will be the sum of the outline points
-          //!< that are not located inside each other
-          assimilator->outlines[i].insert(assimilator->outlines[i].end(),
-            assimilable->outlines[j].begin(), assimilable->outlines[j].end());
-
-
-          //!< The assimilable's new least area rotated bounding box will be the
-          //!< one that encloses the new (merged) outline points
-          cv::RotatedRect substituteRotatedRectangle =
-            minAreaRect(assimilator->outlines[i]);
-
-          //!< Obtain the four vertices of the new rotated rectangle
-          cv::Point2f substituteVerticesArray[4];
-          substituteRotatedRectangle.points(substituteVerticesArray);
-
-          //!< Same as substituteVerticesArray array, but vector
-          std::vector<cv::Point2f> substituteVerticesVector;
-
-          //!< Store the four vertices to the substituteVerticesVector
-          for(int v = 0; v < 4; v++)
-          {
-            substituteVerticesVector.push_back(substituteVerticesArray[v]);
-          }
-
-          //!< Replace the assimilator's vertices with the new vertices
-          assimilator->rectangles[i] = substituteVerticesVector;
-
-
-          //!< The overall candidate hole's keypoint
-          assimilator->keyPoints[i].pt.x = (assimilator->keyPoints[i].pt.x +
-            assimilable->keyPoints[j].pt.x) / 2;
-          assimilator->keyPoints[i].pt.y = (assimilator->keyPoints[i].pt.y +
-            assimilable->keyPoints[j].pt.y) / 2;
-
-          //!< The assimilable has now been merged with the assimilator,
-          //!< so delete it. So long, assimilable
-          assimilable->keyPoints.erase(assimilable->keyPoints.begin() + j);
-          assimilable->outlines[j].erase(assimilable->outlines[j].begin(),
-            assimilable->outlines[j].end());
-          assimilable->outlines.erase(assimilable->outlines.begin() + j);
-          assimilable->rectangles[j].erase(assimilable->rectangles[j].begin(),
-            assimilable->rectangles[j].end());
-          assimilable->rectangles.erase(assimilable->rectangles.begin() + j);
+          connectOnce(i, connector, j, connectable);
         }
       }
     }
+  }
+
+
+
+  /**
+    @brief Indicates whether a hole assigned the role of the connectable
+    is capable of being connected with another hole assigned the role of
+    the connector. The connectable is capable of being connected with the
+    connectable if and only if the connectable's outline
+    points do not intersect with the connector's outline, the bounding
+    rectangle of the connector is larger in area than the bounding
+    rectangle of the connectable, and the minimum distance between the
+    two outlines is lower than a threshold value.
+    @param[in] connectorId [const int&] The index of the specific hole
+    that acts as the connector inside the connectors HolesConveyor
+    @param[in] connector [const HolesConveyor&] The HolesConveyor that
+    acts as the connector struct
+    @param[in] connectableId [const int&] The index of the specific hole
+    that acts as the connectable inside the connectables HolesConveyor
+    @param[in] connectable [const HolesConveyor&] The HolesConveyor that
+    acts as the connectable struct
+    @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud
+    obtained from the depth sensor, used to measure distances in real
+    space
+    @return [bool] True if the connectable is capable of being connected
+    with the connector
+   **/
+  bool GenericFilters::isCapableOfConnecting(const int& connectorId,
+    const HolesConveyor& connector,
+    const int& connectableId,
+    const HolesConveyor& connectable,
+    const PointCloudXYZPtr& pointCloudXYZ)
+  {
+    //!< Are all the connectable's outline points outside
+    //!< the connector's bounding box?
+    int numconnectableOutlinePointsInconnector = 0;
+
+    //!< The real min distance (in meters) between two points of the
+    //!< connector's and connectable's outlines
+    double minOutlinesDistance = 10000.0;
+
+    for (int av = 0; av < connectable.outlines[connectableId].size(); av++)
+    {
+      if (cv::pointPolygonTest(connector.outlines[connectorId],
+          connectable.outlines[connectableId][av], false) > 0)
+      {
+        numconnectableOutlinePointsInconnector++;
+      }
+
+      //!< The connectable's current outline point x,y,z coordinates
+      //!< measured by the depth sensor
+      float connectableOutlinePointX = pointCloudXYZ->points[
+        static_cast<int>(connectable.outlines[connectableId][av].x)
+        + pointCloudXYZ->width *
+        static_cast<int>(connectable.outlines[connectableId][av].y)].x;
+
+      float connectableOutlinePointY = pointCloudXYZ->points[
+        static_cast<int>(connectable.outlines[connectableId][av].x)
+        + pointCloudXYZ->width *
+        static_cast<int>(connectable.outlines[connectableId][av].y)].y;
+
+      float connectableOutlinePointZ = pointCloudXYZ->points[
+        static_cast<int>(connectable.outlines[connectableId][av].x)
+        + pointCloudXYZ->width *
+        static_cast<int>(connectable.outlines[connectableId][av].y)].z;
+
+
+      for (int ac = 0; ac < connector.outlines[connectorId].size(); ac++)
+      {
+        //!< The connector's current outline point x,y,z coordinates
+        //!< measured by the depth sensor
+        float connectorOutlinePointX = pointCloudXYZ->points[
+          static_cast<int>(connector.outlines[connectorId][ac].x)
+          + pointCloudXYZ->width *
+          static_cast<int>(connector.outlines[connectorId][ac].y)].x;
+
+        float connectorOutlinePointY = pointCloudXYZ->points[
+          static_cast<int>(connector.outlines[connectorId][ac].x)
+          + pointCloudXYZ->width *
+          static_cast<int>(connector.outlines[connectorId][ac].y)].y;
+
+        float connectorOutlinePointZ = pointCloudXYZ->points[
+          static_cast<int>(connector.outlines[connectorId][ac].x)
+          + pointCloudXYZ->width *
+          static_cast<int>(connector.outlines[connectorId][ac].y)].z;
+
+
+        //!< The current outline points distance
+        float outlinePointsDistance = sqrt(
+          pow(connectableOutlinePointX - connectorOutlinePointX, 2) +
+          pow(connectableOutlinePointY - connectorOutlinePointY, 2) +
+          pow(connectableOutlinePointZ - connectorOutlinePointZ, 2));
+
+        if (outlinePointsDistance < minOutlinesDistance)
+        {
+          minOutlinesDistance = outlinePointsDistance;
+        }
+      }
+    }
+
+    //!< If not all of connectable's outline points
+    //!< are outside the connector's outline,
+    //!< or the minimum distance between the connector's and connectable's
+    //!< outlines is greater than a distance thrshold,
+    //!< this connectable is not a candidate to be connected with
+    //!< the connector
+    if (numconnectableOutlinePointsInconnector != 0 ||
+      minOutlinesDistance > Parameters::connect_holes_min_distance)
+    {
+      return false;
+    }
+
+
+    //!< Calculate the connector's bounding box area
+    float connectorRectangleWidthX =
+      connector.rectangles[connectorId][0].x
+      - connector.rectangles[connectorId][1].x;
+    float connectorRectangleWidthY =
+      connector.rectangles[connectorId][0].y
+      - connector.rectangles[connectorId][1].y;
+    float connectorRectangleHeightX =
+      connector.rectangles[connectorId][1].x
+      - connector.rectangles[connectorId][2].x;
+    float connectorRectangleHeightY =
+      connector.rectangles[connectorId][1].y
+      - connector.rectangles[connectorId][2].y;
+
+    float connectorBoxArea = sqrt(pow(connectorRectangleWidthX, 2)
+      + pow(connectorRectangleWidthY, 2)) *
+      sqrt(pow(connectorRectangleHeightX, 2)
+        + pow(connectorRectangleHeightY, 2));
+
+    //!< Calculate the connectable's bounding box area
+    float connectableRectangleWidthX =
+      connectable.rectangles[connectableId][0].x
+      - connectable.rectangles[connectableId][1].x;
+    float connectableRectangleWidthY =
+      connectable.rectangles[connectableId][0].y
+      - connectable.rectangles[connectableId][1].y;
+    float connectableRectangleHeightX =
+      connectable.rectangles[connectableId][1].x
+      - connectable.rectangles[connectableId][2].x;
+    float connectableRectangleHeightY =
+      connectable.rectangles[connectableId][1].y
+      - connectable.rectangles[connectableId][2].y;
+
+    float connectableBoxArea = sqrt(pow(connectableRectangleWidthX, 2) +
+      pow(connectableRectangleWidthY, 2)) *
+      sqrt(pow(connectableRectangleHeightX, 2)
+        + pow(connectableRectangleHeightY, 2));
+
+    //!< If the connectable's area is smaller than the connector's,
+    //!< this connectable is capable of being connected with the connector
+    return (connectableBoxArea < connectorBoxArea);
+  }
+
+
+  /**
+    @brief Intended to use after the check of the
+    isCapableOfConnecting function, this function carries the burden
+    of having to delete a hole entry from its HolesConveyor connectable
+    struct, thus being its executor,
+    and modifying the HolesConveyor connector struct entry so that it
+    it has absorbed the connectable hole in terms of keypoint location,
+    outline unification and bounding rectangle inclusion of the
+    connectable's outline
+    @param[in] connectorId [const int&] The identifier of the hole inside
+    the HolesConveyor connectables struct
+    @param[in][out] connector [HolesConveyor*] The holes conveyor
+    whose keypoint, outline and bounding rectangle entries
+    will be modified
+    @param[in] connectableId [const int&] The identifier of the hole inside
+    the HolesConveyor connectables struct
+    @param[in][out] connectable [HolesConveyor*] The holes conveyor
+    whose keypoint, outline and bounding rectangle entries
+    will be deleted
+    @return void
+   **/
+  void GenericFilters::connectOnce(const int& connectorId,
+    HolesConveyor* connector,
+    const int& connectableId,
+    HolesConveyor* connectable)
+  {
+    //!< Viewing the two outlines as sets,
+    //!< the final outline should not have the intersection
+    //!< of the two sets.
+    std::vector<cv::Point> connectorOutline;
+    std::vector<cv::Point> connectableOutline;
+
+
+    //!< The connector's outline will be the sum of the outline points
+    //!< that are not located inside each other
+    connector->outlines[connectorId].insert(
+      connector->outlines[connectorId].end(),
+      connectable->outlines[connectableId].begin(),
+      connectable->outlines[connectableId].end());
+
+
+    //!< The connectable's new least area rotated bounding box will be the
+    //!< one that encloses the new (merged) outline points
+    cv::RotatedRect substituteRotatedRectangle =
+      minAreaRect(connector->outlines[connectorId]);
+
+    //!< Obtain the four vertices of the new rotated rectangle
+    cv::Point2f substituteVerticesArray[4];
+    substituteRotatedRectangle.points(substituteVerticesArray);
+
+    //!< Same as substituteVerticesArray array, but vector
+    std::vector<cv::Point2f> substituteVerticesVector;
+
+    //!< Store the four vertices to the substituteVerticesVector
+    for(int v = 0; v < 4; v++)
+    {
+      substituteVerticesVector.push_back(substituteVerticesArray[v]);
+    }
+
+    //!< Replace the connector's vertices with the new vertices
+    connector->rectangles[connectorId] = substituteVerticesVector;
+
+
+    //!< The overall candidate hole's keypoint
+    connector->keyPoints[connectorId].pt.x =
+      (connector->keyPoints[connectorId].pt.x
+       + connectable->keyPoints[connectableId].pt.x) / 2;
+    connector->keyPoints[connectorId].pt.y = (
+      connector->keyPoints[connectorId].pt.y
+      + connectable->keyPoints[connectableId].pt.y) / 2;
+
+
+    //!< The connectable has now been merged with the connector,
+    //!< so delete it. So long, connectable
+
+    //!< Delete the keypoint from the conveyor
+    connectable->keyPoints.erase(
+      connectable->keyPoints.begin() + connectableId);
+
+
+    //!< Delete each outline point from its respective vector
+    connectable->outlines[connectableId].erase(
+      connectable->outlines[connectableId].begin(),
+      connectable->outlines[connectableId].end());
+
+    //!< Delete the outline vector entry alltogether
+    connectable->outlines.erase(
+      connectable->outlines.begin() + connectableId);
+
+
+    //!< Delete each rectangle point from its respective vector
+    connectable->rectangles[connectableId].erase(
+      connectable->rectangles[connectableId].begin(),
+      connectable->rectangles[connectableId].end());
+
+    //!< Delete the rectangle vector entry alltogether
+    connectable->rectangles.erase(
+      connectable->rectangles.begin() + connectableId);
   }
 
 
@@ -449,13 +550,13 @@ namespace pandora_vision
     rectangle of the amalgamator is larger in area than the bounding
     rectangle of the amalgamatable
     @param[in] amalgamatorId [const int&] The index of the specific hole
-    that acts as the amalgamator inside the amalgamator HolesConveyor
+    that acts as the amalgamator inside the amalgamators HolesConveyor
     @param[in] amalgamator [const HolesConveyor&] The HolesConveyor that
     acts as the amalgamator struct
     @param[in] amalgamatableId [const int&] The index of the specific hole
     that acts as the amalgamatable inside the amalgamatable HolesConveyor
     @param[in] amalgamatable [const HolesConveyor&] The HolesConveyor that
-    acts as the amalgamatavle struct
+    acts as the amalgamatables struct
     @return [bool] True if the amalgamator is capable of amalgamating
     the amalgamatable
    **/
@@ -640,6 +741,7 @@ namespace pandora_vision
     amalgamatable->keyPoints.erase(
       amalgamatable->keyPoints.begin() + amalgamatableId);
 
+
     //!< Delete each outline point from its respective vector
     amalgamatable->outlines[amalgamatableId].erase(
       amalgamatable->outlines[amalgamatableId].begin(),
@@ -648,6 +750,7 @@ namespace pandora_vision
     //!< Delete the outline vector entry alltogether
     amalgamatable->outlines.erase(
       amalgamatable->outlines.begin() + amalgamatableId);
+
 
     //!< Delete each rectangle point from its respective vector
     amalgamatable->rectangles[amalgamatableId].erase(
