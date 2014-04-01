@@ -365,10 +365,8 @@ namespace pandora_vision
     Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
     #endif
 
-    //!< Merge the conveyors from the RGB and Depth sources
-    HolesConveyor rgbdHolesConveyor;
-    HolesConveyorUtils::fuse(depthHolesConveyor_, rgbHolesConveyor_,
-      &rgbdHolesConveyor);
+    fuseHoles();
+
 
 
     #ifdef DEBUG_TIME
@@ -705,7 +703,7 @@ namespace pandora_vision
     Parameters::bounding_box_min_area_threshold =
       config.bounding_box_min_area_threshold;
 
-    //!< The bounding box detection method
+    //!< The bounding box detection zzmethod
     //!< 0 for detecting by means of brushfire starting
     //!< from the keypoint of the blob
     //!< 1 for detecting by means of contours around the edges of the blob
@@ -817,6 +815,147 @@ namespace pandora_vision
       config.number_of_saturation_bins;
     Parameters::number_of_value_bins =
       config.number_of_value_bins;
+  }
+
+
+
+  void HoleFusion::fuseHoles()
+  {
+    //!< Merge the conveyors from the RGB and Depth sources
+    HolesConveyor rgbdHolesConveyor;
+    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
+      &rgbdHolesConveyor);
+
+    bool isFuseComplete = false;
+    while(!isFuseComplete)
+    {
+      //!< Initialize needed variables
+
+      //!< The index of the candidate hole that will
+      //!< {assimilate, amalgamate, connect} the j-th candidate hole
+      int i = 0;
+
+      //!< The index of the candidate hole that will be
+      //!< {assimilated, amalgamated, connected} by / with
+      //!< the i-th candidate hole
+      int j = 1;
+
+      //!< The identifier of the merge process
+      //!< {(assimilate, 0), (amalgamate, 1), (connect, 2)}
+      int mergeProcessId = 0;
+
+      if (i >= rgbdHolesConveyor.keyPoints.size() ||
+        j >= rgbdHolesConveyor.keyPoints.size())
+      {
+        return;
+      }
+
+      bool isAble = false;
+      if (mergeProcessId == 0)
+      {
+        //!< Is the i-th candidate hole able to assimilate the
+        //!< j-th candidate hole?
+        isAble = GenericFilters::isCapableOfAssimilating(i,
+          rgbdHolesConveyor, j, rgbdHolesConveyor);
+      }
+      if (mergeProcessId == 1)
+      {
+        //!< Is the i-th candidate hole able to amalgamate the
+        //!< j-th candidate hole?
+        isAble = GenericFilters::isCapableOfAmalgamating(i,
+          rgbdHolesConveyor, j, rgbdHolesConveyor);
+      }
+      if (mergeProcessId == 2)
+      {
+        //!< Is the j-th candidate hole able to be connected with the
+        //!< i-th candidate hole?
+        isAble = GenericFilters::isCapableOfConnecting(i,
+          rgbdHolesConveyor, j, rgbdHolesConveyor, pointCloudXYZ_);
+      }
+
+      if (isAble)
+      {
+        //!< Copy the original holes conveyor to a temp one.
+        //!< The temp one will be tested through the hole filters
+        //!< On success, temp will replace rgbdHolesConveyor,
+        //!< on failure, rgbdHolesConveyor will remain unchanged
+        HolesConveyor tempHolesConveyor;
+        HolesConveyorUtils::copyTo(rgbdHolesConveyor, &tempHolesConveyor);
+
+        if (mergeProcessId == 0)
+        {
+          //!< Delete the j-th candidate hole
+          GenericFilters::assimilateOnce(j, &tempHolesConveyor);
+        }
+        else if (mergeProcessId == 1)
+        {
+          //!< Delete the j-th candidate hole,
+          //!< alter the i-th candidate hole so that it has amalgamated
+          //!< the j-th candidate hole
+          GenericFilters::amalgamateOnce(i, &tempHolesConveyor,
+            j, &tempHolesConveyor);
+        }
+        else if (mergeProcessId == 2)
+        {
+          //!< Delete the j-th candidate hole,
+          //!< alter the i-th candidate hole so that it has been connected
+          //!< with the j-th candidate hole
+          GenericFilters::connectOnce(i, &tempHolesConveyor,
+            j, &tempHolesConveyor);
+        }
+
+        //!< Obtain the i-th candidate hole in order for it
+        //!< to be checked against the selected filters
+        HolesConveyor ithHole =
+          HolesConveyorUtils::getHole(tempHolesConveyor, i);
+
+        //!< Determines the selected filters execution
+        std::map<int, int> filtersOrder;
+
+        //!< Depth diff runs first
+        filtersOrder[1] = 1;
+
+        //!< Depth / Area runs second
+        filtersOrder[2] = 3;
+
+        //!< Bounding rectangle's plane constitution runs third
+        filtersOrder[3] = 2;
+
+
+        std::vector<cv::Mat> imgs;
+        std::vector<std::string> msgs;
+
+        std::vector<std::vector<float> >probabilitiesVector(3,
+          std::vector<float>(1, 0.0));
+
+        int counter = 0;
+        for (std::map<int, int>::iterator o_it = filtersOrder.begin();
+          o_it != filtersOrder.end(); ++o_it)
+        {
+          DepthFilters::applyFilter(
+            o_it->second,
+            interpolatedDepthImage_,
+            pointCloudXYZ_,
+            &ithHole,
+            Parameters::rectangle_inflation_size,
+            &probabilitiesVector.at(counter),
+            &imgs,
+            &msgs);
+
+          counter++;
+        } //!< o_it iterator ends
+
+        float dd = probabilitiesVector[0][0];
+        float da = probabilitiesVector[1][0];
+        float pc = probabilitiesVector[2][0];
+
+        //!< Probabilities threshold for merge acceptance
+        if (dd > 0.5 && da > 0.5 && pc > 0.7)
+        {
+          HolesConveyorUtils::replace(tempHolesConveyor, &rgbdHolesConveyor);
+        }
+      }
+    }
   }
 
 } // namespace pandora_vision
