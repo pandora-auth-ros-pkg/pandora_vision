@@ -77,13 +77,56 @@ namespace pandora_vision
 
       /**
         @brief Given two sources of struct HolesConveyor, this function
-        fuses them into one struct.
+        merge them into one struct.
         @param[in] srcA [const HolesConveyor&] The first HolesConveyor source
         @param[in] srcB [const HolesConveyor&] The second HolesConveyor source
         @param[out] dst [HolesConveyor*] The final struct
        **/
-      static void fuse(const HolesConveyor& srcA,
+      static void merge(const HolesConveyor& srcA,
         const HolesConveyor& srcB, HolesConveyor* dst);
+
+      /**
+        @brief Extracts the specified hole from a HolesConveyor into a new
+        HolesConveyor struct that is returned
+        @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
+        @param[in] index [const int&] The index of the hole inside the conveyor
+        @return A HolesConveyor struct that containes the index-th hole of the
+        conveyor
+       **/
+      static HolesConveyor getHole(const HolesConveyor& conveyor,
+        const int& index);
+
+      /**
+        @brief Replaces a specified hole from a HolesConveyor dst struct
+        with the hole of index srcIndex of the src HolesConveyor struct entry
+        @param[in] src [const HolesConveyor&] The HolesConveyor source struct
+        @param[in] srcIndex [const int&] The index of the hole inside the
+        src conveyor that will be copied into the dst HolesConveyor struct,
+        in the dstIndex position
+        @param[out] dst [HolesConveyor*] The HolesConveyor destination struct
+        @param[in] dstIndex [const int&] The index of the hole inside the
+        dst conveyor that will be replaced by the srcIndex-th of the src
+        HolesConveyor struct
+        @return void
+       **/
+      static void replaceHole(const HolesConveyor& src,
+        const int& srcIndex, HolesConveyor* dst, const int& dstIndex);
+
+      /**
+        @brief Replaces an entire HolesConveyor struct with another
+        @param[in] src [const HolesConveyor&] The source conveyor struct
+        @param[out] dst [HolesConveyor*] The destination conveyor struct
+        @return void
+       **/
+      static void replace(const HolesConveyor& src, HolesConveyor* dst);
+
+      /**
+        @brief Hollows a HolesConveyor struct, deleting every entry in it
+        @param[in][out] conveyor [HolesConveyor*] The conveyor struct that will
+        be cleared
+        @return void
+       **/
+      static void clear(HolesConveyor* conveyor);
   };
 
 }

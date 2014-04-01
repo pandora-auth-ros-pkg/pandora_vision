@@ -220,6 +220,8 @@ namespace pandora_vision
        **/
       void viewRespectiveProbabilities();
 
+      void fuseHoles();
+
       /**
         @brief Requests from the synchronizer to process a new point cloud
         @return void

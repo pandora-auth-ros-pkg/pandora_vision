@@ -109,11 +109,11 @@ namespace pandora_vision
     points reside entirely inside the assimilator's outline.
     @param[in] assimilatorId [const int&] The index of the specific hole
     inside the assimilators HolesConveyor
-    @paramp[in] assimilator [const HolesConveyor&] The HolesConveyor struct
+    @param[in] assimilator [const HolesConveyor&] The HolesConveyor struct
     that acts as the assimilator
     @param[in] assimilableId [const int&] The index of the specific hole
     inside the assimilables HolesConveyor
-    @paramp[in] assimilable [const HolesConveyor&] The HolesConveyor struct
+    @param[in] assimilable [const HolesConveyor&] The HolesConveyor struct
     that acts as the assimilable
     @return [bool] True if all of the outline points of the assimilable
     hole are inside the outline of the assimilator
