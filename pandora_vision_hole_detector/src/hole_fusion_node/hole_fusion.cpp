@@ -377,28 +377,36 @@ namespace pandora_vision
 
 
     //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 20, 20, &dummy);
+    /*
+     *HolesConveyorUtils::appendDummyConveyor(
+     *  cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 20, 20, &dummy);
+     */
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
 
     //!< 1-st assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
+    /*
+     *HolesConveyorUtils::appendDummyConveyor(
+     *  cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
+     */
 
     //!< 0-th assimilable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+    /*
+     *HolesConveyorUtils::appendDummyConveyor(
+     *  cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+     */
 
     //!< 0-th amalgamatable
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(420, 140), cv::Point(422,142), 40, 40, 36, 36, &dummy);
 
     //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 20, 20, &dummy);
+    /*
+     *HolesConveyorUtils::appendDummyConveyor(
+     *  cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 20, 20, &dummy);
+     */
 
     cv::Mat before;
     before = Visualization::scaleImageForVisualization(
