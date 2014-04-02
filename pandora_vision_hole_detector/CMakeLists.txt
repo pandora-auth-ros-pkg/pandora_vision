@@ -260,6 +260,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utils/parameters.h
   include/utils/edge_detection.h
   include/utils/hole_filters.h
+  include/utils/holes_conveyor.h
   include/utils/morphological_operators.h
   include/utils/noise_elimination.h
   #include/utils/timer.h
@@ -272,6 +273,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/utils/parameters.cpp
   src/utils/edge_detection.cpp
   src/utils/hole_filters.cpp
+  src/utils/holes_conveyor.cpp
   src/utils/morphological_operators.cpp
   src/utils/noise_elimination.cpp
   #src/utils/timer.cpp
