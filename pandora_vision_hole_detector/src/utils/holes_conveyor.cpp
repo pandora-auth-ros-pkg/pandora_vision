@@ -231,7 +231,7 @@ namespace pandora_vision
   void HolesConveyorUtils::print(const HolesConveyor& conveyor,
     const int& id)
   {
-    if (id > 0)
+    if (id < 0)
     {
       ROS_INFO("Conveyor has %zu holes :", conveyor.keyPoints.size());
       for (int i = 0; i < conveyor.keyPoints.size(); i++)
@@ -512,8 +512,8 @@ namespace pandora_vision
     {
       for(int j = 0; j < 4; j++)
       {
-        cv::line(*img, conveyor.outlines[i][j],
-          conveyor.outlines[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
+        cv::line(*img, conveyor.rectangles[i][j],
+          conveyor.rectangles[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
       }
     }
 
