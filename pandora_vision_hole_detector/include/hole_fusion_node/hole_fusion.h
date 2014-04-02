@@ -220,7 +220,20 @@ namespace pandora_vision
        **/
       void viewRespectiveProbabilities();
 
-      void fuseHoles();
+      /**
+        @brief Applies a merging operation of @param mergeProcessId, until
+        every candidate hole, even as it changes through the various merges that
+        happen, has been merged with every candidate hole that can be merged
+        with it.
+        @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+        candidate holes conveyor
+        @param[in] mergeProcessId [const int&] The identifier of the merging
+        process. Values: 0 for assimilation, 1 for amalgamation and
+        2 for connecting
+        @return void
+       **/
+      void applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
+        const int& mergeProcessId);
 
       /**
         @brief Requests from the synchronizer to process a new point cloud

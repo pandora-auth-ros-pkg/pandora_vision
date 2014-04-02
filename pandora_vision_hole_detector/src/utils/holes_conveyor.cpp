@@ -40,15 +40,13 @@
 namespace pandora_vision
 {
   /**
-    @brief Copies one HolesConveyor struct to another
+    @brief Appends one HolesConveyor struct to another.
     @param[in] src [const HolesConveyor&] The source struct
     @param[out] dst [HolesConveyor*] The destination struct
     @return void
    **/
-  void HolesConveyorUtils::copyTo(const HolesConveyor& src,
-    HolesConveyor* dst)
+  void HolesConveyorUtils::append(const HolesConveyor& src, HolesConveyor* dst)
   {
-    //!< Insert the src HolesConveyor into the dst HolesConveyor
     for (int i = 0; i < src.keyPoints.size(); i++)
     {
       dst->keyPoints.push_back(src.keyPoints[i]);
@@ -68,6 +66,105 @@ namespace pandora_vision
       dst->rectangles.push_back(tempRectangle);
     }
   }
+
+
+
+  /**
+    @brief Hollows a HolesConveyor struct, deleting every entry in it
+    @param[in][out] conveyor [HolesConveyor*] The conveyor struct that will
+    be cleared
+    @return void
+   **/
+  void HolesConveyorUtils::clear(HolesConveyor* conveyor)
+  {
+    //!< Delete the keypoints
+    conveyor->keyPoints.erase(conveyor->keyPoints.begin(),
+      conveyor->keyPoints.end());
+
+
+    //!< Delete each outline point from its respective vector
+    for (int i = 0; i < conveyor->outlines.size(); i++)
+    {
+      conveyor->outlines[i].erase(conveyor->outlines[i].begin(),
+        conveyor->outlines[i].end());
+    }
+
+    //!< Delete the outline vector alltogether
+    conveyor->outlines.erase(conveyor->outlines.begin(),
+      conveyor->outlines.end());
+
+
+    //!< Delete each outline point from its respective vector
+    for (int i = 0; i < conveyor->rectangles.size(); i++)
+    {
+      conveyor->rectangles[i].erase(conveyor->rectangles[i].begin(),
+        conveyor->rectangles[i].end());
+    }
+
+    //!< Delete the rectangles vector alltogether
+    conveyor->rectangles.erase(conveyor->rectangles.begin(),
+      conveyor->rectangles.end());
+  }
+
+
+
+  /**
+    @brief Copies one HolesConveyor struct to another. If the dst conveyor
+    is not empty, it empties it first, and then copies the src to the dst
+    @param[in] src [const HolesConveyor&] The source struct
+    @param[out] dst [HolesConveyor*] The destination struct
+    @return void
+   **/
+  void HolesConveyorUtils::copyTo(const HolesConveyor& src,
+    HolesConveyor* dst)
+  {
+    //!< If the dst is not empty, clear it
+    if (dst->keyPoints.size() > 0)
+    {
+      clear(dst);
+    }
+
+    //!< Append the src to the dst
+    append(src, dst);
+  }
+
+
+
+  /**
+    @brief Extracts the specified hole from a HolesConveyor into a new
+    HolesConveyor struct that is returned
+    @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
+    @param[in] index [const int&] The index of the hole inside the conveyor
+    @return A HolesConveyor struct that containes the index-th hole of the
+    conveyor
+   **/
+  HolesConveyor HolesConveyorUtils::getHole(const HolesConveyor& conveyor,
+    const int& index)
+  {
+    HolesConveyor dst;
+
+    //!< Get the index-th hole's keypoint
+    dst.keyPoints.push_back(conveyor.keyPoints[index]);
+
+    //!< Get the index-th hole's outline
+    std::vector<cv::Point> tempOutline;
+    for (int j = 0; j < conveyor.outlines[index].size(); j++)
+    {
+      tempOutline.push_back(conveyor.outlines[index][j]);
+    }
+    dst.outlines.push_back(tempOutline);
+
+    //!< Get the index-th hole's rectangle
+    std::vector<cv::Point2f> tempRectangle;
+    for (int j = 0; j < conveyor.rectangles[index].size(); j++)
+    {
+      tempRectangle.push_back(conveyor.rectangles[index][j]);
+    }
+    dst.rectangles.push_back(tempRectangle);
+
+    return dst;
+  }
+
 
 
   /**
@@ -124,38 +221,49 @@ namespace pandora_vision
 
 
   /**
-    @brief Extracts the specified hole from a HolesConveyor into a new
-    HolesConveyor struct that is returned
-    @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
-    @param[in] index [const int&] The index of the hole inside the conveyor
-    @return A HolesConveyor struct that containes the index-th hole of the
-    conveyor
+    @brief Deletes a hole from HolesConveyor struct,
+    @param[in][out] conveyor [HolesConveyor*] The conveyor struct from which
+    the hole will be removed
+    @param[in] id [const int&] The index of the hole in the conveyor
+    @return void
    **/
-  HolesConveyor HolesConveyorUtils::getHole(const HolesConveyor& conveyor,
-    const int& index)
+  void HolesConveyorUtils::removeHole(HolesConveyor* conveyor, const int& id)
   {
-    HolesConveyor dst;
+    //!< Delete the respective keypoint
+    conveyor->keyPoints.erase(conveyor->keyPoints.begin() + id);
 
-    //!< Get the index-th hole's keypoint
-    dst.keyPoints.push_back(conveyor.keyPoints[index]);
 
-    //!< Get the index-th hole's outline
-    std::vector<cv::Point> tempOutline;
-    for (int j = 0; j < conveyor.outlines[index].size(); j++)
-    {
-      tempOutline.push_back(conveyor.outlines[index][j]);
-    }
-    dst.outlines.push_back(tempOutline);
+    //!< Delete each outline point from its respective vector
+    conveyor->outlines[id].erase(conveyor->outlines[id].begin(),
+      conveyor->outlines[id].end());
 
-    //!< Get the index-th hole's rectangle
-    std::vector<cv::Point2f> tempRectangle;
-    for (int j = 0; j < conveyor.rectangles[index].size(); j++)
-    {
-      tempRectangle.push_back(conveyor.rectangles[index][j]);
-    }
-    dst.rectangles.push_back(tempRectangle);
+    //!< Delete the respective outline vector
+    conveyor->outlines.erase(conveyor->outlines.begin() + id);
 
-    return dst;
+
+    //!< Delete each outline point from its respective vector
+    conveyor->rectangles[id].erase(conveyor->rectangles[id].begin(),
+      conveyor->rectangles[id].end());
+
+    //!< Delete the respective rectangles vector
+    conveyor->rectangles.erase(conveyor->rectangles.begin() + id);
+  }
+
+
+
+  /**
+    @brief Replaces an entire HolesConveyor struct with another
+    @param[in] src [const HolesConveyor&] The source conveyor struct
+    @param[out] dst [HolesConveyor*] The destination conveyor struct
+    @return void
+   **/
+  void HolesConveyorUtils::replace(const HolesConveyor& src, HolesConveyor* dst)
+  {
+    //!< Clear the dst
+    clear(dst);
+
+    //!< Fill it with the src
+    copyTo(src, dst);
   }
 
 
@@ -199,57 +307,142 @@ namespace pandora_vision
 
 
   /**
-    @brief Replaces an entire HolesConveyor struct with another
-    @param[in] src [const HolesConveyor&] The source conveyor struct
-    @param[out] dst [HolesConveyor*] The destination conveyor struct
+    @brief Appends a dummy HolesConveyor to a HoleConveyor struct
+    @param[in] rectangleUpperLeft [const cv::Point2f&] The upper left
+    vertex of the bounding rectangle
+    @param[in] outlineUpperLeft [const cv::Point] The upper left
+    vertex of the hole's outline
+    @param[in] rx [const int&] The width of the rectangle
+    @param[in] ry [const int&] The height of the rectangle
+    @param[in] ox [const int&] The width of the outline rectangle
+    @param[in] ry [const int&] The height of the outline rectangle
+    @param[in][out] conveyor [HolesConveyor*] The conveyor to which the
+    dummy HolesConveyor will be appended
     @return void
    **/
-  void HolesConveyorUtils::replace(const HolesConveyor& src, HolesConveyor* dst)
+  void HolesConveyorUtils::appendDummyConveyor(
+    const cv::Point2f& rectangleUpperLeft,
+    const cv::Point& outlineUpperLeft,
+    const int& rx, const int& ry,
+    const int& ox, const int& oy,
+    HolesConveyor* conveyor)
   {
-    //!< Clear the dst
-    clear(dst);
+    conveyor->rectangles.push_back(
+      generateRectangle(rectangleUpperLeft, rx, ry));
 
-    //!< Fill it with the src
-    copyTo(src, dst);
+    conveyor->outlines.push_back(
+      generateRectangle(outlineUpperLeft, ox, oy));
+
+    cv::KeyPoint k(outlineUpperLeft.x + ox / 2,
+      outlineUpperLeft.y + oy / 2, 1);
+
+    conveyor->keyPoints.push_back(k);
   }
 
 
 
   /**
-    @brief Hollows a HolesConveyor struct, deleting every entry in it
-    @param[in][out] conveyor [HolesConveyor*] The conveyor struct that will
-    be cleared
+    @brief Generates a vector of cv::Point2f that represents the 4 vertices
+    of a rectangle
+    @param[in] upperLeft [const cv::Point2f&] The upper left vertex point
+    of the rectangle
+    @param[in] x [const int&] The length at x direction
+    @param[in] y [const int&] The length at y direction
+    @return std::vector<cv::Point2f> A vector of four vertices
+    of type cv::Point2f
+   **/
+  std::vector<cv::Point2f> HolesConveyorUtils::generateRectangle(
+    const cv::Point2f& upperLeft, const int& x, const int& y)
+  {
+    std::vector<cv::Point2f> rectangleVertices;
+
+    cv::Point2f vertex_1(upperLeft.x, upperLeft.y);
+    rectangleVertices.push_back(vertex_1);
+
+    cv::Point2f vertex_2(upperLeft.x, upperLeft.y + y);
+    rectangleVertices.push_back(vertex_2);
+
+    cv::Point2f vertex_3(upperLeft.x + x, upperLeft.y + y);
+    rectangleVertices.push_back(vertex_3);
+
+    cv::Point2f vertex_4(upperLeft.x + x, upperLeft.y);
+    rectangleVertices.push_back(vertex_4);
+
+    return rectangleVertices;
+  }
+
+
+
+  /**
+    @brief Generates a vector of cv::Point that represents the 4 vertices
+    of a rectangle
+    @param[in] upperLeft [const cv::Point&] The upper left vertex point
+    of the rectangle
+    @param[in] x [const int&] The length at x direction
+    @param[in] y [const int&] The length at y direction
+    @return std::vector<cv::Point> A vector of four vertices
+    of type cv::Point
+   **/
+  std::vector<cv::Point> HolesConveyorUtils::generateRectangle(
+    const cv::Point& upperLeft, const int& x, const int& y)
+  {
+    std::vector<cv::Point> rectangleVertices;
+
+    cv::Point vertex_1(upperLeft.x, upperLeft.y);
+    rectangleVertices.push_back(vertex_1);
+
+    cv::Point vertex_2(upperLeft.x, upperLeft.y + y);
+    rectangleVertices.push_back(vertex_2);
+
+    cv::Point vertex_3(upperLeft.x + x, upperLeft.y + y);
+    rectangleVertices.push_back(vertex_3);
+
+    cv::Point vertex_4(upperLeft.x + x, upperLeft.y);
+    rectangleVertices.push_back(vertex_4);
+
+    return rectangleVertices;
+  }
+
+
+  /**
+    @brief Draws the keypoints, rectangles and outlines of holes
+    @param[in] coneyor [const HolesConveyor&] The conveyor whose holes
+    will be drawn on @param img
+    @param[in][out] img [cv::Mat*] The image drawn
     @return void
    **/
-  void HolesConveyorUtils::clear(HolesConveyor* conveyor)
+  void HolesConveyorUtils::visualize(const HolesConveyor& conveyor,
+    cv::Mat* img)
   {
-    //!< Delete the keypoints
-    conveyor->keyPoints.erase(conveyor->keyPoints.begin(),
-      conveyor->keyPoints.end());
+    cv::drawKeypoints(cv::Mat::zeros(img->size(), CV_8UC3),
+      conveyor.keyPoints, *img, CV_RGB(0, 255, 0),
+      cv::DrawMatchesFlags::DEFAULT);
 
-
-    //!< Delete each outline point from its respective vector
-    for (int i = 0; i < conveyor->outlines.size(); i++)
+    for(unsigned int i = 0; i < conveyor.outlines.size(); i++)
     {
-      conveyor->outlines[i].erase(conveyor->outlines[i].begin(),
-        conveyor->outlines[i].end());
+      for(unsigned int j = 0; j < conveyor.outlines[i].size(); j++)
+      {
+        cv::line(*img,
+          cvPoint(conveyor.outlines[i][j].x - 1, conveyor.outlines[i][j].y - 1),
+          cvPoint(conveyor.outlines[i][j].x + 1, conveyor.outlines[i][j].y + 1),
+          cv::Scalar(0, 255, 0), 1, 8 , CV_AA);
+
+        cv::line(*img,
+          cvPoint(conveyor.outlines[i][j].x - 1, conveyor.outlines[i][j].y + 1),
+          cvPoint(conveyor.outlines[i][j].x + 1, conveyor.outlines[i][j].y - 1),
+          cv::Scalar(0, 255, 0), 1, 8);
+      }
     }
 
-    //!< Delete the outline vector alltogether
-    conveyor->outlines.erase(conveyor->outlines.begin(),
-      conveyor->outlines.end());
-
-
-    //!< Delete each outline point from its respective vector
-    for (int i = 0; i < conveyor->rectangles.size(); i++)
+    for (int i = 0; i < conveyor.rectangles.size(); i++)
     {
-      conveyor->rectangles[i].erase(conveyor->rectangles[i].begin(),
-        conveyor->rectangles[i].end());
+      for(int j = 0; j < 4; j++)
+      {
+        cv::line(*img, conveyor.outlines[i][j],
+          conveyor.outlines[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
+      }
     }
 
-    //!< Delete the rectangles vector alltogether
-    conveyor->rectangles.erase(conveyor->rectangles.begin(),
-      conveyor->rectangles.end());
   }
 
 } // namespace pandora_vision

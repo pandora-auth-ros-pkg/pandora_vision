@@ -1,39 +1,39 @@
 /*********************************************************************
-*
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*
-* Authors: Alexandros Filotheou, Manos Tsardoulias
-*********************************************************************/
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Authors: Alexandros Filotheou, Manos Tsardoulias
+ *********************************************************************/
 
 #include "hole_fusion_node/hole_fusion.h"
 
@@ -365,8 +365,34 @@ namespace pandora_vision
     Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
     #endif
 
-    fuseHoles();
+    //!< Merge the conveyors from the RGB and Depth sources
+    HolesConveyor rgbdHolesConveyor;
+    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
+      &rgbdHolesConveyor);
 
+    /////////// Test applyMergeOperation with dummy conveyors ///////////
+
+    HolesConveyor dummy;
+
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 20, 20, &dummy);
+
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
+
+
+    cv::Mat before = cv::Mat::zeros(interpolatedDepthImage_.size(), CV_8UC3);
+    HolesConveyorUtils::visualize(dummy, &before);
+    Visualization::show("before", before, 1);
+
+    applyMergeOperation(&dummy, 0);
+
+    cv::Mat after = cv::Mat::zeros(interpolatedDepthImage_.size(), CV_8UC3);
+    HolesConveyorUtils::visualize(dummy, &after);
+    Visualization::show("after", after, 1);
 
 
     #ifdef DEBUG_TIME
@@ -539,7 +565,8 @@ namespace pandora_vision
           probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
         }
 
-        ROS_ERROR("P_%d = %s", j, probsString.c_str());
+        ROS_ERROR("P_%d [%f %f]= %s", j, depthHolesConveyor_.keyPoints[j].pt.x,
+          depthHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
         ROS_ERROR("------------------");
       }
     }
@@ -590,7 +617,8 @@ namespace pandora_vision
           probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
         }
 
-        ROS_ERROR("P_%d = %s", j, probsString.c_str());
+        ROS_ERROR("P_%d [%f %f] = %s", j, rgbHolesConveyor_.keyPoints[j].pt.x,
+          rgbHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
         ROS_ERROR("------------------");
       }
     }
@@ -819,59 +847,78 @@ namespace pandora_vision
 
 
 
-  void HoleFusion::fuseHoles()
+  /**
+    @brief Applies a merging operation of @param mergeProcessId, until
+    every candidate hole, even as it changes through the various merges that
+    happen, has been merged with every candidate hole that can be merged
+    with it.
+    @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    candidate holes conveyor
+    @param[in] mergeProcessId [const int&] The identifier of the merging
+    process. Values: 0 for assimilation, 1 for amalgamation and
+    2 for connecting
+    @return void
+   **/
+  void HoleFusion::applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
+    const int& mergeProcessId)
   {
-    //!< Merge the conveyors from the RGB and Depth sources
-    HolesConveyor rgbdHolesConveyor;
-    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
-      &rgbdHolesConveyor);
+    //!< If there are no candidate holes,
+    //!< or there is only one candidate hole,
+    //!< there is no meaning to this operation
+    if (rgbdHolesConveyor->keyPoints.size() < 2)
+    {
+      return;
+    }
+
+    //!< A vector that indicates when a specific hole has finished
+    //!< examining all the other holes in the conveyor for merging.
+    //!< Initialized at 0 for all conveyor entries, the specific hole
+    //!< that corresponds to a vector's entry is given a 1 when it has
+    //!< finished examining all other holes.
+    std::vector<int> finishVector(rgbdHolesConveyor->keyPoints.size(), 0);
+
+    //!< The index of the candidate hole that will
+    //!< {assimilate, amalgamate, connect} the passiveId-th candidate hole.
+    //!< The activeId always has a value of 0 due to the implementation's
+    //!< rationale: The candidate hole that examines each hole in the
+    //!< rgbdHolesConveyor is always the first one. When it has finished,
+    //!< it goes back into the rgbdHolesConveyor, at the last position
+    const int activeId = 0;
+
+    //!< The index of the candidate hole that will be
+    //!< {assimilated, amalgamated, connected} by / with
+    //!< the activeId-th candidate hole
+    int passiveId = 1;
 
     bool isFuseComplete = false;
     while(!isFuseComplete)
     {
-      //!< Initialize needed variables
-
-      //!< The index of the candidate hole that will
-      //!< {assimilate, amalgamate, connect} the j-th candidate hole
-      int i = 0;
-
-      //!< The index of the candidate hole that will be
-      //!< {assimilated, amalgamated, connected} by / with
-      //!< the i-th candidate hole
-      int j = 1;
-
-      //!< The identifier of the merge process
-      //!< {(assimilate, 0), (amalgamate, 1), (connect, 2)}
-      int mergeProcessId = 0;
-
-      if (i >= rgbdHolesConveyor.keyPoints.size() ||
-        j >= rgbdHolesConveyor.keyPoints.size())
-      {
-        return;
-      }
-
+      //!< Is the activeId-th candidate hole able to
+      //!< {assimilate, amalgamate, connect to} the passiveId-th candidate hole?
       bool isAble = false;
       if (mergeProcessId == 0)
       {
-        //!< Is the i-th candidate hole able to assimilate the
-        //!< j-th candidate hole?
-        isAble = GenericFilters::isCapableOfAssimilating(i,
-          rgbdHolesConveyor, j, rgbdHolesConveyor);
+        //!< Is the activeId-th candidate hole able to assimilate the
+        //!< passiveId-th candidate hole?
+        isAble = GenericFilters::isCapableOfAssimilating(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
       if (mergeProcessId == 1)
       {
-        //!< Is the i-th candidate hole able to amalgamate the
-        //!< j-th candidate hole?
-        isAble = GenericFilters::isCapableOfAmalgamating(i,
-          rgbdHolesConveyor, j, rgbdHolesConveyor);
+        //!< Is the activeId-th candidate hole able to amalgamate the
+        //!< passiveId-th candidate hole?
+        isAble = GenericFilters::isCapableOfAmalgamating(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
       if (mergeProcessId == 2)
       {
-        //!< Is the j-th candidate hole able to be connected with the
-        //!< i-th candidate hole?
-        isAble = GenericFilters::isCapableOfConnecting(i,
-          rgbdHolesConveyor, j, rgbdHolesConveyor, pointCloudXYZ_);
+        //!< Is the passiveId-th candidate hole able to be connected with the
+        //!< activeId-th candidate hole?
+        isAble = GenericFilters::isCapableOfConnecting(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor, pointCloudXYZ_);
       }
+
+
 
       if (isAble)
       {
@@ -880,35 +927,48 @@ namespace pandora_vision
         //!< On success, temp will replace rgbdHolesConveyor,
         //!< on failure, rgbdHolesConveyor will remain unchanged
         HolesConveyor tempHolesConveyor;
-        HolesConveyorUtils::copyTo(rgbdHolesConveyor, &tempHolesConveyor);
+        HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
 
         if (mergeProcessId == 0)
         {
-          //!< Delete the j-th candidate hole
-          GenericFilters::assimilateOnce(j, &tempHolesConveyor);
+          //!< Delete the passiveId-th candidate hole
+          GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
+
+          //!< Delete the passiveId-th entry of the finishVector since there
+          //!< is no hole associated with it
+          finishVector.erase(finishVector.begin() + passiveId);
         }
         else if (mergeProcessId == 1)
         {
-          //!< Delete the j-th candidate hole,
-          //!< alter the i-th candidate hole so that it has amalgamated
-          //!< the j-th candidate hole
-          GenericFilters::amalgamateOnce(i, &tempHolesConveyor,
-            j, &tempHolesConveyor);
+          //!< Delete the passiveId-th candidate hole,
+          //!< alter the activeId-th candidate hole so that it has amalgamated
+          //!< the passiveId-th candidate hole
+          GenericFilters::amalgamateOnce(activeId, &tempHolesConveyor,
+            passiveId, &tempHolesConveyor);
+
+          //!< Delete the passiveId-th entry of the finishVector since there is
+          //!< no hole associated with it
+          finishVector.erase(finishVector.begin() + passiveId);
         }
         else if (mergeProcessId == 2)
         {
-          //!< Delete the j-th candidate hole,
-          //!< alter the i-th candidate hole so that it has been connected
-          //!< with the j-th candidate hole
-          GenericFilters::connectOnce(i, &tempHolesConveyor,
-            j, &tempHolesConveyor);
+          //!< Delete the passiveId-th candidate hole,
+          //!< alter the activeId-th candidate hole so that it has been
+          //!< connected with the passiveId -th candidate hole
+          GenericFilters::connectOnce(activeId, &tempHolesConveyor,
+            passiveId, &tempHolesConveyor);
+
+          //!< Delete the passiveId-th entry of the finishVector since there is
+          //!< no hole associated with it
+          finishVector.erase(finishVector.begin() + passiveId);
         }
 
-        //!< Obtain the i-th candidate hole in order for it
+        //!< Obtain the activeId-th candidate hole in order for it
         //!< to be checked against the selected filters
         HolesConveyor ithHole =
-          HolesConveyorUtils::getHole(tempHolesConveyor, i);
+          HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
 
+        //!< TODO make more flexible
         //!< Determines the selected filters execution
         std::map<int, int> filtersOrder;
 
@@ -952,7 +1012,83 @@ namespace pandora_vision
         //!< Probabilities threshold for merge acceptance
         if (dd > 0.5 && da > 0.5 && pc > 0.7)
         {
-          HolesConveyorUtils::replace(tempHolesConveyor, &rgbdHolesConveyor);
+          //!< Since the tempHolesConveyor's ithHole has been positively tested,
+          //!< the tempHolesConveyor is now the new rgbdHolesConveyor
+          HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
+
+          //!< Because of the merge happening, the activeId-th
+          //!< candidate hole must re-examine all the other holes
+          passiveId = 1;
+        }
+        else //!< rgbdHolesConveyor remains unchanged
+        {
+          //!< passiveId-th hole not merged. let's see about the next one
+          passiveId++;
+        }
+      }
+      else //!< isAble == false
+      {
+        //!< passiveId-th hole not merged. let's see about the next one
+        passiveId++;
+      }
+
+      //!< If the passiveId-th hole was the last one to be checked for merge,
+      //!< the one doing the merge is rendered obsolete, so go to the next one
+      //!< by moving the current activeId-th candidate hole to the back
+      //!< of the rgbdHolesConveyor. This way the new activeId-th candidate
+      //!< hole still has a value of 0, but now points to the candidate hole
+      //!< next to the one that was moved back
+      if (passiveId >= rgbdHolesConveyor->keyPoints.size())
+      {
+        //!< No meaning moving to the back of the rgbdHolesConveyor if
+        //!< there is only one candidate hole
+        if (rgbdHolesConveyor->keyPoints.size() > 1)
+        {
+          //!< activeId-th hole candidate finished examining the rest of the
+          //!< hole candidates. move it to the back of the rgbdHolesConveyor
+          HolesConveyorUtils::append(
+            HolesConveyorUtils::getHole(*rgbdHolesConveyor, activeId),
+            rgbdHolesConveyor);
+
+          //!< Remove the activeId-th candidate hole from its former position
+          HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
+
+          //!< Since the candidate hole was appended at the end of the
+          //!< rgbdHolesConveyor, the finish vector needs to be shifted
+          //!< once to the left because the value 1 is always set at the end
+          //!< of the finishVector vector. See below.
+          std::rotate(finishVector.begin(), finishVector.begin() + 1,
+            finishVector.end());
+
+          //!< Return the passive's candidate hole identifier to the
+          //!< next of the active's candidate hole identifier, which is 0
+          passiveId = 1;
+        }
+
+        //!< Since the ith candidate hole was appended at the end of the
+        //!< rgbdHolesConveyor, the position to which it corresponds in the
+        //!< finishVector is at the end of the vector.
+        //!< Place the value of 1 in the last position, indicating that the
+        //!< previously activeId-th candidate hole has finished examining all
+        //!< other candidate holes for merging
+        std::vector<int>::iterator finishVectorIterator =
+          finishVector.end() - 1;
+
+        *finishVectorIterator = 1;
+
+        //!< Count how many aces there are in the finishVector
+        //!< If they amount to the size of the vector, that means that
+        //!< each hole has finished examining the others, and the current
+        //!< operation is complete
+        int numAces = 0;
+        for (int i = 0; i < finishVector.size(); i++)
+        {
+          numAces += finishVector[i];
+        }
+
+        if (numAces == finishVector.size())
+        {
+          isFuseComplete = true;
         }
       }
     }

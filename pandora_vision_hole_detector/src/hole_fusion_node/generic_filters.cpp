@@ -704,7 +704,7 @@ namespace pandora_vision
       amalgamatableOutline.begin(), amalgamatableOutline.end());
 
 
-    //!< The amalgamatable's new least area rotated bounding box will be the
+    //!< The amalgamator's new least area rotated bounding box will be the
     //!< one that encloses the new (merged) outline points
     cv::RotatedRect substituteRotatedRectangle =
       minAreaRect(amalgamator->outlines[amalgamatorId]);

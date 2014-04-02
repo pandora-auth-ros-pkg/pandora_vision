@@ -68,12 +68,40 @@ namespace pandora_vision
     public:
 
       /**
-        @brief Copies one HolesConveyor struct to another
+        @brief Appends one HolesConveyor struct to another.
+        @param[in] src [const HolesConveyor&] The source struct
+        @param[out] dst [HolesConveyor*] The destination struct
+        @return void
+       **/
+      static void append(const HolesConveyor& src, HolesConveyor* dst);
+
+      /**
+        @brief Hollows a HolesConveyor struct, deleting every entry in it
+        @param[in][out] conveyor [HolesConveyor*] The conveyor struct that will
+        be cleared
+        @return void
+       **/
+      static void clear(HolesConveyor* conveyor);
+
+      /**
+        @brief Copies one HolesConveyor struct to another. If the dst conveyor
+        is not empty, it empties it first, and then copies the src to the dst
         @param[in] src [const HolesConveyor&] The source struct
         @param[out] dst [HolesConveyor*] The destination struct
         @return void
        **/
       static void copyTo(const HolesConveyor& src, HolesConveyor* dst);
+
+      /**
+        @brief Extracts the specified hole from a HolesConveyor into a new
+        HolesConveyor struct that is returned
+        @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
+        @param[in] index [const int&] The index of the hole inside the conveyor
+        @return A HolesConveyor struct that containes the index-th hole of the
+        conveyor
+       **/
+      static HolesConveyor getHole(const HolesConveyor& conveyor,
+        const int& index);
 
       /**
         @brief Given two sources of struct HolesConveyor, this function
@@ -86,15 +114,21 @@ namespace pandora_vision
         const HolesConveyor& srcB, HolesConveyor* dst);
 
       /**
-        @brief Extracts the specified hole from a HolesConveyor into a new
-        HolesConveyor struct that is returned
-        @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
-        @param[in] index [const int&] The index of the hole inside the conveyor
-        @return A HolesConveyor struct that containes the index-th hole of the
-        conveyor
+        @brief Replaces an entire HolesConveyor struct with another
+        @param[in] src [const HolesConveyor&] The source conveyor struct
+        @param[out] dst [HolesConveyor*] The destination conveyor struct
+        @return void
        **/
-      static HolesConveyor getHole(const HolesConveyor& conveyor,
-        const int& index);
+      static void replace(const HolesConveyor& src, HolesConveyor* dst);
+
+      /**
+        @brief Deletes a hole from HolesConveyor struct,
+        @param[in][out] conveyor [HolesConveyor*] The conveyor struct from which
+        the hole will be removed
+        @param[in] id [const int&] The index of the hole in the conveyor
+        @return void
+       **/
+      static void removeHole(HolesConveyor* conveyor, const int& id);
 
       /**
         @brief Replaces a specified hole from a HolesConveyor dst struct
@@ -113,22 +147,63 @@ namespace pandora_vision
         const int& srcIndex, HolesConveyor* dst, const int& dstIndex);
 
       /**
-        @brief Replaces an entire HolesConveyor struct with another
-        @param[in] src [const HolesConveyor&] The source conveyor struct
-        @param[out] dst [HolesConveyor*] The destination conveyor struct
+        @brief Appends a dummy HolesConveyor to a HoleConveyor struct
+        @param[in] rectangleUpperLeft [const cv::Point2f&] The upper left
+        vertex of the bounding rectangle
+        @param[in] outlineUpperLeft [const cv::Point] The upper left
+        vertex of the hole's outline
+        @param[in] rx [const int&] The width of the rectangle
+        @param[in] ry [const int&] The height of the rectangle
+        @param[in] ox [const int&] The width of the outline rectangle
+        @param[in] ry [const int&] The height of the outline rectangle
+        @param[in][out] conveyor [HolesConveyor*] The conveyor to which the
+        dummy HolesConveyor will be appended
         @return void
        **/
-      static void replace(const HolesConveyor& src, HolesConveyor* dst);
+      static void appendDummyConveyor(
+        const cv::Point2f& rectangleUpperLeft,
+        const cv::Point& outlineUpperLeft,
+        const int& rx, const int& ry,
+        const int& ox, const int& oy,
+        HolesConveyor* conveyor);
 
       /**
-        @brief Hollows a HolesConveyor struct, deleting every entry in it
-        @param[in][out] conveyor [HolesConveyor*] The conveyor struct that will
-        be cleared
+        @brief Generates a vector of cv::Point2f that represents the 4 vertices
+        of a rectangle
+        @param[in] upperLeft [const cv::Point2f&] The upper left vertex point
+        of the rectangle
+        @param[in] x [const int&] The length at x direction
+        @param[in] y [const int&] The length at y direction
+        @return std::vector<cv::Point2f> A vector of four vertices
+        of type cv::Point2f
+       **/
+      static std::vector<cv::Point2f> generateRectangle(
+        const cv::Point2f& upperLeft, const int& x, const int& y);
+
+      /**
+        @brief Generates a vector of cv::Point that represents the 4 vertices
+        of a rectangle
+        @param[in] upperLeft [const cv::Point&] The upper left vertex point
+        of the rectangle
+        @param[in] x [const int&] The length at x direction
+        @param[in] y [const int&] The length at y direction
+        @return std::vector<cv::Point> A vector of four vertices
+        of type cv::Point
+       **/
+      static std::vector<cv::Point> generateRectangle(
+        const cv::Point& upperLeft, const int& x, const int& y);
+
+      /**
+        @brief Draws the keypoints, rectangles and outlines of holes
+        @param[in] coneyor [const HolesConveyor&] The conveyor whose holes
+        will be drawn on @param img
+        @param[in][out] img [cv::Mat*] The image drawn
         @return void
        **/
-      static void clear(HolesConveyor* conveyor);
+      static void visualize(const HolesConveyor& conveyor,
+        cv::Mat* img);
   };
 
-}
+} // namespace pandora_vision
 
-#endif  // namespace pandora_vision
+#endif  // UTILS_HOLES_CONVEYOR_H
