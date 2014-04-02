@@ -114,6 +114,15 @@ namespace pandora_vision
         const HolesConveyor& srcB, HolesConveyor* dst);
 
       /**
+        @brief Prints data pertaining to the contents of a HolesConveyor struct,
+        that is, the keypoints, rectangle points and outline points of the
+        holes it contains
+        @param[in] conveyor [const HolesConveyor&] The conveyor
+        @param[in] id [const int&] The identifier of a specific hole
+        @return void
+       **/
+      static void print(const HolesConveyor& conveyor, const int& id = -1);
+      /**
         @brief Replaces an entire HolesConveyor struct with another
         @param[in] src [const HolesConveyor&] The source conveyor struct
         @param[out] dst [HolesConveyor*] The destination conveyor struct
@@ -146,6 +155,12 @@ namespace pandora_vision
       static void replaceHole(const HolesConveyor& src,
         const int& srcIndex, HolesConveyor* dst, const int& dstIndex);
 
+      /**
+        @brief Gets the number of holes in a HolesConveyor
+        @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
+        @return int The size of @param conveyor
+       **/
+      static int size(const HolesConveyor& conveyor);
       /**
         @brief Appends a dummy HolesConveyor to a HoleConveyor struct
         @param[in] rectangleUpperLeft [const cv::Point2f&] The upper left

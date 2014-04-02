@@ -370,27 +370,54 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
+
     /////////// Test applyMergeOperation with dummy conveyors ///////////
 
     HolesConveyor dummy;
 
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
 
+    //!< Invalid
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 20, 20, &dummy);
 
+    //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
 
+    //!< 1-st assimilator - amalgamator - connector
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
 
-    cv::Mat before = cv::Mat::zeros(interpolatedDepthImage_.size(), CV_8UC3);
+    //!< 0-th assimilable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+
+    //!< 0-th amalgamatable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(420, 140), cv::Point(422,142), 40, 40, 36, 36, &dummy);
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 20, 20, &dummy);
+
+    cv::Mat before;
+    before = Visualization::scaleImageForVisualization(
+      interpolatedDepthImage_, Parameters::scale_method);
+    cv::cvtColor(before, before, CV_GRAY2RGB);
+
     HolesConveyorUtils::visualize(dummy, &before);
     Visualization::show("before", before, 1);
 
-    applyMergeOperation(&dummy, 0);
+    for (int i = 0; i < 3; i++)
+    {
+      applyMergeOperation(&dummy, i);
+    }
 
-    cv::Mat after = cv::Mat::zeros(interpolatedDepthImage_.size(), CV_8UC3);
+    cv::Mat after;
+    after = Visualization::scaleImageForVisualization(
+      interpolatedDepthImage_, Parameters::scale_method);
+    cv::cvtColor(after, after, CV_GRAY2RGB);
+
     HolesConveyorUtils::visualize(dummy, &after);
     Visualization::show("after", after, 1);
 
@@ -848,19 +875,19 @@ namespace pandora_vision
 
 
   /**
-    @brief Applies a merging operation of @param mergeProcessId, until
+    @brief Applies a merging operation of @param operationId, until
     every candidate hole, even as it changes through the various merges that
     happen, has been merged with every candidate hole that can be merged
     with it.
     @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
     candidate holes conveyor
-    @param[in] mergeProcessId [const int&] The identifier of the merging
+    @param[in] operationId [const int&] The identifier of the merging
     process. Values: 0 for assimilation, 1 for amalgamation and
     2 for connecting
     @return void
    **/
   void HoleFusion::applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
-    const int& mergeProcessId)
+    const int& operationId)
   {
     //!< If there are no candidate holes,
     //!< or there is only one candidate hole,
@@ -896,21 +923,21 @@ namespace pandora_vision
       //!< Is the activeId-th candidate hole able to
       //!< {assimilate, amalgamate, connect to} the passiveId-th candidate hole?
       bool isAble = false;
-      if (mergeProcessId == 0)
+      if (operationId == 0)
       {
         //!< Is the activeId-th candidate hole able to assimilate the
         //!< passiveId-th candidate hole?
         isAble = GenericFilters::isCapableOfAssimilating(activeId,
           *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
-      if (mergeProcessId == 1)
+      if (operationId == 1)
       {
         //!< Is the activeId-th candidate hole able to amalgamate the
         //!< passiveId-th candidate hole?
         isAble = GenericFilters::isCapableOfAmalgamating(activeId,
           *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
-      if (mergeProcessId == 2)
+      if (operationId == 2)
       {
         //!< Is the passiveId-th candidate hole able to be connected with the
         //!< activeId-th candidate hole?
@@ -929,7 +956,7 @@ namespace pandora_vision
         HolesConveyor tempHolesConveyor;
         HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
 
-        if (mergeProcessId == 0)
+        if (operationId == 0)
         {
           //!< Delete the passiveId-th candidate hole
           GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
@@ -938,7 +965,7 @@ namespace pandora_vision
           //!< is no hole associated with it
           finishVector.erase(finishVector.begin() + passiveId);
         }
-        else if (mergeProcessId == 1)
+        else if (operationId == 1)
         {
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has amalgamated
@@ -950,7 +977,7 @@ namespace pandora_vision
           //!< no hole associated with it
           finishVector.erase(finishVector.begin() + passiveId);
         }
-        else if (mergeProcessId == 2)
+        else if (operationId == 2)
         {
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has been

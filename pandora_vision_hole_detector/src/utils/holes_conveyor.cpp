@@ -221,6 +221,69 @@ namespace pandora_vision
 
 
   /**
+    @brief Prints data pertaining to the contents of a HolesConveyor struct,
+    that is, the keypoints, rectangle points and outline points of the
+    holes it contains
+    @param[in] conveyor [const HolesConveyor&] The conveyor
+    @param[in] id [const int&] The identifier of a specific hole
+    @return void
+   **/
+  void HolesConveyorUtils::print(const HolesConveyor& conveyor,
+    const int& id)
+  {
+    if (id > 0)
+    {
+      ROS_INFO("Conveyor has %zu holes :", conveyor.keyPoints.size());
+      for (int i = 0; i < conveyor.keyPoints.size(); i++)
+      {
+        ROS_INFO("---------------");
+        ROS_INFO("Hole #%d :", i);
+
+        ROS_INFO("KeyPoint: [%f %f]",
+          conveyor.keyPoints[i].pt.x, conveyor.keyPoints[i].pt.y);
+
+        ROS_INFO("Rectangle points:");
+        for (int j = 0; j < conveyor.rectangles[i].size(); j++)
+        {
+          ROS_INFO("[%f %f]",
+            conveyor.rectangles[i][j].x, conveyor.rectangles[i][j].y);
+        }
+
+        ROS_INFO("Outline points:");
+        for (int j = 0; j < conveyor.outlines[i].size(); j++)
+        {
+          ROS_INFO("[%d %d]",
+            conveyor.outlines[i][j].x, conveyor.outlines[i][j].y);
+        }
+      }
+    }
+    else
+    {
+      ROS_INFO("---------------");
+      ROS_INFO("Hole #%d :", id);
+
+      ROS_INFO("KeyPoint: [%f %f]",
+        conveyor.keyPoints[id].pt.x, conveyor.keyPoints[id].pt.y);
+
+      ROS_INFO("Rectangle points:");
+      for (int j = 0; j < conveyor.rectangles[id].size(); j++)
+      {
+        ROS_INFO("[%f %f]",
+          conveyor.rectangles[id][j].x, conveyor.rectangles[id][j].y);
+      }
+
+      ROS_INFO("Outline points:");
+      for (int j = 0; j < conveyor.outlines[id].size(); j++)
+      {
+        ROS_INFO("[%d %d]",
+          conveyor.outlines[id][j].x, conveyor.outlines[id][j].y);
+      }
+    }
+  }
+
+
+
+  /**
     @brief Deletes a hole from HolesConveyor struct,
     @param[in][out] conveyor [HolesConveyor*] The conveyor struct from which
     the hole will be removed
@@ -302,6 +365,18 @@ namespace pandora_vision
 
     //!< Replace the dst's dstIndex-th hole's rectangle points
     dst->rectangles.at(dstIndex) = src.rectangles[srcIndex];
+  }
+
+
+
+  /**
+    @brief Gets the number of holes in a HolesConveyor
+    @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
+    @return int The size of @param conveyor
+   **/
+  int HolesConveyorUtils::size(const HolesConveyor& conveyor)
+  {
+    return conveyor.keyPoints.size();
   }
 
 
@@ -414,8 +489,7 @@ namespace pandora_vision
   void HolesConveyorUtils::visualize(const HolesConveyor& conveyor,
     cv::Mat* img)
   {
-    cv::drawKeypoints(cv::Mat::zeros(img->size(), CV_8UC3),
-      conveyor.keyPoints, *img, CV_RGB(0, 255, 0),
+    cv::drawKeypoints(*img, conveyor.keyPoints, *img, CV_RGB(0, 255, 0),
       cv::DrawMatchesFlags::DEFAULT);
 
     for(unsigned int i = 0; i < conveyor.outlines.size(); i++)
