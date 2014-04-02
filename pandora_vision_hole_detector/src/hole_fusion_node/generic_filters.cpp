@@ -707,7 +707,7 @@ namespace pandora_vision
     //!< The amalgamator's new least area rotated bounding box will be the
     //!< one that encloses the new (merged) outline points
     cv::RotatedRect substituteRotatedRectangle =
-      minAreaRect(amalgamator->outlines[amalgamatorId]);
+      cv::minAreaRect(amalgamator->outlines[amalgamatorId]);
 
     //!< Obtain the four vertices of the new rotated rectangle
     cv::Point2f substituteVerticesArray[4];
@@ -723,7 +723,11 @@ namespace pandora_vision
     }
 
     //!< Replace the amalgamator's vertices with the new vertices
-    amalgamator->rectangles[amalgamatorId] = substituteVerticesVector;
+    amalgamator->rectangles[amalgamatorId].erase(
+      amalgamator->rectangles[amalgamatorId].begin(),
+      amalgamator->rectangles[amalgamatorId].end());
+
+    amalgamator->rectangles.at(amalgamatorId) = substituteVerticesVector;
 
 
     //!< The overall candidate hole's keypoint
