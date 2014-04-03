@@ -281,6 +281,90 @@ namespace pandora_vision
 
 
   /**
+    @brief Depicts the contents of a HolesConveyor on an image
+    @param[in] windowTitle [const std::string&] The window title
+    @param[in] inImage [const cv::Mat&] The image to show
+    @param[in] conveyor [const HolesConveyor&] The holes conveyor
+    @param[in] ms [const int&] How many ms the showing lasts
+    @param[in] msgs [const std::vector<std::string>&] Message to show to
+    each keypoint
+    @param[in] hz [const float&] If positive holds the Hz
+    @return void
+   **/
+  cv::Mat Visualization::showHoles(
+    const std::string& windowTitle,
+    const cv::Mat& inImage,
+    const HolesConveyor& conveyor,
+    const int& ms,
+    const std::vector<std::string>& msgs,
+    const float& hz)
+  {
+    cv::Mat img;
+    if (inImage.type() != CV_8UC1 || inImage.type() != CV_8UC3)
+    {
+      img = scaleImageForVisualization(inImage,
+        Parameters::scale_method);
+    }
+    else
+    {
+      inImage.copyTo(img);
+    }
+
+    cv::drawKeypoints(img, conveyor.keyPoints, img, CV_RGB(0, 255, 0),
+      cv::DrawMatchesFlags::DEFAULT);
+
+    for(unsigned int i = 0; i < conveyor.outlines.size(); i++)
+    {
+      for(unsigned int j = 0; j < conveyor.outlines[i].size(); j++)
+      {
+        cv::line(img,
+          cvPoint(conveyor.outlines[i][j].x - 1, conveyor.outlines[i][j].y - 1),
+          cvPoint(conveyor.outlines[i][j].x + 1, conveyor.outlines[i][j].y + 1),
+          cv::Scalar(0, 255, 0), 1, 8 , CV_AA);
+
+        cv::line(img,
+          cvPoint(conveyor.outlines[i][j].x - 1, conveyor.outlines[i][j].y + 1),
+          cvPoint(conveyor.outlines[i][j].x + 1, conveyor.outlines[i][j].y - 1),
+          cv::Scalar(0, 255, 0), 1, 8);
+      }
+    }
+
+    for (int i = 0; i < conveyor.rectangles.size(); i++)
+    {
+      for(int j = 0; j < 4; j++)
+      {
+        cv::line(img, conveyor.rectangles[i][j],
+          conveyor.rectangles[i][(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
+      }
+
+      if(msgs.size() == conveyor.rectangles.size())
+      {
+        cv::putText(img, msgs[i].c_str(),
+          cvPoint(conveyor.keyPoints[i].pt.x - 20,
+            conveyor.keyPoints[i].pt.y - 20),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255, 50, 50), 1, CV_AA);
+      }
+    }
+
+    if(hz > 0)
+    {
+      cv::putText(img,
+        (TOSTR(hz)+std::string("Hz")).c_str(),
+        cvPoint(20, 20),
+        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 0, 255), 1, CV_AA);
+    }
+
+    if(ms >= 0)
+    {
+      Visualization::show(windowTitle.c_str(), img, ms);
+    }
+
+    return img;
+  }
+
+
+
+  /**
     @brief Depicts the keypoints and bounding boxes
     @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show

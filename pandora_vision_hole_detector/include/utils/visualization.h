@@ -39,6 +39,7 @@
 #define UTILS_VISUALIZATION_H
 
 #include "utils/parameters.h"
+#include "utils/holes_conveyor.h"
 
 /**
   @namespace vision
@@ -107,7 +108,7 @@ namespace pandora_vision
         @param[in] outlineVector [const std::vector<std::vector<cv::Point> >&]
         The valid holes' outlines
         @param[in] hz [const floa&t] If positive holds the Hz
-        @return void
+        @return [cv::Mat] The drawn image
        **/
       static cv::Mat showHoles(
         const std::string& windowTitle,
@@ -117,6 +118,25 @@ namespace pandora_vision
         const std::vector<std::vector<cv::Point2f> >& bounding_boxes,
         const std::vector<std::string>& msgs,
         const std::vector<std::vector<cv::Point> >& outlineVector,
+        const float& hz = -1);
+
+      /**
+        @brief Depicts the contents of a HolesConveyor on an image
+        @param[in] windowTitle [const std::string&] The window title
+        @param[in] inImage [const cv::Mat&] The image to show
+        @param[in] conveyor [const HolesConveyor&] The holes conveyor
+        @param[in] ms [const int&] How many ms the showing lasts
+        @param[in] msgs [const std::vector<std::string>&] Message to show to
+        each keypoint
+        @param[in] hz [const float&] If positive holds the Hz
+        @return [cv::Mat] The drawn image
+       **/
+      static cv::Mat showHoles(
+        const std::string& windowTitle,
+        const cv::Mat& inImage,
+        const HolesConveyor& conveyor,
+        const int& ms,
+        const std::vector<std::string>& msgs,
         const float& hz = -1);
 
       /**

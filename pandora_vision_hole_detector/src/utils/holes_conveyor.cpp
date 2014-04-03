@@ -370,6 +370,39 @@ namespace pandora_vision
 
 
   /**
+    @brief Shuffles the contents of a HolesConveyor
+    @param[in][out] src [HolesConveyor*] The conveyor
+    @return void
+   **/
+  void HolesConveyorUtils::shuffle(HolesConveyor* src)
+  {
+    //!< Keep the original holes' arrangement
+    HolesConveyor temp;
+    copyTo(*src, &temp);
+
+    //!< Hollow-out the src
+    clear(src);
+
+    //!< The vector of holes' indices
+    std::vector<int> indices;
+    for (int i = 0; i < temp.keyPoints.size(); i++)
+    {
+      indices.push_back(i);
+    }
+
+    //!< Shuffle the indices
+    std::random_shuffle(indices.begin(), indices.end());
+
+    //!< Fill the src conveyor with the shuffled holes
+    for (int i = 0; i < temp.keyPoints.size(); i++)
+    {
+      append(getHole(temp, indices[i]), src);
+    }
+  }
+
+
+
+  /**
     @brief Gets the number of holes in a HolesConveyor
     @param[in] conveyor [const HolesConveyor&] The HolesConveyor struct
     @return int The size of @param conveyor
@@ -486,7 +519,7 @@ namespace pandora_vision
     @param[in][out] img [cv::Mat*] The image drawn
     @return void
    **/
-  void HolesConveyorUtils::visualize(const HolesConveyor& conveyor,
+  void HolesConveyorUtils::draw(const HolesConveyor& conveyor,
     cv::Mat* img)
   {
     cv::drawKeypoints(*img, conveyor.keyPoints, *img, CV_RGB(0, 255, 0),

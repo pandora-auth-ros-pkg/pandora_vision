@@ -376,58 +376,53 @@ namespace pandora_vision
     HolesConveyor dummy;
 
 
+
     //!< Invalid
-    /*
-     *HolesConveyorUtils::appendDummyConveyor(
-     *  cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 20, 20, &dummy);
-     */
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, &dummy);
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, &dummy);
+
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
 
-    //!< 1-st assimilator - amalgamator - connector
-    /*
-     *HolesConveyorUtils::appendDummyConveyor(
-     *  cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
-     */
-
     //!< 0-th assimilable
-    /*
-     *HolesConveyorUtils::appendDummyConveyor(
-     *  cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
-     */
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
 
     //!< 0-th amalgamatable
     HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(420, 140), cv::Point(422,142), 40, 40, 36, 36, &dummy);
+      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, &dummy);
 
-    //!< Invalid
-    /*
-     *HolesConveyorUtils::appendDummyConveyor(
-     *  cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 20, 20, &dummy);
-     */
+    //!< 0-th connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(410, 80), cv::Point(412, 82), 40, 40, 36, 36, &dummy);
 
-    cv::Mat before;
-    before = Visualization::scaleImageForVisualization(
-      interpolatedDepthImage_, Parameters::scale_method);
-    cv::cvtColor(before, before, CV_GRAY2RGB);
 
-    HolesConveyorUtils::visualize(dummy, &before);
-    Visualization::show("before", before, 1);
+    //!< 1-st assimilator - amalgamator - connector
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
+
+    //!< 1-st connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, &dummy);
+
+
+
+    HolesConveyorUtils::shuffle(&dummy);
+
+    std::vector<std::string> msgs;
+    Visualization::showHoles("before", interpolatedDepthImage_, dummy, 1, msgs);
 
     for (int i = 0; i < 3; i++)
     {
       applyMergeOperation(&dummy, i);
     }
 
-    cv::Mat after;
-    after = Visualization::scaleImageForVisualization(
-      interpolatedDepthImage_, Parameters::scale_method);
-    cv::cvtColor(after, after, CV_GRAY2RGB);
-
-    HolesConveyorUtils::visualize(dummy, &after);
-    Visualization::show("after", after, 1);
+    Visualization::showHoles("after", interpolatedDepthImage_, dummy, 1, msgs);
 
 
     #ifdef DEBUG_TIME
@@ -878,6 +873,10 @@ namespace pandora_vision
       config.number_of_saturation_bins;
     Parameters::number_of_value_bins =
       config.number_of_value_bins;
+
+    //!< Holes connection - merger
+    Parameters::connect_holes_min_distance =
+      config.connect_holes_min_distance;
   }
 
 
@@ -968,10 +967,6 @@ namespace pandora_vision
         {
           //!< Delete the passiveId-th candidate hole
           GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
-
-          //!< Delete the passiveId-th entry of the finishVector since there
-          //!< is no hole associated with it
-          finishVector.erase(finishVector.begin() + passiveId);
         }
         else if (operationId == 1)
         {
@@ -980,10 +975,6 @@ namespace pandora_vision
           //!< the passiveId-th candidate hole
           GenericFilters::amalgamateOnce(activeId, &tempHolesConveyor,
             passiveId, &tempHolesConveyor);
-
-          //!< Delete the passiveId-th entry of the finishVector since there is
-          //!< no hole associated with it
-          finishVector.erase(finishVector.begin() + passiveId);
         }
         else if (operationId == 2)
         {
@@ -992,16 +983,13 @@ namespace pandora_vision
           //!< connected with the passiveId -th candidate hole
           GenericFilters::connectOnce(activeId, &tempHolesConveyor,
             passiveId, &tempHolesConveyor);
-
-          //!< Delete the passiveId-th entry of the finishVector since there is
-          //!< no hole associated with it
-          finishVector.erase(finishVector.begin() + passiveId);
         }
 
         //!< Obtain the activeId-th candidate hole in order for it
         //!< to be checked against the selected filters
         HolesConveyor ithHole =
           HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
+
 
         //!< TODO make more flexible
         //!< Determines the selected filters execution
@@ -1050,6 +1038,10 @@ namespace pandora_vision
           //!< Since the tempHolesConveyor's ithHole has been positively tested,
           //!< the tempHolesConveyor is now the new rgbdHolesConveyor
           HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
+
+          //!< Delete the passiveId-th entry of the finishVector since the
+          //!< passiveId-th hole has been absorbed by the activeId-th hole
+          finishVector.erase(finishVector.begin() + passiveId);
 
           //!< Because of the merge happening, the activeId-th
           //!< candidate hole must re-examine all the other holes
