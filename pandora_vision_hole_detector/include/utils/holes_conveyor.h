@@ -122,6 +122,7 @@ namespace pandora_vision
         @return void
        **/
       static void print(const HolesConveyor& conveyor, const int& id = -1);
+
       /**
         @brief Replaces an entire HolesConveyor struct with another
         @param[in] src [const HolesConveyor&] The source conveyor struct
@@ -154,6 +155,13 @@ namespace pandora_vision
        **/
       static void replaceHole(const HolesConveyor& src,
         const int& srcIndex, HolesConveyor* dst, const int& dstIndex);
+
+      /**
+        @brief Shuffles the contents of a HolesConveyor
+        @param[in][out] src [HolesConveyor*] The conveyor
+        @return void
+       **/
+      static void shuffle(HolesConveyor* src);
 
       /**
         @brief Gets the number of holes in a HolesConveyor
@@ -215,7 +223,7 @@ namespace pandora_vision
         @param[in][out] img [cv::Mat*] The image drawn
         @return void
        **/
-      static void visualize(const HolesConveyor& conveyor,
+      static void draw(const HolesConveyor& conveyor,
         cv::Mat* img);
   };
 

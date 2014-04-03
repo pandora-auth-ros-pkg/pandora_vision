@@ -310,7 +310,6 @@ namespace pandora_vision
         }
       }
     }
-
     //!< If not all of connectable's outline points
     //!< are outside the connector's outline,
     //!< or the minimum distance between the connector's and connectable's
@@ -395,15 +394,8 @@ namespace pandora_vision
     const int& connectableId,
     HolesConveyor* connectable)
   {
-    //!< Viewing the two outlines as sets,
-    //!< the final outline should not have the intersection
-    //!< of the two sets.
-    std::vector<cv::Point> connectorOutline;
-    std::vector<cv::Point> connectableOutline;
-
-
     //!< The connector's outline will be the sum of the outline points
-    //!< that are not located inside each other
+    //!< of the two conveyors
     connector->outlines[connectorId].insert(
       connector->outlines[connectorId].end(),
       connectable->outlines[connectableId].begin(),
@@ -413,7 +405,7 @@ namespace pandora_vision
     //!< The connectable's new least area rotated bounding box will be the
     //!< one that encloses the new (merged) outline points
     cv::RotatedRect substituteRotatedRectangle =
-      minAreaRect(connector->outlines[connectorId]);
+      cv::minAreaRect(connector->outlines[connectorId]);
 
     //!< Obtain the four vertices of the new rotated rectangle
     cv::Point2f substituteVerticesArray[4];
@@ -429,13 +421,19 @@ namespace pandora_vision
     }
 
     //!< Replace the connector's vertices with the new vertices
-    connector->rectangles[connectorId] = substituteVerticesVector;
+    connector->rectangles[connectorId].erase(
+      connector->rectangles[connectorId].begin(),
+      connector->rectangles[connectorId].end());
+
+    //!< Replace the connector's vertices with the new vertices
+    connector->rectangles.at(connectorId) = substituteVerticesVector;
 
 
     //!< The overall candidate hole's keypoint
     connector->keyPoints[connectorId].pt.x =
       (connector->keyPoints[connectorId].pt.x
        + connectable->keyPoints[connectableId].pt.x) / 2;
+
     connector->keyPoints[connectorId].pt.y = (
       connector->keyPoints[connectorId].pt.y
       + connectable->keyPoints[connectableId].pt.y) / 2;
