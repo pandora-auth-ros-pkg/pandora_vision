@@ -37,6 +37,7 @@ add_executable(victim_node
     src/victim_node.cpp
     src/victim_detection.cpp
     src/color_detection.cpp
+    src/edge_orientation_detection.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
 add_dependencies(victim_node 
@@ -61,6 +62,9 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
             
   include/color_detection.h
   src/color_detection.cpp
+
+  include/edge_orientation_detection.h
+  src/edge_orientation_detection.cpp
   
             
 )
