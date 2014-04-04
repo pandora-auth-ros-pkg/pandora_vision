@@ -205,11 +205,10 @@ void VictimDetection::victimCallback()
 {
   if(!victimNowON)
   {
-    ROS_INFO("VICTIMNOWNOTON");
     return;
   }
-  ROS_INFO("VICTIMNOWON");
-  _colorDetection.findColorFeatures(victimFrame);
+  //_colorDetection.findColorFeatures(victimFrame);
+  _edgeOrientationDetection.findEdgeFeatures(victimFrame);
 }
 
 
