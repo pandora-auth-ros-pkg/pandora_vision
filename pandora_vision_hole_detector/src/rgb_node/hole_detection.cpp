@@ -75,21 +75,30 @@ namespace pandora_vision
     ROS_INFO("[rgb_node] : Created Hole Detection instance");
   }
 
-   /**
+
+
+  /**
     @brief Destructor
-  */
+   **/
   HoleDetection::~HoleDetection()
   {
     ROS_DEBUG("[rgb_node] : Destroying Hole Detection instance");
   }
 
+
+
   /**
     @brief Get parameters referring to the view and
     frame characteristics
     @return void
-  **/
+   **/
   void HoleDetection::getGeneralParams()
   {
+    #ifdef DEBUG_TIME
+    Timer::start("getGeneralParams", "findHoles");
+    #endif
+
+
     packagePath = ros::package::getPath("pandora_vision_hole_detector");
 
     //!< Get the camera to be used by hole node;
@@ -151,7 +160,13 @@ namespace pandora_vision
       cameraFrameId = "/camera";
       ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("getGeneralParams");
+    #endif
   }
+
+
 
   /**
     @brief Function called when new ROS message appears, for camera
@@ -160,6 +175,10 @@ namespace pandora_vision
   */
   void HoleDetection::imageCallback(const sensor_msgs::Image& msg)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("imageCallback", "", true);
+    #endif
+
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     _holeFrame = in_msg->image.clone();
@@ -180,6 +199,10 @@ namespace pandora_vision
       &rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_8UC3, msg);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("imageCallback");
+    #endif
   }
 
 

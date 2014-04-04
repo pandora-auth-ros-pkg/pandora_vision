@@ -1,47 +1,46 @@
 /*********************************************************************
-*
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*
-* Author: Despoina Paschalidou
-*********************************************************************/
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Author: Despoina Paschalidou
+ *********************************************************************/
 #include "rgb_node/texture_filter.h"
 
 namespace pandora_vision
 {
-
   /**
-     @brief Class constructor
-  */
+    @brief Class constructor
+   **/
   TextureDetector::TextureDetector()
   {
     getGeneralParams();
@@ -54,19 +53,23 @@ namespace pandora_vision
     ROS_INFO("[rgb_node]: Textrure detector instance created");
   }
 
+
+
   /**
     @brief Destructor
-  */
+   **/
   TextureDetector::~TextureDetector()
   {
     ROS_INFO("[rgb_node]: Textrure detector instance deleted");
   }
 
+
+
   /**
     @brief Get parameters referring to view and frame characteristics
     from launch file
     @return void
-  */
+   **/
   void TextureDetector::getGeneralParams()
   {
     packagePath = ros::package::getPath("pandora_vision_hole_detector");
@@ -96,10 +99,12 @@ namespace pandora_vision
     }
   }
 
+
+
   /**
     @brief Function for calculating histogramms for texture recognition
     @return void
-  */
+   **/
   void  TextureDetector::calculateTexture()
   {
     std::vector<cv::Mat> walls;
@@ -112,11 +117,13 @@ namespace pandora_vision
     calculateHistogramm(walls);
   }
 
+
+
   /**
     @brief Function for calculating HS histogramm
     @param walls [vector<cv::Mat>] vector of images corresponding to walls
     @return void
-  */
+   **/
   void TextureDetector::calculateHistogramm(std::vector<cv::Mat> walls)
   {
     cv::Mat* hsv = new cv::Mat[14];
@@ -136,8 +143,10 @@ namespace pandora_vision
     /// We compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
     cv::calcHist(hsv, 6, channels, cv::Mat(), histogramm, 2,
-          histSize, ranges, true, false );
+      histSize, ranges, true, false );
   }
+
+
 
   /**
     @brief Function for calculating applying backprojection in input image
@@ -145,7 +154,7 @@ namespace pandora_vision
     @param backprojectedframe [cv::Mat*] image after backprojection is
     applied
     @return void
-  */
+   **/
   void TextureDetector::applyBackprojection(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
@@ -160,7 +169,7 @@ namespace pandora_vision
     const float* ranges[] = { hranges, sranges};
     int channels[] = {0, 1};
     cv::calcBackProject( &hsv, 1, channels , histogramm,
-        *backprojectedFrame, ranges, 1, true );
+      *backprojectedFrame, ranges, 1, true );
     int const max_BINARY_value = 255;
     cv::Mat temp;
     backprojectedFrame->copyTo(temp);
@@ -170,19 +179,21 @@ namespace pandora_vision
     temp.copyTo(*backprojectedFrame);
   }
 
+
+
   /**
-   @brief Function that applies backprogected image in current frame
-   in order to find out which part of it belong to the given texture
-   @param holeFrame [cv::Mat] the currrent frame to be processed
-   @param backprojectedFrame [cv::Mat*] current frame after backprojection,
-   this parameter is returned
-   @return void
-  */
+    @brief Function that applies backprogected image in current frame
+    in order to find out which part of it belong to the given texture
+    @param holeFrame [cv::Mat] the currrent frame to be processed
+    @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+    this parameter is returned
+    @return void
+   **/
   void TextureDetector::applyTexture(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
     cv::Mat backprojection =
-        cv::Mat::zeros(480,
+      cv::Mat::zeros(480,
         640, CV_8UC1);
 
     applyBackprojection(holeFrame, backprojectedFrame);
@@ -192,6 +203,8 @@ namespace pandora_vision
     bitwise_and( *holeFrame, *backprojectedFrame, backprojection);
   }
 
+
+
   /**
     @brief Function for debbuging reasons,shows histogramm and
     current frame after backprojection is applied
@@ -200,17 +213,18 @@ namespace pandora_vision
     @param backprojectedFrame [cv::Mat*] current frame after backprojection,
     this parameter is returned
     @return void
-  */
+   **/
   void TextureDetector::debug_show(cv::Mat holeFrame,
-      cv::Mat backprojection, cv::Mat backprojectedFrame)
+    cv::Mat backprojection, cv::Mat backprojectedFrame)
   {
     ros::Time timeBegin = ros::Time::now();
     while( ros::Time::now()-timeBegin < ros::Duration(1))
     {
-       cv::imshow(" Current frame", holeFrame);
-       cv::imshow(" Backprojection", backprojection);
-       cv::imshow(" Frame after backprojection ", backprojectedFrame);
-       cv::waitKey(10);
+      cv::imshow(" Current frame", holeFrame);
+      cv::imshow(" Backprojection", backprojection);
+      cv::imshow(" Frame after backprojection ", backprojectedFrame);
+      cv::waitKey(10);
     }
   }
-}// namespace pandora_vision
+
+} // namespace pandora_vision

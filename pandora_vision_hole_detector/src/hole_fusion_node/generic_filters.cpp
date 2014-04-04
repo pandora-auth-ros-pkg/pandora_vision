@@ -124,6 +124,10 @@ namespace pandora_vision
     const int& assimilableId,
     const HolesConveyor& assimilable)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("isCapableOfAssimilating", "applyMergeOperation");
+    #endif
+
     //!< Are all the outline points of assimilable inside the
     //!< assimilator's outline?
     bool allAssimilableOutlinePointsInAssimilator = true;
@@ -136,6 +140,11 @@ namespace pandora_vision
         break;
       }
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("isCapableOfAssimilating");
+    #endif
+
     return allAssimilableOutlinePointsInAssimilator;
   }
 
@@ -156,6 +165,10 @@ namespace pandora_vision
   void GenericFilters::assimilateOnce(const int& keyPointId,
     HolesConveyor* assimilable)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("assimilateOnce", "applyMergeOperation");
+    #endif
+
     //!< Delete the keypoint from the conveyor
     assimilable->keyPoints.erase(
       assimilable->keyPoints.begin() + keyPointId);
@@ -177,6 +190,10 @@ namespace pandora_vision
 
     //!< Delete the rectangle vector entry alltogether
     assimilable->rectangles.erase(assimilable->rectangles.begin() + keyPointId);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("assimilateOnce");
+    #endif
   }
 
 
@@ -244,6 +261,10 @@ namespace pandora_vision
     const HolesConveyor& connectable,
     const PointCloudXYZPtr& pointCloudXYZ)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("isCapableOfConnecting", "applyMergeOperation");
+    #endif
+
     //!< Are all the connectable's outline points outside
     //!< the connector's bounding box?
     int numconnectableOutlinePointsInconnector = 0;
@@ -361,6 +382,10 @@ namespace pandora_vision
       sqrt(pow(connectableRectangleHeightX, 2)
         + pow(connectableRectangleHeightY, 2));
 
+    #ifdef DEBUG_TIME
+    Timer::tick("isCapableOfConnecting");
+    #endif
+
     //!< If the connectable's area is smaller than the connector's,
     //!< this connectable is capable of being connected with the connector
     return (connectableBoxArea < connectorBoxArea);
@@ -394,6 +419,10 @@ namespace pandora_vision
     const int& connectableId,
     HolesConveyor* connectable)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("connectOnce", "applyMergeOperation");
+    #endif
+
     //!< The connector's outline will be the sum of the outline points
     //!< of the two conveyors
     connector->outlines[connectorId].insert(
@@ -465,6 +494,10 @@ namespace pandora_vision
     //!< Delete the rectangle vector entry alltogether
     connectable->rectangles.erase(
       connectable->rectangles.begin() + connectableId);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("connectOnce");
+    #endif
   }
 
 
@@ -565,6 +598,10 @@ namespace pandora_vision
     const int& amalgamatableId,
     const HolesConveyor& amalgamatable)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("isCapableOfAmalgamating", "applyMergeOperation");
+    #endif
+
     //!< Are all the assimilable's outline points inside
     //!< the assimilator's bounding box? If not all but some, continue
     int numAmalgamatableOutlinePointsInAmalgamator= 0;
@@ -629,6 +666,9 @@ namespace pandora_vision
       sqrt(pow(amalgamatableRectangleHeightX, 2)
         + pow(amalgamatableRectangleHeightY, 2));
 
+    #ifdef DEBUG_TIME
+    Timer::tick("isCapableOfAmalgamating");
+    #endif
 
     //!< If the amalgatamable's area is smaller than the assimilator's,
     //!< this amalgamator is capable of amalgamating the amalgamatable
@@ -663,6 +703,10 @@ namespace pandora_vision
     const int& amalgamatableId,
     HolesConveyor* amalgamatable)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("amalgamateOnce", "applyMergeOperation");
+    #endif
+
     //!< Viewing the two outlines as sets,
     //!< the final outline should not have the intersection
     //!< of the two sets.
@@ -763,6 +807,10 @@ namespace pandora_vision
     //!< Delete the rectangle vector entry alltogether
     amalgamatable->rectangles.erase(
       amalgamatable->rectangles.begin() + amalgamatableId);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("amalgamateOnce");
+    #endif
   }
 
 } // namespace pandora_vision

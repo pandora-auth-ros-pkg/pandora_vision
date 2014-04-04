@@ -127,7 +127,7 @@ namespace pandora_vision
         CV_32FC1 for depth image, CV_8UC3 for rgb image
         @return cv::Mat The output image
        **/
-      static cv::Mat pointCloudToImage(
+      static cv::Mat convertPointCloudMessageToImage(
         const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage,
         const int& encoding);
 
@@ -200,17 +200,6 @@ namespace pandora_vision
       static sensor_msgs::Image convertImageToMessage(
         const cv::Mat& image, const std::string& encoding,
         const sensor_msgs::Image& msg);
-
-      /**
-        @brief Sets the depth values of a point cloud according to the
-        values of a depth image
-        @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
-        @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
-        @return void
-       **/
-      static void setDepthValuesInPointCloud(const cv::Mat& inImage,
-        PointCloudXYZPtr* pointCloudXYZPtr);
-
   };
 
 } // namespace pandora_vision

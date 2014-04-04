@@ -38,6 +38,7 @@
 #ifndef SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 #define SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 
+#include "utils/message_conversions.h"
 #include <utils/defines.h>
 #include <std_msgs/Empty.h>
 
@@ -77,6 +78,9 @@ namespace pandora_vision
       //!< lock/unlock messages concerning the rgb_depth_synchronizer's
       //!< behaviour
       ros::Subscriber holeFusionSubscriber_;
+
+      //!< Records the time for each synchronizer evocation
+      double evocationTime_;
 
       /**
         @brief The synchronized callback for the point cloud
