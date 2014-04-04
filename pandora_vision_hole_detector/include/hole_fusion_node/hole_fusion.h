@@ -146,9 +146,10 @@ namespace pandora_vision
         rgbCandidateHolesVector);
 
       /**
-        @brief Callback for the point cloud via the synchronizer node
-        @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&]
-        The point cloud
+        @brief Callback for the point cloud that the synchronizer node
+        publishes
+        @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The message
+        containing the point cloud
         @return void
        **/
       void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
@@ -234,6 +235,16 @@ namespace pandora_vision
         @return void
        **/
       void unlockSynchronizer();
+
+      /**
+        @brief Sets the depth values of a point cloud according to the
+        values of a depth image
+        @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
+        @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
+        @return void
+       **/
+      static void setDepthValuesInPointCloud(const cv::Mat& inImage,
+        PointCloudXYZPtr* pointCloudXYZPtr);
 
     public:
 

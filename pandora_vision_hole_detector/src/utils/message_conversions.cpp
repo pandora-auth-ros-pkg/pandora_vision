@@ -1,39 +1,39 @@
 /*********************************************************************
-*
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*
-* Authors: Alexandros Filotheou, Manos Tsardoulias
-*********************************************************************/
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Authors: Alexandros Filotheou, Manos Tsardoulias
+ *********************************************************************/
 
 #include "utils/message_conversions.h"
 
@@ -44,154 +44,24 @@
 namespace pandora_vision
 {
   /**
-    @brief Extracts a PointCloudXYZPtr (see defines.h)
-    from a point cloud message
-    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
-    cloud message
-    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
-    @return void
+    @brief Converts a cv::Mat image into a sensor_msgs::Image message
+    @param[in] image [const cv::Mat&] The image
+    @param[in] encoding [const std::string&] The image message's encoding
+    @param[in] msg [const sensor_msgs::Image&] A message needed for
+    setting the output message's header by extracting its header
+    @return [sensor_msgs::Image] The output image message
    **/
-  void MessageConversions::extractPointCloudXYZFromMessage(
-    const sensor_msgs::PointCloud2ConstPtr& msg,
-    PointCloudXYZPtr* pointCloudXYZ)
+  sensor_msgs::Image MessageConversions::convertImageToMessage(
+    const cv::Mat& image, const std::string& encoding,
+    const sensor_msgs::Image& msg)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("extractPointCloudXYZFromMessage");
-    #endif
+    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
 
-    PointCloud pointCloud;
+    msgPtr->header = msg.header;
+    msgPtr->encoding = encoding;
+    msgPtr->image = image;
 
-    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
-    //!< to pcl::PCLPointCloud2
-    pcl_conversions::toPCL(*msg, pointCloud);
-
-    //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
-    //!< aka PointCloudXYZPtr
-    pcl::fromPCLPointCloud2 (pointCloud, *(*pointCloudXYZ));
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractPointCloudXYZFromMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Converts a point cloud of type PointCloudXYZPtr to
-    a point cloud of type PointCloud and packs it in a message
-    @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
-    converted
-    @param[out] pointCloud [sensor_msgs::PointCloud2*]
-    The converted point cloud message
-    @return void
-   **/
-  void MessageConversions::convertPointCloudXYZToMessage(
-    const PointCloudXYZPtr& pointCloudXYZPtr,
-    sensor_msgs::PointCloud2* pointCloudMsg)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("convertPointCloudXYZToMessage");
-    #endif
-
-    PointCloud pointCloud;
-
-    //!< Convert the pcl::PointCloud<pcl::PointXYZ>::Ptr aka PointCloudXYZPtr
-    //!< to pcl::PCLPointCloud2
-    pcl::toPCLPointCloud2(*pointCloudXYZPtr, pointCloud);
-
-    //!< Pack the point cloud to a ROS message
-    pcl_conversions::fromPCL(pointCloud, *pointCloudMsg);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("convertPointCloudXYZToMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Extracts a cv::Mat image from a ROS image message pointer
-    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS image
-    message pointer
-    @param[out] image [cv::Mat*] The output image
-    @param[in] encoding [const std::string&] The image encoding
-    @return void
-   **/
-  void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::ImageConstPtr& msg,
-    cv::Mat* image,
-    const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractImageFromMessage");
-    #endif
-
-    cv_bridge::CvImagePtr in_msg;
-
-    in_msg = cv_bridge::toCvCopy(msg, encoding);
-
-    *image = in_msg->image.clone();
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractImageFromMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Extracts a cv::Mat image from a ROS image message
-    @param[in] msg [const sensor_msgs::Image&] The input ROS image
-    message
-    @param[out] image [cv::Mat*] The output image
-    @param[in] encoding [const std::string&] The image encoding
-    @return void
-   **/
-  void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::Image& msg,
-    cv::Mat* image,
-    const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractImageFromMessage");
-    #endif
-
-    cv_bridge::CvImagePtr in_msg;
-
-    in_msg = cv_bridge::toCvCopy(msg, encoding);
-
-    *image = in_msg->image.clone();
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractImageFromMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Extracts a cv::Mat image from a custom ROS message of type
-    vision_communications::CandidateHolesVectorMsg
-    containing the interpolated depth image
-    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-    @param[out] image [cv::Mat*] The output image
-    @param[in] encoding [const std::string&] The image encoding
-    @return void
-   **/
-  void MessageConversions::extractImageFromMessageContainer(
-    const vision_communications::CandidateHolesVectorMsg& msg,
-    cv::Mat* image, const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractDepthImageFromMessageContainer");
-    #endif
-
-    sensor_msgs::Image imageMsg = msg.image;
-    extractImageFromMessage(imageMsg, image, encoding);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractDepthImageFromMessageContainer");
-    #endif
+    return *msgPtr->toImageMsg();
   }
 
 
@@ -204,13 +74,13 @@ namespace pandora_vision
     CV_32FC1 for depth image, CV_8UC3 for rgb image
     @return cv::Mat The output image
    **/
-  cv::Mat MessageConversions::pointCloudToImage(
+  cv::Mat MessageConversions::convertPointCloudMessageToImage(
     const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage,
     const int& encoding)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("pointCloudToImage");
-    #endif
+#ifdef DEBUG_TIME
+    Timer::start("convertPointCloudMessageToImage");
+#endif
 
     PointCloud pointCloud;
 
@@ -266,11 +136,44 @@ namespace pandora_vision
       }
     }
 
-    #ifdef DEBUG_TIME
-    Timer::tick("pointCloudToImage");
-    #endif
+#ifdef DEBUG_TIME
+    Timer::tick("convertPointCloudMessageToImage");
+#endif
 
     return image;
+  }
+
+
+
+  /**
+    @brief Converts a point cloud of type PointCloudXYZPtr to
+    a point cloud of type PointCloud and packs it in a message
+    @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
+    converted
+    @param[out] pointCloud [sensor_msgs::PointCloud2*]
+    The converted point cloud message
+    @return void
+   **/
+  void MessageConversions::convertPointCloudXYZToMessage(
+    const PointCloudXYZPtr& pointCloudXYZPtr,
+    sensor_msgs::PointCloud2* pointCloudMsg)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("convertPointCloudXYZToMessage");
+#endif
+
+    PointCloud pointCloud;
+
+    //!< Convert the pcl::PointCloud<pcl::PointXYZ>::Ptr aka PointCloudXYZPtr
+    //!< to pcl::PCLPointCloud2
+    pcl::toPCLPointCloud2(*pointCloudXYZPtr, pointCloud);
+
+    //!< Pack the point cloud to a ROS message
+    pcl_conversions::fromPCL(pointCloud, *pointCloudMsg);
+
+#ifdef DEBUG_TIME
+    Timer::tick("convertPointCloudXYZToMessage");
+#endif
   }
 
 
@@ -296,9 +199,9 @@ namespace pandora_vision
     const std::string& encoding,
     const sensor_msgs::Image& msg)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("createCandidateHolesMessage", "inputDepthImageCallback");
-    #endif
+#ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesVectorMessage");
+#endif
 
     //!< Fill the vision_communications::CandidateHolesVectorMsg's
     //!< candidateHoles vector
@@ -316,9 +219,9 @@ namespace pandora_vision
     //!< header
     candidateHolesVectorMsg->header = msg.header;
 
-    #ifdef DEBUG_TIME
-    Timer::tick("createCandidateHolesMessage");
-    #endif
+#ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesVectorMessage");
+#endif
   }
 
 
@@ -343,9 +246,9 @@ namespace pandora_vision
     vision_communications::CandidateHolesVectorMsg* candidateHolesVectorMsg,
     const sensor_msgs::Image& msg)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("createCandidateHolesMessage", "inputDepthImageCallback");
-    #endif
+#ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesVectorMessage");
+#endif
 
     //!< Fill the vision_communications::CandidateHolesVectorMsg's
     //!< candidateHoles vector
@@ -362,9 +265,9 @@ namespace pandora_vision
     //!< header
     candidateHolesVectorMsg->header = msg.header;
 
-    #ifdef DEBUG_TIME
+#ifdef DEBUG_TIME
     Timer::tick("createCandidateHolesMessage");
-    #endif
+#endif
   }
 
 
@@ -385,6 +288,10 @@ namespace pandora_vision
     const HolesConveyor& conveyor,
     std::vector<vision_communications::CandidateHoleMsg>* candidateHolesVector)
   {
+#ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesVector");
+#endif
+
     //!< Fill the vision_communications::CandidateHolesVectorMsg's
     //!< candidateHoles vector
     for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
@@ -412,57 +319,130 @@ namespace pandora_vision
       //!< Push back one hole to the holes vector message
       candidateHolesVector->push_back(holeMsg);
     }
+
+#ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesVector");
+#endif
   }
 
 
 
   /**
-    @brief Converts a cv::Mat image into a sensor_msgs::Image message
-    @param[in] image [const cv::Mat&] The image
-    @param[in] encoding [const std::string&] The image message's encoding
-    @param[in] msg [const sensor_msgs::Image&] A message needed for
-    setting the output message's header by extracting its header
-    @return [sensor_msgs::Image] The output image message
-   **/
-  sensor_msgs::Image MessageConversions::convertImageToMessage(
-    const cv::Mat& image, const std::string& encoding,
-    const sensor_msgs::Image& msg)
-  {
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-    msgPtr->header = msg.header;
-    msgPtr->encoding = encoding;
-    msgPtr->image = image;
-
-    return *msgPtr->toImageMsg();
-  }
-
-
-
-  /**
-    @brief Sets the depth values of a point cloud according to the
-    values of a depth image
-    @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
-    @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
+    @brief Extracts a PointCloudXYZPtr (see defines.h)
+    from a point cloud message
+    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
+    cloud message
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
     @return void
    **/
-  void MessageConversions::setDepthValuesInPointCloud(const cv::Mat& inImage,
-    PointCloudXYZPtr* pointCloudXYZPtr)
+  void MessageConversions::extractPointCloudXYZFromMessage(
+    const sensor_msgs::PointCloud2ConstPtr& msg,
+    PointCloudXYZPtr* pointCloudXYZ)
   {
-    //!< If the inImage is not of type CV_32FC1, return
-    if(inImage.type() != CV_32FC1)
-    {
-      return;
-    }
+#ifdef DEBUG_TIME
+    Timer::start("extractPointCloudXYZFromMessage");
+#endif
 
-    for (unsigned int row = 0; row < (*pointCloudXYZPtr)->height; ++row)
-    {
-      for (unsigned int col = 0; col < (*pointCloudXYZPtr)->width; ++col)
-      {
-        (*pointCloudXYZPtr)->points[col + (*pointCloudXYZPtr)->width * row].z =
-          inImage.at<float>(row, col);
-      }
-    }
+    PointCloud pointCloud;
+
+    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
+    //!< to pcl::PCLPointCloud2
+    pcl_conversions::toPCL(*msg, pointCloud);
+
+    //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
+    //!< aka PointCloudXYZPtr
+    pcl::fromPCLPointCloud2 (pointCloud, *(*pointCloudXYZ));
+
+#ifdef DEBUG_TIME
+    Timer::tick("extractPointCloudXYZFromMessage");
+#endif
+  }
+
+
+
+  /**
+    @brief Extracts a cv::Mat image from a ROS image message pointer
+    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS image
+    message pointer
+    @param[out] image [cv::Mat*] The output image
+    @param[in] encoding [const std::string&] The image encoding
+    @return void
+   **/
+  void MessageConversions::extractImageFromMessage(
+    const sensor_msgs::ImageConstPtr& msg,
+    cv::Mat* image,
+    const std::string& encoding)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("extractImageFromMessage");
+#endif
+
+    cv_bridge::CvImagePtr in_msg;
+
+    in_msg = cv_bridge::toCvCopy(msg, encoding);
+
+    *image = in_msg->image.clone();
+
+#ifdef DEBUG_TIME
+    Timer::tick("extractImageFromMessage");
+#endif
+  }
+
+
+
+  /**
+    @brief Extracts a cv::Mat image from a ROS image message
+    @param[in] msg [const sensor_msgs::Image&] The input ROS image
+    message
+    @param[out] image [cv::Mat*] The output image
+    @param[in] encoding [const std::string&] The image encoding
+    @return void
+   **/
+  void MessageConversions::extractImageFromMessage(
+    const sensor_msgs::Image& msg,
+    cv::Mat* image,
+    const std::string& encoding)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("extractImageFromMessage");
+#endif
+
+    cv_bridge::CvImagePtr in_msg;
+
+    in_msg = cv_bridge::toCvCopy(msg, encoding);
+
+    *image = in_msg->image.clone();
+
+#ifdef DEBUG_TIME
+    Timer::tick("extractImageFromMessage");
+#endif
+  }
+
+
+
+  /**
+    @brief Extracts a cv::Mat image from a custom ROS message of type
+    vision_communications::CandidateHolesVectorMsg
+    containing the interpolated depth image
+    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
+    @param[out] image [cv::Mat*] The output image
+    @param[in] encoding [const std::string&] The image encoding
+    @return void
+   **/
+  void MessageConversions::extractImageFromMessageContainer(
+    const vision_communications::CandidateHolesVectorMsg& msg,
+    cv::Mat* image, const std::string& encoding)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("extractDepthImageFromMessageContainer");
+#endif
+
+    sensor_msgs::Image imageMsg = msg.image;
+    extractImageFromMessage(imageMsg, image, encoding);
+
+#ifdef DEBUG_TIME
+    Timer::tick("extractDepthImageFromMessageContainer");
+#endif
   }
 
 } // namespace pandora_vision

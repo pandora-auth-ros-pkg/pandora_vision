@@ -85,7 +85,7 @@
 
 #define DEBUG_SHOW
 //~ #define DEBUG_PRINT
-//#define DEBUG_TIME
+#define DEBUG_TIME
 
 //!< Transforms a float number to string
 #define TOSTR( x )      static_cast< std::ostringstream & >( \

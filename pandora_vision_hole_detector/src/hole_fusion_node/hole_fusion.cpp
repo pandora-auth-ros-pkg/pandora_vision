@@ -128,9 +128,7 @@ namespace pandora_vision
 
     //!< Clear the current depthHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
-    depthHolesConveyor_.keyPoints.clear();
-    depthHolesConveyor_.rectangles.clear();
-    depthHolesConveyor_.outlines.clear();
+    HolesConveyorUtils::clear(&depthHolesConveyor_);
 
     //!< Unpack the message
     unpackMessage(depthCandidateHolesVector,
@@ -155,6 +153,7 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("depthCandidateHolesCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 
@@ -182,9 +181,7 @@ namespace pandora_vision
 
     //!< Clear the current rgbHolesConveyor struct
     //!< (or else keyPoints, rectangles and outlines accumulate)
-    rgbHolesConveyor_.keyPoints.clear();
-    rgbHolesConveyor_.rectangles.clear();
-    rgbHolesConveyor_.outlines.clear();
+    HolesConveyorUtils::clear(&rgbHolesConveyor_);
 
     //!< Unpack the message
     unpackMessage(rgbCandidateHolesVector,
@@ -209,11 +206,19 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("rgbCandidateHolesCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 
 
 
+  /**
+    @brief Callback for the point cloud that the synchronizer node
+    publishes
+    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The message
+    containing the point cloud
+    @return void
+   **/
   void HoleFusion::pointCloudCallback(
     const sensor_msgs::PointCloud2ConstPtr& msg)
   {
@@ -232,7 +237,8 @@ namespace pandora_vision
     //!< pointCloudXYZ_
 
     //!< Extract the depth image from the point cloud message
-    cv::Mat depthImage = MessageConversions::pointCloudToImage(msg, CV_32FC1);
+    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
+      msg, CV_32FC1);
 
     //!< Interpolate the depthImage
     cv::Mat interpolatedDepthImage;
@@ -241,8 +247,7 @@ namespace pandora_vision
 
     //!< Set the interpolatedDepthImage's values as the depth values
     //!< of the point cloud
-    MessageConversions::setDepthValuesInPointCloud(interpolatedDepthImage,
-      &pointCloudXYZ_);
+    setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloudXYZ_);
 
     numNodesReady_++;
 
@@ -261,6 +266,7 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("pointCloudCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 
@@ -335,6 +341,10 @@ namespace pandora_vision
    **/
   void HoleFusion::getWallsHistogram()
   {
+    #ifdef DEBUG_TIME
+    Timer::start("getWallsHistogram", "HoleFusion");
+    #endif
+
     //!< The path to the package where the wall pictures directory lies in
     std::string packagePath =
       ros::package::getPath("pandora_vision_hole_detector");
@@ -406,6 +416,10 @@ namespace pandora_vision
       wallsHistogram_, 2, histSize, ranges, true, false);
 
     delete[] wallImagesHSV;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("getWallsHistogram");
+    #endif
   }
 
 
@@ -422,7 +436,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_TIME
-    Timer::start("processCandidateHoles", "depthCandidateHolesCallback");
+    Timer::start("processCandidateHoles");
     #endif
 
     //!< Merge the conveyors from the RGB and Depth sources
@@ -430,60 +444,63 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
+/*
+ *
+ *    /////////// Test applyMergeOperation with dummy conveyors ///////////
+ *
+ *    HolesConveyor dummy;
+ *
+ *
+ *
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, &dummy);
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, &dummy);
+ *
+ *
+ *    //!< 0-th assimilator - amalgamator - connector
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
+ *
+ *    //!< 0-th assimilable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+ *
+ *    //!< 0-th amalgamatable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, &dummy);
+ *
+ *    //!< 0-th connectable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(410, 80), cv::Point(412, 82), 40, 40, 36, 36, &dummy);
+ *
+ *
+ *    //!< 1-st assimilator - amalgamator - connector
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
+ *
+ *    //!< 1-st connectable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, &dummy);
+ *
+ *
+ *
+ *    HolesConveyorUtils::shuffle(&dummy);
+ *
+ *    std::vector<std::string> msgs;
+ *    Visualization::showHoles("before", interpolatedDepthImage_, dummy, 1, msgs);
+ *
+ *    for (int i = 0; i < 3; i++)
+ *    {
+ *      applyMergeOperation(&dummy, i);
+ *    }
+ *
+ *    Visualization::showHoles("after", interpolatedDepthImage_, dummy, 1, msgs);
+ */
 
-    /////////// Test applyMergeOperation with dummy conveyors ///////////
-
-    HolesConveyor dummy;
-
-
-
-    //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, &dummy);
-    //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, &dummy);
-
-
-    //!< 0-th assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
-
-    //!< 0-th assimilable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
-
-    //!< 0-th amalgamatable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, &dummy);
-
-    //!< 0-th connectable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(410, 80), cv::Point(412, 82), 40, 40, 36, 36, &dummy);
-
-
-    //!< 1-st assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
-
-    //!< 1-st connectable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, &dummy);
-
-
-
-    HolesConveyorUtils::shuffle(&dummy);
-
-    std::vector<std::string> msgs;
-    Visualization::showHoles("before", interpolatedDepthImage_, dummy, 1, msgs);
-
-    for (int i = 0; i < 3; i++)
-    {
-      applyMergeOperation(&dummy, i);
-    }
-
-    Visualization::showHoles("after", interpolatedDepthImage_, dummy, 1, msgs);
-
+    viewRespectiveProbabilities();
 
     #ifdef DEBUG_TIME
     Timer::tick("processCandidateHoles");
@@ -512,7 +529,7 @@ namespace pandora_vision
     HolesConveyor* conveyor, cv::Mat* image, const std::string& encoding)
   {
     #ifdef DEBUG_TIME
-    Timer::start("unpackMessage", "depthCandidateHolesCallback");
+    Timer::start("unpackMessage");
     #endif
 
     //!< Recreate the conveyor
@@ -525,7 +542,7 @@ namespace pandora_vision
       encoding);
 
     #ifdef DEBUG_TIME
-    Timer::tick("unpackDepthMessage");
+    Timer::tick("unpackMessage");
     #endif
   }
 
@@ -559,6 +576,10 @@ namespace pandora_vision
    **/
   void HoleFusion::viewRespectiveProbabilities()
   {
+    #ifdef DEBUG_TIME
+    Timer::start("viewRespectiveProbabilities", "processCandidateHoles");
+    #endif
+
     #ifdef DEBUG_SHOW
     ROS_ERROR("===========================================");
     ROS_ERROR("#Depth keypoints : %zu", depthHolesConveyor_.keyPoints.size());
@@ -711,6 +732,10 @@ namespace pandora_vision
         rgbMsgs,
         rgbHolesConveyor_.outlines);
     }
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::tick("viewRespectiveProbabilities");
     #endif
   }
 
@@ -915,6 +940,10 @@ namespace pandora_vision
   void HoleFusion::applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
     const int& operationId)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("applyMergeOperation", "processCandidateHoles");
+    #endif
+
     //!< If there are no candidate holes,
     //!< or there is only one candidate hole,
     //!< there is no meaning to this operation
@@ -1138,6 +1167,46 @@ namespace pandora_vision
         }
       }
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyMergeOperation");
+    #endif
+  }
+
+
+
+  /**
+    @brief Sets the depth values of a point cloud according to the
+    values of a depth image
+    @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
+    @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
+    @return void
+   **/
+  void HoleFusion::setDepthValuesInPointCloud(const cv::Mat& inImage,
+    PointCloudXYZPtr* pointCloudXYZPtr)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("setDepthValuesInPointCloud", "pointCloudCallback");
+    #endif
+
+    //!< If the inImage is not of type CV_32FC1, return
+    if(inImage.type() != CV_32FC1)
+    {
+      return;
+    }
+
+    for (unsigned int row = 0; row < (*pointCloudXYZPtr)->height; ++row)
+    {
+      for (unsigned int col = 0; col < (*pointCloudXYZPtr)->width; ++col)
+      {
+        (*pointCloudXYZPtr)->points[col + (*pointCloudXYZPtr)->width * row].z =
+          inImage.at<float>(row, col);
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("setDepthValuesInPointCloud");
+    #endif
   }
 
 } // namespace pandora_vision
