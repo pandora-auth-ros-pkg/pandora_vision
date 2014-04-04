@@ -51,20 +51,24 @@ namespace pandora_vision
 
     ros::Duration(0.5).sleep();
 
+/*
+ *    //!< Subscribe to the point cloud published by the
+ *    //!< rgb_depth_synchronizer node
+ *    inputCloudSubscriber_ = nodeHandle_.subscribe(
+ *      "/synchronized/camera/depth/points", 1,
+ *      &PandoraKinect::inputCloudCallback, this);
+ *
+ */
     //!< Subscribe to the point cloud published by the
     //!< rgb_depth_synchronizer node
-    _inputCloudSubscriber = _nodeHandle.subscribe(
-      "/synchronized/camera/depth/points", 1,
-      &PandoraKinect::inputCloudCallback, this);
+    depthImageSubscriber_ = nodeHandle_.subscribe(
+      "/synchronized/camera/depth/image_raw", 1,
+      &PandoraKinect::inputDepthImageCallback, this);
 
     //!< Advertise the candidate holes found by the depth node
-    _candidateHolesPublisher = _nodeHandle.advertise
-      <vision_communications::DepthCandidateHolesVectorMsg>(
+    candidateHolesPublisher_ = nodeHandle_.advertise
+      <vision_communications::CandidateHolesVectorMsg>(
       "/synchronized/camera/depth/candidate_holes", 1000);
-
-    //!< Advertise the point cloud's planes
-    _planePublisher = _nodeHandle.advertise<PointCloudXYZ>
-      ("/vision/kinect/planes", 1000);
 
     //!< The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&PandoraKinect::parametersCallback,
@@ -91,29 +95,24 @@ namespace pandora_vision
 
 
   /**
-    @brief Callback for the point cloud
-    @param msg [const sensor_msgs::PointCloud2ConstPtr&] The point cloud
-    message
+    @brief Callback for depth image
+    @param msg [const sensor_msgs::Image&] The depth image message
     @return void
    **/
-  void PandoraKinect::inputCloudCallback(
-    const sensor_msgs::PointCloud2ConstPtr& msg)
+  void PandoraKinect::inputDepthImageCallback(
+    const sensor_msgs::Image& msg)
   {
     #ifdef DEBUG_TIME
-    Timer::start("inputCloudCallback", "", true);
+    Timer::start("inputDepthImageCallback", "", true);
     #endif
 
     #ifdef DEBUG_SHOW
     ROS_INFO("Depth node callback");
     #endif
 
-    //!< Extract a PointCloudXYZPtr from the point cloud message
-    PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
-    MessageConversions::extractPointCloudXYZFromMessage(msg, &pointCloudXYZ);
-
-    //!< Extract the depth image from the PointCloudXYZPtr
-    cv::Mat depthImage(pointCloudXYZ->height, pointCloudXYZ->width, CV_32FC1);
-    extractDepthImageFromPointCloud(pointCloudXYZ, &depthImage);
+    cv::Mat depthImage;
+    MessageConversions::extractImageFromMessage(msg, &depthImage,
+      sensor_msgs::image_encodings::TYPE_32FC1);
 
     //!< Finds possible holes
     cv::Mat interpolatedDepthImage;
@@ -121,19 +120,19 @@ namespace pandora_vision
       &interpolatedDepthImage);
 
     //!< Create the candidate holes message
-    vision_communications::DepthCandidateHolesVectorMsg depthCandidateHolesMsg;
+    vision_communications::CandidateHolesVectorMsg depthCandidateHolesMsg;
 
-    createCandidateHolesMessage(holes,
+    MessageConversions::createCandidateHolesVectorMessage(holes,
       interpolatedDepthImage,
-      pointCloudXYZ,
       &depthCandidateHolesMsg,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+      sensor_msgs::image_encodings::TYPE_32FC1,
+      msg);
 
     //!< Publish the candidate holes message
-    _candidateHolesPublisher.publish(depthCandidateHolesMsg);
+    candidateHolesPublisher_.publish(depthCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
-    Timer::tick("inputCloudCallback");
+    Timer::tick("inputDepthImageCallback");
     #endif
 
     return;
@@ -141,176 +140,7 @@ namespace pandora_vision
 
 
 
-  /**
-    @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
-    message
-    @param[in] conveyor [HolesConveyor&] A struct containing
-    vectors of the holes' keypoints, bounding rectangles' vertices
-    and blobs' outlines
-    @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
-    @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
-    cloud
-    @param[out] depthCandidateHolesMsg
-    [vision_communications::DepthCandidateHolesVectorMsg*] The output message
-    @param[in] encoding [std::string&] The interpoladedDepth image's encoding
-    @return void
-   **/
-  void PandoraKinect::createCandidateHolesMessage(
-    const HolesConveyor& conveyor,
-    const cv::Mat& interpolatedDepthImage,
-    const PointCloudXYZPtr& pointCloudXYZPtr,
-    vision_communications::DepthCandidateHolesVectorMsg* depthCandidateHolesMsg,
-    const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("createCandidateHolesMessage", "inputCloudCallback");
-    #endif
 
-    //!< Fill the vision_communications::DepthCandidateHolesVectorMsg's
-    //!< candidateHoles vector
-    for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
-    {
-      vision_communications::CandidateHoleMsg holeMsg;
-
-      //!< Push back the keypoint
-      holeMsg.keypointX = conveyor.keyPoints[i].pt.x;
-      holeMsg.keypointY = conveyor.keyPoints[i].pt.y;
-
-      //!< Push back the bounding rectangle's vertices
-      for (int v = 0; v < conveyor.rectangles[i].size(); v++)
-      {
-        holeMsg.verticesX.push_back(conveyor.rectangles[i][v].x);
-        holeMsg.verticesY.push_back(conveyor.rectangles[i][v].y);
-      }
-
-      //!< Push back the blob's outline points
-      for (int o = 0; o < conveyor.outlines[i].size(); o++)
-      {
-        holeMsg.outlineX.push_back(conveyor.outlines[i][o].x);
-        holeMsg.outlineY.push_back(conveyor.outlines[i][o].y);
-      }
-
-      //!< Push back one hole to the holes vector message
-      depthCandidateHolesMsg->candidateHoles.push_back(holeMsg);
-    }
-
-
-    //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
-    //!< sensor_msgs/PointCloud2 pointCloud
-    sensor_msgs::PointCloud2 pointCloudMessage;
-    MessageConversions::convertPointCloudXYZToMessage(pointCloudXYZPtr,
-      &pointCloudMessage);
-    depthCandidateHolesMsg->pointCloud = pointCloudMessage;
-
-
-    //!< Convert the cv::Mat image to a ROS message
-    cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
-
-    imageMessagePtr->header = pointCloudMessage.header;
-    imageMessagePtr->encoding = encoding;
-    imageMessagePtr->image = interpolatedDepthImage;
-
-    //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
-    //!< sensor_msgs/Image interpolatedDepthImage
-    depthCandidateHolesMsg->interpolatedDepthImage =
-      *imageMessagePtr->toImageMsg();
-
-    #ifdef DEBUG_TIME
-    Timer::tick("createCandidateHolesMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
-    point cloud
-    @param pointCloudXYZ [const PointCloudXYZPtr&] The point cloud
-    @param depthImage [cv::Mat*] The extracted depth image
-    @return [cv::Mat] The depth image
-   **/
-  void PandoraKinect::extractDepthImageFromPointCloud(
-    const PointCloudXYZPtr& pointCloudXYZ, cv::Mat* depthImage)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractDepthImageFromPointCloud", "inputCloudCallback");
-    #endif
-
-    for (unsigned int row = 0; row < pointCloudXYZ->height; ++row)
-    {
-      for (unsigned int col = 0; col < pointCloudXYZ->width; ++col)
-      {
-        depthImage->at<float>(row, col) =
-          pointCloudXYZ->points[col + pointCloudXYZ->width * row].z;
-
-        //!< if element is nan make it a zero
-        if (depthImage->at<float>(row, col) != depthImage->at<float>(row, col))
-        {
-          depthImage->at<float>(row, col) = 0.0;
-        }
-      }
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractDepthImageFromPointCloud");
-    #endif
-  }
-
-
-
-  /**
-    @brief Stores a ensemble of point clouds in pcd images
-    @param in_cloud [const std::vector<PointCloudXYZPtr>&] The point clouds
-    @return void
-   **/
-  void PandoraKinect::storePointCloudVectorToImages(
-    const std::vector<PointCloudXYZPtr>& in_vector)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("storePointCloudVectorToImages");
-    #endif
-
-    for (int i = 0; i < in_vector.size(); i++)
-    {
-      pcl::io::savePCDFileASCII
-        (boost::to_string(i) + "_.pcd", *in_vector[i]);
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("storePointCloudVectorToImages");
-    #endif
-  }
-
-
-
-  /**
-  @brief Publishes the planes to /vision/kinect/planes topic
-  @param cloudVector [const std::vector<PointCloudXYZPtr>&] The point clouds\
-  containing the planes
-  @return void
-   **/
-  void PandoraKinect::publishPlanes(
-    const std::vector<PointCloudXYZPtr>& cloudVector)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("publishPlanes");
-    #endif
-
-    PointCloudXYZPtr aggregatedPlanes (new PointCloudXYZ);
-
-    for (unsigned int i = 0; i < cloudVector.size(); i++)
-    {
-      *aggregatedPlanes += *cloudVector[i];
-    }
-
-    aggregatedPlanes->header.frame_id = cloudVector[0]->header.frame_id;
-    aggregatedPlanes->header.stamp = cloudVector[0]->header.stamp;
-    _planePublisher.publish(aggregatedPlanes);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("publishPlanes");
-    #endif
-  }
 
 
 
@@ -404,7 +234,6 @@ namespace pandora_vision
       config.debug_show_get_shapes_clear_border;
     Parameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
-
   }
 
 } // namespace pandora_vision

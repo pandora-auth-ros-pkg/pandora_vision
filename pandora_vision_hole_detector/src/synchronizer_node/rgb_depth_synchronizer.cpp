@@ -66,6 +66,10 @@ namespace pandora_vision
     synchronizedPointCloudPublisher_ = nodeHandle_.advertise
       <sensor_msgs::PointCloud2>("/synchronized/camera/depth/points", 1000);
 
+    //!< Advertise the synchronized depth image
+    synchronizedDepthImagePublisher_ = nodeHandle_.advertise
+      <sensor_msgs::Image>("/synchronized/camera/depth/image_raw", 1000);
+
     //!< Advertise the synchronized rgb image
     synchronizedRGBImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>("/synchronized/camera/rgb/image_raw", 1000);
@@ -106,7 +110,6 @@ namespace pandora_vision
 
     if (!isLocked_)
     {
-
       #ifdef DEBUG_SHOW
       ROS_INFO("Synchronizer unlocked");
       #endif
@@ -116,21 +119,38 @@ namespace pandora_vision
       isLocked_ = true;
 
       //!< Extract the RGB image from the point cloud
-      cv::Mat rgbImage = MessageConversions::pointCloudToRGBImage(
-        pointCloudMessage);
+      cv::Mat rgbImage = MessageConversions::pointCloudToImage(
+        pointCloudMessage, CV_8UC3);
 
-      //!< Convert the cv::Mat image to a ROS message
-      cv_bridge::CvImagePtr imageMessagePtr(new cv_bridge::CvImage());
+      //!< Convert the rgbImage to a ROS message
+      cv_bridge::CvImagePtr rgbImageMessagePtr(new cv_bridge::CvImage());
 
-      imageMessagePtr->header = pointCloudMessage->header;
-      imageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
-      imageMessagePtr->image = rgbImage;
+      rgbImageMessagePtr->header = pointCloudMessage->header;
+      rgbImageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
+      rgbImageMessagePtr->image = rgbImage;
+
+      //!< Publish the synchronized rgb image
+      synchronizedRGBImagePublisher_.publish(rgbImageMessagePtr->toImageMsg());
+
+
+      //!< Extract the depth image from the point cloud
+      cv::Mat depthImage = MessageConversions::pointCloudToImage(
+        pointCloudMessage, CV_32FC1);
+
+      //!< Convert the depthImage to a ROS message
+      cv_bridge::CvImagePtr depthImageMessagePtr(new cv_bridge::CvImage());
+
+      depthImageMessagePtr->header = pointCloudMessage->header;
+      depthImageMessagePtr->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+      depthImageMessagePtr->image = depthImage;
+
+      //!< Publish the synchronized depth image
+      synchronizedDepthImagePublisher_.publish(
+        depthImageMessagePtr->toImageMsg());
+
 
       //!< Publish the synchronized point cloud
       synchronizedPointCloudPublisher_.publish(pointCloudMessage);
-
-      //!< Publish the synchronized rgb image
-      synchronizedRGBImagePublisher_.publish(imageMessagePtr->toImageMsg());
     }
 
     #ifdef DEBUG_TIME

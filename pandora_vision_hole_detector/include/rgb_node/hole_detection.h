@@ -47,9 +47,10 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
-#include "vision_communications/RgbCandidateHolesVectorMsg.h"
+#include "vision_communications/CandidateHolesVectorMsg.h"
 #include "state_manager/state_client.h"
 #include "utils/parameters.h"
+#include "utils/message_conversions.h"
 #include "rgb_node/hole_detector.h"
 
 namespace pandora_vision
@@ -124,13 +125,6 @@ namespace pandora_vision
         @return void
       */
       void imageCallback(const sensor_msgs::Image& inImage);
-
-      void createCandidateHolesMessage(
-          const HolesConveyor& conveyor,
-          const sensor_msgs::Image& rgbImage,
-          vision_communications::RgbCandidateHolesVectorMsg*
-          rgbCandidateHolesMsg,
-          const std::string& encoding);
 
       /**
         @brief The function called when a parameter is changed
