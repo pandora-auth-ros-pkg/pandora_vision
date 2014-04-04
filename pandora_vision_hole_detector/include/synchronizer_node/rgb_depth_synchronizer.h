@@ -63,9 +63,10 @@ namespace pandora_vision
       ros::Subscriber pointCloudSubscriber_;
 
       //!< The publishers which will advertise the
-      //!< synchronized point cloud topic and rgb image extracted from the
+      //!< synchronized point cloud, depth and rgb images extracted from the
       //!< point cloud;
       ros::Publisher synchronizedPointCloudPublisher_;
+      ros::Publisher synchronizedDepthImagePublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
 
       //!< A boolean indicating whether the node is publishing through the

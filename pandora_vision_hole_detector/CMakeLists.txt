@@ -125,6 +125,7 @@ add_library(hole_fusion_lib
   src/utils/edge_detection.cpp
   src/utils/hole_filters.cpp
   src/utils/morphological_operators.cpp
+  src/utils/noise_elimination.cpp
   src/utils/timer.cpp
   src/utils/holes_conveyor.cpp
   src/utils/visualization.cpp
@@ -185,6 +186,7 @@ add_library(rgb_node_lib
   src/utils/edge_detection.cpp
   src/utils/blob_detection.cpp
   src/utils/bounding_box_detection.cpp
+  src/utils/message_conversions.cpp
   src/utils/morphological_operators.cpp
   src/utils/visualization.cpp
   src/utils/parameters.cpp

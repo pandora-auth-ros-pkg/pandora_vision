@@ -53,17 +53,17 @@ namespace pandora_vision
 
     //!< Advertise the candidate holes found by the depth node
     rgbCandidateHolesPublisher_ = nodeHandle_.advertise
-      <vision_communications::RgbCandidateHolesVectorMsg>(
+      <vision_communications::CandidateHolesVectorMsg>(
       "/synchronized/camera/rgb/candidate_holes", 1000);
 
-    ROS_INFO("RGB node initiated");
+    ROS_INFO("RGB dummy node initiated");
   }
 
 
   //!< Destructor
   Rgb::~Rgb(void)
   {
-    ROS_INFO("RGB node terminated");
+    ROS_INFO("RGB dummy node terminated");
   }
 
   /**
@@ -103,53 +103,13 @@ namespace pandora_vision
       rgbHolesConveyor.outlines.push_back(outlines);
     }
 
-    vision_communications::RgbCandidateHolesVectorMsg rgbCandidateHolesMsg;
-    createCandidateHolesMessage(rgbHolesConveyor,
-      inImage, &rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_32FC1);
+    vision_communications::CandidateHolesVectorMsg rgbCandidateHolesMsg;
+    MessageConversions::createCandidateHolesVectorMessage(rgbHolesConveyor,
+      inImage,
+      &rgbCandidateHolesMsg,
+      inImage);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
-  }
-
-
-
-
-  void Rgb::createCandidateHolesMessage(
-    const HolesConveyor& conveyor,
-    const sensor_msgs::Image& rgbImage,
-    vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
-    const std::string& encoding)
-  {
-    //!< Fill the vision_communications::RgbCandidateHolesVectorMsg's
-    //!< candidateHoles vector
-    for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
-    {
-      vision_communications::CandidateHoleMsg holeMsg;
-
-      //!< Push back the keypoint
-      holeMsg.keypointX = conveyor.keyPoints[i].pt.x;
-      holeMsg.keypointY = conveyor.keyPoints[i].pt.y;
-
-      //!< Push back the bounding rectangle's vertices
-      for (int v = 0; v < conveyor.rectangles[i].size(); v++)
-      {
-        holeMsg.verticesX.push_back(conveyor.rectangles[i][v].x);
-        holeMsg.verticesY.push_back(conveyor.rectangles[i][v].y);
-      }
-
-      //!< Push back the blob's outline points
-      for (int o = 0; o < conveyor.outlines[i].size(); o++)
-      {
-        holeMsg.outlineX.push_back(conveyor.outlines[i][o].x);
-        holeMsg.outlineY.push_back(conveyor.outlines[i][o].y);
-      }
-
-      //!< Push back one hole to the holes vector message
-      rgbCandidateHolesMsg->candidateHoles.push_back(holeMsg);
-    }
-
-    //!< Fill vision_communications::DepthCandidateHolesVectorMsg's
-    //!< sensor_msgs/Image interpolatedDepthImage
-    rgbCandidateHolesMsg->rgbImage = rgbImage;
   }
 
 } // namespace pandora_vision

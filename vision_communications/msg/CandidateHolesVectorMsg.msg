@@ -2,4 +2,4 @@ Header header
 
 vision_communications/CandidateHoleMsg[] candidateHoles
 
-sensor_msgs/Image rgbImage
+sensor_msgs/Image image

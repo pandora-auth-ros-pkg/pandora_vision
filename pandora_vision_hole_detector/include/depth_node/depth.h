@@ -41,7 +41,7 @@
 #include "depth_node/hole_detector.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
-#include "vision_communications/DepthCandidateHolesVectorMsg.h"
+#include "vision_communications/CandidateHolesVectorMsg.h"
 
 
 /**
@@ -54,28 +54,13 @@ namespace pandora_vision
   {
     private:
       //!< The ROS node handle
-      ros::NodeHandle     _nodeHandle;
-
-      //!< The RGB image acquired from Kinect
-      cv::Mat             _kinectFrame;
-
-      //!< The Depth image acquired from Kinect
-      cv::Mat             _kinectDepthFrame;
-
-      //!< Timestamp of RGB image
-      ros::Time           _kinectFrameTimestamp;
-
-      //!< Timestamp of depth image
-      ros::Time           _kinectDepthFrameTimestamp;
+      ros::NodeHandle nodeHandle_;
 
       //!< Subscriber of Kinect point cloud
-      ros::Subscriber     _inputCloudSubscriber;
-
-      //!< ROS publisher for computed 2D planes
-      ros::Publisher      _planePublisher;
+      ros::Subscriber depthImageSubscriber_;
 
       //!< ROS publisher for the candidate holes
-      ros::Publisher      _candidateHolesPublisher;
+      ros::Publisher candidateHolesPublisher_;
 
       //!< The dynamic reconfigure (depth) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
@@ -87,65 +72,11 @@ namespace pandora_vision
 
 
       /**
-        @brief Callback for the point cloud
-        @param msg [const sensor_msgs::PointCloud2ConstPtr&] The point cloud
-        message
+        @brief Callback for the depth image
+        @param msg [const sensor_msgs::Image&] The depth image message
         @return void
        **/
-      void inputCloudCallback
-        (const sensor_msgs::PointCloud2ConstPtr& msg);
-
-
-      /**
-        @brief Extracts a CV_32FC1 depth image from a PointCloudXYZPtr
-        point cloud
-        @param pointCloudXYZ [const PointCloudXYZPtr&] The point cloud
-        @param depthImage [cv::Mat*] The extracted depth image
-        @return [cv::Mat] The depth image
-       **/
-      void extractDepthImageFromPointCloud(
-        const PointCloudXYZPtr& pointCloudXYZPtr, cv::Mat* depthImage);
-
-      /**
-        @brief Stores a ensemble of point clouds in pcd images
-        @param in_cloud [const std::vector<PointCloudXYZPtr>&] The point clouds
-        @return void
-       **/
-      void storePointCloudVectorToImages
-        (const std::vector<PointCloudXYZPtr>& in_cloud);
-
-      /**
-        @brief Constructs a vision_communications/DepthCandidateHolesVectorMsg
-        message
-        @param[in] conveyor [HolesConveyor&] A struct containing
-        vectors of the holes' keypoints, bounding rectangles' vertices
-        and blobs' outlines
-        @param[in] interpolatedDepthImage [cv::Mat&] The denoised depth image
-        @param[in] pointCloudXYZPtr [PointCloudXYZPtr&] The undistorted point
-        cloud
-        @param[out] depthCandidateHolesMsg
-        [vision_communications::DepthCandidateHolesVectorMsg*] The output
-        message
-        @param[in] encoding [std::string&] The interpoladedDepth image's
-        encoding
-        @return void
-       **/
-      void createCandidateHolesMessage(
-        const HolesConveyor& conveyor,
-        const cv::Mat& interpolatedDepthImage,
-        const PointCloudXYZPtr& pointCloudXYZPtr,
-        vision_communications::DepthCandidateHolesVectorMsg*
-        depthCandidateHolesMsg,
-        const std::string& encoding);
-
-      /**
-        @brief Publishes the planes to /vision/kinect/planes topic
-        @param cloudVector [const std::vector<PointCloudXYZPtr>&] The point
-        clouds containing the planes
-        @return void
-       **/
-      void publishPlanes
-        (const std::vector<PointCloudXYZPtr>& cloudVector);
+      void inputDepthImageCallback(const sensor_msgs::Image& msg);
 
       /**
         @brief The function called when a parameter is changed

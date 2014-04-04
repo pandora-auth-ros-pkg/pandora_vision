@@ -41,7 +41,7 @@
 #include "utils/defines.h"
 #include "utils/holes_conveyor.h"
 #include "utils/message_conversions.h"
-#include "vision_communications/RgbCandidateHolesVectorMsg.h"
+#include "vision_communications/CandidateHolesVectorMsg.h"
 
 namespace pandora_vision
 {
@@ -67,11 +67,6 @@ namespace pandora_vision
        **/
       void rgbImageCallback(const sensor_msgs::Image& inImage);
 
-      void createCandidateHolesMessage(
-        const HolesConveyor& conveyor,
-        const sensor_msgs::Image& rgbImage,
-        vision_communications::RgbCandidateHolesVectorMsg* rgbCandidateHolesMsg,
-        const std::string& encoding);
 
     public:
 

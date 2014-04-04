@@ -77,39 +77,6 @@ namespace pandora_vision
 
 
   /**
-    @brief Extracts a PointCloudXYZPtr (see defines.h)
-    from a point cloud message container
-    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The input point
-    cloud message
-    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The extracted point cloud
-    @return void
-   **/
-  void MessageConversions::extractPointCloudXYZFromMessageContainer(
-    const vision_communications::DepthCandidateHolesVectorMsg& msg,
-    PointCloudXYZPtr* pointCloudXYZ)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractPointCloudXYZFromMessageContainer");
-    #endif
-
-    PointCloud pointCloud;
-
-    //!< convert the point cloud from sensor_msgs::PointCloud2ConstrPtr
-    //!< to pcl::PCLPointCloud2
-    pcl_conversions::toPCL(msg.pointCloud, pointCloud);
-
-    //!< Convert the pcl::PCLPointCloud2 to pcl::PointCloud<pcl::PointXYZ>::Ptr
-    //!< aka PointCloudXYZPtr
-    pcl::fromPCLPointCloud2 (pointCloud, *(*pointCloudXYZ));
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractPointCloudXYZFromMessageContainer");
-    #endif
-  }
-
-
-
-  /**
     @brief Converts a point cloud of type PointCloudXYZPtr to
     a point cloud of type PointCloud and packs it in a message
     @param[in] pointCloudXYZ [const PointCloudXYZPtr&] The point cloud to be
@@ -151,7 +118,8 @@ namespace pandora_vision
     @return void
    **/
   void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::ImageConstPtr& msg, cv::Mat* image,
+    const sensor_msgs::ImageConstPtr& msg,
+    cv::Mat* image,
     const std::string& encoding)
   {
     #ifdef DEBUG_TIME
@@ -180,7 +148,9 @@ namespace pandora_vision
     @return void
    **/
   void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::Image& msg, cv::Mat* image, const std::string& encoding)
+    const sensor_msgs::Image& msg,
+    cv::Mat* image,
+    const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractImageFromMessage");
@@ -200,23 +170,23 @@ namespace pandora_vision
 
 
   /**
-    @brief Extracts a cv::Mat image from a custom ROS message  of type
-    vision_communications::DepthCandidateHolesVectorMsg
+    @brief Extracts a cv::Mat image from a custom ROS message of type
+    vision_communications::CandidateHolesVectorMsg
     containing the interpolated depth image
     @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
     @param[out] image [cv::Mat*] The output image
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
-  void MessageConversions::extractDepthImageFromMessageContainer(
-    const vision_communications::DepthCandidateHolesVectorMsg& msg,
+  void MessageConversions::extractImageFromMessageContainer(
+    const vision_communications::CandidateHolesVectorMsg& msg,
     cv::Mat* image, const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractDepthImageFromMessageContainer");
     #endif
 
-    sensor_msgs::Image imageMsg = msg.interpolatedDepthImage;
+    sensor_msgs::Image imageMsg = msg.image;
     extractImageFromMessage(imageMsg, image, encoding);
 
     #ifdef DEBUG_TIME
@@ -227,43 +197,19 @@ namespace pandora_vision
 
 
   /**
-    @brief Extracts a cv::Mat image from a custom ROS message  of type
-    vision_communications::RgbCandidateHolesVectorMsg
-    containing the rgb image
-    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
-    @param[out] image [cv::Mat*] The output image
-    @param[in] encoding [const std::string&] The image encoding
-    @return void
-   **/
-  void MessageConversions::extractRgbImageFromMessageContainer(
-    const vision_communications::RgbCandidateHolesVectorMsg& msg,
-    cv::Mat* image, const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractRgbImageFromMessageContainer");
-    #endif
-
-    sensor_msgs::Image imageMsg = msg.rgbImage;
-    extractImageFromMessage(imageMsg, image, encoding);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractRgbImageFromMessageContainer");
-    #endif
-  }
-
-
-
-  /**
-    @brief Extracts a RGB image from a point cloud message
+    @brief Extracts an image from a point cloud message
     @param pointCloud[in] [const sensor_msgs::PointCloud2ConstPtr&]
     The input point cloud message
-    @return cv::Mat The output rgb image
+    @param[in] id [const int&] The enconding of the converted image.
+    CV_32FC1 for depth image, CV_8UC3 for rgb image
+    @return cv::Mat The output image
    **/
-  cv::Mat MessageConversions::pointCloudToRGBImage(
-    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage)
+  cv::Mat MessageConversions::pointCloudToImage(
+    const sensor_msgs::PointCloud2ConstPtr& pointCloudMessage,
+    const int& encoding)
   {
     #ifdef DEBUG_TIME
-    Timer::start("pointCloudToRGBImage");
+    Timer::start("pointCloudToImage");
     #endif
 
     PointCloud pointCloud;
@@ -272,32 +218,251 @@ namespace pandora_vision
     //!< to pcl::PCLPointCloud2
     pcl_conversions::toPCL(*pointCloudMessage, pointCloud);
 
-    //!< convert the point cloud from pcl::PCLPointCloud2 to pcl::PointCLoud
-    PointCloudXYZRGBPtr pointCloudXYZRGB (new PointCloudXYZRGB);
-    pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZRGB);
+    //!< prepare the output image
+    cv::Mat image(pointCloud.height, pointCloud.width,
+      encoding);
 
-    //!< prepare to convert the array to an opencv image
-    cv::Mat rgbImage(pointCloudXYZRGB->height, pointCloudXYZRGB->width,
-      CV_8UC3);
-
-    for (unsigned int row = 0; row < pointCloudXYZRGB->height; ++row)
+    if (encoding == CV_32FC1)
     {
-      for (unsigned int col = 0; col < pointCloudXYZRGB->width; ++col)
+      //!< convert the point cloud from
+      //!< pcl::PCLPointCloud2 to pcl::PointCloudXYZ
+      PointCloudXYZPtr pointCloudXYZ (new PointCloudXYZ);
+      pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZ);
+
+      for (unsigned int row = 0; row < pointCloudXYZ->height; ++row)
       {
-        rgbImage.at<unsigned char>(row, 3 * col + 2) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].r;
-        rgbImage.at<unsigned char>(row, 3 * col + 1) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].g;
-        rgbImage.at<unsigned char>(row, 3 * col + 0) =
-          pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].b;
+        for (unsigned int col = 0; col < pointCloudXYZ->width; ++col)
+        {
+          image.at<float>(row, col) =
+            pointCloudXYZ->points[col + pointCloudXYZ->width * row].z;
+
+          //!< if element is nan make it a zero
+          if (image.at<float>(row, col) !=
+            image.at<float>(row, col))
+          {
+            image.at<float>(row, col) = 0.0;
+          }
+        }
+      }
+    }
+    else if (encoding == CV_8UC3)
+    {
+      //!< convert the point cloud from
+      //!< pcl::PCLPointCloud2 to pcl::PointCloudXYZRGB
+      PointCloudXYZRGBPtr pointCloudXYZRGB (new PointCloudXYZRGB);
+      pcl::fromPCLPointCloud2 (pointCloud, *pointCloudXYZRGB);
+
+      for (unsigned int row = 0; row < pointCloudXYZRGB->height; ++row)
+      {
+        for (unsigned int col = 0; col < pointCloudXYZRGB->width; ++col)
+        {
+          image.at<unsigned char>(row, 3 * col + 2) =
+            pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].r;
+          image.at<unsigned char>(row, 3 * col + 1) =
+            pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].g;
+          image.at<unsigned char>(row, 3 * col + 0) =
+            pointCloudXYZRGB->points[col + pointCloudXYZRGB->width * row].b;
+        }
       }
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("pointCloudToRGBImage");
+    Timer::tick("pointCloudToImage");
     #endif
 
-    return rgbImage;
+    return image;
+  }
+
+
+
+  /**
+    @brief Constructs a vision_communications/CandidateHolesVectorMsg
+    message
+    @param[in] conveyor [HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[in] image [cv::Mat&] The image to be packed in the message
+    @param[out] candidateHolesVectorMsg
+    [vision_communications::CandidateHolesVectorMsg*] The output message
+    @param[in] encoding [std::string&] The image's encoding
+    @param[in] msg [const sensor_msgs::Image&] Needed to extract
+    its header and place it as the header of the output message
+    @return void
+   **/
+  void MessageConversions::createCandidateHolesVectorMessage(
+    const HolesConveyor& conveyor,
+    const cv::Mat& image,
+    vision_communications::CandidateHolesVectorMsg* candidateHolesVectorMsg,
+    const std::string& encoding,
+    const sensor_msgs::Image& msg)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesMessage", "inputDepthImageCallback");
+    #endif
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< candidateHoles vector
+    std::vector<vision_communications::CandidateHoleMsg> candidateHolesVector;
+    createCandidateHolesVector(conveyor, &candidateHolesVector);
+
+    candidateHolesVectorMsg->candidateHoles = candidateHolesVector;
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< image
+    candidateHolesVectorMsg->image =
+      convertImageToMessage(image, encoding, msg);
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< header
+    candidateHolesVectorMsg->header = msg.header;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesMessage");
+    #endif
+  }
+
+
+
+  /**
+    @brief Constructs a vision_communications/CandidateHolesVectorMsg
+    message
+    @param[in] conveyor [const HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[in] image [const sensor_msgs::Image&] The image to be packed
+    in the message
+    @param[out] candidateHolesVectorMsg
+    [vision_communications::CandidateHolesVectorMsg*] The output message
+    @param[in] msg [const sensor_msgs::Image&] Needed to extract
+    its header and place it as the header of the output message
+    @return void
+   **/
+  void MessageConversions::createCandidateHolesVectorMessage(
+    const HolesConveyor& conveyor,
+    const sensor_msgs::Image& image,
+    vision_communications::CandidateHolesVectorMsg* candidateHolesVectorMsg,
+    const sensor_msgs::Image& msg)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesMessage", "inputDepthImageCallback");
+    #endif
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< candidateHoles vector
+    std::vector<vision_communications::CandidateHoleMsg> candidateHolesVector;
+    createCandidateHolesVector(conveyor, &candidateHolesVector);
+
+    candidateHolesVectorMsg->candidateHoles = candidateHolesVector;
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< image
+    candidateHolesVectorMsg->image = image;
+
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< header
+    candidateHolesVectorMsg->header = msg.header;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesMessage");
+    #endif
+  }
+
+
+
+  /**
+    @brief Constructs a vision_communications/CandidateHolesVectorMsg
+    message
+    @param[in] conveyor [HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[out] candidateHolesVector
+    [std::vector<vision_communications::CandidateHolesVectorMsg>*]
+    The vector containing the conveyor's holes in
+    vision_communications::CandidateHolesVectorMsg format
+    @return void
+   **/
+  void MessageConversions::createCandidateHolesVector(
+    const HolesConveyor& conveyor,
+    std::vector<vision_communications::CandidateHoleMsg>* candidateHolesVector)
+  {
+    //!< Fill the vision_communications::CandidateHolesVectorMsg's
+    //!< candidateHoles vector
+    for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
+    {
+      vision_communications::CandidateHoleMsg holeMsg;
+
+      //!< Push back the keypoint
+      holeMsg.keypointX = conveyor.keyPoints[i].pt.x;
+      holeMsg.keypointY = conveyor.keyPoints[i].pt.y;
+
+      //!< Push back the bounding rectangle's vertices
+      for (int v = 0; v < conveyor.rectangles[i].size(); v++)
+      {
+        holeMsg.verticesX.push_back(conveyor.rectangles[i][v].x);
+        holeMsg.verticesY.push_back(conveyor.rectangles[i][v].y);
+      }
+
+      //!< Push back the blob's outline points
+      for (int o = 0; o < conveyor.outlines[i].size(); o++)
+      {
+        holeMsg.outlineX.push_back(conveyor.outlines[i][o].x);
+        holeMsg.outlineY.push_back(conveyor.outlines[i][o].y);
+      }
+
+      //!< Push back one hole to the holes vector message
+      candidateHolesVector->push_back(holeMsg);
+    }
+  }
+
+
+
+  /**
+    @brief Converts a cv::Mat image into a sensor_msgs::Image message
+    @param[in] image [const cv::Mat&] The image
+    @param[in] encoding [const std::string&] The image message's encoding
+    @param[in] msg [const sensor_msgs::Image&] A message needed for
+    setting the output message's header by extracting its header
+    @return [sensor_msgs::Image] The output image message
+   **/
+  sensor_msgs::Image MessageConversions::convertImageToMessage(
+    const cv::Mat& image, const std::string& encoding,
+    const sensor_msgs::Image& msg)
+  {
+    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+    msgPtr->header = msg.header;
+    msgPtr->encoding = encoding;
+    msgPtr->image = image;
+
+    return *msgPtr->toImageMsg();
+  }
+
+
+
+  /**
+    @brief Sets the depth values of a point cloud according to the
+    values of a depth image
+    @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
+    @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
+    @return void
+   **/
+  void MessageConversions::setDepthValuesInPointCloud(const cv::Mat& inImage,
+    PointCloudXYZPtr* pointCloudXYZPtr)
+  {
+    //!< If the inImage is not of type CV_32FC1, return
+    if(inImage.type() != CV_32FC1)
+    {
+      return;
+    }
+
+    for (unsigned int row = 0; row < (*pointCloudXYZPtr)->height; ++row)
+    {
+      for (unsigned int col = 0; col < (*pointCloudXYZPtr)->width; ++col)
+      {
+        (*pointCloudXYZPtr)->points[col + (*pointCloudXYZPtr)->width * row].z =
+          inImage.at<float>(row, col);
+      }
+    }
   }
 
 } // namespace pandora_vision
