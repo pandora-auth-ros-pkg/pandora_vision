@@ -1146,7 +1146,7 @@ namespace pandora_vision
     RgbFilters::checkHoles(
       rgbImage_,
       wallsHistogram_,
-      &rgbHolesConveyor_,
+      rgbHolesConveyor_,
       &rgbProbabilitiesVector2D);
 
     #ifdef DEBUG_SHOW
