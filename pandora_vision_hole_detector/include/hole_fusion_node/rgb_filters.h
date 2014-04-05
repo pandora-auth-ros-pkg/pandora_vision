@@ -59,14 +59,10 @@ namespace pandora_vision
       /**
         @brief Checks for color homogenity in a region where points are
         constrained inside each @param inOutlines's elements. A candidate hole
-        is considered valid if its Hue plane histogram has above a certain
+        is considered valid if its H-V histogram has above a certain
         number of bins occupied.
-        @param[in] inImage [const cv::Mat&] The RGB image in unscaled
-        format
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-        of the candidate holes's keypoints
-        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-        The vector of the candidate holes's outline points
+        @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
+        @param[in] conveyor [const HolesConveyor&] The candidate holes
         @param[out] probabilitiesVector [std::vector<float>*] A vector
         of probabilities hinting to the certainty degree which with the
         candidate hole is associated. While the returned set may be reduced in
@@ -74,13 +70,11 @@ namespace pandora_vision
         number of keypoints found and published by the rgb node
         @param[in][out] msgs [std::vector<std::string>*] Messages for debug
         reasons
-        @return std::set<unsigned int> The indices of valid (by this filter)
-        blobs
+        @return void
        **/
-      static std::set<unsigned int> checkHolesColorHomogenity(
+      static void checkHolesColorHomogenity(
         const cv::Mat& inImage,
-        const std::vector<cv::KeyPoint>& inKeyPoints,
-        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const HolesConveyor& conveyor,
         std::vector<float>* probabilitiesVector,
         std::vector<std::string>* msgs);
 
@@ -90,12 +84,7 @@ namespace pandora_vision
         outside the blob's outline and
         (2) the points inside the blob's outline.
         @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-        of the candidate holes's keypoints
-        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-        The vector of the candidate holes's bounding boxes
-        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-        The vector of the candidate holes's outline points
+        @param[in] conveyor [const HolesConveyor&] The candidate holes
         @param[in] inflationSize [cosnt int&] grow the rectangle by
         inflationSize as to acquire more points to check for plane existence.
         @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -105,18 +94,14 @@ namespace pandora_vision
         number of keypoints found and published by the rgb node
         @param[in][out] msgs [std::vector<std::string>*] Messages for
         debug reasons
-        @return std::set<unsigned int> The indices of valid (by this filter)
-        blobs
+        @return void
        **/
-      static std::set<unsigned int> checkHolesLuminosityDiff(
+      static void checkHolesLuminosityDiff(
         const cv::Mat& inImage,
-        const std::vector<cv::KeyPoint>& inKeyPoints,
-        const std::vector<std::vector<cv::Point2f> >& inRectangles,
-        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const HolesConveyor& conveyor,
         const int& inflationSize,
         std::vector<float>* probabilitiesVector,
         std::vector<std::string>* msgs);
-
 
       /**
         @brief Given a set of keypoints, their respective outline and
@@ -130,12 +115,7 @@ namespace pandora_vision
         format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-        of the candidate holes's keypoints
-        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-        The vector of the candidate holes's bounding boxes
-        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-        The vector of the candidate holes's outline points
+        @param[in] conveyor [const HolesConveyor&] The candidate holes
         @param[in] inflationSize [cosnt int&] grow the rectangle by
         inflationSize as to acquire more points to check for plane existence.
         @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -145,15 +125,12 @@ namespace pandora_vision
         number of keypoints found and published by the rgb node
         @param[in][out] msgs [std::vector<std::string>*] Messages for debug
         reasons
-        @return std::set<unsigned int> The indices of valid (by this filter)
-        blobs
+        @return void
        **/
-      static std::set<unsigned int> checkHolesTextureDiff(
+      static void checkHolesTextureDiff(
         const cv::Mat& inImage,
         const cv::MatND& inHistogram,
-        const std::vector<cv::KeyPoint>& inKeyPoints,
-        const std::vector<std::vector<cv::Point2f> >& inRectangles,
-        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const HolesConveyor& conveyor,
         const int& inflationSize,
         std::vector<float>* probabilitiesVector,
         std::vector<std::string>* msgs);
@@ -171,12 +148,7 @@ namespace pandora_vision
         format
         @param[in] inHistogram [const cv::MatND&]
         The model histogram's H and S component
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-        of the candidate holes's keypoints
-        @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-        The vector of the candidate holes's bounding boxes
-        @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-        The vector of the candidate holes's outline points
+        @param[in] conveyor [const HolesConveyor&] The candidate holes
         @param[in] inflationSize [cosnt int&] grow the rectangle by
         inflationSize as to acquire more points to check for plane existence.
         @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -184,17 +156,14 @@ namespace pandora_vision
         candidate hole is associated. While the returned set may be reduced in
         size, the size of this vector is the same throughout and equal to the
         number of keypoints found and published by the rgb node
-        @param[in][out] msgs [std::vector<std::string>*] Messages for
-        debug reasons
-        @return std::set<unsigned int> The indices of valid (by this filter)
-        blobs
+        @param[in][out] msgs [std::vector<std::string>*] Messages for debug
+        reasons
+        @return void
        **/
-      static std::set<unsigned int> checkHolesTextureBackProject(
+      static void checkHolesTextureBackProject(
         const cv::Mat& inImage,
         const cv::MatND& inHistogram,
-        const std::vector<cv::KeyPoint>& inKeyPoints,
-        const std::vector<std::vector<cv::Point2f> >& inRectangles,
-        const std::vector<std::vector<cv::Point> >& inOutlines,
+        const HolesConveyor& conveyor,
         const int& inflationSize,
         std::vector<float>* probabilitiesVector,
         std::vector<std::string>* msgs);
@@ -204,7 +173,7 @@ namespace pandora_vision
         attached to an order which relates to the sequence of the overall
         filter execution.
         @param[in] rgbImage [const cv::Mat&] The input rgb image
-        @param[in][out] conveyor [HolesConveyor*] A struct that
+        @param[in] conveyor [const HolesConveyor&] A struct that
         contains the final valid holes
         @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
         A 2D vector of probabilities hinting to the certainty degree with
@@ -219,7 +188,7 @@ namespace pandora_vision
       static void checkHoles(
         const cv::Mat& rgbImage,
         const cv::MatND& inHistogram,
-        HolesConveyor* conveyor,
+        const HolesConveyor& conveyor,
         std::vector<std::vector<float> >* probabilitiesVector);
 
       /**
@@ -228,8 +197,8 @@ namespace pandora_vision
         filter execution.
         @param[in] method [const unsigned int&] The filter identifier to execute
         @param[in] img [const cv::Mat&] The input rgb image
-        @param[in][out] conveyor [HoleFilters::HolesConveyor*] The structure
-        that holds the final holes' data
+        @param[in] conveyor [const HolesConveyor&] The structure that
+        holds the final holes' data
         @param[in] inflationSize [const int&] The amount of pixels by which each
         bounding box is inflated
         @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -245,7 +214,7 @@ namespace pandora_vision
       static void applyFilter(
         const unsigned int& method,
         const cv::Mat& img,
-        HolesConveyor* conveyor,
+        const HolesConveyor& conveyor,
         const int& inflationSize,
         const cv::MatND& inHistogram,
         std::vector<float>* probabilitiesVector,
@@ -256,4 +225,3 @@ namespace pandora_vision
 } // namespace pandora_vision
 
 #endif  // HOLE_FUSION_NODE_RGB_FILTERS_H
-

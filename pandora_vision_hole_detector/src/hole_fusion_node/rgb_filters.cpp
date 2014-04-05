@@ -46,32 +46,24 @@ namespace pandora_vision
     is considered valid if its H-V histogram has above a certain
     number of bins occupied.
     @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-    of the candidate holes's keypoints
-    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-    The vector of the candidate holes's outline points
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[out] probabilitiesVector [std::vector<float>*] A vector
     of probabilities hinting to the certainty degree which with the
     candidate hole is associated. While the returned set may be reduced in
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
     @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
-    @return std::set<unsigned int> The indices of valid (by this filter)
-    blobs
+    @return void
    **/
-  std::set<unsigned int> RgbFilters::checkHolesColorHomogenity(
+  void RgbFilters::checkHolesColorHomogenity(
     const cv::Mat& inImage,
-    const std::vector<cv::KeyPoint>& inKeyPoints,
-    const std::vector<std::vector<cv::Point> >& inOutlines,
+    const HolesConveyor& conveyor,
     std::vector<float>* probabilitiesVector,
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
     Timer::start("checkHolesColorHomogenity", "applyFilter");
     #endif
-
-    //!< The valid (by this filter) blobs' indices
-    std::set<unsigned int> valid;
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
     cv::Mat inImage_;
@@ -89,7 +81,7 @@ namespace pandora_vision
     cv::Mat inImageHSV;
     cv::cvtColor(inImage_, inImageHSV, cv::COLOR_BGR2HSV);
 
-    for (unsigned int i = 0; i < inKeyPoints.size(); i++)
+    for (unsigned int i = 0; i < conveyor.keyPoints.size(); i++)
     {
       //!< Create the mask needed for the histogram of the
       //!< points inside this blobs'outline
@@ -101,7 +93,7 @@ namespace pandora_vision
         for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false) > 0)
+              conveyor.outlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobMask.at<unsigned char>(rows, cols) = 255;
           }
@@ -169,21 +161,15 @@ namespace pandora_vision
         }
       }
 
-      //!< Every keypoint is considered valid, with a suited probability
-      valid.insert(i);
-
       probabilitiesVector->at(i) = static_cast<float> (overallNonZeroBoxes) /
         (h_bins / box_x * v_bins / box_y);
 
       msgs->push_back(TOSTR(probabilitiesVector->at(i)));
-
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesColorHomogenity");
     #endif
-
-    return valid;
   }
 
 
@@ -194,12 +180,7 @@ namespace pandora_vision
     outside the blob's outline and
     (2) the points inside the blob's outline.
     @param[in] inImage [const cv::Mat&] The RGB image in unscaled format
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-    of the candidate holes's keypoints
-    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-    The vector of the candidate holes's bounding boxes
-    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-    The vector of the candidate holes's outline points
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] inflationSize [cosnt int&] grow the rectangle by
     inflationSize as to acquire more points to check for plane existence.
     @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -209,14 +190,11 @@ namespace pandora_vision
     number of keypoints found and published by the rgb node
     @param[in][out] msgs [std::vector<std::string>*] Messages for
     debug reasons
-    @return std::set<unsigned int> The indices of valid (by this filter)
-    blobs
+    @return void
    **/
-  std::set<unsigned int> RgbFilters::checkHolesLuminosityDiff(
+  void RgbFilters::checkHolesLuminosityDiff(
     const cv::Mat& inImage,
-    const std::vector<cv::KeyPoint>& inKeyPoints,
-    const std::vector<std::vector<cv::Point2f> >& inRectangles,
-    const std::vector<std::vector<cv::Point> >& inOutlines,
+    const HolesConveyor& conveyor,
     const int& inflationSize,
     std::vector<float>* probabilitiesVector,
     std::vector<std::string>* msgs)
@@ -224,9 +202,6 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("checkHolesLuminosityDiff", "applyFilter");
     #endif
-
-    //!< The returned set of valid keypoint indices
-    std::set<unsigned int> valid;
 
     //!< Since not all rectangles may make it, store the indices
     //!< of the original keypoints that correspond to valid inflated rectangles
@@ -256,18 +231,18 @@ namespace pandora_vision
     double theta;
     double keypointVertDist;
 
-    for (unsigned int i = 0; i < inRectangles.size(); i++)
+    for (unsigned int i = 0; i < conveyor.rectangles.size(); i++)
     {
       std::vector<cv::Point> inflatedVertices;
       int inflatedVerticesWithinImageLimits = 0;
 
       for (int j = 0; j < 4; j++)
       {
-        key_y = inKeyPoints[i].pt.y;
-        key_x = inKeyPoints[i].pt.x;
+        key_y = conveyor.keyPoints[i].pt.y;
+        key_x = conveyor.keyPoints[i].pt.x;
 
-        vert_y = inRectangles[i][j].y;
-        vert_x = inRectangles[i][j].x;
+        vert_y = conveyor.rectangles[i][j].y;
+        vert_x = conveyor.rectangles[i][j].x;
 
         theta = atan2(key_y - vert_y, key_x - vert_x);
 
@@ -325,7 +300,7 @@ namespace pandora_vision
         {
           //!< Mean outline luminosity test
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false) > 0)
+              conveyor.outlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobLuminosity +=
               (uint8_t)luminosityImage.at<unsigned char>(rows, cols);
@@ -364,18 +339,12 @@ namespace pandora_vision
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
 
-      //!< Every keypoint of a valid inflated rectangle
-      //!< is considered valid, with a suited probability
-      valid.insert(validKeyPointsIndices[i]);
-
       msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesLuminosityDiff");
     #endif
-
-    return valid;
   }
 
 
@@ -391,12 +360,7 @@ namespace pandora_vision
     @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
     @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-    of the candidate holes's keypoints
-    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-    The vector of the candidate holes's bounding boxes
-    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-    The vector of the candidate holes's outline points
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] inflationSize [cosnt int&] grow the rectangle by
     inflationSize as to acquire more points to check for plane existence.
     @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -405,15 +369,12 @@ namespace pandora_vision
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
     @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
-    @return std::set<unsigned int> The indices of valid (by this filter)
-    blobs
+    @return void
    **/
-  std::set<unsigned int> RgbFilters::checkHolesTextureDiff(
+  void RgbFilters::checkHolesTextureDiff(
     const cv::Mat& inImage,
     const cv::MatND& inHistogram,
-    const std::vector<cv::KeyPoint>& inKeyPoints,
-    const std::vector<std::vector<cv::Point2f> >& inRectangles,
-    const std::vector<std::vector<cv::Point> >& inOutlines,
+    const HolesConveyor& conveyor,
     const int& inflationSize,
     std::vector<float>* probabilitiesVector,
     std::vector<std::string>* msgs)
@@ -421,9 +382,6 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("checkHolesTextureDiff", "applyFilter");
     #endif
-
-    //!< The returned set of valid keypoint indices
-    std::set<unsigned int> valid;
 
     //!< Since not all rectangles may make it, store the indices
     //!< of the original keypoints that correspond to valid inflated rectangles
@@ -459,18 +417,18 @@ namespace pandora_vision
     double theta;
     double keypointVertDist;
 
-    for (unsigned int i = 0; i < inRectangles.size(); i++)
+    for (unsigned int i = 0; i < conveyor.rectangles.size(); i++)
     {
       std::vector<cv::Point> inflatedVertices;
       int inflatedVerticesWithinImageLimits = 0;
 
       for (int j = 0; j < 4; j++)
       {
-        key_y = inKeyPoints[i].pt.y;
-        key_x = inKeyPoints[i].pt.x;
+        key_y = conveyor.keyPoints[i].pt.y;
+        key_x = conveyor.keyPoints[i].pt.x;
 
-        vert_y = inRectangles[i][j].y;
-        vert_x = inRectangles[i][j].x;
+        vert_y = conveyor.rectangles[i][j].y;
+        vert_x = conveyor.rectangles[i][j].x;
 
         theta = atan2(key_y - vert_y, key_x - vert_x);
 
@@ -526,7 +484,7 @@ namespace pandora_vision
         for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false) > 0)
+              conveyor.outlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobMask.at<unsigned char>(rows, cols) = 255;
           }
@@ -599,18 +557,12 @@ namespace pandora_vision
         probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
 
-      //!< Every keypoint of a valid inflated rectangle
-      //!< is considered valid, with a suited probability
-      valid.insert(validKeyPointsIndices[i]);
-
       msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesTextureDiff");
     #endif
-
-    return valid;
   }
 
 
@@ -627,12 +579,7 @@ namespace pandora_vision
     @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
     @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The vector
-    of the candidate holes's keypoints
-    @param[in] inRectangles [const std::vector<std::vector<cv::Point2f> >&]
-    The vector of the candidate holes's bounding boxes
-    @param[in] inOutlines [const std::vector<std::vector<cv::Point> >&]
-    The vector of the candidate holes's outline points
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] inflationSize [cosnt int&] grow the rectangle by
     inflationSize as to acquire more points to check for plane existence.
     @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -641,15 +588,12 @@ namespace pandora_vision
     size, the size of this vector is the same throughout and equal to the
     number of keypoints found and published by the rgb node
     @param[in][out] msgs [std::vector<std::string>*] Messages for debug reasons
-    @return std::set<unsigned int> The indices of valid (by this filter)
-    blobs
+    @return void
    **/
-  std::set<unsigned int> RgbFilters::checkHolesTextureBackProject(
+  void RgbFilters::checkHolesTextureBackProject(
     const cv::Mat& inImage,
     const cv::MatND& inHistogram,
-    const std::vector<cv::KeyPoint>& inKeyPoints,
-    const std::vector<std::vector<cv::Point2f> >& inRectangles,
-    const std::vector<std::vector<cv::Point> >& inOutlines,
+    const HolesConveyor& conveyor,
     const int& inflationSize,
     std::vector<float>* probabilitiesVector,
     std::vector<std::string>* msgs)
@@ -657,9 +601,6 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("checkHolesTextureBackProject", "applyFilter");
     #endif
-
-    //!< The returned set of valid keypoint indices
-    std::set<unsigned int> valid;
 
     //!< Since not all rectangles may make it, store the indices
     //!< of the original keypoints that correspond to valid inflated rectangles
@@ -715,18 +656,18 @@ namespace pandora_vision
     double theta;
     double keypointVertDist;
 
-    for (unsigned int i = 0; i < inRectangles.size(); i++)
+    for (unsigned int i = 0; i < conveyor.rectangles.size(); i++)
     {
       std::vector<cv::Point> inflatedVertices;
       int inflatedVerticesWithinImageLimits = 0;
 
       for (int j = 0; j < 4; j++)
       {
-        key_y = inKeyPoints[i].pt.y;
-        key_x = inKeyPoints[i].pt.x;
+        key_y = conveyor.keyPoints[i].pt.y;
+        key_x = conveyor.keyPoints[i].pt.x;
 
-        vert_y = inRectangles[i][j].y;
-        vert_x = inRectangles[i][j].x;
+        vert_y = conveyor.rectangles[i][j].y;
+        vert_x = conveyor.rectangles[i][j].x;
 
         theta = atan2(key_y - vert_y, key_x - vert_x);
 
@@ -778,7 +719,7 @@ namespace pandora_vision
         for (unsigned int cols = 0; cols < inImage.cols; cols++)
         {
           if (cv::pointPolygonTest(
-              inOutlines[i], cv::Point(cols, rows), false) > 0)
+              conveyor.outlines[i], cv::Point(cols, rows), false) > 0)
           {
             blobSum +=
               (uint8_t)backProject.at<unsigned char>(rows, cols);
@@ -818,18 +759,12 @@ namespace pandora_vision
         probabilitiesVector->at(validKeyPointsIndices[i]) = 0.0;
       }
 
-      //!< Every keypoint of a valid inflated rectangle
-      //!< is considered valid, with a suited probability
-      valid.insert(validKeyPointsIndices[i]);
-
       msgs->push_back(TOSTR(probabilitiesVector->at(validKeyPointsIndices[i])));
     }
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesTextureBackProject");
     #endif
-
-    return valid;
   }
 
 
@@ -839,7 +774,7 @@ namespace pandora_vision
     attached to an order which relates to the sequence of the overall
     filter execution.
     @param[in] rgbImage [const cv::Mat&] The input rgb image
-    @param[in][out] conveyor [HolesConveyor*] A struct that
+    @param[in] conveyor [const HolesConveyor&] A struct that
     contains the final valid holes
     @param[out] probabilitiesVector [std::vector<std::vector<float> >*]
     A 2D vector of probabilities hinting to the certainty degree with
@@ -854,7 +789,7 @@ namespace pandora_vision
   void RgbFilters::checkHoles(
     const cv::Mat& rgbImage,
     const cv::MatND& inHistogram,
-    HolesConveyor* conveyor,
+    const HolesConveyor& conveyor,
     std::vector<std::vector<float> >* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
@@ -922,7 +857,7 @@ namespace pandora_vision
     to an order which relates to the sequence of the overall filter execution.
     @param[in] method [const unsigned int&] The filter identifier to execute
     @param[in] img [const cv::Mat&] The input rgb image
-    @param[in][out] conveyor [HolesConveyor*] The structure that
+    @param[in] conveyor [const HolesConveyor&] The structure that
     holds the final holes' data
     @param[in] inflationSize [const int&] The amount of pixels by which each
     bounding box is inflated
@@ -939,7 +874,7 @@ namespace pandora_vision
   void RgbFilters::applyFilter(
     const unsigned int& method,
     const cv::Mat& img,
-    HolesConveyor* conveyor,
+    const HolesConveyor& conveyor,
     const int& inflationSize,
     const cv::MatND& inHistogram,
     std::vector<float>* probabilitiesVector,
@@ -951,18 +886,10 @@ namespace pandora_vision
     #endif
 
     std::string windowMsg;
-    std::set<unsigned int> indexes;
     std::vector<std::string> finalMsgs;
     std::vector<std::string> msgs_;
-    std::vector<cv::KeyPoint> finalKeyPoints;
-    std::vector<std::vector<cv::Point2f> > finalRectangles;
-    std::vector<std::vector<cv::Point> > finalBlobsOutlineVector;
 
     //!< Initialize structures
-    indexes.clear();
-    finalKeyPoints.clear();
-    finalRectangles.clear();
-    finalBlobsOutlineVector.clear();
     finalMsgs.clear();
     msgs_.clear();
 
@@ -971,10 +898,9 @@ namespace pandora_vision
       //!< Filter #1 (Color homogenity inside blob)-----------------------------
       case 1 :
         {
-          indexes = checkHolesColorHomogenity(
+          checkHolesColorHomogenity(
             img,
-            conveyor->keyPoints,
-            conveyor->outlines,
+            conveyor,
             probabilitiesVector,
             &msgs_);
           windowMsg = "Filter: Color homogenity";
@@ -985,11 +911,9 @@ namespace pandora_vision
         //!< the blob's bounding box and the points inside the blob's outline
       case 2 :
         {
-          indexes = checkHolesLuminosityDiff(
+          checkHolesLuminosityDiff(
             img,
-            conveyor->keyPoints,
-            conveyor->rectangles,
-            conveyor->outlines,
+            conveyor,
             inflationSize,
             probabilitiesVector,
             &msgs_);
@@ -999,12 +923,10 @@ namespace pandora_vision
         //!< Filter #3 (Texture difference)-------------------------------------
       case 3 :
         {
-          indexes = checkHolesTextureDiff(
+          checkHolesTextureDiff(
             img,
             inHistogram,
-            conveyor->keyPoints,
-            conveyor->rectangles,
-            conveyor->outlines,
+            conveyor,
             inflationSize,
             probabilitiesVector,
             &msgs_);
@@ -1014,12 +936,10 @@ namespace pandora_vision
         //!< Filter #4 (Back project model histogram)---------------------------
       case 4 :
         {
-          indexes = checkHolesTextureBackProject(
+          checkHolesTextureBackProject(
             img,
             inHistogram,
-            conveyor->keyPoints,
-            conveyor->rectangles,
-            conveyor->outlines,
+            conveyor,
             inflationSize,
             probabilitiesVector,
             &msgs_);
@@ -1028,22 +948,14 @@ namespace pandora_vision
         }
     }
 
-    for(std::set<unsigned int>::iterator it = indexes.begin() ;
-      it != indexes.end() ; it++)
+    for(int i = 0; i < conveyor.keyPoints.size(); i++)
     {
-      finalKeyPoints.push_back(conveyor->keyPoints[*it]);
-      finalRectangles.push_back(conveyor->rectangles[*it]);
-      finalBlobsOutlineVector.push_back(conveyor->outlines[*it]);
-
-      if(msgs_.size() == conveyor->keyPoints.size())
+      if(msgs_.size() == conveyor.keyPoints.size())
       {
-        finalMsgs.push_back(msgs_[*it]);
+        finalMsgs.push_back(msgs_[i]);
       }
     }
 
-    conveyor->outlines = finalBlobsOutlineVector;
-    conveyor->rectangles = finalRectangles;
-    conveyor->keyPoints = finalKeyPoints;
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_check_holes) // Debug
@@ -1056,11 +968,9 @@ namespace pandora_vision
       tmp = Visualization::showHoles(
         windowMsg.c_str(),
         img,
+        conveyor,
         -1,
-        conveyor->keyPoints,
-        conveyor->rectangles,
-        finalMsgs,
-        conveyor->outlines);
+        finalMsgs);
 
       imgs->push_back(tmp);
     }
