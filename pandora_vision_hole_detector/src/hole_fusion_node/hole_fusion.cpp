@@ -107,6 +107,256 @@ namespace pandora_vision
 
 
   /**
+    @brief Applies a merging operation of @param operationId, until
+    every candidate hole, even as it changes through the various merges that
+    happen, has been merged with every candidate hole that can be merged
+    with it.
+    @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    candidate holes conveyor
+    @param[in] operationId [const int&] The identifier of the merging
+    process. Values: 0 for assimilation, 1 for amalgamation and
+    2 for connecting
+    @return void
+   **/
+  void HoleFusion::applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
+    const int& operationId)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("applyMergeOperation", "processCandidateHoles");
+    #endif
+
+    //!< If there are no candidate holes,
+    //!< or there is only one candidate hole,
+    //!< there is no meaning to this operation
+    if (rgbdHolesConveyor->keyPoints.size() < 2)
+    {
+      return;
+    }
+
+    //!< A vector that indicates when a specific hole has finished
+    //!< examining all the other holes in the conveyor for merging.
+    //!< Initialized at 0 for all conveyor entries, the specific hole
+    //!< that corresponds to a vector's entry is given a 1 when it has
+    //!< finished examining all other holes.
+    std::vector<int> finishVector(rgbdHolesConveyor->keyPoints.size(), 0);
+
+    //!< The index of the candidate hole that will
+    //!< {assimilate, amalgamate, connect} the passiveId-th candidate hole.
+    //!< The activeId always has a value of 0 due to the implementation's
+    //!< rationale: The candidate hole that examines each hole in the
+    //!< rgbdHolesConveyor is always the first one. When it has finished,
+    //!< it goes back into the rgbdHolesConveyor, at the last position
+    const int activeId = 0;
+
+    //!< The index of the candidate hole that will be
+    //!< {assimilated, amalgamated, connected} by / with
+    //!< the activeId-th candidate hole
+    int passiveId = 1;
+
+    bool isFuseComplete = false;
+    while(!isFuseComplete)
+    {
+      //!< Is the activeId-th candidate hole able to
+      //!< {assimilate, amalgamate, connect to} the passiveId-th candidate hole?
+      bool isAble = false;
+      if (operationId == 0)
+      {
+        //!< Is the activeId-th candidate hole able to assimilate the
+        //!< passiveId-th candidate hole?
+        isAble = GenericFilters::isCapableOfAssimilating(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
+      }
+      if (operationId == 1)
+      {
+        //!< Is the activeId-th candidate hole able to amalgamate the
+        //!< passiveId-th candidate hole?
+        isAble = GenericFilters::isCapableOfAmalgamating(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
+      }
+      if (operationId == 2)
+      {
+        //!< Is the passiveId-th candidate hole able to be connected with the
+        //!< activeId-th candidate hole?
+        isAble = GenericFilters::isCapableOfConnecting(activeId,
+          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor, pointCloudXYZ_);
+      }
+
+
+
+      if (isAble)
+      {
+        //!< Copy the original holes conveyor to a temp one.
+        //!< The temp one will be tested through the hole filters
+        //!< On success, temp will replace rgbdHolesConveyor,
+        //!< on failure, rgbdHolesConveyor will remain unchanged
+        HolesConveyor tempHolesConveyor;
+        HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
+
+        if (operationId == 0)
+        {
+          //!< Delete the passiveId-th candidate hole
+          GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
+        }
+        else if (operationId == 1)
+        {
+          //!< Delete the passiveId-th candidate hole,
+          //!< alter the activeId-th candidate hole so that it has amalgamated
+          //!< the passiveId-th candidate hole
+          GenericFilters::amalgamateOnce(activeId, &tempHolesConveyor,
+            passiveId, &tempHolesConveyor);
+        }
+        else if (operationId == 2)
+        {
+          //!< Delete the passiveId-th candidate hole,
+          //!< alter the activeId-th candidate hole so that it has been
+          //!< connected with the passiveId -th candidate hole
+          GenericFilters::connectOnce(activeId, &tempHolesConveyor,
+            passiveId, &tempHolesConveyor);
+        }
+
+        //!< Obtain the activeId-th candidate hole in order for it
+        //!< to be checked against the selected filters
+        HolesConveyor ithHole =
+          HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
+
+
+        //!< TODO make more flexible
+        //!< Determines the selected filters execution
+        std::map<int, int> filtersOrder;
+
+        //!< Depth diff runs first
+        filtersOrder[1] = 1;
+
+        //!< Depth / Area runs second
+        filtersOrder[2] = 3;
+
+        //!< Bounding rectangle's plane constitution runs third
+        filtersOrder[3] = 2;
+
+
+        std::vector<cv::Mat> imgs;
+        std::vector<std::string> msgs;
+
+        std::vector<std::vector<float> >probabilitiesVector(3,
+          std::vector<float>(1, 0.0));
+
+        int counter = 0;
+        for (std::map<int, int>::iterator o_it = filtersOrder.begin();
+          o_it != filtersOrder.end(); ++o_it)
+        {
+          DepthFilters::applyFilter(
+            o_it->second,
+            interpolatedDepthImage_,
+            pointCloudXYZ_,
+            ithHole,
+            Parameters::rectangle_inflation_size,
+            &probabilitiesVector.at(counter),
+            &imgs,
+            &msgs);
+
+          counter++;
+        } //!< o_it iterator ends
+
+        float dd = probabilitiesVector[0][0];
+        float da = probabilitiesVector[1][0];
+        float pc = probabilitiesVector[2][0];
+
+        //!< Probabilities threshold for merge acceptance
+        if (dd > 0.5 && da > 0.5 && pc > 0.7)
+        {
+          //!< Since the tempHolesConveyor's ithHole has been positively tested,
+          //!< the tempHolesConveyor is now the new rgbdHolesConveyor
+          HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
+
+          //!< Delete the passiveId-th entry of the finishVector since the
+          //!< passiveId-th hole has been absorbed by the activeId-th hole
+          finishVector.erase(finishVector.begin() + passiveId);
+
+          //!< Because of the merge happening, the activeId-th
+          //!< candidate hole must re-examine all the other holes
+          passiveId = 1;
+        }
+        else //!< rgbdHolesConveyor remains unchanged
+        {
+          //!< passiveId-th hole not merged. let's see about the next one
+          passiveId++;
+        }
+      }
+      else //!< isAble == false
+      {
+        //!< passiveId-th hole not merged. let's see about the next one
+        passiveId++;
+      }
+
+      //!< If the passiveId-th hole was the last one to be checked for merge,
+      //!< the one doing the merge is rendered obsolete, so go to the next one
+      //!< by moving the current activeId-th candidate hole to the back
+      //!< of the rgbdHolesConveyor. This way the new activeId-th candidate
+      //!< hole still has a value of 0, but now points to the candidate hole
+      //!< next to the one that was moved back
+      if (passiveId >= rgbdHolesConveyor->keyPoints.size())
+      {
+        //!< No meaning moving to the back of the rgbdHolesConveyor if
+        //!< there is only one candidate hole
+        if (rgbdHolesConveyor->keyPoints.size() > 1)
+        {
+          //!< activeId-th hole candidate finished examining the rest of the
+          //!< hole candidates. move it to the back of the rgbdHolesConveyor
+          HolesConveyorUtils::append(
+            HolesConveyorUtils::getHole(*rgbdHolesConveyor, activeId),
+            rgbdHolesConveyor);
+
+          //!< Remove the activeId-th candidate hole from its former position
+          HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
+
+          //!< Since the candidate hole was appended at the end of the
+          //!< rgbdHolesConveyor, the finish vector needs to be shifted
+          //!< once to the left because the value 1 is always set at the end
+          //!< of the finishVector vector. See below.
+          std::rotate(finishVector.begin(), finishVector.begin() + 1,
+            finishVector.end());
+
+          //!< Return the passive's candidate hole identifier to the
+          //!< next of the active's candidate hole identifier, which is 0
+          passiveId = 1;
+        }
+
+        //!< Since the ith candidate hole was appended at the end of the
+        //!< rgbdHolesConveyor, the position to which it corresponds in the
+        //!< finishVector is at the end of the vector.
+        //!< Place the value of 1 in the last position, indicating that the
+        //!< previously activeId-th candidate hole has finished examining all
+        //!< other candidate holes for merging
+        std::vector<int>::iterator finishVectorIterator =
+          finishVector.end() - 1;
+
+        *finishVectorIterator = 1;
+
+        //!< Count how many aces there are in the finishVector
+        //!< If they amount to the size of the vector, that means that
+        //!< each hole has finished examining the others, and the current
+        //!< operation is complete
+        int numAces = 0;
+        for (int i = 0; i < finishVector.size(); i++)
+        {
+          numAces += finishVector[i];
+        }
+
+        if (numAces == finishVector.size())
+        {
+          isFuseComplete = true;
+        }
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyMergeOperation");
+    #endif
+  }
+
+
+
+  /**
     @brief Callback for the candidate holes via the depth node
     @param[in] depthCandidateHolesVector
     [const vision_communications::CandidateHolesVectorMsg&]
@@ -153,119 +403,6 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("depthCandidateHolesCallback");
-    Timer::printAllMeansTree();
-    #endif
-  }
-
-
-
-  /**
-    @brief Callback for the candidate holes via the rgb node
-    @param[in] depthCandidateHolesVector
-    [const vision_communications::CandidateHolesVectorMsg&]
-    The message containing the necessary information to filter hole
-    candidates acquired through the rgb node
-    @return void
-   **/
-  void HoleFusion::rgbCandidateHolesCallback(
-    const vision_communications::CandidateHolesVectorMsg&
-    rgbCandidateHolesVector)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("rgbCandidateHolesCallback", "", true);
-    #endif
-
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Hole Fusion RGB callback");
-    #endif
-
-    //!< Clear the current rgbHolesConveyor struct
-    //!< (or else keyPoints, rectangles and outlines accumulate)
-    HolesConveyorUtils::clear(&rgbHolesConveyor_);
-
-    //!< Unpack the message
-    unpackMessage(rgbCandidateHolesVector,
-      &rgbHolesConveyor_,
-      &rgbImage_,
-      sensor_msgs::image_encodings::TYPE_8UC3);
-
-    numNodesReady_++;
-
-    //!< If the RGB and the depth nodes are ready
-    //!< and the point cloud has been delivered and interpolated,
-    //!< unlock the rgb_depth_synchronizer and process the candidate holes
-    //!< from both sources
-    if (numNodesReady_ == 3)
-    {
-      numNodesReady_ = 0;
-
-      unlockSynchronizer();
-
-      processCandidateHoles();
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("rgbCandidateHolesCallback");
-    Timer::printAllMeansTree();
-    #endif
-  }
-
-
-
-  /**
-    @brief Callback for the point cloud that the synchronizer node
-    publishes
-    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The message
-    containing the point cloud
-    @return void
-   **/
-  void HoleFusion::pointCloudCallback(
-    const sensor_msgs::PointCloud2ConstPtr& msg)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("pointCloudCallback", "", true);
-    #endif
-
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Hole Fusion Point Cloud callback");
-    #endif
-    //!< Unpack the point cloud
-    MessageConversions::extractPointCloudXYZFromMessage(msg,
-      &pointCloudXYZ_);
-
-    //!< Interpolate the point cloud and store it the member variable
-    //!< pointCloudXYZ_
-
-    //!< Extract the depth image from the point cloud message
-    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
-      msg, CV_32FC1);
-
-    //!< Interpolate the depthImage
-    cv::Mat interpolatedDepthImage;
-    NoiseElimination::performNoiseElimination(depthImage,
-      &interpolatedDepthImage);
-
-    //!< Set the interpolatedDepthImage's values as the depth values
-    //!< of the point cloud
-    setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloudXYZ_);
-
-    numNodesReady_++;
-
-    //!< If the RGB and the depth nodes are ready
-    //!< and the point cloud has been delivered and interpolated,
-    //!< unlock the rgb_depth_synchronizer and process the candidate holes
-    //!< from both sources
-    if (numNodesReady_ == 3)
-    {
-      numNodesReady_ = 0;
-
-      unlockSynchronizer();
-
-      processCandidateHoles();
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("pointCloudCallback");
     Timer::printAllMeansTree();
     #endif
   }
@@ -419,323 +556,6 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("getWallsHistogram");
-    #endif
-  }
-
-
-
-  /**
-    @brief Implements a strategy to combine
-    information from both sources in order to accurately find valid holes
-    @return void
-   **/
-  void HoleFusion::processCandidateHoles()
-  {
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Processing candidate holes");
-    #endif
-
-    #ifdef DEBUG_TIME
-    Timer::start("processCandidateHoles");
-    #endif
-
-    //!< Merge the conveyors from the RGB and Depth sources
-    HolesConveyor rgbdHolesConveyor;
-    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
-      &rgbdHolesConveyor);
-
-/*
- *
- *    /////////// Test applyMergeOperation with dummy conveyors ///////////
- *
- *    HolesConveyor dummy;
- *
- *
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, &dummy);
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, &dummy);
- *
- *
- *    //!< 0-th assimilator - amalgamator - connector
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
- *
- *    //!< 0-th assimilable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
- *
- *    //!< 0-th amalgamatable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, &dummy);
- *
- *    //!< 0-th connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410, 80), cv::Point(412, 82), 40, 40, 36, 36, &dummy);
- *
- *
- *    //!< 1-st assimilator - amalgamator - connector
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
- *
- *    //!< 1-st connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, &dummy);
- *
- *
- *
- *    HolesConveyorUtils::shuffle(&dummy);
- *
- *    std::vector<std::string> msgs;
- *    Visualization::showHoles("before", interpolatedDepthImage_, dummy, 1, msgs);
- *
- *    for (int i = 0; i < 3; i++)
- *    {
- *      applyMergeOperation(&dummy, i);
- *    }
- *
- *    Visualization::showHoles("after", interpolatedDepthImage_, dummy, 1, msgs);
- */
-
-    viewRespectiveProbabilities();
-
-    #ifdef DEBUG_TIME
-    Timer::tick("processCandidateHoles");
-    Timer::printAllMeansTree();
-    #endif
-  }
-
-
-
-  /**
-    @brief Unpacks the the HolesConveyor struct for the
-    candidate holes, the interpolated depth image and the point cloud
-    from the vision_communications::CandidateHolesVectorMsg message
-    @param[in] holesMsg
-    [vision_communications::CandidateHolesVectorMsg&] The input
-    candidate holes message obtained through the depth node
-    @param[out] conveyor [HolesConveyor*] The output conveyor
-    struct
-    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
-    @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
-    depth image
-    @return void
-   **/
-  void HoleFusion::unpackMessage(
-    const vision_communications::CandidateHolesVectorMsg& holesMsg,
-    HolesConveyor* conveyor, cv::Mat* image, const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("unpackMessage");
-    #endif
-
-    //!< Recreate the conveyor
-    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
-
-    //!< Unpack the image
-    MessageConversions::extractImageFromMessageContainer(
-      holesMsg,
-      image,
-      encoding);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("unpackMessage");
-    #endif
-  }
-
-
-
-  /**
-    @brief Requests from the synchronizer to process a new point cloud
-    @return void
-   **/
-  void HoleFusion::unlockSynchronizer()
-  {
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Sending unlock message");
-    #endif
-
-    std_msgs::Empty unlockMsg;
-    unlockPublisher_.publish(unlockMsg);
-  }
-
-
-
-  /**
-    @brief Runs candidate holes obtained through Depth and RGB analysis
-    through selected filters, from a respective viewpoint (keypoints
-    obtained through Depth analysis are checked against Depth-based
-    filters, etc). Probabilities for each candidate hole and filter
-    are printed in the console, with an order specified by the
-    hole_fusion_cfg of the dynamic reconfigure utility
-    @param void
-    @return void
-   **/
-  void HoleFusion::viewRespectiveProbabilities()
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("viewRespectiveProbabilities", "processCandidateHoles");
-    #endif
-
-    #ifdef DEBUG_SHOW
-    ROS_ERROR("===========================================");
-    ROS_ERROR("#Depth keypoints : %zu", depthHolesConveyor_.keyPoints.size());
-    ROS_ERROR("#RGB keypoints : %zu", rgbHolesConveyor_.keyPoints.size());
-    ROS_ERROR("-------------------------------------------");
-    #endif
-
-    //!< Initialize the probabilities 2D vector. But first we need to know
-    //!< how many rows the vector will accomodate
-    int depthActiveFilters = 0;
-
-    if (Parameters::run_checker_depth_diff > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_outline_of_rectangle > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_depth_area > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_depth_homogenity > 0)
-    {
-      depthActiveFilters++;
-    }
-
-    std::vector<std::vector<float> > depthProbabilitiesVector2D(
-      depthActiveFilters,
-      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
-
-    //!< check holes for debugging purposes
-    DepthFilters::checkHoles(
-      interpolatedDepthImage_,
-      pointCloudXYZ_,
-      &depthHolesConveyor_,
-      &depthProbabilitiesVector2D);
-
-    #ifdef DEBUG_SHOW
-    if (depthHolesConveyor_.keyPoints.size() > 0)
-    {
-      ROS_ERROR("Depth : Candidate Holes' probabilities");
-      for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
-      {
-        std::string probsString;
-        for (int i = 0; i < depthActiveFilters; i++)
-        {
-          probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
-        }
-
-        ROS_ERROR("P_%d [%f %f]= %s", j, depthHolesConveyor_.keyPoints[j].pt.x,
-          depthHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
-        ROS_ERROR("------------------");
-      }
-    }
-    #endif
-
-    //!< Initialize the probabilities 2D vector. But first we need to know
-    //!< how many rows the vector will accomodate
-    int rgbActiveFilters = 0;
-
-    if (Parameters::run_checker_color_homogenity > 0)
-    {
-      rgbActiveFilters++;
-    }
-    if (Parameters::run_checker_luminosity_diff > 0)
-    {
-      rgbActiveFilters++;
-    }
-    if (Parameters::run_checker_texture_diff > 0)
-    {
-      rgbActiveFilters++;
-    }
-    if (Parameters::run_checker_texture_backproject > 0)
-    {
-      rgbActiveFilters++;
-    }
-
-
-    std::vector<std::vector<float> > rgbProbabilitiesVector2D(rgbActiveFilters,
-      std::vector<float>(rgbHolesConveyor_.keyPoints.size(), 0.0));
-
-    //!< check holes for debugging purposes
-    RgbFilters::checkHoles(
-      rgbImage_,
-      wallsHistogram_,
-      &rgbHolesConveyor_,
-      &rgbProbabilitiesVector2D);
-
-    #ifdef DEBUG_SHOW
-    ROS_ERROR("-------------------------------------------");
-    if (rgbHolesConveyor_.keyPoints.size() > 0)
-    {
-      ROS_ERROR("RGB: Candidate Holes' probabilities");
-      for (int j = 0; j < rgbHolesConveyor_.keyPoints.size(); j++)
-      {
-        std::string probsString;
-        for (int i = 0; i < rgbActiveFilters; i++)
-        {
-          probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
-        }
-
-        ROS_ERROR("P_%d [%f %f] = %s", j, rgbHolesConveyor_.keyPoints[j].pt.x,
-          rgbHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
-        ROS_ERROR("------------------");
-      }
-    }
-    #endif
-
-
-    #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes) // Debug
-    {
-      //!< Push back the identities of each keypoint originated from
-      //!< depth analysis
-      std::vector<std::string> depthMsgs;
-      for (int i = 0; i < depthHolesConveyor_.keyPoints.size(); i++)
-      {
-        depthMsgs.push_back(TOSTR(i));
-      }
-
-      Visualization::showHoles(
-        "Depth : Final KeyPoints",
-        interpolatedDepthImage_,
-        1,
-        depthHolesConveyor_.keyPoints,
-        depthHolesConveyor_.rectangles,
-        depthMsgs,
-        depthHolesConveyor_.outlines);
-
-      //!< Push back the identities of each keypoint originated from
-      //!< RGB analysis
-      std::vector<std::string> rgbMsgs;
-      for (int i = 0; i < rgbHolesConveyor_.keyPoints.size(); i++)
-      {
-        rgbMsgs.push_back(TOSTR(i));
-      }
-
-      Visualization::showHoles(
-        "RGB: Final KeyPoints",
-        rgbImage_,
-        1,
-        rgbHolesConveyor_.keyPoints,
-        rgbHolesConveyor_.rectangles,
-        rgbMsgs,
-        rgbHolesConveyor_.outlines);
-    }
-    #endif
-
-    #ifdef DEBUG_TIME
-    Timer::tick("viewRespectiveProbabilities");
     #endif
   }
 
@@ -926,250 +746,204 @@ namespace pandora_vision
 
 
   /**
-    @brief Applies a merging operation of @param operationId, until
-    every candidate hole, even as it changes through the various merges that
-    happen, has been merged with every candidate hole that can be merged
-    with it.
-    @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
-    candidate holes conveyor
-    @param[in] operationId [const int&] The identifier of the merging
-    process. Values: 0 for assimilation, 1 for amalgamation and
-    2 for connecting
+    @brief Callback for the point cloud that the synchronizer node
+    publishes
+    @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The message
+    containing the point cloud
     @return void
    **/
-  void HoleFusion::applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
-    const int& operationId)
+  void HoleFusion::pointCloudCallback(
+    const sensor_msgs::PointCloud2ConstPtr& msg)
   {
     #ifdef DEBUG_TIME
-    Timer::start("applyMergeOperation", "processCandidateHoles");
+    Timer::start("pointCloudCallback", "", true);
     #endif
 
-    //!< If there are no candidate holes,
-    //!< or there is only one candidate hole,
-    //!< there is no meaning to this operation
-    if (rgbdHolesConveyor->keyPoints.size() < 2)
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Hole Fusion Point Cloud callback");
+    #endif
+    //!< Unpack the point cloud
+    MessageConversions::extractPointCloudXYZFromMessage(msg,
+      &pointCloudXYZ_);
+
+    //!< Interpolate the point cloud and store it the member variable
+    //!< pointCloudXYZ_
+
+    //!< Extract the depth image from the point cloud message
+    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
+      msg, CV_32FC1);
+
+    //!< Interpolate the depthImage
+    cv::Mat interpolatedDepthImage;
+    NoiseElimination::performNoiseElimination(depthImage,
+      &interpolatedDepthImage);
+
+    //!< Set the interpolatedDepthImage's values as the depth values
+    //!< of the point cloud
+    setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloudXYZ_);
+
+    numNodesReady_++;
+
+    //!< If the RGB and the depth nodes are ready
+    //!< and the point cloud has been delivered and interpolated,
+    //!< unlock the rgb_depth_synchronizer and process the candidate holes
+    //!< from both sources
+    if (numNodesReady_ == 3)
     {
-      return;
-    }
+      numNodesReady_ = 0;
 
-    //!< A vector that indicates when a specific hole has finished
-    //!< examining all the other holes in the conveyor for merging.
-    //!< Initialized at 0 for all conveyor entries, the specific hole
-    //!< that corresponds to a vector's entry is given a 1 when it has
-    //!< finished examining all other holes.
-    std::vector<int> finishVector(rgbdHolesConveyor->keyPoints.size(), 0);
+      unlockSynchronizer();
 
-    //!< The index of the candidate hole that will
-    //!< {assimilate, amalgamate, connect} the passiveId-th candidate hole.
-    //!< The activeId always has a value of 0 due to the implementation's
-    //!< rationale: The candidate hole that examines each hole in the
-    //!< rgbdHolesConveyor is always the first one. When it has finished,
-    //!< it goes back into the rgbdHolesConveyor, at the last position
-    const int activeId = 0;
-
-    //!< The index of the candidate hole that will be
-    //!< {assimilated, amalgamated, connected} by / with
-    //!< the activeId-th candidate hole
-    int passiveId = 1;
-
-    bool isFuseComplete = false;
-    while(!isFuseComplete)
-    {
-      //!< Is the activeId-th candidate hole able to
-      //!< {assimilate, amalgamate, connect to} the passiveId-th candidate hole?
-      bool isAble = false;
-      if (operationId == 0)
-      {
-        //!< Is the activeId-th candidate hole able to assimilate the
-        //!< passiveId-th candidate hole?
-        isAble = GenericFilters::isCapableOfAssimilating(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
-      }
-      if (operationId == 1)
-      {
-        //!< Is the activeId-th candidate hole able to amalgamate the
-        //!< passiveId-th candidate hole?
-        isAble = GenericFilters::isCapableOfAmalgamating(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
-      }
-      if (operationId == 2)
-      {
-        //!< Is the passiveId-th candidate hole able to be connected with the
-        //!< activeId-th candidate hole?
-        isAble = GenericFilters::isCapableOfConnecting(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor, pointCloudXYZ_);
-      }
-
-
-
-      if (isAble)
-      {
-        //!< Copy the original holes conveyor to a temp one.
-        //!< The temp one will be tested through the hole filters
-        //!< On success, temp will replace rgbdHolesConveyor,
-        //!< on failure, rgbdHolesConveyor will remain unchanged
-        HolesConveyor tempHolesConveyor;
-        HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
-
-        if (operationId == 0)
-        {
-          //!< Delete the passiveId-th candidate hole
-          GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
-        }
-        else if (operationId == 1)
-        {
-          //!< Delete the passiveId-th candidate hole,
-          //!< alter the activeId-th candidate hole so that it has amalgamated
-          //!< the passiveId-th candidate hole
-          GenericFilters::amalgamateOnce(activeId, &tempHolesConveyor,
-            passiveId, &tempHolesConveyor);
-        }
-        else if (operationId == 2)
-        {
-          //!< Delete the passiveId-th candidate hole,
-          //!< alter the activeId-th candidate hole so that it has been
-          //!< connected with the passiveId -th candidate hole
-          GenericFilters::connectOnce(activeId, &tempHolesConveyor,
-            passiveId, &tempHolesConveyor);
-        }
-
-        //!< Obtain the activeId-th candidate hole in order for it
-        //!< to be checked against the selected filters
-        HolesConveyor ithHole =
-          HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
-
-
-        //!< TODO make more flexible
-        //!< Determines the selected filters execution
-        std::map<int, int> filtersOrder;
-
-        //!< Depth diff runs first
-        filtersOrder[1] = 1;
-
-        //!< Depth / Area runs second
-        filtersOrder[2] = 3;
-
-        //!< Bounding rectangle's plane constitution runs third
-        filtersOrder[3] = 2;
-
-
-        std::vector<cv::Mat> imgs;
-        std::vector<std::string> msgs;
-
-        std::vector<std::vector<float> >probabilitiesVector(3,
-          std::vector<float>(1, 0.0));
-
-        int counter = 0;
-        for (std::map<int, int>::iterator o_it = filtersOrder.begin();
-          o_it != filtersOrder.end(); ++o_it)
-        {
-          DepthFilters::applyFilter(
-            o_it->second,
-            interpolatedDepthImage_,
-            pointCloudXYZ_,
-            &ithHole,
-            Parameters::rectangle_inflation_size,
-            &probabilitiesVector.at(counter),
-            &imgs,
-            &msgs);
-
-          counter++;
-        } //!< o_it iterator ends
-
-        float dd = probabilitiesVector[0][0];
-        float da = probabilitiesVector[1][0];
-        float pc = probabilitiesVector[2][0];
-
-        //!< Probabilities threshold for merge acceptance
-        if (dd > 0.5 && da > 0.5 && pc > 0.7)
-        {
-          //!< Since the tempHolesConveyor's ithHole has been positively tested,
-          //!< the tempHolesConveyor is now the new rgbdHolesConveyor
-          HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
-
-          //!< Delete the passiveId-th entry of the finishVector since the
-          //!< passiveId-th hole has been absorbed by the activeId-th hole
-          finishVector.erase(finishVector.begin() + passiveId);
-
-          //!< Because of the merge happening, the activeId-th
-          //!< candidate hole must re-examine all the other holes
-          passiveId = 1;
-        }
-        else //!< rgbdHolesConveyor remains unchanged
-        {
-          //!< passiveId-th hole not merged. let's see about the next one
-          passiveId++;
-        }
-      }
-      else //!< isAble == false
-      {
-        //!< passiveId-th hole not merged. let's see about the next one
-        passiveId++;
-      }
-
-      //!< If the passiveId-th hole was the last one to be checked for merge,
-      //!< the one doing the merge is rendered obsolete, so go to the next one
-      //!< by moving the current activeId-th candidate hole to the back
-      //!< of the rgbdHolesConveyor. This way the new activeId-th candidate
-      //!< hole still has a value of 0, but now points to the candidate hole
-      //!< next to the one that was moved back
-      if (passiveId >= rgbdHolesConveyor->keyPoints.size())
-      {
-        //!< No meaning moving to the back of the rgbdHolesConveyor if
-        //!< there is only one candidate hole
-        if (rgbdHolesConveyor->keyPoints.size() > 1)
-        {
-          //!< activeId-th hole candidate finished examining the rest of the
-          //!< hole candidates. move it to the back of the rgbdHolesConveyor
-          HolesConveyorUtils::append(
-            HolesConveyorUtils::getHole(*rgbdHolesConveyor, activeId),
-            rgbdHolesConveyor);
-
-          //!< Remove the activeId-th candidate hole from its former position
-          HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
-
-          //!< Since the candidate hole was appended at the end of the
-          //!< rgbdHolesConveyor, the finish vector needs to be shifted
-          //!< once to the left because the value 1 is always set at the end
-          //!< of the finishVector vector. See below.
-          std::rotate(finishVector.begin(), finishVector.begin() + 1,
-            finishVector.end());
-
-          //!< Return the passive's candidate hole identifier to the
-          //!< next of the active's candidate hole identifier, which is 0
-          passiveId = 1;
-        }
-
-        //!< Since the ith candidate hole was appended at the end of the
-        //!< rgbdHolesConveyor, the position to which it corresponds in the
-        //!< finishVector is at the end of the vector.
-        //!< Place the value of 1 in the last position, indicating that the
-        //!< previously activeId-th candidate hole has finished examining all
-        //!< other candidate holes for merging
-        std::vector<int>::iterator finishVectorIterator =
-          finishVector.end() - 1;
-
-        *finishVectorIterator = 1;
-
-        //!< Count how many aces there are in the finishVector
-        //!< If they amount to the size of the vector, that means that
-        //!< each hole has finished examining the others, and the current
-        //!< operation is complete
-        int numAces = 0;
-        for (int i = 0; i < finishVector.size(); i++)
-        {
-          numAces += finishVector[i];
-        }
-
-        if (numAces == finishVector.size())
-        {
-          isFuseComplete = true;
-        }
-      }
+      processCandidateHoles();
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("applyMergeOperation");
+    Timer::tick("pointCloudCallback");
+    Timer::printAllMeansTree();
+    #endif
+  }
+
+
+
+  /**
+    @brief Implements a strategy to combine
+    information from both sources in order to accurately find valid holes
+    @return void
+   **/
+  void HoleFusion::processCandidateHoles()
+  {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Processing candidate holes");
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::start("processCandidateHoles");
+    #endif
+
+    //!< Merge the conveyors from the RGB and Depth sources
+    HolesConveyor rgbdHolesConveyor;
+    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
+      &rgbdHolesConveyor);
+
+/*
+ *
+ *    /////////// Test applyMergeOperation with dummy conveyors ///////////
+ *
+ *    HolesConveyor dummy;
+ *
+ *
+ *
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, &dummy);
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, &dummy);
+ *
+ *
+ *    //!< 0-th assimilator - amalgamator - connector
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, &dummy);
+ *
+ *    //!< 0-th assimilable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, &dummy);
+ *
+ *    //!< 0-th amalgamatable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, &dummy);
+ *
+ *    //!< 0-th connectable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(410, 80), cv::Point(412, 82), 40, 40, 36, 36, &dummy);
+ *
+ *
+ *    //!< 1-st assimilator - amalgamator - connector
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, &dummy);
+ *
+ *    //!< 1-st connectable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, &dummy);
+ *
+ *
+ *
+ *    HolesConveyorUtils::shuffle(&dummy);
+ *
+ *    std::vector<std::string> msgs;
+ *    Visualization::showHoles("before", interpolatedDepthImage_, dummy, 1, msgs);
+ *
+ *    for (int i = 0; i < 3; i++)
+ *    {
+ *      applyMergeOperation(&dummy, i);
+ *    }
+ *
+ *    Visualization::showHoles("after", interpolatedDepthImage_, dummy, 1, msgs);
+ */
+
+    for (int i = 0; i < 3; i++)
+    {
+      applyMergeOperation(&rgbdHolesConveyor, i);
+    }
+
+    viewRespectiveProbabilities();
+
+    #ifdef DEBUG_TIME
+    Timer::tick("processCandidateHoles");
+    Timer::printAllMeansTree();
+    #endif
+  }
+
+
+
+  /**
+    @brief Callback for the candidate holes via the rgb node
+    @param[in] depthCandidateHolesVector
+    [const vision_communications::CandidateHolesVectorMsg&]
+    The message containing the necessary information to filter hole
+    candidates acquired through the rgb node
+    @return void
+   **/
+  void HoleFusion::rgbCandidateHolesCallback(
+    const vision_communications::CandidateHolesVectorMsg&
+    rgbCandidateHolesVector)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("rgbCandidateHolesCallback", "", true);
+    #endif
+
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Hole Fusion RGB callback");
+    #endif
+
+    //!< Clear the current rgbHolesConveyor struct
+    //!< (or else keyPoints, rectangles and outlines accumulate)
+    HolesConveyorUtils::clear(&rgbHolesConveyor_);
+
+    //!< Unpack the message
+    unpackMessage(rgbCandidateHolesVector,
+      &rgbHolesConveyor_,
+      &rgbImage_,
+      sensor_msgs::image_encodings::TYPE_8UC3);
+
+    numNodesReady_++;
+
+    //!< If the RGB and the depth nodes are ready
+    //!< and the point cloud has been delivered and interpolated,
+    //!< unlock the rgb_depth_synchronizer and process the candidate holes
+    //!< from both sources
+    if (numNodesReady_ == 3)
+    {
+      numNodesReady_ = 0;
+
+      unlockSynchronizer();
+
+      processCandidateHoles();
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("rgbCandidateHolesCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 
@@ -1206,6 +980,237 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("setDepthValuesInPointCloud");
+    #endif
+  }
+
+
+
+  /**
+    @brief Unpacks the the HolesConveyor struct for the
+    candidate holes, the interpolated depth image and the point cloud
+    from the vision_communications::CandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [vision_communications::CandidateHolesVectorMsg&] The input
+    candidate holes message obtained through the depth node
+    @param[out] conveyor [HolesConveyor*] The output conveyor
+    struct
+    @param[out] pointCloudXYZ [PointCloudXYZPtr*] The output point cloud
+    @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
+    depth image
+    @return void
+   **/
+  void HoleFusion::unpackMessage(
+    const vision_communications::CandidateHolesVectorMsg& holesMsg,
+    HolesConveyor* conveyor, cv::Mat* image, const std::string& encoding)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("unpackMessage");
+    #endif
+
+    //!< Recreate the conveyor
+    fromCandidateHoleMsgToConveyor(holesMsg.candidateHoles, conveyor);
+
+    //!< Unpack the image
+    MessageConversions::extractImageFromMessageContainer(
+      holesMsg,
+      image,
+      encoding);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackMessage");
+    #endif
+  }
+
+
+
+  /**
+    @brief Requests from the synchronizer to process a new point cloud
+    @return void
+   **/
+  void HoleFusion::unlockSynchronizer()
+  {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Sending unlock message");
+    #endif
+
+    std_msgs::Empty unlockMsg;
+    unlockPublisher_.publish(unlockMsg);
+  }
+
+
+
+  /**
+    @brief Runs candidate holes obtained through Depth and RGB analysis
+    through selected filters, from a respective viewpoint (keypoints
+    obtained through Depth analysis are checked against Depth-based
+    filters, etc). Probabilities for each candidate hole and filter
+    are printed in the console, with an order specified by the
+    hole_fusion_cfg of the dynamic reconfigure utility
+    @param void
+    @return void
+   **/
+  void HoleFusion::viewRespectiveProbabilities()
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("viewRespectiveProbabilities", "processCandidateHoles");
+    #endif
+
+    #ifdef DEBUG_SHOW
+    ROS_ERROR("===========================================");
+    ROS_ERROR("#Depth keypoints : %zu", depthHolesConveyor_.keyPoints.size());
+    ROS_ERROR("#RGB keypoints : %zu", rgbHolesConveyor_.keyPoints.size());
+    ROS_ERROR("-------------------------------------------");
+    #endif
+
+    //!< Initialize the probabilities 2D vector. But first we need to know
+    //!< how many rows the vector will accomodate
+    int depthActiveFilters = 0;
+
+    if (Parameters::run_checker_depth_diff > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (Parameters::run_checker_outline_of_rectangle > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (Parameters::run_checker_depth_area > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
+    {
+      depthActiveFilters++;
+    }
+    if (Parameters::run_checker_depth_homogenity > 0)
+    {
+      depthActiveFilters++;
+    }
+
+    std::vector<std::vector<float> > depthProbabilitiesVector2D(
+      depthActiveFilters,
+      std::vector<float>(depthHolesConveyor_.keyPoints.size(), 0.0));
+
+    //!< check holes for debugging purposes
+    DepthFilters::checkHoles(
+      interpolatedDepthImage_,
+      pointCloudXYZ_,
+      depthHolesConveyor_,
+      &depthProbabilitiesVector2D);
+
+    #ifdef DEBUG_SHOW
+    if (depthHolesConveyor_.keyPoints.size() > 0)
+    {
+      ROS_ERROR("Depth : Candidate Holes' probabilities");
+      for (int j = 0; j < depthHolesConveyor_.keyPoints.size(); j++)
+      {
+        std::string probsString;
+        for (int i = 0; i < depthActiveFilters; i++)
+        {
+          probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
+        }
+
+        ROS_ERROR("P_%d [%f %f]= %s", j, depthHolesConveyor_.keyPoints[j].pt.x,
+          depthHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
+        ROS_ERROR("------------------");
+      }
+    }
+    #endif
+
+    //!< Initialize the probabilities 2D vector. But first we need to know
+    //!< how many rows the vector will accomodate
+    int rgbActiveFilters = 0;
+
+    if (Parameters::run_checker_color_homogenity > 0)
+    {
+      rgbActiveFilters++;
+    }
+    if (Parameters::run_checker_luminosity_diff > 0)
+    {
+      rgbActiveFilters++;
+    }
+    if (Parameters::run_checker_texture_diff > 0)
+    {
+      rgbActiveFilters++;
+    }
+    if (Parameters::run_checker_texture_backproject > 0)
+    {
+      rgbActiveFilters++;
+    }
+
+
+    std::vector<std::vector<float> > rgbProbabilitiesVector2D(rgbActiveFilters,
+      std::vector<float>(rgbHolesConveyor_.keyPoints.size(), 0.0));
+
+    //!< check holes for debugging purposes
+    RgbFilters::checkHoles(
+      rgbImage_,
+      wallsHistogram_,
+      &rgbHolesConveyor_,
+      &rgbProbabilitiesVector2D);
+
+    #ifdef DEBUG_SHOW
+    ROS_ERROR("-------------------------------------------");
+    if (rgbHolesConveyor_.keyPoints.size() > 0)
+    {
+      ROS_ERROR("RGB: Candidate Holes' probabilities");
+      for (int j = 0; j < rgbHolesConveyor_.keyPoints.size(); j++)
+      {
+        std::string probsString;
+        for (int i = 0; i < rgbActiveFilters; i++)
+        {
+          probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
+        }
+
+        ROS_ERROR("P_%d [%f %f] = %s", j, rgbHolesConveyor_.keyPoints[j].pt.x,
+          rgbHolesConveyor_.keyPoints[j].pt.y, probsString.c_str());
+        ROS_ERROR("------------------");
+      }
+    }
+    #endif
+
+
+    #ifdef DEBUG_SHOW
+    if(Parameters::debug_show_find_holes) // Debug
+    {
+      //!< Push back the identities of each keypoint originated from
+      //!< depth analysis
+      std::vector<std::string> depthMsgs;
+      for (int i = 0; i < depthHolesConveyor_.keyPoints.size(); i++)
+      {
+        depthMsgs.push_back(TOSTR(i));
+      }
+
+      Visualization::showHoles(
+        "Depth : Final KeyPoints",
+        interpolatedDepthImage_,
+        1,
+        depthHolesConveyor_.keyPoints,
+        depthHolesConveyor_.rectangles,
+        depthMsgs,
+        depthHolesConveyor_.outlines);
+
+      //!< Push back the identities of each keypoint originated from
+      //!< RGB analysis
+      std::vector<std::string> rgbMsgs;
+      for (int i = 0; i < rgbHolesConveyor_.keyPoints.size(); i++)
+      {
+        rgbMsgs.push_back(TOSTR(i));
+      }
+
+      Visualization::showHoles(
+        "RGB: Final KeyPoints",
+        rgbImage_,
+        1,
+        rgbHolesConveyor_.keyPoints,
+        rgbHolesConveyor_.rectangles,
+        rgbMsgs,
+        rgbHolesConveyor_.outlines);
+    }
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::tick("viewRespectiveProbabilities");
     #endif
   }
 
