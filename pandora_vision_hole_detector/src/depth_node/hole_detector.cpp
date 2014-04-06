@@ -58,7 +58,7 @@ namespace pandora_vision
     cv::Mat* interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findHoles", "inputCloudCallback");
+    Timer::start("findHoles", "inputDepthImageCallback");
     #endif
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
@@ -161,15 +161,6 @@ namespace pandora_vision
     }
     #endif
 
-    //!< Since not all blobs are holes, sift blobs according to known properties
-    //!< of holes in 3D space
-    /*
-     *HoleFilters::checkHoles(
-     *    interpolatedDepthImage,
-     *    initialPointCloud,
-     *    conveyor);
-     */
-
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_find_holes) // Debug
@@ -192,21 +183,11 @@ namespace pandora_vision
     }
     #endif
 
-    //-------------------------------------------//
-    //~ cv::Mat tempMat;
-    //~ interpolatedDepthImage.copyTo(tempMat);
-    //~ pf.update(conveyor.keyPoints);
-    //~ pf.show(tempMat);  // Just for testing
-    //~ Visualization::showScaled("PF",tempMat,1);
-    //--------------------------------------------//
-
     #ifdef DEBUG_TIME
     Timer::tick("findHoles");
-    Timer::printAllMeansTree();
     #endif
 
     return conveyor;
   }
 
 } // namespace pandora_vision
-

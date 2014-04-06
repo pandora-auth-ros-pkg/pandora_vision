@@ -202,6 +202,7 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("imageCallback");
+    Timer::printAllMeansTree();
     #endif
   }
 
