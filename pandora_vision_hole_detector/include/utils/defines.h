@@ -84,7 +84,7 @@
 #include "utils/timer.h"
 
 #define DEBUG_SHOW
-//~ #define DEBUG_PRINT
+//#define DEBUG_PRINT
 #define DEBUG_TIME
 
 //!< Transforms a float number to string

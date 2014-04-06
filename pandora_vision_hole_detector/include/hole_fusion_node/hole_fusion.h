@@ -51,6 +51,7 @@
 #include "hole_fusion_node/depth_filters.h"
 #include "hole_fusion_node/rgb_filters.h"
 #include "hole_fusion_node/generic_filters.h"
+
 /**
   @namespace vision
   @brief The main namespace for PANDORA vision
@@ -204,16 +205,31 @@ namespace pandora_vision
       void processCandidateHoles();
 
       /**
+        @brief Runs candidate holes through selected filters.
+        Probabilities for each candidate hole and filter
+        are printed in the console, with an order specified by the
+        hole_fusion_cfg of the dynamic reconfigure utility
+        @param[in] conveyor [const HolesConveyor&] The conveyor
+        containing candidate holes
+        @return void
+       **/
+      void sift(const HolesConveyor& conveyor);
+
+      /**
         @brief Runs candidate holes obtained through Depth and RGB analysis
         through selected filters, from a respective viewpoint (keypoints
         obtained through Depth analysis are checked against Depth-based
         filters, etc). Probabilities for each candidate hole and filter
         are printed in the console, with an order specified by the
         hole_fusion_cfg of the dynamic reconfigure utility
-        @param void
+        @param[in] depthHolesConveyor [const HolesConveyor&] The conveyor
+        containing candidate holes originated from the depth image's analysis
+        @param[in] rgbHolesConveyor [const HolesConveyor&] The conveyor
+        containing candidate holes originated from the rgb image's analysis
         @return void
        **/
-      void viewRespectiveProbabilities();
+      void sift(const HolesConveyor& depthHolesConveyor,
+        const HolesConveyor& rgbHolesConveyor);
 
       /**
         @brief Applies a merging operation of @param operationId, until
@@ -243,8 +259,16 @@ namespace pandora_vision
         @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
         @return void
        **/
-      static void setDepthValuesInPointCloud(const cv::Mat& inImage,
+      void setDepthValuesInPointCloud(const cv::Mat& inImage,
         PointCloudXYZPtr* pointCloudXYZPtr);
+
+      /**
+        @brief Tests the merging operations on artificial holes
+        @param[out] dummy [HolesConveyor*] The hole candidates
+        @return void
+       **/
+      void testDummyHolesMerging(HolesConveyor* dummy);
+
 
     public:
 

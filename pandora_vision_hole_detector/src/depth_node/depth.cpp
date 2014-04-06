@@ -133,6 +133,7 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("inputDepthImageCallback");
+    Timer::printAllMeansTree();
     #endif
 
     return;
