@@ -45,9 +45,9 @@ namespace pandora_vision
   {
     getGeneralParams();
 
-    pathToWalls = packagePath+ "/walls/";
-    //! Calculate histogramm according to a given set of
-    //! images
+    pathToWalls = packagePath + "/walls/";
+
+    //! Calculate histogramm according to a given set of images
     calculateTexture();
 
     ROS_INFO("[rgb_node]: Textrure detector instance created");
@@ -72,6 +72,10 @@ namespace pandora_vision
    **/
   void TextureDetector::getGeneralParams()
   {
+    #ifdef DEBUG_TIME
+    Timer::start("getGeneralParams", "TextureDetector");
+    #endif
+
     packagePath = ros::package::getPath("pandora_vision_hole_detector");
 
     //!< Get the Height parameter if available;
@@ -97,6 +101,10 @@ namespace pandora_vision
       frameWidth = 640;
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("getGeneralParams");
+    #endif
   }
 
 
@@ -105,8 +113,12 @@ namespace pandora_vision
     @brief Function for calculating histogramms for texture recognition
     @return void
    **/
-  void  TextureDetector::calculateTexture()
+  void TextureDetector::calculateTexture()
   {
+    #ifdef DEBUG_TIME
+    Timer::start("calculateTexture", "TextureDetector");
+    #endif
+
     std::vector<cv::Mat> walls;
     for(int i = 0; i < 6; i++)
     {
@@ -114,7 +126,12 @@ namespace pandora_vision
       out<< pathToWalls << i << ".png";
       walls.push_back(cv::imread(out.str()));
     }
+
     calculateHistogramm(walls);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("calculateTexture");
+    #endif
   }
 
 
@@ -126,6 +143,10 @@ namespace pandora_vision
    **/
   void TextureDetector::calculateHistogramm(std::vector<cv::Mat> walls)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("calculateHistogramm", "calculateTexture");
+    #endif
+
     cv::Mat* hsv = new cv::Mat[14];
     for(int i = 0; i < 6; i++)
       cvtColor(walls[i], hsv[i], CV_BGR2HSV);
@@ -144,6 +165,10 @@ namespace pandora_vision
     int channels[] = {0, 1};
     cv::calcHist(hsv, 6, channels, cv::Mat(), histogramm, 2,
       histSize, ranges, true, false );
+
+    #ifdef DEBUG_TIME
+    Timer::tick("calculateHistogramm");
+    #endif
   }
 
 
@@ -158,6 +183,10 @@ namespace pandora_vision
   void TextureDetector::applyBackprojection(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("applyBackprojection", "applyTexture");
+    #endif
+
     cv::Mat hsv;
     cvtColor(*holeFrame, hsv, CV_BGR2HSV);
 
@@ -177,6 +206,10 @@ namespace pandora_vision
     cv::threshold(temp, temp, 45, max_BINARY_value, 0);
     Morphology::dilation(&temp, 3, false);
     temp.copyTo(*backprojectedFrame);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyBackprojection");
+    #endif
   }
 
 
@@ -192,15 +225,21 @@ namespace pandora_vision
   void TextureDetector::applyTexture(cv::Mat* holeFrame,
     cv::Mat* backprojectedFrame)
   {
-    cv::Mat backprojection =
-      cv::Mat::zeros(480,
-        640, CV_8UC1);
+    #ifdef DEBUG_TIME
+    Timer::start("applyTexture", "findHoles");
+    #endif
+
+    cv::Mat backprojection = cv::Mat::zeros(480, 640, CV_8UC1);
 
     applyBackprojection(holeFrame, backprojectedFrame);
 
     cvtColor(*holeFrame, *holeFrame, CV_BGR2GRAY);
 
-    bitwise_and( *holeFrame, *backprojectedFrame, backprojection);
+    bitwise_and(*holeFrame, *backprojectedFrame, backprojection);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyTexture");
+    #endif
   }
 
 

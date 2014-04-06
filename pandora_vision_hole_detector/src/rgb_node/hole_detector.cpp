@@ -67,7 +67,7 @@ namespace pandora_vision
   HolesConveyor HoleDetector::findHoles(cv::Mat holeFrame)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findHoles");
+    Timer::start("findHoles", "inputRgbImageCallback");
     #endif
 
     //! Find pixels in current frame where there is the same texture
