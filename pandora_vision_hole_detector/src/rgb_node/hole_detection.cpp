@@ -95,7 +95,7 @@ namespace pandora_vision
   void HoleDetection::getGeneralParams()
   {
     #ifdef DEBUG_TIME
-    Timer::start("getGeneralParams", "findHoles");
+    Timer::start("getGeneralParams", "HoleDetection");
     #endif
 
 
@@ -173,10 +173,10 @@ namespace pandora_vision
     @param msg [const sensor_msgs::ImageConstPtr&] The message
     @return void
   */
-  void HoleDetection::imageCallback(const sensor_msgs::Image& msg)
+  void HoleDetection::inputRgbImageCallback(const sensor_msgs::Image& msg)
   {
     #ifdef DEBUG_TIME
-    Timer::start("imageCallback", "", true);
+    Timer::start("inputRgbImageCallback", "", true);
     #endif
 
     cv_bridge::CvImagePtr in_msg;
@@ -201,7 +201,7 @@ namespace pandora_vision
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
-    Timer::tick("imageCallback");
+    Timer::tick("inputRgbImageCallback");
     Timer::printAllMeansTree();
     #endif
   }
