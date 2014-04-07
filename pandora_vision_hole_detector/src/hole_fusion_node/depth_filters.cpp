@@ -778,7 +778,7 @@ namespace pandora_vision
     std::vector<std::vector<float> >* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHoles", "findHoles");
+    Timer::start("checkHoles", "sift");
     #endif
 
     std::map<int, int> filtersOrder;

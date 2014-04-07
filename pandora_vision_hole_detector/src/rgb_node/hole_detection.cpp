@@ -61,7 +61,7 @@ namespace pandora_vision
     //!< rgb_depth_synchronizer node
     _frameSubscriber = _nh.subscribe(
       "/synchronized/camera/rgb/image_raw", 1,
-      &HoleDetection::imageCallback, this);
+      &HoleDetection::inputRgbImageCallback, this);
 
     //!< Advertise the candidate holes found by the depth node
     rgbCandidateHolesPublisher_ = _nh.advertise
