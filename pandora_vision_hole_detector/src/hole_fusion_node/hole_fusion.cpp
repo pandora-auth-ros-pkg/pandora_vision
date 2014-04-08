@@ -717,6 +717,11 @@ namespace pandora_vision
     Parameters::debug_show_check_holes_size =
       config.debug_show_check_holes_size;
 
+    Parameters::debug_show_merge_holes =
+      config.debug_show_merge_holes;
+    Parameters::debug_show_merge_holes_size =
+      config.debug_show_merge_holes_size;
+
 
     //!< Texture parameters
     //!< The threshold for texture matching
@@ -834,46 +839,32 @@ namespace pandora_vision
 
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes)
+    std::vector<std::string> msgs;
+    std::vector<cv::Mat> canvases;
+    std::vector<std::string> titles;
+
+    if(Parameters::debug_show_merge_holes)
     {
       //!< Push back the identifier of each keypoint
-      std::vector<std::string> msgs;
       for (int i = 0; i < rgbdHolesConveyorBeforeMerge.keyPoints.size(); i++)
       {
         msgs.push_back(TOSTR(i));
       }
 
-      cv::Mat depthCanvas =
+      canvases.push_back(
         Visualization::showHoles(
           "",
           interpolatedDepthImage_,
           rgbdHolesConveyorBeforeMerge,
           -1,
-          msgs);
+          msgs));
 
-      cv::Mat rgbCanvas =
-        Visualization::showHoles(
-          "",
-          rgbImage_,
-          rgbdHolesConveyorBeforeMerge,
-          -1,
-          msgs);
-
-      std::vector<cv::Mat> canvases;
-      canvases.push_back(depthCanvas);
-      canvases.push_back(rgbCanvas);
-
-      std::vector<std::string> titles;
-      titles.push_back("Interpolated depth image");
-      titles.push_back("RGB image");
-
-      Visualization::multipleShow("Keypoints before merge",
-        canvases, titles, 1280, 1);
+      titles.push_back("Before merging");
     }
     #endif
 
     //!< Try to merge holes that can be assimilated, amalgamated or connected
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 3; i++)
     {
       applyMergeOperation(&rgbdHolesConveyor, i);
     }
@@ -882,40 +873,26 @@ namespace pandora_vision
 
 
     #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes)
+    if(Parameters::debug_show_merge_holes)
     {
       //!< Push back the identifier of each keypoint
-      std::vector<std::string> msgs;
       for (int i = 0; i < rgbdHolesConveyor.keyPoints.size(); i++)
       {
         msgs.push_back(TOSTR(i));
       }
 
-      cv::Mat depthCanvas =
+      canvases.push_back(
         Visualization::showHoles(
           "",
           interpolatedDepthImage_,
           rgbdHolesConveyor,
           -1,
-          msgs);
+          msgs));
 
-      cv::Mat rgbCanvas =
-        Visualization::showHoles(
-          "",
-          rgbImage_,
-          rgbdHolesConveyor,
-          -1,
-          msgs);
+      titles.push_back("After merging");
 
-      std::vector<cv::Mat> canvases;
-      canvases.push_back(depthCanvas);
-      canvases.push_back(rgbCanvas);
-
-      std::vector<std::string> titles;
-      titles.push_back("Interpolated depth image");
-      titles.push_back("RGB image");
-
-      Visualization::multipleShow("Sifted Keypoints", canvases, titles, 1280, 1);
+      Visualization::multipleShow("Merged and Sifted Keypoints",
+        canvases, titles, Parameters::debug_show_merge_holes_size, 1);
     }
     #endif
 
@@ -1055,35 +1032,38 @@ namespace pandora_vision
       depthActiveFilters++;
     }
 
-    std::vector<std::vector<float> > depthProbabilitiesVector2D(
-      depthActiveFilters,
-      std::vector<float>(conveyor.keyPoints.size(), 0.0));
-
-    //!< check holes for debugging purposes
-    DepthFilters::checkHoles(
-      interpolatedDepthImage_,
-      pointCloudXYZ_,
-      conveyor,
-      &depthProbabilitiesVector2D);
-
-    #ifdef DEBUG_SHOW
-    ROS_ERROR("-------------------------------------------");
-    if (conveyor.keyPoints.size() > 0)
+    if (depthActiveFilters > 0)
     {
-      ROS_ERROR("Depth : Candidate Holes' probabilities");
-      for (int j = 0; j < conveyor.keyPoints.size(); j++)
-      {
-        std::string probsString;
-        for (int i = 0; i < depthActiveFilters; i++)
-        {
-          probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
-        }
+      std::vector<std::vector<float> > depthProbabilitiesVector2D(
+        depthActiveFilters,
+        std::vector<float>(conveyor.keyPoints.size(), 0.0));
 
-        ROS_ERROR("P_%d [%f %f]= %s", j, conveyor.keyPoints[j].pt.x,
-          conveyor.keyPoints[j].pt.y, probsString.c_str());
+      //!< check holes for debugging purposes
+      DepthFilters::checkHoles(
+        interpolatedDepthImage_,
+        pointCloudXYZ_,
+        conveyor,
+        &depthProbabilitiesVector2D);
+
+      #ifdef DEBUG_SHOW
+      ROS_ERROR("-------------------------------------------");
+      if (conveyor.keyPoints.size() > 0)
+      {
+        ROS_ERROR("Depth : Candidate Holes' probabilities");
+        for (int j = 0; j < conveyor.keyPoints.size(); j++)
+        {
+          std::string probsString;
+          for (int i = 0; i < depthActiveFilters; i++)
+          {
+            probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
+          }
+
+          ROS_ERROR("P_%d [%f %f]= %s", j, conveyor.keyPoints[j].pt.x,
+            conveyor.keyPoints[j].pt.y, probsString.c_str());
+        }
       }
+      #endif
     }
-    #endif
 
     //!< Initialize the rgb probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
@@ -1106,34 +1086,37 @@ namespace pandora_vision
       rgbActiveFilters++;
     }
 
-
-    std::vector<std::vector<float> > rgbProbabilitiesVector2D(rgbActiveFilters,
-      std::vector<float>(conveyor.keyPoints.size(), 0.0));
-
-    //!< check holes for debugging purposes
-    RgbFilters::checkHoles(
-      rgbImage_,
-      wallsHistogram_,
-      conveyor,
-      &rgbProbabilitiesVector2D);
-
-    #ifdef DEBUG_SHOW
-    if (conveyor.keyPoints.size() > 0)
+    if (rgbActiveFilters > 0)
     {
-      ROS_ERROR("RGB: Candidate Holes' probabilities");
-      for (int j = 0; j < conveyor.keyPoints.size(); j++)
-      {
-        std::string probsString;
-        for (int i = 0; i < rgbActiveFilters; i++)
-        {
-          probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
-        }
+      std::vector<std::vector<float> > rgbProbabilitiesVector2D(
+        rgbActiveFilters,
+        std::vector<float>(conveyor.keyPoints.size(), 0.0));
 
-        ROS_ERROR("P_%d [%f %f] = %s", j, conveyor.keyPoints[j].pt.x,
-          conveyor.keyPoints[j].pt.y, probsString.c_str());
+      //!< check holes for debugging purposes
+      RgbFilters::checkHoles(
+        rgbImage_,
+        wallsHistogram_,
+        conveyor,
+        &rgbProbabilitiesVector2D);
+
+      #ifdef DEBUG_SHOW
+      if (conveyor.keyPoints.size() > 0)
+      {
+        ROS_ERROR("RGB: Candidate Holes' probabilities");
+        for (int j = 0; j < conveyor.keyPoints.size(); j++)
+        {
+          std::string probsString;
+          for (int i = 0; i < rgbActiveFilters; i++)
+          {
+            probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
+          }
+
+          ROS_ERROR("P_%d [%f %f] = %s", j, conveyor.keyPoints[j].pt.x,
+            conveyor.keyPoints[j].pt.y, probsString.c_str());
+        }
       }
+      #endif
     }
-    #endif
 
     #ifdef DEBUG_TIME
     Timer::tick("sift");
