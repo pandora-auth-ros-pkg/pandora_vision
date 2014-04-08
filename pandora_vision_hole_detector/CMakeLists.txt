@@ -52,6 +52,7 @@ include_directories(include
 add_library(depth_node_lib
   src/utils/message_conversions.cpp
   src/utils/hole_filters.cpp
+  src/utils/holes_conveyor.cpp
   src/utils/noise_elimination.cpp
   src/utils/edge_detection.cpp
   src/utils/blob_detection.cpp
@@ -182,6 +183,7 @@ add_dependencies(rgb_dummy_node
 ################################ RgbNode ######################################
 add_library(rgb_node_lib
   src/utils/hole_filters.cpp
+  src/utils/holes_conveyor.cpp
   src/utils/noise_elimination.cpp
   src/utils/edge_detection.cpp
   src/utils/blob_detection.cpp

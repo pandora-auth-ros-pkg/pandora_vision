@@ -374,9 +374,13 @@ namespace pandora_vision
 
       if (deleteThisKeypoint)
       {
+        keypointOutline.erase(keypointOutline.begin(),
+          keypointOutline.end());
+
         inKeyPoints->erase(inKeyPoints->begin() + keypointId);
         continue;
       }
+
 
       blobsOutlineVector->push_back(keypointOutline);
 
@@ -410,6 +414,13 @@ namespace pandora_vision
 
       blobsArea->push_back(area);
     }
+
+    //!< Because the keypoints vector is traversed backwards,
+    //!< but the elements are pushed back into keypointOutline and blobsArea,
+    //!< we must reverse them in order for them to be accurately corresponded
+    //!< to one another
+    std::reverse(blobsOutlineVector->begin(), blobsOutlineVector->end());
+    std::reverse(blobsArea->begin(), blobsArea->end());
 
     #ifdef DEBUG_TIME
     Timer::tick("raycastKeypoint");
