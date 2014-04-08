@@ -134,6 +134,9 @@ namespace pandora_vision
   bool Parameters::debug_show_check_holes = false;
   int Parameters::debug_show_check_holes_size = 1200;
 
+  bool Parameters::debug_show_merge_holes = false;
+  int Parameters::debug_show_merge_holes_size = 1200;
+
 
   //!< Texture parameters
   //!< The threshold for texture matching

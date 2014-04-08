@@ -142,6 +142,8 @@ namespace pandora_vision
     static bool debug_show_check_holes;
     static int debug_show_check_holes_size;
 
+    static bool debug_show_merge_holes;
+    static int debug_show_merge_holes_size;
 
     //!< Texture parameters
     //!< The threshold for texture matching
