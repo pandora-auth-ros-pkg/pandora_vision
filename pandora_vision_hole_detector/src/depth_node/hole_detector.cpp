@@ -137,7 +137,7 @@ namespace pandora_vision
       packed in the conveyor object.
      **/
     HoleFilters::validateBlobs(
-      keyPoints,
+      &keyPoints,
       &denoisedDepthImageEdges,
       Parameters::bounding_box_detection_method,
       &conveyor);

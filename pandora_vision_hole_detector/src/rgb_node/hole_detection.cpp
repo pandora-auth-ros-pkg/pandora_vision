@@ -175,6 +175,10 @@ namespace pandora_vision
   */
   void HoleDetection::inputRgbImageCallback(const sensor_msgs::Image& msg)
   {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("RGB node callback");
+    #endif
+
     #ifdef DEBUG_TIME
     Timer::start("inputRgbImageCallback", "", true);
     #endif
@@ -189,7 +193,6 @@ namespace pandora_vision
       ROS_ERROR("[rgb_node] : No more Frames");
       return;
     }
-
 
     HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
 

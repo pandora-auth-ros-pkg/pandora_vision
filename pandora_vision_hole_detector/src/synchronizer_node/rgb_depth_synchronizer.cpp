@@ -111,7 +111,7 @@ namespace pandora_vision
 
       #ifdef DEBUG_TIME
       ROS_ERROR("================================================");
-      ROS_ERROR("Previous synchronizer evocation before %f seconds",
+      ROS_ERROR("Previous synchronizer evocation before %fs",
         ros::Time::now().toSec() - evocationTime_);
       ROS_ERROR("================================================");
 

@@ -271,7 +271,7 @@ namespace pandora_vision
   /**
     @brief Implements a raycast algorithm for all blob keypoints in order
     to find the blob limits
-    @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+    @param[in][out] inKeyPoints [std::vector<cv::KeyPoint>*] The keypoints
     @param[in] edgesImage [cv::Mat*] The input image
     @param[in] partitions [const int&] The number of directions
     towards which the outline of the blob will be sought,
@@ -283,7 +283,7 @@ namespace pandora_vision
     @return void
    **/
   void BlobDetection::raycastKeypoint(
-      const std::vector<cv::KeyPoint>& inKeyPoints,
+      std::vector<cv::KeyPoint>* inKeyPoints,
       cv::Mat* edgesImage,
       const int& partitions,
       std::vector<std::vector<cv::Point> >* blobsOutlineVector,
@@ -293,10 +293,19 @@ namespace pandora_vision
     Timer::start("raycastKeypoint", "validateBlobs");
     #endif
 
+
     unsigned char* ptr = edgesImage->ptr();
 
-    for (int keypointId = 0; keypointId < inKeyPoints.size(); keypointId++)
+    //!< Traverse the inKeyPoints vector backwards because a keypoint
+    //!< might be deleted due to it not being entirely surrounded by
+    //!< non-zero pixels
+    for (int keypointId = inKeyPoints->size() - 1; keypointId >= 0;
+      keypointId--)
     {
+      //!< A priori, this keypoint is not to be deleted
+      bool deleteThisKeypoint = false;
+
+      //!< A vector storing the non-zero pixels surrounding the keypoint
       std::vector<cv::Point> keypointOutline;
 
       float theta = 0;
@@ -307,22 +316,35 @@ namespace pandora_vision
         bool outlineFound = false;
         int counter = 0;
 
-        while(!outlineFound)
+        while(!outlineFound && !deleteThisKeypoint)
         {
           counter++;
+
+          //!< If the 8 pixels surrounding the ray's pixel, including the center
+          //!< pixel, are found to be all outside the image's borders,
+          //!< something has gone horribly wrong. The keypoint is not surrounded
+          //!< entirely by non-zero pixels. The best choice is to delete it.
+          int numPixelsOutsideImageBorders = 0;
 
           for (int m = -1; m < 2; m++)
           {
             for (int n = -1; n < 2; n++)
             {
-              int x = inKeyPoints[keypointId].pt.x + m + counter * cos(theta);
-              int y = inKeyPoints[keypointId].pt.y + n + counter * sin(theta);
+              int x = (*inKeyPoints)[keypointId].pt.x + m + counter * cos(theta);
+              int y = (*inKeyPoints)[keypointId].pt.y + n + counter * sin(theta);
 
-              //!< If the ray point is not within image borders, proceed
+              //!< If the ray point is not within image borders
               if (x < 0 || y < 0 ||
                 x > edgesImage->cols - 1 ||
                 y > edgesImage->rows - 1)
               {
+                numPixelsOutsideImageBorders++;
+
+                if (numPixelsOutsideImageBorders >= 9)
+                {
+                  deleteThisKeypoint = true;
+                }
+
                 continue;
               }
 
@@ -336,9 +358,24 @@ namespace pandora_vision
               }
             }
           }
-        }
+        } //!< End {while outline not found} loop
 
-        theta += thetaIncrement;
+        //!< If this keypoint is to be deleted, break from the angles loop
+        //!< in order to delete the keypoint and move on to the next one
+        if (deleteThisKeypoint)
+        {
+          break;
+        }
+        else
+        {
+          theta += thetaIncrement;
+        }
+      }
+
+      if (deleteThisKeypoint)
+      {
+        inKeyPoints->erase(inKeyPoints->begin() + keypointId);
+        continue;
       }
 
       blobsOutlineVector->push_back(keypointOutline);
@@ -351,12 +388,12 @@ namespace pandora_vision
         //!< calculate the area of each triangle found
         //!< O is the keypoint and A, B any two successive outline points
         float lengthOA = sqrt(
-          pow(inKeyPoints[keypointId].pt.x - keypointOutline[t].x, 2)
-          + pow(inKeyPoints[keypointId].pt.y - keypointOutline[t].y, 2));
+          pow((*inKeyPoints)[keypointId].pt.x - keypointOutline[t].x, 2)
+          + pow((*inKeyPoints)[keypointId].pt.y - keypointOutline[t].y, 2));
         float lengthOB = sqrt(
-          pow(inKeyPoints[keypointId].pt.x
+          pow((*inKeyPoints)[keypointId].pt.x
             - keypointOutline[(t + 1) % partitions].x, 2)
-          + pow(inKeyPoints[keypointId].pt.y
+          + pow((*inKeyPoints)[keypointId].pt.y
             - keypointOutline[(t + 1) % partitions].y, 2));
         float lengthAB = sqrt(
           pow(keypointOutline[t].x

@@ -826,6 +826,49 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
+    HolesConveyor rgbdHolesConveyorBeforeMerge;
+    HolesConveyorUtils::copyTo(rgbdHolesConveyor,
+      &rgbdHolesConveyorBeforeMerge);
+
+    #ifdef DEBUG_SHOW
+    if(Parameters::debug_show_find_holes)
+    {
+      //!< Push back the identifier of each keypoint
+      std::vector<std::string> msgs;
+      for (int i = 0; i < rgbdHolesConveyorBeforeMerge.keyPoints.size(); i++)
+      {
+        msgs.push_back(TOSTR(i));
+      }
+
+      cv::Mat depthCanvas =
+        Visualization::showHoles(
+          "",
+          interpolatedDepthImage_,
+          rgbdHolesConveyorBeforeMerge,
+          -1,
+          msgs);
+
+      cv::Mat rgbCanvas =
+        Visualization::showHoles(
+          "",
+          rgbImage_,
+          rgbdHolesConveyorBeforeMerge,
+          -1,
+          msgs);
+
+      std::vector<cv::Mat> canvases;
+      canvases.push_back(depthCanvas);
+      canvases.push_back(rgbCanvas);
+
+      std::vector<std::string> titles;
+      titles.push_back("Interpolated depth image");
+      titles.push_back("RGB image");
+
+      Visualization::multipleShow("Keypoints before merge",
+        canvases, titles, 1280, 1);
+    }
+    #endif
+
     //!< Try to merge holes that can be assimilated, amalgamated or connected
     for (int i = 0; i < 3; i++)
     {
@@ -833,6 +876,45 @@ namespace pandora_vision
     }
 
     sift(rgbdHolesConveyor);
+
+
+    #ifdef DEBUG_SHOW
+    if(Parameters::debug_show_find_holes)
+    {
+      //!< Push back the identifier of each keypoint
+      std::vector<std::string> msgs;
+      for (int i = 0; i < rgbdHolesConveyor.keyPoints.size(); i++)
+      {
+        msgs.push_back(TOSTR(i));
+      }
+
+      cv::Mat depthCanvas =
+        Visualization::showHoles(
+          "",
+          interpolatedDepthImage_,
+          rgbdHolesConveyor,
+          -1,
+          msgs);
+
+      cv::Mat rgbCanvas =
+        Visualization::showHoles(
+          "",
+          rgbImage_,
+          rgbdHolesConveyor,
+          -1,
+          msgs);
+
+      std::vector<cv::Mat> canvases;
+      canvases.push_back(depthCanvas);
+      canvases.push_back(rgbCanvas);
+
+      std::vector<std::string> titles;
+      titles.push_back("Interpolated depth image");
+      titles.push_back("RGB image");
+
+      Visualization::multipleShow("Sifted Keypoints", canvases, titles, 1280, 1);
+    }
+    #endif
 
     #ifdef DEBUG_TIME
     Timer::tick("processCandidateHoles");
@@ -1047,46 +1129,6 @@ namespace pandora_vision
         ROS_ERROR("P_%d [%f %f] = %s", j, conveyor.keyPoints[j].pt.x,
           conveyor.keyPoints[j].pt.y, probsString.c_str());
       }
-    }
-    #endif
-
-
-    #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_find_holes)
-    {
-      //!< Push back the identifier of each keypoint
-      std::vector<std::string> msgs;
-      for (int i = 0; i < conveyor.keyPoints.size(); i++)
-      {
-        msgs.push_back(TOSTR(i));
-      }
-
-      cv::Mat depthCanvas =
-        Visualization::showHoles(
-          "",
-          interpolatedDepthImage_,
-          conveyor,
-          -1,
-          msgs);
-
-      cv::Mat rgbCanvas =
-        Visualization::showHoles(
-          "",
-          rgbImage_,
-          conveyor,
-          -1,
-          msgs);
-
-      std::vector<cv::Mat> canvases;
-      canvases.push_back(depthCanvas);
-      canvases.push_back(rgbCanvas);
-
-      std::vector<std::string> titles;
-      titles.push_back("Interpolated depth image");
-      titles.push_back("RGB image");
-
-      Visualization::multipleShow("Sifted Keypoints", canvases, titles, 1280, 1);
-
     }
     #endif
 
