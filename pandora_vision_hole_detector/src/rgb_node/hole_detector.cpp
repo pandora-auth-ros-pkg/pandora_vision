@@ -85,13 +85,14 @@ namespace pandora_vision
     cv::Mat before_blur;
     holeFrame.copyTo(before_blur);
     msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    msg += " : Initial Depth";
+    msg += " : Initial RGB image";
     msgs.push_back(msg);
     imgs.push_back(before_blur);
     #endif
 
     backprojectedFrame = cv::Mat::zeros(holeFrame.size().height,
       holeFrame.size().width, CV_8UC1);
+
     holeFrame.copyTo(temp);
 
     cv::Mat after_blur;
@@ -120,6 +121,7 @@ namespace pandora_vision
 
     EdgeDetection::denoiseEdges(&temp);
 
+
     #ifdef SHOW_DEBUG_IMAGE
     msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
     msg += " : After denoising";
@@ -129,14 +131,16 @@ namespace pandora_vision
 
     BlobDetection::detectBlobs(temp, &detectedkeyPoints);
 
+
     //!< The final vectors of keypoints, rectangles and blobs' outlines.
     struct HolesConveyor conveyor;
 
     HoleFilters::validateBlobs(
-      detectedkeyPoints,
+      &detectedkeyPoints,
       &temp,
       Parameters::bounding_box_detection_method,
       &conveyor);
+
 
     #ifdef SHOW_DEBUG_IMAGE
     msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
@@ -161,6 +165,7 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::tick("findHoles");
     #endif
+
     return conveyor;
   }
 

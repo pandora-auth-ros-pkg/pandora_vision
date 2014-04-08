@@ -97,7 +97,7 @@ namespace pandora_vision
       /**
         @brief Implements a raycast algorithm for all blob keypoints in order
         to find the blob limits
-        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
+        @param[in][out] inKeyPoints [std::vector<cv::KeyPoint>*] The keypoints
         @param[in] edgesImage [cv::Mat*] The input image
         @param[in] partitions [const int&] The number of directions
         towards which the outline of the blob will be sought,
@@ -109,7 +109,7 @@ namespace pandora_vision
         @return void
        **/
       static void raycastKeypoint(
-        const std::vector<cv::KeyPoint>& inKeyPoints,
+        std::vector<cv::KeyPoint>* inKeyPoints,
         cv::Mat* edgesImage,
         const int& partitions,
         std::vector<std::vector<cv::Point> >* blobsOutlineVector,
