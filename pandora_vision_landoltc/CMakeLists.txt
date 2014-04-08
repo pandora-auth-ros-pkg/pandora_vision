@@ -37,6 +37,7 @@ add_executable(landoltc_node
               src/landoltc_node.cpp
 						  src/landoltc_detection.cpp
               src/landoltc_detector.cpp
+              src/landoltc3d_detector.cpp
 )
 target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
@@ -52,9 +53,11 @@ set(ROSLINT_CPP_OPTS
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
   RELATIVE ${PROJECT_SOURCE_DIR} 
             
+  include/landoltc3d_detector.h
   include/landoltc_detector.h
   include/landoltc_detection.h
   src/landoltc_detector.cpp
+  src/landoltc3d_detector.cpp
   src/landoltc_detection.cpp
   src/landoltc_node.cpp
   
