@@ -827,8 +827,11 @@ namespace pandora_vision
       &rgbdHolesConveyor);
 
     HolesConveyor rgbdHolesConveyorBeforeMerge;
+
     HolesConveyorUtils::copyTo(rgbdHolesConveyor,
       &rgbdHolesConveyorBeforeMerge);
+
+
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_find_holes)
@@ -870,7 +873,7 @@ namespace pandora_vision
     #endif
 
     //!< Try to merge holes that can be assimilated, amalgamated or connected
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 1; i++)
     {
       applyMergeOperation(&rgbdHolesConveyor, i);
     }

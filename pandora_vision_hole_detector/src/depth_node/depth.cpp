@@ -141,10 +141,6 @@ namespace pandora_vision
 
 
 
-
-
-
-
   /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
