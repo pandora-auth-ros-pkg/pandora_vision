@@ -65,7 +65,7 @@ namespace pandora_vision
     public:
     
     //!Constructor
-    EdgeOrientationDetection ();
+    EdgeOrientationDetection();
     
     //!Destructor
     virtual ~EdgeOrientationDetection ();
@@ -73,8 +73,29 @@ namespace pandora_vision
     /**
      * @brief This is the main function which calls all the others and 
      * computes the final edge histogram features.
+     * @param src [cv::Mat] the current image.
     */ 
     void findEdgeFeatures(cv::Mat src);
+
+    /**
+     *@brief This is the function which divides the image 
+     *into 16 subblocks and calls the findLocalEdgeFeatures to compute the 
+     *features of the current subblock
+     * @param currFrame [cv::Mat] the current subblock.
+     * @param colsBlockSize [int] the cols size of the subblock.
+     * @param rowsBlockSize [int] the rows size of the subblock.
+     * @return [std::vector<double>] the computed  80 edgeFeatures vector.
+    */ 
+    std::vector<double> partition(cv::Mat currFrame, int colsBlockSize, 
+                                  int rowsBlockSize );
+
+    /**
+     * @brief This is the function which  computes the edge histogram 
+     *  feature of the current subblock.
+     * @param currFrame [cv::Mat] the current subblock.
+     * @return [std::vector<double>] the computed 1x5 edgeFeatures vector
+    */ 
+    std::vector<double> findLocalEdgeFeatures(cv::Mat currFrame);
     
     /**
      * @brief This function applies the sobel filters on the src image.  
