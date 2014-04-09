@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_landoltc)
 
+set(CMAKE_BUILD_TYPE Release)
+#~ set(CMAKE_BUILD_TYPE Debug)
+
 find_package(catkin REQUIRED COMPONENTS 
     roscpp
     vision_communications
@@ -33,11 +36,12 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+
+########################### landoltcNode ############################
 add_executable(landoltc_node 
               src/landoltc_node.cpp
-						  src/landoltc_detection.cpp
+              src/landoltc_detection.cpp
               src/landoltc_detector.cpp
-              src/landoltc3d_detector.cpp
 )
 target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
@@ -45,6 +49,7 @@ add_dependencies(landoltc_node
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
+
 
 #~ To check lint : catkin_make roslint_pandora_vision_landoltc
 set(ROSLINT_CPP_OPTS 
