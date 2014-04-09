@@ -52,6 +52,19 @@ add_dependencies(landoltc_node
     vision_communications_gencpp
 )
 
+########################### landoltc3dNode ############################
+add_executable(landoltc3d_node 
+              src/landoltc3d_node.cpp
+              src/landoltc3d_detection.cpp
+              src/landoltc3d_detector.cpp
+)
+target_link_libraries(landoltc3d_node ${catkin_LIBRARIES} )
+
+add_dependencies(landoltc3d_node 
+    ${catkin_EXPORTED_TARGETS}
+    vision_communications_gencpp
+)
+
 
 #~ To check lint : catkin_make roslint_pandora_vision_landoltc
 set(ROSLINT_CPP_OPTS 
