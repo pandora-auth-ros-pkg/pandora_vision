@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     vision_communications
     state_manager
     state_manager_communications
+    vision_communications
     cv_bridge
     image_transport
     sensor_msgs
@@ -23,6 +24,7 @@ catkin_package(
       vision_communications
       state_manager
       state_manager_communications
+      vision_communications
       cv_bridge
       image_transport
       sensor_msgs
@@ -46,8 +48,8 @@ add_executable(landoltc_node
 target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
 add_dependencies(landoltc_node 
-    vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
+    vision_communications_gencpp
 )
 
 
