@@ -768,12 +768,10 @@ namespace pandora_vision
     ROS_INFO("Hole Fusion Point Cloud callback");
     #endif
 
-    //!< Unpack the point cloud
+    //!< Unpack the point cloud and store it in the member variable
+    //!< pointCloudXYZ_
     MessageConversions::extractPointCloudXYZFromMessage(msg,
       &pointCloudXYZ_);
-
-    //!< Interpolate the point cloud and store it the member variable
-    //!< pointCloudXYZ_
 
     //!< Extract the depth image from the point cloud message
     cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
@@ -831,11 +829,12 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
+    //!< Keep a copy of the initial (not merged) candidate holes for
+    //!< debugging and exibition purposes
     HolesConveyor rgbdHolesConveyorBeforeMerge;
 
     HolesConveyorUtils::copyTo(rgbdHolesConveyor,
       &rgbdHolesConveyorBeforeMerge);
-
 
 
     #ifdef DEBUG_SHOW
@@ -863,13 +862,12 @@ namespace pandora_vision
     }
     #endif
 
+
     //!< Try to merge holes that can be assimilated, amalgamated or connected
     for (int i = 0; i < 3; i++)
     {
       applyMergeOperation(&rgbdHolesConveyor, i);
     }
-
-    sift(rgbdHolesConveyor);
 
 
     #ifdef DEBUG_SHOW
@@ -891,10 +889,12 @@ namespace pandora_vision
 
       titles.push_back("After merging");
 
-      Visualization::multipleShow("Merged and Sifted Keypoints",
+      Visualization::multipleShow("Merged Keypoints",
         canvases, titles, Parameters::debug_show_merge_holes_size, 1);
     }
     #endif
+
+    sift(rgbdHolesConveyor);
 
     #ifdef DEBUG_TIME
     Timer::tick("processCandidateHoles");
