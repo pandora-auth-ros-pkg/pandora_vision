@@ -46,7 +46,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltCDetection::LandoltCDetection()
+LandoltCDetection::LandoltCDetection() : _nh(), landoltcNowON(false)
 {
   getGeneralParams();
 
@@ -55,7 +55,13 @@ LandoltCDetection::LandoltCDetection()
 
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
                                         &LandoltCDetection::imageCallback, this);
-
+  
+  //!< Declare publisher and advertise topic
+  //!< where algorithm results are posted
+  _landoltcPublisher =
+      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>("landoltc_alert", 10, true);
+      
+      
   ROS_INFO("[landoltc_node] : Created LandoltC Detection instance");
 
 }
@@ -185,7 +191,62 @@ void LandoltCDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void LandoltCDetection::landoltcCallback()
 {
+  if(!landoltcNowON)
+  {
+    return;
+  }
+    
   _landoltcDetector.begin(&landoltCFrame);
+  
+  //!< Create message of Landoltc Detector
+  vision_communications::LandoltcAlertsVectorMsg LandoltcVectorMsg;
+  vision_communications::LandoltcAlertMsg LandoltccodeMsg;
+  LandoltcVectorMsg.header.frame_id = cameraFrameId;
+  LandoltcVectorMsg.header.stamp = ros::Time::now();
 }
 
+/**
+  @brief Node's state manager
+  @param newState [int] The robot's new state
+  @return void
+*/
+void LandoltCDetection::startTransition(int newState)
+{
+  curState = newState;
+
+  //!< check if datamatrix algorithm should be running now
+  landoltcNowON =
+    (curState ==
+     state_manager_communications::robotModeMsg::MODE_EXPLORATION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_ARM_APPROACH)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_TELEOPERATED_LOCOMOTION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_DF_HOLD);
+
+  //!< shutdown if the robot is switched off
+  if (curState ==
+      state_manager_communications::robotModeMsg::MODE_TERMINATING)
+  {
+    ros::shutdown();
+    return;
+  }
+
+  prevState = curState;
+
+  //!< this needs to be called everytime a node finishes transition
+  completeTransition();
+}
+
+/**
+ @brief After completion of state transition
+ @return void
+ */
+void LandoltCDetection::completeTransition()
+{
+  ROS_INFO("[Landoltc_node] : Transition Complete");
+}
 } // namespace pandora_vision

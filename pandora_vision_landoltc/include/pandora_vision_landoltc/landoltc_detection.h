@@ -49,7 +49,8 @@
 
 #include <iostream>
 #include <stdlib.h>
-
+#include "state_manager/state_client.h"
+#include "vision_communications/LandoltcAlertsVectorMsg.h"
 #include "pandora_vision_landoltc/landoltc_detector.h"
 //!< default frame height
 #define DEFAULT_HEIGHT 480
@@ -82,7 +83,13 @@ private:
 
   //!< The topic subscribed to for the front camera
   std::string imageTopic;
-
+  
+  //!< Variable used for State Managing
+  bool landoltcNowON;
+  
+  //!< Publishers for LandoltcDetector result messages
+  ros::Publisher _landoltcPublisher;
+    
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
@@ -119,8 +126,22 @@ public:
   @return void
   **/
   void getGeneralParams();
+  
+  /**
+    @brief Node's state manager
+    @param newState [int] The robot's new state
+    @return void
+  */
+    void startTransition(int newState);
 
-
-};
+  /**
+    @brief After completion of state transition
+    @return void
+  */
+    void completeTransition(void);
+    
+    int curState;
+    int prevState;
+  };
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTION_H
