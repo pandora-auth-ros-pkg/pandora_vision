@@ -130,14 +130,12 @@ namespace pandora_vision
 
     //!< Are all the outline points of assimilable inside the
     //!< assimilator's outline?
-    bool allAssimilableOutlinePointsInAssimilator = true;
     for (int av = 0; av < assimilable.outlines[assimilableId].size(); av++)
     {
       if (cv::pointPolygonTest(assimilator.outlines[assimilatorId],
           assimilable.outlines[assimilableId][av], false) < 0)
       {
-        allAssimilableOutlinePointsInAssimilator = false;
-        break;
+        return false;
       }
     }
 
@@ -145,7 +143,7 @@ namespace pandora_vision
     Timer::tick("isCapableOfAssimilating");
     #endif
 
-    return allAssimilableOutlinePointsInAssimilator;
+    return true;
   }
 
 
@@ -265,22 +263,21 @@ namespace pandora_vision
     Timer::start("isCapableOfConnecting", "applyMergeOperation");
     #endif
 
-    //!< Are all the connectable's outline points outside
-    //!< the connector's bounding box?
-    int numconnectableOutlinePointsInconnector = 0;
-
-    //!< The real min distance (in meters) between two points of the
-    //!< connector's and connectable's outlines
-    double minOutlinesDistance = 10000.0;
-
     for (int av = 0; av < connectable.outlines[connectableId].size(); av++)
     {
       if (cv::pointPolygonTest(connector.outlines[connectorId],
           connectable.outlines[connectableId][av], false) > 0)
       {
-        numconnectableOutlinePointsInconnector++;
+        return false;
       }
+    }
 
+
+    //!< The real min distance (in meters) between two points of the
+    //!< connector's and connectable's outlines
+    double minOutlinesDistance = 10000.0;
+    for (int av = 0; av < connectable.outlines[connectableId].size(); av++)
+    {
       //!< The connectable's current outline point x,y,z coordinates
       //!< measured by the depth sensor
       float connectableOutlinePointX = pointCloudXYZ->points[
@@ -337,8 +334,7 @@ namespace pandora_vision
     //!< outlines is greater than a distance thrshold,
     //!< this connectable is not a candidate to be connected with
     //!< the connector
-    if (numconnectableOutlinePointsInconnector != 0 ||
-      minOutlinesDistance > Parameters::connect_holes_min_distance)
+    if (minOutlinesDistance > Parameters::connect_holes_min_distance)
     {
       return false;
     }
@@ -604,7 +600,7 @@ namespace pandora_vision
 
     //!< Are all the assimilable's outline points inside
     //!< the assimilator's bounding box? If not all but some, continue
-    int numAmalgamatableOutlinePointsInAmalgamator= 0;
+    int numAmalgamatableOutlinePointsInAmalgamator = 0;
     for (int av = 0; av < amalgamatable.outlines[amalgamatableId].size(); av++)
     {
       if (cv::pointPolygonTest(amalgamator.outlines[amalgamatorId],
@@ -613,6 +609,7 @@ namespace pandora_vision
         numAmalgamatableOutlinePointsInAmalgamator++;
       }
     }
+
 
     //!< If zero or all of amalgamatable's outline points
     //!< are inside the amalgamator's outline, this amalgamatable is
