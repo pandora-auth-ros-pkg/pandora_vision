@@ -159,6 +159,7 @@ namespace pandora_vision
       //!< Is the activeId-th candidate hole able to
       //!< {assimilate, amalgamate, connect to} the passiveId-th candidate hole?
       bool isAble = false;
+
       if (operationId == 0)
       {
         //!< Is the activeId-th candidate hole able to assimilate the
@@ -238,7 +239,7 @@ namespace pandora_vision
         std::vector<cv::Mat> imgs;
         std::vector<std::string> msgs;
         std::vector<std::set<unsigned int> > holesMasksSetVector;
-        std::vector<std::vector<cv::Point> > rectanglesVector;
+        std::vector<std::vector<cv::Point2f> > rectanglesVector;
         std::vector<int> rectanglesIndices;
         std::vector<std::set<unsigned int> > intermediatePointsSetVector;
 
@@ -469,11 +470,11 @@ namespace pandora_vision
       conveyor->rectangles.push_back(renctangleVertices);
 
       //!< Recreate conveyor.outlines
-      std::vector<cv::Point> outlinePoints;
+      std::vector<cv::Point2f> outlinePoints;
       for (unsigned int o = 0;
         o < candidateHolesVector[i].outlineX.size(); o++)
       {
-        cv::Point outlinePoint;
+        cv::Point2f outlinePoint;
         outlinePoint.x = candidateHolesVector[i].outlineX[o];
         outlinePoint.y = candidateHolesVector[i].outlineY[o];
         outlinePoints.push_back(outlinePoint);
@@ -1052,7 +1053,7 @@ namespace pandora_vision
       &holesMasksSetVector);
 
     //!< A vector of vertices of each inflated bounding rectangle.
-    std::vector<std::vector<cv::Point> > inflatedRectanglesVector;
+    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector;
 
     //!< Since inflated rectangle's vertices may go outside the image's bounds,
     //!< this vector stores the indices of the keypoints whose corresponding
@@ -1316,7 +1317,7 @@ namespace pandora_vision
       //!< The set of points' indices inside the hole's outline
       std::set<unsigned int> visitedPoints;
 
-      cv::Point keypoint(
+      cv::Point2f keypoint(
         conveyor.keyPoints[i].pt.x, conveyor.keyPoints[i].pt.y);
 
       //!< Brushfire from the keypoint to the hole's outline
@@ -1372,7 +1373,7 @@ namespace pandora_vision
           conveyor.outlines[i][j].y, conveyor.outlines[i][j].x) = 255;
       }
 
-      cv::Point keypoint(
+      cv::Point2f keypoint(
         conveyor.keyPoints[i].pt.x, conveyor.keyPoints[i].pt.y);
 
       std::set<unsigned int> holeSet;
@@ -1406,12 +1407,12 @@ namespace pandora_vision
     @param[in] inflationSize [const int&] The bounding rectangles
     inflation size in pixels
     @param[out] inflatedRectanglesVector
-    [std::vector<std::vector<cv::Point> >*] The vector that holds the
+    [std::vector<std::vector<cv::Point2f> >*] The vector that holds the
     vertices of the in-image-bounds inflated rectangles
     @param[out] inflatedRectanglesIndices [std::vector<int>*]
     The vector that holes the indices of the original holes whose
     inflated bounding rectangles is within the image's bounds.
-    @param[out] brushfireBeginPoints [std::vector<cv::Point>*] A vector
+    @param[out] brushfireBeginPoints [std::vector<cv::Point2f>*] A vector
     used from checker methods that use the brushfire algorithm
     between a hole's outline and its inflated rectangle
     @return void
@@ -1420,7 +1421,7 @@ namespace pandora_vision
     const HolesConveyor& conveyor,
     const cv::Mat& image,
     const int& inflationSize,
-    std::vector<std::vector<cv::Point> >* inflatedRectanglesVector,
+    std::vector<std::vector<cv::Point2f> >* inflatedRectanglesVector,
     std::vector<int>* inflatedRectanglesIndices)
   {
     #ifdef DEBUG_TIME
@@ -1429,7 +1430,7 @@ namespace pandora_vision
 
     //!< Store the vertices of the inside-of-image-bounds inflated bounding
     //!< rectangles in the inflatedRectangles vector
-    std::vector<std::vector<cv::Point> > inflatedRectangles;
+    std::vector<std::vector<cv::Point2f> > inflatedRectangles;
 
     float key_y;
     float key_x;
@@ -1440,7 +1441,7 @@ namespace pandora_vision
 
     for (int i = 0; i < conveyor.rectangles.size(); i++)
     {
-      std::vector<cv::Point> inflatedVertices;
+      std::vector<cv::Point2f> inflatedVertices;
       int inflatedVerticesWithinImageLimits = 0;
 
       for (int j = 0; j < 4; j++)
@@ -1465,7 +1466,7 @@ namespace pandora_vision
         }
 
         inflatedVertices.push_back(
-          cv::Point(round(vert_x - inflationSize * cos(theta)),
+          cv::Point2f(round(vert_x - inflationSize * cos(theta)),
             round(vert_y - inflationSize * sin(theta))));
       } //!< end for rectangle's points
 
@@ -1496,7 +1497,7 @@ namespace pandora_vision
     These points are then stored in an image.
     @param[in] conveyor [const HolesConveyor&] The conveyor of holes
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&] A vector that holds
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
     @param[in] rectanglesIndices [const std::vector<int>&] A vector that
@@ -1514,7 +1515,7 @@ namespace pandora_vision
    **/
   void HoleFusion::createIntermediateHolesPointsImageVector(
     const HolesConveyor& conveyor,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     const cv::Mat& image,
     const int& inflationSize,
@@ -1540,7 +1541,7 @@ namespace pandora_vision
       unsigned char* ptr_r = rectangleOutlineFilled.ptr();
 
       //!< The brushfire start point is the hole's keypoint
-      cv::Point keypoint(
+      cv::Point2f keypoint(
         conveyor.keyPoints[rectanglesIndices[i]].pt.x,
         conveyor.keyPoints[rectanglesIndices[i]].pt.y);
 
@@ -1610,7 +1611,7 @@ namespace pandora_vision
     These points are then stored in a std::set of ints.
     @param[in] conveyor [const HolesConveyor&] The conveyor of holes
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&] A vector that holds
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
     @param[in] rectanglesIndices [const std::vector<int>&] A vector that
@@ -1624,7 +1625,7 @@ namespace pandora_vision
    **/
   void HoleFusion::createIntermediateHolesPointsSetVector(
     const HolesConveyor& conveyor,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     const cv::Mat& image,
     std::vector<std::set<unsigned int> >* intermediatePointsSetVector)
@@ -1649,7 +1650,7 @@ namespace pandora_vision
       unsigned char* ptr_r = rectangleOutlineFilled.ptr();
 
       //!< The brushfire start point is the hole's keypoint
-      cv::Point keypoint(
+      cv::Point2f keypoint(
         conveyor.keyPoints[rectanglesIndices[i]].pt.x,
         conveyor.keyPoints[rectanglesIndices[i]].pt.y);
 
@@ -1707,13 +1708,13 @@ namespace pandora_vision
  *
  *  void HoleFusion::createCheckerRequiredVectors(
  *    const HolesConveyor& conveyor,
- *    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+ *    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
  *    const std::vector<int>& rectanglesIndices,
  *    const cv::Mat& image,
  *    const int& inflationSize,
  *    std::vector<cv::Mat>* holesMasksImageVector,
  *    std::vector<std::set<int> >* holesMasksSetVector,
- *    std::vector<std::vector<cv::Point> >* inflatedRectanglesVector,
+ *    std::vector<std::vector<cv::Point2f> >* inflatedRectanglesVector,
  *    std::vector<int>* inflatedRectanglesIndices,
  *    std::vector<cv::Mat>* intermediatePointsImageVector,
  *    std::vector<std::set<int> >* intermediatePointsSetVector)
@@ -1735,41 +1736,41 @@ namespace pandora_vision
  *
  *    //!< Invalid
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(20, 20), cv::Point(30, 30), 50, 50, 30, 30, dummy);
+ *      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
  *
  *    //!< Invalid
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(80, 80), cv::Point(90, 90), 50, 50, 30, 30, dummy);
+ *      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
  *
  */
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(370, 130), cv::Point(372, 132), 80, 80, 76, 76, dummy);
+      cv::Point2f(370.0, 130.0), cv::Point2f(372.0, 132.0), 80, 80, 76, 76, dummy);
 /*
  *
  *    //!< 0-th assimilable
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(380, 140), cv::Point(382, 142), 20, 20, 16, 16, dummy);
+ *      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16, dummy);
  *
  */
     //!< 0-th amalgamatable
     HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(420, 140), cv::Point(422, 142), 40, 40, 36, 36, dummy);
+      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 40, 40, 36, 36, dummy);
 /*
  *
  *    //!< 0-th connectable
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(510, 80), cv::Point(512, 82), 40, 40, 36, 36, dummy);
+ *      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36, dummy);
  *
  *
  *    //!< 1-st assimilator - amalgamator - connector
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(300, 300), cv::Point(302, 302), 100, 100, 96, 96, dummy);
+ *      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96, dummy);
  *
  *    //!< 1-st connectable
  *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410, 350), cv::Point(412, 352), 50, 50, 46, 46, dummy);
+ *      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46, dummy);
  *
  */
 

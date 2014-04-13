@@ -707,8 +707,8 @@ namespace pandora_vision
     //!< Viewing the two outlines as sets,
     //!< the final outline should not have the intersection
     //!< of the two sets.
-    std::vector<cv::Point> amalgamatorOutline;
-    std::vector<cv::Point> amalgamatableOutline;
+    std::vector<cv::Point2f> amalgamatorOutline;
+    std::vector<cv::Point2f> amalgamatableOutline;
 
     //!< Add all the amalgamatable's outline points that are not located
     //!< inside the amalgamator's outline, to the amalgamatableOutline

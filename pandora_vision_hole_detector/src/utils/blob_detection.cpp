@@ -44,7 +44,7 @@ namespace pandora_vision
     find a blob limits
     @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
     @param[in] edgesImage [cv::Mat*] The input image
-    @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
+    @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point2f> >*]
     The output vector containing the blobs' outline
     @param[out] blobsArea [std::vector<float>*] The area of each blob
     @return void
@@ -52,7 +52,7 @@ namespace pandora_vision
   void BlobDetection::brushfireKeypoint(
     const std::vector<cv::KeyPoint>& inKeyPoints,
     cv::Mat* edgesImage,
-    std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+    std::vector<std::vector<cv::Point2f> >* blobsOutlineVector,
     std::vector<float>* blobsArea)
   {
     #ifdef DEBUG_TIME
@@ -65,7 +65,7 @@ namespace pandora_vision
     {
       std::set<unsigned int> current, next, visited;
 
-      std::vector<cv::Point> keypointOutline;
+      std::vector<cv::Point2f> keypointOutline;
 
       current.insert(
         static_cast<int>(
@@ -107,7 +107,7 @@ namespace pandora_vision
 
               if (v != 0)
               {
-                keypointOutline.push_back(cv::Point(x, y));
+                keypointOutline.push_back(cv::Point2f(x, y));
               }
 
               visited.insert(ind);
@@ -133,14 +133,14 @@ namespace pandora_vision
     @brief Implements the brushfire algorithm. Its specific purpose is
     to find the points between a blob's outline and its bounding box
     (not necessarily one of least area).
-    @param[in] inPoint [const cv::Point&] The input point
+    @param[in] inPoint [const cv::Point2f&] The input point
     @param[in] inImage [cv::Mat*] The input image
     @param[out] visited [std::set<unsigned int>*] The points between two
     areas of non-zero value pixels.
     @return void
    **/
   void BlobDetection::brushfirePoint(
-    const cv::Point& inPoint,
+    const cv::Point2f& inPoint,
     cv::Mat* inImage,
     std::set<unsigned int>* visited)
   {
@@ -278,7 +278,7 @@ namespace pandora_vision
     towards which the outline of the blob will be sought,
     or the number of partitions in which the blob will be divided by
     the rays.  Same deal.
-    @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
+    @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point2f> >*]
     The output vector containing the blobs' (rough approximate) outline
     @param[out] blobsArea [std::vector<float>*] The area of each blob
     @return void
@@ -287,7 +287,7 @@ namespace pandora_vision
       std::vector<cv::KeyPoint>* inKeyPoints,
       cv::Mat* edgesImage,
       const int& partitions,
-      std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+      std::vector<std::vector<cv::Point2f> >* blobsOutlineVector,
       std::vector<float>* blobsArea)
   {
     #ifdef DEBUG_TIME
@@ -307,7 +307,7 @@ namespace pandora_vision
       bool deleteThisKeypoint = false;
 
       //!< A vector storing the non-zero pixels surrounding the keypoint
-      std::vector<cv::Point> keypointOutline;
+      std::vector<cv::Point2f> keypointOutline;
 
       float theta = 0;
       float thetaIncrement = 2 * 3.1415926535897 / partitions;
@@ -357,7 +357,7 @@ namespace pandora_vision
               if (v != 0)
               {
                 outlineFound = true;
-                keypointOutline.push_back(cv::Point(x, y));
+                keypointOutline.push_back(cv::Point2f(x, y));
               }
             }
           }
@@ -409,7 +409,7 @@ namespace pandora_vision
         {
           if (canvas.at<unsigned char>(rows, cols) != 0)
           {
-            keypointOutline.push_back(cv::Point(cols, rows));
+            keypointOutline.push_back(cv::Point2f(cols, rows));
           }
         }
       }
@@ -467,12 +467,12 @@ namespace pandora_vision
     @outlines the outlines of closed curves.
     (Assumes that the input image comprises entirely of closed curves.)
     @param[in] inImage [cv::Mat*] The input binary image
-    @param[out] outlines [std::vector<std::vector<cv::Point> >*] The points
+    @param[out] outlines [std::vector<std::vector<cv::Point2f> >*] The points
     that each detected closed curve consists of
     @return void
    **/
   void BlobDetection::getClosedCurves(cv::Mat* inImage,
-    std::vector<std::vector<cv::Point> >* outlines)
+    std::vector<std::vector<cv::Point2f> >* outlines)
   {
     #ifdef DEBUG_TIME
     Timer::start("getClosedCurves");
@@ -481,7 +481,7 @@ namespace pandora_vision
     unsigned char* ptr = inImage->ptr();
 
     std::set<unsigned int> current, next, visited, checked;
-    std::vector<cv::Point> curve;
+    std::vector<cv::Point2f> curve;
 
     for (unsigned int rows = 0; rows < inImage->rows; rows++)
     {
@@ -495,7 +495,7 @@ namespace pandora_vision
         {
           current.insert(ind);
           visited.insert(ind);
-          curve.push_back(cv::Point(rows, cols));
+          curve.push_back(cv::Point2f(rows, cols));
 
           while (current.size() != 0)
           {
@@ -523,7 +523,7 @@ namespace pandora_vision
                   if ((nV != 0) && visited.find(nInd) == visited.end())
                   {
                     next.insert(nInd);
-                    curve.push_back(cv::Point(y, x));
+                    curve.push_back(cv::Point2f(y, x));
                   }
 
                   visited.insert(nInd);
