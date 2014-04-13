@@ -850,10 +850,13 @@ namespace pandora_vision
       &rgbdHolesConveyor);
 
 
-
-    HolesConveyor dummy;
-    testDummyHolesMerging(&dummy);
-    return;
+/*
+ *
+ *    HolesConveyor dummy;
+ *    testDummyHolesMerging(&dummy);
+ *    return;
+ *
+ */
 
     //!< Keep a copy of the initial (not merged) candidate holes for
     //!< debugging and exibition purposes
@@ -1310,7 +1313,7 @@ namespace pandora_vision
       //!< Draw the outline of the i-th hole onto holeMask
       for(unsigned int j = 0; j < conveyor.outlines[i].size(); j++)
       {
-        holeMask.at<uchar>(
+        holeMask.at<unsigned char>(
           conveyor.outlines[i][j].y, conveyor.outlines[i][j].x) = 255;
       }
 
@@ -1369,7 +1372,7 @@ namespace pandora_vision
       //!< Draw the outline of the i-th hole onto holeMask
       for(unsigned int j = 0; j < conveyor.outlines[i].size(); j++)
       {
-        holeMask.at<uchar>(
+        holeMask.at<unsigned char>(
           conveyor.outlines[i][j].y, conveyor.outlines[i][j].x) = 255;
       }
 
@@ -1732,47 +1735,47 @@ namespace pandora_vision
    **/
   void HoleFusion::testDummyHolesMerging(HolesConveyor* dummy)
   {
-/*
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
- *
- */
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
+
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(370.0, 130.0), cv::Point2f(372.0, 132.0), 80, 80, 76, 76, dummy);
-/*
- *
- *    //!< 0-th assimilable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16, dummy);
- *
- */
+      cv::Point2f(370.0, 130.0), cv::Point2f(372.0, 132.0), 80, 80, 76, 76,
+      dummy);
+
+    //!< 0-th assimilable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16,
+      dummy);
+
     //!< 0-th amalgamatable
     HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 40, 40, 36, 36, dummy);
-/*
- *
- *    //!< 0-th connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36, dummy);
- *
- *
- *    //!< 1-st assimilator - amalgamator - connector
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96, dummy);
- *
- *    //!< 1-st connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46, dummy);
- *
- */
+      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 40, 40, 36, 36,
+      dummy);
+
+    //!< 0-th connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
+      dummy);
+
+
+    //!< 1-st assimilator - amalgamator - connector
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
+      dummy);
+
+    //!< 1-st connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
+      dummy);
+
 
     //HolesConveyorUtils::shuffle(dummy);
 
