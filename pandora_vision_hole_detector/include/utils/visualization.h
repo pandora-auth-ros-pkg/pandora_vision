@@ -105,7 +105,7 @@ namespace pandora_vision
         The bounding boxes' vertices
         @param[in] msgs [const std::vector<std::string>] Message to show to each
         keypoint
-        @param[in] outlineVector [const std::vector<std::vector<cv::Point> >&]
+        @param[in] outlineVector [const std::vector<std::vector<cv::Point2f> >&]
         The valid holes' outlines
         @param[in] hz [const floa&t] If positive holds the Hz
         @return [cv::Mat] The drawn image
@@ -117,7 +117,7 @@ namespace pandora_vision
         const std::vector<cv::KeyPoint>& keypoints,
         const std::vector<std::vector<cv::Point2f> >& bounding_boxes,
         const std::vector<std::string>& msgs,
-        const std::vector<std::vector<cv::Point> >& outlineVector,
+        const std::vector<std::vector<cv::Point2f> >& outlineVector,
         const float& hz = -1);
 
       /**

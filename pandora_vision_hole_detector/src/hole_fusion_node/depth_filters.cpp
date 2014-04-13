@@ -45,7 +45,7 @@ namespace pandora_vision
     @param[in] depthImage [const cv::Mat&] The depth image
     @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&]
+    [const std::vector<std::vector<cv::Point2f> >&]
     @param[in] rectanglesIndices [const std::vector<int>&]
     @param[out] msgs [std::vector<std::string>*] Messages for debug reasons
     @param[out] probabilitiesVector [std::vector<float>*] A vector
@@ -59,7 +59,7 @@ namespace pandora_vision
   void DepthFilters::checkHolesDepthDiff(
     const cv::Mat& depthImage,
     const HolesConveyor& conveyor,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     std::vector<std::string>* msgs,
     std::vector<float>* probabilitiesVector)
@@ -292,7 +292,7 @@ namespace pandora_vision
     [const pcl::PointCloud<pcl::PointXYZ>::Ptr&]
     The point cloud acquired from the depth sensor, interpolated
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&] A vector that holds
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
     @param[in] rectanglesIndices [const std::vector<int>&] A vector that
@@ -312,7 +312,7 @@ namespace pandora_vision
   void DepthFilters::checkHolesRectangleEdgesPlaneConstitution(
     const cv::Mat& inImage,
     const PointCloudXYZPtr& initialPointCloud,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     std::vector<float>* probabilitiesVector,
     std::vector<std::string>* msgs)
@@ -509,7 +509,7 @@ namespace pandora_vision
     A vector that holds sets of points's indices;
     each point is internal to its respective hole
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&] A vector that holds
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
     @param[in] rectanglesIndices [const std::vector<int>&] A vector that
@@ -534,7 +534,7 @@ namespace pandora_vision
     const cv::Mat& interpolatedDepthImage,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr& interpolatedPointCloud,
     const std::vector<std::set<unsigned int> >& holesMasksSetVector,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     const std::vector<std::set<unsigned int> >& intermediatePointsSetVector,
     std::vector<std::vector<float> >* probabilitiesVector)
@@ -617,7 +617,7 @@ namespace pandora_vision
     A vector that holds sets of points; each point is internal to its
     respective hole
     @param[in] rectanglesVector
-    [const std::vector<std::vector<cv::Point> >&] A vector that holds
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
     @param[in] rectanglesIndices [const std::vector<int>&] A vector that
@@ -644,7 +644,7 @@ namespace pandora_vision
     const PointCloudXYZPtr& pointCloud,
     const HolesConveyor& conveyor,
     const std::vector<std::set<unsigned int> >& holesMasksSetVector,
-    const std::vector<std::vector<cv::Point> >& rectanglesVector,
+    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
     const std::vector<int>& rectanglesIndices,
     const std::vector<std::set<unsigned int> >& intermediatePointsSetVector,
     std::vector<float>* probabilitiesVector,

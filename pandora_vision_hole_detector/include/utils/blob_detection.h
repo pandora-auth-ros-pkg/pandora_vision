@@ -59,7 +59,7 @@ namespace pandora_vision
         order to find a blob limits
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
         @param[in] edgesImage [cv::Mat*] The input image
-        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
+        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point2f> >*]
         The output vector containing the blobs' outline
         @param[out] blobsArea [std::vector<float>*] The area of each blob
         @return void
@@ -67,20 +67,20 @@ namespace pandora_vision
       static void brushfireKeypoint (
         const std::vector<cv::KeyPoint>& inKeyPoints,
         cv::Mat* edgesImage,
-        std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+        std::vector<std::vector<cv::Point2f> >* blobsOutlineVector,
         std::vector<float>* blobsArea);
 
       /**
         @brief Implements the brushfire algorithm. Its specific purpose is
         to find the points between a blob's outline and its bounding box
         (not necessarily one of least area).
-        @param[in] inPoint [const cv::Point&] The input point
+        @param[in] inPoint [const cv::Point2f&] The input point
         @param[in] inImage [cv::Mat*] The input image
         @param[out] visited [std::set<unsigned int>&] The points between
         two areas of non-zero value pixels.
         @return void
        **/
-      static void brushfirePoint(const cv::Point& inPoint,
+      static void brushfirePoint(const cv::Point2f& inPoint,
         cv::Mat* inImage,
         std::set<unsigned int>* visited);
 
@@ -104,7 +104,7 @@ namespace pandora_vision
         towards which the outline of the blob will be sought,
         or the number of partitions in which the blob will be divided by
         the rays.  Same deal.
-        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point> >*]
+        @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point2f> >*]
         The output vector containing the blobs' (rough approximate) outline
         @param[out] blobsArea [std::vector<float>*] The area of each blob
         @return void
@@ -113,7 +113,7 @@ namespace pandora_vision
         std::vector<cv::KeyPoint>* inKeyPoints,
         cv::Mat* edgesImage,
         const int& partitions,
-        std::vector<std::vector<cv::Point> >* blobsOutlineVector,
+        std::vector<std::vector<cv::Point2f> >* blobsOutlineVector,
         std::vector<float>* blobsArea);
 
       /**
@@ -121,12 +121,12 @@ namespace pandora_vision
         @outlines the outlines of closed curves.
         (Assumes that the input image comprises entirely of closed curves.)
         @param[in] inImage [cv::Mat*] The input binary image
-        @param[out] outlines [std::vector<std::vector<cv::Point> >*] The points
+        @param[out] outlines [std::vector<std::vector<cv::Point2f> >*] The points
         that each detected closed curve consists of
         @return void
        **/
       static void getClosedCurves(cv::Mat* inImage,
-        std::vector<std::vector<cv::Point> >* outlines);
+        std::vector<std::vector<cv::Point2f> >* outlines);
 
   };
 
