@@ -266,7 +266,7 @@ namespace pandora_vision
     for (int av = 0; av < connectable.outlines[connectableId].size(); av++)
     {
       if (cv::pointPolygonTest(connector.outlines[connectorId],
-          connectable.outlines[connectableId][av], false) > 0)
+          connectable.outlines[connectableId][av], false) >= 0)
       {
         return false;
       }
@@ -454,14 +454,18 @@ namespace pandora_vision
     connector->rectangles.at(connectorId) = substituteVerticesVector;
 
 
-    //!< The overall candidate hole's keypoint
-    connector->keyPoints[connectorId].pt.x =
-      (connector->keyPoints[connectorId].pt.x
-       + connectable->keyPoints[connectableId].pt.x) / 2;
+    //!< Set the overall candidate hole's keypoint to the center of the
+    //!< newly created bounding rectangle
+    float x = 0;
+    float y = 0;
+    for (int k = 0; k < 4; k++)
+    {
+      x += connector->rectangles[connectorId][k].x;
+      y += connector->rectangles[connectorId][k].y;
+    }
 
-    connector->keyPoints[connectorId].pt.y = (
-      connector->keyPoints[connectorId].pt.y
-      + connectable->keyPoints[connectableId].pt.y) / 2;
+    connector->keyPoints[connectorId].pt.x = x / 4;
+    connector->keyPoints[connectorId].pt.y = y / 4;
 
 
     //!< The connectable has now been merged with the connector,
@@ -604,7 +608,7 @@ namespace pandora_vision
     for (int av = 0; av < amalgamatable.outlines[amalgamatableId].size(); av++)
     {
       if (cv::pointPolygonTest(amalgamator.outlines[amalgamatorId],
-          amalgamatable.outlines[amalgamatableId][av], false) > 0)
+          amalgamatable.outlines[amalgamatableId][av], false) >= 0)
       {
         numAmalgamatableOutlinePointsInAmalgamator++;
       }
@@ -716,7 +720,7 @@ namespace pandora_vision
     for (int o = 0; o < amalgamatable->outlines[amalgamatableId].size(); o++)
     {
       if (pointPolygonTest(amalgamator->outlines[amalgamatorId],
-          amalgamatable->outlines[amalgamatableId][o], false) <= 0)
+          amalgamatable->outlines[amalgamatableId][o], false) < 0)
       {
         amalgamatableOutline.push_back(
           amalgamatable->outlines[amalgamatableId][o]);
@@ -729,7 +733,7 @@ namespace pandora_vision
     for (int o = 0; o < amalgamator->outlines[amalgamatorId].size(); o++)
     {
       if (pointPolygonTest(amalgamatable->outlines[amalgamatableId],
-          amalgamator->outlines[amalgamatorId][o], false) <= 0)
+          amalgamator->outlines[amalgamatorId][o], false) < 0)
       {
         amalgamatorOutline.push_back(amalgamator->outlines[amalgamatorId][o]);
       }
@@ -769,14 +773,19 @@ namespace pandora_vision
     amalgamator->rectangles.at(amalgamatorId) = substituteVerticesVector;
 
 
-    //!< The overall candidate hole's keypoint
-    amalgamator->keyPoints[amalgamatorId].pt.x =
-      (amalgamator->keyPoints[amalgamatorId].pt.x +
-       amalgamatable->keyPoints[amalgamatableId].pt.x) / 2;
+    //!< Set the overall candidate hole's keypoint to the center of the
+    //!< newly created bounding rectangle
+    float x = 0;
+    float y = 0;
+    for (int k = 0; k < 4; k++)
+    {
+      x += amalgamator->rectangles[amalgamatorId][k].x;
+      y += amalgamator->rectangles[amalgamatorId][k].y;
+    }
 
-    amalgamator->keyPoints[amalgamatorId].pt.y =
-      (amalgamator->keyPoints[amalgamatorId].pt.y +
-       amalgamatable->keyPoints[amalgamatableId].pt.y) / 2;
+    amalgamator->keyPoints[amalgamatorId].pt.x = x / 4;
+    amalgamator->keyPoints[amalgamatorId].pt.y = y / 4;
+
 
     //!< The amalgamatable has now been merged with the amalgamator,
     //!< so delete it. So long, amalgamatable
