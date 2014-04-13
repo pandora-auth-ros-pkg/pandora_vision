@@ -891,13 +891,15 @@ namespace pandora_vision
     }
     #endif
 
-
-    //!< Try to merge holes that can be assimilated, amalgamated or connected
-    for (int i = 0; i < 3; i++)
-    {
-      applyMergeOperation(&rgbdHolesConveyor, i);
-    }
-
+/*
+ *
+ *    //!< Try to merge holes that can be assimilated, amalgamated or connected
+ *    for (int i = 0; i < 3; i++)
+ *    {
+ *      applyMergeOperation(&rgbdHolesConveyor, i);
+ *    }
+ *
+ */
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_merge_holes)
@@ -1735,15 +1737,20 @@ namespace pandora_vision
    **/
   void HoleFusion::testDummyHolesMerging(HolesConveyor* dummy)
   {
-
-    //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
-
-    //!< Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
-
+    #ifdef DEBUG_TIME
+    Timer::start("testDummyHolesMerging", "processCandidateHoles");
+    #endif
+/*
+ *
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
+ *
+ *    //!< Invalid
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
+ *
+ */
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
@@ -1765,17 +1772,19 @@ namespace pandora_vision
       cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
       dummy);
 
-
-    //!< 1-st assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
-      dummy);
-
-    //!< 1-st connectable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
-      dummy);
-
+/*
+ *
+ *    //!< 1-st assimilator - amalgamator - connector
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
+ *      dummy);
+ *
+ *    //!< 1-st connectable
+ *    HolesConveyorUtils::appendDummyConveyor(
+ *      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
+ *      dummy);
+ *
+ */
 
     //HolesConveyorUtils::shuffle(dummy);
 
@@ -1793,6 +1802,10 @@ namespace pandora_vision
     ROS_ERROR("keypoints after: %d ", HolesConveyorUtils::size(*dummy));
     Visualization::showHoles("after", interpolatedDepthImage_, *dummy,
       1, msgs);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("testDummyHolesMerging");
+    #endif
   }
 
 } // namespace pandora_vision
