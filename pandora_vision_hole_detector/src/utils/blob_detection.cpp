@@ -134,8 +134,8 @@ namespace pandora_vision
     to find the points between a blob's outline and its bounding box
     (not necessarily one of least area).
     @param[in] inPoint [const cv::Point&] The input point
-    @param[in] inImage [const cv::Mat*] The input image
-    @param[out] pointsCovered [std::set<unsigned int>*] The points between two
+    @param[in] inImage [cv::Mat*] The input image
+    @param[out] visited [std::set<unsigned int>*] The points between two
     areas of non-zero value pixels.
     @return void
    **/
@@ -270,7 +270,8 @@ namespace pandora_vision
 
   /**
     @brief Implements a raycast algorithm for all blob keypoints in order
-    to find the blob limits
+    to find blob's outlines. The output is a vector containing a coherent
+    vector of points.
     @param[in][out] inKeyPoints [std::vector<cv::KeyPoint>*] The keypoints
     @param[in] edgesImage [cv::Mat*] The input image
     @param[in] partitions [const int&] The number of directions
@@ -330,8 +331,10 @@ namespace pandora_vision
           {
             for (int n = -1; n < 2; n++)
             {
-              int x = (*inKeyPoints)[keypointId].pt.x + m + counter * cos(theta);
-              int y = (*inKeyPoints)[keypointId].pt.y + n + counter * sin(theta);
+              int x = (*inKeyPoints)[keypointId].pt.x
+                + m + counter * cos(theta);
+              int y = (*inKeyPoints)[keypointId].pt.y
+                + n + counter * sin(theta);
 
               //!< If the ray point is not within image borders
               if (x < 0 || y < 0 ||
@@ -379,6 +382,36 @@ namespace pandora_vision
 
         inKeyPoints->erase(inKeyPoints->begin() + keypointId);
         continue;
+      }
+
+      //!< Instead of keeping the sparce points that are the product of
+      //!< the raycast algorithm, connect them linearly in order to
+      //!< have a coherent set of points as the hole's outline
+      cv::Mat canvas = cv::Mat::zeros(edgesImage->size(), CV_8UC1);
+
+      //!< Draw the connected outline of the i-th hole onto canvas
+      for(unsigned int j = 0; j < keypointOutline.size(); j++)
+      {
+        cv::line(canvas, keypointOutline[j],
+          keypointOutline[(j + 1) % keypointOutline.size()],
+          cv::Scalar(255, 0, 0), 1, 8 );
+      }
+
+      //!< Clear the outline vector. It will be filled with the points
+      //!< drawn on the canvas image
+      keypointOutline.clear();
+
+      //!< Every non-zero point is a point drawn; it is a point that
+      //!< belongs to the outline of the hole
+      for (unsigned int rows = 0; rows < canvas.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < canvas.cols; cols++)
+        {
+          if (canvas.at<unsigned char>(rows, cols) != 0)
+          {
+            keypointOutline.push_back(cv::Point(cols, rows));
+          }
+        }
       }
 
 
