@@ -46,11 +46,20 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltC3dDetection::LandoltC3dDetection() 
+LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(false) 
 {
   getGeneralParams();
+  
+  //!< Initiliaze and preprocess reference image
+  _landoltc3dDetector.initializeReferenceImage(patternPath);
+  
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
                                         &LandoltC3dDetection::imageCallback, this);
+                                        
+  //!< Declare publisher and advertise topic
+  //!< where algorithm results are posted
+  _landoltc3dPublisher =
+      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>("landoltc3d_alert", 10, true);
       
   ROS_INFO("[landoltc3d_node] : Created LandoltC3d Detection instance");
 
@@ -163,26 +172,79 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   landoltCFrame = in_msg -> image.clone();
   if ( landoltCFrame.empty() )
   {
-    ROS_ERROR("[landoltc_node] : No more Frames");
+    ROS_ERROR("[landoltc3d_node] : No more Frames");
     return;
   }
 
-  landoltcCallback();
+  landoltc3dCallback();
 
 }
 
 /**
  @brief main function called for publishing messages in
-  data fusion. In this function an object of class landoltcDetector
+  data fusion. In this function an object of class landoltc3dDetector
   is created to identify landoltCs in current frame.
  @param void
  @return void
  **/
 
-void LandoltC3dDetection::landoltcCallback()
+void LandoltC3dDetection::landoltc3dCallback()
 {
+  if(!landoltc3dNowON)
+  {
+    return;
+  }
+    
+  _landoltc3dDetector.begin(&landoltCFrame);
+  
+  //!< Create message of Landoltc Detector
+  vision_communications::Landoltc3dAlertsVectorMsg Landoltc3dVectorMsg;
+  vision_communications::Landoltc3dAlertMsg Landoltc3dcodeMsg;
+  Landoltc3dVectorMsg.header.frame_id = cameraFrameId;
+  Landoltc3dVectorMsg.header.stamp = ros::Time::now();
+}
 
+/**
+  @brief Node's state manager
+  @param newState [int] The robot's new state
+  @return void
+*/
+void LandoltC3dDetection::startTransition(int newState)
+{
+  curState = newState;
 
+  //!< check if datamatrix algorithm should be running now
+  landoltc3dNowON =
+    (curState ==
+     state_manager_communications::robotModeMsg::MODE_EXPLORATION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_ARM_APPROACH)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_TELEOPERATED_LOCOMOTION)
+    || (curState ==
+        state_manager_communications::robotModeMsg::MODE_DF_HOLD);
+
+  //!< shutdown if the robot is switched off
+  if (curState ==
+      state_manager_communications::robotModeMsg::MODE_TERMINATING)
+  {
+    ros::shutdown();
+    return;
+  }
+
+  prevState = curState;
+
+}
+
+/**
+ @brief After completion of state transition
+ @return void
+ */
+void LandoltC3dDetection::completeTransition()
+{
+  ROS_INFO("[Landoltc3d_node] : Transition Complete");
 }
 
 } // namespace pandora_vision
