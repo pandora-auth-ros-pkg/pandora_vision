@@ -257,7 +257,7 @@ namespace pandora_vision
         @brief Apply a cascade-like hole checker. Each filter applied is
         attached to an order which relates to the sequence of the overall filter
         execution.
-        @param[in] method [const unsigned int&] The filter identifier to execute
+        @param[in] method [const int&] The filter identifier to execute
         @param[in] img [const cv::Mat&] The input rgb image
         @param[in] conveyor [const HolesConveyor&] The structure that
         holds the final holes' data
@@ -292,7 +292,7 @@ namespace pandora_vision
         @return void
        **/
       static void applyFilter(
-        const unsigned int& method,
+        const int& method,
         const cv::Mat& img,
         const HolesConveyor& conveyor,
         const cv::MatND& inHistogram,

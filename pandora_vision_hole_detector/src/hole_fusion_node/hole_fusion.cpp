@@ -891,15 +891,13 @@ namespace pandora_vision
     }
     #endif
 
-/*
- *
- *    //!< Try to merge holes that can be assimilated, amalgamated or connected
- *    for (int i = 0; i < 3; i++)
- *    {
- *      applyMergeOperation(&rgbdHolesConveyor, i);
- *    }
- *
- */
+
+    //!< Try to merge holes that can be assimilated, amalgamated or connected
+    for (int i = 0; i < 3; i++)
+    {
+      applyMergeOperation(&rgbdHolesConveyor, i);
+    }
+
 
     #ifdef DEBUG_SHOW
     if(Parameters::debug_show_merge_holes)

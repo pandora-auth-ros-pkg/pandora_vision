@@ -61,7 +61,7 @@ namespace pandora_vision
         @param[in] imgs [const std::vector<cv::Mat>&] The images to be shown
         @param[in] titles [const std::vector<std::string>&] The titles for each
         image
-        @param[in] maxSize [const unsigned int&] The maximum size of the window
+        @param[in] maxSize [const int&] The maximum size of the window
         @param[in] ms [const int&] How many seconds the showing lasts
         @return void
        **/
@@ -69,7 +69,7 @@ namespace pandora_vision
         const std::string& title,
         const std::vector<cv::Mat>& imgs,
         const std::vector<std::string>& titles,
-        const unsigned int& maxSize,
+        const int& maxSize,
         const int& ms);
 
       /**
