@@ -35,7 +35,7 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "hole_fusion_node/generic_filters.h"
+#include "hole_fusion_node/hole_merger.h"
 
 namespace pandora_vision
 {
@@ -48,7 +48,7 @@ namespace pandora_vision
     The candidate holes conveyor originated from the rgb node
     @return void
    **/
-  void GenericFilters::assimilateBilaterally(
+  void HoleMerger::assimilateBilaterally(
     HolesConveyor* depthHolesConveyor,
     HolesConveyor* rgbHolesConveyor)
   {
@@ -80,7 +80,7 @@ namespace pandora_vision
     by the assimilator
     @return void
    **/
-  void GenericFilters::assimilateUnilaterally(
+  void HoleMerger::assimilateUnilaterally(
     const HolesConveyor& assimilator,
     HolesConveyor* assimilable)
   {
@@ -118,7 +118,7 @@ namespace pandora_vision
     @return [bool] True if all of the outline points of the assimilable
     hole are inside the outline of the assimilator
    **/
-  bool GenericFilters::isCapableOfAssimilating(
+  bool HoleMerger::isCapableOfAssimilating(
     const int& assimilatorId,
     const HolesConveyor& assimilator,
     const int& assimilableId,
@@ -160,7 +160,7 @@ namespace pandora_vision
     will be deleted
     @return void
    **/
-  void GenericFilters::assimilateOnce(const int& keyPointId,
+  void HoleMerger::assimilateOnce(const int& keyPointId,
     HolesConveyor* assimilable)
   {
     #ifdef DEBUG_TIME
@@ -208,7 +208,7 @@ namespace pandora_vision
     by criterion of distance
     @return void
    **/
-  void GenericFilters::connectUnilaterally(HolesConveyor* connector,
+  void HoleMerger::connectUnilaterally(HolesConveyor* connector,
     HolesConveyor* connectable, const PointCloudXYZPtr& pointCloudXYZ)
   {
     //!< Validate the connectable's holes against the connector's ones
@@ -253,7 +253,7 @@ namespace pandora_vision
     @return [bool] True if the connectable is capable of being connected
     with the connector
    **/
-  bool GenericFilters::isCapableOfConnecting(const int& connectorId,
+  bool HoleMerger::isCapableOfConnecting(const int& connectorId,
     const HolesConveyor& connector,
     const int& connectableId,
     const HolesConveyor& connectable,
@@ -410,7 +410,7 @@ namespace pandora_vision
     will be deleted
     @return void
    **/
-  void GenericFilters::connectOnce(const int& connectorId,
+  void HoleMerger::connectOnce(const int& connectorId,
     HolesConveyor* connector,
     const int& connectableId,
     HolesConveyor* connectable)
@@ -514,7 +514,7 @@ namespace pandora_vision
     The candidate holes conveyor originated from the rgb node
     @return void
    **/
-  void GenericFilters::amalgamateBilaterally(
+  void HoleMerger::amalgamateBilaterally(
     HolesConveyor* depthHolesConveyor,
     HolesConveyor* rgbHolesConveyor)
   {
@@ -551,7 +551,7 @@ namespace pandora_vision
     will be assimilated by candidate holes of @paramamalgamator
     @return void
    **/
-  void GenericFilters::amalgamateUnilaterally(
+  void HoleMerger::amalgamateUnilaterally(
     HolesConveyor* amalgamator,
     HolesConveyor* amalgamatable)
   {
@@ -592,7 +592,7 @@ namespace pandora_vision
     @return [bool] True if the amalgamator is capable of amalgamating
     the amalgamatable
    **/
-  bool GenericFilters::isCapableOfAmalgamating(
+  bool HoleMerger::isCapableOfAmalgamating(
     const int& amalgamatorId,
     const HolesConveyor& amalgamator,
     const int& amalgamatableId,
@@ -699,7 +699,7 @@ namespace pandora_vision
     will be deleted
     @return void
    **/
-  void GenericFilters::amalgamateOnce(const int& amalgamatorId,
+  void HoleMerger::amalgamateOnce(const int& amalgamatorId,
     HolesConveyor* amalgamator,
     const int& amalgamatableId,
     HolesConveyor* amalgamatable)
