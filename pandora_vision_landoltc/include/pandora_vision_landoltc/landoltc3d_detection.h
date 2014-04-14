@@ -51,7 +51,7 @@
 #include <stdlib.h>
 #include "state_manager/state_client.h"
 #include "vision_communications/LandoltcAlertsVectorMsg.h"
-#include "pandora_vision_landoltc/landoltc_detector.h"
+#include "pandora_vision_landoltc/landoltc3d_detector.h"
 //!< default frame height
 #define DEFAULT_HEIGHT 480
 

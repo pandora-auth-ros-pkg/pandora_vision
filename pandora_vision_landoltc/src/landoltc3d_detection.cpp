@@ -198,8 +198,8 @@ void LandoltC3dDetection::landoltc3dCallback()
   _landoltc3dDetector.begin(&landoltCFrame);
   
   //!< Create message of Landoltc Detector
-  vision_communications::Landoltc3dAlertsVectorMsg Landoltc3dVectorMsg;
-  vision_communications::Landoltc3dAlertMsg Landoltc3dcodeMsg;
+  vision_communications::LandoltcAlertsVectorMsg Landoltc3dVectorMsg;
+  vision_communications::LandoltcAlertMsg Landoltc3dcodeMsg;
   Landoltc3dVectorMsg.header.frame_id = cameraFrameId;
   Landoltc3dVectorMsg.header.stamp = ros::Time::now();
 }
