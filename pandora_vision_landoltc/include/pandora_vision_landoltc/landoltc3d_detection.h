@@ -70,6 +70,8 @@ private:
   //!< Current frame to be processed
   cv::Mat landoltCFrame;
   
+  LandoltC3dDetector _landoltc3dDetector;
+  
   std::string packagePath;
 
   std::string patternPath;
@@ -82,6 +84,12 @@ private:
 
   //!< The topic subscribed to for the front camera
   std::string imageTopic;
+  
+  //!< Variable used for State Managing
+  bool landoltc3dNowON;
+  
+  //!< Publishers for LandoltcDetector result messages
+  ros::Publisher _landoltc3dPublisher;
   
   /**
   @brief Callback for the RGB Image
@@ -97,7 +105,7 @@ private:
   @param void
   @return void
   **/
-  void landoltcCallback();
+  void landoltc3dCallback();
 
 public:
 
@@ -119,6 +127,23 @@ public:
   @return void
   **/
   void getGeneralParams();
+  
+  /**
+  @brief Node's state manager
+  @param newState [int] The robot's new state
+  @return void
+  **/
+  void startTransition(int newState);
+
+  /**
+  @brief After completion of state transition
+  @return void
+  **/
+  void completeTransition(void);
+    
+  int curState;
+  int prevState;
+  
   };
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTION_H
