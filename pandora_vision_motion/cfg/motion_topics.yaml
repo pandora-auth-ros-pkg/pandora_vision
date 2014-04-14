@@ -1,0 +1,4 @@
+published_topic_names:  
+  motion_alert : /vision/motion
+  camera_name: kinect
+      
