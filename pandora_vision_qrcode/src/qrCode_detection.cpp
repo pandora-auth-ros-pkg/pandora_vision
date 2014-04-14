@@ -102,19 +102,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
   
-        
-    //! Advertise topics for debugging if we are in debug mode
-    if (_nh.getParam("published_topic_names/debug_qrcode", param))
-    {
-      _qrcodeDebugPublisher =
-        image_transport::ImageTransport(_nh).advertise(param, 1);
-    }
-    else
-    {
-      ROS_FATAL("debug qrcode topic name param not found");
-      ROS_BREAK(); 
-    }    
-         
+    
     //!< Get the debugQrCode parameter if available;
     if (_nh.getParam("debugQrCode", debugQrCode))
     {
@@ -122,9 +110,24 @@ namespace pandora_vision
     }
     else
     {
-      debugQrCode = true;
+      debugQrCode = false;
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrCode);
     }
+    
+    if(debugQrCode)
+    {    
+      //! Advertise topics for debugging if we are in debug mode
+      if (_nh.getParam("published_topic_names/debug_qrcode", param))
+      {
+        _qrcodeDebugPublisher =
+          image_transport::ImageTransport(_nh).advertise(param, 1);
+      }
+      else
+      {
+        ROS_WARN(" Cannot find qrcode debug show topic");
+      }    
+    }         
+  
     
     //!< Get the camera to be used by qr node;
     if (_nh.getParam("camera_name", cameraName)) {

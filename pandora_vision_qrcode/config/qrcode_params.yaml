@@ -1,4 +1,4 @@
 camera_name: kinect
-debugQrCode: true
+debugQrCode: false
 qrcodeSharpenBlur: 5
 qrcodeSharpenWeight: 0.8
