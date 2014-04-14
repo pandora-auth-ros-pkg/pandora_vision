@@ -608,7 +608,7 @@ namespace pandora_vision
     @brief Apply a cascade-like hole checker. Each filter applied is
     attached to an order which relates to the sequence of the
     overall filter execution.
-    @param[in] method [const unsigned int&] The filter identifier to execute
+    @param[in] method [const int&] The filter identifier to execute
     @param[in] img [const cv::Mat&] The input depth image
     @param[in] pointCloud [const pcl::PointCloud<pcl::PointXYZ>::Ptr&] The
     original point cloud that corresponds to the input depth image
@@ -639,7 +639,7 @@ namespace pandora_vision
     @return void
    **/
   void DepthFilters::applyFilter(
-    const unsigned int& method,
+    const int& method,
     const cv::Mat& img,
     const PointCloudXYZPtr& pointCloud,
     const HolesConveyor& conveyor,
