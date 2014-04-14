@@ -164,21 +164,21 @@ namespace pandora_vision
       {
         //!< Is the activeId-th candidate hole able to assimilate the
         //!< passiveId-th candidate hole?
-        isAble = GenericFilters::isCapableOfAssimilating(activeId,
+        isAble = HoleMerger::isCapableOfAssimilating(activeId,
           *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
       if (operationId == 1)
       {
         //!< Is the activeId-th candidate hole able to amalgamate the
         //!< passiveId-th candidate hole?
-        isAble = GenericFilters::isCapableOfAmalgamating(activeId,
+        isAble = HoleMerger::isCapableOfAmalgamating(activeId,
           *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
       }
       if (operationId == 2)
       {
         //!< Is the passiveId-th candidate hole able to be connected with the
         //!< activeId-th candidate hole?
-        isAble = GenericFilters::isCapableOfConnecting(activeId,
+        isAble = HoleMerger::isCapableOfConnecting(activeId,
           *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor, pointCloudXYZ_);
       }
 
@@ -196,14 +196,14 @@ namespace pandora_vision
         if (operationId == 0)
         {
           //!< Delete the passiveId-th candidate hole
-          GenericFilters::assimilateOnce(passiveId, &tempHolesConveyor);
+          HoleMerger::assimilateOnce(passiveId, &tempHolesConveyor);
         }
         else if (operationId == 1)
         {
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has amalgamated
           //!< the passiveId-th candidate hole
-          GenericFilters::amalgamateOnce(activeId, &tempHolesConveyor,
+          HoleMerger::amalgamateOnce(activeId, &tempHolesConveyor,
             passiveId, &tempHolesConveyor);
         }
         else if (operationId == 2)
@@ -211,7 +211,7 @@ namespace pandora_vision
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has been
           //!< connected with the passiveId -th candidate hole
-          GenericFilters::connectOnce(activeId, &tempHolesConveyor,
+          HoleMerger::connectOnce(activeId, &tempHolesConveyor,
             passiveId, &tempHolesConveyor);
         }
 
@@ -850,13 +850,11 @@ namespace pandora_vision
       &rgbdHolesConveyor);
 
 
-/*
- *
- *    HolesConveyor dummy;
- *    testDummyHolesMerging(&dummy);
- *    return;
- *
- */
+    //!< Uncomment for testing artificial holes' merging process
+    HolesConveyor dummy;
+    testDummyHolesMerging(&dummy);
+    return;
+
 
     //!< Keep a copy of the initial (not merged) candidate holes for
     //!< debugging and exibition purposes
@@ -1738,17 +1736,15 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("testDummyHolesMerging", "processCandidateHoles");
     #endif
-/*
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
- *
- */
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
+
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
@@ -1770,21 +1766,19 @@ namespace pandora_vision
       cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
       dummy);
 
-/*
- *
- *    //!< 1-st assimilator - amalgamator - connector
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
- *      dummy);
- *
- *    //!< 1-st connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
- *      dummy);
- *
- */
 
-    //HolesConveyorUtils::shuffle(dummy);
+    //!< 1-st assimilator - amalgamator - connector
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
+      dummy);
+
+    //!< 1-st connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
+      dummy);
+
+
+    HolesConveyorUtils::shuffle(dummy);
 
     ROS_ERROR("keypoints before: %d ", HolesConveyorUtils::size(*dummy));
 
