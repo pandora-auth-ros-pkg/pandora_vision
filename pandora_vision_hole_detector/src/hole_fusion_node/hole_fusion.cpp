@@ -428,6 +428,204 @@ namespace pandora_vision
 
 
   /**
+    @brief Each Depth and RGB filter requires the construction of a set
+    of vectors which uses to determine the validity of each hole.
+    The total number of vectors is finite; every filter uses vectors from
+    this pool of vectors. This method centrally constructs the necessary
+    vectors in runtime, depending on which filters are commanded to run
+    @param[in] conveyor [const HolesConeveyor&] The candidate holes
+    from which each element of the vector will be constructed
+    @param[in] image [const cv::Mat&] An image needed for its size
+    @param[in] inflationSize [const int&] The bounding rectangles
+    inflation size
+    @param[out] holesMasksImageVector [std::vector<cv::Mat>*]
+    A vector containing an image (the mask) for each hole
+    @param[out] holesMasksSetVector [std::vector<std::set<unsigned int> >*]
+    A vector that holds sets of points's indices; each set holds the
+    indices of the points inside the outline of each hole
+    @param[out] inflatedRectanglesVector
+    [std::vector<std::vector<cv::Point2f> >*] The vector that holds the
+    vertices of the in-image-bounds inflated rectangles
+    @param[out] inflatedRectanglesIndices [std::vector<int>*]
+    The vector that holds the indices of the original holes whose
+    inflated bounding rectangles is within the image's bounds.
+    @param[out] intermediatePointsImageVector [std::vector<cv::Mat>*]
+    A vector that holds the image of the intermediate points between
+    a hole's outline and its bounding box, for each hole whose identifier
+    exists in the @param inflatedRectanglesIndices vector
+    @param[out] intermediatePointsSetVector [std::vector<std::set<int> >*]
+    A vector that holds the intermediate points' between a hole's outline
+    and its bounding box, for each hole whose identifier
+    exists in the @param inflatedRectanglesIndices vector
+    @return void
+   **/
+  void HoleFusion::createCheckerRequiredVectors(
+    const HolesConveyor& conveyor,
+    const cv::Mat& image,
+    const int& inflationSize,
+    std::vector<cv::Mat>* holesMasksImageVector,
+    std::vector<std::set<unsigned int> >* holesMasksSetVector,
+    std::vector<std::vector<cv::Point2f> >* inflatedRectanglesVector,
+    std::vector<int>* inflatedRectanglesIndices,
+    std::vector<cv::Mat>* intermediatePointsImageVector,
+    std::vector<std::set<unsigned int> >* intermediatePointsSetVector)
+  {
+    bool enable_holesMasksImageVector = false;
+    bool enable_holesMasksSetVector = false;
+    bool enable_inflatedRectanglesVectorAndIndices = false;
+    bool enable_intermediatePointsImageVector = false;
+    bool enable_intermediatePointsSetVector = false;
+
+    //!< The color homogeneity filter requires a vector of holes' masks
+    //!< that will be used to extract their histograms
+    if (Parameters::run_checker_color_homogeneity > 0)
+    {
+      enable_holesMasksImageVector = true;
+    }
+
+    //!< The luminosity diff filter requires the set of points' indices
+    //!< that are inside a hole's outline,
+    //!< the set of points' indices that are outside a hole's outline
+    //!< but inside its (inflated) bounding rectangle
+    //!< and the inflated rectangles and indices of the respective
+    //!< valid keypoints
+    if (Parameters::run_checker_luminosity_diff > 0)
+    {
+      enable_holesMasksSetVector = true;
+      enable_intermediatePointsSetVector = true;
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The texture diff filter requires the construction of an image mask
+    //!< vector for the points inside holes' outline and of image and set
+    //!< masks for the points outside holes' outline but inside their (inflated)
+    //!< bounding box
+    //!< as it checks for texture metrics difference between the
+    //!< histograms of the points inside a hole's outline and outside
+    //!< the hole's outline but inside its (inflated) bounding rectangle
+    if (Parameters::run_checker_texture_diff > 0)
+    {
+      enable_holesMasksImageVector = true;
+      enable_intermediatePointsSetVector = true;
+      enable_intermediatePointsImageVector = true;
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The texture backproject filter uses two sets: they respectively contain
+    //!< the indices of points inside holes' outlines and the indices of points
+    //!< outside holes' outlines but inside their (inflated) bounding rectangle.
+    //!< Hence, we also need the construction of inflated rectangles' vectors
+    if (Parameters::run_checker_texture_backproject > 0)
+    {
+      enable_holesMasksSetVector = true;
+      enable_intermediatePointsSetVector = true;
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The depth diff filter requires only the contruction of the vectors that
+    //!< have to do with the inflation of holes' rectangles
+    if (Parameters::run_checker_depth_diff > 0)
+    {
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The depth/area filter requires only the construction of sets that
+    //!< hold the indices of points inside holes' outlines
+    if (Parameters::run_checker_depth_area > 0)
+    {
+      enable_holesMasksSetVector = true;
+    }
+
+    //!< The intermediate points plane constitution filter requires exactly
+    //!< the construction of vectors pertaining to holes' inflation and
+    //!< and a vector of sets of indices of points between holes' outline and
+    //!< their respective (inflated) bounding rectangle
+    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
+    {
+      enable_intermediatePointsSetVector = true;
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The outline of rectangle plane constitution filter requires
+    //!< the construction of vectors pertaining to holes' inflation
+    if (Parameters::run_checker_outline_of_rectangle > 0)
+    {
+      enable_inflatedRectanglesVectorAndIndices = true;
+    }
+
+    //!< The depth homogeneity filter requires the construction of sets of
+    //!< points' indices; these points are the ones inside holes' outlines
+    if (Parameters::run_checker_depth_homogeneity > 0)
+    {
+      enable_holesMasksSetVector = true;
+    }
+
+    //!< Create the necessary resources
+
+    if (enable_holesMasksImageVector)
+    {
+      createHolesMasksImageVector(conveyor, image, holesMasksImageVector);
+    }
+
+    if (enable_holesMasksSetVector)
+    {
+      createHolesMasksSetVector(conveyor, image, holesMasksSetVector);
+    }
+
+    if (enable_inflatedRectanglesVectorAndIndices)
+    {
+      createInflatedRectanglesVector(conveyor,
+        interpolatedDepthImage_,
+        inflationSize,
+        inflatedRectanglesVector,
+        inflatedRectanglesIndices);
+    }
+
+    if (enable_intermediatePointsImageVector)
+    {
+      //!< The intermediate points images vector depends on the
+      //!< inflated rectangles vectors
+      if (!enable_inflatedRectanglesVectorAndIndices)
+      {
+        createInflatedRectanglesVector(conveyor,
+          interpolatedDepthImage_,
+          inflationSize,
+          inflatedRectanglesVector,
+          inflatedRectanglesIndices);
+      }
+
+      createIntermediateHolesPointsImageVector(conveyor,
+        *inflatedRectanglesVector,
+        *inflatedRectanglesIndices,
+        interpolatedDepthImage_,
+        Parameters::rectangle_inflation_size,
+        intermediatePointsImageVector);
+    }
+
+    if (enable_intermediatePointsSetVector)
+    {
+      //!< The intermediate points set vector depends on the
+      //!< inflated rectangles vectors
+      if (!enable_inflatedRectanglesVectorAndIndices)
+      {
+        createInflatedRectanglesVector(conveyor,
+          interpolatedDepthImage_,
+          inflationSize,
+          inflatedRectanglesVector,
+          inflatedRectanglesIndices);
+      }
+
+      createIntermediateHolesPointsSetVector(conveyor,
+        *inflatedRectanglesVector,
+        *inflatedRectanglesIndices,
+        interpolatedDepthImage_,
+        intermediatePointsSetVector);
+    }
+  }
+
+
+
+  /**
     @brief Some hole checkers require the construction of a hole's mask,
     that is, the pixels inside the hole with a value of
     value 255 while the background pixels are with 0 value.
@@ -657,9 +855,9 @@ namespace pandora_vision
     its size
     @param[in] inflationSize [const int&] The bounding rectangles
     inflation size in pixels
-    @param[out] intermediatePointsVector [std::vector<cv::Mat>*]
-    A vector that holds the image of the intermediate points for each
-    hole whose identifier exists in the @param rectanglesIndices vector
+    A vector that holds the image of the intermediate points between
+    a hole's outline and its bounding box, for each hole whose identifier
+    exists in the @param inflatedRectanglesIndices vector
     @return void
    **/
   void HoleFusion::createIntermediateHolesPointsImageVector(
@@ -767,9 +965,10 @@ namespace pandora_vision
     is used to identify a hole's corresponding rectangle. Used primarily
     because the rectangles used are inflated rectangles; not all holes
     possess an inflated rectangle
-    @param[out] intermediatePointsVector [std::vector<std::set<int> >*]
-    A vector that holds the intermediate points' indices for each hole
-    whose identifier exists in the @param rectanglesIndices vector
+    @param[out] intermediatePointsSetVector [std::vector<std::set<int> >*]
+    A vector that holds the intermediate points' indices between a hole's
+    outline and its bounding box, for each hole whose identifier
+    exists in the @param inflatedRectanglesIndices vector
     @return void
    **/
   void HoleFusion::createIntermediateHolesPointsSetVector(
@@ -1525,18 +1724,9 @@ namespace pandora_vision
     //!< hole's mask: non-zero value pixels are within a hole's outline points
     std::vector<cv::Mat> holesMasksImageVector;
 
-    //!< Get the mask images
-    createHolesMasksImageVector(conveyor, interpolatedDepthImage_,
-      &holesMasksImageVector);
-
-
     //!< A vector of sets that each one of them contains indices of points
     //!< inside the hole's outline
     std::vector<std::set<unsigned int> > holesMasksSetVector;
-
-    //!< Get the sets of points inside the hole's outline
-    createHolesMasksSetVector(conveyor, interpolatedDepthImage_,
-      &holesMasksSetVector);
 
     //!< A vector of vertices of each inflated bounding rectangle.
     std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector;
@@ -1546,41 +1736,26 @@ namespace pandora_vision
     //!< inflated rectangle is in totality within the image's bounds
     std::vector<int> inflatedRectanglesIndices;
 
-
-    //!< Get the inflated rectangles vector and the indices of the original
-    //!< keypoints that correspond to its elements
-    createInflatedRectanglesVector(conveyor,
-      interpolatedDepthImage_,
-      Parameters::rectangle_inflation_size,
-      &inflatedRectanglesVector,
-      &inflatedRectanglesIndices);
-
-
     //!< A vector of sets that each one of them contains indices of points
     //!< between the hole's outline and its respective bounding box
     std::vector<std::set<unsigned int> > intermediatePointsSetVector;
-
-    //!< Get the intermediate points between holes' outlines and their
-    //!< respective inflated bounding box
-    createIntermediateHolesPointsSetVector(conveyor,
-      inflatedRectanglesVector,
-      inflatedRectanglesIndices,
-      interpolatedDepthImage_,
-      &intermediatePointsSetVector);
-
 
     //!< A vector of images that each one of them contains points
     //!< between the hole's outline and its respective bounding box
     std::vector<cv::Mat> intermediatePointsImageVector;
 
-    //!< Get the intermediate points between holes' outlines and their
-    //!< respective inflated bounding box
-    createIntermediateHolesPointsImageVector(conveyor,
-      inflatedRectanglesVector,
-      inflatedRectanglesIndices,
+    //!< Construct the necessary vectors, depending on which filters
+    //!< are to run in runtime
+    createCheckerRequiredVectors(
+      conveyor,
       interpolatedDepthImage_,
       Parameters::rectangle_inflation_size,
-      &intermediatePointsImageVector);
+      &holesMasksImageVector,
+      &holesMasksSetVector,
+      &inflatedRectanglesVector,
+      &inflatedRectanglesIndices,
+      &intermediatePointsImageVector,
+      &intermediatePointsSetVector);
 
 
     //!< Initialize the depth probabilities 2D vector. But first we need to know
@@ -1671,19 +1846,19 @@ namespace pandora_vision
       std::vector<std::vector<float> > rgbProbabilitiesVector2D(
         rgbActiveFilters,
         std::vector<float>(conveyor.keyPoints.size(), 0.0));
-/*
- *
- *      //!< check holes for debugging purposes
- *      RgbFilters::checkHoles(
- *        rgbImage_,
- *        wallsHistogram_,
- *        conveyor,
- *        holesMasksVector,
- *        inflatedRectanglesVector,
- *        inflatedRectanglesIndices,
- *        &rgbProbabilitiesVector2D);
- *
- */
+
+      //!< check holes for debugging purposes
+      RgbFilters::checkHoles(
+        conveyor,
+        rgbImage_,
+        wallsHistogram_,
+        inflatedRectanglesIndices,
+        holesMasksImageVector,
+        holesMasksSetVector,
+        intermediatePointsImageVector,
+        intermediatePointsSetVector,
+        &rgbProbabilitiesVector2D);
+
       #ifdef DEBUG_SHOW
       if (conveyor.keyPoints.size() > 0)
       {
@@ -1765,25 +1940,6 @@ namespace pandora_vision
 
 
 
-/*
- *
- *  void HoleFusion::createCheckerRequiredVectors(
- *    const HolesConveyor& conveyor,
- *    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
- *    const std::vector<int>& rectanglesIndices,
- *    const cv::Mat& image,
- *    const int& inflationSize,
- *    std::vector<cv::Mat>* holesMasksImageVector,
- *    std::vector<std::set<int> >* holesMasksSetVector,
- *    std::vector<std::vector<cv::Point2f> >* inflatedRectanglesVector,
- *    std::vector<int>* inflatedRectanglesIndices,
- *    std::vector<cv::Mat>* intermediatePointsImageVector,
- *    std::vector<std::set<int> >* intermediatePointsSetVector)
- *  {
- *
- *  }
- *
- */
 
 
   /**
