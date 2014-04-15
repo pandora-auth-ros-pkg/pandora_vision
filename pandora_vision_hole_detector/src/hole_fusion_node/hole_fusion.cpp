@@ -133,6 +133,13 @@ namespace pandora_vision
       return;
     }
 
+
+    //!< The holesMaskSetVector vector is used in the merging processes
+    std::vector<std::set<unsigned int> > holesMasksSetVector;
+    createHolesMasksSetVector(*rgbdHolesConveyor, interpolatedDepthImage_,
+      &holesMasksSetVector);
+
+
     //!< A vector that indicates when a specific hole has finished
     //!< examining all the other holes in the conveyor for merging.
     //!< Initialized at 0 for all conveyor entries, the specific hole
@@ -164,22 +171,28 @@ namespace pandora_vision
       {
         //!< Is the activeId-th candidate hole able to assimilate the
         //!< passiveId-th candidate hole?
-        isAble = HoleMerger::isCapableOfAssimilating(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
+        isAble = HoleMerger::isCapableOfAssimilating(
+          holesMasksSetVector[activeId],
+          holesMasksSetVector[passiveId]);
       }
       if (operationId == 1)
       {
         //!< Is the activeId-th candidate hole able to amalgamate the
         //!< passiveId-th candidate hole?
-        isAble = HoleMerger::isCapableOfAmalgamating(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor);
+        isAble = HoleMerger::isCapableOfAmalgamating(
+          holesMasksSetVector[activeId],
+          holesMasksSetVector[passiveId]);
       }
       if (operationId == 2)
       {
         //!< Is the passiveId-th candidate hole able to be connected with the
         //!< activeId-th candidate hole?
-        isAble = HoleMerger::isCapableOfConnecting(activeId,
-          *rgbdHolesConveyor, passiveId, *rgbdHolesConveyor, pointCloudXYZ_);
+        isAble = HoleMerger::isCapableOfConnecting(*rgbdHolesConveyor,
+          activeId,
+          passiveId,
+          holesMasksSetVector[activeId],
+          holesMasksSetVector[passiveId],
+          pointCloudXYZ_);
       }
 
 
@@ -193,32 +206,57 @@ namespace pandora_vision
         HolesConveyor tempHolesConveyor;
         HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
 
+        //!< Copy the original holes masks set to a temp one.
+        //!< If the temp conveyor is tested successfully through the hole
+        //!< filters, temp will replace the original.
+        //!< On failure, the original will remain unchanged
+        std::vector<std::set<unsigned int> > tempHolesMasksSetVector;
+        tempHolesMasksSetVector = holesMasksSetVector;
+
         if (operationId == 0)
         {
           //!< Delete the passiveId-th candidate hole
-          HoleMerger::assimilateOnce(passiveId, &tempHolesConveyor);
+          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
         }
         else if (operationId == 1)
         {
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has amalgamated
           //!< the passiveId-th candidate hole
-          HoleMerger::amalgamateOnce(activeId, &tempHolesConveyor,
-            passiveId, &tempHolesConveyor);
+          HoleMerger::amalgamateOnce(&tempHolesConveyor,
+            activeId,
+            &tempHolesMasksSetVector[activeId],
+            tempHolesMasksSetVector[passiveId],
+            interpolatedDepthImage_);
+
+          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
         }
         else if (operationId == 2)
         {
           //!< Delete the passiveId-th candidate hole,
           //!< alter the activeId-th candidate hole so that it has been
           //!< connected with the passiveId -th candidate hole
-          HoleMerger::connectOnce(activeId, &tempHolesConveyor,
-            passiveId, &tempHolesConveyor);
+          HoleMerger::connectOnce(&tempHolesConveyor,
+            activeId, passiveId,
+            &tempHolesMasksSetVector[activeId],
+            tempHolesMasksSetVector[passiveId]);
+
+          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
         }
+
+        //!< Since the {assimilator, amalgamator, connector} is able,
+        //!< delete the assimilable's entries in the vectors needed
+        //!< for filtering and merging
+        tempHolesMasksSetVector.erase(
+          tempHolesMasksSetVector.begin() + passiveId);
+
 
         //!< Obtain the activeId-th candidate hole in order for it
         //!< to be checked against the selected filters
         HolesConveyor ithHole =
           HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
+
+
 
 
         //!< TODO make more flexible
@@ -234,15 +272,17 @@ namespace pandora_vision
         //!< Bounding rectangle's plane constitution runs third
         filtersOrder[3] = 2;
 
-
-        //!< Create the necessary vectors for each filter used
+        //!< Create the necessary vectors for each hole checker and
+        //!< merger used
         std::vector<cv::Mat> imgs;
         std::vector<std::string> msgs;
-        std::vector<std::set<unsigned int> > holesMasksSetVector;
         std::vector<std::vector<cv::Point2f> > rectanglesVector;
         std::vector<int> rectanglesIndices;
         std::vector<std::set<unsigned int> > intermediatePointsSetVector;
 
+        //!< The inflated rectangles vector is used in the
+        //!< checkHolesDepthDiff and checkHolesRectangleEdgesPlaneConstitution
+        //!< checkers
         createInflatedRectanglesVector(
           ithHole,
           interpolatedDepthImage_,
@@ -250,8 +290,6 @@ namespace pandora_vision
           &rectanglesVector,
           &rectanglesIndices);
 
-        createHolesMasksSetVector(ithHole, interpolatedDepthImage_,
-          &holesMasksSetVector);
 
 
         std::vector<std::vector<float> >probabilitiesVector(3,
@@ -266,7 +304,7 @@ namespace pandora_vision
             interpolatedDepthImage_,
             pointCloudXYZ_,
             ithHole,
-            holesMasksSetVector,
+            tempHolesMasksSetVector,
             rectanglesVector,
             rectanglesIndices,
             intermediatePointsSetVector,
@@ -288,9 +326,16 @@ namespace pandora_vision
           //!< the tempHolesConveyor is now the new rgbdHolesConveyor
           HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
 
+
+          //!< ..and the new holesMasksSetVector is the positively tested
+          //!< temp one
+          holesMasksSetVector = tempHolesMasksSetVector;
+
+
           //!< Delete the passiveId-th entry of the finishVector since the
           //!< passiveId-th hole has been absorbed by the activeId-th hole
           finishVector.erase(finishVector.begin() + passiveId);
+
 
           //!< Because of the merge happening, the activeId-th
           //!< candidate hole must re-examine all the other holes
@@ -328,6 +373,12 @@ namespace pandora_vision
 
           //!< Remove the activeId-th candidate hole from its former position
           HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
+
+
+          //!< Remove the activeId-th set from its position and append it
+          holesMasksSetVector.push_back(holesMasksSetVector[activeId]);
+          holesMasksSetVector.erase(holesMasksSetVector.begin() + activeId);
+
 
           //!< Since the candidate hole was appended at the end of the
           //!< rgbdHolesConveyor, the finish vector needs to be shifted
@@ -1194,6 +1245,8 @@ namespace pandora_vision
     //!< Holes connection - merger
     Parameters::connect_holes_min_distance =
       config.connect_holes_min_distance;
+    Parameters::connect_holes_max_distance =
+      config.connect_holes_max_distance;
   }
 
 
@@ -1618,19 +1671,19 @@ namespace pandora_vision
       std::vector<std::vector<float> > rgbProbabilitiesVector2D(
         rgbActiveFilters,
         std::vector<float>(conveyor.keyPoints.size(), 0.0));
-
-      //!< check holes for debugging purposes
-      /*
-       *RgbFilters::checkHoles(
-       *  rgbImage_,
-       *  wallsHistogram_,
-       *  conveyor,
-       *  holesMasksVector,
-       *  inflatedRectanglesVector,
-       *  inflatedRectanglesIndices,
-       *  &rgbProbabilitiesVector2D);
-       */
-
+/*
+ *
+ *      //!< check holes for debugging purposes
+ *      RgbFilters::checkHoles(
+ *        rgbImage_,
+ *        wallsHistogram_,
+ *        conveyor,
+ *        holesMasksVector,
+ *        inflatedRectanglesVector,
+ *        inflatedRectanglesIndices,
+ *        &rgbProbabilitiesVector2D);
+ *
+ */
       #ifdef DEBUG_SHOW
       if (conveyor.keyPoints.size() > 0)
       {
@@ -1743,17 +1796,15 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("testDummyHolesMerging", "processCandidateHoles");
     #endif
-/*
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
- *
- *    //!< Invalid
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
- *
- */
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
+
+    //!< Invalid
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
+
 
     //!< 0-th assimilator - amalgamator - connector
     HolesConveyorUtils::appendDummyConveyor(
@@ -1764,35 +1815,33 @@ namespace pandora_vision
     HolesConveyorUtils::appendDummyConveyor(
       cv::Point2f(372.0, 132.0), cv::Point2f(374.0, 134.0), 80, 80, 76, 76,
       dummy);
-/*
- *
- *    //!< 0-th assimilable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16,
- *      dummy);
- *
- *    //!< 0-th amalgamatable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 40, 40, 36, 36,
- *      dummy);
- *
- *    //!< 0-th connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
- *      dummy);
- *
- *
- *    //!< 1-st assimilator - amalgamator - connector
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
- *      dummy);
- *
- *    //!< 1-st connectable
- *    HolesConveyorUtils::appendDummyConveyor(
- *      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
- *      dummy);
- *
- */
+
+    //!< 0-th assimilable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16,
+      dummy);
+
+    //!< 0-th amalgamatable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 120, 40, 116, 36,
+      dummy);
+
+    //!< 0-th connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
+      dummy);
+
+
+    //!< 1-st assimilator - amalgamator - connector
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
+      dummy);
+
+    //!< 1-st connectable
+    HolesConveyorUtils::appendDummyConveyor(
+      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
+      dummy);
+
 
     HolesConveyorUtils::shuffle(dummy);
 
