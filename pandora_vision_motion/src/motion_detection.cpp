@@ -41,7 +41,7 @@ namespace pandora_vision
   /**
     @brief Constructor
   **/
-  MotionDetection::MotionDetection() : _nh()
+  MotionDetection::MotionDetection(const std::string& ns) : _nh(ns)
   {
   
     //!< Get General Parameters, such as frame width & height , camera id
@@ -97,12 +97,12 @@ namespace pandora_vision
       ROS_BREAK();
     }
        
-    //! Get the camera to be used by hole node;
+    //!< Get the camera to be used by qr node;
     if (_nh.getParam("camera_name", cameraName)) 
     {
       ROS_DEBUG_STREAM("camera_name : " << cameraName);
     }
-    else
+    else 
     {
       ROS_FATAL("Camera name not found");
       ROS_BREAK(); 
