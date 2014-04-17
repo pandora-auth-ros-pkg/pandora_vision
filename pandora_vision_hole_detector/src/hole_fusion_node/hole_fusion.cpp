@@ -470,6 +470,10 @@ namespace pandora_vision
     std::vector<cv::Mat>* intermediatePointsImageVector,
     std::vector<std::set<unsigned int> >* intermediatePointsSetVector)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("createCheckerRequiredVectors", "sift");
+    #endif
+
     bool enable_holesMasksImageVector = false;
     bool enable_holesMasksSetVector = false;
     bool enable_inflatedRectanglesVectorAndIndices = false;
@@ -559,6 +563,7 @@ namespace pandora_vision
     {
       enable_holesMasksSetVector = true;
     }
+
 
     //!< Create the necessary resources
 
@@ -650,6 +655,10 @@ namespace pandora_vision
         intermediatePointsImageVector,
         intermediatePointsSetVector);
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCheckerRequiredVectors");
+    #endif
   }
 
 
@@ -1842,6 +1851,7 @@ namespace pandora_vision
     }
     #endif
 
+    //!< Apply all active filters
     sift(rgbdHolesConveyor);
 
     #ifdef DEBUG_TIME

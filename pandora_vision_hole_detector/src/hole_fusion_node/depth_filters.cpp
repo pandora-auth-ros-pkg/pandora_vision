@@ -440,7 +440,7 @@ namespace pandora_vision
     std::vector<float>* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesDepthHomogenity", "applyFilter");
+    Timer::start("checkHolesDepthHomogeneity", "applyFilter");
     #endif
 
     //!< Facilitate the edge detection by converting the 32FC1 image
@@ -489,7 +489,7 @@ namespace pandora_vision
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("checkHolesDepthHomogenity");
+    Timer::tick("checkHolesDepthHomogeneity");
     #endif
   }
 

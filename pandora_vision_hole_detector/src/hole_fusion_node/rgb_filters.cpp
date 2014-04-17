@@ -58,7 +58,7 @@ namespace pandora_vision
     debug reasons
     @return void
    **/
-  void RgbFilters::checkHolesColorHomogenity(
+  void RgbFilters::checkHolesColorHomogeneity(
     const HolesConveyor& conveyor,
     const cv::Mat& inImage,
     const std::vector<cv::Mat>& holesMasksImageVector,
@@ -66,7 +66,7 @@ namespace pandora_vision
     std::vector<std::string>* msgs)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesColorHomogenity", "applyFilter");
+    Timer::start("checkHolesColorHomogeneity", "applyFilter");
     #endif
 
     //!< Scale the inImage in [0, 255] into inImage_ if not already
@@ -149,7 +149,7 @@ namespace pandora_vision
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("checkHolesColorHomogenity");
+    Timer::tick("checkHolesColorHomogeneity");
     #endif
   }
 
@@ -726,14 +726,14 @@ namespace pandora_vision
       //!< Filter #1 (Color homogenity inside blob)-----------------------------
       case 1 :
         {
-          checkHolesColorHomogenity(
+          checkHolesColorHomogeneity(
             conveyor,
             img,
             holesMasksImageVector,
             probabilitiesVector,
             &msgs_);
 
-          windowMsg = "Filter: Color homogenity";
+          windowMsg = "Filter: Color homogeneity";
           break;
         }
         //!< Filter #2 (Luminosity difference)----------------------------------
