@@ -74,7 +74,7 @@ namespace pandora_vision
         debug reasons
         @return void
        **/
-      static void checkHolesColorHomogenity(
+      static void checkHolesColorHomogeneity(
         const HolesConveyor& conveyor,
         const cv::Mat& inImage,
         const std::vector<cv::Mat>& holesMasksVector,
