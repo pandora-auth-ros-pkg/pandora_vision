@@ -35,224 +35,19 @@
  * Authors: Alexandros Filotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef HOLE_FUSION_NODE_HOLE_FUSION_H
-#define HOLE_FUSION_NODE_HOLE_FUSION_H
+#ifndef HOLE_FUSION_NODE_FILTERS_RESOURCES_H
+#define HOLE_FUSION_NODE_FILTERS_RESOURCES_H
 
-#include <dirent.h>
-#include <ros/package.h>
-#include <std_msgs/Empty.h>
-#include "vision_communications/CandidateHolesVectorMsg.h"
-#include "vision_communications/CandidateHoleMsg.h"
-#include "utils/message_conversions.h"
-#include "utils/noise_elimination.h"
 #include "utils/defines.h"
+#include "utils/blob_detection.h"
+#include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
-#include "utils/visualization.h"
-#include "hole_fusion_node/depth_filters.h"
-#include "hole_fusion_node/filters_resources.h"
-#include "hole_fusion_node/rgb_filters.h"
-#include "hole_fusion_node/hole_merger.h"
 
-/**
-  @namespace vision
-  @brief The main namespace for PANDORA vision
- **/
 namespace pandora_vision
 {
-  class HoleFusion
+  class FiltersResources
   {
-    private:
-
-      //!< The ROS node handle
-      ros::NodeHandle nodeHandle_;
-
-      //!< The ROS publisher that will be used for unlocking the
-      //!< synchronizer_node
-      ros::Publisher unlockPublisher_;
-
-      //!< The ROS subscriber for acquisition of candidate holes originated
-      //!< from the depth node
-      ros::Subscriber depthCandidateHolesSubscriber_;
-
-      //!< The ROS subscriber for acquisition of candidate holes originated
-      //!< from the rgb node
-      ros::Subscriber rgbCandidateHolesSubscriber_;
-
-      //!< The ROS subscriber for acquisition of the point cloud originated
-      //!< from th e synchronizer node
-      ros::Subscriber pointCloudSubscriber_;
-
-      //!< Indicates how many of the depth_node and rgb_node nodes have
-      //!< received hole candidates and are ready to send them for processing
-      int numNodesReady_;
-
-      //!< The rgb received by the RGB node
-      cv::Mat rgbImage_;
-
-      //!< The point cloud received by the depth node
-      PointCloudXYZPtr pointCloudXYZ_;
-
-      //!< The interpolated depth image received by the depth node
-      cv::Mat interpolatedDepthImage_;
-
-      //!< The conveyor of hole candidates received by the depth node
-      HolesConveyor depthHolesConveyor_;
-
-      //!< The conveyor of hole candidates received by the rgb node
-      HolesConveyor rgbHolesConveyor_;
-
-      //!< A histogramm for the texture of walls
-      cv::MatND wallsHistogram_;
-
-      //!< The dynamic reconfigure (hole fusion's) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
-        hole_fusion_cfgConfig> server;
-
-      //!< The dynamic reconfigure (hole fusion's) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
-        hole_fusion_cfgConfig>:: CallbackType f;
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config
-        [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
-        @param[in] level [const uint32_t] The level (?)
-        @return void
-       **/
-      void parametersCallback(
-        const pandora_vision_hole_detector::hole_fusion_cfgConfig& config,
-        const uint32_t& level);
-
-      /**
-        @brief Callback for the candidate holes via the depth node
-        @param[in] depthCandidateHolesVector
-        [const vision_communications::CandidateHolesVectorMsg&]
-        The message containing the necessary information to filter hole
-        candidates acquired through the depth node
-        @return void
-       **/
-      void depthCandidateHolesCallback(
-        const vision_communications::CandidateHolesVectorMsg&
-        depthCandidateHolesVector);
-
-      /**
-        @brief Callback for the candidate holes via the rgb node
-        @param[in] depthCandidateHolesVector
-        [const vision_communications::CandidateHolesVectorMsg&]
-        The message containing the necessary information to filter hole
-        candidates acquired through the rgb node
-        @return void
-       **/
-      void rgbCandidateHolesCallback(
-        const vision_communications::CandidateHolesVectorMsg&
-        rgbCandidateHolesVector);
-
-      /**
-        @brief Callback for the point cloud that the synchronizer node
-        publishes
-        @param[in] msg [const sensor_msgs::PointCloud2ConstPtr&] The message
-        containing the point cloud
-        @return void
-       **/
-      void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
-
-      /**
-        @brief Recreates the HolesConveyor struct for the
-        candidate holes from the
-        vision_communications::CandidateHolerMsg message
-        @param[in]candidateHolesVector
-        [const std::vector<vision_communications::CandidateHoleMsg>&]
-        The input candidate holes
-        @param[out] conveyor [HolesConveyor*] The output conveyor
-        struct
-        @return void
-       **/
-      void fromCandidateHoleMsgToConveyor(
-        const std::vector<vision_communications::CandidateHoleMsg>&
-        candidateHolesVector,
-        HolesConveyor* conveyor);
-
-      /**
-        @brief Computes a cv::MatND histogram from images loaded in directory
-        ${pandora_vision_hole_detector}/src/wall_pictures and stores it in
-        a private member variable so as to be used in texture comparing
-        @parameters void
-        @return void
-       **/
-      void getWallsHistogram();
-
-      /**
-        @brief Unpacks the the HolesConveyor struct for the
-        candidate holes and the image
-        from the vision_communications::CandidateHolesVectorMsg message
-        @param[in] holesMsg
-        [vision_communications::CandidateHolesVectorMsg&] The input
-        candidate holes message
-        @param[out] conveyor [HolesConveyor*] The output conveyor
-        struct
-        @param[out] image [cv::Mat*] The output image
-        @param[in] encoding [const std::string&] The image's encoding
-        @return void
-       **/
-      void unpackMessage(
-        const vision_communications::CandidateHolesVectorMsg& holesMsg,
-        HolesConveyor* conveyor, cv::Mat* image, const std::string& encoding);
-
-      /**
-        @brief Implements a strategy to combine
-        information from both sources in order to accurately find valid holes
-        @return void
-       **/
-      void processCandidateHoles();
-
-      /**
-        @brief Runs candidate holes through selected filters.
-        Probabilities for each candidate hole and filter
-        are printed in the console, with an order specified by the
-        hole_fusion_cfg of the dynamic reconfigure utility
-        @param[in] conveyor [const HolesConveyor&] The conveyor
-        containing candidate holes
-        @return void
-       **/
-      void sift(const HolesConveyor& conveyor);
-
-      /**
-        @brief Applies a merging operation of @param operationId, until
-        every candidate hole, even as it changes through the various merges that
-        happen, has been merged with every candidate hole that can be merged
-        with it.
-        @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
-        candidate holes conveyor
-        @param[in] operationId [const int&] The identifier of the merging
-        process. Values: 0 for assimilation, 1 for amalgamation and
-        2 for connecting
-        @return void
-       **/
-      void applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
-        const int& operationId);
-
-      /**
-        @brief Requests from the synchronizer to process a new point cloud
-        @return void
-       **/
-      void unlockSynchronizer();
-
-      /**
-        @brief Sets the depth values of a point cloud according to the
-        values of a depth image
-        @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
-        @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
-        @return void
-       **/
-      void setDepthValuesInPointCloud(const cv::Mat& inImage,
-        PointCloudXYZPtr* pointCloudXYZPtr);
-
-      /**
-        @brief Tests the merging operations on artificial holes
-        @param[out] dummy [HolesConveyor*] The hole candidates
-        @return void
-       **/
-      void testDummyHolesMerging(HolesConveyor* dummy);
+    public:
 
       /**
         @brief Each Depth and RGB filter requires the construction of a set
@@ -286,7 +81,7 @@ namespace pandora_vision
         exists in the @param inflatedRectanglesIndices vector
         @return void
        **/
-      void createCheckerRequiredVectors(
+      static void createCheckerRequiredVectors(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
         const int& inflationSize,
@@ -332,7 +127,7 @@ namespace pandora_vision
         A vector containing an image (the mask) for each hole
         @return void
        **/
-      void createHolesMasksImageVector(
+      static void createHolesMasksImageVector(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
         std::vector<cv::Mat>* holesMasksImageVector);
@@ -348,7 +143,7 @@ namespace pandora_vision
         that holds sets of points; each set holds the inside points of each hole
         @return void
        **/
-      void createHolesMasksSetVector(const HolesConveyor& conveyor,
+      static void createHolesMasksSetVector(const HolesConveyor& conveyor,
         const cv::Mat& image,
         std::vector<std::set<unsigned int> >* holesMasksSetVector);
 
@@ -374,7 +169,7 @@ namespace pandora_vision
         inflated bounding rectangles is within the image's bounds.
         @return void
        **/
-      void createInflatedRectanglesVector(
+      static void createInflatedRectanglesVector(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
         const int& inflationSize,
@@ -437,7 +232,7 @@ namespace pandora_vision
         hole whose identifier exists in the @param rectanglesIndices vector
         @return void
        **/
-      void createIntermediateHolesPointsImageVector(
+      static void createIntermediateHolesPointsImageVector(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
         const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
@@ -463,28 +258,15 @@ namespace pandora_vision
         whose identifier exists in the @param rectanglesIndices vector
         @return void
        **/
-      void createIntermediateHolesPointsSetVector(
+      static void createIntermediateHolesPointsSetVector(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
         const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
         const std::vector<int>& inflatedRectanglesIndices,
         std::vector<std::set<unsigned int> >* intermediatePointsSetVector);
 
-
-    public:
-
-      /**
-        @brief The HoleFusion constructor
-       **/
-      HoleFusion(void);
-
-      /**
-        @brief The HoleFusion deconstructor
-       **/
-      ~HoleFusion(void);
-
   };
 
 } // namespace pandora_vision
 
-#endif  // HOLE_FUSION_NODE_HOLE_FUSION_H
+#endif  // HOLE_FUSION_NODE_FILTERS_RESOURCES_H
