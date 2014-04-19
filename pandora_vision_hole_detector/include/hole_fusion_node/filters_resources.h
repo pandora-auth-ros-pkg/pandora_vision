@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Filotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
 #ifndef HOLE_FUSION_NODE_FILTERS_RESOURCES_H
@@ -143,7 +143,8 @@ namespace pandora_vision
         that holds sets of points; each set holds the inside points of each hole
         @return void
        **/
-      static void createHolesMasksSetVector(const HolesConveyor& conveyor,
+      static void createHolesMasksSetVector(
+        const HolesConveyor& conveyor,
         const cv::Mat& image,
         std::vector<std::set<unsigned int> >* holesMasksSetVector);
 
@@ -185,6 +186,8 @@ namespace pandora_vision
         once for every hole, instead of twice, if the image and set vectors
         are needed
         @param[in] conveyor [const HolesConveyor&] The conveyor of holes
+        @param[in] image [const cv::Mat&] An image needed only for
+        its size
         @param[in] rectanglesVector
         [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
         the vertices of each rectangle that corresponds to a specific hole
@@ -217,6 +220,8 @@ namespace pandora_vision
         outline and the rectangle (inflated or not) that corrensponds to it.
         These points are then stored in an image
         @param[in] conveyor [const HolesConveyor&] The conveyor of holes
+        @param[in] image [const cv::Mat&] An image needed only for
+        its size
         @param[in] rectanglesVector
         [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
         the vertices of each rectangle that corresponds to a specific hole
@@ -225,11 +230,10 @@ namespace pandora_vision
         is used to identify a hole's corresponding rectangle. Used primarily
         because the rectangles used are inflated rectangles; not all holes
         possess an inflated rectangle
-        @param[in] image [const cv::Mat&] An image needed only for
-        its size
-        @param[out] intermediatePointsVector [std::vector<cv::Mat>*]
-        A vector that holds the image of the intermediate points for each
-        hole whose identifier exists in the @param rectanglesIndices vector
+        @param[out] intermediatePointsImageVector [std::vector<cv::Mat>*]
+        A vector that holds the image of the intermediate points between
+        a hole's outline and its bounding box, for each hole whose identifier
+        exists in the @param inflatedRectanglesIndices vector
         @return void
        **/
       static void createIntermediateHolesPointsImageVector(
@@ -244,18 +248,20 @@ namespace pandora_vision
         outline and the rectangle (inflated or not) that corrensponds to it.
         These points are then stored in a std::set of ints.
         @param[in] conveyor [const HolesConveyor&] The conveyor of holes
-        @param[in] rectanglesVector
+        @param[in] image [const cv::Mat&] An image needed only for
+        its size
+        @param[in] inflatedRectanglesVector
         [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
         the vertices of each rectangle that corresponds to a specific hole
         inside the coveyor
-        @param[in] rectanglesIndices [const std::vector<int>&] A vector that
-        is used to identify a hole's corresponding rectangle. Used primarily
-        because the rectangles used are inflated rectangles; not all holes
-        possess an inflated rectangle
+        @param[in] inflatedRectanglesIndices [const std::vector<int>&] A vector
+        that is used to identify a hole's corresponding rectangle.
+        Used primarily because the rectangles used are inflated rectangles;
+        not all holes possess an inflated rectangle
         @param[out] intermediatePointsSetVector
         [std::vector<std::set<unsigned int> >*]
         A vector that holds the intermediate points' indices for each hole
-        whose identifier exists in the @param rectanglesIndices vector
+        whose identifier exists in the @param inflatedRectanglesIndices vector
         @return void
        **/
       static void createIntermediateHolesPointsSetVector(

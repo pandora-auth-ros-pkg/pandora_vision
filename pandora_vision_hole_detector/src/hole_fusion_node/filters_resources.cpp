@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Filotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
 #include "hole_fusion_node/filters_resources.h"
@@ -459,9 +459,6 @@ namespace pandora_vision
     @param[out] inflatedRectanglesIndices [std::vector<int>*]
     The vector that holes the indices of the original holes whose
     inflated bounding rectangles is within the image's bounds.
-    @param[out] brushfireBeginPoints [std::vector<cv::Point2f>*] A vector
-    used from checker methods that use the brushfire algorithm
-    between a hole's outline and its inflated rectangle
     @return void
    **/
   void FiltersResources::createInflatedRectanglesVector(
@@ -615,6 +612,7 @@ namespace pandora_vision
   }
 
 
+
   /**
     @brief For each hole, this function finds the points between the hole's
     outline and the rectangle (inflated or not) that corrensponds to it.
@@ -690,11 +688,11 @@ namespace pandora_vision
     @param[in] conveyor [const HolesConveyor&] The conveyor of holes
     @param[in] image [const cv::Mat&] An image needed only for
     its size
-    @param[in] rectanglesVector
+    @param[in] inflatedRectanglesVector
     [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of each rectangle that corresponds to a specific hole
     inside the coveyor
-    @param[in] rectanglesIndices [const std::vector<int>&] A vector that
+    @param[in] inflatedRectanglesIndices [const std::vector<int>&] A vector that
     is used to identify a hole's corresponding rectangle. Used primarily
     because the rectangles used are inflated rectangles; not all holes
     possess an inflated rectangle
@@ -707,8 +705,8 @@ namespace pandora_vision
   void FiltersResources::createIntermediateHolesPointsSetVector(
     const HolesConveyor& conveyor,
     const cv::Mat& image,
-    const std::vector<std::vector<cv::Point2f> >& rectanglesVector,
-    const std::vector<int>& rectanglesIndices,
+    const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
+    const std::vector<int>& inflatedRectanglesIndices,
     std::vector<std::set<unsigned int> >* intermediatePointsSetVector)
   {
     #ifdef DEBUG_TIME
@@ -716,12 +714,12 @@ namespace pandora_vision
       "createCheckerRequiredVectors");
     #endif
 
-    for (int i = 0; i < rectanglesVector.size(); i++)
+    for (int i = 0; i < inflatedRectanglesVector.size(); i++)
     {
       //!< The brushfire start point is the hole's keypoint
       cv::Point2f keypoint(
-        conveyor.keyPoints[rectanglesIndices[i]].pt.x,
-        conveyor.keyPoints[rectanglesIndices[i]].pt.y);
+        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.x,
+        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.y);
 
       //!< The current hole's mask
       cv::Mat intermediatePointsMask = cv::Mat::zeros(image.size(), CV_8UC1);
@@ -733,11 +731,11 @@ namespace pandora_vision
 
       //!< Draw the outline of the i-th hole onto holeOutlineFilledImage
       for(unsigned int j = 0;
-        j < conveyor.outlines[rectanglesIndices[i]].size(); j++)
+        j < conveyor.outlines[inflatedRectanglesIndices[i]].size(); j++)
       {
         holeOutlineFilledImage.at<uchar>(
-          conveyor.outlines[rectanglesIndices[i]][j].y,
-          conveyor.outlines[rectanglesIndices[i]][j].x) = 255;
+          conveyor.outlines[inflatedRectanglesIndices[i]][j].y,
+          conveyor.outlines[inflatedRectanglesIndices[i]][j].x) = 255;
       }
 
       //!< The set of indices of points inside the i-th hole's outline
@@ -758,11 +756,12 @@ namespace pandora_vision
 
       //!< Draw the bounding rectangle of the i-th hole onto
       //!< rectangleOutlineFilledImage
-      for(unsigned int j = 0; j < rectanglesVector[i].size(); j++)
+      for(unsigned int j = 0; j < inflatedRectanglesVector[i].size(); j++)
       {
         cv::line(rectangleOutlineFilledImage,
-          rectanglesVector[i][j],
-          rectanglesVector[i][(j + 1) % rectanglesVector[i].size()],
+          inflatedRectanglesVector[i][j],
+          inflatedRectanglesVector[i][(j + 1)
+          % inflatedRectanglesVector[i].size()],
           cv::Scalar(255, 0, 0), 1, 8 );
       }
 
@@ -793,5 +792,7 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::tick("createIntermediateHolesPointsSetVector");
     #endif
+
   }
-}
+
+} // namespace pandora_vision
