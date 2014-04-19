@@ -32,14 +32,13 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Filotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
 #include "hole_fusion_node/rgb_filters.h"
 
 namespace pandora_vision
 {
-
   /**
     @brief Checks for color homogenity in a region where points are
     constrained inside each hole. A candidate hole is considered valid
@@ -280,7 +279,8 @@ namespace pandora_vision
     histograms of the bounding box and the points inside the outline of the
     blob.
     @param[in] conveyor [const HolesConveyor&] The candidate holes
-    @param[in] inImage [const cv::Mat&] The input RGB image in unscaled format
+    @param[in] inImage [const cv::Mat&] The input RGB image in unscaled
+    format
     @param[in] inHistogram [const cv::MatND&]
     The model histogram's H and S component
     @param[in] holesMasksImageVector [const std::vector<cv::Mat>&]

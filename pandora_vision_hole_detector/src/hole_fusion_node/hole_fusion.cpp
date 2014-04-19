@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Filotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
 #include "hole_fusion_node/hole_fusion.h"
@@ -111,7 +111,7 @@ namespace pandora_vision
     every candidate hole, even as it changes through the various merges that
     happen, has been merged with every candidate hole that can be merged
     with it.
-    @param[in][out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    @param[in out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
     candidate holes conveyor
     @param[in] operationId [const int&] The identifier of the merging
     process. Values: 0 for assimilation, 1 for amalgamation and
@@ -544,7 +544,7 @@ namespace pandora_vision
 
   /**
     @brief Computes a cv::MatND histogram from images loaded in directory
-    ${pandora_vision_hole_detector}/src/wall_pictures and stores it in
+    ${pandora_vision_hole_detector}/src/walls and stores it in
     a private member variable so as to be used in texture comparing
     @parameters void
     @return void
@@ -649,15 +649,15 @@ namespace pandora_vision
     ROS_INFO("Parameters callback called");
     #endif
 
-    //!< Kanny parameters
-    Parameters::kanny_ratio =
-      config.kanny_ratio;
-    Parameters::kanny_kernel_size =
-      config.kanny_kernel_size;
-    Parameters::kanny_low_threshold =
-      config.kanny_low_threshold;
-    Parameters::kanny_blur_noise_kernel_size =
-      config.kanny_blur_noise_kernel_size;
+    //!< canny parameters
+    Parameters::canny_ratio =
+      config.canny_ratio;
+    Parameters::canny_kernel_size =
+      config.canny_kernel_size;
+    Parameters::canny_low_threshold =
+      config.canny_low_threshold;
+    Parameters::canny_blur_noise_kernel_size =
+      config.canny_blur_noise_kernel_size;
 
     Parameters::contrast_enhance_beta =
       config.contrast_enhance_beta;
@@ -904,14 +904,13 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-/*
- *
- *    //!< Uncomment for testing artificial holes' merging process
- *    HolesConveyor dummy;
- *    testDummyHolesMerging(&dummy);
- *    return;
- *
- */
+    /*//////////////////////////////////////////////////////////////////////////
+    //!< Uncomment for testing artificial holes' merging process
+    HolesConveyor dummy;
+    testDummyHolesMerging(&dummy);
+    return;
+    //////////////////////////////////////////////////////////////////////////*/
+
 
     //!< Keep a copy of the initial (not merged) candidate holes for
     //!< debugging and exibition purposes
@@ -1078,6 +1077,7 @@ namespace pandora_vision
     Timer::tick("setDepthValuesInPointCloud");
     #endif
   }
+
 
 
   /**
@@ -1262,6 +1262,22 @@ namespace pandora_vision
 
 
   /**
+    @brief Requests from the synchronizer to process a new point cloud
+    @return void
+   **/
+  void HoleFusion::unlockSynchronizer()
+  {
+    #ifdef DEBUG_SHOW
+    ROS_INFO("Sending unlock message");
+    #endif
+
+    std_msgs::Empty unlockMsg;
+    unlockPublisher_.publish(unlockMsg);
+  }
+
+
+
+  /**
     @brief Unpacks the the HolesConveyor struct for the
     candidate holes, the interpolated depth image and the point cloud
     from the vision_communications::CandidateHolesVectorMsg message
@@ -1296,25 +1312,6 @@ namespace pandora_vision
     Timer::tick("unpackMessage");
     #endif
   }
-
-
-
-  /**
-    @brief Requests from the synchronizer to process a new point cloud
-    @return void
-   **/
-  void HoleFusion::unlockSynchronizer()
-  {
-    #ifdef DEBUG_SHOW
-    ROS_INFO("Sending unlock message");
-    #endif
-
-    std_msgs::Empty unlockMsg;
-    unlockPublisher_.publish(unlockMsg);
-  }
-
-
-
 
 
 
