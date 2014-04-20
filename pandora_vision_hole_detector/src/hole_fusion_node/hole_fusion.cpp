@@ -241,7 +241,7 @@ namespace pandora_vision
           HoleMerger::connectOnce(&tempHolesConveyor,
             activeId, passiveId,
             &tempHolesMasksSetVector[activeId],
-            tempHolesMasksSetVector[passiveId]);
+            interpolatedDepthImage_);
 
           HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
         }
