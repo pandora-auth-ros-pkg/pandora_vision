@@ -100,8 +100,11 @@ namespace pandora_vision
   int Parameters::run_checker_brushfire_outline_to_rectangle = 4;
   int Parameters::run_checker_outline_of_rectangle = 2;
   int Parameters::run_checker_depth_homogeneity = 5;
+
   int Parameters::rectangle_inflation_size = 20;
   float Parameters::depth_difference = 0.4;
+  float Parameters::holes_gaussian_mean = 0.3;
+  float Parameters::holes_gaussian_stddev = 0.3;
 
   int Parameters::run_checker_color_homogeneity = 1;
   int Parameters::run_checker_luminosity_diff = 2;

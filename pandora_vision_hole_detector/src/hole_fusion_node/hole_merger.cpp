@@ -515,9 +515,6 @@ namespace pandora_vision
       }
     }
 
-    cv::imshow("canvas", canvas);
-    cv::waitKey(1);
-
     //!< Construct the connector's new hole mask
     //!< First, clear the former one
     connectorHoleMaskSet->erase(

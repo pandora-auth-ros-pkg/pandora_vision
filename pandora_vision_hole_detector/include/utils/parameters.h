@@ -108,8 +108,11 @@ namespace pandora_vision
     static int run_checker_brushfire_outline_to_rectangle;
     static int run_checker_outline_of_rectangle;
     static int run_checker_depth_homogeneity;
+
     static int rectangle_inflation_size;
     static float depth_difference;
+    static float holes_gaussian_mean;
+    static float holes_gaussian_stddev;
 
     static int run_checker_color_homogeneity;
     static int run_checker_luminosity_diff;
