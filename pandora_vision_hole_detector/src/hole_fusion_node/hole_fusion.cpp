@@ -260,7 +260,6 @@ namespace pandora_vision
 
 
 
-
         //!< TODO make more flexible
         //!< Determines the selected filters execution
         std::map<int, int> filtersOrder;
@@ -654,6 +653,11 @@ namespace pandora_vision
       config.rectangle_inflation_size;
     Parameters::depth_difference =
       config.depth_difference;
+
+    Parameters::holes_gaussian_mean=
+      config.holes_gaussian_mean;
+    Parameters::holes_gaussian_stddev=
+      config.holes_gaussian_stddev;
 
     Parameters::run_checker_color_homogeneity =
       config.run_checker_color_homogeneity;
