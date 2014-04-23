@@ -113,20 +113,6 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole_detector::
         hole_fusion_cfgConfig>:: CallbackType f;
 
-      /**
-        @brief Applies a merging operation of @param operationId, until
-        every candidate hole, even as it changes through the various merges that
-        happen, has been merged with every candidate hole that can be merged
-        with it.
-        @param[in out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
-        candidate holes conveyor
-        @param[in] operationId [const int&] The identifier of the merging
-        process. Values: 0 for assimilation, 1 for amalgamation and
-        2 for connecting
-        @return void
-       **/
-      void applyMergeOperation(HolesConveyor* rgbdHolesConveyor,
-        const int& operationId);
 
       /**
         @brief Callback for the candidate holes via the depth node
