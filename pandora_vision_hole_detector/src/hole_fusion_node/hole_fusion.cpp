@@ -519,7 +519,7 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    /*//////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     //!< Uncomment for testing artificial holes' merging process
     HolesConveyor dummy;
     testDummyHolesMerging(&dummy);
