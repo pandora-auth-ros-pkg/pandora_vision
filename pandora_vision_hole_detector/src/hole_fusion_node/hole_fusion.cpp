@@ -220,6 +220,120 @@ namespace pandora_vision
 
 
   /**
+    @brief With an input a conveyor of holes, this method, depending on
+    the depth image's interpolation method, has holes assimilating,
+    amalgamating or being connected with holes that can be assimilated,
+    amalgamated or connected with or by them. The interpolation method is
+    a basic criterion for the mode of merging holes because the two
+    filters that verify the validity of each merger are depth-based ones.
+    If there is no valid depth image on which to run these filters, it is
+    sure that the depth sensor is closer to the scene it is witnessing
+    than 0.5-0.6m. In this way of operation, the merging of holes does not
+    consider employing validator filters and simply merges holes that can
+    be merged with each other (assimilated, amalgamated, or connected).
+    @param[in out] conveyor [HolesConveyor*] The conveyor of holes to be
+    merged with one another, where applicable.
+    @return void
+   **/
+  void HoleFusion::mergeHoles(HolesConveyor* conveyor)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("mergeHoles", "processCandidateHoles");
+    #endif
+
+    //!< Keep a copy of the initial (not merged) candidate holes for
+    //!< debugging and exibition purposes
+    HolesConveyor conveyorBeforeMerge;
+
+    HolesConveyorUtils::copyTo(*conveyor, &conveyorBeforeMerge);
+
+
+    #ifdef DEBUG_SHOW
+    std::vector<std::string> msgs;
+    std::vector<cv::Mat> canvases;
+    std::vector<std::string> titles;
+
+    if(Parameters::debug_show_merge_holes)
+    {
+      //!< Push back the identifier of each keypoint
+      for (int i = 0; i < conveyorBeforeMerge.keyPoints.size(); i++)
+      {
+        msgs.push_back(TOSTR(i));
+      }
+
+      canvases.push_back(
+        Visualization::showHoles(
+          "",
+          interpolatedDepthImage_,
+          conveyorBeforeMerge,
+          -1,
+          msgs));
+
+      titles.push_back(
+        TOSTR(conveyor->keyPoints.size()) + " holes before merging");
+    }
+    #endif
+
+
+    //!< Try to merge holes that can be assimilated, amalgamated or connected
+    if (Parameters::interpolation_method == 0)
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        HoleMerger::applyMergeOperation(
+          conveyor,
+          interpolatedDepthImage_,
+          pointCloudXYZ_,
+          i);
+      }
+    }
+    else
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        HoleMerger::applyMergeOperationWithoutValidation(
+          conveyor,
+          interpolatedDepthImage_,
+          pointCloudXYZ_,
+          i);
+      }
+    }
+
+
+    #ifdef DEBUG_SHOW
+    if(Parameters::debug_show_merge_holes)
+    {
+      msgs.clear();
+      //!< Push back the identifier of each keypoint
+      for (int i = 0; i < conveyor->keyPoints.size(); i++)
+      {
+        msgs.push_back(TOSTR(i));
+      }
+
+      canvases.push_back(
+        Visualization::showHoles(
+          "",
+          interpolatedDepthImage_,
+          *conveyor,
+          -1,
+          msgs));
+
+      titles.push_back(
+        TOSTR(conveyor->keyPoints.size()) + " holes after merging");
+
+      Visualization::multipleShow("Merged Keypoints",
+        canvases, titles, Parameters::debug_show_merge_holes_size, 1);
+    }
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::tick("mergeHoles");
+    #endif
+  }
+
+
+
+  /**
     @brief The function called when a parameter is changed
     @param[in] config
     [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
@@ -519,85 +633,15 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    ///////////////////////////////////////////////////////////////////////////
+    /*//////////////////////////////////////////////////////////////////////////
     //!< Uncomment for testing artificial holes' merging process
     HolesConveyor dummy;
     testDummyHolesMerging(&dummy);
     return;
     //////////////////////////////////////////////////////////////////////////*/
 
-
-    //!< Keep a copy of the initial (not merged) candidate holes for
-    //!< debugging and exibition purposes
-    HolesConveyor rgbdHolesConveyorBeforeMerge;
-
-    HolesConveyorUtils::copyTo(rgbdHolesConveyor,
-      &rgbdHolesConveyorBeforeMerge);
-
-
-    #ifdef DEBUG_SHOW
-    std::vector<std::string> msgs;
-    std::vector<cv::Mat> canvases;
-    std::vector<std::string> titles;
-
-    if(Parameters::debug_show_merge_holes)
-    {
-      //!< Push back the identifier of each keypoint
-      for (int i = 0; i < rgbdHolesConveyorBeforeMerge.keyPoints.size(); i++)
-      {
-        msgs.push_back(TOSTR(i));
-      }
-
-      canvases.push_back(
-        Visualization::showHoles(
-          "",
-          interpolatedDepthImage_,
-          rgbdHolesConveyorBeforeMerge,
-          -1,
-          msgs));
-
-      titles.push_back(
-        TOSTR(rgbdHolesConveyor.keyPoints.size()) + " holes before merging");
-    }
-    #endif
-
-
-    //!< Try to merge holes that can be assimilated, amalgamated or connected
-    for (int i = 0; i < 3; i++)
-    {
-      HoleMerger::applyMergeOperation(
-        &rgbdHolesConveyor,
-        interpolatedDepthImage_,
-        pointCloudXYZ_,
-        i);
-    }
-
-
-    #ifdef DEBUG_SHOW
-    if(Parameters::debug_show_merge_holes)
-    {
-      msgs.clear();
-      //!< Push back the identifier of each keypoint
-      for (int i = 0; i < rgbdHolesConveyor.keyPoints.size(); i++)
-      {
-        msgs.push_back(TOSTR(i));
-      }
-
-      canvases.push_back(
-        Visualization::showHoles(
-          "",
-          interpolatedDepthImage_,
-          rgbdHolesConveyor,
-          -1,
-          msgs));
-
-      titles.push_back(
-        TOSTR(rgbdHolesConveyor.keyPoints.size()) + " holes after merging");
-
-      Visualization::multipleShow("Merged Keypoints",
-        canvases, titles, Parameters::debug_show_merge_holes_size, 1);
-    }
-    #endif
+    //!< Apply the {assimilation, amalgamation, connection} processes
+    mergeHoles(&rgbdHolesConveyor);
 
     //!< Apply all active filters
     sift(rgbdHolesConveyor);
