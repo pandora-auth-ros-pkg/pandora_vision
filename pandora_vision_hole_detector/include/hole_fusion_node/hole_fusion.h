@@ -218,7 +218,7 @@ namespace pandora_vision
         containing candidate holes
         @return void
        **/
-      void sift(const HolesConveyor& conveyor);
+      void siftHoles(const HolesConveyor& conveyor);
 
       /**
         @brief Requests from the synchronizer to process a new point cloud

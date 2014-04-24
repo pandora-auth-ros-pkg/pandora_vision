@@ -644,7 +644,7 @@ namespace pandora_vision
     mergeHoles(&rgbdHolesConveyor);
 
     //!< Apply all active filters
-    sift(rgbdHolesConveyor);
+    siftHoles(rgbdHolesConveyor);
 
     #ifdef DEBUG_TIME
     Timer::tick("processCandidateHoles");
@@ -752,12 +752,11 @@ namespace pandora_vision
     containing candidate holes
     @return void
    **/
-  void HoleFusion::sift(const HolesConveyor& conveyor)
+  void HoleFusion::siftHoles(const HolesConveyor& conveyor)
   {
     #ifdef DEBUG_TIME
-    Timer::start("sift", "processCandidateHoles");
+    Timer::start("siftHoles", "processCandidateHoles");
     #endif
-
 
     //!< A vector of images that each one of them represents the corresponding
     //!< hole's mask: non-zero value pixels are within a hole's outline points
@@ -784,11 +783,12 @@ namespace pandora_vision
     std::vector<cv::Mat> intermediatePointsImageVector;
 
     //!< Construct the necessary vectors, depending on which filters
-    //!< are to run in runtime
+    //!< are to run in runtime and on the interpolation method used
     FiltersResources::createCheckerRequiredVectors(
       conveyor,
       interpolatedDepthImage_,
       Parameters::rectangle_inflation_size,
+      Parameters::interpolation_method,
       &holesMasksImageVector,
       &holesMasksSetVector,
       &inflatedRectanglesVector,
@@ -797,67 +797,12 @@ namespace pandora_vision
       &intermediatePointsSetVector);
 
 
-    //!< Initialize the depth probabilities 2D vector. But first we need to know
-    //!< how many rows the vector will accomodate
-    int depthActiveFilters = 0;
+    //!< The overall 2D vector that contains the probabilities from
+    //!< both the depth and rgb filtering regimes
+    //!< Each column is a specific hole.
+    //!< In each row there are values of probabilities of a specific filter
+    std::vector<std::vector<float> > probabilitiesVector2D;
 
-    if (Parameters::run_checker_depth_diff > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_outline_of_rectangle > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_depth_area > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
-    {
-      depthActiveFilters++;
-    }
-    if (Parameters::run_checker_depth_homogeneity > 0)
-    {
-      depthActiveFilters++;
-    }
-
-    if (depthActiveFilters > 0)
-    {
-      std::vector<std::vector<float> > depthProbabilitiesVector2D(
-        depthActiveFilters,
-        std::vector<float>(conveyor.keyPoints.size(), 0.0));
-
-      //!< check holes for debugging purposes
-      DepthFilters::checkHoles(
-        conveyor,
-        interpolatedDepthImage_,
-        pointCloudXYZ_,
-        holesMasksSetVector,
-        inflatedRectanglesVector,
-        inflatedRectanglesIndices,
-        intermediatePointsSetVector,
-        &depthProbabilitiesVector2D);
-
-      #ifdef DEBUG_SHOW
-      ROS_ERROR("-------------------------------------------");
-      if (conveyor.keyPoints.size() > 0)
-      {
-        ROS_ERROR("Depth : Candidate Holes' probabilities");
-        for (int j = 0; j < conveyor.keyPoints.size(); j++)
-        {
-          std::string probsString;
-          for (int i = 0; i < depthActiveFilters; i++)
-          {
-            probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
-          }
-
-          ROS_ERROR("P_%d [%f %f]= %s", j, conveyor.keyPoints[j].pt.x,
-            conveyor.keyPoints[j].pt.y, probsString.c_str());
-        }
-      }
-      #endif
-    }
 
     //!< Initialize the rgb probabilities 2D vector. But first we need to know
     //!< how many rows the vector will accomodate
@@ -915,10 +860,100 @@ namespace pandora_vision
         }
       }
       #endif
+
+      //!< Fill the probabilitiesVector2D with the rgb one
+      for (int i = 0; i < rgbProbabilitiesVector2D.size(); i++)
+      {
+        std::vector<float> row;
+        for (int j = 0; j < rgbProbabilitiesVector2D[i].size(); j++)
+        {
+          row.push_back(rgbProbabilitiesVector2D[i][j]);
+        }
+        probabilitiesVector2D.push_back(row);
+      }
     }
 
+    //!< If depth analysis is applicable
+    if (Parameters::interpolation_method == 0)
+    {
+      //!< Initialize the depth probabilities 2D vector.
+      //!< But first we need to know how many rows the vector will accomodate
+      int depthActiveFilters = 0;
+
+      if (Parameters::run_checker_depth_diff > 0)
+      {
+        depthActiveFilters++;
+      }
+      if (Parameters::run_checker_outline_of_rectangle > 0)
+      {
+        depthActiveFilters++;
+      }
+      if (Parameters::run_checker_depth_area > 0)
+      {
+        depthActiveFilters++;
+      }
+      if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
+      {
+        depthActiveFilters++;
+      }
+      if (Parameters::run_checker_depth_homogeneity > 0)
+      {
+        depthActiveFilters++;
+      }
+
+      if (depthActiveFilters > 0)
+      {
+        std::vector<std::vector<float> > depthProbabilitiesVector2D(
+          depthActiveFilters,
+          std::vector<float>(conveyor.keyPoints.size(), 0.0));
+
+        //!< check holes for debugging purposes
+        DepthFilters::checkHoles(
+          conveyor,
+          interpolatedDepthImage_,
+          pointCloudXYZ_,
+          holesMasksSetVector,
+          inflatedRectanglesVector,
+          inflatedRectanglesIndices,
+          intermediatePointsSetVector,
+          &depthProbabilitiesVector2D);
+
+        #ifdef DEBUG_SHOW
+        ROS_ERROR("-------------------------------------------");
+        if (conveyor.keyPoints.size() > 0)
+        {
+          ROS_ERROR("Depth : Candidate Holes' probabilities");
+          for (int j = 0; j < conveyor.keyPoints.size(); j++)
+          {
+            std::string probsString;
+            for (int i = 0; i < depthActiveFilters; i++)
+            {
+              probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
+            }
+
+            ROS_ERROR("P_%d [%f %f]= %s", j, conveyor.keyPoints[j].pt.x,
+              conveyor.keyPoints[j].pt.y, probsString.c_str());
+          }
+        }
+        #endif
+
+        //!< Fill the probabilitiesVector2D with the rgb one
+        for (int i = 0; i < depthProbabilitiesVector2D.size(); i++)
+        {
+          std::vector<float> row;
+          for (int j = 0; j < depthProbabilitiesVector2D[i].size(); j++)
+          {
+            row.push_back(depthProbabilitiesVector2D[i][j]);
+          }
+          probabilitiesVector2D.push_back(row);
+        }
+      }
+    }
+    //!< All filters have been applied, all probabilities produced
+
+
     #ifdef DEBUG_TIME
-    Timer::tick("sift");
+    Timer::tick("siftHoles");
     #endif
   }
 
