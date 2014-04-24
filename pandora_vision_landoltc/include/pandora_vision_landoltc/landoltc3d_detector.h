@@ -34,8 +34,8 @@
 *
 * Author: Victor Daropoulos
 *********************************************************************/
-#ifndef PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTOR_H
-#define PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTOR_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTOR_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTOR_H
 
 #include "ros/ros.h"
 #include <opencv2/opencv.hpp>
@@ -127,8 +127,8 @@ namespace pandora_vision
     @return void
     **/
     
-    void applyBradleyThresholding(const cv::Mat& in,cv::Mat* out);
+    void applyBradleyThresholding(const cv::Mat& in, cv::Mat* out);
     
   };
 } // namespace pandora_vision
-#endif  // PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTOR_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTOR_H
