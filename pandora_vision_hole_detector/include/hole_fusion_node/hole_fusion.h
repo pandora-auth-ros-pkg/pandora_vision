@@ -143,6 +143,24 @@ namespace pandora_vision
         HolesConveyor* conveyor);
 
       /**
+        @brief With an input a conveyor of holes, this method, depending on
+        the depth image's interpolation method, has holes assimilating,
+        amalgamating or being connected with holes that can be assimilated,
+        amalgamated or connected with or by them. The interpolation method is
+        a basic criterion for the mode of merging holes because the two
+        filters that verify the validity of each merger are depth-based ones.
+        If there is no valid depth image on which to run these filters, it is
+        sure that the depth sensor is closer to the scene it is witnessing
+        than 0.5-0.6m. In this way of operation, the merging of holes does not
+        consider employing validator filters and simply merges holes that can
+        be merged with each other (assimilated, amalgamated, or connected).
+        @param[in out] conveyor [HolesConveyor*] The conveyor of holes to be
+        merged with one another, where applicable.
+        @return void
+       **/
+      void mergeHoles(HolesConveyor* conveyor);
+
+      /**
         @brief The function called when a parameter is changed
         @param[in] config
         [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]

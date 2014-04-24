@@ -84,6 +84,31 @@ namespace pandora_vision
         const int& operationId);
 
       /**
+        @brief Applies a merging operation of @param operationId, until
+        every candidate hole, even as it changes through the various merges that
+        happen, has been merged with every candidate hole that can be merged
+        with it. In contrast to the applyMergeOperation method, this method
+        does not consult hole checkers to validate the newly merged holes.
+        (Used when depth analysis is unattainable)
+        @param[in out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+        candidate holes conveyor
+        @param[in] image [const cv::Mat&] An image used for filters' resources
+        creation and size usage
+        @param[in] pointCloud [const PointCloudXYZPtr] An interpolated point
+        cloud used in the connection operation; it is used to obtain real world
+        distances between holes
+        @param[in] operationId [const int&] The identifier of the merging
+        process. Values: 0 for assimilation, 1 for amalgamation and
+        2 for connecting
+        @return void
+       **/
+      static void applyMergeOperationWithoutValidation(
+        HolesConveyor* rgbdHolesConveyor,
+        const cv::Mat& image,
+        const PointCloudXYZPtr& pointCloud,
+        const int& operationId);
+
+      /**
         @brief Indicates whether a hole assigned the role of the assimilator
         is capable of assimilating another hole assigned the role of
         the assimilable. It checks whether the assimilable's outline
