@@ -61,6 +61,9 @@ LandoltCDetection::LandoltCDetection() : _nh(), landoltcNowON(false)
   _landoltcPublisher =
       _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>("landoltc_alert", 10, true);
       
+  //!< The dynamic reconfigure parameter's callback
+  server.setCallback(boost::bind(&LandoltCDetection::parametersCallback, this, _1, _2));
+      
       
   ROS_INFO("[landoltc_node] : Created LandoltC Detection instance");
 
@@ -247,4 +250,22 @@ void LandoltCDetection::completeTransition()
 {
   ROS_INFO("[Landoltc_node] : Transition Complete");
 }
+
+/**
+  @brief The function called when a parameter is changed
+  @param[in] config [const pandora_vision_landoltc::landoltc_cfgConfig&]
+  @param[in] level [const uint32_t] The level 
+  @return void
+**/
+void LandoltCDetection::parametersCallback(
+  const pandora_vision_landoltc::landoltc_cfgConfig& config,
+  const uint32_t& level)
+  {
+    //!< Threshold parameters
+    LandoltcParameters::gradientThreshold = config.gradientThreshold;
+    LandoltcParameters::centerThreshold = config.centerThreshold;
+    LandoltcParameters::huMomentsPrec = config.huMomentsPrec;
+    LandoltcParameters::adaptiveThresholdSubtractSize = config.adaptiveThresholdSubtractSize;
+    
+  }
 } // namespace pandora_vision

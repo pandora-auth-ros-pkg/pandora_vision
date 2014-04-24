@@ -43,7 +43,7 @@ namespace pandora_vision
 LandoltCDetector::LandoltCDetector()
 {
   _minDiff = 60;
-
+  
   _threshold = 90;
   
   _edges = 0;
@@ -325,7 +325,8 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
       float dx = grX[i];
       float dy = grY[i];
       float mag = dx * dx + dy * dy;
-      if (mag > (_minDiff * _minDiff))
+      if (mag > (LandoltcParameters::gradientThreshold 
+      * LandoltcParameters::gradientThreshold)) //old _minDiff* _minDiff
       {
         mag = sqrt(mag);
         float s = 20 / mag;
@@ -346,7 +347,7 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
     {
       int i = y * cols + x;
       int cur = readvoting[i];
-      if (cur >= _threshold)
+      if (cur >= LandoltcParameters::centerThreshold) //old _threshold
       {
         bool biggest = true;
 
@@ -452,7 +453,8 @@ void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int
 
     for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
     {
-      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 && prec < 0.43)
+      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 
+      && prec < LandoltcParameters::huMomentsPrec)
       {
         //std::cout << "Prec is : " << prec << std::endl;
         cv::Rect bounding_rect = boundingRect((contours[i]));
@@ -500,7 +502,8 @@ void LandoltCDetector::begin(cv::Mat* input)
 
   blur(gray, gray, cv::Size(3, 3));
 
-  cv::adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 2);
+  cv::adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 
+  LandoltcParameters::adaptiveThresholdSubtractSize);
 
   cv::erode(binary, binary, erodeKernel);
 

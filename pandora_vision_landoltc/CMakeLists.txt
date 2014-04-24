@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_landoltc)
 
 set(CMAKE_BUILD_TYPE Release)
-#~ set(CMAKE_BUILD_TYPE Debug)
+#~set(CMAKE_BUILD_TYPE Debug)
 
 find_package(catkin REQUIRED COMPONENTS 
     roscpp
@@ -13,7 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     image_transport
     sensor_msgs
+    dynamic_reconfigure
     roslint
+)
+
+generate_dynamic_reconfigure_options(
+  cfg/landoltc_cfg.cfg
 )
 
 
@@ -28,6 +33,7 @@ catkin_package(
       cv_bridge
       image_transport
       sensor_msgs
+      dynamic_reconfigure
       roslint
     INCLUDE_DIRS
       include
@@ -44,12 +50,14 @@ add_executable(landoltc_node
               src/landoltc_node.cpp
               src/landoltc_detection.cpp
               src/landoltc_detector.cpp
+              src/landoltc_parameters.cpp
 )
 target_link_libraries(landoltc_node ${catkin_LIBRARIES} )
 
 add_dependencies(landoltc_node 
-    ${catkin_EXPORTED_TARGETS}
+    pandora_vision_landoltc_gencfg
     vision_communications_gencpp
+    ${catkin_EXPORTED_TARGETS}
 )
 
 ########################### landoltc3dNode ############################
@@ -74,12 +82,17 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR} 
             
   include/landoltc3d_detector.h
+  include/landoltc3d_detection.h
   include/landoltc_detector.h
   include/landoltc_detection.h
+  include/landoltc_parameters.h
   src/landoltc_detector.cpp
   src/landoltc3d_detector.cpp
+  src/landoltc3d_detection.cpp
+  src/landoltc3d_node.cpp
   src/landoltc_detection.cpp
   src/landoltc_node.cpp
+  src/landoltc_parameters.cpp
   
             
 )

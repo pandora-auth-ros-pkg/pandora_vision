@@ -77,7 +77,7 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
 
   cv::findContours(ref, _refContours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
   
-  clahe = cv::createCLAHE(4,cv::Size(8,8));
+  clahe = cv::createCLAHE(4, cv::Size(8, 8));
 }
 
 /**
@@ -87,15 +87,15 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
   @return void
 **/
 
-void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input,cv::Mat* output)
+void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat* output)
 {
-  long sum=0;
+  int64_t sum = 0;
   
-  int count=0;
+  int count = 0;
       
   int index;
       
-  unsigned long* integralImg =new unsigned long[input.cols*input.rows];
+  uint64_t* integralImg =new uint64_t[input.cols*input.rows];
           
   unsigned char* in;
   
@@ -103,36 +103,36 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input,cv::Mat* 
       
   unsigned char* out=(unsigned char*)output->data;
   
-  int x1,y1,x2,y2;
+  int x1, y1, x2, y2;
       
-  int s2=input.cols/16;
+  int s2 = input.cols/16;
       
         
-  for(int i=0;i<input.cols;i++)
+  for(int i = 0; i < input.cols; i++)
   {
-    sum=0;
+    sum = 0;
         
-    for(int j=0;j<input.rows;j++)
+    for(int j = 0; j < input.rows; j++)
     {
-      index=j*input.cols+i;
+      index = j*input.cols+i;
       sum+=in[index];
-      if(i==0) 
+      if(i == 0) 
       integralImg[index]=sum;
       else
       integralImg[index]=integralImg[index-1]+sum;
     }
   }
 
-  for(int i=0;i<input.cols;i++)
+  for(int i = 0; i < input.cols; i++)
   {
-    for(int j=0;j<input.rows;j++)
+    for(int j = 0; j < input.rows; j++)
     {
-      index=j*input.cols+i;
+      index = j*input.cols+i;
       
-      x1=i-s2;
-      x2=i+s2;
-      y1=j-s2;
-      y2=j+s2;
+      x1 = i-s2;
+      x2 = i+s2;
+      y1 = j-s2;
+      y2 = j+s2;
           
       if (x1 < 0) x1 = 0;
       if (x2 >= input.cols) x2 = input.cols-1;
@@ -141,9 +141,10 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input,cv::Mat* 
           
       count=(x2-x1)*(y2-y1);
           
-      sum=integralImg[y2*input.cols+x2]-integralImg[y1*input.cols+x2]-integralImg[y2*input.cols+x1]+integralImg[y1*input.cols+x1];
+      sum = integralImg[y2*input.cols+x2]-integralImg[y1*input.cols+x2]-
+      integralImg[y2*input.cols+x1]+integralImg[y1*input.cols+x1];
           
-      if((long)(in[index]*count) < (long)(sum*(1.0-0.15)))
+      if((int64_t)(in[index]*count) < (int64_t)(sum*(1.0-0.15)))
       {
         out[index]=0;
       }
@@ -153,6 +154,8 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input,cv::Mat* 
       }
     }
   }
+  
+  delete[] integralImg;
 }
       
 
@@ -334,7 +337,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
         cv::drawContours(_coloredContours, contours, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
         _fillColors.push_back(color);
         _newCenters.push_back(mc[i]);
-       // cv::imshow("Contours", _coloredContours);
+         cv::imshow("Contours", _coloredContours);
         _rectangles.push_back(bounding_rect);
 
       }
@@ -350,15 +353,15 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 
 void LandoltC3dDetector::begin(cv::Mat* input)
 {
-  cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y,thresholded;
+  cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y, thresholded, grad_x, grad_y;
 
   cv::cvtColor(*input, gray, CV_BGR2GRAY);
 
   _voting = cv::Mat::zeros(input->rows, input->cols, CV_16U);
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
-  thresholded=cv::Mat::zeros(input->rows,input->cols,CV_8UC1);
+  thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  bilateralFilter(gray,dst,3,6,1.5);
+  bilateralFilter(gray, dst, 3, 6, 1.5);
   
   clahe->apply(gray, dst);
   
@@ -375,15 +378,15 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::circle(*input, _centers.at(i), 2, (0, 0, 255), -1);
   }
   
-  //Sobel( dst, grad_x, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT );
-  convertScaleAbs( gradX, abs_grad_x );
+  Sobel( dst, grad_x, CV_32F, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT );
+  convertScaleAbs( grad_x, abs_grad_x );
   
-  //Sobel( dst, grad_y, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
-  convertScaleAbs( gradY, abs_grad_y );
+  Sobel( dst, grad_y, CV_32F, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
+  convertScaleAbs( grad_y, abs_grad_y );
       
-  addWeighted( abs_grad_x, 0.9, abs_grad_y, 0.9, 0, dst ); 
+  addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
-  applyBradleyThresholding(dst,&thresholded);
+  applyBradleyThresholding(dst, &thresholded);
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 

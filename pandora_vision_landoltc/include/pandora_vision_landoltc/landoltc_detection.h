@@ -58,6 +58,7 @@
 //!< default frame width
 #define DEFAULT_WIDTH 640
 
+
 namespace pandora_vision
 {
 class LandoltCDetection
@@ -74,8 +75,12 @@ private:
   std::string packagePath;
 
   std::string patternPath;
-
+  
+  
+  /// Frame height
   int frameHeight;
+  
+  /// Frame width
   int frameWidth;
 
   std::string cameraName;
@@ -89,7 +94,13 @@ private:
   
   //!< Publishers for LandoltcDetector result messages
   ros::Publisher _landoltcPublisher;
-    
+  
+  //!< The dynamic reconfigure (landoltc) parameters' server
+  dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc_cfgConfig>
+  server;
+  
+  dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc_cfgConfig>::CallbackType f;
+  
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
@@ -105,7 +116,17 @@ private:
   @return void
   **/
   void landoltcCallback();
-
+  
+  /**
+  @brief The function called when a parameter is changed
+  @param[in] config [const pandora_vision_landoltc::landoltc_cfgConfig&]
+  @param[in] level [const uint32_t] The level 
+  @return void
+  **/
+  void parametersCallback(
+  const pandora_vision_landoltc::landoltc_cfgConfig& config,
+  const uint32_t& level);
+  
 public:
 
   /**
@@ -142,6 +163,6 @@ public:
     
     int curState;
     int prevState;
-  };
+};
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTION_H

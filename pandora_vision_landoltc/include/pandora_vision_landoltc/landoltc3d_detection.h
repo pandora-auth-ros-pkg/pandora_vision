@@ -34,8 +34,8 @@
 *
 * Author: Victor Daropoulos
 *********************************************************************/
-#ifndef PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTION_H
-#define PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTION_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTION_H 
+#define PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTION_H 
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -144,6 +144,7 @@ public:
   int curState;
   int prevState;
   
-  };
+};
 } // namespace pandora_vision
-#endif  // PANDORA_VISION_LANDOLTC3D_LANDOLTC3D_DETECTION_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTION_H
+
