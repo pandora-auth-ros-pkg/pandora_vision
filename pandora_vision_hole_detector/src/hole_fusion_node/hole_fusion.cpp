@@ -148,7 +148,7 @@ namespace pandora_vision
 
       unlockSynchronizer();
 
-      processCandidateHoles();
+      //processCandidateHoles();
     }
 
     #ifdef DEBUG_TIME
@@ -602,7 +602,7 @@ namespace pandora_vision
 
       unlockSynchronizer();
 
-      processCandidateHoles();
+      //processCandidateHoles();
     }
 
     #ifdef DEBUG_TIME
@@ -696,7 +696,7 @@ namespace pandora_vision
 
       unlockSynchronizer();
 
-      processCandidateHoles();
+      //processCandidateHoles();
     }
 
     #ifdef DEBUG_TIME

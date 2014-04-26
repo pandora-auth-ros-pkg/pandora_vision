@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Victor Daropoulos
+ * Authors: Victor Daropoulos, Alexandros Philotheou
  *********************************************************************/
 
 #include "utils/wavelets.h"
@@ -251,6 +251,54 @@ namespace pandora_vision
     tempy000 = tempy000 / maxVal;
 
     return tempy000;
+  }
+
+
+  /**
+    @brief Returns a CV_32FC1 image containing the low-low part of the
+    input image, which is also in CV_32FC1 format
+    @param[in] inImage [const cv::Mat&] The input image in CV_32FC1 format
+    @param[in] min [const double&] The inImage's min value
+    @param[in] max [const double&] The inImage's max value
+    @param[out] outImage [cv::Mat*] The low-low part of the inImage in
+    CV_32FC1 format
+    @return void
+   **/
+  void Wavelets::getLowLow(const cv::Mat& inImage,
+    const double& min, const double& max,
+    cv::Mat* outImage)
+  {
+    cv::Mat temp = cv::Mat(inImage.size(), CV_8UC1);
+
+    temp = Visualization::scaleImageForVisualization(inImage, 0);
+
+    Wavelets* wave = new Wavelets();
+
+    std::vector<float> H0 = wave->getH0(1);
+
+    std::vector<float> G0 = wave->getG0(H0);
+
+    std::vector<float> G1 = wave->getG1(H0);
+
+    std::vector<float> H1 = wave->getH1(G1);
+
+
+    cv::Mat doubled = cv::Mat::zeros(temp.rows, temp.cols, CV_32FC1);
+
+    for(int y = 0; y < doubled.rows; y++)
+    {
+      for(int x = 0; x < doubled.cols; x++)
+      {
+        doubled.at<float>(y, x) = static_cast<float>(temp.at<uchar>(y, x) / 255.0);
+      }
+    }
+
+    //!< LowLow contains the inImage's low low frequencies, in CV_32FC1 format
+    //!< What we will return will be this image scaled to the actual proportions
+    //!< of values of the inImage (also in CV_32FC1 format).
+    //!< After obtaining the low-low, reverse the scale operation, in an
+    //!< attempt to approximate the initial depth image's values
+    *outImage = wave->getLowLow(doubled, H0) * (max - min);
   }
 
 
