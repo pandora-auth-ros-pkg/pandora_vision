@@ -22,6 +22,7 @@ generate_dynamic_reconfigure_options(
   cfg/depth_cfg.cfg
   cfg/hole_fusion_cfg.cfg
   cfg/rgb_cfg.cfg
+  cfg/global_cfg.cfg
 )
 
 catkin_package(

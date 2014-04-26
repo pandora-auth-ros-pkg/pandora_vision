@@ -107,8 +107,8 @@ namespace pandora_vision
       sensor_msgs::image_encodings::TYPE_32FC1);
 
     //!< A value of 1 means that the depth image is subtituted by its
-    //!< low-low, wavelet analysis driven, frequencies
-    if (Parameters::depth_analysis_method == 1)
+    //!< low-low, wavelet analysis driven, part
+    if (Parameters::depth_image_representation_method == 1)
     {
       double min;
       double max;
@@ -157,13 +157,6 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     ROS_INFO("Parameters callback called");
     #endif
-
-    //!< Depth analysis method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
-    //!< 1 through wavelet analysis
-    Parameters::depth_analysis_method =
-      config.depth_analysis_method;
 
     //!< canny parameters
     Parameters::canny_ratio = config.canny_ratio;
@@ -241,6 +234,26 @@ namespace pandora_vision
       config.debug_show_get_shapes_clear_border;
     Parameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
+  }
+
+
+
+  /**
+    @brief The function called when a global parameter is changed
+    @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
+    @param[in] level [const uint32_t] The level (?)
+    @return void
+   **/
+  void Depth::globalParametersCallback(
+    const pandora_vision_hole_detector::global_cfgConfig& config,
+    const uint32_t& level)
+  {
+    //!< Depth image representation method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet representation
+    Parameters::depth_image_representation_method =
+      config.depth_image_representation_method;
   }
 
 } // namespace pandora_vision
