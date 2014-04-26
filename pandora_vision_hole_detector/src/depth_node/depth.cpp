@@ -106,6 +106,17 @@ namespace pandora_vision
     MessageConversions::extractImageFromMessage(msg, &depthImage,
       sensor_msgs::image_encodings::TYPE_32FC1);
 
+    //!< A value of 1 means that the depth image is subtituted by its
+    //!< low-low, wavelet analysis driven, frequencies
+    if (Parameters::depth_analysis_method == 1)
+    {
+      double min;
+      double max;
+      cv::minMaxIdx(depthImage, &min, &max);
+
+      Wavelets::getLowLow(depthImage, min, max, &depthImage);
+    }
+
     //!< Finds possible holes
     cv::Mat interpolatedDepthImage;
     HolesConveyor holes = HoleDetector::findHoles(depthImage,
@@ -146,6 +157,13 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     ROS_INFO("Parameters callback called");
     #endif
+
+    //!< Depth analysis method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet analysis
+    Parameters::depth_analysis_method =
+      config.depth_analysis_method;
 
     //!< canny parameters
     Parameters::canny_ratio = config.canny_ratio;

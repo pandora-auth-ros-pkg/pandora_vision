@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Victor Daropoulos
+ * Authors: Victor Daropoulos, Alexandros Philotheou
  *********************************************************************/
 
 #ifndef UTILS_WAVELETS_H
@@ -44,6 +44,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "utils/defines.h"
+#include "utils/visualization.h"
 
 namespace pandora_vision
 {
@@ -61,24 +62,38 @@ namespace pandora_vision
 
       std::vector<float> getH1(const std::vector<float>& G1);
 
-      cv::Mat convCols(const cv::Mat& in,
+      static cv::Mat convCols(const cv::Mat& in,
         const std::vector<float>& kernel);
 
-      cv::Mat convRows(const cv::Mat& in,
+      static cv::Mat convRows(const cv::Mat& in,
         const std::vector<float>& kernel);
 
-      cv::Mat getLowLow(const cv::Mat& in,
+      static cv::Mat getLowLow(const cv::Mat& in,
         const std::vector<float>& kernel);
 
-      cv::Mat getLowHigh(const cv::Mat& in,
+      /**
+        @brief Returns a CV_32FC1 image containing the low-low part of the
+        input image, which is also in CV_32FC1 format
+        @param[in] inImage [const cv::Mat&] The input image in CV_32FC1 format
+        @param[in] min [const double&] The inImage's min value
+        @param[in] max [const double&] The inImage's max value
+        @param[out] outImage [cv::Mat*] The low-low part of the inImage in
+        CV_32FC1 format
+        @return void
+       **/
+      static void getLowLow(const cv::Mat& inImage,
+        const double& min, const double& max,
+        cv::Mat* outImage);
+
+      static cv::Mat getLowHigh(const cv::Mat& in,
         const std::vector<float>& kernel0,
         const std::vector<float>& kernel1);
 
-      cv::Mat getHighLow(const cv::Mat& in,
+      static cv::Mat getHighLow(const cv::Mat& in,
         const std::vector<float>& kernel0,
         const std::vector<float>& kernel1);
 
-      cv::Mat getHighHigh(const cv::Mat& in,
+      static cv::Mat getHighHigh(const cv::Mat& in,
         const std::vector<float>& kernel);
   };
 

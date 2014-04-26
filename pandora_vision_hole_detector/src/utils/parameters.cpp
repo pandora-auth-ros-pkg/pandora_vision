@@ -39,6 +39,12 @@
 
 namespace pandora_vision
 {
+  //!< Depth analysis method.
+  //!< 0 if the depth image used is the one obtained from the depth sensor,
+  //!< unadulterated
+  //!< 1 through wavelet analysis
+  int Parameters::depth_analysis_method = 0;
+
   //!< canny parameters
   int Parameters::canny_ratio = 3;
   int Parameters::canny_kernel_size = 3;
