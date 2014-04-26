@@ -113,6 +113,14 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole_detector::
         hole_fusion_cfgConfig>:: CallbackType f;
 
+      //!< The dynamic reconfigure (global) parameters' server
+      dynamic_reconfigure::Server
+        <pandora_vision_hole_detector::global_cfgConfig> globalServer;
+
+      //!< The dynamic reconfigure (global) parameters' callback
+      dynamic_reconfigure::Server
+        <pandora_vision_hole_detector::global_cfgConfig>::CallbackType globalF;
+
 
       /**
         @brief Callback for the candidate holes via the depth node
@@ -141,6 +149,16 @@ namespace pandora_vision
         const std::vector<vision_communications::CandidateHoleMsg>&
         candidateHolesVector,
         HolesConveyor* conveyor);
+
+      /**
+        @brief The function called when a global parameter is changed
+        @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
+        @param[in] level [const uint32_t] The level (?)
+        @return void
+       **/
+      void globalParametersCallback(
+        const pandora_vision_hole_detector::global_cfgConfig& config,
+        const uint32_t& level);
 
       /**
         @brief With an input a conveyor of holes, this method, depending on

@@ -44,16 +44,17 @@
 #include <pandora_vision_hole_detector/depth_cfgConfig.h>
 #include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
 #include <pandora_vision_hole_detector/rgb_cfgConfig.h>
+#include <pandora_vision_hole_detector/global_cfgConfig.h>
 
 namespace pandora_vision
 {
   struct Parameters
   {
-    //!< Depth analysis method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
+    //!< Depth and RGB images' representation method.
+    //!< 0 if image used is used as obtained from the image sensor
     //!< 1 through wavelet analysis
-    static int depth_analysis_method;
+    static int depth_image_representation_method;
+    static int rgb_image_representation_method;
 
     //!< canny parameters
     static int canny_ratio;
