@@ -194,6 +194,12 @@ namespace pandora_vision
       return;
     }
 
+    //!< Regardless of the image representation method, the RGB node
+    //!< will publish the RGB image of original size
+    //!< to the Hole Fusion node
+    cv::Mat holeFrameSent;
+    _holeFrame.copyTo(holeFrameSent);
+
     //!< A value of 1 means that the rgb image is subtituted by its
     //!< low-low, wavelet analysis driven, part
     if (Parameters::rgb_image_representation_method == 1)
@@ -205,8 +211,10 @@ namespace pandora_vision
 
     vision_communications::CandidateHolesVectorMsg rgbCandidateHolesMsg;
 
-    MessageConversions::createCandidateHolesVectorMessage(conveyor, _holeFrame,
-      &rgbCandidateHolesMsg, sensor_msgs::image_encodings::TYPE_8UC3, msg);
+    MessageConversions::createCandidateHolesVectorMessage(conveyor,
+      holeFrameSent,
+      &rgbCandidateHolesMsg,
+      sensor_msgs::image_encodings::TYPE_8UC3, msg);
 
     rgbCandidateHolesPublisher_.publish(rgbCandidateHolesMsg);
 
