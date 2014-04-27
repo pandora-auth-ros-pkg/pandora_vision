@@ -194,6 +194,13 @@ namespace pandora_vision
       return;
     }
 
+    //!< A value of 1 means that the rgb image is subtituted by its
+    //!< low-low, wavelet analysis driven, part
+    if (Parameters::rgb_image_representation_method == 1)
+    {
+      Wavelets::getLowLow(_holeFrame, &_holeFrame);
+    }
+
     HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
 
     vision_communications::CandidateHolesVectorMsg rgbCandidateHolesMsg;
@@ -224,6 +231,13 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     ROS_INFO("Parameters callback called");
     #endif
+
+    //!< RGB image representation method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet representation
+    Parameters::rgb_image_representation_method =
+      config.rgb_image_representation_method;
 
     //!< canny parameters
     Parameters::canny_ratio = config.canny_ratio;
@@ -307,26 +321,6 @@ namespace pandora_vision
       config.debug_show_get_shapes_clear_border;
     Parameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
-  }
-
-
-
-  /**
-    @brief The function called when a global parameter is changed
-    @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
-    @return void
-   **/
-  void HoleDetection::globalParametersCallback(
-    const pandora_vision_hole_detector::global_cfgConfig& config,
-    const uint32_t& level)
-  {
-    //!< RGB image representation method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
-    //!< 1 through wavelet representation
-    Parameters::rgb_image_representation_method =
-      config.rgb_image_representation_method;
   }
 
 } // namespace pandora_vision

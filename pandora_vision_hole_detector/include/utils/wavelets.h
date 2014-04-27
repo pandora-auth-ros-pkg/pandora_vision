@@ -85,6 +85,16 @@ namespace pandora_vision
         const double& min, const double& max,
         cv::Mat* outImage);
 
+      /**
+        @brief Returns a RGB CV_8UC1 image containing the low-low part of the
+        input RGB image, which is also in CV_8UC1 format
+        @param[in] inImage [const cv::Mat&] The input image in CV_8UC1 format
+        @param[out] outImage [cv::Mat*] The low-low part of the inImage in
+        CV_8UC1 format
+        @return void
+       **/
+      static void getLowLow(const cv::Mat& inImage, cv::Mat* outImage);
+
       static cv::Mat getLowHigh(const cv::Mat& in,
         const std::vector<float>& kernel0,
         const std::vector<float>& kernel1);
