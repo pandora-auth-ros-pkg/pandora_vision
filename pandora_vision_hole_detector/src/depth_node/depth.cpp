@@ -102,9 +102,21 @@ namespace pandora_vision
     ROS_INFO("Depth node callback");
     #endif
 
+    //!< Obtain the depth image
     cv::Mat depthImage;
     MessageConversions::extractImageFromMessage(msg, &depthImage,
       sensor_msgs::image_encodings::TYPE_32FC1);
+
+    //!< Perform noise elimination on the depth image
+    cv::Mat interpolatedDepthImage;
+    NoiseElimination::performNoiseElimination(depthImage,
+      &interpolatedDepthImage);
+
+    //!< Regardless of the image representation method, the depth node
+    //!< will publish the interpolated depth image of original size
+    //!< to the Hole Fusion node
+    cv::Mat interpolatedDepthImageSent;
+    interpolatedDepthImage.copyTo(interpolatedDepthImageSent);
 
     //!< A value of 1 means that the depth image is subtituted by its
     //!< low-low, wavelet analysis driven, part
@@ -114,19 +126,18 @@ namespace pandora_vision
       double max;
       cv::minMaxIdx(depthImage, &min, &max);
 
-      Wavelets::getLowLow(depthImage, min, max, &depthImage);
+      Wavelets::getLowLow(interpolatedDepthImage, min, max,
+        &interpolatedDepthImage);
     }
 
     //!< Finds possible holes
-    cv::Mat interpolatedDepthImage;
-    HolesConveyor holes = HoleDetector::findHoles(depthImage,
-      &interpolatedDepthImage);
+    HolesConveyor holes = HoleDetector::findHoles(interpolatedDepthImage);
 
     //!< Create the candidate holes message
     vision_communications::CandidateHolesVectorMsg depthCandidateHolesMsg;
 
     MessageConversions::createCandidateHolesVectorMessage(holes,
-      interpolatedDepthImage,
+      interpolatedDepthImageSent,
       &depthCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_32FC1,
       msg);
