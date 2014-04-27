@@ -22,7 +22,6 @@ generate_dynamic_reconfigure_options(
   cfg/depth_cfg.cfg
   cfg/hole_fusion_cfg.cfg
   cfg/rgb_cfg.cfg
-  cfg/global_cfg.cfg
 )
 
 catkin_package(
@@ -198,6 +197,7 @@ add_library(rgb_node_lib
   src/utils/visualization.cpp
   src/utils/parameters.cpp
   src/utils/timer.cpp
+  src/utils/wavelets.cpp
 )
 
 target_link_libraries(rgb_node_lib

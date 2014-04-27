@@ -40,17 +40,16 @@
 
 #include <iostream>
 #include <stdlib.h>
-
 #include "ros/ros.h"
 #include <ros/package.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include <image_transport/image_transport.h>
 #include "vision_communications/CandidateHolesVectorMsg.h"
 #include "state_manager/state_client.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
+#include "utils/wavelets.h"
 #include "rgb_node/hole_detector.h"
 
 namespace pandora_vision
@@ -114,14 +113,6 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>::
         CallbackType f;
 
-      //!< The dynamic reconfigure (global) parameters' server
-      dynamic_reconfigure::Server
-        <pandora_vision_hole_detector::global_cfgConfig> globalServer;
-
-      //!< The dynamic reconfigure (global) parameters' callback
-      dynamic_reconfigure::Server
-        <pandora_vision_hole_detector::global_cfgConfig>::CallbackType globalF;
-
       /**
         @brief Get parameters referring to view and frame characteristics from
         launch file
@@ -144,16 +135,6 @@ namespace pandora_vision
        **/
       void parametersCallback(
         const pandora_vision_hole_detector::rgb_cfgConfig& config,
-        const uint32_t& level);
-
-      /**
-        @brief The function called when a global parameter is changed
-        @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
-        @param[in] level [const uint32_t] The level (?)
-        @return void
-       **/
-      void globalParametersCallback(
-        const pandora_vision_hole_detector::global_cfgConfig& config,
         const uint32_t& level);
 
 

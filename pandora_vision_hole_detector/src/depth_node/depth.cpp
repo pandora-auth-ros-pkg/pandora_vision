@@ -158,6 +158,13 @@ namespace pandora_vision
     ROS_INFO("Parameters callback called");
     #endif
 
+    //!< Depth image representation method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet representation
+    Parameters::depth_image_representation_method =
+      config.depth_image_representation_method;
+
     //!< canny parameters
     Parameters::canny_ratio = config.canny_ratio;
     Parameters::canny_kernel_size = config.canny_kernel_size;
@@ -234,26 +241,6 @@ namespace pandora_vision
       config.debug_show_get_shapes_clear_border;
     Parameters::debug_show_get_shapes_clear_border_size =
       config.debug_show_get_shapes_clear_border_size;
-  }
-
-
-
-  /**
-    @brief The function called when a global parameter is changed
-    @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
-    @return void
-   **/
-  void Depth::globalParametersCallback(
-    const pandora_vision_hole_detector::global_cfgConfig& config,
-    const uint32_t& level)
-  {
-    //!< Depth image representation method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
-    //!< 1 through wavelet representation
-    Parameters::depth_image_representation_method =
-      config.depth_image_representation_method;
   }
 
 } // namespace pandora_vision

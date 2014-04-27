@@ -220,33 +220,6 @@ namespace pandora_vision
 
 
   /**
-    @brief The function called when a global parameter is changed
-    @param[in] config [const pandora_vision_hole_detector::global_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
-    @return void
-   **/
-  void HoleFusion::globalParametersCallback(
-    const pandora_vision_hole_detector::global_cfgConfig& config,
-    const uint32_t& level)
-  {
-    //!< Depth image representation method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
-    //!< 1 through wavelet representation
-    Parameters::depth_image_representation_method =
-      config.depth_image_representation_method;
-
-    //!< RGB image representation method.
-    //!< 0 if the depth image used is the one obtained from the depth sensor,
-    //!< unadulterated
-    //!< 1 through wavelet representation
-    Parameters::rgb_image_representation_method =
-      config.rgb_image_representation_method;
-  }
-
-
-
-  /**
     @brief With an input a conveyor of holes, this method, depending on
     the depth image's interpolation method, has holes assimilating,
     amalgamating or being connected with holes that can be assimilated,
@@ -374,6 +347,20 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     ROS_INFO("Parameters callback called");
     #endif
+
+    //!< Depth image representation method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet representation
+    Parameters::depth_image_representation_method =
+      config.depth_image_representation_method;
+
+    //!< RGB image representation method.
+    //!< 0 if the depth image used is the one obtained from the depth sensor,
+    //!< unadulterated
+    //!< 1 through wavelet representation
+    Parameters::rgb_image_representation_method =
+      config.rgb_image_representation_method;
 
     //!< canny parameters
     Parameters::canny_ratio =

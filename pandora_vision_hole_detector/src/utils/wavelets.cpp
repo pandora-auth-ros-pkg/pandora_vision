@@ -289,7 +289,8 @@ namespace pandora_vision
     {
       for(int x = 0; x < doubled.cols; x++)
       {
-        doubled.at<float>(y, x) = static_cast<float>(temp.at<uchar>(y, x) / 255.0);
+        doubled.at<float>(y, x) =
+          static_cast<float>(temp.at<unsigned char>(y, x) / 255.0);
       }
     }
 
@@ -299,6 +300,67 @@ namespace pandora_vision
     //!< After obtaining the low-low, reverse the scale operation, in an
     //!< attempt to approximate the initial depth image's values
     *outImage = wave->getLowLow(doubled, H0) * (max - min);
+  }
+
+
+
+  /**
+    @brief Returns a RGB CV_8UC1 image containing the low-low part of the
+    input RGB image, which is also in CV_8UC1 format
+    @param[in] inImage [const cv::Mat&] The input image in CV_8UC1 format
+    @param[out] outImage [cv::Mat*] The low-low part of the inImage in
+    CV_8UC1 format
+    @return void
+   **/
+  void Wavelets::getLowLow(const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    Wavelets* wave = new Wavelets();
+
+    std::vector<float> H0 = wave->getH0(1);
+
+    std::vector<float> G0 = wave->getG0(H0);
+
+    std::vector<float> G1 = wave->getG1(H0);
+
+    std::vector<float> H1 = wave->getH1(G1);
+
+
+    cv::Mat lowLow[3];
+
+    for (int i = 0; i < 3; i++)
+    {
+      cv::Mat doubled = cv::Mat::zeros(inImage.rows, inImage.cols, CV_32FC1);
+      for(int y = 0; y < doubled.rows; y++)
+      {
+        for(int x = 0; x < doubled.cols; x++)
+        {
+          doubled.at<float>(y, x) =
+            inImage.at<unsigned char>(y, 3 * x + i) / 255.0;
+        }
+      }
+
+      //!< LowLow contains the inImage's low low frequencies, in CV_32FC1 format
+      //!< What we will return will be this image scaled to the actual
+      //!< proportions of values of the inImage (also in CV_32FC1 format).
+      lowLow[i] = wave->getLowLow(doubled, H0);
+    }
+
+    //!< The outImage. out has to be assigned to *outImage but cannot be done
+    //!< in the following loops immediately
+    cv::Mat out = cv::Mat::zeros(lowLow[0].size(), CV_8UC3);
+
+    for (int i = 0; i < 3; i++)
+    {
+      for(int y = 0; y < lowLow[i].rows; y++)
+      {
+        for(int x = 0; x < lowLow[i].cols; x++)
+        {
+          out.at<unsigned char>(y, 3 * x + i) = lowLow[i].at<float>(y, x) * 255;
+        }
+      }
+    }
+
+    *outImage = out;
   }
 
 

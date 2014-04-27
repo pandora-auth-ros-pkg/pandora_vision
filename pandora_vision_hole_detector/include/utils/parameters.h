@@ -44,7 +44,6 @@
 #include <pandora_vision_hole_detector/depth_cfgConfig.h>
 #include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
 #include <pandora_vision_hole_detector/rgb_cfgConfig.h>
-#include <pandora_vision_hole_detector/global_cfgConfig.h>
 
 namespace pandora_vision
 {
