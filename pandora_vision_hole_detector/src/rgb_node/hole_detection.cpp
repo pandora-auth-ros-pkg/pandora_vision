@@ -44,19 +44,6 @@ namespace pandora_vision
   **/
   HoleDetection::HoleDetection(): _nh(), holeNowON(false)
   {
-    //!< Get general parameters for image processing
-    getGeneralParams();
-
-    //!< Convert field of view from degrees to rads
-    hfov = hfov * CV_PI / 180;
-    vfov = vfov * CV_PI / 180;
-
-    ratioX = hfov / frameWidth;
-    ratioY = vfov / frameHeight;
-
-    //!< Memory will allocated in the imageCallback
-    _holeFrame= cv::Mat::zeros(frameWidth, frameHeight, CV_8UC3);
-
     //!< Subscribe to the RGB image published by the
     //!< rgb_depth_synchronizer node
     _frameSubscriber = _nh.subscribe(
@@ -88,87 +75,6 @@ namespace pandora_vision
 
 
   /**
-    @brief Get parameters referring to the view and
-    frame characteristics
-    @return void
-   **/
-  void HoleDetection::getGeneralParams()
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("getGeneralParams", "HoleDetection");
-    #endif
-
-
-    packagePath = ros::package::getPath("pandora_vision_hole_detector");
-
-    //!< Get the camera to be used by hole node;
-    if (_nh.hasParam("camera_name"))
-    {
-      _nh.getParam("camera_name", cameraName);
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    }
-    else
-    {
-      cameraName = "camera";
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    }
-
-    //!< Get the Height parameter if available;
-    if (_nh.hasParam("/" + cameraName + "/image_height"))
-    {
-      _nh.getParam("/" + cameraName + "/image_height", frameHeight);
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    }
-    else
-    {
-      frameHeight = _holeFrame.rows;
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    }
-
-    //!< Get the Width parameter if available;
-    if (_nh.hasParam("/" + cameraName + "/image_width"))
-    {
-      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-    else
-    {
-      frameWidth = _holeFrame.cols;
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-
-    //!< Get the images's topic;
-    if (_nh.hasParam("/" + cameraName + "/topic_name"))
-    {
-      _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else
-    {
-      imageTopic = "/camera/rgb/image_color";
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-
-    //!< Get the images's frame_id;
-    if (_nh.hasParam("/" + cameraName + "/camera_frame_id"))
-    {
-      _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-    }
-    else
-    {
-      cameraFrameId = "/camera";
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("getGeneralParams");
-    #endif
-  }
-
-
-
-  /**
     @brief Function called when new ROS message appears, for camera
     @param msg [const sensor_msgs::ImageConstPtr&] The message
     @return void
@@ -195,8 +101,7 @@ namespace pandora_vision
     }
 
     //!< Regardless of the image representation method, the RGB node
-    //!< will publish the RGB image of original size
-    //!< to the Hole Fusion node
+    //!< will publish the RGB image of original size to the Hole Fusion node
     cv::Mat holeFrameSent;
     _holeFrame.copyTo(holeFrameSent);
 
@@ -207,8 +112,11 @@ namespace pandora_vision
       Wavelets::getLowLow(_holeFrame, &_holeFrame);
     }
 
+    //!< Find candidate holes in the current frame
     HolesConveyor conveyor = _holeDetector.findHoles(_holeFrame);
 
+    //!< With candidate holes found, create the message that includes them
+    //!< and the original RGB image and send them over to the HoleFusion node
     vision_communications::CandidateHolesVectorMsg rgbCandidateHolesMsg;
 
     MessageConversions::createCandidateHolesVectorMessage(conveyor,

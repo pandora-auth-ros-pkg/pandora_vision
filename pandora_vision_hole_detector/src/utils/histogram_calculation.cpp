@@ -78,7 +78,7 @@ namespace pandora_vision
     directory = opendir(wallPicturesPath.c_str());
     if (theDir != NULL)
     {
-      while ((readdir_r(directory, theDir, &result)) == 0 && result!= NULL)
+      while ((readdir_r(directory, theDir, &result)) == 0 && result != NULL)
       {
         fileLength = strlen(theDir->d_name);
         if (strcmp (".png", &(theDir->d_name[fileLength - 4])) == 0)

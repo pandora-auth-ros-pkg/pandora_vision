@@ -41,36 +41,56 @@
 #define SHOW_DEBUG_IMAGE
 
 #include "utils/hole_filters.h"
-#include "rgb_node/texture_filter.h"
+#include "utils/histogram_calculation.h"
 
 namespace pandora_vision
 {
   class HoleDetector
   {
-    //! Instance of class TextureDetector, that applies texture in current
-    //! frame in order to isolate pixels of the image, where we have walls
-    TextureDetector _textureDetector;
+    private:
 
+      //!< Calculated histogramm according to given images
+      cv::MatND histogram_;
+
+      /**
+        @brief Function for calculating applying backprojection in input image
+        @param[in] holeFrame [const cv::Mat&] current frame to be processed
+        @param[out] backprojectedframe [cv::Mat*] image after backprojection is
+        applied
+        @return void
+        */
+      void applyBackprojection(const cv::Mat& holeFrame,
+        cv::Mat* backprojectedFrame);
+
+      /**
+        @brief Function that applies backprogected image in current frame
+        in order to find out which part of it belong to the given texture
+        @param holeFrame [cv::Mat] the currrent frame to be processed
+        @param backprojectedFrame [cv::Mat*] current frame after backprojection,
+        this parameter is returned
+        @return void
+        */
+      void applyTexture(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
 
     public:
 
-    /**
-      @brief Class constructor
-      */
-    HoleDetector();
+      /**
+        @brief Class constructor
+       **/
+      HoleDetector();
 
-    /**
-      @brief Class destructor
-      */
-    virtual ~HoleDetector();
+      /**
+        @brief Class destructor
+       **/
+      ~HoleDetector();
 
-    /**
-      @brief Function that locates the position of potentional holes
-      in current frame.
-      @param holeFrame [cv::Mat] current frame to be processed
-      @return void
-      */
-    HolesConveyor findHoles(cv::Mat holeFrame);
+      /**
+        @brief Function that locates the position of potentional holes
+        in current frame.
+        @param holeFrame [cv::Mat] current frame to be processed
+        @return void
+        */
+      HolesConveyor findHoles(cv::Mat holeFrame);
 
   };
 
