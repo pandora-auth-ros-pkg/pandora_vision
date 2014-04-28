@@ -207,7 +207,6 @@ add_executable(rgb_node
   src/rgb_node/hole_node.cpp
   src/rgb_node/hole_detection.cpp
   src/rgb_node/hole_detector.cpp
-  src/rgb_node/texture_filter.cpp
 )
 
 target_link_libraries(rgb_node
@@ -304,11 +303,9 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   include/rgb_node/hole_detection.h
   include/rgb_node/hole_detector.h
-  include/rgb_node/texture_filter.h
 
   src/rgb_node/hole_detection.cpp
   src/rgb_node/hole_detector.cpp
-  src/rgb_node/texture_filter.cpp
   src/rgb_node/hole_node.cpp
   )
 

@@ -61,30 +61,11 @@ namespace pandora_vision
       //!< The NodeHandle
       ros::NodeHandle _nh;
 
-      std::string packagePath;
-
-      float ratioX;
-      float ratioY;
-
-      //!< Horizontal field of view in rad
-      double hfov;
-      //!< Vertical Field Of View (rad)
-      double vfov;
-
-      int frameWidth;
-      int frameHeight;
-
-      std::string cameraName;
-
       //!< Frame processed by FaceDetector
       cv::Mat _holeFrame;
 
       //!<FaceDetector frame timestamp
       ros::Time _holeFrameTimestamp;
-
-      //!< The topic subscribed to for the camera
-      std::string imageTopic;
-      std::string cameraFrameId;
 
       //!< The ROS subscriber for acquisition of the RGB image through the
       //depth sensor
@@ -112,13 +93,6 @@ namespace pandora_vision
       //!< The dynamic reconfigure (RGB) parameters' callback
       dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>::
         CallbackType f;
-
-      /**
-        @brief Get parameters referring to view and frame characteristics from
-        launch file
-        @return void
-       **/
-      void getGeneralParams();
 
       /**
         Function called when new ROS message appears, for front camera
