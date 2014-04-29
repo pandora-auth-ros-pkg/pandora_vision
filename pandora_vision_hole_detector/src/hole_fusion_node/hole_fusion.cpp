@@ -945,7 +945,7 @@ namespace pandora_vision
             probsString += TOSTR(rgbProbabilitiesVector2D[i][j]) + " | ";
           }
 
-          ROS_ERROR("P_%d [%f %f] = %s", j, conveyor.keyPoints[j].pt.x,
+          ROS_ERROR("P_%d [%f %f] : %s", j, conveyor.keyPoints[j].pt.x,
             conveyor.keyPoints[j].pt.y, probsString.c_str());
         }
       }
@@ -1021,7 +1021,7 @@ namespace pandora_vision
               probsString += TOSTR(depthProbabilitiesVector2D[i][j]) + " | ";
             }
 
-            ROS_ERROR("P_%d [%f %f]= %s", j, conveyor.keyPoints[j].pt.x,
+            ROS_ERROR("P_%d [%f %f] : %s", j, conveyor.keyPoints[j].pt.x,
               conveyor.keyPoints[j].pt.y, probsString.c_str());
           }
         }

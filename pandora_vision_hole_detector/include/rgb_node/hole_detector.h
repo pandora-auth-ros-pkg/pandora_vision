@@ -67,11 +67,11 @@ namespace pandora_vision
 
       /**
         @brief Function that locates the position of potentional holes
-        in current frame.
-        @param holeFrame [cv::Mat] current frame to be processed
+        in the current frame.
+        @param holeFrame [const cv::Mat&] current frame to be processed
         @return void
        **/
-      HolesConveyor findHoles(cv::Mat holeFrame);
+      HolesConveyor findHoles(const cv::Mat& holeFrame);
 
   };
 
