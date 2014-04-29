@@ -35,19 +35,62 @@
  * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/histogram_calculation.h"
+#include "utils/histogram.h"
 
 namespace pandora_vision
 {
-    /**
-      @brief Computes a cv::MatND histogram from images loaded in directory
-      ${pandora_vision_hole_detector}/src/walls
-      @param[in] secondaryChannel [const int&] Which channel to use, aside the
-      hue one. 1 for the Saturation channel, 2 for the Value channel
-      @param[out] The calculated histogram
-      @return void
-     **/
-  void HistogramCalculation::getHistogram (
+  /**
+    @brief Function for calculating the backprojection of an image,
+    based on the histogram @param modelHistogram
+    @param[in] inImage [const cv::Mat&] Current frame to be processed
+    @param[in] modelHistogram [const cv::MatND&] A model histogram
+    based on which the @param backprojection is produced
+    @param[out] backprojection [cv::Mat*] Backprojection of the current
+    frame
+    @return void
+   **/
+  void Histogram::getBackprojection(const cv::Mat& inImage,
+    const cv::MatND& modelHistogram,
+    cv::Mat* backprojection)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("applyBackprojection");
+    #endif
+
+    //!< Convert the inImage image from RGB to HSV
+    cv::Mat hsv;
+    cvtColor(inImage, hsv, CV_BGR2HSV);
+
+    //!< hue varies from 0 to 180
+    float hranges[] = { 0, 180 };
+
+    //!< saturation or value varies from 0 to 256
+    float sec_ranges[] = { 0, 256 };
+
+    const float* ranges[] = { hranges, sec_ranges};
+
+    //!< Use the 0-th (Hue) and 2-nd (Value) channels
+    int channels[] = {0, 2};
+
+    cv::calcBackProject(&hsv, 1, channels, modelHistogram,
+      *backprojection, ranges, 1, true);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("applyBackprojection");
+    #endif
+  }
+
+
+
+  /**
+    @brief Computes a cv::MatND histogram from images loaded in directory
+    ${pandora_vision_hole_detector}/src/walls
+    @param[in] secondaryChannel [const int&] Which channel to use, aside the
+    hue one. 1 for the Saturation channel, 2 for the Value channel
+    @param[out] The calculated histogram
+    @return void
+   **/
+  void Histogram::getHistogram (
     const int& secondaryChannel,
     cv::MatND* histogram)
   {

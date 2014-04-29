@@ -32,41 +32,21 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Despoina Paschalidou, Alexandros Philotheou
+ * Author: Despoina Paschalidou
  *********************************************************************/
 
-#ifndef UTILS_HISTOGRAM_CALCULATION_H
-#define UTILS_HISTOGRAM_CALCULATION_H
+#include "rgb_node/rgb.h"
 
-#include <dirent.h>
-#include <ros/package.h>
-#include "utils/defines.h"
-#include "utils/parameters.h"
-#include "utils/visualization.h"
-
-namespace pandora_vision
+/**
+  @brief Main function of the face node
+  @param argc [int] Number of input arguments
+  @param argv [char**] The input arguments
+  @return int : 0 for success
+ **/
+int main(int argc, char** argv)
 {
-  /**
-    @class HistogramCalculation
-    @brief Provides methods for calculation of histograms
-   **/
-  class HistogramCalculation
-  {
-    public:
-
-    /**
-      @brief Computes a cv::MatND histogram from images loaded in directory
-      ${pandora_vision_hole_detector}/src/walls
-      @param[in] secondaryChannel [const int&] Which channel to use, aside the
-      hue one. 1 for the Saturation channel, 2 for the Value channel
-      @param[out] The calculated histogram
-      @return void
-     **/
-    static void getHistogram (
-      const int& secondaryChannel,
-      cv::MatND* histogram);
-
-  };
-} // namespace pandora_vision
-
-#endif  // UTILS_HISTOGRAM_CALCULATION_H
+  ros::init(argc, argv, "rgb_node");
+  pandora_vision::Rgb hole_finder;
+  ros::spin();
+  return 0;
+}

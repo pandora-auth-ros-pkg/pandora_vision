@@ -35,20 +35,20 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#include "rgb_node/hole_detection.h"
+#include "rgb_node/rgb.h"
 
 namespace pandora_vision
 {
   /**
     @brief Constructor
   **/
-  HoleDetection::HoleDetection(): _nh(), holeNowON(false)
+  Rgb::Rgb(): _nh(), holeNowON(false)
   {
     //!< Subscribe to the RGB image published by the
     //!< rgb_depth_synchronizer node
     _frameSubscriber = _nh.subscribe(
       "/synchronized/camera/rgb/image_raw", 1,
-      &HoleDetection::inputRgbImageCallback, this);
+      &Rgb::inputRgbImageCallback, this);
 
     //!< Advertise the candidate holes found by the depth node
     rgbCandidateHolesPublisher_ = _nh.advertise
@@ -56,10 +56,10 @@ namespace pandora_vision
       "/synchronized/camera/rgb/candidate_holes", 1000);
 
     //!< The dynamic reconfigure (RGB) parameter's callback
-    server.setCallback(boost::bind(&HoleDetection::parametersCallback,
+    server.setCallback(boost::bind(&Rgb::parametersCallback,
         this, _1, _2));
 
-    ROS_INFO("[rgb_node] : Created Hole Detection instance");
+    ROS_INFO("[rgb_node] : Created Rgb instance");
   }
 
 
@@ -67,7 +67,7 @@ namespace pandora_vision
   /**
     @brief Destructor
    **/
-  HoleDetection::~HoleDetection()
+  Rgb::~Rgb()
   {
     ROS_DEBUG("[rgb_node] : Destroying Hole Detection instance");
   }
@@ -79,7 +79,7 @@ namespace pandora_vision
     @param msg [const sensor_msgs::ImageConstPtr&] The message
     @return void
   */
-  void HoleDetection::inputRgbImageCallback(const sensor_msgs::Image& msg)
+  void Rgb::inputRgbImageCallback(const sensor_msgs::Image& msg)
   {
     #ifdef DEBUG_SHOW
     ROS_INFO("RGB node callback");
@@ -140,7 +140,7 @@ namespace pandora_vision
     @param[in] level [const uint32_t] The level (?)
     @return void
    **/
-  void HoleDetection::parametersCallback(
+  void Rgb::parametersCallback(
     const pandora_vision_hole_detector::rgb_cfgConfig& config,
     const uint32_t& level)
   {
