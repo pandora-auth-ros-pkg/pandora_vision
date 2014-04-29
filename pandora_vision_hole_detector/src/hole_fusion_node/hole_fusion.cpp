@@ -51,7 +51,7 @@ namespace pandora_vision
     ros::Duration(0.5).sleep();
 
     //!< Calculate the histogram cv::MatND needed for texture comparing
-    HistogramCalculation::getHistogram(2, &wallsHistogram_);
+    Histogram::getHistogram(2, &wallsHistogram_);
 
     //!< Initialize the numNodesReady variable
     numNodesReady_ = 0;

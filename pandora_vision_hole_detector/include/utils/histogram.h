@@ -32,21 +32,55 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou
+ * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "rgb_node/hole_detection.h"
+#ifndef UTILS_HISTOGRAM_H
+#define UTILS_HISTOGRAM_H
 
-/**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+#include <dirent.h>
+#include <ros/package.h>
+#include "utils/defines.h"
+#include "utils/parameters.h"
+#include "utils/visualization.h"
+
+namespace pandora_vision
 {
-  ros::init(argc, argv, "rgb_node");
-  pandora_vision::HoleDetection hole_finder;
-  ros::spin();
-  return 0;
-}
+  /**
+    @class HistogramCalculation
+    @brief Provides methods for calculation of histograms
+   **/
+  class Histogram
+  {
+    public:
+
+      /**
+        @brief Function for calculating the backprojection of an image,
+        based on the histogram @param modelHistogram
+        @param[in] inImage [const cv::Mat&] Current frame to be processed
+        @param[in] modelHistogram [const cv::MatND&] A model histogram
+        based on which the @param backprojection is produced
+        @param[out] backprojection [cv::Mat*] Backprojection of the current
+        frame
+        @return void
+       **/
+      static void getBackprojection(const cv::Mat& inImage,
+        const cv::MatND& modelHistogram,
+        cv::Mat* backprojection);
+
+      /**
+        @brief Computes a cv::MatND histogram from images loaded in directory
+        ${pandora_vision_hole_detector}/src/walls
+        @param[in] secondaryChannel [const int&] Which channel to use, aside the
+        hue one. 1 for the Saturation channel, 2 for the Value channel
+        @param[out] The calculated histogram
+        @return void
+       **/
+      static void getHistogram (const int& secondaryChannel,
+        cv::MatND* histogram);
+
+  };
+
+} // namespace pandora_vision
+
+#endif  // UTILS_HISTOGRAM_H

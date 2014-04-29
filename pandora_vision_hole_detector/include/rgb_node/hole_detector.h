@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou
+ * Author: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
 #ifndef RGB_NODE_HOLE_DETECTOR_H
@@ -41,7 +41,7 @@
 #define SHOW_DEBUG_IMAGE
 
 #include "utils/hole_filters.h"
-#include "utils/histogram_calculation.h"
+#include "utils/histogram.h"
 
 namespace pandora_vision
 {
@@ -52,25 +52,6 @@ namespace pandora_vision
       //!< Calculated histogramm according to given images
       cv::MatND histogram_;
 
-      /**
-        @brief Function for calculating applying backprojection in input image
-        @param[in] holeFrame [const cv::Mat&] current frame to be processed
-        @param[out] backprojectedframe [cv::Mat*] image after backprojection is
-        applied
-        @return void
-        */
-      void applyBackprojection(const cv::Mat& holeFrame,
-        cv::Mat* backprojectedFrame);
-
-      /**
-        @brief Function that applies backprogected image in current frame
-        in order to find out which part of it belong to the given texture
-        @param holeFrame [cv::Mat] the currrent frame to be processed
-        @param backprojectedFrame [cv::Mat*] current frame after backprojection,
-        this parameter is returned
-        @return void
-        */
-      void applyTexture(cv::Mat* holeFrame, cv::Mat* backprojectedFrame);
 
     public:
 
@@ -89,7 +70,7 @@ namespace pandora_vision
         in current frame.
         @param holeFrame [cv::Mat] current frame to be processed
         @return void
-        */
+       **/
       HolesConveyor findHoles(cv::Mat holeFrame);
 
   };

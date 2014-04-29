@@ -35,16 +35,10 @@
  * Author: Despoina Paschalidou
  *********************************************************************/
 
-#ifndef RGB_NODE_HOLE_DETECTION_H
-#define RGB_NODE_HOLE_DETECTION_H
+#ifndef RGB_NODE_RGB_H
+#define RGB_NODE_RGB_H
 
-#include <iostream>
-#include <stdlib.h>
-#include "ros/ros.h"
-#include <ros/package.h>
-#include <opencv2/opencv.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include "utils/defines.h"
 #include "vision_communications/CandidateHolesVectorMsg.h"
 #include "state_manager/state_client.h"
 #include "utils/parameters.h"
@@ -54,7 +48,7 @@
 
 namespace pandora_vision
 {
-  class HoleDetection
+  class Rgb
   {
     private:
 
@@ -115,12 +109,12 @@ namespace pandora_vision
     public:
 
       //!< The constructor
-      HoleDetection();
+      Rgb();
 
       //!< The destructor
-      virtual ~HoleDetection();
+      ~Rgb();
   };
 
 } //namespace pandora_vision
 
-#endif  // RGB_NODE_HOLE_DETECTION_H
+#endif  // RGB_NODE_RGB_H

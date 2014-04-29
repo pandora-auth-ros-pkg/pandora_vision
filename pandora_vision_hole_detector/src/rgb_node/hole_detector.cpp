@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou
+ * Author: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
 #include "rgb_node/hole_detector.h"
@@ -45,7 +45,7 @@ namespace pandora_vision
   HoleDetector::HoleDetector()
   {
     //! Calculate histogram according to a given set of images
-    HistogramCalculation::getHistogram(2, &histogram_);
+    Histogram::getHistogram(2, &histogram_);
 
     ROS_INFO("[rgb_node]: HoleDetector instance created");
   }
@@ -89,21 +89,24 @@ namespace pandora_vision
     imgs.push_back(before_blur);
     #endif
 
-    cv::Mat after_blur;
-    holeFrame.copyTo(after_blur);
-    cv::blur(holeFrame, after_blur, cv::Size(7, 7));
-
-    #ifdef SHOW_DEBUG_IMAGE
-    msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    msg += " : After blur";
-    msgs.push_back(msg);
-    imgs.push_back(after_blur);
-    #endif
-
-    //! backprojection of current frame
+    //! Backprojection of current frame
     cv::Mat backprojectedFrame = cv::Mat::zeros(holeFrame.size(), CV_8UC1);
-    applyTexture(&holeFrame, &backprojectedFrame);
 
+    //!< Get the backprojected image of the frame, based on the precalculated
+    //!< histogram_ histogram
+    Histogram::getBackprojection(holeFrame, histogram_, &backprojectedFrame);
+
+    //Visualization::show("backproject", *backprojectedFrame, 1);
+
+    // apply thresholds in backprojected image
+    cv::threshold(backprojectedFrame, backprojectedFrame, 200, 255, 0);
+    //Visualization::show("bp thresholded", backprojectedFrame, 1);
+
+    //cv::cvtColor(holeFrame, holeFrame, CV_BGR2GRAY);
+    //cv::bitwise_and(holeFrame, backprojectedFrame, backprojectedFrame);
+    //cv::threshold(backprojectedFrame, backprojectedFrame, 0, 255, 0);
+
+    Morphology::dilation(&backprojectedFrame, 3, false);
     #ifdef SHOW_DEBUG_IMAGE
     msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
     msg += " : After texture";
@@ -117,6 +120,7 @@ namespace pandora_vision
     //! Apply in current frame Canny edge detection algorithm
     EdgeDetection::applySobel(backprojectedFrame, &temp);
 
+    //!< Denoise the edges image
     EdgeDetection::denoiseEdges(&temp);
 
 
@@ -160,7 +164,7 @@ namespace pandora_vision
     #endif
 
     #ifdef SHOW_DEBUG_IMAGE
-    Visualization::multipleShow("RGB node",imgs,msgs,800,1);
+    //Visualization::multipleShow("RGB node", imgs, msgs, 800, 1);
     #endif
 
     #ifdef DEBUG_TIME
@@ -168,90 +172,6 @@ namespace pandora_vision
     #endif
 
     return conveyor;
-  }
-
-
-
-  /**
-    @brief Function for calculating applying backprojection in input image
-    @param holeFrame [const cv::Mat&] current frame to be processed
-    @param backprojectedframe [cv::Mat*] image after backprojection is
-    applied
-    @return void
-   **/
-  void HoleDetector::applyBackprojection(const cv::Mat& holeFrame,
-    cv::Mat* backprojectedFrame)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("applyBackprojection", "applyTexture");
-    #endif
-
-    //!< Convert the holeFrame image from RGB to HSV
-    cv::Mat hsv;
-    cvtColor(holeFrame, hsv, CV_BGR2HSV);
-
-    //!< hue varies from 0 to 180
-    float hranges[] = { 0, 180 };
-
-    //!< saturation or value varies from 0 to 256
-    float sec_ranges[] = { 0, 256 };
-
-    const float* ranges[] = { hranges, sec_ranges};
-
-    //!< Use the 0-th (Hue) and 2-nd (value) channels
-    int channels[] = {0, 2};
-
-    cv::calcBackProject(&hsv, 1, channels, histogram_,
-      *backprojectedFrame, ranges, 1, true);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("applyBackprojection");
-    #endif
-  }
-
-
-
-  /**
-    @brief Function that applies backprogected image in current frame
-    in order to find out which part of it belong to the given texture
-    @param holeFrame [cv::Mat] the currrent frame to be processed
-    @param backprojectedFrame [cv::Mat*] current frame after backprojection,
-    this parameter is returned
-    @return void
-   **/
-  void HoleDetector::applyTexture(cv::Mat* holeFrame,
-    cv::Mat* backprojectedFrame)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("applyTexture", "findHoles");
-    #endif
-
-    //!< Get the backprojected image of the frame, based on the precalculated
-    //!< histogram_ histogram
-    applyBackprojection(*holeFrame, backprojectedFrame);
-
-    Visualization::show("backproject", *backprojectedFrame, 1);
-
-    // apply thresholds in backprojected image
-    cv::threshold(*backprojectedFrame, *backprojectedFrame, 0, 255, 0);
-    Visualization::show("bp thresholded", *backprojectedFrame, 1);
-
-    cv::cvtColor(*holeFrame, *holeFrame, CV_BGR2GRAY);
-    cv::bitwise_and(*holeFrame, *backprojectedFrame, *backprojectedFrame);
-    cv::threshold(*backprojectedFrame, *backprojectedFrame, 0, 255, 0);
-
-
-
-
-
-    Visualization::show("after threshold", *backprojectedFrame, 1);
-
-    Morphology::dilation(backprojectedFrame, 3, false);
-    Visualization::show("after morphology", *backprojectedFrame, 1);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("applyTexture");
-    #endif
   }
 
 } // namespace pandora_vision
