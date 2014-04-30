@@ -250,15 +250,21 @@ std::vector<double> ColorDetection::computeDFT(cv::Mat img)
   merge(planes, 2, complexI);
   
   //!< This way the result may fit in the source matrix         
-  dft(complexI, complexI);            
+  dft(complexI, complexI);
+  
+  //!< Normalize the dft coeffs
+   for (int ii=0; ii<complexI.rows; ii++)
+      for(int jj=0; jj<complexI.cols; jj++)
+          complexI.at<float>(ii,jj)=complexI.at<float>(ii,jj)/(complexI.cols*complexI.rows);
+            
 
   //!< Compute the magnitude
   // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I)) 
   split(complexI, planes);  
   
   //!< planes[0] = magnitude
-  cv::Mat magI = planes[0];                 
   magnitude(planes[0], planes[1], planes[0]);
+  cv::Mat magI = planes[0]; 
   temp[0] = static_cast<double>(magI.at<float>(0, 0));
   temp[1] = static_cast<double>(magI.at<float>(0, 1));
   temp[2] = static_cast<double>(magI.at<float>(1, 0));
