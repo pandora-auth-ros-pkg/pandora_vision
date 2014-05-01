@@ -185,6 +185,7 @@ namespace pandora_vision
   int Parameters::number_of_hue_bins = 30;
   int Parameters::number_of_saturation_bins = 32;
   int Parameters::number_of_value_bins = 32;
+  int Parameters::secondary_channel = 2;
 
   //!< Holes connection - merger
   float Parameters::connect_holes_min_distance = 0.1;

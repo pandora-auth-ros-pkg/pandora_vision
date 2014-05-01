@@ -231,6 +231,7 @@ namespace pandora_vision
     Parameters::number_of_hue_bins = config.number_of_hue_bins;
     Parameters::number_of_saturation_bins = config.number_of_saturation_bins;
     Parameters::number_of_value_bins = config.number_of_value_bins;
+    Parameters::secondary_channel = config.secondary_channel;
 
 
     //!< Debug
