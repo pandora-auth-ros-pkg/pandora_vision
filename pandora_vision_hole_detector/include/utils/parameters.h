@@ -191,6 +191,8 @@ namespace pandora_vision
     static int number_of_hue_bins;
     static int number_of_saturation_bins;
     static int number_of_value_bins;
+    static int secondary_channel;
+
 
     //!< Holes connection - merger
     static float connect_holes_min_distance;

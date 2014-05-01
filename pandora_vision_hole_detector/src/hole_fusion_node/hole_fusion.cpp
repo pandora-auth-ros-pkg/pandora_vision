@@ -51,7 +51,7 @@ namespace pandora_vision
     ros::Duration(0.5).sleep();
 
     //!< Calculate the histogram cv::MatND needed for texture comparing
-    Histogram::getHistogram(2, &wallsHistogram_);
+    Histogram::getHistogram(&wallsHistogram_, Parameters::secondary_channel);
 
     //!< Initialize the numNodesReady variable
     numNodesReady_ = 0;
@@ -638,6 +638,8 @@ namespace pandora_vision
       config.number_of_saturation_bins;
     Parameters::number_of_value_bins =
       config.number_of_value_bins;
+    Parameters::secondary_channel =
+      config.secondary_channel;
 
     //!< Holes connection - merger
     Parameters::connect_holes_min_distance =

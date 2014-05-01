@@ -45,7 +45,7 @@ namespace pandora_vision
   HoleDetector::HoleDetector()
   {
     //! Calculate histogram according to a given set of images
-    Histogram::getHistogram(2, &histogram_);
+    Histogram::getHistogram(&histogram_, Parameters::secondary_channel);
 
     ROS_INFO("[rgb_node]: HoleDetector instance created");
   }
@@ -94,7 +94,8 @@ namespace pandora_vision
 
     //!< Get the backprojected image of the frame, based on the precalculated
     //!< histogram_ histogram
-    Histogram::getBackprojection(holeFrame, histogram_, &backprojectedFrame);
+    Histogram::getBackprojection(holeFrame, histogram_,
+      &backprojectedFrame, Parameters::secondary_channel);
 
     //Visualization::show("backproject", backprojectedFrame, 1);
 /*
