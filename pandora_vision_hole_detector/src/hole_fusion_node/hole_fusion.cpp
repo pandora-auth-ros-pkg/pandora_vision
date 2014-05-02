@@ -1195,7 +1195,6 @@ namespace pandora_vision
     Timer::start("validateHoles", "processCandidateHoles");
     #endif
 
-
     //!< The vector of holes' indices that are valid and will be returned
     std::vector<int> valid;
 
@@ -1246,8 +1245,8 @@ namespace pandora_vision
       {
         if (Parameters::run_checker_depth_homogeneity > 0)
         {
-          sum += pow(2, exponent) * probabilitiesVector2D[i][rgbActiveFilters
-            + Parameters::run_checker_depth_homogeneity];
+          sum += pow(2, exponent) * probabilitiesVector2D[rgbActiveFilters
+            + Parameters::run_checker_depth_homogeneity - 1][i];
 
           exponent++;
         }
@@ -1257,7 +1256,7 @@ namespace pandora_vision
       if (Parameters::run_checker_texture_diff > 0)
       {
         sum += pow(2, exponent) *
-          probabilitiesVector2D[i][Parameters::run_checker_texture_diff];
+          probabilitiesVector2D[Parameters::run_checker_texture_diff - 1][i];
 
         exponent++;
       }
@@ -1266,7 +1265,7 @@ namespace pandora_vision
       if (Parameters::run_checker_texture_backproject > 0)
       {
         sum += pow(2, exponent) *
-          probabilitiesVector2D[i][Parameters::run_checker_texture_backproject];
+          probabilitiesVector2D[Parameters::run_checker_texture_backproject - 1][i];
 
         exponent++;
       }
@@ -1275,7 +1274,7 @@ namespace pandora_vision
       if (Parameters::run_checker_color_homogeneity > 0)
       {
         sum += pow(2, exponent) *
-          probabilitiesVector2D[i][Parameters::run_checker_color_homogeneity];
+          probabilitiesVector2D[Parameters::run_checker_color_homogeneity - 1][i];
 
         exponent++;
       }
@@ -1284,7 +1283,7 @@ namespace pandora_vision
       if (Parameters::run_checker_luminosity_diff > 0)
       {
         sum += pow(2, exponent) *
-          probabilitiesVector2D[i][Parameters::run_checker_luminosity_diff];
+          probabilitiesVector2D[Parameters::run_checker_luminosity_diff - 1][i];
 
         exponent++;
       }
@@ -1295,8 +1294,8 @@ namespace pandora_vision
         if (Parameters::run_checker_brushfire_outline_to_rectangle > 0)
         {
           sum += pow(2, exponent) *
-            probabilitiesVector2D[i][rgbActiveFilters
-            + Parameters::run_checker_brushfire_outline_to_rectangle];
+            probabilitiesVector2D[rgbActiveFilters
+            + Parameters::run_checker_brushfire_outline_to_rectangle - 1][i];
 
           exponent++;
         }
@@ -1308,8 +1307,8 @@ namespace pandora_vision
         if (Parameters::run_checker_outline_of_rectangle > 0)
         {
           sum += pow(2, exponent) *
-            probabilitiesVector2D[i][rgbActiveFilters
-            + Parameters::run_checker_outline_of_rectangle];
+            probabilitiesVector2D[rgbActiveFilters
+            + Parameters::run_checker_outline_of_rectangle - 1][i];
 
           exponent++;
         }
@@ -1321,8 +1320,8 @@ namespace pandora_vision
         if (Parameters::run_checker_depth_diff > 0)
         {
           sum += pow(2, exponent) *
-            probabilitiesVector2D[i][rgbActiveFilters
-            + Parameters::run_checker_depth_diff];
+            probabilitiesVector2D[rgbActiveFilters
+            + Parameters::run_checker_depth_diff - 1][i];
 
           exponent++;
         }
@@ -1334,8 +1333,8 @@ namespace pandora_vision
         if (Parameters::run_checker_depth_area > 0)
         {
           sum += pow(2, exponent) *
-            probabilitiesVector2D[i][rgbActiveFilters
-            + Parameters::run_checker_depth_area];
+            probabilitiesVector2D[rgbActiveFilters
+            + Parameters::run_checker_depth_area - 1][i];
 
           exponent++;
         }
@@ -1343,7 +1342,7 @@ namespace pandora_vision
 
       sum /= (pow(2, exponent) - 1);
 
-      float threshold = 0.5;
+      float threshold = 0.8;
       if (sum > threshold)
       {
         valid.push_back(i);
