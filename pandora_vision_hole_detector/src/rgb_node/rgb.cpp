@@ -114,7 +114,7 @@ namespace pandora_vision
 
     // A value of 1 means that the rgb image is subtituted by its
     // low-low, wavelet analysis driven, part
-    if (Parameters::rgb_image_representation_method == 1)
+    if (Parameters::image_representation_method == 1)
     {
       Wavelets::getLowLow(_holeFrame, &_holeFrame);
     }
@@ -163,8 +163,8 @@ namespace pandora_vision
     // 0 if the depth image used is the one obtained from the depth sensor,
     // unadulterated
     // 1 through wavelet representation
-    Parameters::rgb_image_representation_method =
-      config.rgb_image_representation_method;
+    Parameters::image_representation_method =
+      config.image_representation_method;
 
     // canny parameters
     Parameters::canny_ratio = config.canny_ratio;
