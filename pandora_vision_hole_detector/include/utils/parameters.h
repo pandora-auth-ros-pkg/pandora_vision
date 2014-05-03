@@ -91,7 +91,6 @@ namespace pandora_vision
     static bool blob_filter_by_circularity;
 
     // Bounding boxes parameters
-    static int bounding_box_min_area_threshold;
 
     // The bounding box detection method
     // 0 for detecting by means of brushfire starting

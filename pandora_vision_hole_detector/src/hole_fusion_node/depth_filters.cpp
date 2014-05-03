@@ -416,8 +416,6 @@ namespace pandora_vision
         }
       }
 
-      ROS_ERROR("maxPoints : %d", maxPoints);
-
       probabilitiesVector->at(rectanglesIndices[i]) =
         static_cast<float> (maxPoints) / visitedPoints.size();
 
