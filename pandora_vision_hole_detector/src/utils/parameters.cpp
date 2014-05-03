@@ -82,7 +82,6 @@ namespace pandora_vision
   bool Parameters::blob_filter_by_circularity = 1;
 
   // Bounding boxes parameters
-  int Parameters::bounding_box_min_area_threshold = 550;
 
   // The bounding box detection method
   // 0 for detecting by means of brushfire starting
