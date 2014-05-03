@@ -54,6 +54,9 @@ namespace pandora_vision
   // 1 through wavelet analysis
   int Parameters::image_representation_method = 0;
 
+  // Edge detection parameters
+  int Parameters::edge_detection_method = 2;
+
   // canny parameters
   int Parameters::canny_ratio = 3;
   int Parameters::canny_kernel_size = 3;
