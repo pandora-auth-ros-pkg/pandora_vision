@@ -475,9 +475,29 @@ namespace pandora_vision
       visualizableDenoisedImage = Visualization::scaleImageForVisualization
       (tempImg, Parameters::scale_method);
 
+
     // from now onwards every image is in the range of 0-255
-    EdgeDetection::applySobel
-      (visualizableDenoisedImage, &denoisedDepthImageEdges);
+    if (Parameters::edge_detection_method == 0)
+    {
+      EdgeDetection::applyCanny(
+        visualizableDenoisedImage, &denoisedDepthImageEdges);
+    }
+    else if (Parameters::edge_detection_method == 1)
+    {
+      EdgeDetection::applyScharr(
+        visualizableDenoisedImage, &denoisedDepthImageEdges);
+    }
+    else if (Parameters::edge_detection_method == 2)
+    {
+      EdgeDetection::applySobel(
+        visualizableDenoisedImage, &denoisedDepthImageEdges);
+    }
+    else if (Parameters::edge_detection_method == 3)
+    {
+      EdgeDetection::applyLaplacian(
+        visualizableDenoisedImage, &denoisedDepthImageEdges);
+    }
+
 
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
       Parameters::threshold_lower_value, 255, 3);

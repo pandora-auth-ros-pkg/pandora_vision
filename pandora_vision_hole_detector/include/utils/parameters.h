@@ -64,6 +64,9 @@ namespace pandora_vision
     // 1 through wavelet analysis
     static int image_representation_method;
 
+    // Edge detection parameters
+    static int edge_detection_method;
+
     // canny parameters
     static int canny_ratio;
     static int canny_kernel_size;
