@@ -62,8 +62,7 @@ namespace pandora_vision
     // Depth and RGB images' representation method.
     // 0 if image used is used as obtained from the image sensor
     // 1 through wavelet analysis
-    static int depth_image_representation_method;
-    static int rgb_image_representation_method;
+    static int image_representation_method;
 
     // canny parameters
     static int canny_ratio;
