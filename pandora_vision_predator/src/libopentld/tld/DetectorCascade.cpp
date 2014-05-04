@@ -52,8 +52,8 @@ DetectorCascade::DetectorCascade()
     minSize = 25;
     imgWidthStep = -1;
 
-    numTrees = 13;
-    numFeatures = 10;
+    numTrees = 10;
+    numFeatures = 13;
 
     initialised = false;
 
@@ -75,6 +75,7 @@ DetectorCascade::~DetectorCascade()
     delete ensembleClassifier;
     delete nnClassifier;
     delete detectionResult;
+    delete clustering;
 }
 
 void DetectorCascade::init()

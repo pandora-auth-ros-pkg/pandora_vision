@@ -106,7 +106,7 @@ float NNClassifier::classifyPatch(NormalizedPatch *patch)
 
     float ccorr_max_n = 0;
 
-    //Compare patch to positive patches
+    //Compare patch to negative patches
     for(size_t i = 0; i < falsePositives->size(); i++)
     {
         float ccorr = ncc(falsePositives->at(i).values, patch->values);
