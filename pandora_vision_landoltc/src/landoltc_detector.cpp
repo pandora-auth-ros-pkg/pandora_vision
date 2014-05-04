@@ -36,6 +36,7 @@
 *********************************************************************/
 
 #include "pandora_vision_landoltc/landoltc_detector.h"
+#define SHOW_DEBUG_IMAGE true
 
 namespace pandora_vision
 {

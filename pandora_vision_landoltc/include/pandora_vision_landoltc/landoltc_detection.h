@@ -72,6 +72,7 @@ private:
   cv::Mat landoltCFrame;
 
   LandoltCDetector _landoltcDetector;
+  
   std::string packagePath;
 
   std::string patternPath;
