@@ -37,6 +37,7 @@
 
 #include "pandora_vision_landoltc/landoltc3d_detection.h"
 
+
 namespace pandora_vision
 {
 
@@ -46,7 +47,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(false) 
+LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(true) 
 {
   getGeneralParams();
   
@@ -97,7 +98,7 @@ void LandoltC3dDetection::getGeneralParams()
     patternPath.append(temp);
   }
 
-  //!< Get the camera to be used by qr node;
+  //!< Get the camera to be used by landoltc3d node;
   if (_nh.hasParam("camera_name"))
   {
     _nh.getParam("camera_name", cameraName);

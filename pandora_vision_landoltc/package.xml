@@ -4,14 +4,14 @@
   <version>0.1.0</version>
   <description>Containts landoltC detection node.</description>
 
-  <maintainer email="paschalidoud@gmail.com">Despoina Paschalidou</maintainer>
+  <maintainer email="elendorial@gmail.com">Victor Daropoulos</maintainer>
 
   <license>BSD</license>
 
   <url type="bugtracker">https://github.com/pandora-auth-ros-pkg/pandora_vision/issues</url>
   <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
-  <author>Victor Daropoulos, Despoina Paschalidou</author>
+  <author>Victor Daropoulos</author>
   
   <buildtool_depend>catkin</buildtool_depend>
   

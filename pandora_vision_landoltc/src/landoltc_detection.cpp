@@ -46,7 +46,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltCDetection::LandoltCDetection() : _nh(), landoltcNowON(false)
+LandoltCDetection::LandoltCDetection() : _nh(), landoltcNowON(true)
 {
   getGeneralParams();
 
@@ -101,7 +101,7 @@ void LandoltCDetection::getGeneralParams()
     patternPath.append(temp);
   }
 
-  //!< Get the camera to be used by qr node;
+  //!< Get the camera to be used by landoltc node;
   if (_nh.hasParam("camera_name"))
   {
     _nh.getParam("camera_name", cameraName);
