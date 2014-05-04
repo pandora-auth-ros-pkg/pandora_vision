@@ -51,7 +51,7 @@ void Clustering::release()
     numWindows = 0;
 }
 
-void Clustering::calcMeanRect(vector<int> * indices)
+void Clustering::calcMeanRect(std::vector<int> * indices)
 {
 
     float x, y, w, h;
@@ -87,7 +87,7 @@ void Clustering::calcDistances(float *distances)
 {
     float *distances_tmp = distances;
 
-    vector<int> confidentIndices = *detectionResult->confidentIndices;
+    std::vector<int> confidentIndices = *detectionResult->confidentIndices;
 
     size_t indices_size = confidentIndices.size();
 
@@ -119,8 +119,11 @@ void Clustering::clusterConfidentIndices()
         calcMeanRect(detectionResult->confidentIndices);
         //TODO: Take the maximum confidence as the result confidence.
     }
-
-
+    
+    delete[] distances;
+    distances=NULL;
+    delete[] clusterIndices;
+    clusterIndices=NULL;
 }
 
 void Clustering::cluster(float *distances, int *clusterIndices)
@@ -258,6 +261,9 @@ void Clustering::cluster(float *distances, int *clusterIndices)
     }
 
     detectionResult->numClusters = numClusters;
+    
+    delete[] distUsed;
+    distUsed=NULL;
 }
 
 } /* namespace tld */

@@ -56,7 +56,8 @@ TLD::TLD()
 TLD::~TLD()
 {
     storeCurrentData();
-
+    
+    delete currBB;
     delete detectorCascade;
     delete medianFlowTracker;
 }
@@ -93,6 +94,10 @@ void TLD::selectObject(const Mat &img, Rect *bb)
     detectorCascade->init();
 
     currImg = img;
+    if(!currBB)
+    {
+      delete currBB;
+    }
     currBB = tldCopyRect(bb);
     currConf = 1;
     valid = true;
@@ -145,6 +150,10 @@ void TLD::fuseHypotheses()
     if(trackerBB != NULL)
     {
         float confTracker = nnClassifier->classifyBB(currImg, trackerBB);
+        if(!currBB)
+        {
+          delete currBB;
+        }
 
         if(numClusters == 1 && confDetector > confTracker && tldOverlapRectRect(*trackerBB, *detectorBB) < 0.5)
         {
@@ -169,6 +178,10 @@ void TLD::fuseHypotheses()
     }
     else if(numClusters == 1)
     {
+        if(!currBB)
+        {
+          delete currBB;
+        }
         currBB = tldCopyRect(detectorBB);
         currConf = confDetector;
     }
@@ -308,7 +321,7 @@ void TLD::learn()
 
         if(overlap[i] < 0.2)
         {
-            if(!detectorCascade->ensembleClassifier->enabled || detectionResult->posteriors[i] > 0.1)   //TODO: Shouldn't this read as 0.5?
+            if(!detectorCascade->ensembleClassifier->enabled || detectionResult->posteriors[i] > 0.5)   //Should be 0.5 according to the paper
             {
                 negativeIndices.push_back(i);
             }
@@ -599,6 +612,8 @@ void TLD::readFromFile(const char *path)
     detectorCascade->initialised = true;
 
     ec->initFeatureOffsets();
+    
+    fclose(file);
 
 }
 

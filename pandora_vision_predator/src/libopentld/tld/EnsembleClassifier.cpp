@@ -218,7 +218,7 @@ void EnsembleClassifier::updatePosterior(int treeIdx, int idx, int positive, int
 {
     int arrayIndex = treeIdx * numIndices + idx;
     (positive) ? positives[arrayIndex] += amount : negatives[arrayIndex] += amount;
-    posteriors[arrayIndex] = ((float) positives[arrayIndex]) / (positives[arrayIndex] + negatives[arrayIndex]) / 10.0;
+    posteriors[arrayIndex] = ((float) positives[arrayIndex]) / (positives[arrayIndex] + negatives[arrayIndex]) / (float) numTrees;
 }
 
 void EnsembleClassifier::updatePosteriors(int *featureVector, int positive, int amount)
