@@ -59,6 +59,9 @@ namespace pandora_vision
     // hole fusion node, on top of their respective origin images
     static bool show_respective_holes;
 
+    // The product of this package: valid holes
+    static bool show_final_holes;
+
     // Depth and RGB images' representation method.
     // 0 if image used is used as obtained from the image sensor
     // 1 through wavelet analysis
