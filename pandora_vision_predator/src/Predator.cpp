@@ -31,8 +31,8 @@ Predator::Predator(): _nh()
   detectorCascade->minScale = -10;
   detectorCascade->maxScale = 10;
   detectorCascade->minSize = 25;
-  detectorCascade->numTrees = 25;
-  detectorCascade->numFeatures = 20;
+  detectorCascade->numTrees = 20;
+  detectorCascade->numFeatures = 25;
   detectorCascade->nnClassifier->thetaTP = 0.65;
   detectorCascade->nnClassifier->thetaFP = 0.5;
    

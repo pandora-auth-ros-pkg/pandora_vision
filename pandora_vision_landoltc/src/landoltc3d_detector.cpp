@@ -74,7 +74,7 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
   //!< Turning to gray and binarizing ref image
 
   cv::cvtColor(ref, ref, CV_BGR2GRAY);
-  cv::threshold(ref, ref, 128, 255, cv::THRESH_BINARY_INV);
+  cv::threshold(ref, ref, 0, 255, cv::THRESH_BINARY_INV | CV_THRESH_OTSU);
 
   cv::findContours(ref, _refContours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
   
@@ -155,6 +155,8 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
       }
     }
   }
+  
+  //cv::imshow("bradley",*output);
   
   delete[] integralImg;
 }
@@ -330,7 +332,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 
     for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
     {
-      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 && prec < 0.43)
+      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 9 && fabs(mc[i].y - (*it).y) < 9 && prec < 0.3)
       {
         //std::cout << "Prec is : " << prec << std::endl;
         cv::Rect bounding_rect = boundingRect((contours[i]));
@@ -372,7 +374,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   float* gradXF = reinterpret_cast<float*>(gradX.data);
   float* gradYF = reinterpret_cast<float*>(gradY.data);
 
-  findCenters(input->rows, input->cols, gradXF, gradYF);
+  findCenters(dst.rows, dst.cols, gradXF, gradYF);
   
   for(std::size_t i = 0; i < _centers.size(); i++)
   {
@@ -388,6 +390,10 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
   applyBradleyThresholding(dst, &thresholded);
+  
+  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1,1) );
+  
+  cv::erode(thresholded,thresholded,element); 
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
