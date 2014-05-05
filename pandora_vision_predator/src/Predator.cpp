@@ -32,7 +32,7 @@ Predator::Predator(): _nh()
   detectorCascade->maxScale = 10;
   detectorCascade->minSize = 25;
   detectorCascade->numTrees = 10;
-  detectorCascade->numFeatures = 13;
+  detectorCascade->numFeatures = 10;
   detectorCascade->nnClassifier->thetaTP = 0.65;
   detectorCascade->nnClassifier->thetaFP = 0.5;
    
@@ -147,7 +147,7 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_INFO("Draw Bounding Box and Press Enter.");
 
     semaphore_locked = true;
-    bbox = cvRect(-1, -1, -1, -1);
+    bbox = cv::Rect(-1, -1, -1, -1);
     cv::setMouseCallback("tld", mouseHandler, &PredatorFrame);
     break;
     // end drawing bounding box (Enter)
@@ -183,6 +183,12 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     tld->writeToFile(modelExportFile);
     break;
     
+    case 'c':
+    
+    ROS_INFO("Clearing Model");
+    tld->release();
+    break;
+    
     case 'q':
     
     ROS_INFO("Shutdown Request by User. Quitting...");
@@ -191,6 +197,8 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     case 'i':
     
+    tld->release();
+    ROS_INFO("Importing Model");
     tld->readFromFile(modelPath);
     break;
 

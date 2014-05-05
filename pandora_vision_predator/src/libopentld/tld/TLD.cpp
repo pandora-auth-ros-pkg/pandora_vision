@@ -103,11 +103,18 @@ void TLD::storeCurrentData()
     
     if(currBB)//Store old bounding box (if any)
     {
-        //~ prevBB->x = currBB->x;
-        //~ prevBB->y = currBB->y;
-        //~ prevBB->width = currBB->width;
-        //~ prevBB->height = currBB->height;
-        prevBB=currBB;
+        prevBB->x = currBB->x;
+        prevBB->y = currBB->y;
+        prevBB->width = currBB->width;
+        prevBB->height = currBB->height;
+        //prevBB=currBB;
+    }
+    else
+    {
+      prevBB->x = 0;
+      prevBB->y = 0;
+      prevBB->width = 0;
+      prevBB->height = 0;
     }
     
     
