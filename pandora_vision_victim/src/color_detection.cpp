@@ -253,9 +253,10 @@ std::vector<double> ColorDetection::computeDFT(cv::Mat img)
   dft(complexI, complexI);
   
   //!< Normalize the dft coeffs
-   for (int ii=0; ii<complexI.rows; ii++)
-      for(int jj=0; jj<complexI.cols; jj++)
-          complexI.at<float>(ii,jj)=complexI.at<float>(ii,jj)/(complexI.cols*complexI.rows);
+  for (int ii = 0; ii < complexI.rows; ii++)
+    for(int jj = 0; jj < complexI.cols; jj++)
+        complexI.at<float>(ii, jj)=complexI.at<float>(ii, jj) / 
+                                    (complexI.cols * complexI.rows);
             
 
   //!< Compute the magnitude
