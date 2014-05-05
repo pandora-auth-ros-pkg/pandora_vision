@@ -67,6 +67,9 @@ namespace pandora_vision
   
   void EdgeOrientationDetection::findEdgeFeatures(cv::Mat src)
   {
+    GaussianBlur( src, src, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT );
+    cvtColor( src, src, CV_BGR2GRAY );
+    
     //!<block size
     std::cout<< "src image size= "<< src.size() <<std::endl;
     int colsBlockSize = src.cols/4;
@@ -129,7 +132,7 @@ namespace pandora_vision
   std::vector<double> EdgeOrientationDetection::findLocalEdgeFeatures(cv::Mat 
                                                                   currFrame)
 {
-  cvtColor( currFrame, currFrame, CV_BGR2GRAY );
+  
   cv::Mat img;
   currFrame.convertTo(img, CV_64F);
  
@@ -138,11 +141,14 @@ namespace pandora_vision
   std::vector<cv::Mat> convImg(5);
  
   
-  //!< Define the filters for the 5 types of edges
+  //!< Define the Scharr filters for the 5 types of edges
   std::vector<cv::Mat> kernel(5);
-   double vals[5][9] = {1, 2, 1, 0, 0, 0, -1, -2, -1, -1, 0, 1, -2, 0, 2, -1, 
+  /*double vals[5][9] = {1, 2, 1, 0, 0, 0, -1, -2, -1, -1, 0, 1, -2, 0, 2, -1, 
                   0, 1, 2, 2, -1, 2, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1, 2, 
-                  -1, -1, -1, -1, 0, 1, 0, 0, 0, 1, 0, -1}; 
+                  -1, -1, -1, -1, 0, 1, 0, 0, 0, 1, 0, -1}; */
+  double vals[5][9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3, -3, 0, 3, -10, 0, 10, -3,
+                  0, 3, 0, 3, 10, -3, 0, 3, -10, -3, 0, -10, -3, 0, -3, 
+                  0, 3, 0, 3, 10, -3, 0, 3, 0, 0, 0, 3, 0, -3};
 
   for (int ii = 0; ii < kernel.size(); ii++)
     kernel[ii] = cv::Mat(3, 3, CV_64F, vals[ii]);
@@ -150,7 +156,10 @@ namespace pandora_vision
   //!<iterate over the posible directions and apply the filters
  
   for (int ii = 0; ii < kernel.size(); ii++)
+  {
     conv2(img, kernel[ii], CONVOLUTION_SAME, &convImg[ii]);
+    convImg[ii]=abs(convImg[ii]);
+  }
     
   //!< Calculate the max sobel gradient and save the type of the orientation
   double maxVal;
@@ -176,6 +185,7 @@ namespace pandora_vision
     for(int jj = 0; jj < edges.cols; jj++)
         if(edges.at<double>(ii, jj) == 255)
           edges.at<double>(ii, jj)=1;
+  
 
   
   //!<multiply against the types of orientations detected by the Sobel masks
@@ -203,7 +213,7 @@ namespace pandora_vision
   cv::calcHist( &data, 1, 0, cv::Mat(), hist, 1, &bins, &histRange, uniform, 
                 accumulate );
   
-  show_histogramm(bins, hist, "Color Histogramm");
+  show_histogramm(bins, hist, "Edge Histogramm");
   
   //!< save the final edgeFeatures for the 5 types of oriented gradients
   std::vector<double> edgeFeatures(5);
@@ -242,7 +252,7 @@ namespace pandora_vision
  
   //cv::Point anchor(kernel.cols - kernel.cols / 2 - 1, 
   //                 kernel.rows - kernel.rows / 2 - 1);
-  cv::Point anchor(1, 1);
+  cv::Point anchor(-1, -1);
   int borderMode = cv::BORDER_CONSTANT;
   //cv::flip(kernel,kernel, -1);
   filter2D(source, dest2, img.depth(), kernel, anchor, 0, borderMode);
