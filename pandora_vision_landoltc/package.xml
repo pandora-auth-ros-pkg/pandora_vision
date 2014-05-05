@@ -11,7 +11,7 @@
   <url type="bugtracker">https://github.com/pandora-auth-ros-pkg/pandora_vision/issues</url>
   <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
-  <author>Victor Daropoulos</author>
+  <author>Victor Daropoulos, Despoina Paschalidou </author>
   
   <buildtool_depend>catkin</buildtool_depend>
   

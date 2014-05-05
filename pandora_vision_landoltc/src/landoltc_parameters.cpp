@@ -44,7 +44,7 @@ namespace pandora_vision
   
   int LandoltcParameters::centerThreshold = 90;
   
-  double LandoltcParameters::huMomentsPrec = 0.43;
+  double LandoltcParameters::huMomentsPrec = 0.3;
   
   int LandoltcParameters::adaptiveThresholdSubtractSize = 2;
   
