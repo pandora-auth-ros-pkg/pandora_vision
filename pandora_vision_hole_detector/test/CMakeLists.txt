@@ -6,6 +6,11 @@ find_package(catkin REQUIRED COMPONENTS
 link_directories(${catkin_LIBRARIES_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
+############## Unit Tests ####################
+
+catkin_add_gtest(morphological_operators_test unit/utils/morphological_operators_test.cpp)
+target_link_libraries(morphological_operators_test ${catkin_LIBRARIES} depth_node_lib gtest_main) 
+
 ############## Functional Tests ###############
 
 if(TARGET tests)
