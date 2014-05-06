@@ -1091,7 +1091,12 @@ namespace pandora_vision
 
 
   /**
-    @brief
+    @brief Publishes the valid holes' information.
+    @param[in] conveyor [const HolesConveyor&] The overall unique holes
+    found by the depth and RGB nodes.
+    @param[in] map [std::map<int, float>*] A map containing the indices
+    of valid holes and their respective probabilities of validity
+    @return void
    **/
   void HoleFusion::publishValidHoles(const HolesConveyor& conveyor,
     std::map<int, float>* map)
