@@ -89,6 +89,13 @@ namespace pandora_vision
       // from th e synchronizer node
       ros::Subscriber pointCloudSubscriber_;
 
+
+      // The timestamp of the point cloud
+      ros::Time timestamp_;
+
+      // The frame_id of the point cloud
+      std::string frame_id_;
+
       // Indicates how many of the depth_node and rgb_node nodes have
       // received hole candidates and are ready to send them for processing
       int numNodesReady_;
@@ -209,6 +216,9 @@ namespace pandora_vision
         @return void
        **/
       void processCandidateHoles();
+
+      void publishValidHoles(const HolesConveyor& conveyor,
+        std::map<int, float>* map);
 
       /**
         @brief Callback for the candidate holes via the rgb node
