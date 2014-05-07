@@ -43,16 +43,16 @@
 
 namespace pandora_vision
 {
-  class ColorDetection 
+  class ColorExtractor 
   {
     
     public:
     
     //!Constructor
-    ColorDetection();
+    ColorExtractor();
     
     //!Destructor
-    virtual ~ColorDetection();
+    virtual ~ColorExtractor();
     
     /**
      * @brief This is the main function which calls all other for the 
