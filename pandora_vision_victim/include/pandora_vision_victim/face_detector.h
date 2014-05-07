@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_FACE_FACE_DETECTOR_H 
-#define PANDORA_VISION_FACE_FACE_DETECTOR_H 
+#ifndef PANDORA_VISION_VICTIM_FACE_DETECTOR_H
+#define PANDORA_VISION_VICTIM_FACE_DETECTOR_H 
 
 #include <math.h>
 #include <iostream>
@@ -140,6 +140,6 @@ namespace pandora_vision
     */
     float getProbability();
 
- };
+  };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_FACE_FACE_DETECTOR_H
+#endif  // PANDORA_VISION_VICTIM_FACE_DETECTOR_H
