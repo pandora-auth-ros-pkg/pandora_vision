@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "TLD.h"
 
@@ -70,7 +71,13 @@ class Predator
     const char* modelExportFile;
     
     //!<Path of imported model
+    std::string patternPath;
+    
+    std::string packagePath;
+    
     const char* modelPath;
+    
+    bool modelLoaded;
     
     /**
     @brief Callback for the RGB Image
@@ -81,7 +88,6 @@ class Predator
     
     
   public:
-  
   
   
   /**
@@ -97,10 +103,19 @@ class Predator
   void getGeneralParams();
   
   /**
+  @brief Checks for file existence
+  @return void
+  **/
+  bool is_file_exist(const std::string& fileName);
+  
+  
+  /**
   @brief Default Destructor
   @return void
   **/
   ~Predator();
+  
+  
 };
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_PREDATOR_PREDATOR_H

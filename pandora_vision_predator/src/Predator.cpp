@@ -5,6 +5,8 @@ namespace pandora_vision
 
 Predator::Predator(): _nh()
 {
+  modelLoaded = false;
+  
   getGeneralParams();
   
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
@@ -13,7 +15,6 @@ Predator::Predator(): _nh()
   
   semaphore_locked = false;
   modelExportFile="/home/maximus/Desktop/model";
-  modelPath="/home/maximus/Desktop/model";
   
   tld = new tld::TLD();
   
@@ -31,8 +32,8 @@ Predator::Predator(): _nh()
   detectorCascade->minScale = -10;
   detectorCascade->maxScale = 10;
   detectorCascade->minSize = 25;
-  detectorCascade->numTrees = 20;
-  detectorCascade->numFeatures = 25;
+  detectorCascade->numTrees = 15;
+  detectorCascade->numFeatures = 15;
   detectorCascade->nnClassifier->thetaTP = 0.65;
   detectorCascade->nnClassifier->thetaFP = 0.5;
    
@@ -155,7 +156,7 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     case '\n':
     
     if (semaphore_locked == false) break;
-    ROS_INFO("Initiate Hunting.");
+    ROS_INFO("Initiating Hunt.");
     semaphore_locked = false;
     if (bbox.x == -1 || bbox.y == -1 || bbox.width == -1 || bbox.height == -1)
     {
@@ -196,7 +197,7 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     break; 
     
     case 'i':
-    
+    const char* modelPath = patternPath.c_str();
     tld->release();
     ROS_INFO("Importing Model");
     tld->readFromFile(modelPath);
@@ -205,11 +206,51 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
   }
   
+  if(modelLoaded)
+  {
+    const char* modelPath = patternPath.c_str();
+    tld->release();
+    ROS_INFO("Importing Model");
+    tld->readFromFile(modelPath);
+    ROS_INFO("Initiating Hunt");
+    modelLoaded = false;
+  } 
 
 }
 
+bool Predator::is_file_exist(const std::string& fileName)
+{
+  struct stat buffer;
+  return(stat (fileName.c_str(), &buffer) == 0);
+}
+
+
 void Predator::getGeneralParams()
 {
+  
+  packagePath = ros::package::getPath("pandora_vision_predator");
+
+  //!< Get the path to the pattern used for detection
+  if (_nh.hasParam("patternPath"))
+  {
+    _nh.getParam("patternPath", patternPath);
+    ROS_DEBUG_STREAM("patternPath: " << patternPath);
+    ROS_INFO("Pattern path loaded from launcher");
+    if(is_file_exist(patternPath))
+    {
+      ROS_INFO("Model Loaded");
+      modelLoaded = true;
+    }
+    else
+    {
+      ROS_INFO("Model does not exist in patternPath. Awaiting User Input... \n");
+    }
+  }
+  else
+  {
+    ROS_INFO("Pattern path not found, waiting user input \n");
+  }
+  
   //!< Get the camera to be used by predator node;
   if (_nh.hasParam("camera_name"))
   {
