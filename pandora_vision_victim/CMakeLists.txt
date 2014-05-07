@@ -61,13 +61,8 @@ set(ROSLINT_CPP_OPTS
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
   RELATIVE ${PROJECT_SOURCE_DIR} 
             
-  include/color_detection.h
-  src/color_detection.cpp
-
-  include/edge_orientation_detection.h
-  src/edge_orientation_detection.cpp
-  
-            
+  include/face_detector.h
+  src/face_detector.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
