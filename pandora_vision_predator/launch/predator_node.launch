@@ -5,6 +5,8 @@
 		
 			<node name="predator_node" type="predator_node" pkg="pandora_vision_predator" respawn="False" output="screen" />
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+			
+			<param name="patternPath" type="str" value="$(find pandora_vision_predator)/model"/>
        
     </group>
 </launch>
