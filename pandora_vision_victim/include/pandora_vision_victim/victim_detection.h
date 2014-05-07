@@ -53,7 +53,7 @@
 #include "state_manager/state_client.h"
 
 
-#include "pandora_vision_victim/color_detection.h"
+#include "pandora_vision_victim/color_extractor.h"
 #include "pandora_vision_victim/edge_orientation_detection.h"
 //!< Horizontal field of view in degrees
 #define HFOV 61.14
@@ -101,7 +101,7 @@ private:
   std::string cameraFrameId;
   
   
-  ColorDetection _colorDetection;
+  ColorExtractor _colorDetection;
   EdgeOrientationDetection _edgeOrientationDetection;
  
   //!< Publishers for FaceDetector result messages

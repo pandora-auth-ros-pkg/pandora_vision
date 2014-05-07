@@ -36,7 +36,7 @@ include_directories(include
 add_executable(victim_node 
     src/victim_node.cpp
     src/victim_detection.cpp
-    src/color_detection.cpp
+    src/color_extractor.cpp
     src/edge_orientation_detection.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
