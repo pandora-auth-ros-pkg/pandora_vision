@@ -142,7 +142,7 @@ include_directories(
 
 target_link_libraries(libopentld cvblobs ${OpenCV_LIBS})
 
-add_executable(predator_node src/Predator.cpp)
+add_executable(predator_node src/predator_node.cpp)
 
 target_link_libraries(predator_node cvblobs libopentld ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
@@ -153,8 +153,8 @@ set(ROSLINT_CPP_OPTS
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
   RELATIVE ${PROJECT_SOURCE_DIR} 
             
-  src/Predator.cpp
-  include/Predator.h
+  src/predator_node.cpp
+  include/predator_node.h
   
             
 )
