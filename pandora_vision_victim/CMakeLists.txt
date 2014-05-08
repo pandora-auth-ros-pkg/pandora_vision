@@ -64,8 +64,10 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
             
   include/face_detector.h
   include/color_extractor.h
+  include/haralickfeature_extractor.h
   src/face_detector.cpp
   src/color_extractor.cpp
+  src/haralickfeature_extractor.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

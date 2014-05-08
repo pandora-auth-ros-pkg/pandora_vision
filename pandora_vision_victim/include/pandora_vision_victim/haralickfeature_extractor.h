@@ -34,6 +34,8 @@
 *
 * Author: Victor Daropoulos
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -75,7 +77,8 @@ namespace pandora_vision
     @param in [cv::Mat&] The GLCM matrix
     @return void
     **/  
-    void updateGLCM(int y1,int x1,int y2,int x2,cv::Mat* out,const cv::Mat& in);
+    void updateGLCM(int y1, int x1, int y2, int x2, 
+        cv::Mat* out,const cv::Mat& in);
     
     /**
     @brief Function for normalizing the values of the GLCM matrix.
@@ -187,4 +190,5 @@ namespace pandora_vision
     **/          
     std::vector<float> getFeatures();
   };
-}
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
