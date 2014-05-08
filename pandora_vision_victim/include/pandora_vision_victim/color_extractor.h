@@ -34,8 +34,8 @@
 *
 * Author: Marios Protopapas
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_COLOR_DETECTION_H 
-#define PANDORA_VISION_VICTIM_COLOR_DETECTION_H 
+#ifndef PANDORA_VISION_VICTIM_COLOR_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_COLOR_EXTRACTOR_H
 
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
@@ -129,4 +129,4 @@ namespace pandora_vision
   };
   
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_COLOR_DETECTION_H
+#endif  // PANDORA_VISION_VICTIM_COLOR_EXTRACTOR_H
