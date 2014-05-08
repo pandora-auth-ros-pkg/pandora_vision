@@ -109,7 +109,8 @@ namespace pandora_vision
     {
       for(int x = 0; x < in->cols; x++)
       {
-        in->at<float>(y, x)=(float)(in->at<float>(y, x)/(float)totalSum[0]);
+        in->at<float>(y, x) =
+        static_cast<float>(in->at<float>(y, x)/static_cast<float>(totalSum[0]));
       }
     }
     return *in;
@@ -177,7 +178,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        sum+=pow((float)(y-x), 2.0)*in.at<float>(y, x);
+        sum+=pow(static_cast<float>(y-x), 2.0)*in.at<float>(y, x);
       }
     }
     
@@ -208,7 +209,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        variance+=pow((float)(y-w_mean), 2.0)*in.at<float>(y, x);
+        variance+=pow(static_cast<float>(y-w_mean), 2.0)*in.at<float>(y, x);
       }
     }
     
@@ -240,7 +241,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        std+=pow((float)y-mean, 2.0)*in.at<float>(y, x);
+        std+=pow(static_cast<float>(y-mean), 2.0)*in.at<float>(y, x);
       }
     }
     
@@ -271,7 +272,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp+=(1./(1.+pow(float(y-x), 2)))*in.at<float>(y, x);
+        temp+=(1./(1.+pow(static_cast<float>(y-x), 2)))*in.at<float>(y, x);
       }
     }
     
@@ -332,7 +333,7 @@ namespace pandora_vision
     
     for(int i = 0; i < temp.cols; i++)
     {
-      sum+=pow(float(i)-f7, 2.0)*temp.at<float>(i);
+      sum+=pow(static_cast<float>(i-f7), 2.0)*temp.at<float>(i);
     }
     
     _haralickFeatures.push_back(sum);
@@ -400,7 +401,7 @@ namespace pandora_vision
     
     for(int i = 0; i < temp.cols; i++)
     {
-      f10+=pow((float)(i-f10_), 2.0)*temp.at<float>(i);
+      f10+=pow(static_cast<float>(i-f10_), 2.0)*temp.at<float>(i);
     }
     
     _haralickFeatures.push_back(f10);
@@ -420,7 +421,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(abs(y-x))+ = in.at<float>(y, x);
+        temp.at<float>(abs(y-x))+=in.at<float>(y, x);
       }
     }
     
@@ -588,7 +589,7 @@ namespace pandora_vision
     myvec = features->getFeatures();
     
     for(int i = 0; i < myvec.size(); i++)
-      ROS_INFO_STREAM(" " << myvec.at(i));
+      ROS_INFO_STREAM(" "<< myvec.at(i));
   
     return 0;
     

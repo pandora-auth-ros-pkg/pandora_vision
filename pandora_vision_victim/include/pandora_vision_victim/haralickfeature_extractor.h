@@ -42,6 +42,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include "ros/ros.h"
 
 namespace pandora_vision
 {
@@ -78,7 +79,7 @@ namespace pandora_vision
     @return void
     **/  
     void updateGLCM(int y1, int x1, int y2, int x2, 
-        cv::Mat* out,const cv::Mat& in);
+        cv::Mat* out, const cv::Mat& in);
     
     /**
     @brief Function for normalizing the values of the GLCM matrix.
