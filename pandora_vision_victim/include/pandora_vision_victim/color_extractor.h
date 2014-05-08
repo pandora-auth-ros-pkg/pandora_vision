@@ -63,7 +63,7 @@ namespace pandora_vision
     std::vector<double>satdft;
     //!< Compute the colour angles of rgb color components
     std::vector<double>ColorAnglesAndStd;
-     //!< Compute a vector of all color features
+    //!< Compute a vector of all color features
     std::vector<double>ColorFeatureVector;
     
     public:

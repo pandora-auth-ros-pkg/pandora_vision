@@ -46,7 +46,7 @@
 
 namespace pandora_vision
 {
-  class HaralickFeatures
+  class HaralickFeaturesExtractor
   {
     
     private:
@@ -57,7 +57,7 @@ namespace pandora_vision
     public:
     
     //!<Constructor
-    HaralickFeatures();
+    HaralickFeaturesExtractor();
     
     /**
     @brief Function for calculating the normalized GLCM matrix, considering an
@@ -190,6 +190,8 @@ namespace pandora_vision
     @return std::vector [float] The vector containing the haralick features
     **/          
     std::vector<float> getFeatures();
+    
+     void findHaralickFeatures(cv::Mat image);
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
