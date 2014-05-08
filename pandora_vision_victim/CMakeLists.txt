@@ -39,6 +39,7 @@ add_executable(victim_node
     src/face_detector.cpp
     src/color_extractor.cpp
     src/edge_orientation_detection.cpp
+    src/haralickfeature_extractor.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
 add_dependencies(victim_node 
