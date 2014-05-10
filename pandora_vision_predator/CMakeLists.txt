@@ -8,6 +8,7 @@ set(CMAKE_BUILD_TYPE Release)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
 cv_bridge
+vision_communications
 roscpp
 image_transport
 sensor_msgs
@@ -50,6 +51,7 @@ catkin_package(
  roscpp
  cv_bridge
  image_transport
+ vision_communications
  sensor_msgs
  roslint
  DEPENDS system_lib
@@ -145,6 +147,11 @@ target_link_libraries(libopentld cvblobs ${OpenCV_LIBS})
 add_executable(predator_node src/predator_node.cpp)
 
 target_link_libraries(predator_node cvblobs libopentld ${OpenCV_LIBS} ${catkin_LIBRARIES})
+
+add_dependencies(predator_node 
+    vision_communications_gencpp
+    ${catkin_EXPORTED_TARGETS}
+)
 
 #~ To check lint : catkin_make roslint_pandora_vision_predator
 set(ROSLINT_CPP_OPTS 

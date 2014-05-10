@@ -1,8 +1,32 @@
+/*  Copyright (c) 2014, Victor Daropoulos
+ *  All rights reserved.
+ *  
+ *  This file is part of Pandora_OpenTLD.
+
+ *  Pandora_OpenTLD is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Pandora_OpenTLD is distributed in the hope that it will be useful, 
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Pandora_OpenTLD. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include "pandora_vision_predator/predator_node.h"
 
 namespace pandora_vision
 {
 
+
+/**
+  @brief Default Constructor
+  @return void
+**/
 Predator::Predator(): _nh()
 {
   modelLoaded = false;
@@ -12,6 +36,9 @@ Predator::Predator(): _nh()
   ROS_INFO("[predator_node] : Created Predator instance");
   
   semaphore_locked = false;
+  
+  framecounter = 0;
+  
   modelExportFile="/home/maximus/Desktop/model";
   
   tld = new tld::TLD();
@@ -38,15 +65,29 @@ Predator::Predator(): _nh()
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
 }
 
+/**
+  @brief Default Destructor
+  @return void
+**/
 Predator::~Predator(void)
 {
   ROS_INFO("[predator_node] : Destroying Predator instance");
 }
 
+
+
 static int drag = 0;
 static cv::Point point;
 static cv::Rect bbox;
 
+/**
+  @brief Function for capturing mouse events
+  @param event [int] Mouse Even
+  @param x [int] Bounding box x-coordinate
+  @param y [int] Bounding box y-coordinate
+  @param flags [int]
+  @param param [void*] Pointer to parameter passed in mousecallback function
+**/
 static void mouseHandler(int event, int x, int y, int flags, void *param)
 {
   
@@ -80,11 +121,17 @@ static void mouseHandler(int event, int x, int y, int flags, void *param)
   }
 }
 
+/**
+    @brief Callback for the RGB Image
+    @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
+    @return void
+**/
 
 void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
   
   double start = static_cast<double>(cv::getTickCount());
+  framecounter++;
   double fps;
   
   char LearningString[10]="";
@@ -112,7 +159,13 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     tld->processImage(PredatorFrame);
     
-    fps = cv::getTickFrequency() / (cv::getTickCount() - start);
+    //fps = cv::getTickFrequency() / (cv::getTickCount() - start);
+    
+    double end = (cvGetTickCount() - start) / cvGetTickFrequency();
+
+    end = end / 1000000;
+
+    fps = 1 / end;
     
     if(tld->learning)
     {
@@ -121,14 +174,14 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     if(tld->currBB != NULL)
     {
-      cv::Scalar rectangleColor = tld->currConf > (double)0.7 ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
+      cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
       cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
     }
     
   }
   
-  snprintf(mystring, sizeof(mystring), "# Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
-  tld->currConf, fps, tld->detectorCascade->numWindows, LearningString);
+  snprintf(mystring, sizeof(mystring), "#%d, Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
+  framecounter, tld->currConf, fps, tld->detectorCascade->numWindows, LearningString);
   cv::rectangle(PredatorFrame, cv::Point(0, 0), cv::Point(PredatorFrame.cols, 50), CV_RGB(0, 0, 0), CV_FILLED, 8, 0);
   cv::putText(PredatorFrame, mystring, cv::Point(25, 25), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255, 255, 255));
   
@@ -217,12 +270,21 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 }
 
+/**
+  @brief Checks for file existence
+  @return [bool]
+**/
+  
 bool Predator::is_file_exist(const std::string& fileName)
 {
   struct stat buffer;
   return(stat (fileName.c_str(), &buffer) == 0);
 }
 
+/**
+  @brief Get parameters referring to view and frame characteristics
+  @return void
+**/
 
 void Predator::getGeneralParams()
 {
