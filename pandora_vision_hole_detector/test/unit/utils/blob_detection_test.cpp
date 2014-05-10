@@ -47,6 +47,22 @@ namespace pandora_vision
 
       BlobDetectionTest() {}
 
+      /**
+        @brief Constructs a rectangle of width @param x and height of @param y
+        @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
+        rectangle to be created
+        @param[in] x [const int&] The recgangle's width
+        @param[in] y [const int&] The rectangle's height
+        @param[out] image [cv::Mat*] The image on which the rectangle will be
+        imprinted on
+        return void
+       **/
+      void generateRectangle (
+        const cv::Point2f& upperLeft,
+        const int& x,
+        const int& y,
+        cv::Mat* image );
+
       //! Sets up two images: square_, which features a single non-zero value
       //! square of size 100 with its upper left vertex at (100, 100),
       //! and squares_, which features two non-zero value squares of size 100.
@@ -62,30 +78,9 @@ namespace pandora_vision
         // A (100, 100), B (100, 200), C (200, 200), D (200, 100)
         square_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
 
-        // Two squares with vertices
-        // A (100, 100), B (100, 200), C (200, 200), D (200, 100) and
-        // A' (WIDTH - 1 - 100, HEIGHT - 1 - 100),
-        // B' (WIDTH - 1 - 100, HEIGHT - 1)
-        // C' (WIDTH - 1, HEIGHT - 1)
-        // D' (WIDTH - 1, HEIGHT - 1 - 100)
-        squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
-        ASSERT_EQ( HEIGHT, square_.rows );
-        ASSERT_EQ( WIDTH, square_.cols );
-
-
         // Construct the square_ image
-        for ( int cols = 100; cols < 200; cols++)
-        {
-          square_.at< unsigned char >( 100, cols ) = 255;
-          square_.at< unsigned char >( 199, cols ) = 255;
-        }
-
-        for ( int rows = 100; rows < 200; rows++)
-        {
-          square_.at< unsigned char >( rows, 100 ) = 255;
-          square_.at< unsigned char >( rows, 199 ) = 255;
-        }
+        BlobDetectionTest::generateRectangle
+          ( cv::Point2f ( 100, 100 ), 100, 100, &square_ );
 
         // Locate the outline points of the square in the square_ image
         for ( int rows = 0; rows < square_.rows; rows++ )
@@ -105,22 +100,25 @@ namespace pandora_vision
         ASSERT_EQ ( 396, squareOutlinePointsVector_.size() );
 
 
+        // Two squares with vertices
+        // A (100, 100), B (100, 200), C (200, 200), D (200, 100) and
+        // A' (WIDTH - 1 - 100, HEIGHT - 1 - 100),
+        // B' (WIDTH - 1 - 100, HEIGHT - 1)
+        // C' (WIDTH - 1, HEIGHT - 1)
+        // D' (WIDTH - 1, HEIGHT - 1 - 100)
+        squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
         // Construct the squares_ image
 
         // Construct the lower right square
         cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
 
-        for ( int cols = WIDTH - 100; cols < WIDTH; cols++ )
-        {
-          lowerRightSquare.at< unsigned char >( HEIGHT - 100, cols ) = 255;
-          lowerRightSquare.at< unsigned char >( HEIGHT - 1, cols ) = 255;
-        }
+        BlobDetectionTest::generateRectangle
+          ( cv::Point2f ( WIDTH - 1 - 100, HEIGHT - 1 - 100),
+            100,
+            100,
+            &lowerRightSquare );
 
-        for ( int rows = HEIGHT - 100; rows < HEIGHT ; rows++ )
-        {
-          lowerRightSquare.at< unsigned char >( rows, WIDTH - 100 ) = 255;
-          lowerRightSquare.at< unsigned char >( rows, WIDTH - 1 ) = 255;
-        }
 
         std::vector< cv::Point2f > lowerRightSquareOutline;
         for ( int rows = 0; rows < lowerRightSquare.rows; rows++ )
@@ -148,8 +146,11 @@ namespace pandora_vision
 
         // The number of actual outline points of the squares should be
         // 4 x 100 - 4
-        ASSERT_EQ( 396 , squaresOutlinePointsVector_[0].size() );
-        ASSERT_EQ( 396 , squaresOutlinePointsVector_[1].size() );
+        ASSERT_EQ( 396, squaresOutlinePointsVector_[0].size() );
+        ASSERT_EQ( 396, squaresOutlinePointsVector_[1].size() );
+
+        ASSERT_EQ( HEIGHT, square_.rows );
+        ASSERT_EQ( WIDTH, square_.cols );
       }
 
 
@@ -178,6 +179,41 @@ namespace pandora_vision
       std::vector< std::vector< cv::Point2f > > squaresOutlinePointsVector_;
 
   };
+
+
+
+  /**
+    @brief Constructs a rectangle of width @param x and height of @param y
+    @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
+    rectangle to be created
+    @param[in] x [const int&] The recgangle's width
+    @param[in] y [const int&] The rectangle's height
+    @param[out] image [cv::Mat*] The image on which the rectangle will be
+    imprinted on
+    return void
+   **/
+  void BlobDetectionTest::generateRectangle (
+    const cv::Point2f& upperLeft,
+    const int& x,
+    const int& y,
+    cv::Mat* image )
+  {
+    // The four vertices of the rectangle
+    cv::Point2f vertex_1(upperLeft.x, upperLeft.y);
+
+    cv::Point2f vertex_2(upperLeft.x, upperLeft.y + y - 1);
+
+    cv::Point2f vertex_3(upperLeft.x + x - 1, upperLeft.y + y - 1);
+
+    cv::Point2f vertex_4(upperLeft.x + x - 1, upperLeft.y);
+
+    cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
+
+    for(unsigned int j = 0; j < 4; j++)
+    {
+      cv::line(*image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
+    }
+  }
 
 
 
