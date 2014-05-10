@@ -45,7 +45,7 @@ Predator::Predator(): _nh()
   
   tld->trackerEnabled = true;
   tld->alternating = false;
-  tld->learningEnabled = true;
+  tld->learningEnabled = learningEnabled;
     
   tld::DetectorCascade* detectorCascade =tld->detectorCascade;
   
@@ -310,6 +310,18 @@ void Predator::getGeneralParams()
   else
   {
     ROS_INFO("Pattern path not found, waiting user input \n");
+  }
+  
+  //!< Get value for enabling or disabling TLD learning mode
+  
+  if(_nh.hasParam("learningEnabled"))
+  {
+    _nh.getParam("learningEnabled", learningEnabled);
+    ROS_INFO("Getting learningEnabled value from launcher");
+  }
+  else
+  {
+    ROS_INFO("There's no learningEnabled value from launcher");
   }
   
   //!< Get the camera to be used by predator node;

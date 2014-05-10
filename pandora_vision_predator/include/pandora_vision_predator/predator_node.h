@@ -105,6 +105,9 @@ class Predator
     //!<Value representing total number of frames
     int framecounter;
     
+    //!<Value for enabling or disabling TLD learning mode
+    bool learningEnabled;
+    
     /**
     @brief Callback for the RGB Image
     @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
