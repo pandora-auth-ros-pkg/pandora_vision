@@ -394,11 +394,13 @@ void LandoltCDetector::applyMask()
     
     cv::inRange(_coloredContours, _fillColors[i], _fillColors[i], _mask);
     
-    cv::Mat cropped = _mask(_rectangles[i]).clone();
+    cv::Mat out = getWarpPerspectiveTransform(_mask, _rectangles[i]);
+    
+    //cv::Mat cropped = _mask(_rectangles[i]).clone(); 
     
     cv::Mat padded;
     
-    cv::copyMakeBorder(cropped, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
+    cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
     
     //cv::imshow("padded", padded); 
     
@@ -412,6 +414,53 @@ void LandoltCDetector::applyMask()
     #endif
   }
 }
+
+/**
+  @brief Function for calculating perspective transform, in
+  order to get better angle calculation precision
+  @param rec [cv::rec] Rectangle enclosing a 'C'
+  @param in [cv::Mat&] Input Image
+  @return [cv::Mat] Output Image 
+**/    
+  
+cv::Mat LandoltCDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec)
+{
+  std::vector<cv::Point2f> corners;
+  cv::Mat quad = cv::Mat::zeros(100, 100, CV_8UC1);
+  
+  corners.clear();
+  corners.push_back(rec.tl());
+  
+  cv::Point2f tr = cv::Point2f(rec.tl().x+rec.width, rec.tl().y);
+  corners.push_back(tr);
+  
+  corners.push_back(rec.br());
+  cv::Point2f bl = cv::Point2f(rec.br().x-rec.width, rec.br().y);
+  corners.push_back(bl);
+  
+  
+  // Corners of the destination image
+  std::vector<cv::Point2f> quad_pts;
+  quad_pts.push_back(cv::Point2f(0, 0));
+  quad_pts.push_back(cv::Point2f(quad.cols, 0));
+  quad_pts.push_back(cv::Point2f(quad.cols, quad.rows));
+  quad_pts.push_back(cv::Point2f(0, quad.rows));
+  
+  // Get transformation matrix
+  cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
+  
+  // Apply perspective transformation
+  cv::warpPerspective(in, quad, transmtx, quad.size());
+  
+  #ifdef SHOW_DEBUG_IMAGE
+  cv:imshow("warp", quad);
+  cv::waitKey(5);      
+  #endif
+  
+  return quad;
+    
+}
+
 
 /**
   @brief Finds LandoltC Contours on RGB Frames

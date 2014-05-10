@@ -364,7 +364,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  bilateralFilter(gray, dst, 3, 6, 1.5);
+  //bilateralFilter(gray, dst, 3, 6, 1.5);
   
   clahe->apply(gray, dst);
   
@@ -387,13 +387,13 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   Sobel( dst, grad_y, CV_32F, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
   convertScaleAbs( grad_y, abs_grad_y );
       
-  addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
+  addWeighted( abs_grad_x, 0.7, abs_grad_y, 0.7, 0, dst ); 
   
   applyBradleyThresholding(dst, &thresholded);
   
-  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1,1) );
+  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
   
-  cv::erode(thresholded,thresholded,element); 
+  cv::erode(thresholded, thresholded, element); 
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
@@ -404,7 +404,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   #ifdef SHOW_DEBUG_IMAGE
     cv::imshow("Raw", *input);
-    cv::waitKey(20);
+    cv::waitKey(5);
   #endif
 
   _centers.clear();
