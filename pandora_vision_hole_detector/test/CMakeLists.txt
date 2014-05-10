@@ -20,6 +20,10 @@ catkin_add_gtest(morphological_operators_test
   unit/utils/morphological_operators_test.cpp)
 target_link_libraries(morphological_operators_test ${catkin_LIBRARIES} depth_node_lib gtest_main)
 
+catkin_add_gtest(bounding_box_detection_test
+  unit/utils/bounding_box_detection_test.cpp)
+target_link_libraries(bounding_box_detection_test ${catkin_LIBRARIES} depth_node_lib gtest_main)
+
 ############## Functional Tests ###############
 
 #if(TARGET tests)
