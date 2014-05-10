@@ -7,6 +7,7 @@
 			<!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 			
 			<param name="patternPath" type="str" value="$(find pandora_vision_predator)/model"/>
+			<param name="learningEnabled" type="bool" value="false"/>
        
     </group>
 </launch>
