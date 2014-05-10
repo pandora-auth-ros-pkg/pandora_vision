@@ -1,5 +1,25 @@
-#ifndef PANDORA_VISION_PREDATOR_PREDATOR_H
-#define PANDORA_VISION_PREDATOR_PREDATOR_H
+/*  Copyright (c) 2014, Victor Daropoulos
+ *  All rights reserved.
+ *  
+ *  This file is part of Pandora_OpenTLD.
+
+ *  Pandora_OpenTLD is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Pandora_OpenTLD is distributed in the hope that it will be useful, 
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Pandora_OpenTLD. If not, see http://www.gnu.org/licenses/.
+ */
+
+
+#ifndef PANDORA_VISION_PREDATOR_PREDATOR_NODE_H
+#define PANDORA_VISION_PREDATOR_PREDATOR_NODE_H
 
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -15,7 +35,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "TLD.h"
+#include "../tld/TLD.h"
 
 
 //!< default frame height
@@ -73,11 +93,17 @@ class Predator
     //!<Path of imported model
     std::string patternPath;
     
+    //!<Path of package
     std::string packagePath;
     
+    //!<Path of imported model
     const char* modelPath;
     
+    //!<Boolean value representing if model is loaded
     bool modelLoaded;
+    
+    //!<Value representing total number of frames
+    int framecounter;
     
     /**
     @brief Callback for the RGB Image
@@ -104,7 +130,7 @@ class Predator
   
   /**
   @brief Checks for file existence
-  @return void
+  @return [bool]
   **/
   bool is_file_exist(const std::string& fileName);
   
@@ -118,6 +144,6 @@ class Predator
   
 };
 } // namespace pandora_vision
-#endif  // PANDORA_VISION_PREDATOR_PREDATOR_H
+#endif  // PANDORA_VISION_PREDATOR_PREDATOR_NODE_H
   
   
