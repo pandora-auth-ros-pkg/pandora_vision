@@ -111,10 +111,10 @@ void TLD::storeCurrentData()
     }
     else
     {
-      prevBB->x = -1;
-      prevBB->y = -1;
-      prevBB->width = -1;
-      prevBB->height = -1;
+      prevBB->x = 0;
+      prevBB->y = 0;
+      prevBB->width = 0;
+      prevBB->height = 0;
     }
     
     
