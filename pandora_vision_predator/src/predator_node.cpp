@@ -121,7 +121,7 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     if(tld->currBB != NULL)
     {
-      cv::Scalar rectangleColor = tld->currConf > 0.5 ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
+      cv::Scalar rectangleColor = tld->currConf > (double)0.7 ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
       cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
     }
     
