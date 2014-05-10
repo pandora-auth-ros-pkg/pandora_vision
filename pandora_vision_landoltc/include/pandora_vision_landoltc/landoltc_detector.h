@@ -175,6 +175,15 @@ public:
   **/    
   void find8Neights(unsigned int index, const cv::Mat& in);
   
+  /**
+  @brief Function for calculating perspective transform, in
+  order to get better angle calculation precision
+  @param rec [cv::rec] Rectangle enclosing a 'C'
+  @param in [cv::Mat&] Input Image
+  @return [cv::Mat] Output Image 
+  **/    
+  cv::Mat getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec);
+  
 
 };
 } // namespace pandora_vision
