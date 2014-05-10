@@ -35,17 +35,17 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/bounding_box_detection.h"
+#include "utils/edge_detection.h"
 #include "gtest/gtest.h"
 
 
 namespace pandora_vision
 {
-  class BoundingBoxDetectionTest : public ::testing::Test
+  class EdgeDetectionTest : public ::testing::Test
   {
     protected:
 
-      BoundingBoxDetectionTest () {}
+      EdgeDetectionTest () {}
 
       /**
         @brief Constructs a rectangle of width @param x and height of @param y
@@ -95,7 +95,7 @@ namespace pandora_vision
           }
         }
 
-        BoundingBoxDetectionTest::generateRectangle
+        EdgeDetectionTest::generateRectangle
           ( cv::Point2f ( 100, 100 ), 100, 100, &upperLeftSquare );
 
         // Locate the outline points of the square in the upperLeftSquare image
@@ -123,7 +123,7 @@ namespace pandora_vision
           }
         }
 
-        BoundingBoxDetectionTest::generateRectangle
+        EdgeDetectionTest::generateRectangle
           ( cv::Point2f ( WIDTH - 1 - 100, HEIGHT - 1 - 100),
             100,
             100,
@@ -199,7 +199,7 @@ namespace pandora_vision
     imprinted on
     return void
    **/
-  void BoundingBoxDetectionTest::generateRectangle (
+  void EdgeDetectionTest::generateRectangle (
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y,
@@ -224,37 +224,66 @@ namespace pandora_vision
 
 
 
-  //! Test BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-  TEST_F ( BoundingBoxDetectionTest, FindRotatedBoundingBoxesFromOutlineTest )
+  //! Test EdgeDetection::applyCanny
+  TEST_F ( EdgeDetectionTest, ApplyCannyTest )
   {
-    // The square's area
-    std::vector< float > blobsArea;
-    blobsArea.push_back( 10000 );
-    blobsArea.push_back( 10000 );
+    cv::Mat squares_edges;
+    EdgeDetection::applyCanny ( squares_, &squares_edges );
+
+    ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+  }
 
 
-    // Run BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-    std::vector<std::vector<cv::Point2f> > outRectangles;
-    BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-      (squares_, squaresOutlinePointsVector_, blobsArea, &outRectangles);
 
-    ASSERT_EQ ( 2, outRectangles.size() );
+  //! Test EdgeDetection::applyScharr
+  TEST_F ( EdgeDetectionTest, ApplyScharrTest )
+  {
+    cv::Mat squares_edges;
+    EdgeDetection::applyScharr ( squares_, &squares_edges );
+
+    ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+  }
 
 
-    // Clear the blobsArea vector and replace it with values that should mean
-    // that the squares' area is lower than the accepted threshold
-    blobsArea.clear();
 
-    blobsArea.push_back( 0 );
-    blobsArea.push_back( 0 );
+  //! Test EdgeDetection::applySobel
+  TEST_F ( EdgeDetectionTest, ApplySobelTest )
+  {
+    cv::Mat squares_edges;
+    EdgeDetection::applySobel ( squares_, &squares_edges );
 
-    outRectangles.clear();
+    ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+  }
 
-    // Run BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-    BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-      (squares_, squaresOutlinePointsVector_, blobsArea, &outRectangles);
 
-    ASSERT_EQ ( 0, outRectangles.size() );
+
+  //! Test EdgeDetection::applyLaplacian
+  TEST_F ( EdgeDetectionTest, ApplyLaplacianTest )
+  {
+    cv::Mat squares_edges;
+    EdgeDetection::applyLaplacian ( squares_, &squares_edges );
+
+    ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+  }
+
+
+
+  //! Test EdgeDetection::applyLaplacian
+  TEST_F ( EdgeDetectionTest, ApplyEdgeContaminationTest)
+  {
+    // Obtain the edges image for the squares_ image.
+    // Here, it does not matter with which operator the edges image is produced,
+    // provided that the the value tested below changes accordingly
+    cv::Mat squares_edges;
+    EdgeDetection::applyLaplacian ( squares_, &squares_edges );
+
+    // The number of non-zero pixels before the appliance of edge contamination
+    EXPECT_EQ ( 2 * ( 3 * 396 - 4 ) , cv::countNonZero ( squares_edges ) );
+
+    EdgeDetection::applyEdgeContamination ( &squares_edges );
+
+    // The number of non-zero pixels after the appliance of edge contamination
+    EXPECT_EQ ( 3 * 396 - 4, cv::countNonZero ( squares_edges ) );
   }
 
 } // namespace pandora_vision
