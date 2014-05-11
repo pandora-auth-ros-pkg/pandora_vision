@@ -69,6 +69,12 @@ namespace pandora_vision
     cv::Mat _coloredContours;
     //!<Pointer used for Contrast Limited Adaptive Histogram Equalization
     cv::Ptr<cv::CLAHE> clahe;
+    
+    cv::Rect bbox;
+    
+    float confidence;
+    
+    bool isFuseEnabled;
       
     public:
     
@@ -130,13 +136,16 @@ namespace pandora_vision
     void applyBradleyThresholding(const cv::Mat& in, cv::Mat* out);
     
     /**
-    @brief Function for fusing result from both landoltc3dDetector and
+    @brief Function for enabling fusing result from both landoltc3dDetector and
     Predator
-    @param rec [const cv::Rect&] Predator Bounding Box
+    @param bounding_box [const cv::Rect&] Predator Bounding Box
     @param posterior [const float&] Predator Confidence
+    @param flag [bool] Enable fuse flag
     @return void
     **/
-    void fuse(const cv::Rect& rec, const float& posterior);
+    void enableFuse(const cv::Rect& bounding_box, const float& posterior, bool flag);
+    
+    void fuse();
     
   };
 } // namespace pandora_vision

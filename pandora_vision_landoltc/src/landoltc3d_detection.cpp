@@ -57,7 +57,7 @@ LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(true)
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
   &LandoltC3dDetection::imageCallback, this);
   
-  _landoltc3dPredator = _nh.subscribe("PredatorAlert", 1,
+  _landoltc3dPredator = _nh.subscribe("/pandora_vision_predator/PredatorAlert", 1,
   &LandoltC3dDetection::predatorCallback, this);
 
   //!< Declare publisher and advertise topic
@@ -193,8 +193,9 @@ void LandoltC3dDetection::predatorCallback(const vision_communications::Predator
   
   cv::Rect bounding_box = cv::Rect(msg.x, msg.y, msg.width, msg.height);
   float posterior = msg.posterior;
+  bool flag = true;
   
-  _landoltc3dDetector.fuse(bounding_box, posterior);
+  _landoltc3dDetector.enableFuse(bounding_box, posterior, flag);
 }
 
 
