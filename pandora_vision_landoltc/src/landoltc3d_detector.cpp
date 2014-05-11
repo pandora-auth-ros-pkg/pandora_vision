@@ -47,6 +47,8 @@ LandoltC3dDetector::LandoltC3dDetector()
 
   _threshold = 90;
   
+  isFuseEnabled = false;
+  
 }
 
 //!< Destructor
@@ -340,7 +342,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
         cv::drawContours(_coloredContours, contours, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
         _fillColors.push_back(color);
         _newCenters.push_back(mc[i]);
-         cv::imshow("Contours", _coloredContours);
+        // cv::imshow("Contours", _coloredContours);
         _rectangles.push_back(bounding_rect);
 
       }
@@ -382,25 +384,30 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::circle(*input, _centers.at(i), 2, (0, 0, 255), -1);
   }
   
-  Sobel( dst, grad_x, CV_32F, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT );
-  convertScaleAbs( grad_x, abs_grad_x );
+  //Sobel( dst, grad_x, CV_32F, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT );
+  convertScaleAbs( gradX, abs_grad_x );
   
-  Sobel( dst, grad_y, CV_32F, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
-  convertScaleAbs( grad_y, abs_grad_y );
+  //Sobel( dst, grad_y, CV_32F, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
+  convertScaleAbs( gradY, abs_grad_y );
       
-  addWeighted( abs_grad_x, 0.7, abs_grad_y, 0.7, 0, dst ); 
+  addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
   applyBradleyThresholding(dst, &thresholded);
   
-  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
-  
-  cv::erode(thresholded, thresholded, element); 
+  //~ cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
+  //~ 
+  //~ cv::erode(thresholded, thresholded, element); 
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
   for(std::size_t i = 0; i < _rectangles.size(); i++)
   {
     cv::rectangle(*input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
+  }
+  
+  if(isFuseEnabled)
+  {
+    fuse();
   }
   
   #ifdef SHOW_DEBUG_IMAGE
@@ -415,15 +422,29 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 
 }
 
-void LandoltC3dDetector::fuse(const cv::Rect& bounding_box, const float& posterior)
+void LandoltC3dDetector::enableFuse(const cv::Rect& bounding_box, const float& posterior, bool flag)
+{
+  bbox = bounding_box;
+  confidence = posterior;
+  isFuseEnabled = true;  
+}
+
+void LandoltC3dDetector::fuse()
 {
   for(int i = 0; i < _newCenters.size(); i++)
   {
-    if(bounding_box.contains(_newCenters.at(i)))
+    if(bbox.contains(_newCenters.at(i)))
     {
       ROS_INFO("It contains it");
     }
+    else
+    {
+      ROS_INFO("Does not contain it");
+    }
   }
+  
+  bbox = cv::Rect(-1, -1, -1, -1);
+  isFuseEnabled = false;
   
 }
 
