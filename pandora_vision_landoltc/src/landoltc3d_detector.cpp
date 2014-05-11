@@ -348,6 +348,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
   }
 }
 
+
 /**
   @brief Function called from ImageCallBack that Initiates LandoltC search in the frame
   @param input [cv::Mat*] Matrix containing the frame received from the camera
@@ -412,6 +413,18 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _rectangles.clear();
   _fillColors.clear();
 
+}
+
+void LandoltC3dDetector::fuse(const cv::Rect& bounding_box, const float& posterior)
+{
+  for(int i = 0; i < _newCenters.size(); i++)
+  {
+    if(bounding_box.contains(_newCenters.at(i)))
+    {
+      ROS_INFO("It contains it");
+    }
+  }
+  
 }
 
 

@@ -55,8 +55,11 @@ LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(true)
   _landoltc3dDetector.initializeReferenceImage(patternPath);
   
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
-                                        &LandoltC3dDetection::imageCallback, this);
-                                        
+  &LandoltC3dDetection::imageCallback, this);
+  
+  _landoltc3dPredator = _nh.subscribe("PredatorAlert", 1,
+  &LandoltC3dDetection::predatorCallback, this);
+
   //!< Declare publisher and advertise topic
   //!< where algorithm results are posted
   _landoltc3dPublisher =
@@ -180,6 +183,20 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   landoltc3dCallback();
 
 }
+
+void LandoltC3dDetection::predatorCallback(const vision_communications::PredatorAlertMsg& msg)
+{
+  if(!landoltc3dNowON)
+  {
+    return;
+  }
+  
+  cv::Rect bounding_box = cv::Rect(msg.x, msg.y, msg.width, msg.height);
+  float posterior = msg.posterior;
+  
+  _landoltc3dDetector.fuse(bounding_box, posterior);
+}
+
 
 /**
  @brief main function called for publishing messages in
