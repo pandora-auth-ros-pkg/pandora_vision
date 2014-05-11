@@ -34,6 +34,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "vision_communications/PredatorAlertMsg.h"
 
 #include "../tld/TLD.h"
 
@@ -56,6 +57,9 @@ class Predator
     
     //!<Subscriber of RGB Image
     ros::Subscriber _inputImageSubscriber;
+    
+    //!<Predator Publisher
+    ros::Publisher _predatorPublisher;
   
     //!< Current frame to be processed
     cv::Mat PredatorFrame;
@@ -136,6 +140,15 @@ class Predator
   @return [bool]
   **/
   bool is_file_exist(const std::string& fileName);
+  
+  /**
+  @brief Sends message of tracked object
+  @param rec [const cv::Rect&] The Bounding Box
+  @param posterior [const float&] Confidence
+  @return void
+  **/
+  
+  void sendMessage(const cv::Rect& rec, const float& posterior);
   
   
   /**
