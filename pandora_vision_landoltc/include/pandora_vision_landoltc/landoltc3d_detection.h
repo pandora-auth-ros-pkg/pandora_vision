@@ -51,6 +51,7 @@
 #include <stdlib.h>
 #include "state_manager/state_client.h"
 #include "vision_communications/LandoltcAlertsVectorMsg.h"
+#include "vision_communications/PredatorAlertMsg.h"
 #include "pandora_vision_landoltc/landoltc3d_detector.h"
 //!< default frame height
 #define DEFAULT_HEIGHT 480
@@ -65,21 +66,35 @@ class LandoltC3dDetection
 private:
   //!<Subscriber of RGB Image
   ros::Subscriber _inputImageSubscriber;
+  
+  //!<Subscriber for Predator
+  ros::Subscriber _landoltc3dPredator;
+  
   //!<Node Handler
   ros::NodeHandle _nh;
+  
   //!< Current frame to be processed
   cv::Mat landoltCFrame;
   
+  //!<Landoltc3d Detector object
   LandoltC3dDetector _landoltc3dDetector;
   
+  //!<Current package path
   std::string packagePath;
-
+  
+  //!<Current pattern path
   std::string patternPath;
-
+  
+  //!<Frame Height
   int frameHeight;
+  
+  //!<Frame Width
   int frameWidth;
-
+  
+  //!<Camera Name
   std::string cameraName;
+  
+  //!<Camera Frame ID
   std::string cameraFrameId;
 
   //!< The topic subscribed to for the front camera
@@ -97,6 +112,13 @@ private:
   @return void
   **/
   void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+  
+  /**
+  @brief Predator Callback
+  @param msg [const vision_communications::PredatorAlertMsg& msg]
+  @return void
+  **/
+  void predatorCallback(const vision_communications::PredatorAlertMsg& msg);
 
   /**
   @brief main function called for publishing messages in

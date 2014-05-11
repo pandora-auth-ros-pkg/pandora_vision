@@ -129,6 +129,15 @@ namespace pandora_vision
     
     void applyBradleyThresholding(const cv::Mat& in, cv::Mat* out);
     
+    /**
+    @brief Function for fusing result from both landoltc3dDetector and
+    Predator
+    @param rec [const cv::Rect&] Predator Bounding Box
+    @param posterior [const float&] Predator Confidence
+    @return void
+    **/
+    void fuse(const cv::Rect& rec, const float& posterior);
+    
   };
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC3D_DETECTOR_H
