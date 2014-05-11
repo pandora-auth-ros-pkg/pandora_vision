@@ -1454,6 +1454,15 @@ namespace pandora_vision
    **/
   void EdgeDetection::getShapesClearBorder (cv::Mat* inImage)
   {
+    if (inImage->type() != CV_8UC1)
+    {
+      #ifdef DEBUG_SHOW
+      ROS_ERROR("EdgeDetection::getShapesClearBorder : \
+        Inappropriate image type.");
+      #endif
+
+      return;
+    }
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
@@ -1672,6 +1681,15 @@ namespace pandora_vision
    **/
   void EdgeDetection::getShapesClearBorderSimple (cv::Mat* inImage)
   {
+    if (inImage->type() != CV_8UC1)
+    {
+      #ifdef DEBUG_SHOW
+      ROS_ERROR("EdgeDetection::getShapesClearBorderSimple : \
+        Inappropriate image type.");
+      #endif
+
+      return;
+    }
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
