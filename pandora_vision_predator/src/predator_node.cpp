@@ -62,6 +62,8 @@ Predator::Predator(): _nh()
   detectorCascade->nnClassifier->thetaTP = 0.65;
   detectorCascade->nnClassifier->thetaFP = 0.5;
   
+  _predatorPublisher = _nh.advertise<vision_communications::PredatorAlertMsg>("PredatorAlert", 1000);
+  
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
 }
 
@@ -176,6 +178,7 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
       cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
       cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
+      sendMessage(*tld->currBB, tld->currConf);
     }
     
   }
@@ -384,6 +387,27 @@ void Predator::getGeneralParams()
     cameraFrameId = "/camera";
   }
 }
+
+/**
+  @brief Sends message of tracked object
+  @param rec [const cv::Rect&] The Bounding Box
+  @param posterior [const float&] Confidence
+  @return void
+**/
+  
+void Predator::sendMessage(const cv::Rect& rec, const float& posterior)
+{
+  vision_communications::PredatorAlertMsg predatorAlertMsg;
+  
+  predatorAlertMsg.x = rec.x;
+  predatorAlertMsg.y = rec.y;
+  predatorAlertMsg.width = rec.width;
+  predatorAlertMsg.height = rec.height;
+  predatorAlertMsg.posterior = posterior;
+  
+  _predatorPublisher.publish(predatorAlertMsg);  
+  
+}  
 
 
 } // namespace pandora_vision

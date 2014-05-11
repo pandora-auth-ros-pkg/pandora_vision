@@ -149,8 +149,9 @@ add_executable(predator_node src/predator_node.cpp)
 target_link_libraries(predator_node cvblobs libopentld ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
 add_dependencies(predator_node 
-    vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
+    vision_communications_gencpp
+    
 )
 
 #~ To check lint : catkin_make roslint_pandora_vision_predator
