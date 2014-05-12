@@ -73,8 +73,6 @@ namespace pandora_vision
     cv::Rect bbox;
     
     float confidence;
-    
-    bool isFuseEnabled;
       
     public:
     
@@ -143,7 +141,7 @@ namespace pandora_vision
     @param flag [bool] Enable fuse flag
     @return void
     **/
-    void enableFuse(const cv::Rect& bounding_box, const float& posterior, bool flag);
+    void enableFuse(const cv::Rect& bounding_box, const float& posterior);
     
     void fuse();
     

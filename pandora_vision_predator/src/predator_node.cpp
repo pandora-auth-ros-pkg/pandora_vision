@@ -39,7 +39,7 @@ Predator::Predator(): _nh()
   
   framecounter = 0;
   
-  modelExportFile="/home/maximus/Desktop/model";
+  modelExportFile = exportPath.c_str();
   
   tld = new tld::TLD();
   
@@ -47,7 +47,7 @@ Predator::Predator(): _nh()
   tld->alternating = false;
   tld->learningEnabled = learningEnabled;
     
-  tld::DetectorCascade* detectorCascade =tld->detectorCascade;
+  tld::DetectorCascade* detectorCascade = tld->detectorCascade;
   
   detectorCascade->varianceFilter->enabled = true;
   detectorCascade->ensembleClassifier->enabled = true;
@@ -62,7 +62,7 @@ Predator::Predator(): _nh()
   detectorCascade->nnClassifier->thetaTP = 0.65;
   detectorCascade->nnClassifier->thetaFP = 0.5;
   
-  _predatorPublisher = _nh.advertise<vision_communications::PredatorAlertMsg>("PredatorAlert", 1000);
+  _predatorPublisher = _nh.advertise<vision_communications::PredatorAlertMsg>(publisher_topic_name, 1000);
   
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
 }
@@ -295,36 +295,64 @@ void Predator::getGeneralParams()
   packagePath = ros::package::getPath("pandora_vision_predator");
 
   //!< Get the path to the pattern used for detection
-  if (_nh.hasParam("patternPath"))
+  if (_nh.hasParam("pattern_path"))
   {
-    _nh.getParam("patternPath", patternPath);
-    ROS_DEBUG_STREAM("patternPath: " << patternPath);
+    _nh.getParam("pattern_path", patternPath);
+    ROS_DEBUG_STREAM("pattern_path: " << patternPath);
     ROS_INFO("Pattern path loaded from launcher");
     if(is_file_exist(patternPath))
     {
-      ROS_INFO("Model Loaded");
+      ROS_INFO("Model Loaded From Launcher");
       modelLoaded = true;
     }
     else
     {
-      ROS_INFO("Model does not exist in patternPath. Awaiting User Input... \n");
+      ROS_INFO("Model Does Not Exist In pattern_path. Awaiting User Input... \n");
     }
   }
   else
   {
-    ROS_INFO("Pattern path not found, waiting user input \n");
+    ROS_INFO("Pattern Path Not Found, Waiting User Input \n");
   }
   
-  //!< Get value for enabling or disabling TLD learning mode
-  
-  if(_nh.hasParam("learningEnabled"))
+  //!<Get Model Export Path
+  if(_nh.hasParam("export_path"))
   {
-    _nh.getParam("learningEnabled", learningEnabled);
-    ROS_INFO("Getting learningEnabled value from launcher");
+    _nh.getParam("export_path", exportPath);
+    ROS_DEBUG_STREAM("export_path: " << exportPath);
+    ROS_INFO("Export Path Loaded From Launcher");
   }
   else
   {
-    ROS_INFO("There's no learningEnabled value from launcher");
+    ROS_INFO("Export Path Not Defined. Using Default");
+    std:: string temp = "/model";
+    exportPath.assign(packagePath);
+    exportPath.append(temp);
+  }
+  
+  //!<Get Publisher Topic Name
+  if(_nh.hasParam("publisher_topic"))
+  {
+    _nh.getParam("publisher_topic", publisher_topic_name);
+    ROS_DEBUG_STREAM("publisher_topic: " << publisher_topic_name);
+    ROS_INFO("Publisher Topic Name Loaded From Launcher");
+  }
+  else
+  {
+    ROS_INFO("Publisher Topic Name Not Loaded From Launcher. Using Default");
+    publisher_topic_name = "PredatorAlert";
+  }
+    
+  //!< Get value for enabling or disabling TLD learning mode
+  
+  if(_nh.hasParam("learning_enabled"))
+  {
+    _nh.getParam("learning_enabled", learningEnabled);
+    ROS_INFO("Learning Enabled Value From Launcher");
+  }
+  else
+  {
+    ROS_INFO("Learning Enabled Value Not Loaded From Launcher");
   }
   
   //!< Get the camera to be used by predator node;
@@ -363,15 +391,15 @@ void Predator::getGeneralParams()
     frameWidth = DEFAULT_WIDTH;
   }
 
-  //!< Get the listener's topic;
-  if (_nh.hasParam("/" + cameraName + "/topic_name"))
+  //!< Get the subscriber's topic;
+  if (_nh.hasParam("subscribe_topic"))
   {
-    _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-    ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
+    _nh.getParam("subscribe_topic", imageTopic);
+    ROS_DEBUG_STREAM("subscribe_topic : " << imageTopic);
   }
   else
   {
-    ROS_DEBUG("[predator_node] : Parameter imageTopic not found. Using Default");
+    ROS_DEBUG("[predator_node] : Parameter subscribe_topic not found. Using Default");
     imageTopic = "/camera_head/image_raw";
   }
 

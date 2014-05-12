@@ -193,9 +193,8 @@ void LandoltC3dDetection::predatorCallback(const vision_communications::Predator
   
   cv::Rect bounding_box = cv::Rect(msg.x, msg.y, msg.width, msg.height);
   float posterior = msg.posterior;
-  bool flag = true;
   
-  _landoltc3dDetector.enableFuse(bounding_box, posterior, flag);
+  _landoltc3dDetector.enableFuse(bounding_box, posterior);
 }
 
 

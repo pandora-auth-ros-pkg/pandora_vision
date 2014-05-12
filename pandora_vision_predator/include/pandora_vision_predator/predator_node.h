@@ -100,6 +100,12 @@ class Predator
     //!<Path of package
     std::string packagePath;
     
+    //!<Export Path of model
+    std::string exportPath;
+    
+    //!<Publisher Topic Name
+    std::string publisher_topic_name;
+    
     //!<Path of imported model
     const char* modelPath;
     
