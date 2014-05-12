@@ -47,8 +47,6 @@ LandoltC3dDetector::LandoltC3dDetector()
 
   _threshold = 90;
   
-  isFuseEnabled = false;
-  
 }
 
 //!< Destructor
@@ -367,9 +365,13 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  //bilateralFilter(gray, dst, 3, 6, 1.5);
+  bilateralFilter(gray, dst, 3, 6, 1.5);
+  
+  gray=dst.clone();
   
   clahe->apply(gray, dst);
+  
+  //dst = gray.clone();
   
   cv::Sobel(dst, gradX, CV_32F, 1, 0, 3);
   cv::Sobel(dst, gradY, CV_32F, 0, 1, 3);
@@ -394,9 +396,9 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   applyBradleyThresholding(dst, &thresholded);
   
-  //~ cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
-  //~ 
-  //~ cv::erode(thresholded, thresholded, element); 
+  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
+  
+  cv::erode(thresholded, thresholded, element); 
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
@@ -405,10 +407,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::rectangle(*input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
   }
   
-  if(isFuseEnabled)
-  {
-    fuse();
-  }
+  fuse();
   
   #ifdef SHOW_DEBUG_IMAGE
     cv::imshow("Raw", *input);
@@ -422,11 +421,10 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 
 }
 
-void LandoltC3dDetector::enableFuse(const cv::Rect& bounding_box, const float& posterior, bool flag)
+void LandoltC3dDetector::enableFuse(const cv::Rect& bounding_box, const float& posterior)
 {
   bbox = bounding_box;
   confidence = posterior;
-  isFuseEnabled = true;  
 }
 
 void LandoltC3dDetector::fuse()
@@ -437,14 +435,9 @@ void LandoltC3dDetector::fuse()
     {
       ROS_INFO("It contains it");
     }
-    else
-    {
-      ROS_INFO("Does not contain it");
-    }
   }
   
   bbox = cv::Rect(-1, -1, -1, -1);
-  isFuseEnabled = false;
   
 }
 
