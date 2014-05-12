@@ -58,7 +58,7 @@ namespace pandora_vision
   // The topic where the hole fusion publishes messages that unlock the
   // synchronizer node
   std::string Parameters::synchronizer_unlock_topic =
-    "/hole_detector/hole_fusion/unlock_rgb_depth_synchronizer";
+    "/hole_detector/unlock_rgb_depth_synchronizer";
 
   // The topic where the synchronized node publishes the input
   // point cloud to the hole fusion node

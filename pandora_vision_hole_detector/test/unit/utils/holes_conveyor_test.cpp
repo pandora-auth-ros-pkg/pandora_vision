@@ -239,4 +239,41 @@ namespace pandora_vision
     }
   }
 
+
+
+  //! Test HolesConveyorUtils::generateRectangle
+  TEST_F ( HolesConveyorUtilsTest, GenerateRectangleTest )
+  {
+    // The rectangle's points that will be returned
+    std::vector< cv::Point2f > points_1;
+
+    // The rectangle's vertices that will be returned
+    std::vector< cv::Point2f > points_2;
+
+    // Run HolesConveyorUtils::generateRectangle with intent = 1
+    points_1 = HolesConveyorUtils::generateRectangle
+      ( cv::Point2f ( 100, 100 ), 100, 100, 1 );
+
+    // Run HolesConveyorUtils::generateRectangle with intent = 2
+    points_2 = HolesConveyorUtils::generateRectangle
+      ( cv::Point2f ( 100, 100 ), 100, 100, 2 );
+
+    // The number of vertices should amount to a number
+    // lower than the number of points
+    ASSERT_LT ( points_2.size(), points_1.size() );
+
+    // There should be four vertices
+    EXPECT_EQ ( 4, points_2.size() );
+
+    EXPECT_EQ ( 100, points_2[0].x );
+    EXPECT_EQ ( 100, points_2[0].y );
+
+    // There should be 4 * 100 points
+    EXPECT_EQ ( 400, points_1.size() );
+
+    EXPECT_EQ ( 100, points_1[0].x );
+    EXPECT_EQ ( 100, points_1[0].y );
+
+  }
+
 } // namespace pandora_vision
