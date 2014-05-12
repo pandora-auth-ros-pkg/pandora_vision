@@ -46,7 +46,6 @@
  **/
 namespace pandora_vision
 {
-
   struct GraphNode
   {
     GraphNode(int x, int y)
