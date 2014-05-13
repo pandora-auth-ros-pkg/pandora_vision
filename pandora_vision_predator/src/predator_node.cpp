@@ -178,7 +178,12 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
       cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
       cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
-      sendMessage(*tld->currBB, tld->currConf);
+      sendMessage(*tld->currBB, tld->currConf, msg);
+    }
+    else
+    {
+      cv::Rect temp = cv::Rect(0, 0, 0, 0);
+      sendMessage(temp, 0, msg);
     }
     
   }
@@ -423,7 +428,7 @@ void Predator::getGeneralParams()
   @return void
 **/
   
-void Predator::sendMessage(const cv::Rect& rec, const float& posterior)
+void Predator::sendMessage(const cv::Rect& rec, const float& posterior, const sensor_msgs::ImageConstPtr& frame)
 {
   vision_communications::PredatorAlertMsg predatorAlertMsg;
   
@@ -432,6 +437,8 @@ void Predator::sendMessage(const cv::Rect& rec, const float& posterior)
   predatorAlertMsg.width = rec.width;
   predatorAlertMsg.height = rec.height;
   predatorAlertMsg.posterior = posterior;
+  //frame.toImageMsg(predatorAlertMsg.img);
+  predatorAlertMsg.img = *frame;
   
   _predatorPublisher.publish(predatorAlertMsg);  
   

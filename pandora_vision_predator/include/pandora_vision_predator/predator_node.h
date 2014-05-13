@@ -154,7 +154,7 @@ class Predator
   @return void
   **/
   
-  void sendMessage(const cv::Rect& rec, const float& posterior);
+  void sendMessage(const cv::Rect& rec, const float& posterior, const sensor_msgs::ImageConstPtr& frame);
   
   
   /**

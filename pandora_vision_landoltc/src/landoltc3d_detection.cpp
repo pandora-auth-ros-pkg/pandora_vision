@@ -54,11 +54,16 @@ LandoltC3dDetection::LandoltC3dDetection(): _nh(), landoltc3dNowON(true)
   //!< Initiliaze and preprocess reference image
   _landoltc3dDetector.initializeReferenceImage(patternPath);
   
-  _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
-  &LandoltC3dDetection::imageCallback, this);
-  
-  _landoltc3dPredator = _nh.subscribe("/pandora_vision_predator/PredatorAlert", 1,
-  &LandoltC3dDetection::predatorCallback, this);
+  if(PredatorOn)
+  {
+    _landoltc3dPredator = _nh.subscribe("/pandora_vision_predator/PredatorAlert", 1,
+    &LandoltC3dDetection::predatorCallback, this);
+  }
+  else
+  {
+    _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
+    &LandoltC3dDetection::imageCallback, this);
+  }
 
   //!< Declare publisher and advertise topic
   //!< where algorithm results are posted
@@ -99,6 +104,17 @@ void LandoltC3dDetection::getGeneralParams()
     std:: string temp = "/bold.jpg";
     patternPath.assign(packagePath);
     patternPath.append(temp);
+  }
+  
+  //!< Get the PredatorOn value
+  if(_nh.hasParam("PredatorOn"))
+  {
+    _nh.getParam("PredatorOn", PredatorOn);
+  }
+  else
+  {
+    ROS_DEBUG("[landoltc3d_node] : Parameter PredatorOn not found. Using Default");
+    PredatorOn = false;
   }
 
   //!< Get the camera to be used by landoltc3d node;
@@ -179,6 +195,7 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("[landoltc3d_node] : No more Frames");
     return;
   }
+  //ROS_INFO("Getting Frame From Camera");
 
   landoltc3dCallback();
 
@@ -186,15 +203,14 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void LandoltC3dDetection::predatorCallback(const vision_communications::PredatorAlertMsg& msg)
 {
-  if(!landoltc3dNowON)
-  {
-    return;
-  }
-  
+ 
+  cv_bridge::CvImagePtr in_msg;
+  in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
+  landoltCFrame = in_msg -> image.clone();
   cv::Rect bounding_box = cv::Rect(msg.x, msg.y, msg.width, msg.height);
   float posterior = msg.posterior;
-  
-  _landoltc3dDetector.enableFuse(bounding_box, posterior);
+  //ROS_INFO("Getting Frame From Predator");
+  landoltc3dCallback();
 }
 
 

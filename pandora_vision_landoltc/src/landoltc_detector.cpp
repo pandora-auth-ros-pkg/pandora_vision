@@ -495,14 +495,15 @@ void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int
 
   //!<Shape matching using Hu Moments, and contour center proximity
 
-  for(int i = 0; i < contours.size(); i++)
+  
+  for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
   {
-    approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true) * 0.02, true);
-    std::vector<cv::Point> cnt = contours[i];
-    double prec = cv::matchShapes(cv::Mat(ref), cv::Mat(cnt), CV_CONTOURS_MATCH_I3, 0);
-
-    for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
+    
+    for(int i = 0; i < contours.size(); i++)
     {
+      approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true) * 0.02, true);
+      std::vector<cv::Point> cnt = contours[i];
+      double prec = cv::matchShapes(cv::Mat(ref), cv::Mat(cnt), CV_CONTOURS_MATCH_I3, 0);
       if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 
       && prec < LandoltcParameters::huMomentsPrec)
       {
