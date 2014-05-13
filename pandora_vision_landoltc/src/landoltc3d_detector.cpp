@@ -367,7 +367,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   bilateralFilter(gray, dst, 3, 6, 1.5);
   
-  gray=dst.clone();
+  gray = dst.clone();
   
   clahe->apply(gray, dst);
   

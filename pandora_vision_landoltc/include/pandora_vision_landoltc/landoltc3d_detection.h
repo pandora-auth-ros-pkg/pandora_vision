@@ -106,6 +106,9 @@ private:
   //!< Publishers for LandoltcDetector result messages
   ros::Publisher _landoltc3dPublisher;
   
+  //!< Variable for checking if Predator is On
+  bool PredatorOn;
+  
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
