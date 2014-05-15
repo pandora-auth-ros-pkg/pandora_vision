@@ -11,8 +11,6 @@
 
 #include "defines.h"
 
-//~ namespace aaaaaa
-//~ {
 /***************************** Inline Functions ******************************/
 /**
   A function to get a pixel value from an 8-bit unsigned image.

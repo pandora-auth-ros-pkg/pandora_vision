@@ -8,6 +8,7 @@
 
 #ifndef XFORM_H
 #define XFORM_H
+
 #include "pandora_vision_hazmat/imgfeatures.h"
 
 /********************************** Structures *******************************/
@@ -22,15 +23,6 @@ struct ransac_data
 };
 
 /******************************* Defs and macros *****************************/
-
-/* RANSAC error tolerance in pixels */
-#define RANSAC_ERR_TOL 3
-
-/** pessimistic estimate of fraction of inlers for RANSAC */
-#define RANSAC_INLIER_FRAC_EST 0.25
-
-/** estimate of the probability that a correspondence supports a bad model */
-#define RANSAC_PROB_BAD_SUPP 0.10
 
 /* extracts a feature's RANSAC data */
 #define feat_ransac_data( feat ) ( (struct ransac_data*) (feat)->feature_data )
