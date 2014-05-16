@@ -258,6 +258,10 @@ namespace pandora_vision
     Parameters::secondary_channel = config.secondary_channel;
 
     // RGB image segmentation parameters
+    Parameters::compute_edges_backprojection_threshold =
+      config.compute_edges_backprojection_threshold;
+    Parameters::rgb_edges_extraction_method =
+      config.rgb_edges_extraction_method;
     Parameters::spatial_window_radius =
       config.spatial_window_radius;
     Parameters::color_window_radius =
