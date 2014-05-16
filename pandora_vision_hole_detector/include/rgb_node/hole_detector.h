@@ -74,40 +74,6 @@ namespace pandora_vision
        **/
       HolesConveyor findHoles(const cv::Mat& holeFrame);
 
-      /**
-        @brief Fills an image with random colours per image segment
-        @param[in,out] image [cv::Mat*] The image to be processed
-        @return void
-       **/
-      void floodFillPostprocess(cv::Mat* image);
-
-      /**
-        @brief This method takes as input a segmented RGB image and uses
-        the backprojection of the input image based on the precalculated
-        histogram histogram_ in order to identify whole regions whose
-        histogram matches histogram_, although the backprojection image
-        might be sparcely populated. After the identification of the regions
-        of interest, this method extracts their edges and returns the image
-        depicting them.
-        @param[in] inImage [const cv::Mat&] The input segmented image
-        @param[out] outImage [cv::Mat*] The output edges image, in CV_8UC1
-        format
-        @return void
-       **/
-      void produceEdgesFromSegmentationThroughBackprojection
-        (const cv::Mat& inImage, cv::Mat* outImage);
-
-      /**
-        @brief Segments a RGB image
-        @param[in] inImage [const cv::Mat&] The RGB image to be segmented
-        @param[in] posterize [const bool&] Indicates the appliance of a
-        random color to each segment
-        @param[out] outImage [cv::Mat*] The posterized image
-        @return void
-       **/
-      void segmentation(const cv::Mat& inImage,
-        const bool& posterize, cv::Mat* outImage);
-
   };
 
 } // namespace pandora_vision

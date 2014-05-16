@@ -247,6 +247,8 @@ namespace pandora_vision
   int Parameters::secondary_channel = 2;
 
   // RGB image segmentation parameters
+  int Parameters::rgb_edges_extraction_method = 1;
+  int Parameters::compute_edges_backprojection_threshold = 128;
   int Parameters::spatial_window_radius = 4;
   int Parameters::color_window_radius = 40;
   int Parameters::maximum_level_pyramid_segmentation = 2;

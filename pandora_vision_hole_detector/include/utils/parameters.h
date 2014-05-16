@@ -248,6 +248,8 @@ namespace pandora_vision
     static int secondary_channel;
 
     // RGB image segmentation parameters
+    static int rgb_edges_extraction_method;
+    static int compute_edges_backprojection_threshold;
     static int spatial_window_radius;
     static int color_window_radius;
     static int maximum_level_pyramid_segmentation;
