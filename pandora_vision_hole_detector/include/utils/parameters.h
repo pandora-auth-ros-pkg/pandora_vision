@@ -214,6 +214,9 @@ namespace pandora_vision
     static bool debug_show_find_holes;
     static int debug_show_find_holes_size;
 
+    static bool debug_show_produce_edges;
+    static int debug_show_produce_edges_size;
+
     static bool debug_show_denoise_edges;
     static int debug_show_denoise_edges_size;
 
@@ -255,6 +258,8 @@ namespace pandora_vision
     static int watershed_foreground_erosion_factor;
     static int watershed_background_dilation_factor;
     static int watershed_background_erosion_factor;
+    static bool posterize_after_segmentation;
+
 
     // Holes connection - merger
     static float connect_holes_min_distance;

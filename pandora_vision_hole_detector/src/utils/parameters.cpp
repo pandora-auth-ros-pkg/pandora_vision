@@ -212,6 +212,9 @@ namespace pandora_vision
   bool Parameters::debug_show_find_holes = false;
   int Parameters::debug_show_find_holes_size = 1000;
 
+  bool Parameters::debug_show_produce_edges = false;
+  int Parameters::debug_show_produce_edges_size = 900;
+
   bool Parameters::debug_show_denoise_edges = false;
   int Parameters::debug_show_denoise_edges_size = 900;
 
@@ -254,6 +257,7 @@ namespace pandora_vision
   int Parameters::watershed_foreground_erosion_factor = 1;
   int Parameters::watershed_background_dilation_factor = 1;
   int Parameters::watershed_background_erosion_factor = 1;
+  bool Parameters::posterize_after_segmentation = false;
 
   // Holes connection - merger
   float Parameters::connect_holes_min_distance = 0.1;
