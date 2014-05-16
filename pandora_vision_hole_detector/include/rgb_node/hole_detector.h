@@ -40,6 +40,7 @@
 
 #define SHOW_DEBUG_IMAGE
 
+#include "utils/defines.h"
 #include "utils/hole_filters.h"
 #include "utils/histogram.h"
 

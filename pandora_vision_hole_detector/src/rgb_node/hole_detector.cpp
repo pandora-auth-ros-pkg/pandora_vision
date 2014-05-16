@@ -74,44 +74,61 @@ namespace pandora_vision
     Timer::start("findHoles", "inputRgbImageCallback");
     #endif
 
-    #ifdef SHOW_DEBUG_IMAGE
+    #ifdef DEBUG_SHOW
     std::string msg;
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
     #endif
 
-    #ifdef SHOW_DEBUG_IMAGE
-    cv::Mat initialRgbImage;
-    holeFrame.copyTo(initialRgbImage);
-    msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    msg += " : Initial RGB image";
-    msgs.push_back(msg);
-    imgs.push_back(initialRgbImage);
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat initialRgbImage;
+      holeFrame.copyTo(initialRgbImage);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Initial RGB image";
+      msgs.push_back(msg);
+      imgs.push_back(initialRgbImage);
+    }
     #endif
 
     // Copy the input image to the segmentedHoleFrame one
     cv::Mat segmentedHoleFrame = cv::Mat(holeFrame.size(), CV_8UC3);
     holeFrame.copyTo(segmentedHoleFrame);
 
-
-    bool posterize = false;
-
     // Segment the input image
-    segmentation(holeFrame, posterize, &segmentedHoleFrame);
+    segmentation(holeFrame, Parameters::posterize_after_segmentation,
+      &segmentedHoleFrame);
 
-    Visualization::show("segmentedHoleFrame", segmentedHoleFrame, 1);
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Segmented RGB image";
+      msgs.push_back(msg);
+      imgs.push_back(segmentedHoleFrame);
+    }
+    #endif
 
     // Convert the RGB segmented frame to grayscale
     cv::Mat segmentedHoleFrame8UC1 =
       cv::Mat::zeros(segmentedHoleFrame.size(), CV_8UC1);
 
-    if (posterize)
+    if (Parameters::posterize_after_segmentation)
     {
       // In order to find the edges of the segmented image,
       // first, turn it to grayscale
       cv::cvtColor(segmentedHoleFrame, segmentedHoleFrame8UC1, CV_BGR2GRAY);
 
-      Visualization::show("segmentedHoleFrame8UC1", segmentedHoleFrame8UC1, 1);
+      #ifdef DEBUG_SHOW
+      if (Parameters::debug_show_produce_edges)
+      {
+        msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += " : Segmented RGB image in grayscale";
+        msgs.push_back(msg);
+        imgs.push_back(segmentedHoleFrame8UC1);
+      }
+      #endif
 
       // Apply edge detection to the grayscale posterized input RGB image
       if (Parameters::edge_detection_method == 0)
@@ -150,22 +167,43 @@ namespace pandora_vision
         }
       }
 
-      Visualization::show("segmentation->edges", segmentedHoleFrame8UC1, 1);
+      #ifdef DEBUG_SHOW
+      if (Parameters::debug_show_produce_edges)
+      {
+        msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += " : Edges from the segmented grayscale image";
+        msgs.push_back(msg);
+        imgs.push_back(segmentedHoleFrame8UC1);
+      }
+      #endif
     }
     else
     {
       produceEdgesFromSegmentationThroughBackprojection(segmentedHoleFrame,
         &segmentedHoleFrame8UC1);
+
+      #ifdef DEBUG_SHOW
+      if (Parameters::debug_show_produce_edges)
+      {
+        msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += " : Edges from the segmented image using backprojection";
+        msgs.push_back(msg);
+        imgs.push_back(segmentedHoleFrame8UC1);
+      }
+      #endif
     }
 
     // Denoise the edges image
     EdgeDetection::denoiseEdges(&segmentedHoleFrame8UC1);
 
-    #ifdef SHOW_DEBUG_IMAGE
-    msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    msg += " : After denoising";
-    msgs.push_back(msg);
-    imgs.push_back(segmentedHoleFrame8UC1);
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : After denoising";
+      msgs.push_back(msg);
+      imgs.push_back(segmentedHoleFrame8UC1);
+    }
     #endif
 
     //! Find pixels in current frame where there is the same texture
@@ -183,24 +221,31 @@ namespace pandora_vision
       Parameters::bounding_box_detection_method,
       &conveyor);
 
-    #ifdef SHOW_DEBUG_IMAGE
-    msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    msg += STR(" : Blobs");
-    msgs.push_back(msg);
-    imgs.push_back(
-      Visualization::showHoles(
-        msg,
-        initialRgbImage,
-        -1,
-        conveyor.keyPoints,
-        conveyor.rectangles,
-        std::vector<std::string>(),
-        conveyor.outlines)
-      );
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Blobs");
+      msgs.push_back(msg);
+      imgs.push_back(
+        Visualization::showHoles(
+          msg,
+          holeFrame,
+          -1,
+          conveyor.keyPoints,
+          conveyor.rectangles,
+          std::vector<std::string>(),
+          conveyor.outlines)
+        );
+    }
     #endif
 
-    #ifdef SHOW_DEBUG_IMAGE
-    //Visualization::multipleShow("RGB node", imgs, msgs, 800, 1);
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      Visualization::multipleShow("RGB node", imgs, msgs,
+        Parameters::debug_show_produce_edges_size, 1);
+    }
     #endif
 
     #ifdef DEBUG_TIME
