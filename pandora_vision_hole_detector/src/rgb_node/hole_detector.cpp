@@ -103,16 +103,24 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     if (Parameters::debug_show_produce_edges)
     {
+      cv::Mat tmp;
+      segmentedHoleFrame.copyTo(tmp);
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Segmented RGB image";
       msgs.push_back(msg);
-      imgs.push_back(segmentedHoleFrame);
+      imgs.push_back(tmp);
     }
     #endif
 
     // Convert the RGB segmented frame to grayscale
     cv::Mat segmentedHoleFrame8UC1 =
       cv::Mat::zeros(segmentedHoleFrame.size(), CV_8UC1);
+
+    // The image of the edges of the grayscale segmented image
+    // (posterize_after_segmentation = true) or
+    // the edges of the segmented image
+    // (posterize_after_segmentation = false)
+    cv::Mat edges;
 
     if (Parameters::posterize_after_segmentation)
     {
@@ -123,46 +131,42 @@ namespace pandora_vision
       #ifdef DEBUG_SHOW
       if (Parameters::debug_show_produce_edges)
       {
+        cv::Mat tmp;
+        segmentedHoleFrame8UC1.copyTo(tmp);
         msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
         msg += " : Segmented RGB image in grayscale";
         msgs.push_back(msg);
-        imgs.push_back(segmentedHoleFrame8UC1);
+        imgs.push_back(tmp);
       }
       #endif
 
       // Apply edge detection to the grayscale posterized input RGB image
       if (Parameters::edge_detection_method == 0)
       {
-        EdgeDetection::applyCanny(segmentedHoleFrame8UC1,
-          &segmentedHoleFrame8UC1);
+        EdgeDetection::applyCanny(segmentedHoleFrame8UC1, &edges);
       }
       else if (Parameters::edge_detection_method == 1)
       {
-        EdgeDetection::applyScharr(segmentedHoleFrame8UC1,
-          &segmentedHoleFrame8UC1);
+        EdgeDetection::applyScharr(segmentedHoleFrame8UC1, &edges);
       }
       else if (Parameters::edge_detection_method == 2)
       {
-        EdgeDetection::applySobel(segmentedHoleFrame8UC1,
-          &segmentedHoleFrame8UC1);
+        EdgeDetection::applySobel(segmentedHoleFrame8UC1, &edges);
       }
       else if (Parameters::edge_detection_method == 3)
       {
-        EdgeDetection::applyLaplacian(segmentedHoleFrame8UC1,
-          &segmentedHoleFrame8UC1);
+        EdgeDetection::applyLaplacian(segmentedHoleFrame8UC1, &edges);
       }
       else if (Parameters::edge_detection_method == 4) // Mixed mode
       {
         if (Parameters::mixed_edges_toggle_switch == 1)
         {
-          EdgeDetection::applyScharr(segmentedHoleFrame8UC1,
-            &segmentedHoleFrame8UC1);
+          EdgeDetection::applyScharr(segmentedHoleFrame8UC1, &edges);
           Parameters::mixed_edges_toggle_switch = 2;
         }
         else if (Parameters::mixed_edges_toggle_switch == 2)
         {
-          EdgeDetection::applySobel(segmentedHoleFrame8UC1,
-            &segmentedHoleFrame8UC1);
+          EdgeDetection::applySobel(segmentedHoleFrame8UC1, &edges);
           Parameters::mixed_edges_toggle_switch = 1;
         }
       }
@@ -170,46 +174,52 @@ namespace pandora_vision
       #ifdef DEBUG_SHOW
       if (Parameters::debug_show_produce_edges)
       {
+        cv::Mat tmp;
+        edges.copyTo(tmp);
         msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
         msg += " : Edges from the segmented grayscale image";
         msgs.push_back(msg);
-        imgs.push_back(segmentedHoleFrame8UC1);
+        imgs.push_back(tmp);
       }
       #endif
     }
     else
     {
       produceEdgesFromSegmentationThroughBackprojection(segmentedHoleFrame,
-        &segmentedHoleFrame8UC1);
+        &edges);
 
       #ifdef DEBUG_SHOW
       if (Parameters::debug_show_produce_edges)
       {
+        cv::Mat tmp;
+        edges.copyTo(tmp);
         msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
         msg += " : Edges from the segmented image using backprojection";
         msgs.push_back(msg);
-        imgs.push_back(segmentedHoleFrame8UC1);
+        imgs.push_back(tmp);
       }
       #endif
     }
 
     // Denoise the edges image
-    EdgeDetection::denoiseEdges(&segmentedHoleFrame8UC1);
+    EdgeDetection::denoiseEdges(&edges);
 
     #ifdef DEBUG_SHOW
     if (Parameters::debug_show_produce_edges)
     {
+      cv::Mat tmp;
+      edges.copyTo(tmp);
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After denoising";
       msgs.push_back(msg);
-      imgs.push_back(segmentedHoleFrame8UC1);
+      imgs.push_back(tmp);
     }
     #endif
 
     //! Find pixels in current frame where there is the same texture
     //! according to the given histogram and calculate
     std::vector<cv::KeyPoint> detectedkeyPoints;
-    BlobDetection::detectBlobs(segmentedHoleFrame8UC1, &detectedkeyPoints);
+    BlobDetection::detectBlobs(edges, &detectedkeyPoints);
 
 
     // The final vectors of keypoints, rectangles and blobs' outlines.
@@ -217,7 +227,7 @@ namespace pandora_vision
 
     HoleFilters::validateBlobs(
       &detectedkeyPoints,
-      &segmentedHoleFrame8UC1,
+      &edges,
       Parameters::bounding_box_detection_method,
       &conveyor);
 
@@ -321,122 +331,225 @@ namespace pandora_vision
     format
     @return void
    **/
-  void HoleDetector::produceEdgesFromSegmentationThroughBackprojection
-    (const cv::Mat& inImage, cv::Mat* outImage)
+  void HoleDetector::produceEdgesFromSegmentationThroughBackprojection (
+    const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    if (inImage.type() != CV_8UC3)
     {
-      if (inImage.type() != CV_8UC3)
-      {
-        #ifdef DEBUG_SHOW
-        ROS_ERROR("HoleDetector::\
-          produceEdgesFromSegmentationThroughBackprojection: \
-          Inappropriate image type.");
-        #endif
-
-        return;
-      }
-
-      #ifdef DEBUG_TIME
-      Timer::start("produceEdgesFromSegmentationThroughBackprojection",
-        "findHoles");
+      #ifdef DEBUG_SHOW
+      ROS_ERROR("HoleDetector::\
+        produceEdgesFromSegmentationThroughBackprojection: \
+        Inappropriate image type.");
       #endif
 
-      // Backprojection of the RGB inImage
-      cv::Mat backprojectedFrame = cv::Mat::zeros(inImage.size(), CV_8UC1);
-
-      // Get the backprojected image of the frame, based on the precalculated
-      // histogram_ histogram
-      Histogram::getBackprojection(inImage, histogram_,
-        &backprojectedFrame, Parameters::secondary_channel);
-
-      cv::threshold(backprojectedFrame, backprojectedFrame,
-        40, 255, cv::THRESH_BINARY);
-
-      Visualization::show("bp ", backprojectedFrame, 1);
-
-      // The foreground image needed by the watershed algorithm
-      cv::Mat foreground = cv::Mat::zeros(inImage.size(), CV_8UC1);
-
-      // Copy the backprojection to the foreground image
-      backprojectedFrame.copyTo(foreground);
-
-      // Dilate
-      Morphology::dilationRelative(&foreground,
-        Parameters::watershed_foreground_dilation_factor);
-
-      // All non-zero pixels have now a value of 255
-      cv::threshold(foreground, foreground, 0, 255, cv::THRESH_BINARY);
-
-      // Erode. The erosion factor should be greater
-      // than the dilation factor used above
-      Morphology::erosion(&foreground,
-        Parameters::watershed_foreground_erosion_factor);
-
-      Visualization::show("fg", foreground, 1);
-
-
-      // The background image needed by the watershed algorithm
-      cv::Mat background = cv::Mat::zeros(inImage.size(), CV_8UC1);
-
-      // Copy the backprojection to the background image
-      backprojectedFrame.copyTo(background);
-
-      // Dilate
-      Morphology::dilationRelative(&background,
-        Parameters::watershed_background_dilation_factor);
-
-      // All non-zero pixels have now a value of 255
-      cv::threshold(background, background, 0, 255, cv::THRESH_BINARY);
-
-      // All zero value pixels turn to white, all white to black
-      cv::threshold(background, background, 0, 255, cv::THRESH_BINARY_INV);
-
-      // Erode. The erosion factor should be greater
-      // than the dilation factor used above. This erosion happens so that
-      // the background pixels belong surely to the background
-      Morphology::erosion(&background,
-        Parameters::watershed_background_erosion_factor);
-
-      // All zero value pixels' values are elevated to 128.
-      // These belong neither to foreground, nor to background:
-      // they are labeled as so-called "unknown"
-      cv::threshold(background, background, 0, 128, cv::THRESH_BINARY);
-      Visualization::show("bg", background, 1);
-
-      // Create the markers image, needed by the watershed algorighm
-      cv::Mat markers(inImage.size(), CV_8UC1, cv::Scalar(0));
-
-      // The markers array is composed by the foreground, background and
-      // unknown pixels
-      markers = foreground + background;
-
-      Visualization::show("markers", markers, 1);
-      Visualization::show("outImage", *outImage, 1);
-
-      // Convert the marker image of type CV_8UC1, to CV_32S
-      cv::Mat markers32S;
-      markers.convertTo(markers32S, CV_32S);
-
-      // Watershed the product of the segmentation.
-      // Each pixel p is transformed into
-      // 255p + 255 before conversion
-      cv::watershed(inImage, markers32S);
-
-      // Convert the markers image to back to type CV_8UC1.
-      // This image identifies the whole area that matches the histogram
-      // histogram_ in the input image
-      markers32S.convertTo(*outImage, CV_8U, 255, 255);
-
-      // All zero value pixels turn to white, all white to black.
-      // In essence, this is the edges of the area whose histogram
-      // matches histogram_
-      cv::threshold(*outImage, *outImage, 0, 255, cv::THRESH_BINARY_INV);
-
-      Visualization::show("*outImage", *outImage, 1);
-
-      #ifdef DEBUG_TIME
-      Timer::tick("produceEdgesFromSegmentationThroughBackprojection");
-      #endif
+      return;
     }
+
+    #if def DEBUG_TIME
+    Timer::start("produceEdgesFromSegmentationThroughBackprojection",
+      "findHoles");
+    #endif
+
+    #ifdef DEBUG_SHOW
+    std::string msg;
+    std::vector<cv::Mat> imgs;
+    std::vector<std::string> msgs;
+    #endif
+
+    // Backprojection of the RGB inImage
+    cv::Mat backprojectedFrame = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+    // Get the backprojected image of the frame, based on the precalculated
+    // histogram_ histogram
+    Histogram::getBackprojection(inImage, histogram_,
+      &backprojectedFrame, Parameters::secondary_channel);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      backprojectedFrame.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection ";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    cv::threshold(backprojectedFrame, backprojectedFrame,
+      40, 255, cv::THRESH_BINARY);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      backprojectedFrame.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection thresholded to 40";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // The foreground image needed by the watershed algorithm
+    cv::Mat foreground = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+    // Copy the backprojection to the foreground image
+    backprojectedFrame.copyTo(foreground);
+
+    // Dilate
+    Morphology::dilationRelative(&foreground,
+      Parameters::watershed_foreground_dilation_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      foreground.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection dilated by " +
+        TOSTR(Parameters::watershed_foreground_dilation_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All non-zero pixels have now a value of 255
+    cv::threshold(foreground, foreground, 0, 255, cv::THRESH_BINARY);
+
+    // Erode. The erosion factor should be greater
+    // than the dilation factor used above
+    Morphology::erosion(&foreground,
+      Parameters::watershed_foreground_erosion_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      foreground.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Foreground eroded by " +
+        TOSTR(Parameters::watershed_foreground_erosion_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // The background image needed by the watershed algorithm
+    cv::Mat background = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+    // Copy the backprojection to the background image
+    backprojectedFrame.copyTo(background);
+
+    // Dilate
+    Morphology::dilationRelative(&background,
+      Parameters::watershed_background_dilation_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection dilated by " +
+        TOSTR(Parameters::watershed_background_dilation_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All non-zero pixels have now a value of 255
+    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY);
+
+    // All zero value pixels turn to white, all white to black
+    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY_INV);
+
+    // Erode. The erosion factor should be greater
+    // than the dilation factor used above. This erosion happens so that
+    // the background pixels belong surely to the background
+    Morphology::erosion(&background,
+      Parameters::watershed_background_erosion_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Background eroded by " +
+        TOSTR(Parameters::watershed_background_erosion_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All zero value pixels' values are elevated to 128.
+    // These belong neither to foreground, nor to background:
+    // they are labeled as so-called "unknown"
+    cv::threshold(background, background, 0, 128, cv::THRESH_BINARY);
+
+    // Create the markers image, needed by the watershed algorighm
+    cv::Mat markers(inImage.size(), CV_8UC1, cv::Scalar(0));
+
+    // The markers array is composed by the foreground, background and
+    // unknown pixels
+    markers = foreground + background;
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Markers";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // Convert the marker image of type CV_8UC1, to CV_32S
+    cv::Mat markers32S;
+    markers.convertTo(markers32S, CV_32S);
+
+    // Watershed the product of the segmentation.
+    // Each pixel p is transformed into
+    // 255p + 255 before conversion
+    cv::watershed(inImage, markers32S);
+
+    // Convert the markers image to back to type CV_8UC1.
+    // This image identifies the whole area that matches the histogram
+    // histogram_ in the input image
+    markers32S.convertTo(*outImage, CV_8U, 255, 255);
+
+    // All zero value pixels turn to white, all white to black.
+    // In essence, this is the edges of the area whose histogram
+    // matches histogram_
+    cv::threshold(*outImage, *outImage, 0, 255, cv::THRESH_BINARY_INV);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      cv::Mat tmp;
+      outImage->copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Edges from watershed";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::debug_show_produce_edges)
+    {
+      Visualization::multipleShow("Watershed edges", imgs, msgs,
+        Parameters::debug_show_produce_edges_size, 1);
+    }
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::tick("produceEdgesFromSegmentationThroughBackprojection");
+    #endif
+  }
 
 
 
