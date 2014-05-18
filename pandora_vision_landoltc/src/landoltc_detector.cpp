@@ -84,11 +84,11 @@ void LandoltCDetector::initializeReferenceImage(std::string path)
   @brief Calculation of rotation based on moments.Precision is good for a
   distance up to 30cm from the camera
   @param in [const cv::Mat&] Matrix containing the padded frame
-  @param i [int] Index of C being processed
+  @param temp [LandoltC*] Struct of LandoltC
   @return void
 **/
 
-void LandoltCDetector::findRotationA(const cv::Mat& in, int i)
+void LandoltCDetector::findRotationA(const cv::Mat& in, LandoltC* temp)
 {
   std::vector<std::vector<cv::Point> > left_contours;
 
@@ -136,7 +136,8 @@ void LandoltCDetector::findRotationA(const cv::Mat& in, int i)
   if(left_contours.size() == 2) angle+=3.14159265359;
       
   //std::cout << "Angle of " << i <<" is: " << (angle*(180/3.14159265359)) << std::endl;
-  ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+  //ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+  (*temp).angles.push_back(angle);
   
 }
 
@@ -145,11 +146,11 @@ void LandoltCDetector::findRotationA(const cv::Mat& in, int i)
   distance up to 50cm from the camera, gives more accurate results than the first
   method but it's slower.
   @param in [const cv::Mat&] Matrix containing the padded frame
-  @param i [int] Index of C being processed
+  @param temp [LandoltC*] Struct of LandoltC
   @return void
 **/  
 
-void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
+void LandoltCDetector::findRotationB(const cv::Mat& in, LandoltC* temp)
 {
   cv::Mat paddedptr;
         
@@ -201,7 +202,8 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, int i)
     if(angle < 0) angle+=2*3.14159265359;
     
     //std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
-    ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+    //ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+    (*temp).angles.push_back(angle);
 
     
   }
@@ -387,31 +389,35 @@ void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
 
 void LandoltCDetector::applyMask()
 {
-
-  for (int i = 0; i < _fillColors.size(); i++)
+  for(int i = 0; i < _landoltc.size(); i++)
   {
-    _mask = cv::Mat::zeros(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
+    LandoltC* temp = &(_landoltc.at(i));
     
-    cv::inRange(_coloredContours, _fillColors[i], _fillColors[i], _mask);
+    for (int j = 0; j < (*temp).color.size(); j++)
+    {
+      _mask = cv::Mat::zeros(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
     
-    cv::Mat out = getWarpPerspectiveTransform(_mask, _rectangles[i]);
+      cv::inRange(_coloredContours, (*temp).color[j], (*temp).color[j], _mask);
     
-    //cv::Mat cropped = _mask(_rectangles[i]).clone(); 
+      cv::Mat out = getWarpPerspectiveTransform(_mask, (*temp).bbox[j]);
     
-    cv::Mat padded;
+      cv::Mat cropped = _mask((*temp).bbox[j]).clone(); 
     
-    cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
+      cv::Mat padded;
     
-    //cv::imshow("padded", padded); 
+      cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
     
-    //findRotationA(padded, i);
+      cv::imshow("padded", padded); 
     
-    findRotationB(padded, i);
+      //findRotationA(padded, temp);
     
-    #ifdef SHOW_DEBUG_IMAGE
-      cv::imshow("padded", padded);
+      findRotationB(padded, temp);
+    
+      #ifdef SHOW_DEBUG_IMAGE
+      //cv::imshow("padded", padded);
       //cv::waitKey(200);
-    #endif
+      #endif
+    }
   }
 }
 
@@ -495,9 +501,14 @@ void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int
 
   //!<Shape matching using Hu Moments, and contour center proximity
 
+  LandoltC temp;
   
   for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
   {
+    int counter = 0;
+    bool flag = false;
+    _fillColors.clear();
+    _rectangles.clear();
     
     for(int i = 0; i < contours.size(); i++)
     {
@@ -507,17 +518,29 @@ void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int
       if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 
       && prec < LandoltcParameters::huMomentsPrec)
       {
-        //std::cout << "Prec is : " << prec << std::endl;
+        flag = true;
         cv::Rect bounding_rect = boundingRect((contours[i]));
         cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
         cv::drawContours(_coloredContours, contours, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
         _fillColors.push_back(color);
         _newCenters.push_back(mc[i]);
-       // cv::imshow("Contours", _coloredContours);
         _rectangles.push_back(bounding_rect);
+        counter++;
 
       }
     }
+    
+    if(flag)
+    {
+      temp.center = *it;
+      temp.count = counter;
+      temp.color = _fillColors;
+      temp.bbox = _rectangles;
+      _landoltc.push_back(temp);      
+      //do stuff
+      flag = false;
+    } 
+    
   }
 }
 
@@ -559,10 +582,14 @@ void LandoltCDetector::begin(cv::Mat* input)
   cv::erode(binary, binary, erodeKernel);
 
   findLandoltContours(binary, input->rows, input->cols, _refContours[0]);
-
-  for(std::size_t i = 0; i < _rectangles.size(); i++)
+  
+  for(int i = 0; i < _landoltc.size(); i++)
   {
-    cv::rectangle(*input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
+    LandoltC temp = _landoltc.at(i);
+    for(std::size_t j = 0; j < temp.bbox.size(); j++)
+    {
+      cv::rectangle(*input, temp.bbox.at(j), cv::Scalar(0, 0, 255), 1, 8, 0);
+    }
   }
 
   applyMask();
@@ -572,13 +599,36 @@ void LandoltCDetector::begin(cv::Mat* input)
     //cv::imshow("Adaptive Threshold", binary);
     cv::waitKey(20);
   #endif
+  
+  for(int i = 0; i< _landoltc.size(); i++)
+  {
+    LandoltC temp = _landoltc.at(i);
+    for(int j = 0; j < temp.angles.size(); j++)
+    {
+      float angle = temp.angles.at(j);
+      ROS_INFO("Angle of %d is %lf \n", j, angle*(180/3.14159265359));
+    }
+  }
+    
 
+  clear();
+
+}
+
+/**
+  @brief Clearing vector values
+  @param void
+  @return void
+**/
+void LandoltCDetector::clear()
+{
   _centers.clear();
   _newCenters.clear();
   _rectangles.clear();
   _fillColors.clear();
-
+  _landoltc.clear();
 }
+  
 
 /**
   @brief Thinning algorith using the Zhang-Suen method

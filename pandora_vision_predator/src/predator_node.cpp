@@ -437,7 +437,6 @@ void Predator::sendMessage(const cv::Rect& rec, const float& posterior, const se
   predatorAlertMsg.width = rec.width;
   predatorAlertMsg.height = rec.height;
   predatorAlertMsg.posterior = posterior;
-  //frame.toImageMsg(predatorAlertMsg.img);
   predatorAlertMsg.img = *frame;
   
   _predatorPublisher.publish(predatorAlertMsg);  
