@@ -557,7 +557,7 @@ namespace pandora_vision
 
 
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
-      Parameters::Depth::denoised_edges_threshold, 255, 3);
+      Parameters::Edge::denoised_edges_threshold, 255, 3);
 
     // Make all non zero pixels have a value of 255
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges, 0, 255, 0);
@@ -614,6 +614,12 @@ namespace pandora_vision
     {
       produceEdgesViaBackprojection(inImage, inHistogram, edges);
     }
+
+    cv::threshold(*edges, *edges,
+      Parameters::Edge::denoised_edges_threshold, 255, 3);
+
+    // Make all non zero pixels have a value of 255
+    cv::threshold(*edges, *edges, 0, 255, 0);
 
     // Denoise the edges image
     EdgeDetection::denoiseEdges(edges);
@@ -1549,7 +1555,8 @@ namespace pandora_vision
           // Fill this segment with a random colour
           cv::floodFill(*image, mask, cv::Point(cols, rows), newVal, 0,
             cv::Scalar::all(Parameters::Rgb::floodfill_lower_colour_difference),
-            cv::Scalar::all(Parameters::Rgb::floodfill_upper_colour_difference));
+            cv::Scalar::all(Parameters::Rgb::floodfill_upper_colour_difference)
+            );
         }
       }
     }
@@ -2231,20 +2238,24 @@ namespace pandora_vision
     }
     #endif
 
-    // Fill the various segments with colour
-    floodFillPostprocess(&segmentedHoleFrame);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
+    // Posterize the product of the segmentation
+    if (Parameters::Rgb::posterize_after_segmentation)
     {
-      cv::Mat tmp;
-      segmentedHoleFrame.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Posterized segmented RGB image";
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
+      // Fill the various segments with colour
+      floodFillPostprocess(&segmentedHoleFrame);
+
+      #ifdef DEBUG_SHOW
+      if (Parameters::Debug::show_produce_edges)
+      {
+        cv::Mat tmp;
+        segmentedHoleFrame.copyTo(tmp);
+        msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += " : Posterized segmented RGB image";
+        msgs.push_back(msg);
+        imgs.push_back(tmp);
+      }
+      #endif
     }
-    #endif
 
     // Convert the posterized image to grayscale
     cv::Mat segmentedHoleFrame8UC1 =
