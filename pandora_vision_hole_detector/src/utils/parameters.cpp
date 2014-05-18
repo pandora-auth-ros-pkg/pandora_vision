@@ -249,7 +249,7 @@ namespace pandora_vision
   int Parameters::Rgb::compute_edges_backprojection_threshold = 128;
 
   // Parameters specific to the pyrMeanShiftFiltering method
-  int Parameters::Rgb::spatial_window_radius = 4;
+  int Parameters::Rgb::spatial_window_radius = 18;
   int Parameters::Rgb::color_window_radius = 40;
   int Parameters::Rgb::maximum_level_pyramid_segmentation = 2;
 
