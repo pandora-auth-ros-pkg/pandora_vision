@@ -47,6 +47,16 @@
 
 namespace pandora_vision
 {
+  
+struct LandoltC{
+  cv::Point center;
+  int count;
+  std::vector<float> angles;
+  std::vector<cv::Scalar> color;
+  std::vector<cv::Rect> bbox;
+  LandoltC() {}
+};
+
 class LandoltCDetector
 {
 private:
@@ -75,6 +85,8 @@ private:
   cv::Mat _coloredContours;
   //!<2D Matric used for separating each LandoltC to each parts
   cv::Mat _mask;
+  
+  std::vector<LandoltC> _landoltc;
 
 public:
 
@@ -151,20 +163,20 @@ public:
   @brief Calculation of rotation based on moments.Precision is good for a
   distance up to 30cm from the camera
   @param in [const cv::Mat&] Matrix containing the padded frame
-  @param i [int] Index of C being processed
+  @param temp [LandoltC*] Struct of Landoltc
   @return void
   **/
-  void findRotationA(const cv::Mat& in, int i);  
+  void findRotationA(const cv::Mat& in, LandoltC* temp);  
   
   /**
   @brief Calculation of rotation based on thinning.Precision is good for a
   distance up to 50cm from the camera, gives more accurate results than the first
   method but it's slower.
   @param in [const cv::Mat&] Matrix containing the padded frame
-  @param i [int] Index of C being processed
+  @param temp [LandoltC*] Struct of LandoltC
   @return void
   **/  
-  void findRotationB(const cv::Mat&in, int i);
+  void findRotationB(const cv::Mat&in, LandoltC* temp);
   
   /**
   @brief Function for calculating the neighbours of pixels considering
@@ -183,6 +195,13 @@ public:
   @return [cv::Mat] Output Image 
   **/    
   cv::Mat getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec);
+  
+  /**
+  @brief Clearing vector values
+  @param void
+  @return void
+  **/
+  void clear();
   
 
 };

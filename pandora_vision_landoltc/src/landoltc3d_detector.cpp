@@ -358,6 +358,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 void LandoltC3dDetector::begin(cv::Mat* input)
 {
   cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y, thresholded, grad_x, grad_y;
+  cv::Mat erodeKernel(cv::Size(1, 1), CV_8UC1, cv::Scalar(1));
 
   cv::cvtColor(*input, gray, CV_BGR2GRAY);
 
@@ -370,8 +371,6 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   gray = dst.clone();
   
   clahe->apply(gray, dst);
-  
-  //dst = gray.clone();
   
   cv::Sobel(dst, gradX, CV_32F, 1, 0, 3);
   cv::Sobel(dst, gradY, CV_32F, 0, 1, 3);
@@ -386,19 +385,24 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::circle(*input, _centers.at(i), 2, (0, 0, 255), -1);
   }
   
+  //Scharr(dst, grad_x, CV_32F, 1, 0, 1, 0);
   //Sobel( dst, grad_x, CV_32F, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT );
   convertScaleAbs( gradX, abs_grad_x );
   
+  //Scharr(dst, grad_y, CV_32F, 0, 1, 1, 0);
   //Sobel( dst, grad_y, CV_32F, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT );
   convertScaleAbs( gradY, abs_grad_y );
       
   addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
-  applyBradleyThresholding(dst, &thresholded);
+  cv::imshow("dst", dst);
   
-  cv::Mat element = getStructuringElement( cv::MORPH_CROSS, cv::Size( 1, 1) );
+  //applyBradleyThresholding(dst, &thresholded);
+  cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 25, 2);
   
-  cv::erode(thresholded, thresholded, element); 
+  cv::erode(thresholded, thresholded, erodeKernel);
+  
+  cv::imshow("thresholded", thresholded);
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
@@ -421,11 +425,6 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 
 }
 
-void LandoltC3dDetector::enableFuse(const cv::Rect& bounding_box, const float& posterior)
-{
-  bbox = bounding_box;
-  confidence = posterior;
-}
 
 void LandoltC3dDetector::fuse()
 {
