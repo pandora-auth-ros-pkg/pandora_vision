@@ -200,6 +200,16 @@ namespace pandora_vision
    **/
   void NoiseElimination::chooseInterpolationMethod(const cv::Mat& image)
   {
+    if (image.type() != CV_32FC1)
+    {
+      #ifdef DEBUG_SHOW
+      ROS_ERROR("NoiseElimination::chooseInterpolationMethod : \
+        Inappropriate image type.");
+      #endif
+
+      return;
+    }
+
     #ifdef DEBUG_TIME
     Timer::start("chooseInterpolationMethod");
     #endif
@@ -214,7 +224,7 @@ namespace pandora_vision
       for(unsigned int j = 0 ; j < image.cols ; j++)
       {
         float d = image.at<float>(i, j);
-        if(d == 0)
+        if(d == 0.0)
         {
           blacks++;
         }
