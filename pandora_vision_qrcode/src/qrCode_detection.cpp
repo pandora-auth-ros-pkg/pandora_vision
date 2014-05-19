@@ -56,11 +56,13 @@ namespace pandora_vision
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
-
-    //!< subscribe to input image's topic
-    _frameSubscriber = _nh.subscribe(
-        imageTopic, 1, &QrCodeDetection::imageCallback, this);
-   
+    
+    for(int i = 0; i < imageTopics.size(); i++ ){
+      //!< subscribe to input image's topic
+      ros::Subscriber frameSubscriber = _nh.subscribe(
+          imageTopics[i], 1, &QrCodeDetection::imageCallback, this);
+      _frameSubscribers.push_back(frameSubscriber);   
+    }
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -160,7 +162,8 @@ namespace pandora_vision
       frameWidth = DEFAULT_WIDTH;
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
-
+    
+    std::string imageTopic;
     //!< Get the listener's topic;
     if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
     {
@@ -168,9 +171,10 @@ namespace pandora_vision
     }
     else
     {
-     ROS_FATAL("Camera name not found");
+     ROS_FATAL("Image topic name not found");
      ROS_BREAK(); 
     }
+    imageTopics.push_back(imageTopic);
     
     //!< Get the images's frame_id;
     if (_nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId)) 
@@ -179,7 +183,7 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_FATAL("Camera name not found");
+      ROS_FATAL("Camera frame id not found");
       ROS_BREAK(); 
     }
     
