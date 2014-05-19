@@ -88,24 +88,31 @@ namespace pandora_vision {
       int frameHeight;
       
       std::string cameraName;
+      
+      std::string imageTopic;
+      
       std::string cameraFrameId;
 
-      //!< Frame processed by MotionDetector
+      //!< Frame processed by QrCodeDetector
       cv::Mat qrcodeFrame;
 
       //!< MotionDetector frame timestamp
       ros::Time qrcodeFrameTimestamp;
 
-      //!< The topic subscribed to for the front camera
-      std::vector<std::string> imageTopics;
-
+      //!< The topics subscribed to all cameras
+      std::vector<std::string> _imageTopics;
+    
+      //!< The frame ids subscribed to all cameras
+      std::vector<std::string> cameraFrameIds;
+      
       //!< Publishers for QrCodeDetector result messages
       ros::Publisher _qrcodePublisher;
 
-      //!< The subscriber that listens to the frame topic advertised by the
-      //!< central node for the front camera
+      //!< The subscribers that listens to the frame topic advertised by the
+      //!< central node for all camera
       std::vector<ros::Subscriber> _frameSubscribers;
-
+      
+      ros::Subscriber frameSubscriber;
 
       //!< Debug publisher for MotionDetector
       image_transport::Publisher _qrcodeDebugPublisher;
@@ -143,7 +150,7 @@ namespace pandora_vision {
        * qrcodes in a given frame
        * @return void
        */
-      void qrCallback();
+      void qrDetect(std::string frame_Id);
 
       /**
        * Function called when new ROS message appears, for front camera

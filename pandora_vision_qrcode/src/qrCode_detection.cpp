@@ -57,11 +57,11 @@ namespace pandora_vision
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
     
-    for(int i = 0; i < imageTopics.size(); i++ ){
+    for(int ii = 0; ii < _imageTopics.size(); ii++ ){
       //!< subscribe to input image's topic
-      ros::Subscriber frameSubscriber = _nh.subscribe(
-          imageTopics[i], 1, &QrCodeDetection::imageCallback, this);
-      _frameSubscribers.push_back(frameSubscriber);   
+      frameSubscriber = _nh.subscribe(
+        _imageTopics.at(ii), 1, &QrCodeDetection::imageCallback, this);
+      _frameSubscribers.push_back(frameSubscriber);
     }
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -128,18 +128,37 @@ namespace pandora_vision
       {
         ROS_WARN(" Cannot find qrcode debug show topic");
       }    
-    }         
-    
-    //!< Get the camera to be used by qr node;
-    if (_nh.getParam("camera_name", cameraName)) {
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
     }
-    else 
+             
+    XmlRpc::XmlRpcValue cameras_list;
+    if(_nh.getParam("camera_name", cameras_list)){
+      ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+      
+      for(int ii=0; ii<cameras_list.size(); ii++){
+        ROS_ASSERT(cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeString);
+        cameraName = static_cast<std::string>(cameras_list[ii]);
+        ROS_INFO_STREAM("camera_name : " << cameraName);
+        
+        //!< Get the listener's topic for camera
+        if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
+        {
+          ROS_INFO_STREAM("imageTopic for camera : " << imageTopic);
+        }
+        else
+        {
+         ROS_FATAL("Image topic name not found");
+         ROS_BREAK(); 
+        }
+        _imageTopics.push_back("/"+imageTopic);
+      }
+    }
+    else
     {
-      ROS_FATAL("Camera name not found");
+      ROS_FATAL("Camera_name not found");
       ROS_BREAK(); 
     }
 
+    
     //!< Get the Height parameter if available;
     if (_nh.getParam("/" + cameraName + "/image_height", frameHeight))
     {
@@ -154,7 +173,6 @@ namespace pandora_vision
     //!< Get the Width parameter if available;
     if (_nh.hasParam("/" + cameraName + "/image_width"))
     {
-      _nh.getParam("/" + cameraName + "/image_width", frameWidth);
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
     else
@@ -162,31 +180,7 @@ namespace pandora_vision
       frameWidth = DEFAULT_WIDTH;
       ROS_DEBUG_STREAM("width : " << frameWidth);
     }
-    
-    std::string imageTopic;
-    //!< Get the listener's topic;
-    if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
-    {
-      ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-    }
-    else
-    {
-     ROS_FATAL("Image topic name not found");
-     ROS_BREAK(); 
-    }
-    imageTopics.push_back(imageTopic);
-    
-    //!< Get the images's frame_id;
-    if (_nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId)) 
-    {
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-    }
-    else 
-    {
-      ROS_FATAL("Camera frame id not found");
-      ROS_BREAK(); 
-    }
-    
+        
     //!< Get the HFOV parameter if available;
     if (_nh.getParam("/" + cameraName + "/hfov", hfov)) 
     {
@@ -252,13 +246,13 @@ namespace pandora_vision
    * @param msg [const sensor_msgs::Imager&] The message
    * @return void
    */
-  void QrCodeDetection::imageCallback(
-      const sensor_msgs::Image& msg)
+  void QrCodeDetection::imageCallback(const sensor_msgs::Image& msg)
   {
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     qrcodeFrame = in_msg->image.clone();
     qrcodeFrameTimestamp = msg.header.stamp;
+    std::string frame_id = msg.header.frame_id;
 
     if (qrcodeFrame.empty())
     {
@@ -271,8 +265,7 @@ namespace pandora_vision
     {
       return;
     }
-
-    qrCallback();
+    qrDetect(frame_id);
   }
 
 
@@ -281,7 +274,7 @@ namespace pandora_vision
    * qrcodes in a given frame
    * @return void
    */
-  void QrCodeDetection::qrCallback()
+  void QrCodeDetection::qrDetect(std::string frame_id)
   {
 
     //!< Create message of QrCode Detector
@@ -290,7 +283,7 @@ namespace pandora_vision
  
     //!< Qrcode message 
     //!< do detection and examine result cases
-    qrcodeVectorMsg.header.frame_id = cameraFrameId;
+    qrcodeVectorMsg.header.frame_id = frame_id;
     qrcodeVectorMsg.header.stamp = ros::Time::now();
 
     _qrcodeDetector.detect_qrcode(qrcodeFrame);
