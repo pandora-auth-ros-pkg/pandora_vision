@@ -185,7 +185,6 @@ namespace pandora_vision
   **/
   void HazmatDetection::imageCallback(const sensor_msgs::Image& msg)
   {
-    
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat temp = in_msg->image.clone();
