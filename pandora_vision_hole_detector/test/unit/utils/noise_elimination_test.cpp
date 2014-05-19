@@ -52,13 +52,12 @@ namespace pandora_vision
 
       /**
         @brief Constructs a filled rectangle of width @param x
-        and height of @param y
+        and height of @param y. All points inside the rectangle have a value of
+        0.0
         @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
         rectangle to be created
         @param[in] x [const int&] The recgangle's width
         @param[in] y [const int&] The rectangle's height
-        @param[in] value [const float&] The value with which the inside of the
-        rectangle will be filled
         @param[out] image [cv::Mat*] The image on which the rectangle will be
         imprinted on. Its size must be set before calling this method
         return void
@@ -67,7 +66,6 @@ namespace pandora_vision
         const cv::Point2f& upperLeft,
         const int& x,
         const int& y,
-        const float& value,
         cv::Mat* image );
 
       //! Sets up images needed for testing
@@ -79,30 +77,84 @@ namespace pandora_vision
         // Construct interpolationMethod0
         interpolationMethod0 = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
-        generateFilledRectangle ( cv::Point2f ( 10, 10 ),
-          WIDTH - 10,
-          HEIGHT - 10,
-          1.0,
+        // Fill interpolationMethod0 with a value of 1.0
+        for ( int rows = 0; rows < HEIGHT; rows++ )
+        {
+          for ( int cols = 0; cols < WIDTH; cols++)
+          {
+            interpolationMethod0.at< float >( rows, cols ) = 1.0;
+          }
+        }
+
+        // Insert noise
+        generateFilledRectangle ( cv::Point2f ( 0, 0 ),
+          WIDTH - 200,
+          HEIGHT - 200,
           &interpolationMethod0);
+
+        generateFilledRectangle ( cv::Point2f ( WIDTH - 50, HEIGHT - 50 ),
+          10,
+          10,
+          &interpolationMethod0);
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::showScaled
+         *  ( "interpolationMethod0", interpolationMethod0, 0);
+         */
 
         // Construct interpolationMethod1
         interpolationMethod1 = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
-        generateFilledRectangle ( cv::Point2f ( 10, 10 ),
-          WIDTH - 10,
-          HEIGHT - 10,
-          0.6,
+        // Fill interpolationMethod1 with a value of 0.5
+        for ( int rows = 0; rows < HEIGHT; rows++ )
+        {
+          for ( int cols = 0; cols < WIDTH; cols++)
+          {
+            interpolationMethod1.at< float >( rows, cols ) = 0.5;
+          }
+        }
+
+        // Insert noise
+        generateFilledRectangle ( cv::Point2f ( 0, 0 ),
+          WIDTH - 50,
+          HEIGHT - 200,
           &interpolationMethod1);
+
+        generateFilledRectangle ( cv::Point2f ( WIDTH - 50, HEIGHT - 50 ),
+          10,
+          10,
+          &interpolationMethod1);
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::showScaled
+         *  ( "interpolationMethod1", interpolationMethod1, 0);
+         */
 
 
         // Construct interpolationMethod2
         interpolationMethod2 = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
+        // Fill interpolationMethod2 with a value of 1.0
+        for ( int rows = 0; rows < HEIGHT; rows++ )
+        {
+          for ( int cols = 0; cols < WIDTH; cols++)
+          {
+            interpolationMethod2.at< float >( rows, cols ) = 1.0;
+          }
+        }
+
         generateFilledRectangle ( cv::Point2f ( 10, 10 ),
-          WIDTH - 10,
-          HEIGHT - 10,
-          0.0,
+          WIDTH - 20,
+          HEIGHT - 20,
           &interpolationMethod2);
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::showScaled
+         *  ( "interpolationMethod2", interpolationMethod2, 0);
+         */
 
       }
 
@@ -126,13 +178,11 @@ namespace pandora_vision
 
   /**
     @brief Constructs a filled rectangle of width @param x
-    and height of @param y
+    and height of @param y. All points inside the rectangle have a value of 0.0
     @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
     rectangle to be created
-    @param[in] x [const int&] The recgangle's width
+    @param[in] x [const int&] The rectangle's width
     @param[in] y [const int&] The rectangle's height
-    @param[in] value [const float&] The value with which the inside of the
-    rectangle will be filled
     @param[out] image [cv::Mat*] The image on which the rectangle will be
     imprinted on. Its size must be set before calling this method
     return void
@@ -141,7 +191,6 @@ namespace pandora_vision
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y,
-    const float& value,
     cv::Mat* image )
   {
     if ( image->type() != CV_32FC1 )
@@ -151,28 +200,49 @@ namespace pandora_vision
       return;
     }
 
-    // Fill @param image with black pixels
-    *image = cv::Mat::zeros( image->size(), CV_32FC1 );
-
-    // The four vertices of the rectangle
-    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
-
-    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
-
-    cv::Point2f a[] = { vertex_1, vertex_2, vertex_3, vertex_4 };
-
     // Fill the inside of the desired rectangle with the @param value provided
-    for( int rows = 0; rows < y; rows++ )
+    for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
-      for ( int cols = 0; cols < x; cols++ )
+      for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
       {
-        image->at< float >( rows, cols ) = value;
+        image->at< float >( rows, cols ) = 0.0;
       }
     }
+  }
+
+
+
+  //! Test NoiseElimination::brushfireNearStep
+  TEST_F ( NoiseEliminationTest, BrushfireNearStepTest )
+  {
+
+    // Uncomment for visual inspection
+    /*
+     *Visualization::showScaled
+     *  ( "before brushfireNearStep", interpolationMethod1, 0);
+     */
+
+    // Run NoiseElimination::brushfireNearStep on image interpolationMethod1
+    NoiseElimination::brushfireNearStep
+      ( &interpolationMethod1, 200 * WIDTH + 100 );
+
+    // Uncomment for visual inspection
+    /*
+     *Visualization::showScaled
+     *  ( "after brushfireNearStep", interpolationMethod1, 0);
+     */
+
+    // All pixels of interpolationMethod1 should now have a value of 0.5
+    float sum = 0.0;
+    for ( int rows = 0; rows < interpolationMethod1.rows; rows++ )
+    {
+      for ( int cols = 0; cols < interpolationMethod1.cols; cols++ )
+      {
+        sum += interpolationMethod1.at< float >( rows, cols );
+      }
+    }
+
+    ASSERT_EQ ( 0.5 * ( static_cast< float >( WIDTH * HEIGHT ) - 100 ), sum );
   }
 
 
