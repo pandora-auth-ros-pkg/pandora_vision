@@ -56,7 +56,6 @@ struct min_pq* minpq_init()
 }
 
 
-
 /**
   Inserts an element into a minimizing priority queue.
 
