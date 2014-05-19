@@ -97,14 +97,14 @@ namespace pandora_vision {
       ros::Time qrcodeFrameTimestamp;
 
       //!< The topic subscribed to for the front camera
-      std::string imageTopic;
+      std::vector<std::string> imageTopics;
 
       //!< Publishers for QrCodeDetector result messages
       ros::Publisher _qrcodePublisher;
 
       //!< The subscriber that listens to the frame topic advertised by the
       //!< central node for the front camera
-      ros::Subscriber _frameSubscriber;
+      std::vector<ros::Subscriber> _frameSubscribers;
 
 
       //!< Debug publisher for MotionDetector
