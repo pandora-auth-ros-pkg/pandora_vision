@@ -45,8 +45,8 @@ namespace pandora_vision
   struct LandoltcParameters
   {
     //!< Threshold parameters
-    static int gradientThreshold;
-    static int centerThreshold;
+    static double gradientThreshold;
+    static double centerThreshold;
     static double huMomentsPrec;
     static int adaptiveThresholdSubtractSize;
     

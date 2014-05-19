@@ -54,6 +54,7 @@ struct LandoltC{
   std::vector<float> angles;
   std::vector<cv::Scalar> color;
   std::vector<cv::Rect> bbox;
+  int probability;
   LandoltC() {}
 };
 
@@ -202,6 +203,13 @@ public:
   @return void
   **/
   void clear();
+  
+  /**
+  @brief Performs fusion taking in consideration number of C's in each Landolt
+  @param void
+  @return void
+  **/
+  void fusion();
   
 
 };

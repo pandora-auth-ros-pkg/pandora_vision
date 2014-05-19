@@ -78,7 +78,7 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
 
   cv::findContours(ref, _refContours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
   
-  clahe = cv::createCLAHE(4, cv::Size(8, 8));
+  clahe = cv::createCLAHE(0.01, cv::Size(8, 8));
 }
 
 /**
@@ -366,11 +366,13 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  bilateralFilter(gray, dst, 3, 6, 1.5);
+  //bilateralFilter(gray, dst, 3, 6, 1.5);
+  medianBlur(gray, dst, 3);
   
-  gray = dst.clone();
+  //gray = dst.clone();
   
   clahe->apply(gray, dst);
+  //equalizeHist( gray, dst );
   
   cv::Sobel(dst, gradX, CV_32F, 1, 0, 3);
   cv::Sobel(dst, gradY, CV_32F, 0, 1, 3);
@@ -398,7 +400,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   cv::imshow("dst", dst);
   
   //applyBradleyThresholding(dst, &thresholded);
-  cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 25, 2);
+  cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 15, 1);
   
   cv::erode(thresholded, thresholded, erodeKernel);
   

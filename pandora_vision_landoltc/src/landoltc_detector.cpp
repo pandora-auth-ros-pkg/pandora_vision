@@ -600,16 +600,7 @@ void LandoltCDetector::begin(cv::Mat* input)
     cv::waitKey(20);
   #endif
   
-  for(int i = 0; i< _landoltc.size(); i++)
-  {
-    LandoltC temp = _landoltc.at(i);
-    for(int j = 0; j < temp.angles.size(); j++)
-    {
-      float angle = temp.angles.at(j);
-      ROS_INFO("Angle of %d is %lf \n", j, angle*(180/3.14159265359));
-    }
-  }
-    
+  fusion();
 
   clear();
 
@@ -628,7 +619,39 @@ void LandoltCDetector::clear()
   _fillColors.clear();
   _landoltc.clear();
 }
-  
+
+/**
+  @brief Performs fusion taking in consideration number of C's in each Landolt
+  @param void
+  @return void
+  **/
+void LandoltCDetector::fusion()
+{
+  for(int i = 0; i < _landoltc.size(); i++)
+  {
+    LandoltC* temp = &(_landoltc.at(i));
+    if((*temp).count == 1)
+    {
+      (*temp).probability = 0.2;
+    }
+    else if((*temp).count == 2)
+    {
+      (*temp).probability = 0.4;
+    }
+    else if((*temp).count == 3)
+    {
+      (*temp).probability = 0.6;
+    }
+    else if((*temp).count == 4)
+    {
+      (*temp).probability = 0.8;
+    }
+    else if((*temp).count == 5)
+    {
+      (*temp).probability = 1;
+    }
+  }
+}  
 
 /**
   @brief Thinning algorith using the Zhang-Suen method
