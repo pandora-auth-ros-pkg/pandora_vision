@@ -40,9 +40,9 @@
 namespace pandora_vision
 {
   
-  int LandoltcParameters::gradientThreshold = 60;
+  double LandoltcParameters::gradientThreshold = 60;
   
-  int LandoltcParameters::centerThreshold = 90;
+  double LandoltcParameters::centerThreshold = 90;
   
   double LandoltcParameters::huMomentsPrec = 0.3;
   
