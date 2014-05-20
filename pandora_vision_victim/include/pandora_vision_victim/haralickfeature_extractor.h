@@ -52,7 +52,7 @@ namespace pandora_vision
     private:
     
     //!<Vector containing 13 Haralick Features
-    std::vector<float> _haralickFeatures;
+    std::vector<double> _haralickFeatures;
     
     public:
     
@@ -189,7 +189,7 @@ namespace pandora_vision
     http://murphylab.web.cmu.edu/publications/boland/boland_node26.html  
     @return std::vector [float] The vector containing the haralick features
     **/          
-    std::vector<float> getFeatures();
+    std::vector<double> getFeatures();
     
     /**
     @brief This is the main function called to extract haralick features
