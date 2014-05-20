@@ -74,7 +74,7 @@ namespace pandora_vision
     int rowsBlockSize = src.rows/4;
     if(src.rows % colsBlockSize == 0 && src.cols % rowsBlockSize == 0)
       ROS_INFO("Correct Division");
-    std::vector<double> edgeFeatures;
+      
     edgeFeatures = partition(src, colsBlockSize, rowsBlockSize);
     
     ROS_INFO_STREAM("EdgeFeatures= ");
@@ -287,5 +287,9 @@ namespace pandora_vision
       imshow( colorComp, histImg );
     #endif    
   }
-
+  
+  std::vector<double> EdgeOrientationExtractor::getFeatures()
+  {
+    return edgeFeatures;
+  }
 }// namespace pandora_vision
