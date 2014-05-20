@@ -44,19 +44,16 @@
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
+#include <sstream>
 #include "ros/ros.h"
 #include <ros/package.h>
 
 static void usage( char* name );
 static void modify_arguements();
-
-static int export_lowe_features( char*, struct feature*, int );
-/******************************** Globals ************************************/
+static int export_lowe_features( const char*, struct feature*, int );
 
 char* pname;
-char* img_file_name;
-char* out_file_name = NULL;
-char* out_img_name = NULL;
+const char* out_img_name = NULL;
 int intvls = SIFT_INTVLS;
 double sigma = SIFT_SIGMA;
 double contr_thr = SIFT_CONTR_THR;
@@ -64,8 +61,6 @@ int curv_thr = SIFT_CURV_THR;
 int img_dbl = SIFT_IMG_DBL;
 int descr_width = SIFT_DESCR_WIDTH;
 int descr_hist_bins = SIFT_DESCR_HIST_BINS;
-
-
 
 int main( int argc, char** argv )
 {   
@@ -76,67 +71,53 @@ int main( int argc, char** argv )
     modify_arguements();
        
     std::string packagePath = ros::package::getPath("pandora_vision_hazmat");
-    int numOfPatterns=0;
-    std::cout<<"Give the number of patterns you want to train"<<std::endl;
-    std::cin>>numOfPatterns;
+    int numOfPatterns = 0;
+    std::cout << "Give the number of patterns you want to train" << std::endl;
+    std::cin >> numOfPatterns;
 
-    std::string img_file_name;
-    std::string filename2;
-    
-    for(int i=0;i<numOfPatterns;i++)
+    for(int i = 0; i < numOfPatterns; i++)
     {
-      char temp_name1[200];
-      char temp_name2[200];
-      char temp_name3[200];
-      img_file_name=packagePath;
-      filename2=packagePath;
-
-      sprintf(temp_name1,"/patterns/enter%d.png",i+1);
-      std::string temp1(temp_name1);
-      img_file_name.append(temp1);
-
+      std::stringstream img_file_stream;
+      
+      img_file_stream << packagePath << "/patterns/enter" << i+1 << ".png";
+      std::string img_file_name = img_file_stream.str();
+      
       img = cvLoadImage( img_file_name.c_str(), 1 );
       if(!img)
-        std::cout<< "Unable to load image from %s"<<img_file_name;
+        std::cout << "Unable to load image from %s" << img_file_name;
         
-      printf( "Finding SIFT features...\n" );
+      std::cout <<"Finding SIFT features...\n";
 
       n = _sift_features( img, &features, intvls, sigma, contr_thr, curv_thr,
         img_dbl, descr_width, descr_hist_bins );
-      std::cout<<"Found " <<n <<"features." << std::endl;
+      std::cout << "Found " << n <<"features." << std::endl;
        
       draw_features( img, features, n );
       
       cv::Mat image(img);
-      cv::imshow(temp1, image);
+      cv::imshow("Hazmat", image);
       cv::waitKey(50);
-        
-      sprintf(temp_name2,"/patterns/enter%d.png.sift",i+1);
-      std::string temp2(temp_name2);
-      filename2.append(temp2);
+      
+      std::stringstream out_file_stream;
+      
+      out_file_stream << packagePath << "/patterns/enter" << i+1 << ".png.sift";
+      out_img_name = (out_file_stream.str()).c_str();
+      
       int result;
-      char* out_file_name =new char[200];
-      strcpy(out_file_name, filename2.c_str());
-      result= export_lowe_features(out_file_name, features, n );
-      if(result==0)
-      {
-        printf("Feautures of %d pattern are added successfully,\n",i);
-      }
+      result = export_lowe_features(out_img_name, features, n );
+      if(result == 0)
+        printf("Feautures of %d pattern are added successfully,\n", i);
       
-      img_file_name=packagePath;
-      sprintf(temp_name1,"/patterns/enter_sift%d.png",i+1);
-      std::string temp3(temp_name1);
-      img_file_name.append(temp3);
+      std::stringstream sift_image_file_stream;
       
-      cv::imwrite(img_file_name.c_str(), image);
-      
-      img_file_name.clear();
-      filename2.clear();
+      sift_image_file_stream << packagePath << "/patterns/sift/enter" << i+1 << ".png";
+            
+      cv::imwrite(sift_image_file_stream.str(), image);
     }  
     return 0;
 }
 
-static int export_lowe_features( char* filename, struct feature* feat, int n )
+static int export_lowe_features( const char* filename, struct feature* feat, int n )
 {
     FILE* file;
     int i, j, d;
@@ -147,7 +128,7 @@ static int export_lowe_features( char* filename, struct feature* feat, int n )
          n, __FILE__, __LINE__ );
       return 1;
     }
-    if( ! ( file = fopen( filename, "w" ) ) )
+    if( !( file = fopen( filename, "w" ) ) )
     {
       fprintf( stderr, "Warning: error opening %s, %s, line %d\n",
          filename, __FILE__, __LINE__ );
@@ -165,7 +146,7 @@ static int export_lowe_features( char* filename, struct feature* feat, int n )
       /* write 20 descriptor values per line */
       if( j % 20 == 0 )
       fprintf( file, "\n" );
-      fprintf( file, " %d", (int)(feat[i].descr[j]) );
+      fprintf( file, " %d", static_cast<int>(feat[i].descr[j]) );
     }
       fprintf( file, "\n" );
     }
@@ -186,14 +167,11 @@ static void usage( char* name )
   fprintf(stderr, "Usage: %s detects SIFT keypoints in an image", name);
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  -h               Display this message and exit\n");
-  fprintf(stderr, "  -o <out_file>    Output keypoints to text file\n");
-  fprintf(stderr, "  -m <out_img>     Output keypoint image file (format" \
-    " determined by extension)\n");
   fprintf(stderr, "  -i <intervals>   Set number of sampled intervals per" \
     " octave in scale space\n");
   fprintf(stderr, "                   pyramid (default %d)\n",
     SIFT_INTVLS);
-  fprintf(stderr, "  -s <sigma>       Set sigma for initial gaussian"	\
+  fprintf(stderr, "  -s <sigma>       Set sigma for initial gaussian" \
     " smoothing at each octave\n");
   fprintf(stderr, "                   (default %06.4f)\n", SIFT_SIGMA);
   fprintf(stderr, "  -c <thresh>      Set threshold on keypoint contrast" \
@@ -216,67 +194,58 @@ static void modify_arguements()
 {
   usage("hazmat_trainer");
   char arg;
-  std::cout<<"Select suitable option if you want to modify parameters or x to exit"<<std::endl;
+  std::cout << 
+    "Select suitable option if you want to modify parameters or x to exit" 
+      << std::endl;
   bool isModified = false;
   while( isModified == false)
   {
-      std::cin>>arg;
+      std::cin >> arg;
       switch( arg )
       {
-        /// read out_file_name
-        case 'o':
-          /// Ensure that arguement is provided
-          if( ! optarg )
-            fatal_error( "error parsing arguments at -%c\n"	\
-             "Try '%s -h' for help.", arg, pname );
-          out_file_name = optarg;
-          break;
-
-        /// read out_img_name
-        case 'm':
-          /// Ensure that arguement is provided
-          if( ! optarg )
-            fatal_error( "error parsing arguments at -%c\n"	\
-             "Try '%s -h' for help.", arg, pname );
-          out_img_name = optarg;
-          break;
 
         /// read intervals
         case 'i':
-          std::cout <<"Modify number of sampled intervals per octave"<<std::endl;
-          std::cin >> intvls ;
+          std::cout <<
+            "Modify number of sampled intervals per octave" << std::endl;
+          std::cin >> intvls;
           break;
 
         /// read sigma
         case 's' :
-          std::cout << "Modify sigma for initial gaussian smoothing at each octave"<<std::endl;
+          std::cout << 
+            "Modify sigma for initial gaussian smoothing at each octave" << std::endl;
           std::cin >> sigma;
           break;
 
         /// read contrast_thresh
         case 'c' :
-          std::cout << "Modify threshold on keypoint contrast|D(x)| based on [0,1]"<<std::endl;
+          std::cout << 
+            "Modify threshold on keypoint contrast|D(x)| based on [0,1]" << std::endl;
           /// parse argument and ensure it is a floating point number
           std::cin >> contr_thr;
           break;
 
         /// read curvature_thresh
         case 'r' :
-          std::cout << "Modify threshold on keypoint ratio of principle curvatures"<<std::endl;
+          std::cout << 
+            "Modify threshold on keypoint ratio of principle curvatures" << std::endl;
           /// parse argument and ensure it is a floating point number
           std::cin >> curv_thr;
           break;
 
         /// read descr_width
         case 'n' :
-          std::cout<<"Modify width of descriptor histogram array"<<std::endl;
+          std::cout << 
+            "Modify width of descriptor histogram array" << std::endl;
           /// parse argument and ensure it is a floating point number
           std::cin >> descr_width;
           break;
 
         /// read descr_histo_bins
         case 'b' :
-          std::cout << "Modify number of bins per histogram in descriptor array" << std::endl;
+          std::cout << 
+            "Modify number of bins per histogram in descriptor array" << std::endl;
           std::cin >> descr_hist_bins;
           break;
 
@@ -295,6 +264,7 @@ static void modify_arguements()
           fatal_error( "-%c: invalid option.\nTry '%s -h' for help.",
           optopt, pname );
       }
-      std::cout<<"Select next variable to modify or press x to exit"<<std::endl;
+      std::cout << 
+        "Select next variable to modify or press x to exit" << std::endl;
     }
 }
