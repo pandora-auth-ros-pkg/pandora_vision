@@ -91,8 +91,6 @@ namespace pandora_vision {
       
       std::string imageTopic;
       
-      std::string cameraFrameId;
-
       //!< Frame processed by QrCodeDetector
       cv::Mat qrcodeFrame;
 
@@ -109,7 +107,7 @@ namespace pandora_vision {
       ros::Publisher _qrcodePublisher;
 
       //!< The subscribers that listens to the frame topic advertised by the
-      //!< central node for all camera
+      //!< central node for all cameras
       std::vector<ros::Subscriber> _frameSubscribers;
       
       ros::Subscriber frameSubscriber;
