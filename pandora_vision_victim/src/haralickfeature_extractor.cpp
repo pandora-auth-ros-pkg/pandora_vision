@@ -526,6 +526,11 @@ namespace pandora_vision
     return _haralickFeatures;
   }
   
+  /**
+    @brief This is the main function called to extract haralick features
+    @param image [cv::Mat] The current frame to be processed
+    @param void return
+  */ 
   void HaralickFeaturesExtractor::findHaralickFeatures(cv::Mat image)
   {
     cv::Mat temp = cv::Mat(image.rows, image.cols, CV_8UC1);

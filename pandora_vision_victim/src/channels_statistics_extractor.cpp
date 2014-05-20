@@ -90,8 +90,10 @@ namespace pandora_vision
   /**
    * @brief This is the main function which calls all others for the computation
    * of the color features.
+   * @param src [cv::Mat] current frame to be processed
+   * @return void
   */ 
-  void ChannelsStatisticsExtractor::findColorFeatures(cv::Mat src)
+  void ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(cv::Mat src)
   {
     inFrame = src.clone();
     cv::Mat hsv;

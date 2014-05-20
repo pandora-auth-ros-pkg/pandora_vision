@@ -120,8 +120,10 @@ namespace pandora_vision
     /**
      * @brief This is the main function which calls all other for the 
      * computation of the color features.
+     * @param src [cv::Mat] current frame to be processed
+     * @return void
     */ 
-    void findColorFeatures(cv::Mat src);
+    void findChannelsStatisticsFeatures(cv::Mat src);
     
     /**
      * @brief This function calculates all necessary histogramms

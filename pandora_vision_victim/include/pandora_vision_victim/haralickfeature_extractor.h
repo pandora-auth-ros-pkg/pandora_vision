@@ -191,7 +191,12 @@ namespace pandora_vision
     **/          
     std::vector<float> getFeatures();
     
-     void findHaralickFeatures(cv::Mat image);
+    /**
+    @brief This is the main function called to extract haralick features
+    @param image [cv::Mat] The current frame to be processed
+    @param void return
+    */ 
+    void findHaralickFeatures(cv::Mat image);
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H

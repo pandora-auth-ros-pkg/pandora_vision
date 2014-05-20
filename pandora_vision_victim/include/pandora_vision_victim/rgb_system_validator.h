@@ -36,7 +36,48 @@
 *********************************************************************/
 
 #include "ros/ros.h"
+#include "pandora_vision_victim/edge_orientation_extractor.h"
+#include "pandora_vision_victim/channels_statistics_extractor.h"
+#include "pandora_vision_victim/haralickfeature_extractor.h"
 
 namespace pandora_vision
 {
+  class RgbSystemValidator
+  {
+    ///Feature vector for rgb features
+    std::vector<double> rgbFeatureVector;
+    
+    ///Instance of class  ChannelsStatisticsExtractor 
+    ///to detect color features for the given frame
+    ChannelsStatisticsExtractor _channelsStatisticsDetector;
+    ///Instance of class  EdgeOrientationExtractor 
+    ///to detect edge orientation features for the given frame
+    EdgeOrientationExtractor _edgeOrientationDetector;
+    ///Instance of class  HaralickFeatureExtractor 
+    ///to detect haralick features for the given frame
+    HaralickFeaturesExtractor _haralickFeatureDetector;
+     
+    public:
+    
+    ///Constructor
+    RgbSystemValidator();
+    
+    ///Destructor
+    ~RgbSystemValidator();
+    
+    /**
+     * @brief This function extract features according to the
+     * predifined features for the rgb image
+     * @param inImage [cv::Mat] current rgb frame to be processed
+     * @return void
+     */ 
+    void extractRgbFeatures(cv::Mat inImage);
+    
+    /**
+     * @brief This function creates feature vector according to the
+     * predifined features for the rgb image
+     */ 
+    void setRgbFeatureVector();
+    
+  };
 } 

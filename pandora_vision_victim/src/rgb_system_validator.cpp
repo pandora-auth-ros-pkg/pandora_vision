@@ -39,4 +39,39 @@
 
 namespace pandora_vision
 {
+  /**
+   @brief Constructor
+  */ 
+  RgbSystemValidator::RgbSystemValidator()
+  {
+    ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
+
+  }
+  
+  /**
+    @brief Destructor
+  */
+  RgbSystemValidator::~RgbSystemValidator()
+  {
+    ROS_DEBUG("[victim_node] : Destroying RgbSystemValidator instance");
+  }
+  
+  /**
+   * @brief This function extract features according to the
+   * predifined features for the rgb image
+   * @param inImage [cv::Mat] current rgb frame to be processed
+   * @return void
+  */ 
+  void RgbSystemValidator::extractRgbFeatures(cv::Mat inImage)
+  {
+    ///Extract color and statistics oriented features
+    ///for rgb image
+    _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
+    
+    ///Extract edge orientation features for rgb image
+    _edgeOrientationDetector.findEdgeFeatures(inImage);
+     
+    ///Extract haralick features for rgb image 
+    _haralickFeatureDetector.findHaralickFeatures(inImage);
+  }
 } 
