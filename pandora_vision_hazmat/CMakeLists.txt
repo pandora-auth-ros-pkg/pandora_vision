@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  cfg/hazmat_cfg.cfg
+  config/hazmat_cfg.cfg
 )
 
 catkin_package(
