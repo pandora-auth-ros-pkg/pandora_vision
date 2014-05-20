@@ -63,28 +63,16 @@ namespace pandora_vision
     #endif
 
     inImage.copyTo(*outImage);
+
     bool finished = false;
-
-    // Assign the image borders a non zero value
-    for(unsigned int i = 0 ; i < outImage->rows ; i++)
-    {
-      outImage->at<float>(i, 0) = 1;
-      outImage->at<float>(i, outImage->cols - 1) = 1;
-    }
-
-    for(unsigned int i = 0 ; i < outImage->cols ; i++)
-    {
-      outImage->at<float>(0, i) = 1;
-      outImage->at<float>(outImage->rows - 1, i) = 1;
-    }
 
     while(!finished)
     {
       finished = true;
 
-      for(unsigned int i = 1 ; i < outImage->rows - 1 ; i++)
+      for(unsigned int i = 1; i < outImage->rows - 1; i++)
       {
-        for(unsigned int j = 1 ; j< outImage->cols - 1 ; j++)
+        for(unsigned int j = 1; j < outImage->cols - 1; j++)
         {
           if(outImage->at<float>(i, j) == 0.0)  // Found black
           {
@@ -100,6 +88,7 @@ namespace pandora_vision
         }
       }
     }
+
     #ifdef DEBUG_TIME
     Timer::tick("brushfireNear");
     #endif
@@ -175,7 +164,8 @@ namespace pandora_vision
 
     // Find the lowest non-zero value outside this concentration of
     // zero-value pixels
-    float lower = 10000.0;
+    const float lowest = 10000.0;
+    float lower = lowest;
     float val = 0.0;
     const float noise = 0.0;
 
@@ -243,13 +233,17 @@ namespace pandora_vision
       }
     }
 
-    // Now that the lowest value of non-zero neighboring pixels of
-    // this black concentration of pixels has been found,
-    // assign it to the whole of the concentration
-    for(std::set<unsigned int>::iterator it = visited.begin();
-      it != visited.end(); it++)
+    // If the whole of the image is not black
+    if (lower != lowest)
     {
-      image->at<float>(*it / image->cols, *it % image->cols) = lower;
+      // Now that the lowest value of non-zero neighboring pixels of
+      // this black concentration of pixels has been found,
+      // assign it to the whole of the concentration
+      for(std::set<unsigned int>::iterator it = visited.begin();
+        it != visited.end(); it++)
+      {
+        image->at<float>(*it / image->cols, *it % image->cols) = lower;
+      }
     }
 
     #ifdef DEBUG_TIME
@@ -369,15 +363,19 @@ namespace pandora_vision
     }
 
     // interpolate the corners
-    /// top left
+
+    // top left
     inImage->at<float>(0, 0) = inImage->at<float>(1, 1);
-    /// top right
+
+    // top right
     inImage->at<float>(0, inImage->cols - 1) =
       inImage->at<float>(1, inImage->cols - 2);
-    /// bottom left
+
+    // bottom left
     inImage->at<float>(inImage->rows - 1, 0) =
       inImage->at<float>(inImage->rows - 2, 1);
-    /// bottom right
+
+    // bottom right
     inImage->at<float>(inImage->rows - 1, inImage->cols - 1) =
       inImage->at<float>(inImage->rows - 2, inImage->cols - 2);
 
@@ -590,11 +588,11 @@ namespace pandora_vision
 
     inImage.copyTo(*outImage);
 
-    for(unsigned int i = 0 ; i < inImage.rows ; i++)
+    for(unsigned int i = 0; i < inImage.rows; i++)
     {
-      for(unsigned int j = 0 ; j < inImage.cols ; j++)
+      for(unsigned int j = 0; j < inImage.cols; j++)
       {
-        if(inImage.at<float>(i, j) != 0.0)
+        if(inImage.at<float>(i, j) == 0.0)
         {
           outImage->at<float>(i, j) = 4.0;
         }
