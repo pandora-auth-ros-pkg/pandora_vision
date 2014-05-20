@@ -42,6 +42,8 @@
 #include <limits>
 #include "ros/ros.h"
 
+#define SHOW_DEBUG_IMAGE
+
 namespace pandora_vision
 {
   

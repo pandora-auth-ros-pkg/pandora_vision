@@ -42,8 +42,6 @@ namespace pandora_vision
   /**
     @brief Constructor
   **/
- 
-
   EdgeOrientationDetection::EdgeOrientationDetection()
   {
    
@@ -71,19 +69,18 @@ namespace pandora_vision
     cvtColor( src, src, CV_BGR2GRAY );
     
     //!<block size
-    std::cout<< "src image size= "<< src.size() <<std::endl;
+    ROS_INFO_STREAM("src image size= "<< src.size());
     int colsBlockSize = src.cols/4;
     int rowsBlockSize = src.rows/4;
     if(src.rows % colsBlockSize == 0 && src.cols % rowsBlockSize == 0)
-      std::cout << "Correct Division" << std::endl;
+      ROS_INFO("Correct Division");
     std::vector<double> edgeFeatures;
     edgeFeatures = partition(src, colsBlockSize, rowsBlockSize);
     
-    std::cout << "EdgeFeatures= " << std::endl;
+    ROS_INFO_STREAM("EdgeFeatures= ");
     for (int ii = 0; ii < edgeFeatures.size(); ii++)
-       std::cout  <<  " " << edgeFeatures[ii];
-    
-    std::cout << std::endl;
+       ROS_INFO_STREAM( " " << edgeFeatures[ii]);
+  
   }
   
   /**
@@ -235,67 +232,62 @@ namespace pandora_vision
      * @return dest [cv::Mat&] the convoluted image.
     */ 
 
-  void EdgeOrientationDetection::conv2(const cv::Mat &img, 
-                                      const cv::Mat& kernel,
-                                      ConvolutionType type, cv::Mat* dest)
-
-{
-  cv::Mat source = img;
-  cv::Mat dest2;
-  if(CONVOLUTION_FULL == type) {
-    source = cv::Mat();
-    const int additionalRows = kernel.rows - 1, additionalCols = kernel.cols- 1;
-    copyMakeBorder(img, source, (additionalRows + 1) / 2, additionalRows / 2, 
-                  (additionalCols + 1) / 2, additionalCols / 2, 
-                  cv::BORDER_CONSTANT, cv::Scalar(0) );
+    void EdgeOrientationDetection::conv2(const cv::Mat &img, 
+            const cv::Mat& kernel,ConvolutionType type, cv::Mat* dest)
+  {
+    cv::Mat source = img;
+    cv::Mat dest2;
+    if(CONVOLUTION_FULL == type) {
+      source = cv::Mat();
+      const int additionalRows = kernel.rows - 1, additionalCols = kernel.cols- 1;
+      copyMakeBorder(img, source, (additionalRows + 1) / 2, additionalRows / 2, 
+                    (additionalCols + 1) / 2, additionalCols / 2, 
+                    cv::BORDER_CONSTANT, cv::Scalar(0) );
+    }
+   
+    //cv::Point anchor(kernel.cols - kernel.cols / 2 - 1, 
+    //                 kernel.rows - kernel.rows / 2 - 1);
+    cv::Point anchor(-1, -1);
+    int borderMode = cv::BORDER_CONSTANT;
+    //cv::flip(kernel,kernel, -1);
+    filter2D(source, dest2, img.depth(), kernel, anchor, 0, borderMode);
+   
+    if(CONVOLUTION_VALID == type) {
+      dest2 = dest2.colRange((kernel.cols - 1) / 2, dest2.cols - kernel.cols / 2)
+                 .rowRange((kernel.rows - 1) / 2, dest2.rows - kernel.rows / 2);
+    }
+    *dest = dest2;
   }
- 
-  //cv::Point anchor(kernel.cols - kernel.cols / 2 - 1, 
-  //                 kernel.rows - kernel.rows / 2 - 1);
-  cv::Point anchor(-1, -1);
-  int borderMode = cv::BORDER_CONSTANT;
-  //cv::flip(kernel,kernel, -1);
-  filter2D(source, dest2, img.depth(), kernel, anchor, 0, borderMode);
- 
-  if(CONVOLUTION_VALID == type) {
-    dest2 = dest2.colRange((kernel.cols - 1) / 2, dest2.cols - kernel.cols / 2)
-               .rowRange((kernel.rows - 1) / 2, dest2.rows - kernel.rows / 2);
-  }
-  *dest = dest2;
-}
 
 
-   /**
+  /**
      * @brief This function displays the calculated histogram to the screen.
      * @param bins [int] the number of bins.
      * @param hist [cv::Mat] the calculated histogram.
      * @param colorComp [const char*] the name of the window.
-    */ 
-    
- 
-void EdgeOrientationDetection::show_histogramm(int bins, cv::Mat hist, 
+  */ 
+  void EdgeOrientationDetection::show_histogramm(int bins, cv::Mat hist, 
                                                const char* colorComp)
-                                               
-{
-  
-  int w = 400; int h = 400;
-  double max_val = 0;
-  minMaxLoc(hist, 0, &max_val);
-  int bin_w = cvRound( static_cast<double> (w / bins ));
-  cv::Mat histImg = cv::Mat::zeros( w, h, CV_8UC3 );
-  
-  //!< visualize each bin
-  for(int ii = 0; ii < bins; ii++) 
-  {
-    float const binVal = hist.at<float>(ii);
-    int   const height = cvRound(binVal * h / max_val);
-    rectangle( histImg, cv::Point( ii*bin_w, h ), 
-              cv::Point( (ii+1)*bin_w, h-height ), 
-              cv::Scalar( 112, 255, 112 ), -1 ); 
+  { 
+    int w = 400; int h = 400;
+    double max_val = 0;
+    minMaxLoc(hist, 0, &max_val);
+    int bin_w = cvRound( static_cast<double> (w / bins ));
+    cv::Mat histImg = cv::Mat::zeros( w, h, CV_8UC3 );
+    
+    //!< visualize each bin
+    for(int ii = 0; ii < bins; ii++) 
+    {
+      float const binVal = hist.at<float>(ii);
+      int   const height = cvRound(binVal * h / max_val);
+      rectangle( histImg, cv::Point( ii*bin_w, h ), 
+                cv::Point( (ii+1)*bin_w, h-height ), 
+                cv::Scalar( 112, 255, 112 ), -1 ); 
 
+    }
+    #ifdef SHOW_DEBUG_IMAGE
+      imshow( colorComp, histImg );
+    #endif    
   }
-  //const char* window_image = colorComp;
-  imshow( colorComp, histImg );
-}
 
 }// namespace pandora_vision
