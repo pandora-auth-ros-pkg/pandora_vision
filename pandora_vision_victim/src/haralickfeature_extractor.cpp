@@ -60,7 +60,7 @@ namespace pandora_vision
   {
     if(y2<0 || y2 >= in.rows || x2<0 || x2 >= in.cols) return;
     
-    out->at<float>(in.at<uchar>(y1, x1), in.at<uchar>(y2, x2))+=1.0;
+    out->at<double>(in.at<uchar>(y1, x1), in.at<uchar>(y2, x2))+=1.0;
     
   }
 
@@ -109,8 +109,8 @@ namespace pandora_vision
     {
       for(int x = 0; x < in->cols; x++)
       {
-        in->at<float>(y, x) =
-        static_cast<float>(in->at<float>(y, x)/static_cast<float>(totalSum[0]));
+        in->at<double>(y, x) =
+        static_cast<double>(in->at<double>(y, x)/static_cast<double>(totalSum[0]));
       }
     }
     return *in;
@@ -124,13 +124,13 @@ namespace pandora_vision
   **/    
   void HaralickFeaturesExtractor::getAngularSecondMoment(const cv::Mat& in)
   {
-    float sum = 0;
+    double sum = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        sum+=in.at<float>(y, x)*in.at<float>(y, x);
+        sum+=in.at<double>(y, x)*in.at<double>(y, x);
       }
     }
     
@@ -146,15 +146,15 @@ namespace pandora_vision
   **/      
   void HaralickFeaturesExtractor::getEntropy(const cv::Mat& in)
   {
-    float sum = 0;
+    double sum = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        if(in.at<float>(y, x) != 0)
+        if(in.at<double>(y, x) != 0)
         {
-          sum+=in.at<float>(y, x)*log(in.at<float>(y, x));
+          sum+=in.at<double>(y, x)*log(in.at<double>(y, x));
         }
       }
     }
@@ -172,13 +172,13 @@ namespace pandora_vision
   **/      
   void HaralickFeaturesExtractor::getContrast(const cv::Mat& in)
   {
-    float sum = 0;
+    double sum= 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        sum+=pow(static_cast<float>(y-x), 2.0)*in.at<float>(y, x);
+        sum+=pow(static_cast<double>(y-x), 2.0)*in.at<double>(y, x);
       }
     }
     
@@ -193,23 +193,23 @@ namespace pandora_vision
   **/
   void HaralickFeaturesExtractor::getVariance(const cv::Mat& in)
   {
-    float w_mean = 0;
+    double w_mean = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        w_mean+=y*in.at<float>(y, x);
+        w_mean+=y*in.at<double>(y, x);
       }
     }
     
-    float variance = 0;
+    double variance = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        variance+=pow(static_cast<float>(y-w_mean), 2.0)*in.at<float>(y, x);
+        variance+=pow(static_cast<double>(y-w_mean), 2.0)*in.at<double>(y, x);
       }
     }
     
@@ -225,15 +225,15 @@ namespace pandora_vision
   **/
   void HaralickFeaturesExtractor::getCorrelation(const cv::Mat& in)
   {
-    float mean = 0;
-    float std = 0;
-    float corr = 0;
+    double mean = 0;
+    double std = 0;
+    double corr = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        mean+=y*in.at<float>(y, x);
+        mean+=y*in.at<double>(y, x);
       }
     }
     
@@ -241,7 +241,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        std+=pow(static_cast<float>(y-mean), 2.0)*in.at<float>(y, x);
+        std+=pow(static_cast<double>(y-mean), 2.0)*in.at<double>(y, x);
       }
     }
     
@@ -251,7 +251,7 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        corr+=(in.at<float>(y, x)*(y-mean)*(x-mean))/pow(std, 2.0);
+        corr+=(in.at<double>(y, x)*(y-mean)*(x-mean))/pow(std, 2.0);
       }
     }
     
@@ -266,13 +266,13 @@ namespace pandora_vision
   **/
   void HaralickFeaturesExtractor::getHomogeneity(const cv::Mat& in)
   {
-    float temp = 0;
+    double temp = 0;
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp+=(1./(1.+pow(static_cast<float>(y-x), 2)))*in.at<float>(y, x);
+        temp+=(1./(1.+pow(static_cast<double>(y-x), 2)))*in.at<double>(y, x);
       }
     }
     
@@ -293,13 +293,13 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(x+y)+=in.at<float>(y, x);
+        temp.at<double>(x+y)+=in.at<double>(y, x);
       }
     }
     
     for(int i = 0; i < temp.cols; i++)
     {
-      temp.at<float>(i) = i*temp.at<float>(i);
+      temp.at<double>(i) = i*temp.at<double>(i);
     }
     
     cv::Scalar totalSum = cv::sum(temp);
@@ -323,17 +323,17 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(x+y)+=in.at<float>(y, x);
+        temp.at<double>(x+y)+=in.at<double>(y, x);
       }
     }
     
-    float f7 = _haralickFeatures[6];
+    double f7 = _haralickFeatures[6];
     
     float sum = 0;
     
     for(int i = 0; i < temp.cols; i++)
     {
-      sum+=pow(static_cast<float>(i-f7), 2.0)*temp.at<float>(i);
+      sum+=pow(static_cast<double>(i-f7), 2.0)*temp.at<double>(i);
     }
     
     _haralickFeatures.push_back(sum);
@@ -353,17 +353,17 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(x+y)+=in.at<float>(y, x);
+        temp.at<double>(x+y)+=in.at<double>(y, x);
       }
     }
     
-    float sum = 0;
+    double sum = 0;
     
     for(int i = 0; i < temp.cols; i++)
     {
-      if(temp.at<float>(i) != 0)
+      if(temp.at<double>(i) != 0)
       {
-        sum+=temp.at<float>(i)*log(temp.at<float>(i));
+        sum+=temp.at<double>(i)*log(temp.at<double>(i));
       }
     }
     
@@ -386,22 +386,22 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(abs(y-x))+=in.at<float>(y, x);
+        temp.at<double>(abs(y-x))+=in.at<double>(y, x);
       }
     }
     
-    float f10_ = 0;
+    double f10_ = 0;
     
     for(int i = 0; i < temp.cols; i++)
     {
-      f10_+=i*temp.at<float>(i);
+      f10_+=i*temp.at<double>(i);
     }
     
-    float f10 = 0;
+    double f10 = 0;
     
     for(int i = 0; i < temp.cols; i++)
     {
-      f10+=pow(static_cast<float>(i-f10_), 2.0)*temp.at<float>(i);
+      f10+=pow(static_cast<double>(i-f10_), 2.0)*temp.at<double>(i);
     }
     
     _haralickFeatures.push_back(f10);
@@ -421,17 +421,17 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        temp.at<float>(abs(y-x))+=in.at<float>(y, x);
+        temp.at<double>(abs(y-x))+=in.at<double>(y, x);
       }
     }
     
-    float sum = 0;
+    double sum = 0;
     
     for(int i = 0; i < temp.cols; i++)
     {
-      if(temp.at<float>(i) != 0)
+      if(temp.at<double>(i) != 0)
       {
-        sum+=temp.at<float>(i)*log(temp.at<float>(i));
+        sum+=temp.at<double>(i)*log(temp.at<double>(i));
       }
     }
     
@@ -456,23 +456,23 @@ namespace pandora_vision
     {
       for(int x = 0; x < in.cols; x++)
       {
-        px.at<float>(y)+=in.at<float>(y, x);
-        py.at<float>(y)+=in.at<float>(x, y);
+        px.at<double>(y)+=in.at<double>(y, x);
+        py.at<double>(y)+=in.at<double>(x, y);
       }
     }
     
-    float HX = 0;
-    float HY = 0;
+    double HX = 0;
+    double HY = 0;
      
     for(int i = 0; i < px.cols; i++)
     {
-      if(px.at<float>(i) != 0)
+      if(px.at<double>(i) != 0)
       {
-        HX+=px.at<float>(i)*log(px.at<float>(i));
+        HX+=px.at<double>(i)*log(px.at<double>(i));
       }
-      if(py.at<float>(i) != 0)
+      if(py.at<double>(i) != 0)
       {
-        HY+=py.at<float>(i)*log(py.at<float>(i));
+        HY+=py.at<double>(i)*log(py.at<double>(i));
       }
     }
     
@@ -480,22 +480,22 @@ namespace pandora_vision
     HY = -HY;
     
     
-    float HXY1 = 0;
-    float HXY2 =0;
-    float HXY = 0; 
+    double HXY1 = 0;
+    double HXY2 =0;
+    double HXY = 0; 
     
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        if((px.at<float>(y)*py.at<float>(x)) != 0)
+        if((px.at<double>(y)*py.at<double>(x)) != 0)
         {
-          HXY1+=in.at<float>(y, x)*log(px.at<float>(y)*py.at<float>(x));
-          HXY2+=px.at<float>(y)*py.at<float>(x)*log(px.at<float>(y)*py.at<float>(x));
+          HXY1+=in.at<double>(y, x)*log(px.at<double>(y)*py.at<double>(x));
+          HXY2+=px.at<double>(y)*py.at<double>(x)*log(px.at<double>(y)*py.at<double>(x));
         }
-        if(in.at<float>(y, x) != 0)
+        if(in.at<double>(y, x) != 0)
         {
-          HXY+=in.at<float>(y, x)*log(in.at<float>(y, x));
+          HXY+=in.at<double>(y, x)*log(in.at<double>(y, x));
         }
       }
     }
@@ -504,11 +504,11 @@ namespace pandora_vision
     HXY2 = -HXY2;
     HXY = -HXY;
     
-    float f12 = (HXY-HXY1)/std::max(HX, HY);
+    double f12 = (HXY-HXY1)/std::max(HX, HY);
     
     _haralickFeatures.push_back(f12);
     
-    float f13 = sqrt(1-exp(-2*(HXY2-HXY)));
+    double f13 = sqrt(1-exp(-2*(HXY2-HXY)));
     
     _haralickFeatures.push_back(f13);
     
@@ -519,7 +519,7 @@ namespace pandora_vision
     http://murphylab.web.cmu.edu/publications/boland/boland_node26.html  
     @return std::vector [float] The vector containing the haralick features
   **/     
-  std::vector<float> HaralickFeaturesExtractor::getFeatures()
+  std::vector<double> HaralickFeaturesExtractor::getFeatures()
   {
     for(int i = 0; i < _haralickFeatures.size(); i++)
       ROS_INFO_STREAM(" "<< _haralickFeatures.at(i));
