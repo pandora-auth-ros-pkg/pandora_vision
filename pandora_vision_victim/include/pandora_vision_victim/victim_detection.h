@@ -52,6 +52,9 @@
 #include "vision_communications/FaceDirectionMsg.h"
 #include "state_manager/state_client.h"
 
+#include "pandora_vision_victim/face_detector.h"
+#include "pandora_vision_victim/rgb_system_validator.h"
+
 //!< Horizontal field of view in degrees
 #define HFOV 61.14
 
@@ -111,6 +114,15 @@ private:
   int curState;
   //!< Previous state of robot
   int prevState;
+  
+  ///Instance of class face_detector
+  FaceDetector* _faceDetector;
+  
+  ///Parameters for the FaceDetector instance
+  std::string cascade_path;
+  std::string model_path;
+  std::string model_url;
+  int bufferSize;
 
   /**
    * @brief Get parameters referring to view and frame characteristics from
@@ -119,13 +131,18 @@ private:
   */
   void getGeneralParams();
 
+  /**
+    *@brief Get parameters referring to the face detection algorithm
+    *@return void
+  **/
+  void getFaceDetectorParameters();
 
   /**
    * @brief This method uses a FaceDetector instance to detect all
    * present faces in a given frame
    * @return void
   */
-  void victimDetect();
+  void victimDetect(bool isDepthEnabled, bool isMaskEnabled);
 
   /**
    * Function called when new ROS message appears, for front camera
