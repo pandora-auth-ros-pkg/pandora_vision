@@ -372,9 +372,9 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   bilateralFilter(gray, dst, 3, 6, 1.5);
   //medianBlur(gray, dst, 3);
   
-  //gray = dst.clone();
+  gray = dst.clone();
   
-  //clahe->apply(gray, dst);
+  clahe->apply(gray, dst);
   //equalizeHist( gray, dst );
   
   cv::Sobel(dst, gradX, CV_32F, 1, 0, 3);
