@@ -212,6 +212,55 @@ namespace pandora_vision
 
 
 
+  // Test NoiseElimination::brushfireNear
+  TEST_F ( NoiseEliminationTest, BrushfireNearTest )
+  {
+    cv::Mat image;
+
+    // Uncomment for visual inspection
+    //Visualization::showScaled ( "before brushfireNear", interpolationMethod1, 0 );
+
+    // Run NoiseElimination::brushfireNear on interpolationMethod1
+    NoiseElimination::brushfireNear ( interpolationMethod1, &image );
+
+    // Uncomment for visual inspection
+    //Visualization::showScaled ( "after brushfireNear", image, 0 );
+
+    float mean = 0.0;
+    for ( int rows = 0; rows < image.rows; rows++ )
+    {
+      for ( int cols = 0; cols < image.cols; cols++ )
+      {
+        mean += image.at< float >( rows, cols );
+      }
+    }
+
+    mean /= ( image.rows * image.cols );
+
+    // The whole of the image should be at 0.5 value
+    EXPECT_EQ ( 0.5, mean );
+
+
+    // Run NoiseElimination::brushfireNear on interpolationMethod0
+    NoiseElimination::brushfireNear ( interpolationMethod0, &image );
+
+    mean = 0.0;
+    for ( int rows = 0; rows < image.rows; rows++ )
+    {
+      for ( int cols = 0; cols < image.cols; cols++ )
+      {
+        mean += image.at< float >( rows, cols );
+      }
+    }
+
+    mean /= ( image.rows * image.cols );
+
+    // The whole of the image should be at a value of 1.0
+    EXPECT_EQ ( 1.0, mean );
+  }
+
+
+
   //! Test NoiseElimination::brushfireNearStep
   TEST_F ( NoiseEliminationTest, BrushfireNearStepTest )
   {
@@ -242,7 +291,18 @@ namespace pandora_vision
       }
     }
 
+    // All non-zero value pixels have a value of 0.5
     ASSERT_EQ ( 0.5 * ( static_cast< float >( WIDTH * HEIGHT ) - 100 ), sum );
+
+
+    // Test a blank image
+    cv::Mat blank = cv::Mat::zeros ( HEIGHT, WIDTH, CV_32FC1 );
+
+    // Run NoiseElimination::brushfireNearStep
+    NoiseElimination::brushfireNearStep ( &blank, 10 * WIDTH + 10 );
+
+    // All pixels should be still black
+    ASSERT_EQ ( 0, cv::countNonZero ( blank ) );
   }
 
 
@@ -273,6 +333,48 @@ namespace pandora_vision
 
     ASSERT_EQ ( 2, Parameters::Depth::interpolation_method );
 
+  }
+
+
+
+  //! Test NoiseElimination::transformNoiseToWhite
+  TEST_F ( NoiseEliminationTest, TransformNoiseToWhiteTest )
+  {
+    // Count how many noisy pixels there are on interpolationMethod0
+    int numZero = 0;
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( interpolationMethod0.at< float >( rows, cols ) == 0 )
+        {
+          numZero++;
+        }
+      }
+    }
+
+    cv::Mat out;
+
+    // Run NoiseElimination::transformNoiseToWhite on interpolationMethod0
+    NoiseElimination::transformNoiseToWhite ( interpolationMethod0, &out );
+
+    // Count how many pixels have obtained the value dictated inside
+    // NoiseElimination::transformNoiseToWhite (4.0)
+    int changed = 0;
+
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( out.at< float >( rows, cols ) == 4.0 )
+        {
+          changed++;
+        }
+      }
+    }
+
+    // The number of pixels changed should be equal to the intially noisy ones
+    EXPECT_EQ ( numZero, changed );
   }
 
 } // namespace pandora_vision
