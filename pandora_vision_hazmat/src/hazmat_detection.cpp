@@ -122,7 +122,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     
-     XmlRpc::XmlRpcValue cameras_list;
+    XmlRpc::XmlRpcValue cameras_list;
     if(_nh.getParam("camera_name", cameras_list)){
       ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
       
