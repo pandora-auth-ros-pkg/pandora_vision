@@ -126,7 +126,7 @@ namespace pandora_vision
     if(_nh.getParam("camera_name", cameras_list)){
       ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
       
-      for(int ii=0; ii<cameras_list.size(); ii++){
+      for(int ii = 0; ii< cameras_list.size(); ii++){
         ROS_ASSERT(cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeString);
         cameraName = static_cast<std::string>(cameras_list[ii]);
         ROS_INFO_STREAM("camera_name : " << cameraName);

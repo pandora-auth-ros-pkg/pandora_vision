@@ -81,7 +81,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/hazmat_detector.h
   src/hazmat_detector.cpp
   src/hazmat_detection.cpp
-  src/hazmat_trainer.cpp
+  src/hazmat_trainerHA.cpp
   
             
 )
