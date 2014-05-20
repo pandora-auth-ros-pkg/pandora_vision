@@ -135,6 +135,16 @@ namespace pandora_vision
       Timer::start("synchronizedCallback", "", true);
       #endif
 
+      // For simulation purposes, the width and height parameters of the
+      // point cloud must be set.
+      sensor_msgs::PointCloud2 pointCloud(*pointCloudMessage);
+
+      pointCloud.width = pointCloud.row_step / pointCloud.point_step;
+      pointCloud.height = pointCloud.data.size() / pointCloud.row_step;
+
+      // Take a pointer on the constructed point cloud
+      const sensor_msgs::PointCloud2ConstPtr& pointCloudMsg =
+        boost::make_shared<sensor_msgs::PointCloud2>(pointCloud);
 
       // Lock the rgb_depth_synchronizer node; aka prevent the execution
       // of this if-block without the explicit request of the hole_fusion node
@@ -142,12 +152,12 @@ namespace pandora_vision
 
       // Extract the RGB image from the point cloud
       cv::Mat rgbImage = MessageConversions::convertPointCloudMessageToImage(
-        pointCloudMessage, CV_8UC3);
+        pointCloudMsg, CV_8UC3);
 
       // Convert the rgbImage to a ROS message
       cv_bridge::CvImagePtr rgbImageMessagePtr(new cv_bridge::CvImage());
 
-      rgbImageMessagePtr->header = pointCloudMessage->header;
+      rgbImageMessagePtr->header = pointCloudMsg->header;
       rgbImageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
       rgbImageMessagePtr->image = rgbImage;
 
@@ -157,12 +167,12 @@ namespace pandora_vision
 
       // Extract the depth image from the point cloud
       cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
-        pointCloudMessage, CV_32FC1);
+        pointCloudMsg, CV_32FC1);
 
       // Convert the depthImage to a ROS message
       cv_bridge::CvImagePtr depthImageMessagePtr(new cv_bridge::CvImage());
 
-      depthImageMessagePtr->header = pointCloudMessage->header;
+      depthImageMessagePtr->header = pointCloudMsg->header;
       depthImageMessagePtr->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
       depthImageMessagePtr->image = depthImage;
 
@@ -172,7 +182,7 @@ namespace pandora_vision
 
 
       // Publish the synchronized point cloud
-      synchronizedPointCloudPublisher_.publish(pointCloudMessage);
+      synchronizedPointCloudPublisher_.publish(pointCloudMsg);
 
       #ifdef DEBUG_TIME
       Timer::tick("synchronizedCallback");
