@@ -44,25 +44,31 @@ namespace pandora_vision
 **/
 VictimDetection::VictimDetection() : _nh(), victimNowON(false)
 {
-  //!< Get general parameters for image processing
+  /// Get general parameters for image processing
   getGeneralParams();
+  
+  /// Get parameters referring to faceDetector instance
+  getFaceDetectorParameters();
 
-  //!< Convert field of view from degrees to rads
+  /// Convert field of view from degrees to rads
   hfov = hfov * CV_PI / 180;
   vfov = vfov * CV_PI / 180;
 
   ratioX = hfov / frameWidth;
   ratioY = vfov / frameHeight;
 
-  //!< Memory will allocated in the imageCallback
+  /// Memory will allocated in the imageCallback
   victimFrame = cv::Mat::zeros(frameWidth, frameHeight, CV_8UC3);
 
-  //!< Subscribe to input image's topic
-  //!< image_transport::ImageTransport it(_nh);
+  /// Subscribe to input image's topic
+  /// image_transport::ImageTransport it(_nh);
   _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
                        imageTopic, 1, &VictimDetection::imageCallback, this);
-
-  //!< Initialize states - robot starts in STATE_OFF
+  
+   /// Initialize face detector
+  _faceDetector = new FaceDetector(cascade_path, model_path, bufferSize);
+  
+  /// Initialize states - robot starts in STATE_OFF
   curState = state_manager_communications::robotModeMsg::MODE_OFF;
   prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
@@ -77,6 +83,7 @@ VictimDetection::VictimDetection() : _nh(), victimNowON(false)
 VictimDetection::~VictimDetection()
 {
   ROS_DEBUG("[victim_node] : Destroying Victim Detection instance");
+  delete _faceDetector;
 }
 
 /**
@@ -174,7 +181,63 @@ void VictimDetection::getGeneralParams()
 
 }
 
+/**
+  @brief Get parameters referring to the face detection algorithm
+  @return void
+**/
+void VictimDetection::getFaceDetectorParameters()
+{
 
+  //!< Get the path of haar_cascade xml file if available;
+  if (_nh.hasParam("cascade_path"))
+  {
+    _nh.getParam("cascade_path", cascade_path);
+    ROS_DEBUG_STREAM("cascade_path : " << cascade_path);
+  }
+  else
+  {
+    std::string temp = "/data/haarcascade_frontalface_alt_tree.xml";
+    cascade_path.assign(packagePath);
+    cascade_path.append(temp);
+    ROS_DEBUG_STREAM("cascade_path : " << cascade_path);
+  }
+
+  //!< Get the model.xml url;
+  if (_nh.hasParam("model_url"))
+  {
+    _nh.getParam("model_url", model_url);
+    ROS_DEBUG_STREAM("modelURL : " << model_url);
+  }
+  else
+  {
+    model_url = "https://pandora.ee.auth.gr/vision/model.xml";
+    ROS_DEBUG_STREAM("modelURL : " << model_url);
+  }
+
+  //!< Get the path of model_path xml file to be loaded
+  if (_nh.hasParam("model_path"))
+  {
+    _nh.getParam("model_path",  model_path);
+    ROS_DEBUG_STREAM(" model_path : " <<  model_path);
+  }
+  else
+  {
+    model_path = packagePath + "/data/model.xml";
+    ROS_DEBUG_STREAM(" model_path : " <<  model_path);
+  }
+
+
+  if (_nh.hasParam("bufferSize"))
+  {
+    _nh.getParam("bufferSize", bufferSize);
+    ROS_DEBUG_STREAM("bufferSize : " << bufferSize);
+  }
+  else
+  {
+    bufferSize = 5;
+    ROS_DEBUG_STREAM("bufferSize : " << bufferSize);
+  }
+}
 
 /**
  * @brief Function called when new ROS message appears, for camera
@@ -193,7 +256,9 @@ void VictimDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("[victim_node] : No more Frames ");
     return;
   }
-  victimDetect();
+  bool isDepthEnabled = true;
+  bool isMaskEnabled = true;
+  victimDetect(isDepthEnabled, isMaskEnabled);
 }
 
 /**
@@ -201,13 +266,34 @@ void VictimDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
  * present faces in a given frame
  * @return void
 */
-void VictimDetection::victimDetect()
+void VictimDetection::victimDetect(bool isDepthEnabled, bool isMaskEnabled)
 {
   if(!victimNowON)
-  {
     return;
-  }
   
+  if(isDepthEnabled == true && isMaskEnabled == true){
+    ///Enable Viola Jones for rgb image
+      _faceDetector->findFaces(victimFrame);
+    ///Enable Viola Jones for depth image
+    ///Enable rgb_system validator for rgb image
+    ///Enable rgb_system validator for depth image  
+  }  
+  
+  else if(isDepthEnabled == false && isMaskEnabled == true){
+    ///Enable Viola Jones for rgb image
+      _faceDetector->findFaces(victimFrame);
+    ///Enable rgb_system validator for rgb image
+  }
+   
+  else if(isDepthEnabled == true && isMaskEnabled == false){
+    ///Enable Viola Jones for rgb image
+      _faceDetector->findFaces(victimFrame);
+    ///Enable Viola Jones for depth image
+  }
+  else if(isDepthEnabled == false && isMaskEnabled == false){
+    ///Enable Viola Jones for rgb image
+      _faceDetector->findFaces(victimFrame);
+  }  
 }
 
 
