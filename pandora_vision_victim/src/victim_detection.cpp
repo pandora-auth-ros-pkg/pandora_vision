@@ -193,7 +193,7 @@ void VictimDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("[victim_node] : No more Frames ");
     return;
   }
-  victimCallback();
+  victimDetect();
 }
 
 /**
@@ -201,14 +201,13 @@ void VictimDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
  * present faces in a given frame
  * @return void
 */
-void VictimDetection::victimCallback()
+void VictimDetection::victimDetect()
 {
   if(!victimNowON)
   {
     return;
   }
-  //_colorDetection.findColorFeatures(victimFrame);
-  _edgeOrientationDetection.findEdgeFeatures(victimFrame);
+  
 }
 
 

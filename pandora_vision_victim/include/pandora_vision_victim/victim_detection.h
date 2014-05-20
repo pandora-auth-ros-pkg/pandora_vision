@@ -52,8 +52,6 @@
 #include "vision_communications/FaceDirectionMsg.h"
 #include "state_manager/state_client.h"
 
-#include "pandora_vision_victim/channels_statistics_extractor.h"
-#include "pandora_vision_victim/edge_orientation_detection.h"
 //!< Horizontal field of view in degrees
 #define HFOV 61.14
 
@@ -98,11 +96,7 @@ private:
   //!< The topic subscribed to for the camera
   std::string imageTopic;
   std::string cameraFrameId;
-  
-  
-  ChannelsStatisticsExtractor _colorDetection;
-  EdgeOrientationDetection _edgeOrientationDetection;
- 
+   
   //!< Publishers for FaceDetector result messages
   ros::Publisher _victimDirectionPublisher;
 
@@ -131,7 +125,7 @@ private:
    * present faces in a given frame
    * @return void
   */
-  void victimCallback();
+  void victimDetect();
 
   /**
    * Function called when new ROS message appears, for front camera

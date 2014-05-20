@@ -36,9 +36,11 @@ include_directories(include
 add_executable(victim_node 
     src/victim_node.cpp
     src/victim_detection.cpp
+    src/rgb_system_validator.cpp
+    src/depth_system_validator.cpp
     src/face_detector.cpp
     src/channels_statistics_extractor.cpp
-    src/edge_orientation_detection.cpp
+    src/edge_orientation_extractor.cpp
     src/haralickfeature_extractor.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
