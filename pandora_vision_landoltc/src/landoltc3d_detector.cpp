@@ -359,6 +359,9 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 {
   cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y, thresholded, grad_x, grad_y;
   cv::Mat erodeKernel(cv::Size(1, 1), CV_8UC1, cv::Scalar(1));
+  
+  double start = static_cast<double>(cv::getTickCount());
+  double fps;
 
   cv::cvtColor(*input, gray, CV_BGR2GRAY);
 
@@ -366,12 +369,12 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  //bilateralFilter(gray, dst, 3, 6, 1.5);
-  medianBlur(gray, dst, 3);
+  bilateralFilter(gray, dst, 3, 6, 1.5);
+  //medianBlur(gray, dst, 3);
   
   //gray = dst.clone();
   
-  clahe->apply(gray, dst);
+  //clahe->apply(gray, dst);
   //equalizeHist( gray, dst );
   
   cv::Sobel(dst, gradX, CV_32F, 1, 0, 3);
@@ -397,14 +400,14 @@ void LandoltC3dDetector::begin(cv::Mat* input)
       
   addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
-  cv::imshow("dst", dst);
+  //cv::imshow("dst", dst);
   
   //applyBradleyThresholding(dst, &thresholded);
   cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 15, 1);
   
   cv::erode(thresholded, thresholded, erodeKernel);
   
-  cv::imshow("thresholded", thresholded);
+  //cv::imshow("thresholded", thresholded);
   
   findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
 
@@ -413,7 +416,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::rectangle(*input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
   }
   
-  fuse();
+  //fuse();
   
   #ifdef SHOW_DEBUG_IMAGE
     cv::imshow("Raw", *input);
@@ -424,6 +427,14 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _newCenters.clear();
   _rectangles.clear();
   _fillColors.clear();
+  
+  double end = (cvGetTickCount() - start) / cvGetTickFrequency();
+
+    end = end / 1000000;
+
+    fps = 1 / end;
+    
+    ROS_INFO("FPS %lf", fps);
 
 }
 
