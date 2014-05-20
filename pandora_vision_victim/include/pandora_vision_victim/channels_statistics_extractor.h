@@ -42,7 +42,7 @@
 
 namespace pandora_vision
 {
-  class ColorExtractor 
+  class ChannelsStatisticsExtractor 
   {
     //!< Establish the number of bins
     int h_bins, s_bins, v_bins;
@@ -112,10 +112,10 @@ namespace pandora_vision
     public:
     
     //!Constructor
-    ColorExtractor();
+    ChannelsStatisticsExtractor();
     
     //!Destructor
-    virtual ~ColorExtractor();
+    virtual ~ChannelsStatisticsExtractor();
     
     /**
      * @brief This is the main function which calls all other for the 
@@ -142,7 +142,7 @@ namespace pandora_vision
      * @brief Function returning the color statistics feature vector
      * @return featureVector
      */ 
-    std::vector<double> getColorFeatureVector();
+    std::vector<double> getFeatures();
   };
   
 }// namespace pandora_vision
