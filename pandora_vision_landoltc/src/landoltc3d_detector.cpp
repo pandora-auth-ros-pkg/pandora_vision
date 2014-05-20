@@ -685,20 +685,20 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   //cv::imshow("dst", dst);
   
-  if(_bradley)
-  {
-    applyBradleyThresholding(dst, &thresholded);
-    _bradley = false;
-  }
-  else
-  {
+  //~ if(_bradley)
+  //~ {
+    //~ applyBradleyThresholding(dst, &thresholded);
+    //~ _bradley = false;
+  //~ }
+  //~ else
+  //~ {
     cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 2);
-    _bradley = true;
-  }
+    //~ _bradley = true;
+  //~ }
   
   cv::erode(thresholded, thresholded, erodeKernel);
   
-  cv::imshow("thresholded", thresholded);
+  //cv::imshow("thresholded", thresholded);
   
   findLandoltContours(thresholded, thresholded.rows, thresholded.cols, _refContours[0]);
 
