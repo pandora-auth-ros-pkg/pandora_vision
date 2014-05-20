@@ -61,16 +61,16 @@ namespace pandora_vision
   CONVOLUTION_VALID
   
 };
-  class EdgeOrientationDetection 
+  class EdgeOrientationExtractor
   {
     
     public:
     
     //!Constructor
-    EdgeOrientationDetection();
+    EdgeOrientationExtractor();
     
     //!Destructor
-    virtual ~EdgeOrientationDetection ();
+    virtual ~EdgeOrientationExtractor();
     
     /**
      * @brief This is the main function which calls all the others and 

@@ -35,14 +35,14 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/edge_orientation_detection.h"
+#include "pandora_vision_victim/edge_orientation_extractor.h"
 
 namespace pandora_vision
 {
   /**
     @brief Constructor
   **/
-  EdgeOrientationDetection::EdgeOrientationDetection()
+  EdgeOrientationExtractor::EdgeOrientationExtractor()
   {
    
    ROS_INFO("[victim_node] : Created Edge Orientation detection instance"); 
@@ -52,7 +52,7 @@ namespace pandora_vision
   /**
     @brief Destructor
   */
-  EdgeOrientationDetection::~EdgeOrientationDetection()
+  EdgeOrientationExtractor::~EdgeOrientationExtractor()
   {
     ROS_INFO("[victim_node] : Destroying Edge Orientation detection instance");
   }
@@ -63,7 +63,7 @@ namespace pandora_vision
    * @param src [cv::Mat] the current image.
   */ 
   
-  void EdgeOrientationDetection::findEdgeFeatures(cv::Mat src)
+  void EdgeOrientationExtractor::findEdgeFeatures(cv::Mat src)
   {
     GaussianBlur( src, src, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT );
     cvtColor( src, src, CV_BGR2GRAY );
@@ -93,10 +93,8 @@ namespace pandora_vision
    * @return [std::vector<double>] the computed  1x80 edgeFeatures vector.
   */ 
   
-  std::vector<double> EdgeOrientationDetection::partition(cv::Mat currFrame, 
-                                                          int colsBlockSize, 
-                                                          int rowsBlockSize )
-
+  std::vector<double> EdgeOrientationExtractor::partition(cv::Mat currFrame, 
+        int colsBlockSize, int rowsBlockSize )
   {   
     
     std::vector<double> temp(5);
@@ -126,7 +124,7 @@ namespace pandora_vision
    * @return [std::vector<double>] the computed 1x5 edgeFeatures vector.
   */ 
   
-  std::vector<double> EdgeOrientationDetection::findLocalEdgeFeatures(cv::Mat 
+  std::vector<double> EdgeOrientationExtractor::findLocalEdgeFeatures(cv::Mat 
                                                                   currFrame)
 {
   
@@ -232,7 +230,7 @@ namespace pandora_vision
      * @return dest [cv::Mat&] the convoluted image.
     */ 
 
-    void EdgeOrientationDetection::conv2(const cv::Mat &img, 
+  void EdgeOrientationExtractor::conv2(const cv::Mat &img, 
             const cv::Mat& kernel,ConvolutionType type, cv::Mat* dest)
   {
     cv::Mat source = img;
@@ -266,7 +264,7 @@ namespace pandora_vision
      * @param hist [cv::Mat] the calculated histogram.
      * @param colorComp [const char*] the name of the window.
   */ 
-  void EdgeOrientationDetection::show_histogramm(int bins, cv::Mat hist, 
+  void EdgeOrientationExtractor::show_histogramm(int bins, cv::Mat hist, 
                                                const char* colorComp)
   { 
     int w = 400; int h = 400;
