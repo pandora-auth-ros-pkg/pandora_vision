@@ -73,5 +73,48 @@ namespace pandora_vision
      
     ///Extract haralick features for rgb image 
     _haralickFeatureDetector.findHaralickFeatures(inImage);
+    
+    if(!rgbFeatureVector.empty())
+      rgbFeatureVector.erase(rgbFeatureVector.begin(),
+        rgbFeatureVector.size() + rgbFeatureVector.begin());
+    
+    setRgbFeatureVector();
+  }
+  
+  /**
+    * @brief This function creates feature vector according to the
+    * predifined features for the rgb image
+    * @return void
+  */ 
+  void RgbSystemValidator::setRgbFeatureVector()
+  {
+    ///Append to rgbFeatureVector features according to color
+    ///histogramms and other statistics
+    std::vector<double> channelsStatictisFeatureVector = 
+        _channelsStatisticsDetector.getFeatures();
+    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
+          rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
+    
+    ///Append to rgbFeatureVector features according to edge orientation
+    std::vector<double> edgeOrientationFeatureVector = 
+        _edgeOrientationDetector.getFeatures();
+    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
+          rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
+    
+    ///Append to rgbFeatureVector features according to haaralick features
+    std::vector<double> haaralickFeatureVector = 
+        _haralickFeatureDetector.getFeatures();
+    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
+          rgbFeatureVector.push_back(haaralickFeatureVector[i]);  
+          
+    ///Deallocate memory
+    channelsStatictisFeatureVector.erase(channelsStatictisFeatureVector.begin(),
+      channelsStatictisFeatureVector.size() + channelsStatictisFeatureVector.begin());
+      
+    edgeOrientationFeatureVector.erase(edgeOrientationFeatureVector.begin(),
+      edgeOrientationFeatureVector.size() + edgeOrientationFeatureVector.begin());
+       
+    haaralickFeatureVector.erase(haaralickFeatureVector.begin(),
+      haaralickFeatureVector.size() + haaralickFeatureVector.begin());
   }
 } 

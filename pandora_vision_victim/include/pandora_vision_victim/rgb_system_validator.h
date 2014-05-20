@@ -76,6 +76,7 @@ namespace pandora_vision
     /**
      * @brief This function creates feature vector according to the
      * predifined features for the rgb image
+     * @return void
      */ 
     void setRgbFeatureVector();
     
