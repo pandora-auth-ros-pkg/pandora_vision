@@ -58,6 +58,12 @@ namespace pandora_vision
     ROS_INFO("[victim_node] : Destroying Color Detection instance");
   }
   
+  /**
+   * @brief This function calculates all necessary histogramms
+   * for color extraction.
+   * @param hsvFrame [cv::Mat] current frame to be processed
+   * @return void
+  */ 
   void ColorExtractor::setHistogramms(cv::Mat hsvFrame)
   {
     //!< Separate the image in 3 places (H,S,V) one for each channel
@@ -124,10 +130,10 @@ namespace pandora_vision
     //!< Compute the colour angles of rgb color components
     computeColorAngles();
     ROS_INFO("Color Angles and normalized intensity std");
-    for (int ii = 0; ii< ColorAnglesAndStd.size(); ii++)
-      ROS_INFO_STREAM(" " << ColorAnglesAndStd[ii]);
+    for (int ii = 0; ii< colorAnglesAndStd.size(); ii++)
+      ROS_INFO_STREAM(" " << colorAnglesAndStd[ii]);
     
-    ColorFeatureVector = extractColorFeatureVector();
+    extractColorFeatureVector();
   }
   /**
    * @brief This function returns the histogram of one color component from 
@@ -331,27 +337,39 @@ namespace pandora_vision
    
     //!< Construct the final feature vector
     std::vector<double> ColorAnglesAndStd(4);
-    ColorAnglesAndStd[0] = rgAngle;
-    ColorAnglesAndStd[1] = gbAngle;
-    ColorAnglesAndStd[2] = rbAngle;
-    ColorAnglesAndStd[3] = std;
+    colorAnglesAndStd[0] = rgAngle;
+    colorAnglesAndStd[1] = gbAngle;
+    colorAnglesAndStd[2] = rbAngle;
+    colorAnglesAndStd[3] = std;
   }
   
-  std::vector<double> ColorExtractor::extractColorFeatureVector()
+  /**
+     * @brief This function extract a feature vector according to color
+     * and statistcs features.
+     * @return void
+  */ 
+  void ColorExtractor::extractColorFeatureVector()
   {
  
-    ColorFeatureVector.reserve(28);
-    ColorFeatureVector.insert(ColorFeatureVector.end(),
+    colorFeatureVector.reserve(28);
+    colorFeatureVector.insert(colorFeatureVector.end(),
         meanStdHSV.begin(), meanStdHSV.end());
-    ColorFeatureVector.insert(ColorFeatureVector.end(),
+    colorFeatureVector.insert(colorFeatureVector.end(),
         dominantVal.begin(), dominantVal.end());
-    ColorFeatureVector.insert(ColorFeatureVector.end(),
+    colorFeatureVector.insert(colorFeatureVector.end(),
         huedft.begin(), huedft.end());
-    ColorFeatureVector.insert(ColorFeatureVector.end(),
+    colorFeatureVector.insert(colorFeatureVector.end(),
         satdft.begin(), satdft.end());
-    ColorFeatureVector.insert(ColorFeatureVector.end(),
-        ColorAnglesAndStd.begin(), ColorAnglesAndStd.end());
-    
-    return ColorFeatureVector;
+    colorFeatureVector.insert(colorFeatureVector.end(),
+        colorAnglesAndStd.begin(), colorAnglesAndStd.end());
   } 
+  
+  /**
+     * @brief Function returning the color statistics feature vector
+     * @return featureVector
+  */ 
+  std::vector<double> ColorExtractor::getColorFeatureVector()
+  {
+    return colorFeatureVector;
+  }
 }// namespace pandora_vision

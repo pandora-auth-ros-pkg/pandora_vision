@@ -62,25 +62,11 @@ namespace pandora_vision
     std::vector<double>huedft;
     std::vector<double>satdft;
     //!< Compute the colour angles of rgb color components
-    std::vector<double>ColorAnglesAndStd;
+    std::vector<double>colorAnglesAndStd;
     //!< Compute a vector of all color features
-    std::vector<double>ColorFeatureVector;
+    std::vector<double>colorFeatureVector;
     
-    public:
-    
-    //!Constructor
-    ColorExtractor();
-    
-    //!Destructor
-    virtual ~ColorExtractor();
-    
-    /**
-     * @brief This is the main function which calls all other for the 
-     * computation of the color features.
-    */ 
-    void findColorFeatures(cv::Mat src);
-    
-    /**
+     /**
      * @brief This function returns the histogram of one color component from 
      * the src image.
      * @param planes [cv::Mat] contains the pixel values of a color component.
@@ -123,9 +109,40 @@ namespace pandora_vision
     */
     void computeColorAngles();
     
+    public:
+    
+    //!Constructor
+    ColorExtractor();
+    
+    //!Destructor
+    virtual ~ColorExtractor();
+    
+    /**
+     * @brief This is the main function which calls all other for the 
+     * computation of the color features.
+    */ 
+    void findColorFeatures(cv::Mat src);
+    
+    /**
+     * @brief This function calculates all necessary histogramms
+     * for color extraction.
+     * @param hsvFrame [cv::Mat] current frame to be processed
+     * @return void
+    */ 
     void setHistogramms(cv::Mat hsvFrame);
     
-    std::vector<double> extractColorFeatureVector();
+    /**
+     * @brief This function extract a feature vector according to color
+     * and statistcs features.
+     * @return void
+     */ 
+    void extractColorFeatureVector();
+    
+    /**
+     * @brief Function returning the color statistics feature vector
+     * @return featureVector
+     */ 
+    std::vector<double> getColorFeatureVector();
   };
   
 }// namespace pandora_vision
