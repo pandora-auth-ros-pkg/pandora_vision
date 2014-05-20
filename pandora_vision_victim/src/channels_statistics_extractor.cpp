@@ -35,14 +35,14 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/color_extractor.h"
+#include "pandora_vision_victim/channels_statistics_extractor.h"
 
 namespace pandora_vision
 {
   /**
     @brief Constructor
   **/
-  ColorExtractor::ColorExtractor()
+  ChannelsStatisticsExtractor::ChannelsStatisticsExtractor()
   {
     h_bins = 180; 
     s_bins = 256;
@@ -53,7 +53,7 @@ namespace pandora_vision
   /**
     @brief Destructor
   */
-  ColorExtractor::~ColorExtractor()
+  ChannelsStatisticsExtractor::~ChannelsStatisticsExtractor()
   {
     ROS_INFO("[victim_node] : Destroying Color Detection instance");
   }
@@ -64,7 +64,7 @@ namespace pandora_vision
    * @param hsvFrame [cv::Mat] current frame to be processed
    * @return void
   */ 
-  void ColorExtractor::setHistogramms(cv::Mat hsvFrame)
+  void ChannelsStatisticsExtractor::setHistogramms(cv::Mat hsvFrame)
   {
     //!< Separate the image in 3 places (H,S,V) one for each channel
     split( hsvFrame, hsv_planes );
@@ -91,7 +91,7 @@ namespace pandora_vision
    * @brief This is the main function which calls all others for the computation
    * of the color features.
   */ 
-  void ColorExtractor::findColorFeatures(cv::Mat src)
+  void ChannelsStatisticsExtractor::findColorFeatures(cv::Mat src)
   {
     inFrame = src.clone();
     cv::Mat hsv;
@@ -143,7 +143,7 @@ namespace pandora_vision
    * @param histRange [const float*] the range of the histogram.
    * @return [cv::Mat] the calculated histogram.
   */ 
-  cv::Mat ColorExtractor::computeHist(cv::Mat planes, int histSize,
+  cv::Mat ChannelsStatisticsExtractor::computeHist(cv::Mat planes, int histSize,
     const float* histRange)
   {
     bool uniform = true; 
@@ -160,7 +160,7 @@ namespace pandora_vision
    * @brief This function computes the average and standard deviation value of 
    * every color component(HSV) and returns a feature vector.
   */ 
-  void ColorExtractor::computeMeanStdHSV()
+  void ChannelsStatisticsExtractor::computeMeanStdHSV()
   {
     if(!meanStdHSV.empty())
       meanStdHSV.erase(meanStdHSV.begin(), meanStdHSV.begin()+meanStdHSV.size());
@@ -185,7 +185,7 @@ namespace pandora_vision
    * @param density [double&] the dominant color density (to be returned).
    * @return void
   */ 
-  void ColorExtractor::findDominantColor( cv::Mat hist, int histSize,
+  void ChannelsStatisticsExtractor::findDominantColor( cv::Mat hist, int histSize,
     double* value, double* density )
   {
     double maxVal = 0;
@@ -212,7 +212,7 @@ namespace pandora_vision
    * @return [std::vector<double>] the feature vector with the 6 first Dft 
    * coefficients.
   */
-  std::vector<double> ColorExtractor::computeDFT(cv::Mat img)
+  std::vector<double> ChannelsStatisticsExtractor::computeDFT(cv::Mat img)
   {
     std::vector<double>temp(6);
     cv::Mat padded;  
@@ -262,7 +262,7 @@ namespace pandora_vision
    * normalized intensity std . 
    * @return void
   */
-  void ColorExtractor::computeColorAngles()
+  void ChannelsStatisticsExtractor::computeColorAngles()
   {
     //!< Separate the image in 3 places (R,G,B) one for each channel
     std::vector<cv::Mat> rgb_planes;
@@ -348,7 +348,7 @@ namespace pandora_vision
      * and statistcs features.
      * @return void
   */ 
-  void ColorExtractor::extractColorFeatureVector()
+  void ChannelsStatisticsExtractor::extractColorFeatureVector()
   {
  
     colorFeatureVector.reserve(28);
@@ -368,7 +368,7 @@ namespace pandora_vision
      * @brief Function returning the color statistics feature vector
      * @return featureVector
   */ 
-  std::vector<double> ColorExtractor::getColorFeatureVector()
+  std::vector<double> ChannelsStatisticsExtractor::getFeatures()
   {
     return colorFeatureVector;
   }

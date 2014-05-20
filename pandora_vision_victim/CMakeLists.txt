@@ -37,7 +37,7 @@ add_executable(victim_node
     src/victim_node.cpp
     src/victim_detection.cpp
     src/face_detector.cpp
-    src/color_extractor.cpp
+    src/channels_statistics_extractor.cpp
     src/edge_orientation_detection.cpp
     src/haralickfeature_extractor.cpp
 )
