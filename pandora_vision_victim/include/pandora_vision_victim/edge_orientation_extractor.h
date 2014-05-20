@@ -63,22 +63,9 @@ namespace pandora_vision
 };
   class EdgeOrientationExtractor
   {
+    /// Vector containing features according to edge orientation
+    std::vector<double> edgeFeatures;
     
-    public:
-    
-    //!Constructor
-    EdgeOrientationExtractor();
-    
-    //!Destructor
-    virtual ~EdgeOrientationExtractor();
-    
-    /**
-     * @brief This is the main function which calls all the others and 
-     * computes the final edge histogram features.
-     * @param src [cv::Mat] the current image.
-    */ 
-    void findEdgeFeatures(cv::Mat src);
-
     /**
      *@brief This is the function which divides the image 
      *into 16 subblocks and calls the findLocalEdgeFeatures to compute the 
@@ -117,6 +104,22 @@ namespace pandora_vision
      * @param colorComp [const char*] the name of the window.
     */ 
     void show_histogramm (int bins, cv::Mat hist, const char* colorComp);
+    public:
+    
+    //!Constructor
+    EdgeOrientationExtractor();
+    
+    //!Destructor
+    ~EdgeOrientationExtractor();
+    
+    /**
+     * @brief This is the main function which calls all the others and 
+     * computes the final edge histogram features.
+     * @param src [cv::Mat] the current image.
+    */ 
+    void findEdgeFeatures(cv::Mat src);
+    
+    std::vector<double> getFeatures();
   };
   
 }// namespace pandora_vision
