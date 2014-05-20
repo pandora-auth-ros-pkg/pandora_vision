@@ -86,7 +86,7 @@ private:
   cv::Mat _coloredContours;
   //!<2D Matric used for separating each LandoltC to each parts
   cv::Mat _mask;
-  
+  //!<Vector containing LandoltC structs
   std::vector<LandoltC> _landoltc;
 
 public:

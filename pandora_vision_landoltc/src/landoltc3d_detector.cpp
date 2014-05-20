@@ -47,6 +47,10 @@ LandoltC3dDetector::LandoltC3dDetector()
 
   _threshold = 90;
   
+  _edges = 0;
+  
+  _bradley = false;
+  
 }
 
 //!< Destructor
@@ -78,7 +82,267 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
 
   cv::findContours(ref, _refContours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
   
-  clahe = cv::createCLAHE(0.01, cv::Size(8, 8));
+  clahe = cv::createCLAHE(4, cv::Size(8, 8));
+}
+
+/**
+  @brief Mask for separating a LandoltC3D Contour to its components
+  @return void
+**/
+void LandoltC3dDetector::applyMask()
+{
+  for(int i = 0; i < _landoltc3d.size(); i++)
+  {
+    LandoltC3D* temp = &(_landoltc3d.at(i));
+    
+    for (int j = 0; j < (*temp).color.size(); j++)
+    {
+      _mask = cv::Mat::zeros(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
+    
+      cv::inRange(_coloredContours, (*temp).color[j], (*temp).color[j], _mask);
+    
+      cv::Mat out = getWarpPerspectiveTransform(_mask, (*temp).bbox[j]);
+    
+      cv::Mat cropped = _mask((*temp).bbox[j]).clone(); 
+    
+      cv::Mat padded;
+    
+      cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
+    
+      cv::imshow("padded", padded); 
+    
+      findRotation(padded, temp);
+    
+      #ifdef SHOW_DEBUG_IMAGE
+      //cv::imshow("padded", padded);
+      //cv::waitKey(200);
+      #endif
+    }
+  }
+}
+
+/**
+  @brief Thinning algorith using the Zhang-Suen method
+  @param in [cv::Mat*] Matrix containing the frame to thin
+  @return void
+**/
+void LandoltC3dDetector::thinning(cv::Mat* in)
+{
+  *in = *in / 255;
+  cv::Mat thinned;
+  cv::Mat dif;
+  in->copyTo(thinned);
+
+  do {
+    thinningIter(in, 1);
+    thinningIter(in, 2);
+    cv::absdiff(*in, thinned, dif);
+    in->copyTo(thinned);;
+  } while(cv::countNonZero(dif) > 0);
+
+  *in = (*in) * 255;
+}
+
+/**
+  @brief Thinning iteration call from the thinning function
+  @param in [cv::Mat*] Matrix containing the frame to thin
+  @param iter [int] Number of iteration with values 1-2
+  @return void
+  **/
+void LandoltC3dDetector::thinningIter(cv::Mat* in, int iter)
+{
+  cv::Mat temp = cv::Mat::ones(in->size(), CV_8UC1);
+
+  for(int y = 0; y < (in->rows - 1); y++)
+  {
+    for(int x = 0; x < (in->cols - 1); x++)
+    {
+      unsigned char p2 = in->at<uchar>(y - 1, x);
+      unsigned char p3 = in->at<uchar>(y - 1, x + 1);
+      unsigned char p4 = in->at<uchar>(y, x + 1);
+      unsigned char p5 = in->at<uchar>(y + 1, x + 1);
+      unsigned char p6 = in->at<uchar>(y + 1, x);
+      unsigned char p7 = in->at<uchar>(y + 1, x - 1);
+      unsigned char p8 = in->at<uchar>(y, x - 1);
+      unsigned char p9 = in->at<uchar>(y - 1, x - 1);
+
+      int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+
+      int A = (p2 == 0 && p3 == 1) + (p3 == 0 && p4 == 1) + (p4 == 0 && p5 == 1)
+      + (p5 == 0 && p6 == 1)
+      + (p6 == 0 && p7 == 1) + (p7 == 0 && p8 == 1) + (p8 == 0 && p9 == 1)
+      + (p9 == 0 && p2 == 1);
+
+      if(iter == 1)
+      {
+        int c1 = p2 * p4 * p6;
+        int c2 = p4 * p6 * p8;
+
+        if(A == 1 && (B >= 2 && B <= 6) && c1 == 0 && c2 == 0) temp.at<uchar>(y, x) = 0;
+      }
+
+      if(iter == 2)
+      {
+        int c1 = p2 * p4 * p8;
+        int c2 = p2 * p6 * p8;
+
+        if(A == 1 && (B >= 2 && B <= 6) && c1 == 0 && c2 == 0) temp.at<uchar>(y, x) = 0;
+      }
+    }
+  }
+
+  cv::bitwise_and(*in, temp, *in);
+}
+
+/**
+  @brief Function for calculating the neighbours of pixels considering
+  8-connectivity
+  @param index [unsigned int] Index of pixel in matrix
+  @param in [cv::Mat&] Input Image
+  @return void
+**/    
+void LandoltC3dDetector::find8Neights(unsigned int index, const cv::Mat& in)
+{
+  unsigned int y = index/in.cols;
+  unsigned int x = index%in.cols;
+
+  unsigned char p1 = in.at<unsigned char>(y-1, x);
+  unsigned char p2 = in.at<unsigned char>(y-1, x+1);
+  unsigned char p3 = in.at<unsigned char>(y, x+1);
+  unsigned char p4 = in.at<unsigned char>(y+1, x+1);
+  unsigned char p5 = in.at<unsigned char>(y+1, x);
+  unsigned char p6 = in.at<unsigned char>(y+1, x-1);
+  unsigned char p7 = in.at<unsigned char>(y, x-1);
+  unsigned char p8 = in.at<unsigned char>(y-1, x-1);
+     
+  if(p1+p2+p3+p4+p5+p6+p7+p8 == 255) 
+  {
+    _edges++;
+    _edgePoints.push_back(cv::Point(x, y));    
+  }
+}
+
+/**
+  @brief Function for calculating perspective transform, in
+  order to get better angle calculation precision
+  @param rec [cv::rec] Rectangle enclosing a 'C'
+  @param in [cv::Mat&] Input Image
+  @return [cv::Mat] Output Image 
+**/    
+cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec)
+{
+  std::vector<cv::Point2f> corners;
+  cv::Mat quad = cv::Mat::zeros(100, 100, CV_8UC1);
+  
+  corners.clear();
+  corners.push_back(rec.tl());
+  
+  cv::Point2f tr = cv::Point2f(rec.tl().x+rec.width, rec.tl().y);
+  corners.push_back(tr);
+  
+  corners.push_back(rec.br());
+  cv::Point2f bl = cv::Point2f(rec.br().x-rec.width, rec.br().y);
+  corners.push_back(bl);
+  
+  
+  // Corners of the destination image
+  std::vector<cv::Point2f> quad_pts;
+  quad_pts.push_back(cv::Point2f(0, 0));
+  quad_pts.push_back(cv::Point2f(quad.cols, 0));
+  quad_pts.push_back(cv::Point2f(quad.cols, quad.rows));
+  quad_pts.push_back(cv::Point2f(0, quad.rows));
+  
+  // Get transformation matrix
+  cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
+  
+  // Apply perspective transformation
+  cv::warpPerspective(in, quad, transmtx, quad.size());
+  
+  #ifdef SHOW_DEBUG_IMAGE
+  cv:imshow("warp", quad);
+  cv::waitKey(5);      
+  #endif
+  
+  return quad;
+}
+
+/**
+  @brief Calculation of rotation based on thinning.Precision is good for a
+  distance up to 50cm from the camera, gives more accurate results than the first
+  method but it's slower.
+  @param in [const cv::Mat&] Matrix containing the padded frame
+  @param temp [LandoltC3D*] Struct of LandoltC3D
+  @return void
+**/  
+void LandoltC3dDetector::findRotation(const cv::Mat&in, LandoltC3D* temp)
+{
+  cv::Mat paddedptr;
+        
+  paddedptr = in.clone();
+        
+  thinning(&paddedptr);
+  
+  unsigned int *pts =new unsigned int[paddedptr.cols * paddedptr.rows];
+        
+  int limit = 0;
+
+  for (unsigned int rows = 1; rows < paddedptr.rows - 1; rows++)
+  {
+    for (unsigned int cols = 1; cols < paddedptr.cols - 1; cols++)
+    {
+      if(paddedptr.data[rows * paddedptr.cols + cols] !=0)
+      {
+          pts[limit]= rows * paddedptr.cols + cols;
+          limit++;          
+      }
+    }
+  }
+  
+  for(int j = 0; j < limit; j++) 
+  {
+    find8Neights(pts[j], paddedptr);    
+  }
+  
+  for(int k = 0; k < _edgePoints.size(); k++)  
+  {
+    cv::circle(paddedptr, _edgePoints.at(k), 2, 255, -1, 8, 0);
+  }
+  
+  if(_edgePoints.size() == 2)
+  {
+    int yc=(_edgePoints.at(0).y+_edgePoints.at(1).y)/2;
+    int xc=(_edgePoints.at(0).x+_edgePoints.at(1).x)/2;
+    
+    cv::Point gapCenter(xc, yc);
+    
+    cv::circle(paddedptr, gapCenter, 1, 255, -1, 8, 0);
+        
+    cv::Point center(paddedptr.cols/2, paddedptr.rows/2);
+    
+    cv::circle(paddedptr, center, 1, 255, -1, 8, 0);
+  
+    double angle = atan2(gapCenter.y-center.y, gapCenter.x-center.x);
+    
+    if(angle < 0) angle+=2*3.14159265359;
+    
+    //std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
+    //ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
+    (*temp).angles.push_back(angle);
+
+    
+  }
+  
+  #ifdef SHOW_DEBUG_IMAGE
+    cv::imshow("paddedptr", paddedptr); 
+    cv::waitKey(30); 
+  #endif
+    
+  _edges = 0;
+  
+  _edgePoints.clear();
+  
+  delete[] pts;
+  
 }
 
 /**
@@ -324,27 +588,46 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 
   //!<Shape matching using Hu Moments, and contour center proximity
 
-  for(int i = 0; i < contours.size(); i++)
+  LandoltC3D temp;
+  
+  for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
   {
-    approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true) * 0.02, true);
-    std::vector<cv::Point> cnt = contours[i];
-    double prec = cv::matchShapes(cv::Mat(ref), cv::Mat(cnt), CV_CONTOURS_MATCH_I3, 0);
-
-    for(std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
+    int counter = 0;
+    bool flag = false;
+    _fillColors.clear();
+    _rectangles.clear();
+    
+    for(int i = 0; i < contours.size(); i++)
     {
-      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 9 && fabs(mc[i].y - (*it).y) < 9 && prec < 0.3)
+      approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true) * 0.02, true);
+      std::vector<cv::Point> cnt = contours[i];
+      double prec = cv::matchShapes(cv::Mat(ref), cv::Mat(cnt), CV_CONTOURS_MATCH_I3, 0);
+      if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 
+      && prec < 0.3)
       {
-        //std::cout << "Prec is : " << prec << std::endl;
+        flag = true;
         cv::Rect bounding_rect = boundingRect((contours[i]));
         cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
         cv::drawContours(_coloredContours, contours, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
         _fillColors.push_back(color);
         _newCenters.push_back(mc[i]);
-        // cv::imshow("Contours", _coloredContours);
         _rectangles.push_back(bounding_rect);
+        counter++;
 
       }
     }
+    
+    if(flag)
+    {
+      temp.center = *it;
+      temp.count = counter;
+      temp.color = _fillColors;
+      temp.bbox = _rectangles;
+      _landoltc3d.push_back(temp);      
+      //do stuff
+      flag = false;
+    } 
+    
   }
 }
 
@@ -369,7 +652,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  bilateralFilter(gray, dst, 3, 6, 1.5);
+  bilateralFilter(gray, dst, 2, 4, 1);
   //medianBlur(gray, dst, 3);
   
   gray = dst.clone();
@@ -402,19 +685,29 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   //cv::imshow("dst", dst);
   
-  //applyBradleyThresholding(dst, &thresholded);
-  cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 15, 1);
+  if(_bradley)
+  {
+    applyBradleyThresholding(dst, &thresholded);
+    _bradley = false;
+  }
+  else
+  {
+    cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 2);
+    _bradley = true;
+  }
   
   cv::erode(thresholded, thresholded, erodeKernel);
   
-  //cv::imshow("thresholded", thresholded);
+  cv::imshow("thresholded", thresholded);
   
-  findLandoltContours(thresholded, input->rows, input->cols, _refContours[0]);
+  findLandoltContours(thresholded, thresholded.rows, thresholded.cols, _refContours[0]);
 
   for(std::size_t i = 0; i < _rectangles.size(); i++)
   {
     cv::rectangle(*input, _rectangles.at(i), cv::Scalar(0, 0, 255), 1, 8, 0);
   }
+  
+  applyMask();
   
   //fuse();
   
@@ -423,34 +716,40 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::waitKey(5);
   #endif
 
+  clear();
+  
+  double end = (cvGetTickCount() - start) / cvGetTickFrequency();
+
+  end = end / 1000000;
+
+  fps = 1 / end;
+    
+  ROS_INFO("FPS %lf", fps);
+
+}
+
+/**
+  @brief Function for fusing results from both LandoltC3D and
+  Predator
+  @return void
+**/
+void LandoltC3dDetector::fusion()
+{
+  
+}
+
+/**
+  @brief Clearing vector values
+  @param void
+  @return void
+**/
+void LandoltC3dDetector::clear()
+{
   _centers.clear();
   _newCenters.clear();
   _rectangles.clear();
   _fillColors.clear();
-  
-  double end = (cvGetTickCount() - start) / cvGetTickFrequency();
-
-    end = end / 1000000;
-
-    fps = 1 / end;
-    
-    ROS_INFO("FPS %lf", fps);
-
-}
-
-
-void LandoltC3dDetector::fuse()
-{
-  for(int i = 0; i < _newCenters.size(); i++)
-  {
-    if(bbox.contains(_newCenters.at(i)))
-    {
-      ROS_INFO("It contains it");
-    }
-  }
-  
-  bbox = cv::Rect(-1, -1, -1, -1);
-  
+  _landoltc3d.clear();
 }
 
 
