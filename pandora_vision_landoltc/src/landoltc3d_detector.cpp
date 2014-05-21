@@ -97,7 +97,7 @@ void LandoltC3dDetector::applyMask()
     
     for (int j = 0; j < (*temp).color.size(); j++)
     {
-      _mask = cv::Mat::zeros(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
+      _mask = cv::Mat(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
     
       cv::inRange(_coloredContours, (*temp).color[j], (*temp).color[j], _mask);
     
@@ -109,13 +109,13 @@ void LandoltC3dDetector::applyMask()
     
       cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
     
-      cv::imshow("padded", padded); 
+      //~ cv::imshow("padded", padded); 
     
       findRotation(padded, temp);
     
       #ifdef SHOW_DEBUG_IMAGE
-      //cv::imshow("padded", padded);
-      //cv::waitKey(200);
+      //~ //cv::imshow("padded", padded);
+      //~ //cv::waitKey(200);
       #endif
     }
   }
@@ -129,8 +129,8 @@ void LandoltC3dDetector::applyMask()
 void LandoltC3dDetector::thinning(cv::Mat* in)
 {
   *in = *in / 255;
-  cv::Mat thinned;
-  cv::Mat dif;
+  static cv::Mat thinned;
+  static cv::Mat dif;
   in->copyTo(thinned);
 
   do {
@@ -151,43 +151,50 @@ void LandoltC3dDetector::thinning(cv::Mat* in)
   **/
 void LandoltC3dDetector::thinningIter(cv::Mat* in, int iter)
 {
-  cv::Mat temp = cv::Mat::ones(in->size(), CV_8UC1);
+  static cv::Mat temp = cv::Mat(in->size(), CV_8UC1);
 
   for(int y = 0; y < (in->rows - 1); y++)
   {
     for(int x = 0; x < (in->cols - 1); x++)
     {
-      unsigned char p2 = in->at<uchar>(y - 1, x);
-      unsigned char p3 = in->at<uchar>(y - 1, x + 1);
-      unsigned char p4 = in->at<uchar>(y, x + 1);
-      unsigned char p5 = in->at<uchar>(y + 1, x + 1);
-      unsigned char p6 = in->at<uchar>(y + 1, x);
-      unsigned char p7 = in->at<uchar>(y + 1, x - 1);
-      unsigned char p8 = in->at<uchar>(y, x - 1);
-      unsigned char p9 = in->at<uchar>(y - 1, x - 1);
+      int ind = in->cols * y + x;
+      temp.data[ind] = 1;
+      
+      unsigned char p2 = in->data[ind - in->cols];   
+      unsigned char p4 = in->data[ind + 1];
+      unsigned char p6 = in->data[ind + in->cols];
+      unsigned char p8 = in->data[ind - 1];
+      int c1 = p2 * p4 * (iter == 1 ? p6 : p8);
+      int c2 = (iter == 1 ? p4 : p2) * p6 * p8;
+      if(! (c1 == 0 && c2 == 0))
+        continue;
+      
+      unsigned char p3 = in->data[ind - in->cols + 1];
+      unsigned char p5 = in->data[ind + in->cols + 1];
+      unsigned char p7 = in->data[ind + in->cols - 1];
+      unsigned char p9 = in->data[ind - in->cols - 1];
 
       int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-
-      int A = (p2 == 0 && p3 == 1) + (p3 == 0 && p4 == 1) + (p4 == 0 && p5 == 1)
-      + (p5 == 0 && p6 == 1)
-      + (p6 == 0 && p7 == 1) + (p7 == 0 && p8 == 1) + (p8 == 0 && p9 == 1)
-      + (p9 == 0 && p2 == 1);
-
-      if(iter == 1)
+      if( B < 2 || B > 6)
       {
-        int c1 = p2 * p4 * p6;
-        int c2 = p4 * p6 * p8;
-
-        if(A == 1 && (B >= 2 && B <= 6) && c1 == 0 && c2 == 0) temp.at<uchar>(y, x) = 0;
+        continue;
       }
 
-      if(iter == 2)
-      {
-        int c1 = p2 * p4 * p8;
-        int c2 = p2 * p6 * p8;
+      int A = 
+        (p2 == 0 && p3 == 1) + 
+        (p3 == 0 && p4 == 1) + 
+        (p4 == 0 && p5 == 1) + 
+        (p5 == 0 && p6 == 1) + 
+        (p6 == 0 && p7 == 1) + 
+        (p7 == 0 && p8 == 1) + 
+        (p8 == 0 && p9 == 1) + 
+        (p9 == 0 && p2 == 1);
+      
+      if(A != 1)
+        continue;
 
-        if(A == 1 && (B >= 2 && B <= 6) && c1 == 0 && c2 == 0) temp.at<uchar>(y, x) = 0;
-      }
+      temp.data[ind] = 0;
+
     }
   }
 
@@ -203,8 +210,8 @@ void LandoltC3dDetector::thinningIter(cv::Mat* in, int iter)
 **/    
 void LandoltC3dDetector::find8Neights(unsigned int index, const cv::Mat& in)
 {
-  unsigned int y = index/in.cols;
-  unsigned int x = index%in.cols;
+  unsigned int y = index / in.cols;
+  unsigned int x = index % in.cols;
 
   unsigned char p1 = in.at<unsigned char>(y-1, x);
   unsigned char p2 = in.at<unsigned char>(y-1, x+1);
@@ -232,7 +239,7 @@ void LandoltC3dDetector::find8Neights(unsigned int index, const cv::Mat& in)
 cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec)
 {
   std::vector<cv::Point2f> corners;
-  cv::Mat quad = cv::Mat::zeros(100, 100, CV_8UC1);
+  static cv::Mat quad = cv::Mat::zeros(100, 100, CV_8UC1);
   
   corners.clear();
   corners.push_back(rec.tl());
@@ -246,11 +253,15 @@ cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::R
   
   
   // Corners of the destination image
-  std::vector<cv::Point2f> quad_pts;
-  quad_pts.push_back(cv::Point2f(0, 0));
-  quad_pts.push_back(cv::Point2f(quad.cols, 0));
-  quad_pts.push_back(cv::Point2f(quad.cols, quad.rows));
-  quad_pts.push_back(cv::Point2f(0, quad.rows));
+  
+  static cv::Point2f q_p[] = {
+    cv::Point2f(0, 0),
+    cv::Point2f(quad.cols, 0),
+    cv::Point2f(quad.cols, quad.rows),
+    cv::Point2f(0, quad.rows)
+  };
+  static std::vector<cv::Point2f> 
+    quad_pts ( q_p, q_p + sizeof(q_p) / sizeof(cv::Point2f) );
   
   // Get transformation matrix
   cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
@@ -259,8 +270,8 @@ cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::R
   cv::warpPerspective(in, quad, transmtx, quad.size());
   
   #ifdef SHOW_DEBUG_IMAGE
-  cv:imshow("warp", quad);
-  cv::waitKey(5);      
+  //~ cv:imshow("warp", quad);
+  //~ cv::waitKey(5);      
   #endif
   
   return quad;
@@ -276,13 +287,13 @@ cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::R
 **/  
 void LandoltC3dDetector::findRotation(const cv::Mat&in, LandoltC3D* temp)
 {
-  cv::Mat paddedptr;
+  static cv::Mat paddedptr;
         
   paddedptr = in.clone();
         
   thinning(&paddedptr);
   
-  unsigned int *pts =new unsigned int[paddedptr.cols * paddedptr.rows];
+  static unsigned int *pts = new unsigned int[paddedptr.cols * paddedptr.rows];
         
   int limit = 0;
 
@@ -333,15 +344,15 @@ void LandoltC3dDetector::findRotation(const cv::Mat&in, LandoltC3D* temp)
   }
   
   #ifdef SHOW_DEBUG_IMAGE
-    cv::imshow("paddedptr", paddedptr); 
-    cv::waitKey(30); 
+    //~ cv::imshow("paddedptr", paddedptr); 
+    //~ cv::waitKey(5); 
   #endif
     
   _edges = 0;
   
   _edgePoints.clear();
   
-  delete[] pts;
+  //~ delete[] pts;
   
 }
 
@@ -360,12 +371,9 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
       
   int index;
       
-  uint64_t* integralImg =new uint64_t[input.cols*input.rows];
+  static uint64_t* integralImg =new uint64_t[input.cols*input.rows];
           
-  unsigned char* in;
-  
-  in=(unsigned char*)input.data;
-      
+  unsigned char* in=(unsigned char*)input.data;
   unsigned char* out=(unsigned char*)output->data;
   
   int x1, y1, x2, y2;
@@ -382,9 +390,9 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
       index = j*input.cols+i;
       sum+=in[index];
       if(i == 0) 
-      integralImg[index]=sum;
+        integralImg[index]=sum;
       else
-      integralImg[index]=integralImg[index-1]+sum;
+        integralImg[index]=integralImg[index-1]+sum;
     }
   }
 
@@ -422,7 +430,7 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
   
   //cv::imshow("bradley",*output);
   
-  delete[] integralImg;
+  //~ delete[] integralImg;
 }
       
 
@@ -570,7 +578,7 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 
   //!<find contours and moments in frame used for shape matching later
 
-  std::vector<std::vector<cv::Point> > contours;
+  static std::vector<std::vector<cv::Point> > contours;
   cv::findContours(inImage, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
   std::vector<cv::Moments> mu(contours.size());
   for(int i = 0; i < contours.size(); i++)
@@ -640,8 +648,8 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
 
 void LandoltC3dDetector::begin(cv::Mat* input)
 {
-  cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y, thresholded, grad_x, grad_y;
-  cv::Mat erodeKernel(cv::Size(1, 1), CV_8UC1, cv::Scalar(1));
+  static cv::Mat gray, gradX, gradY, dst, abs_grad_x, abs_grad_y, thresholded, grad_x, grad_y;
+  static  cv::Mat erodeKernel(cv::Size(1, 1), CV_8UC1, cv::Scalar(1));
   
   double start = static_cast<double>(cv::getTickCount());
   double fps;
@@ -713,7 +721,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   #ifdef SHOW_DEBUG_IMAGE
     cv::imshow("Raw", *input);
-    cv::waitKey(5);
+    cv::waitKey(1);
   #endif
 
   clear();
