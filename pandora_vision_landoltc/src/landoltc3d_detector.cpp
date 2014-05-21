@@ -166,7 +166,7 @@ void LandoltC3dDetector::thinningIter(cv::Mat* in, int iter)
       unsigned char p8 = in->data[ind - 1];
       int c1 = p2 * p4 * (iter == 1 ? p6 : p8);
       int c2 = (iter == 1 ? p4 : p2) * p6 * p8;
-      if(! (c1 == 0 && c2 == 0))
+      if(!(c1 == 0 && c2 == 0))
         continue;
       
       unsigned char p3 = in->data[ind - in->cols + 1];
