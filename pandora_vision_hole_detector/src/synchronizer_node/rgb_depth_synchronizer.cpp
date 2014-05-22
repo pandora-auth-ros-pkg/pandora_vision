@@ -154,7 +154,7 @@ namespace pandora_vision
 
         // Read "height" from the nodehandle
         int height;
-        if (nodeHandle_.getParam(ns + "/synchronizer_node/height", height))
+        if (nodeHandle_.getParam(ns + "/height", height))
         {
           pointCloud.height = height;
         }
@@ -165,7 +165,7 @@ namespace pandora_vision
 
         // Read "width" from the nodehandle
         int width;
-        if (nodeHandle_.getParam(ns + "/synchronizer_node/width", width))
+        if (nodeHandle_.getParam(ns + "/width", width))
         {
           pointCloud.width = width;
         }
@@ -176,7 +176,7 @@ namespace pandora_vision
 
         // Read "point_step" from the nodehandle
         int point_step;
-        if (nodeHandle_.getParam(ns + "/synchronizer_node/point_step", point_step))
+        if (nodeHandle_.getParam(ns + "/point_step", point_step))
         {
           pointCloud.point_step = point_step;
         }
