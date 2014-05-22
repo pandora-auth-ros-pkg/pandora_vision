@@ -51,8 +51,8 @@ namespace pandora_vision
 
     ros::Duration(0.5).sleep();
 
-    // Acquire the topics from and to which the depth node will be having
-    // transactionary affairs
+    // Acquire the names of topics which the depth node will be having
+    // transactionary affairs with
     getTopicNames();
 
     // Subscribe to the depth image published by the
