@@ -155,7 +155,7 @@ namespace pandora_vision
         rgbImageTopic_))
     {
       // Make the topic's name absolute
-      rgbImageTopic_ = ns + "/rgb_node/" + rgbImageTopic_;
+      rgbImageTopic_ = ns + "/" + rgbImageTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[RGB Node] Subscribed to the input RGB image");
@@ -174,7 +174,7 @@ namespace pandora_vision
         candidateHolesTopic_))
     {
       // Make the topic's name absolute
-      candidateHolesTopic_ = ns + "/rgb_node/" + candidateHolesTopic_;
+      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[RGB Node] Advertising to the candidate holes topic");

@@ -113,9 +113,6 @@ namespace pandora_vision
         ns + "/synchronizer_node/subscribed_topics/input_topic",
         inputPointCloudTopic_ ))
     {
-      // Make the topic's name absolute
-      inputPointCloudTopic_ = ns + "/synchronizer_node/" + inputPointCloudTopic_;
-
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Synchronizer Node] Subscribed to the input point cloud");
       #endif
@@ -132,7 +129,7 @@ namespace pandora_vision
         unlockTopic_))
     {
       // Make the topic's name absolute
-      unlockTopic_ = ns + "/synchronizer_node/" + unlockTopic_;
+      unlockTopic_ = ns + "/" + unlockTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Synchronizer Node] Subscribed to the unlock topic");
@@ -150,18 +147,17 @@ namespace pandora_vision
         synchronizedPointCloudTopic_))
     {
       // Make the topic's name absolute
-      synchronizedPointCloudTopic_ = ns + "/synchronizer_node/" +
-        synchronizedPointCloudTopic_;
+      synchronizedPointCloudTopic_ = ns + "/" + synchronizedPointCloudTopic_;
 
       #ifdef DEBUG_SHOW
-      ROS_INFO ("[Synchronizer Node] \
-        Advertising to the internal point cloud topic");
+      ROS_INFO ("[Synchronizer Node] "
+        "Advertising to the internal point cloud topic");
       #endif
     }
     else
     {
-      ROS_ERROR ("[Synchronizer Node] \
-        Could not find topic point_cloud_internal_topic");
+      ROS_ERROR ("[Synchronizer Node] "
+        "Could not find topic point_cloud_internal_topic");
     }
 
     // Read the name of the topic that the synchronizer node will be publishing
@@ -171,8 +167,7 @@ namespace pandora_vision
         synchronizedDepthImageTopic_))
     {
       // Make the topic's name absolute
-      synchronizedDepthImageTopic_ = ns + "/synchronizer_node/" +
-        synchronizedDepthImageTopic_;
+      synchronizedDepthImageTopic_ = ns + "/" + synchronizedDepthImageTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Synchronizer Node] Advertising to the internal depth image");
@@ -190,8 +185,7 @@ namespace pandora_vision
         synchronizedRgbImageTopic_))
     {
       // Make the topic's name absolute
-      synchronizedRgbImageTopic_ = ns + "/synchronizer_node/" +
-        synchronizedRgbImageTopic_;
+      synchronizedRgbImageTopic_ = ns + "/" + synchronizedRgbImageTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Synchronizer Node] Advertising to the internal rgb image");
