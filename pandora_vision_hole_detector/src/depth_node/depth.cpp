@@ -183,7 +183,7 @@ namespace pandora_vision
         depthImageTopic_ ))
     {
       // Make the topic's name absolute
-      depthImageTopic_ = ns + "/depth_node/" + depthImageTopic_;
+      depthImageTopic_ = ns + "/" + depthImageTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Depth Node] Subscribed to the input depth image");
@@ -202,7 +202,7 @@ namespace pandora_vision
         candidateHolesTopic_))
     {
       // Make the topic's name absolute
-      candidateHolesTopic_ = ns + "/depth_node/" + candidateHolesTopic_;
+      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
 
       #ifdef DEBUG_SHOW
       ROS_INFO ("[Depth Node] Advertising to the candidate holes topic");
