@@ -38,8 +38,13 @@
 #include "depth_node/hole_detector.h"
 #include "gtest/gtest.h"
 
+
 namespace pandora_vision
 {
+  /**
+    @class HoleDetectorTest
+    @brief Tests the integrity of methods of class HoleDetector
+   **/
   class HoleDetectorTest : public ::testing::Test
   {
     protected:
