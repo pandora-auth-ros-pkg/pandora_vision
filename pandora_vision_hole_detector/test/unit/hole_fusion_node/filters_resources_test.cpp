@@ -35,40 +35,20 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "hole_fusion_node/depth_filters.h"
+#include "hole_fusion_node/filters_resources.h"
 #include "gtest/gtest.h"
-
 
 namespace pandora_vision
 {
   /**
-    @class DepthFiltersTest
-    @brief Tests the integrity of methods of class DepthFilters
+    @class FiltersResourcesTest
+    @brief Tests the integrity of methods of class FiltersResources
    **/
-  class DepthFiltersTest : public ::testing::Test
+  class FiltersResourcesTest : public ::testing::Test
   {
     protected:
 
-      DepthFiltersTest() {}
-
-      /**
-        @brief Constructs a rectangle of width @param x and height of @param y.
-        @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
-        rectangle to be created
-        @param[in] x [const int&] The rectangle's width
-        @param[in] y [const int&] The rectangle's height
-        @param[in] depthIn [const float&] The depth value for all points inside
-        the rectangle
-        @param[out] image [cv::Mat*] The image on which the rectangle will be
-        imprinted
-        return void
-       **/
-      void generateDepthRectangle (
-        const cv::Point2f& upperLeft,
-        const int& x,
-        const int& y,
-        const float& depthIn,
-        cv::Mat* image );
+      FiltersResourcesTest() {}
 
       /**
         @brief Constructs the internals of a rectangular hole
@@ -84,45 +64,13 @@ namespace pandora_vision
         const int& x,
         const int& y );
 
-        //! Sets up one image: squares_,
-        //! which features three squares of size 100.
-      //! The first one (order matters here) has its upper left vertex at
-      //! (100, 100),
-      //! the second one has its upper right vertex at (WIDTH - 3, 3)
-      //! (so that the blob it represents can barely be identified)
-      //! and the the third one has its lower right vertex at
-      //! (WIDTH - 1, HEIGHT - 1)
-      virtual void SetUp()
+      virtual void SetUp ()
       {
         WIDTH = 640;
         HEIGHT = 480;
 
-        // The image upon which the squares will be inprinted
+        // An image needed only for its size
         squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
-
-        // The overall conveyor holding the holes
-        HolesConveyor conveyor;
-
-        // Construct the squares_ image
-
-        // Set the depth for each point of the squares_ image to 1.0
-        for ( int rows = 0; rows < squares_.rows; rows++ )
-        {
-          for ( int cols = 0; cols < squares_.cols; cols++ )
-          {
-            squares_.at< float >( rows, cols ) = 1.0;
-          }
-        }
-
-        // Construct the lower right square
-        cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
-
-        DepthFiltersTest::generateDepthRectangle
-          ( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
-            100,
-            100,
-            1.2,
-            &lowerRightSquare );
 
         HolesConveyorUtils::append(
           getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
@@ -130,32 +78,11 @@ namespace pandora_vision
             100 ),
           &conveyor);
 
-
-        // Construct the upper right image
-        cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
-
-        DepthFiltersTest::generateDepthRectangle
-          ( cv::Point2f ( WIDTH - 103, 3 ),
-            100,
-            100,
-            2.2,
-            &upperRightSquare );
-
         HolesConveyorUtils::append(
           getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
             100,
             100 ),
           &conveyor);
-
-        // Construct the upper left square
-        cv::Mat upperLeftSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
-
-        DepthFiltersTest::generateDepthRectangle
-          ( cv::Point2f ( 100, 100 ),
-            100,
-            100,
-            1.8,
-            &upperLeftSquare );
 
         HolesConveyorUtils::append(
           getConveyor( cv::Point2f ( 100, 100 ),
@@ -163,58 +90,19 @@ namespace pandora_vision
             100 ),
           &conveyor);
 
-        // Synthesize the final squares_ image
-        squares_ = lowerRightSquare + upperRightSquare + upperLeftSquare;
-
       }
 
+      // An image needed only for its size
+      cv::Mat squares_;
 
-      // The images' width and height
+      // Dimensions of the squares_ image
       int WIDTH;
       int HEIGHT;
 
-      // The image that will be used to locate blobs in
-      cv::Mat squares_;
+      // The overall conveyor holding the holes
+      HolesConveyor conveyor;
 
   };
-
-
-
-  /**
-    @brief Constructs a rectangle of width @param x and height of @param y.
-    @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
-    rectangle to be created
-    @param[in] x [const int&] The rectangle's width
-    @param[in] y [const int&] The rectangle's height
-    @param[in] depthIn [const float&] The depth value for all points inside
-    the rectangle
-    @param[out] image [cv::Mat*] The image on which the rectangle will be
-    imprinted on
-    return void
-   **/
-  void DepthFiltersTest::generateDepthRectangle (
-    const cv::Point2f& upperLeft,
-    const int& x,
-    const int& y,
-    const float& depthIn,
-    cv::Mat* image )
-  {
-    if ( image->type() != CV_32FC1 )
-    {
-      std::cerr << "Image of invalid type. Please use CV_32FC1" << std::endl;
-
-      return;
-    }
-
-    // Fill the inside of the desired rectangle with the @param depthIn provided
-    for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
-    {
-      for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
-      {
-        image->at< float >( rows, cols ) = depthIn;
-      }
-    }
-  }
 
 
 
@@ -227,7 +115,7 @@ namespace pandora_vision
     @param[in] y [const int&] The rectangle's height
     return [HolesConveyor] A struct containing the elements of one hole
    **/
-  HolesConveyor DepthFiltersTest::getConveyor (
+  HolesConveyor FiltersResourcesTest::getConveyor (
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y )
@@ -287,6 +175,26 @@ namespace pandora_vision
 
     return conveyor;
 
+  }
+
+
+
+  // Test FiltersResources::createHolesMasksSetVector
+  TEST_F ( FiltersResourcesTest, CreateHolesMasksSetVector )
+  {
+    // The indices of points inside the holes in conveyor
+    std::vector<std::set<unsigned int> > holesMasksSetVector;
+
+    // Run FiltersResources::createHolesMasksSetVector
+    FiltersResources::createHolesMasksSetVector(
+      conveyor,
+      squares_,
+      &holesMasksSetVector );
+
+    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    {
+      EXPECT_EQ ( 10000, holesMasksSetVector[h].size() );
+    }
   }
 
 } // namespace pandora_vision
