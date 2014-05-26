@@ -66,9 +66,14 @@ catkin_add_gtest(depth_filters_test
   unit/hole_fusion_node/depth_filters_test.cpp)
 target_link_libraries(depth_filters_test ${catkin_LIBRARIES} utils_lib hole_fusion_node_lib gtest_main)
 
+
+add_library(filters_resources_lib
+  ../src/hole_fusion_node/filters_resources.cpp
+  )
+
 catkin_add_gtest(filters_resources_test
   unit/hole_fusion_node/filters_resources_test.cpp)
-target_link_libraries(filters_resources_test ${catkin_LIBRARIES} utils_lib hole_fusion_node_lib gtest_main)
+target_link_libraries(filters_resources_test ${catkin_LIBRARIES} utils_lib filters_resources_lib gtest_main)
 
 
 ############## Functional Tests ###############
