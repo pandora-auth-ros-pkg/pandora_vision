@@ -76,19 +76,22 @@ namespace pandora_vision
           getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
             100,
             100 ),
-          &conveyor);
+          &conveyor );
 
         HolesConveyorUtils::append(
           getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
             100,
             100 ),
-          &conveyor);
+          &conveyor );
 
         HolesConveyorUtils::append(
           getConveyor( cv::Point2f ( 100, 100 ),
             100,
             100 ),
-          &conveyor);
+          &conveyor );
+
+        // In total, there should be three holes
+        ASSERT_EQ ( 3, HolesConveyorUtils::size( conveyor ) );
 
       }
 
@@ -124,9 +127,9 @@ namespace pandora_vision
     HolesConveyor conveyor;
 
     // The hole's keypoint
-    cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
+    cv::KeyPoint k ( upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back(k);
+    conveyor.keyPoints.push_back( k );
 
 
     // The four vertices of the rectangle
@@ -138,11 +141,11 @@ namespace pandora_vision
 
     cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
 
-    std::vector<cv::Point2f> rectangle;
-    rectangle.push_back(vertex_1);
-    rectangle.push_back(vertex_2);
-    rectangle.push_back(vertex_3);
-    rectangle.push_back(vertex_4);
+    std::vector< cv::Point2f > rectangle;
+    rectangle.push_back( vertex_1 );
+    rectangle.push_back( vertex_2 );
+    rectangle.push_back( vertex_3 );
+    rectangle.push_back( vertex_4 );
 
     conveyor.rectangles.push_back(rectangle);
 
@@ -151,11 +154,11 @@ namespace pandora_vision
     // of the points consisting the rectangle
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
 
-    cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
+    cv::Point2f a[] = { vertex_1, vertex_2, vertex_3, vertex_4 };
 
     for(unsigned int j = 0; j < 4; j++)
     {
-      cv::line(image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
+      cv::line( image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8 );
     }
 
 
@@ -171,7 +174,7 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back(outline);
+    conveyor.outlines.push_back( outline );
 
     return conveyor;
 
@@ -179,11 +182,111 @@ namespace pandora_vision
 
 
 
+  // Test FiltersResources::createHolesMasksVectors
+  TEST_F ( FiltersResourcesTest, CreateHolesMasksVectorsTest )
+  {
+    // The vector of images of masks
+    std::vector< cv::Mat > holesMasksImageVector;
+
+    // The indices of points inside the holes in conveyor
+    std::vector< std::set< unsigned int > > holesMasksSetVector;
+
+
+    // Run FiltersResources::createHolesMasksVectors
+    FiltersResources::createHolesMasksVectors(
+      conveyor,
+      squares_,
+      &holesMasksImageVector,
+      &holesMasksSetVector );
+
+    // There should be three masks in total
+    EXPECT_EQ ( 3, holesMasksImageVector.size() );
+    EXPECT_EQ ( 3, holesMasksSetVector.size() );
+
+    // The number of non-zero value pixels in all of the images
+    int nonZero = 0;
+    for ( int i = 0; i < holesMasksImageVector.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if ( holesMasksImageVector[i].at<unsigned char >( rows, cols ) != 0 )
+          {
+            nonZero++;
+          }
+        }
+      }
+    }
+
+    // The total number of non-zero value pixels in all of the images should
+    // be equal to three times as much as in any image, which is 100 X 100 minus
+    // the four corners of each square, due to the nature of the brushfire
+    // exploring method
+    EXPECT_EQ ( 3 * (10000 - 4), nonZero );
+
+    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    {
+      // Each mask should have 100 X 100 points minus the square's four corners
+      // due to the nature of the brushfire exploring method
+      EXPECT_EQ ( 10000 - 4, holesMasksSetVector[h].size() );
+    }
+
+  }
+
+
+
+  // Test FiltersResources::createHolesMasksImageVector
+  TEST_F ( FiltersResourcesTest, CreateHolesMasksImageVectorTest )
+  {
+    // The vector of images of masks
+    std::vector< cv::Mat > holesMasksImageVector;
+
+    // Run FiltersResources::createHolesMasksImageVector
+    FiltersResources::createHolesMasksImageVector(
+      conveyor,
+      squares_,
+      &holesMasksImageVector);
+
+    // There should be three images in total
+    EXPECT_EQ ( 3, holesMasksImageVector.size() );
+
+    // The images' type should be CV_8UC1
+    for ( int i = 0; i < holesMasksImageVector.size(); i++ )
+    {
+      EXPECT_EQ ( CV_8UC1, holesMasksImageVector[i].type() );
+    }
+
+    // The number of non-zero value pixels in all of the images
+    int nonZero = 0;
+    for ( int i = 0; i < holesMasksImageVector.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if ( holesMasksImageVector[i].at<unsigned char >( rows, cols ) != 0 )
+          {
+            nonZero++;
+          }
+        }
+      }
+    }
+
+    // The total number of non-zero value pixels in all of the images should
+    // be equal to three times as much as in any image, which is 100 X 100 minus
+    // the four corners of each square, due to the nature of the brushfire
+    // exploring method
+    EXPECT_EQ ( 3 * (10000 - 4), nonZero );
+  }
+
+
+
   // Test FiltersResources::createHolesMasksSetVector
-  TEST_F ( FiltersResourcesTest, CreateHolesMasksSetVector )
+  TEST_F ( FiltersResourcesTest, CreateHolesMasksSetVectorTest )
   {
     // The indices of points inside the holes in conveyor
-    std::vector<std::set<unsigned int> > holesMasksSetVector;
+    std::vector< std::set< unsigned int > > holesMasksSetVector;
 
     // Run FiltersResources::createHolesMasksSetVector
     FiltersResources::createHolesMasksSetVector(
@@ -191,10 +294,419 @@ namespace pandora_vision
       squares_,
       &holesMasksSetVector );
 
+
     for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
     {
-      EXPECT_EQ ( 10000, holesMasksSetVector[h].size() );
+      // Each mask should have 100 X 100 points minus the square's four corners
+      // due to the nature of the brushfire exploring method
+      EXPECT_EQ ( 10000 - 4, holesMasksSetVector[h].size() );
+
+      // Uncomment for visual inspection
+/*
+ *
+ *      cv::Mat img = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+ *      unsigned char* ptr = img.ptr();
+ *
+ *      for ( std::set<unsigned int>::iterator it = holesMasksSetVector[h].begin();
+ *        it != holesMasksSetVector[h].end(); it++ )
+ *      {
+ *        ptr[*it] = 255;
+ *      }
+ *
+ *      Visualization::show ( "Mask", img, 0 );
+ *
+ */
     }
+  }
+
+
+
+  // Test FiltersResources::createInflatedRectanglesVector
+  TEST_F ( FiltersResourcesTest, CreateInflatedRectanglesVectorTest )
+  {
+    // The vector holding the inflated rectangles vertices per hole for
+    // inflation size equal to zero
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_0;
+
+    // The indices of holes inside the conveyor whose inflated rectangles is
+    // actually inside the image's bounds for
+    // inflation size equal to zero
+    std::vector<int> inflatedRectanglesIndices_0;
+
+    // Run FiltersResources::createInflatedRectanglesVector
+    // with inflation size of value 0
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &inflatedRectanglesVector_0,
+      &inflatedRectanglesIndices_0 );
+
+    // All holes' inflated rectangles should be inside the image's bounds
+    EXPECT_EQ ( 3, inflatedRectanglesVector_0.size() );
+    EXPECT_EQ ( 3, inflatedRectanglesIndices_0.size() );
+
+    // All rectangles should be of size four (four vertices)
+    for ( int h = 0; h < inflatedRectanglesVector_0.size(); h++ )
+    {
+      EXPECT_EQ ( 4, inflatedRectanglesVector_0[h].size() );
+    }
+
+    // The vector holding the inflated rectangles vertices per hole for
+    // inflation size equal to two
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_2;
+
+    // The indices of holes inside the conveyor whose inflated rectangles is
+    // actually inside the image's bounds for
+    // inflation size equal to two
+    std::vector<int> inflatedRectanglesIndices_2;
+
+    // Run FiltersResources::createInflatedRectanglesVector
+    // with inflation size of value 2
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      2,
+      &inflatedRectanglesVector_2,
+      &inflatedRectanglesIndices_2 );
+
+    // The lower right hole's inflated rectangle should exceed
+    // the image's bounds
+    EXPECT_EQ ( 2, inflatedRectanglesVector_2.size() );
+    EXPECT_EQ ( 2, inflatedRectanglesIndices_2.size() );
+
+    // All rectangles should be of size four (four vertices)
+    for ( int h = 0; h < inflatedRectanglesVector_2.size(); h++ )
+    {
+      EXPECT_EQ ( 4, inflatedRectanglesVector_2[h].size() );
+    }
+
+    // The first valid inflated rectangle should be conveyor[1]
+    EXPECT_EQ ( 1, inflatedRectanglesIndices_2[0] );
+
+    // The second valid inflated rectangle should be conveyor[2]
+    EXPECT_EQ ( 2, inflatedRectanglesIndices_2[1] );
+  }
+
+
+
+  // Test FiltersResources::createIntermediateHolesPointsVectors
+  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsVectorsTest )
+  {
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_0;
+    std::vector< int > inflatedRectanglesIndices_0;
+
+    // First, test with an inflation size value of 0
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &inflatedRectanglesVector_0,
+      &inflatedRectanglesIndices_0 );
+
+    // The intermediate points vector for all holes
+    std::vector< cv::Mat > intermediatePointsImageVector_0;
+
+    // The intermediate points vector for all holes
+    std::vector< std::set< unsigned int > > intermediatePointsSetVector_0;
+
+    // Run FiltersResources::createIntermediateHolesPointsVectors
+    FiltersResources::createIntermediateHolesPointsVectors(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_0,
+      inflatedRectanglesIndices_0,
+      &intermediatePointsImageVector_0,
+      &intermediatePointsSetVector_0 );
+
+    // Intermediate points positions should only exist for all of the holes
+    ASSERT_EQ ( 3, intermediatePointsImageVector_0.size() );
+    ASSERT_EQ ( 3, intermediatePointsSetVector_0.size() );
+
+    // The total number of intermediate points in all of the images
+    int nonZeroImage = 0;
+
+    for ( int i = 0; i < intermediatePointsImageVector_0.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if (intermediatePointsImageVector_0[i].at<unsigned char>( rows, cols ) != 0)
+          {
+            nonZeroImage++;
+          }
+        }
+      }
+    }
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    EXPECT_EQ ( 0, nonZeroImage );
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    for ( int i = 0; i < intermediatePointsSetVector_0.size(); i++ )
+    {
+      EXPECT_EQ ( 0, intermediatePointsSetVector_0[i].size() );
+    }
+
+
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_2;
+    std::vector< int > inflatedRectanglesIndices_2;
+
+    // First, test with an inflation size value of 2
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      2,
+      &inflatedRectanglesVector_2,
+      &inflatedRectanglesIndices_2 );
+
+    // The intermediate points vector for all holes
+    std::vector< cv::Mat > intermediatePointsImageVector_2;
+
+    // The intermediate points vector for all holes
+    std::vector< std::set< unsigned int > > intermediatePointsSetVector_2;
+
+    // Run FiltersResources::createIntermediateHolesPointsVectors
+    FiltersResources::createIntermediateHolesPointsVectors(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_2,
+      inflatedRectanglesIndices_2,
+      &intermediatePointsImageVector_2,
+      &intermediatePointsSetVector_2 );
+
+    // Intermediate points positions should only exist for all of the holes
+    // whose iflated rectangle is within the image's bounds
+    ASSERT_EQ ( 2, intermediatePointsImageVector_2.size() );
+    ASSERT_EQ ( 2, intermediatePointsSetVector_2.size() );
+
+    // The total number of intermediate points in all of the images
+    nonZeroImage = 0;
+
+    for ( int i = 0; i < intermediatePointsImageVector_2.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if (intermediatePointsImageVector_2[i].at<unsigned char>( rows, cols ) != 0)
+          {
+            nonZeroImage++;
+          }
+        }
+      }
+    }
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    EXPECT_LT ( 2 * 400, nonZeroImage );
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    for ( int i = 0; i < intermediatePointsSetVector_2.size(); i++ )
+    {
+      EXPECT_LT ( 400, intermediatePointsSetVector_2[i].size() );
+    }
+
+  }
+
+
+
+  // Test FiltersResources::createIntermediateHolesPointsImageVector
+  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsImageVectorTest )
+  {
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_0;
+    std::vector< int > inflatedRectanglesIndices_0;
+
+    // First, test with an inflation size value of 0
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &inflatedRectanglesVector_0,
+      &inflatedRectanglesIndices_0 );
+
+    // The intermediate points vector for all holes
+    std::vector< cv::Mat > intermediatePointsImageVector_0;
+
+    // Run FiltersResources::createIntermediateHolesPointsImageVector
+    FiltersResources::createIntermediateHolesPointsImageVector(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_0,
+      inflatedRectanglesIndices_0,
+      &intermediatePointsImageVector_0 );
+
+    // Intermediate points positions should exist for all of the holes
+    ASSERT_EQ ( 3, intermediatePointsImageVector_0.size() );
+
+    // The total number of intermediate points in all of the images
+    int nonZero = 0;
+
+    for ( int i = 0; i < intermediatePointsImageVector_0.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if (intermediatePointsImageVector_0[i].at<unsigned char>( rows, cols ) != 0)
+          {
+            nonZero++;
+          }
+        }
+      }
+    }
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    EXPECT_EQ ( 0, nonZero );
+
+
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_2;
+    std::vector< int > inflatedRectanglesIndices_2;
+
+    // First, test with an inflation size value of 2
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      2,
+      &inflatedRectanglesVector_2,
+      &inflatedRectanglesIndices_2 );
+
+    // The intermediate points vector for all holes
+    std::vector< cv::Mat > intermediatePointsImageVector_2;
+
+    // Run FiltersResources::createIntermediateHolesPointsImageVector
+    FiltersResources::createIntermediateHolesPointsImageVector(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_2,
+      inflatedRectanglesIndices_2,
+      &intermediatePointsImageVector_2 );
+
+    // Intermediate points should only exist for the two holes
+    ASSERT_EQ ( 2, intermediatePointsImageVector_2.size() );
+
+    // The total number of intermediate points in all of the images
+    nonZero = 0;
+
+    for ( int i = 0; i < intermediatePointsImageVector_2.size(); i++ )
+    {
+      for ( int rows = 0; rows < squares_.rows; rows++ )
+      {
+        for ( int cols = 0; cols < squares_.cols; cols++ )
+        {
+          if (intermediatePointsImageVector_2[i].at<unsigned char>( rows, cols ) != 0)
+          {
+            nonZero++;
+          }
+        }
+      }
+    }
+
+    // There should be two valid inflated rectangles, so the total number
+    // of intermediate points should be greater than two times the outline
+    // of each hole
+    EXPECT_LT ( 2 * 400 , nonZero );
+
+  }
+
+
+
+  // Test FiltersResources::createIntermediateHolesPointsSetVector
+  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsSetVectorTest )
+  {
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_0;
+    std::vector< int > inflatedRectanglesIndices_0;
+
+    // First, test with an inflation size value of 0
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &inflatedRectanglesVector_0,
+      &inflatedRectanglesIndices_0 );
+
+    // The intermediate points vector for all holes
+    std::vector< std::set< unsigned int > > intermediatePointsSetVector_0;
+
+    // Run FiltersResources::createIntermediateHolesPointsSetVector
+    FiltersResources::createIntermediateHolesPointsSetVector(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_0,
+      inflatedRectanglesIndices_0,
+      &intermediatePointsSetVector_0 );
+
+    // Intermediate points positions should exist for all of the holes
+    ASSERT_EQ ( 3, intermediatePointsSetVector_0.size() );
+
+    // There shouldn't be any intermediate points for inflation size equal to 0
+    for ( int i = 0; i < intermediatePointsSetVector_0.size(); i++ )
+    {
+      EXPECT_EQ ( 0, intermediatePointsSetVector_0[i].size() );
+    }
+
+    // First off, we need to obtain the inflated rectangles vector and the
+    // corresponding vector of indices of holes with valid inflated rectangles
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_2;
+    std::vector< int > inflatedRectanglesIndices_2;
+
+    // First, test with an inflation size value of 2
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      2,
+      &inflatedRectanglesVector_2,
+      &inflatedRectanglesIndices_2 );
+
+    // The intermediate points vector for all holes
+    std::vector< std::set< unsigned int > > intermediatePointsSetVector_2;
+
+    // Run FiltersResources::createIntermediateHolesPointsSetVector
+    FiltersResources::createIntermediateHolesPointsSetVector(
+      conveyor,
+      squares_,
+      inflatedRectanglesVector_2,
+      inflatedRectanglesIndices_2,
+      &intermediatePointsSetVector_2 );
+
+    // Intermediate points should only exist for the two holes
+    ASSERT_EQ ( 2, intermediatePointsSetVector_2.size() );
+
+    // There should be more than 4 X 100 intermediate points
+    for ( int i = 0; i < intermediatePointsSetVector_2.size(); i++ )
+    {
+      EXPECT_LT ( 400, intermediatePointsSetVector_2[i].size() );
+    }
+
+    // Uncomment for visual inspection
+/*
+ *    for ( int h = 0; h < intermediatePointsSetVector_2.size(); h++ )
+ *    {
+ *
+ *      cv::Mat img = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+ *      unsigned char* ptr = img.ptr();
+ *
+ *      for ( std::set<unsigned int>::iterator it =
+ *        intermediatePointsSetVector_2[h].begin();
+ *        it != intermediatePointsSetVector_2[h].end(); it++ )
+ *      {
+ *        ptr[*it] = 255;
+ *      }
+ *
+ *      Visualization::show ( "Intermediate Points", img, 0 );
+ *    }
+ *
+ */
   }
 
 } // namespace pandora_vision
