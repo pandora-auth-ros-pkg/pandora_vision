@@ -130,7 +130,7 @@ static int export_lowe_features( const char* filename, struct feature* feat, int
     }
     file = fopen( filename, "w");
     
-    if(file==NULL)
+    if(file == NULL)
     {
       fprintf( stderr, "Warning: error opening %s, %s, line %d\n",
          filename, __FILE__, __LINE__ );
