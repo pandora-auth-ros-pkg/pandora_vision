@@ -757,24 +757,22 @@ namespace pandora_vision
     visualizableDenoisedImage = Visualization::scaleImageForVisualization
       (interpolatedDepthImage, Parameters::Image::scale_method);
 
-    // from now onwards every image is in the range of 0-255
+    // From now onwards every image is in the range of 0-255
     cv::Mat interpolatedDepthImageEdges;
     EdgeDetection::applySobel(visualizableDenoisedImage,
       &interpolatedDepthImageEdges);
 
-    // Threshold the interpolatedDepthImageEdges image
-    cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
-      Parameters::Edge::denoised_edges_threshold, 255, 3);
-
-    // make all non zero pixels have a value of 255
+    // Make all non zero pixels have a value of 255
     cv::threshold(interpolatedDepthImageEdges, interpolatedDepthImageEdges,
       0, 255, 0);
 
+    // Take a pointer on the interpolatedDepthImageEdges image
     unsigned char* ptr = interpolatedDepthImageEdges.ptr();
 
     for (unsigned int o = 0; o < conveyor.outlines.size(); o++)
     {
-      int numBlacks = 0;
+      // The number of non-zero value pixels in the
+      // interpolatedDepthImageEdges image, inside mask o
       int numWhites = 0;
 
       for (std::set<unsigned int>::iterator it = holesMasksSetVector[o].begin();
@@ -784,14 +782,10 @@ namespace pandora_vision
         {
           numWhites++;
         }
-        else
-        {
-          numBlacks++;
-        }
       }
 
       probabilitiesVector->at(o) =
-        static_cast<float>(numWhites) / (numWhites + numBlacks);
+        static_cast<float>(numWhites) / (holesMasksSetVector[o].size());
 
       msgs->push_back(TOSTR(probabilitiesVector->at(o)));
     }

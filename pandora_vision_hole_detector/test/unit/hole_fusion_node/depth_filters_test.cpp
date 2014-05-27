@@ -299,8 +299,8 @@ namespace pandora_vision
   {
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 0
-    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_0;
-    std::vector<int> inflatedRectanglesIndices_0;
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_0;
+    std::vector< int > inflatedRectanglesIndices_0;
 
     FiltersResources::createInflatedRectanglesVector(
       conveyor,
@@ -311,7 +311,7 @@ namespace pandora_vision
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
     std::vector<std::string> msgs;
-    std::vector<float> probabilitiesVector_0(3, 0.0);
+    std::vector<float> probabilitiesVector_0( 3, 0.0 );
 
     // Run DepthFilters::checkHolesDepthDiff
     DepthFilters::checkHolesDepthDiff(
@@ -320,11 +320,11 @@ namespace pandora_vision
       inflatedRectanglesVector_0,
       inflatedRectanglesIndices_0,
       &msgs,
-      &probabilitiesVector_0);
+      &probabilitiesVector_0 );
 
 
 
-    for (int i = 0; i < probabilitiesVector_0.size(); i++)
+    for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
     {
       // All three holes should have an inflated rectangle for inflation
       // size of value 0
@@ -336,8 +336,8 @@ namespace pandora_vision
 
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 2
-    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_2;
-    std::vector<int> inflatedRectanglesIndices_2;
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_2;
+    std::vector< int > inflatedRectanglesIndices_2;
 
     FiltersResources::createInflatedRectanglesVector(
       conveyor,
@@ -347,7 +347,7 @@ namespace pandora_vision
       &inflatedRectanglesIndices_2 );
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
-    std::vector<float> probabilitiesVector_2(3, 0.0);
+    std::vector<float> probabilitiesVector_2( 3, 0.0 );
     msgs.clear();
 
     // Run DepthFilters::checkHolesDepthDiff
@@ -357,12 +357,12 @@ namespace pandora_vision
       inflatedRectanglesVector_2,
       inflatedRectanglesIndices_2,
       &msgs,
-      &probabilitiesVector_2);
+      &probabilitiesVector_2 );
 
 
     // Only the last two holes should have an inflated rectangle
     // for inflation size of value 2
-    ASSERT_EQ ( 0.0, probabilitiesVector_2[0]);
+    ASSERT_EQ ( 0.0, probabilitiesVector_2[0] );
     ASSERT_LT ( 0.0, probabilitiesVector_2[1] );
     ASSERT_LT ( 0.0, probabilitiesVector_2[2] );
 
@@ -373,8 +373,8 @@ namespace pandora_vision
 
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 8
-    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_8;
-    std::vector<int> inflatedRectanglesIndices_8;
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_8;
+    std::vector< int > inflatedRectanglesIndices_8;
 
     FiltersResources::createInflatedRectanglesVector(
       conveyor,
@@ -384,7 +384,7 @@ namespace pandora_vision
       &inflatedRectanglesIndices_8 );
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
-    std::vector<float> probabilitiesVector_8(3, 0.0);
+    std::vector< float > probabilitiesVector_8( 3, 0.0 );
     msgs.clear();
 
     // Run DepthFilters::checkHolesDepthDiff
@@ -399,7 +399,7 @@ namespace pandora_vision
 
     // Only the last two holes should have an inflated rectangle
     // for inflation size of value 2
-    ASSERT_EQ ( 0.0, probabilitiesVector_8[0]);
+    ASSERT_EQ ( 0.0, probabilitiesVector_8[0] );
     ASSERT_EQ ( 0.0, probabilitiesVector_8[1] );
     ASSERT_LT ( 0.0, probabilitiesVector_8[2] );
 
@@ -409,8 +409,8 @@ namespace pandora_vision
 
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 180
-    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_180;
-    std::vector<int> inflatedRectanglesIndices_180;
+    std::vector< std::vector< cv::Point2f > > inflatedRectanglesVector_180;
+    std::vector< int > inflatedRectanglesIndices_180;
 
     FiltersResources::createInflatedRectanglesVector(
       conveyor,
@@ -420,7 +420,7 @@ namespace pandora_vision
       &inflatedRectanglesIndices_180 );
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
-    std::vector<float> probabilitiesVector_180(3, 0.0);
+    std::vector<float> probabilitiesVector_180( 3, 0.0 );
     msgs.clear();
 
     // Run DepthFilters::checkHolesDepthDiff
@@ -430,15 +430,77 @@ namespace pandora_vision
       inflatedRectanglesVector_180,
       inflatedRectanglesIndices_180,
       &msgs,
-      &probabilitiesVector_180);
+      &probabilitiesVector_180 );
 
 
     // Only the last two holes should have an inflated rectangle
     // for inflation size of value 2
-    ASSERT_EQ ( 0.0, probabilitiesVector_180[0]);
+    ASSERT_EQ ( 0.0, probabilitiesVector_180[0] );
     ASSERT_EQ ( 0.0, probabilitiesVector_180[1] );
     ASSERT_EQ ( 0.0, probabilitiesVector_180[2] );
 
+  }
+
+
+
+  // Test DepthFilters::checkHolesDepthArea
+  TEST_F ( DepthFiltersTest, CheckHolesDepthAreaTest )
+  {
+    // Generate the vector of holes' mask (set)
+    std::vector< std::set< unsigned int > > holesMasksSetVector;
+
+    FiltersResources::createHolesMasksSetVector(
+      conveyor,
+      squares_,
+      &holesMasksSetVector );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+    std::vector<std::string> msgs;
+    std::vector<float> probabilitiesVector( 3, 0.0 );
+
+    // Run DepthFilters::checkHolesDepthDiff
+    DepthFilters::checkHolesDepthArea(
+      conveyor,
+      squares_,
+      holesMasksSetVector,
+      &msgs,
+      &probabilitiesVector );
+
+    for ( int i = 0; i < probabilitiesVector.size(); i++ )
+    {
+      EXPECT_EQ ( 1.0, probabilitiesVector[i] );
+    }
+  }
+
+
+
+  // Test DepthFilters::checkHolesDepthHomogeneity
+  TEST_F ( DepthFiltersTest, CheckHolesDepthHomogeneityTest)
+  {
+    // Generate the vector of holes' mask (set)
+    std::vector< std::set< unsigned int > > holesMasksSetVector;
+
+    FiltersResources::createHolesMasksSetVector(
+      conveyor,
+      squares_,
+      &holesMasksSetVector );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthHomogeneity method
+    std::vector<std::string> msgs;
+    std::vector<float> probabilitiesVector( 3, 0.0 );
+
+    // Run DepthFilters::checkHolesDepthHomogeneity
+    DepthFilters::checkHolesDepthHomogeneity(
+      conveyor,
+      squares_,
+      holesMasksSetVector,
+      &msgs,
+      &probabilitiesVector );
+
+    // The east and south edges of the lower right square are clipped
+    EXPECT_NEAR ( 196 / 9996, probabilitiesVector[0], 0.1 );
+    EXPECT_NEAR ( 392 / 9996, probabilitiesVector[1], 0.1 );
+    EXPECT_NEAR ( 392 / 9996, probabilitiesVector[2], 0.1 );
   }
 
 
