@@ -143,7 +143,7 @@ namespace pandora_vision
         active filter executed.
         While the returned set may be reduced in size, the size of this vector
         is the same throughout and equal to the number of active filters by
-        the number of keypoints found and published by the rgb node.
+        the number of keypoints found and published by the depth and rgb nodes
         @return void
        **/
       static void checkHoles(
