@@ -36,6 +36,8 @@
  *********************************************************************/
 
 #include "hole_fusion_node/depth_filters.h"
+#include "hole_fusion_node/filters_resources.h"
+#include "hole_fusion_node/planes_detection.h"
 #include "gtest/gtest.h"
 
 
@@ -99,9 +101,6 @@ namespace pandora_vision
 
         // The image upon which the squares will be inprinted
         squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
-
-        // The overall conveyor holding the holes
-        HolesConveyor conveyor;
 
         // Construct the squares_ image
 
@@ -175,6 +174,10 @@ namespace pandora_vision
 
       // The image that will be used to locate blobs in
       cv::Mat squares_;
+
+      // The conveyor of holes that will be used to test methods of class
+      // DepthFilters
+      HolesConveyor conveyor;
 
   };
 
@@ -288,5 +291,38 @@ namespace pandora_vision
     return conveyor;
 
   }
+
+
+
+  // Test DepthFilters::checkHolesDepthDiff
+  TEST_F ( DepthFiltersTest, CheckHolesDepthDiffTest )
+  {
+    // Generate the inflated rectangles and corresponding indices vectors
+    // for an inflation size of value 0
+    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_0;
+    std::vector<int> inflatedRectanglesIndices_0;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &inflatedRectanglesVector_0,
+      &inflatedRectanglesIndices_0 );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+    std::vector<std::string> msgs;
+    std::vector<float> probabilitiesVector(3);
+
+    // Run DepthFilters::checkHolesDepthDiff
+    DepthFilters::checkHolesDepthDiff(
+      squares_,
+      conveyor,
+      inflatedRectanglesVector_0,
+      inflatedRectanglesIndices_0,
+      &msgs,
+      &probabilitiesVector);
+
+  }
+
 
 } // namespace pandora_vision

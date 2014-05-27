@@ -345,7 +345,7 @@ namespace pandora_vision
     with which the associated candidate hole is associated.
     While the returned set may be reduced in size, the size of this vector
     is the same throughout and equal to the number of keypoints found and
-    published by the rgb node
+    published by the depth and rgb nodes
     @return void
    **/
   void DepthFilters::checkHolesDepthDiff(
