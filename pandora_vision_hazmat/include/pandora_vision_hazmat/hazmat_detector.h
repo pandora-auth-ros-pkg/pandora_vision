@@ -53,7 +53,7 @@ namespace pandora_vision{
   struct HazmatEpsilon
   {
     int pattern_num;
-    float x,y;
+    float x, y;
     int m;
     float MO;
     int votes;
@@ -195,7 +195,7 @@ namespace pandora_vision{
       @param pt4 [CvPoint2D64f]
       @return float : The area
     **/        
-    float calculateRectangleArea(CvPoint2D64f pt1,CvPoint2D64f pt2, 
+    float calculateRectangleArea(CvPoint2D64f pt1, CvPoint2D64f pt2, 
       CvPoint2D64f pt3, CvPoint2D64f pt4); 
     
     /**
@@ -204,7 +204,7 @@ namespace pandora_vision{
       @param pattern_image [cv::Mat]
       @return void
     **/
-    void calculateArea(CvMat* H,cv::Mat pattern_image);
+    void calculateArea(CvMat* H, cv::Mat pattern_image);
     
     /**
       @brief (?)
@@ -217,7 +217,7 @@ namespace pandora_vision{
       @return CvPoint2D64f
     **/
     CvPoint2D64f  defineVariance(float& SAD, float& SAD2, IplImage* img, 
-      CvMat* H,cv::Mat _pattern_image,int n);  
+      CvMat* H, cv::Mat _pattern_image, int n);  
     
     cv::MatND patternHistog;
     
@@ -227,8 +227,5 @@ namespace pandora_vision{
     **/ 
     void calcMinMax();
   };
-}
-
-
-
-#endif
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H

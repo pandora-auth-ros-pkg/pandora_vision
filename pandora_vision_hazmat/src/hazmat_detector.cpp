@@ -1,4 +1,39 @@
-
+/*********************************************************************
+*
+* Software License Agreement (BSD License)
+*
+*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions
+*  are met:
+*
+*   * Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   * Redistributions in binary form must reproduce the above
+*     copyright notice, this list of conditions and the following
+*     disclaimer in the documentation and/or other materials provided
+*     with the distribution.
+*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+*     contributors may be used to endorse or promote products derived
+*     from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+*  POSSIBILITY OF SUCH DAMAGE.
+*
+* Authors:  Tsakalis Vasilis, Despoina Paschalidou
+*********************************************************************/
 #include "pandora_vision_hazmat/hazmat_detector.h"
 namespace pandora_vision
 {
@@ -25,20 +60,20 @@ namespace pandora_vision
   void HazmatEpsilonDetector::initDetector()
   {
     FILE* contents = fopen(pattern_index_path.c_str(), "r");
-    if (contents==NULL) 
+    if (contents == NULL) 
       printf("Can't open contents file");
     
-    nPatterns=0;
+    nPatterns = 0;
         
     char imgName[50];
     while(true)
     {
       fgets(imgName, 49, contents);
 
-      if(imgName[0]=='\n') 
+      if(imgName[0] == '\n') 
         break;
       
-      if (feof(contents)!=0) 
+      if (feof(contents) != 0) 
         break;
 
       nPatterns++;
@@ -48,11 +83,10 @@ namespace pandora_vision
     rewind(contents);
     
     /// Load features of patterns in memory
-    feats=new feature* [nPatterns];
+    feats = new feature* [nPatterns];
+    nFeats = new int[nPatterns];
     
-    nFeats=new int[nPatterns];
-    
-    for(int n=0; n<nPatterns; n++)
+    for(int n = 0; n < nPatterns; n++)
     {
       fgets(imgName, 49, contents);
       imgName[strlen(imgName)-1] = '\0';
@@ -62,7 +96,8 @@ namespace pandora_vision
       img_file_stream << package_path << "/" << imgName << ".sift";
     
       /// Returns the number of features imported from every pattern
-      nFeats[n] = import_features((char*)img_file_stream.str().c_str(), 
+      nFeats[n] = 
+        import_features(const_cast<char*>img_file_stream.str().c_str(), 
           FEATURE_LOWE, &feats[n]);
     }
      
@@ -110,31 +145,31 @@ namespace pandora_vision
   **/  
   void HazmatEpsilonDetector::calcMinMax()
   {
-    minUV=new float* [nPatterns];
-    maxUV=new float* [nPatterns];
+    minUV = new float* [nPatterns];
+    maxUV = new float* [nPatterns];
     cv::Mat image;
-    for (int i=0;i<nPatterns;i++)
+    for (int i = 0; i < nPatterns; i++)
     {
-      minUV[i]=new float [2];
-      maxUV[i]=new float [2];
+      minUV[i] = new float [2];
+      maxUV[i] = new float [2];
     }
-    for (int i=0;i<nPatterns;i++)
+    for (int i = 0; i < nPatterns; i++)
     {
       std::stringstream img_file_stream;
       img_file_stream << package_path << "/patterns/enter" << i+1 << ".png";
       
-      image=cv::imread(img_file_stream.str().c_str(),1);
+      image = cv::imread(img_file_stream.str().c_str(), 1);
       cvtColor(image, image, CV_BGR2YCrCb);
       
-      int height,width,step,channels;
+      int height, width, step, channels;
       height = image.size().height;
       width  = image.size().width;
       step = image.step;
       channels = image.channels();
       
-      for (int j=0;j<sideLength;j++)
+      for (int j = 0; j < sideLength; j++)
       {
-        for (int k=0;k<sideLength;k++)
+        for (int k = 0; k < sideLength; k++)
         {
           if( (j == 0) && (k == 0) ){
             minUV[i][0] = (reinterpret_cast<uchar *>(image.data))
@@ -198,17 +233,17 @@ namespace pandora_vision
   **/
   void HazmatEpsilonDetector::calcHistograms()
   {
-    cv::Mat* patterns=new cv::Mat[nPatterns];
+    cv::Mat* patterns = new cv::Mat[nPatterns];
     cv::Mat image;
     
-    for(int i=0;i<nPatterns;i++)
+    for(int i = 0; i < nPatterns; i++)
     {
      std::stringstream img_file_stream;
      img_file_stream << package_path << "/patterns/enter" << i+1 << ".png";
      
-     image = cv::imread(img_file_stream.str().c_str(),1);
-     cvtColor(image,image, CV_BGR2HSV);
-     patterns[i]=image;
+     image = cv::imread(img_file_stream.str().c_str(), 1);
+     cvtColor(image, image, CV_BGR2HSV);
+     patterns[i] = image;
     }
     
     /// Quantize the hue to 30 levels and the saturation to 32 levels
@@ -219,8 +254,8 @@ namespace pandora_vision
     const float* ranges[] = { hranges};
     /// Compute the histogram from the 0-th and 1-st channels
     int channels[] = {0};
-    calcHist(patterns ,nPatterns, channels, cv::Mat(), patternHistog, 1, 
-      histSize, ranges,true, false );
+    calcHist(patterns , nPatterns, channels, cv::Mat(), patternHistog, 1, 
+      histSize, ranges, true, false );
     delete[] patterns;
   }
 
@@ -236,22 +271,22 @@ namespace pandora_vision
     CvPoint2D64f pt2, CvPoint2D64f pt3, CvPoint2D64f pt4)
   {
     float sideA, sideB, sideC; 
-    sideA = sqrt(pow((pt1.x - pt2.x),2) + pow((pt1.y - pt2.y), 2));
-    sideB = sqrt(pow((pt2.x - pt3.x),2) + pow((pt2.y - pt3.y), 2));
-    sideC = sqrt(pow((pt1.x - pt3.x),2) + pow((pt1.y - pt3.y), 2));
+    sideA = sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2));
+    sideB = sqrt(pow((pt2.x - pt3.x), 2) + pow((pt2.y - pt3.y), 2));
+    sideC = sqrt(pow((pt1.x - pt3.x), 2) + pow((pt1.y - pt3.y), 2));
      
     float temp, triangleArea;
     
-    temp = (sideA + sideB + sideC)/2.0;
+    temp = (sideA + sideB + sideC) / 2.0;
     
     triangleArea = sqrt( temp*(temp - sideA) * (temp - sideB) * (temp - sideC));
     
     float triangleArea2;
-    sideA = sqrt(pow((pt1.x - pt3.x),2) + pow((pt1.y - pt3.y), 2));
-    sideB = sqrt(pow((pt1.x - pt4.x),2) + pow((pt1.y - pt4.y), 2));
-    sideC = sqrt(pow((pt3.x - pt4.x),2) + pow((pt3.y - pt4.y), 2));
+    sideA = sqrt(pow((pt1.x - pt3.x), 2) + pow((pt1.y - pt3.y), 2));
+    sideB = sqrt(pow((pt1.x - pt4.x), 2) + pow((pt1.y - pt4.y), 2));
+    sideC = sqrt(pow((pt3.x - pt4.x), 2) + pow((pt3.y - pt4.y), 2));
     
-    temp = (sideA + sideB + sideC)/2.0;
+    temp = (sideA + sideB + sideC) / 2.0;
     
     triangleArea2 = sqrt(temp*(temp - sideA)*(temp - sideB)*(temp - sideC));
     
@@ -277,7 +312,7 @@ namespace pandora_vision
       fgets(imgName, 49, contents);
       imgName[strlen(imgName)-1] = '\0';
       
-      if( strlen(imgName)==0) 
+      if( strlen(imgName) == 0) 
         break;
         
       ROS_INFO_STREAM("Processing hazmat" << imgName);
@@ -316,7 +351,7 @@ namespace pandora_vision
     
     std::vector <int> tempvector;
     
-    for(int i=0; i<testNum; i++)
+    for(int i = 0; i < testNum; i++)
     {
       int k = 
         kdtree_bbf_knn( kd_root, feats[n] +i, 2, &nbrs, KDTREE_BBF_MAX_NN_CHKS );
@@ -374,24 +409,24 @@ namespace pandora_vision
   { 
     /// Convert cv::Mat to IplImage in order to use opensift library
     IplImage* pattern_image = 
-      cvCreateImage( cvSize(cols,rows), IPL_DEPTH_8U, 3 );
+      cvCreateImage( cvSize(cols, rows), IPL_DEPTH_8U, 3 );
     
     IplImage* temp = new IplImage(_pattern_image);
-    pattern_image=cvCloneImage(temp);
+    pattern_image = cvCloneImage(temp);
      
-    IplImage* _xformed= cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 3 );
+    IplImage* _xformed = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 3 );
     cvWarpPerspective( pattern_image, _xformed, H, 
-      CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS,cv::Scalar( 0,0,0 ) );
-    cv::Mat xformed(_xformed,false);
+      CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cv::Scalar( 0, 0, 0));
+    cv::Mat xformed(_xformed, false);
    
-    cv::Mat color_image = cv::Mat( cv::Size(cols,rows), CV_8U, 3 );
+    cv::Mat color_image = cv::Mat( cv::Size(cols, rows), CV_8U, 3 );
     xformed.copyTo(color_image);
-    cvtColor(color_image,color_image,CV_BGR2YCrCb);
-    cv::Mat _img(img,false);
+    cvtColor(color_image, color_image, CV_BGR2YCrCb);
+    cv::Mat _img(img, false);
     
-    cv::Mat ycrcb_image = cv::Mat( cvSize(cols,rows), CV_8U, 3 );
+    cv::Mat ycrcb_image = cv::Mat( cvSize(cols, rows), CV_8U, 3 );
     _img.copyTo(ycrcb_image);
-    cvtColor(ycrcb_image,ycrcb_image,CV_BGR2YCrCb);
+    cvtColor(ycrcb_image, ycrcb_image, CV_BGR2YCrCb);
 
     int color_image_height;
     int color_image_width;
@@ -414,13 +449,13 @@ namespace pandora_vision
     ycrycb_image_channels = ycrcb_image.channels();
     
     CvPoint2D64f point = 
-      {(_pattern_image.size().width)/2,(_pattern_image.size().height)/2};
+      {(_pattern_image.size().width) / 2, (_pattern_image.size().height) / 2};
     point = persp_xform_pt( point, H );
     votes = 0;
               
     //start voting
-    for (int counter=0; counter < sideLength; counter++) {
-      for (int counter2=0; counter2 < sideLength; counter2++){
+    for (int counter = 0; counter < sideLength; counter++) {
+      for (int counter2 = 0; counter2 < sideLength; counter2++){
         if (( (point.y - (sideLength / 2) + counter ) >= 0) && 
             ( (point.y - (sideLength / 2) + counter ) < rows ))
         {
@@ -503,9 +538,9 @@ namespace pandora_vision
   {
     std::vector<HazmatEpsilon> result;
     
-    IplImage* img = cvCreateImage( cv::Size(cols,rows), IPL_DEPTH_8U, 3 );
+    IplImage* img = cvCreateImage( cv::Size(cols, rows), IPL_DEPTH_8U, 3 );
     IplImage* temp = new IplImage(hazmatFrame);
-    img=cvCloneImage(temp);
+    img = cvCloneImage(temp);
       
     initDetector();
 
@@ -520,18 +555,17 @@ namespace pandora_vision
     /// Finds SIFT features in an image.
     int nShot = sift_features(img, &featShot);
     
-    if (nShot>0)
+    if (nShot > 0)
     {
       kd_root = kdtree_build( featShot, nShot );
       
       /// Search screenshot for each pattern
       int i;
       int max = -1;
-      for( int n=0; n < nPatterns; n++)
+      for( int n = 0; n < nPatterns; n++)
       {
         /// Find nearest neighboor for each feature in screenshot
-        int m=0;
-        
+        int m = 0;
         /// Number of imported features from each image
         int num_of_features = nFeats[n];
         
@@ -544,7 +578,7 @@ namespace pandora_vision
         {
           CvMat* H;
           H = ransac_xform( feats[n], num_of_features, FEATURE_FWD_MATCH, 
-            lsq_homog, 4, 0.01, homog_xfer_err,3.0, NULL, NULL );
+            lsq_homog, 4, 0.01, homog_xfer_err, 3.0, NULL, NULL );
           if( H )
           {
             std::stringstream img_file_stream;
@@ -552,7 +586,8 @@ namespace pandora_vision
               << n+1  << ".png";
             
             cv::Mat pattern_image;
-            pattern_image=cv::imread(img_file_stream.str().c_str(),CV_LOAD_IMAGE_COLOR);
+            pattern_image = 
+              cv::imread(img_file_stream.str().c_str(), CV_LOAD_IMAGE_COLOR);
             if (!pattern_image.data)
               ROS_ERROR("could not load pattern image");
 
@@ -568,23 +603,23 @@ namespace pandora_vision
               ///check if the final image's results is within thresholds
               if (votes > votingThreshold){
                 
-                float MO= ( SAD + SAD2 )/2;	
+                float MO = ( SAD + SAD2 )/2;
                 if (MO < MOThreshold)
                 {
                   HazmatEpsilon a;
                   a.x = point.x;
                   a.y = point.y;
                   a.pattern_num = n+1;
-                  a.m=m;
-                  a.MO=MO;
-                  a.votes=votes;
+                  a.m = m;
+                  a.MO = MO;
+                  a.votes = votes;
                   a.H = cvCloneMat(H);
-                  if (result.size()==0)
+                  if (result.size() == 0)
                     result.push_back(a);
                   else
                   {
                     bool flag = false;
-                    for (int v=0; v<result.size(); v++)
+                    for (int v = 0; v < result.size(); v++)
                     {
                       float check1 = fabsf( a.x - result[v].x);
                       float check2 = fabsf( a.y - result[v].y);
@@ -650,19 +685,19 @@ namespace pandora_vision
         }
         if (feature_vector.size() > 0)
         {
-          for (int l=0;l<feature_vector.size(); l++)
+          for (int l = 0; l < feature_vector.size(); l++)
           {
-            feats[n][feature_vector[l]].fwd_match=NULL;
+            feats[n][feature_vector[l]].fwd_match = NULL;
           }
         }
-        feature_vector.erase(feature_vector.begin(),feature_vector.end());
+        feature_vector.erase(feature_vector.begin(), feature_vector.end());
       }
       kdtree_release(kd_root);
       free(featShot);
     }
     delete[] feats;
     delete temp;
-    cvReleaseImage(&img);	
+    cvReleaseImage(&img);
     return result;
   }
-}
+}// namespace pandora_vision
