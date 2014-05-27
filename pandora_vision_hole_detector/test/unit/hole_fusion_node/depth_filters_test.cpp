@@ -86,8 +86,8 @@ namespace pandora_vision
         const int& x,
         const int& y );
 
-        //! Sets up one image: squares_,
-        //! which features three squares of size 100.
+      //! Sets up one image: squares_,
+      //! which features three squares of size 100.
       //! The first one (order matters here) has its upper left vertex at
       //! (100, 100),
       //! the second one has its upper right vertex at (WIDTH - 3, 3)
@@ -120,7 +120,7 @@ namespace pandora_vision
           ( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
             100,
             100,
-            1.2,
+            0.2,
             &lowerRightSquare );
 
         HolesConveyorUtils::append(
@@ -137,7 +137,7 @@ namespace pandora_vision
           ( cv::Point2f ( WIDTH - 103, 3 ),
             100,
             100,
-            2.2,
+            0.2,
             &upperRightSquare );
 
         HolesConveyorUtils::append(
@@ -153,7 +153,7 @@ namespace pandora_vision
           ( cv::Point2f ( 100, 100 ),
             100,
             100,
-            1.8,
+            0.3,
             &upperLeftSquare );
 
         HolesConveyorUtils::append(
@@ -162,8 +162,8 @@ namespace pandora_vision
             100 ),
           &conveyor);
 
-        // Synthesize the final squares_ image
-        squares_ = lowerRightSquare + upperRightSquare + upperLeftSquare;
+        // Compose the final squares_ image
+        squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
 
       }
 
@@ -311,7 +311,7 @@ namespace pandora_vision
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
     std::vector<std::string> msgs;
-    std::vector<float> probabilitiesVector(3);
+    std::vector<float> probabilitiesVector_0(3, 0.0);
 
     // Run DepthFilters::checkHolesDepthDiff
     DepthFilters::checkHolesDepthDiff(
@@ -320,7 +320,124 @@ namespace pandora_vision
       inflatedRectanglesVector_0,
       inflatedRectanglesIndices_0,
       &msgs,
-      &probabilitiesVector);
+      &probabilitiesVector_0);
+
+
+
+    for (int i = 0; i < probabilitiesVector_0.size(); i++)
+    {
+      // All three holes should have an inflated rectangle for inflation
+      // size of value 0
+      ASSERT_LT ( 0.0, probabilitiesVector_0[i] );
+      EXPECT_LT ( 0.3, probabilitiesVector_0[i] );
+    }
+
+
+
+    // Generate the inflated rectangles and corresponding indices vectors
+    // for an inflation size of value 2
+    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_2;
+    std::vector<int> inflatedRectanglesIndices_2;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      2,
+      &inflatedRectanglesVector_2,
+      &inflatedRectanglesIndices_2 );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+    std::vector<float> probabilitiesVector_2(3, 0.0);
+    msgs.clear();
+
+    // Run DepthFilters::checkHolesDepthDiff
+    DepthFilters::checkHolesDepthDiff(
+      squares_,
+      conveyor,
+      inflatedRectanglesVector_2,
+      inflatedRectanglesIndices_2,
+      &msgs,
+      &probabilitiesVector_2);
+
+
+    // Only the last two holes should have an inflated rectangle
+    // for inflation size of value 2
+    ASSERT_EQ ( 0.0, probabilitiesVector_2[0]);
+    ASSERT_LT ( 0.0, probabilitiesVector_2[1] );
+    ASSERT_LT ( 0.0, probabilitiesVector_2[2] );
+
+
+    EXPECT_LT ( 0.8, probabilitiesVector_2[1] );
+    EXPECT_EQ ( 1.0, probabilitiesVector_2[2] );
+
+
+    // Generate the inflated rectangles and corresponding indices vectors
+    // for an inflation size of value 8
+    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_8;
+    std::vector<int> inflatedRectanglesIndices_8;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      8,
+      &inflatedRectanglesVector_8,
+      &inflatedRectanglesIndices_8 );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+    std::vector<float> probabilitiesVector_8(3, 0.0);
+    msgs.clear();
+
+    // Run DepthFilters::checkHolesDepthDiff
+    DepthFilters::checkHolesDepthDiff(
+      squares_,
+      conveyor,
+      inflatedRectanglesVector_8,
+      inflatedRectanglesIndices_8,
+      &msgs,
+      &probabilitiesVector_8);
+
+
+    // Only the last two holes should have an inflated rectangle
+    // for inflation size of value 2
+    ASSERT_EQ ( 0.0, probabilitiesVector_8[0]);
+    ASSERT_EQ ( 0.0, probabilitiesVector_8[1] );
+    ASSERT_LT ( 0.0, probabilitiesVector_8[2] );
+
+
+    EXPECT_EQ ( 1.0, probabilitiesVector_8[2] );
+
+
+    // Generate the inflated rectangles and corresponding indices vectors
+    // for an inflation size of value 180
+    std::vector<std::vector<cv::Point2f> > inflatedRectanglesVector_180;
+    std::vector<int> inflatedRectanglesIndices_180;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      180,
+      &inflatedRectanglesVector_180,
+      &inflatedRectanglesIndices_180 );
+
+    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+    std::vector<float> probabilitiesVector_180(3, 0.0);
+    msgs.clear();
+
+    // Run DepthFilters::checkHolesDepthDiff
+    DepthFilters::checkHolesDepthDiff(
+      squares_,
+      conveyor,
+      inflatedRectanglesVector_180,
+      inflatedRectanglesIndices_180,
+      &msgs,
+      &probabilitiesVector_180);
+
+
+    // Only the last two holes should have an inflated rectangle
+    // for inflation size of value 2
+    ASSERT_EQ ( 0.0, probabilitiesVector_180[0]);
+    ASSERT_EQ ( 0.0, probabilitiesVector_180[1] );
+    ASSERT_EQ ( 0.0, probabilitiesVector_180[2] );
 
   }
 
