@@ -238,7 +238,7 @@ namespace pandora_vision
     vision_communications::HazmatAlertMsg hazmatMsg;
      
     std::vector<HazmatEpsilon> a = 
-        hazmatDetector_->DetectHazmatEpsilon(hazmatFrame_);
+        hazmatDetector_->detectHazmat(hazmatFrame_);
 
     //if hazmat found
     if (a.size() > 0)
