@@ -216,8 +216,8 @@ namespace pandora_vision{
       @param n [int]
       @return CvPoint2D64f
     **/
-    CvPoint2D64f  defineVariance(float& SAD, float& SAD2, IplImage* img, 
-      CvMat* H, cv::Mat _pattern_image, int n);  
+    CvPoint2D64f  defineVariance(float* SAD, float* SAD2, 
+      IplImage* img, CvMat* H, cv::Mat _pattern_image, int n);  
     
     cv::MatND patternHistog;
     
