@@ -96,11 +96,9 @@ namespace pandora_vision
       img_file_stream << package_path << "/" << imgName << ".sift";
     
       /// Returns the number of features imported from every pattern
-      nFeats[n] = 
-        import_features(const_cast<char*>img_file_stream.str().c_str(), 
-          FEATURE_LOWE, &feats[n]);
-    }
-     
+      nFeats[n] = import_features(const_cast<char*>(img_file_stream.str().c_str())
+        , FEATURE_LOWE, &feats[n]);
+    } 
     fclose(contents);
   }
   
@@ -326,7 +324,7 @@ namespace pandora_vision
       
       
       int n = sift_features(img, &feat);
-      sprintf(featName, "%s.sift", imgName);
+      snprintf(featName, sizeof(featName), "%s.sift", imgName);
       export_features(featName, feat, n);
 
       /// Free memory
@@ -404,8 +402,8 @@ namespace pandora_vision
     @param n [int]
     @return CvPoint2D64f
   **/
-  CvPoint2D64f HazmatEpsilonDetector::defineVariance(float& SAD, float& SAD2, 
-    IplImage* img, CvMat* H, cv::Mat _pattern_image, int n)  
+  CvPoint2D64f HazmatEpsilonDetector::defineVariance(float* SAD, 
+    float* SAD2, IplImage* img, CvMat* H, cv::Mat _pattern_image, int n)  
   { 
     /// Convert cv::Mat to IplImage in order to use opensift library
     IplImage* pattern_image = 
@@ -494,7 +492,7 @@ namespace pandora_vision
               }
               
             /// Find the absolute variance between the initial and the final image
-            SAD = SAD + fabsf(
+            *SAD = *SAD + fabsf(
               (reinterpret_cast<uchar*>(ycrcb_image.data))[
                 ( static_cast<int>(point.y) - sideLength / 2 + counter) *
                   ycrycb_image_step +
@@ -506,7 +504,7 @@ namespace pandora_vision
                 ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
                   color_image_channels + 1] );
                   
-            SAD2 = SAD2 + fabsf(
+            *SAD2 = *SAD2 + fabsf(
             (reinterpret_cast<uchar*>(ycrcb_image.data))[
                 ( static_cast<int>(point.y) - sideLength / 2 + counter) *
                   ycrycb_image_step +
@@ -598,7 +596,7 @@ namespace pandora_vision
               float SAD = 0;
               float SAD2 = 0;
               CvPoint2D64f point;
-              point = defineVariance(SAD, SAD2, img, H, pattern_image, n);
+              point = defineVariance(&SAD, &SAD2, img, H, pattern_image, n);
               
               ///check if the final image's results is within thresholds
               if (votes > votingThreshold){
@@ -700,4 +698,5 @@ namespace pandora_vision
     cvReleaseImage(&img);
     return result;
   }
+  
 }// namespace pandora_vision
