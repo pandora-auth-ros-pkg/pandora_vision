@@ -39,7 +39,11 @@ Predator::Predator(const std::string& ns): _nh(ns)
   model_path_stream << packagePath << "/model";
   
   patternPath = model_path_stream.str();
-  modelLoaded = true;
+  if(is_file_exist(patternPath))
+    modelLoaded = true;
+  else
+    ROS_INFO("Model not found!Waiting... <3 ");
+    
   //!<Get Model Export Path
   exportPath = model_path_stream.str();
   
