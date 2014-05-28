@@ -203,7 +203,7 @@ void LandoltCDetector::findRotationB(const cv::Mat& in, LandoltC* temp)
     
     //std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
     //ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
-    (*temp).angles.push_back(angle*(180/3.14159265359));
+    (*temp).angles.push_back(angle);
   }
   
   
