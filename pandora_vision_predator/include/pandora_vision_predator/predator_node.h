@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "vision_communications/PredatorAlertMsg.h"
+#include "common_communications/GeneralAlertMsg.h"
 #include "vision_communications/LandoltcPredatorMsg.h"
 
 #include "../tld/TLD.h"

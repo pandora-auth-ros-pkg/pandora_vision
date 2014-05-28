@@ -33,6 +33,16 @@ Predator::Predator(const std::string& ns): _nh(ns)
     
   getGeneralParams();
   
+    
+  //!< Get the path to the pattern used for detection
+  std::stringstream model_path_stream;
+  model_path_stream << packagePath << "/model";
+  
+  patternPath = model_path_stream.str();
+  modelLoaded = true;
+  //!<Get Model Export Path
+  exportPath = model_path_stream.str();
+  
   //!< Convert field of view from degrees to rads
   hfov = hfov * CV_PI / 180;
   vfov = vfov * CV_PI / 180;
@@ -311,7 +321,7 @@ void Predator::getGeneralParams()
   if (_nh.getParam("published_topic_names/predator_alert", param))
   {
     _predatorPublisher = 
-      _nh.advertise<vision_communications::PredatorAlertMsg>(param, 1000);
+      _nh.advertise<common_communications::GeneralAlertMsg>(param, 1000);
   }
   else
   {
@@ -332,15 +342,6 @@ void Predator::getGeneralParams()
     ROS_FATAL("Predator to landoltc alert topic name not found");
     ROS_BREAK();
   }
-  
-  //!< Get the path to the pattern used for detection
-  std::stringstream model_path_stream;
-  model_path_stream << packagePath << "/model";
-  
-  patternPath = model_path_stream.str();
-  modelLoaded = true;
-   //!<Get Model Export Path
-  exportPath = model_path_stream.str();
   
   //!< Get value for enabling or disabling TLD learning mode
   if( _nh.getParam("learning_enabled", learningEnabled))
@@ -467,7 +468,7 @@ void Predator::sendMessage(const cv::Rect& rec, const float& posterior,
   }
   else{
     
-    vision_communications::PredatorAlertMsg predatorAlertMsg;
+    common_communications::GeneralAlertMsg predatorAlertMsg;
     
     predatorAlertMsg.header.frame_id = cameraFrameId;
     predatorAlertMsg.probability = posterior;
