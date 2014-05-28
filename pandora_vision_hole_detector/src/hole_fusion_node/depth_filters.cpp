@@ -326,80 +326,6 @@ namespace pandora_vision
 
 
   /**
-    @brief Checks for valid holes just by the depth difference between
-    the keypoint of the blob and the edges of its bounding box
-    @param[in] depthImage [const cv::Mat&] The depth image
-    @param[in] conveyor [const HolesConveyor&] The candidate holes
-    @param[in] inflatedRectanglesVector
-    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
-    the vertices of the inflated rectangle that corresponds to a specific
-    hole inside the coveyor
-    @param[in] inflatedRectanglesIndices [const std::vector<int>&]
-    A vector that is used to identify a hole's corresponding inflated
-    rectangle.
-    Used because the rectangles used are inflated rectangles;
-    not all holes possess an inflated rectangle
-    @param[out] msgs [std::vector<std::string>*] Messages for debug reasons
-    @param[out] probabilitiesVector [std::vector<float>*] A vector
-    of probabilities, each position of which hints to the certainty degree
-    with which the associated candidate hole is associated.
-    While the returned set may be reduced in size, the size of this vector
-    is the same throughout and equal to the number of keypoints found and
-    published by the depth and rgb nodes
-    @return void
-   **/
-  void DepthFilters::checkHolesDepthDiff(
-    const cv::Mat& depthImage,
-    const HolesConveyor& conveyor,
-    const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
-    const std::vector<int>& inflatedRectanglesIndices,
-    std::vector<std::string>* msgs,
-    std::vector<float>* probabilitiesVector)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("checkHolesDepthDiff", "applyFilter");
-    #endif
-
-    for(unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
-    {
-      float mean = 0;
-
-      for(unsigned int j = 0 ; j < 4; j++)
-      {
-        int x = inflatedRectanglesVector[i][j].x;
-        int y = inflatedRectanglesVector[i][j].y;
-
-        mean += depthImage.at<float>(y, x);
-      }
-
-      mean /= inflatedRectanglesVector[i].size();
-
-      float value = depthImage.at<float>(
-        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.y,
-        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.x) - mean;
-
-      // The gaussian mean
-      float m = Parameters::HoleFusion::holes_gaussian_mean;
-
-      // The gaussian standard deviation
-      float s = Parameters::HoleFusion::holes_gaussian_stddev;
-
-      // The gaussian probability of this hole being valid
-      probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-        exp(-pow((value - m) / s, 2) / 2);
-
-      msgs->push_back(TOSTR(
-          probabilitiesVector->at(inflatedRectanglesIndices[i])));
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("checkHolesDepthDiff");
-    #endif
-  }
-
-
-
-  /**
     @brief Checks for valid holes by area / depth comparison
     @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] depthImage [const cv::Mat&] The depth image
@@ -479,124 +405,10 @@ namespace pandora_vision
 
 
   /**
-    @brief If the intermediate points (points between a hole's outline
-    and its bounding rectangle) for each hole lie on one plane,
-    this hole is considered valid. Although plane constitution alone is
-    considered valid, the @param probabilitiesVector hint to the
-    validity of the candidate hole through this filter
-    @param[in] inImage [const cv::Mat&] The input depth image
-    @param[in] initialPointCloud [const PointCloudPtr&]
-    The point cloud acquired from the depth sensor, interpolated
-    @param[in] intermediatePointsSetVector
-    [const std::vector<std::set<unsigned int> >& ] A vector that holds for
-    each hole a set of points;
-    these points are the points between the hole's outline and its
-    bounding rectangle
-    @param[in] inflatedRectanglesIndices [const std::vector<int>&] Because
-    each hole's bounding rectangle may be inflated, and thus not all holes
-    possess a bounding rectangle by this process, in this vector is stored
-    the indices of the holes whose inflated bounding box is inside the
-    image's bounds
-    @param[out] probabilitiesVector [std::vector<float>*] A vector
-    of probabilities, each position of which hints to the certainty degree
-    with which the associated candidate hole is associated.
-    While the returned set may be reduced in size, the size of this vector
-    is the same throughout and equal to the number of keypoints found and
-    published by the rgb node
-    @param[out] msgs [std::vector<std::string>*] Messages for
-    debug reasons
-    @return void
-   **/
-  void DepthFilters::checkHolesOutlineToRectanglePlaneConstitution(
-    const cv::Mat& inImage,
-    const PointCloudPtr& initialPointCloud,
-    const std::vector<std::set<unsigned int> >& intermediatePointsSetVector,
-    const std::vector<int>& inflatedRectanglesIndices,
-    std::vector<float>* probabilitiesVector,
-    std::vector<std::string>* msgs)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("checkHolesOutlineToRectanglePlaneConstitution",
-      "applyFilter");
-    #endif
-
-    for (unsigned int i = 0; i < inflatedRectanglesIndices.size(); i++)
-    {
-      // From each set of intermediate points, construct the point cloud
-      // that will be checked for plane constitution
-      PointCloudXYZPtr intermediatePointsPointCloud (new PointCloudXYZ);
-
-      intermediatePointsPointCloud->width =
-        intermediatePointsSetVector[i].size();
-
-      intermediatePointsPointCloud->height = 1;
-
-      intermediatePointsPointCloud->points.resize
-        (intermediatePointsPointCloud->width
-         * intermediatePointsPointCloud->height);
-
-      intermediatePointsPointCloud->header.frame_id =
-        initialPointCloud->header.frame_id;
-      intermediatePointsPointCloud->header.stamp =
-        initialPointCloud->header.stamp;
-
-      int pointCloudPointsIndex = 0;
-      for(std::set<unsigned int>::iterator
-        it = intermediatePointsSetVector[i].begin();
-        it != intermediatePointsSetVector[i].end(); it++)
-      {
-        intermediatePointsPointCloud->points[pointCloudPointsIndex].x =
-          initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].x;
-
-        intermediatePointsPointCloud->points[pointCloudPointsIndex].y =
-          initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].y;
-
-        intermediatePointsPointCloud->points[pointCloudPointsIndex].z =
-          initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].z;
-
-        pointCloudPointsIndex++;
-      }
-
-      // Check if the intermediatePointsPointCloud's points are on a plane
-      std::vector<pcl::PointIndices::Ptr> inliersVector;
-      int numPlanes = PlanesDetection::locatePlanes(
-        intermediatePointsPointCloud, false, &inliersVector);
-
-      // The probability (in all probability) of the current hole lying on
-      // one plane will be the ratio of the number of intermediate points
-      // that lie on one plane over all the intermediate points
-      // (max points on one plane) / (all intermediate points)
-      int maxPoints = 0;
-      for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
-      {
-        if (inliersVector[iv]->indices.size() > maxPoints)
-        {
-          maxPoints = inliersVector[iv]->indices.size();
-        }
-      }
-
-      probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-        static_cast<float> (maxPoints) / intermediatePointsSetVector[i].size();
-
-      msgs->push_back(TOSTR(
-          probabilitiesVector->at(inflatedRectanglesIndices[i])));
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("checkHolesOutlineToRectanglePlaneConstitution");
-    #endif
-  }
-
-
-
-  /**
-    @brief All the points that lie on the (edges of the) rectangle should
-    also lie on exactly one plane for the blob to be a hole. Although all
-    planes are considered valid, the @param probabilitiesVector hint
-    to the validity of the candidate hole through this filter
-    @param[in] inImage [const cv::Mat&] The input depth image
-    @param[in] initialPointCloud [const PointCloudPtr&]
-    The point cloud acquired from the depth sensor, interpolated
+    @brief Checks for valid holes just by the depth difference between
+    the keypoint of the blob and the edges of its bounding box
+    @param[in] depthImage [const cv::Mat&] The depth image
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] inflatedRectanglesVector
     [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of the inflated rectangle that corresponds to a specific
@@ -606,116 +418,61 @@ namespace pandora_vision
     rectangle.
     Used because the rectangles used are inflated rectangles;
     not all holes possess an inflated rectangle
+    @param[out] msgs [std::vector<std::string>*] Messages for debug reasons
     @param[out] probabilitiesVector [std::vector<float>*] A vector
     of probabilities, each position of which hints to the certainty degree
     with which the associated candidate hole is associated.
     While the returned set may be reduced in size, the size of this vector
     is the same throughout and equal to the number of keypoints found and
-    published by the rgb node
-    @param[out] msgs [std::vector<std::string>*] Messages for
-    debug reasons
+    published by the depth and rgb nodes
     @return void
    **/
-  void DepthFilters::checkHolesRectangleEdgesPlaneConstitution(
-    const cv::Mat& inImage,
-    const PointCloudPtr& initialPointCloud,
+  void DepthFilters::checkHolesDepthDiff(
+    const cv::Mat& depthImage,
+    const HolesConveyor& conveyor,
     const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
     const std::vector<int>& inflatedRectanglesIndices,
-    std::vector<float>* probabilitiesVector,
-    std::vector<std::string>* msgs)
+    std::vector<std::string>* msgs,
+    std::vector<float>* probabilitiesVector)
   {
     #ifdef DEBUG_TIME
-    Timer::start("checkHolesRectangleEdgesPlaneConstitution", "applyFilter");
+    Timer::start("checkHolesDepthDiff", "applyFilter");
     #endif
 
-
-    // For each inflated rectangle, store in visitedPoints
-    // the points that constitute the rectangle.
-    // We will test if these points all lie on one plane.
-    for (unsigned int i = 0; i < inflatedRectanglesVector.size(); i++)
+    for(unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
     {
-      // The canvas image will hold the rectangles.
-      cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
-      cv::RNG rng(12345);
-      cv::Scalar color = cv::Scalar(
-        rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+      float mean = 0;
 
-
-      // Draw the rectangle that corresponds to it
-      for(int j = 0; j < 4; j++)
+      for(unsigned int j = 0 ; j < 4; j++)
       {
-        cv::line(canvas, inflatedRectanglesVector[i][j],
-          inflatedRectanglesVector[i][(j + 1) % 4], color, 1, 8);
+        int x = inflatedRectanglesVector[i][j].x;
+        int y = inflatedRectanglesVector[i][j].y;
+
+        mean += depthImage.at<float>(y, x);
       }
 
-      std::set<unsigned int> visitedPoints;
-      for (unsigned int rows = 0; rows < inImage.rows; rows++)
-      {
-        for (unsigned int cols = 0; cols < inImage.cols; cols++)
-        {
-          if (canvas.data[rows * inImage.cols + cols] != 0)
-          {
-            visitedPoints.insert(rows * inImage.cols + cols);
-          }
-        }
-      }
+      mean /= inflatedRectanglesVector[i].size();
 
-      // From each set of points lying on the edges of the rectangle,
-      // construct the point cloud that will be checked for plane constitution
-      PointCloudXYZPtr edgePointsPointCloud (new PointCloudXYZ);
+      float value = depthImage.at<float>(
+        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.y,
+        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.x) - mean;
 
-      edgePointsPointCloud->width = visitedPoints.size();
-      edgePointsPointCloud->height = 1;
-      edgePointsPointCloud->points.resize
-        (edgePointsPointCloud->width * edgePointsPointCloud->height);
+      // The gaussian mean
+      float m = Parameters::HoleFusion::holes_gaussian_mean;
 
-      edgePointsPointCloud->header.frame_id =
-        initialPointCloud->header.frame_id;
-      edgePointsPointCloud->header.stamp =
-        initialPointCloud->header.stamp;
+      // The gaussian standard deviation
+      float s = Parameters::HoleFusion::holes_gaussian_stddev;
 
-      int pointCloudPointsIndex = 0;
-      for(std::set<unsigned int>::iterator it = visitedPoints.begin();
-        it != visitedPoints.end(); it++)
-      {
-        edgePointsPointCloud->points[pointCloudPointsIndex].x =
-          initialPointCloud->points[*visitedPoints.find(*it)].x;
-
-        edgePointsPointCloud->points[pointCloudPointsIndex].y =
-          initialPointCloud->points[*visitedPoints.find(*it)].y;
-
-        edgePointsPointCloud->points[pointCloudPointsIndex].z =
-          initialPointCloud->points[*visitedPoints.find(*it)].z;
-
-        pointCloudPointsIndex++;
-      }
-
-      // Check if the edgePointsPointCloud points are on a plane
-      std::vector<pcl::PointIndices::Ptr> inliersVector;
-      int numPlanes = PlanesDetection::locatePlanes(edgePointsPointCloud,
-        false, &inliersVector);
-
-      // The probability (in all probability) of an inflated rectangle
-      // residing on one plane will be the ratio of
-      // (max points on one plane) / (all inflated rectangle points)
-      int maxPoints = 0;
-      for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
-      {
-        if (inliersVector[iv]->indices.size() > maxPoints)
-        {
-          maxPoints = inliersVector[iv]->indices.size();
-        }
-      }
-
+      // The gaussian probability of this hole being valid
       probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-        static_cast<float> (maxPoints) / visitedPoints.size();
+        exp(-pow((value - m) / s, 2) / 2);
 
       msgs->push_back(TOSTR(
           probabilitiesVector->at(inflatedRectanglesIndices[i])));
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("checkHolesRectangleEdgesPlaneConstitution");
+    Timer::tick("checkHolesDepthDiff");
     #endif
   }
 
@@ -792,6 +549,266 @@ namespace pandora_vision
 
     #ifdef DEBUG_TIME
     Timer::tick("checkHolesDepthHomogeneity");
+    #endif
+  }
+
+
+
+  /**
+    @brief If the intermediate points (points between a hole's outline
+    and its bounding rectangle) for each hole lie on one plane,
+    this hole is considered valid. Although plane constitution alone is
+    considered valid, the @param probabilitiesVector hint to the
+    validity of the candidate hole through this filter
+    @param[in] inImage [const cv::Mat&] The input depth image
+    @param[in] initialPointCloud [const PointCloudPtr&]
+    The point cloud acquired from the depth sensor, interpolated
+    @param[in] intermediatePointsSetVector
+    [const std::vector<std::set<unsigned int> >& ] A vector that holds for
+    each hole a set of points;
+    these points are the points between the hole's outline and its
+    bounding rectangle
+    @param[in] inflatedRectanglesIndices [const std::vector<int>&] Because
+    each hole's bounding rectangle may be inflated, and thus not all holes
+    possess a bounding rectangle by this process, in this vector is stored
+    the indices of the holes whose inflated bounding box is inside the
+    image's bounds
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities, each position of which hints to the certainty degree
+    with which the associated candidate hole is associated.
+    While the returned set may be reduced in size, the size of this vector
+    is the same throughout and equal to the number of keypoints found and
+    published by the rgb node
+    @param[out] msgs [std::vector<std::string>*] Messages for
+    debug reasons
+    @return void
+   **/
+  void DepthFilters::checkHolesOutlineToRectanglePlaneConstitution(
+    const cv::Mat& inImage,
+    const PointCloudPtr& initialPointCloud,
+    const std::vector<std::set<unsigned int> >& intermediatePointsSetVector,
+    const std::vector<int>& inflatedRectanglesIndices,
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("checkHolesOutlineToRectanglePlaneConstitution",
+      "applyFilter");
+    #endif
+
+    for (unsigned int i = 0; i < inflatedRectanglesIndices.size(); i++)
+    {
+      if (intermediatePointsSetVector[i].size() > 0)
+      {
+        // From each set of intermediate points, construct the point cloud
+        // that will be checked for plane constitution
+        PointCloudXYZPtr intermediatePointsPointCloud (new PointCloudXYZ);
+
+        intermediatePointsPointCloud->width =
+          intermediatePointsSetVector[i].size();
+
+        intermediatePointsPointCloud->height = 1;
+
+        intermediatePointsPointCloud->points.resize
+          (intermediatePointsPointCloud->width
+           * intermediatePointsPointCloud->height);
+
+        intermediatePointsPointCloud->header.frame_id =
+          initialPointCloud->header.frame_id;
+        intermediatePointsPointCloud->header.stamp =
+          initialPointCloud->header.stamp;
+
+        int pointCloudPointsIndex = 0;
+        for(std::set<unsigned int>::iterator
+          it = intermediatePointsSetVector[i].begin();
+          it != intermediatePointsSetVector[i].end(); it++)
+        {
+          intermediatePointsPointCloud->points[pointCloudPointsIndex].x =
+            initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].x;
+
+          intermediatePointsPointCloud->points[pointCloudPointsIndex].y =
+            initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].y;
+
+          intermediatePointsPointCloud->points[pointCloudPointsIndex].z =
+            initialPointCloud->points[*intermediatePointsSetVector[i].find(*it)].z;
+
+          pointCloudPointsIndex++;
+        }
+
+        // Check if the intermediatePointsPointCloud's points are on a plane
+        std::vector<pcl::PointIndices::Ptr> inliersVector;
+        int numPlanes = PlanesDetection::locatePlanes(
+          intermediatePointsPointCloud, false, &inliersVector);
+
+        // The probability (in all probability) of the current hole lying on
+        // one plane will be the ratio of the number of intermediate points
+        // that lie on one plane over all the intermediate points
+        // (max points on one plane) / (all intermediate points)
+        int maxPoints = 0;
+        for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
+        {
+          if (inliersVector[iv]->indices.size() > maxPoints)
+          {
+            maxPoints = inliersVector[iv]->indices.size();
+          }
+        }
+
+        probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+          static_cast<float> (maxPoints) / intermediatePointsSetVector[i].size();
+
+        msgs->push_back(TOSTR(
+            probabilitiesVector->at(inflatedRectanglesIndices[i])));
+      }
+      else
+      {
+         probabilitiesVector->at(inflatedRectanglesIndices[i]) = 0.0;
+
+        msgs->push_back(TOSTR(0));
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("checkHolesOutlineToRectanglePlaneConstitution");
+    #endif
+  }
+
+
+
+  /**
+    @brief All the points that lie on the (edges of the) rectangle should
+    also lie on exactly one plane for the blob to be a hole. Although all
+    planes are considered valid, the @param probabilitiesVector hint
+    to the validity of the candidate hole through this filter
+    @param[in] inImage [const cv::Mat&] The input depth image
+    @param[in] initialPointCloud [const PointCloudPtr&]
+    The point cloud acquired from the depth sensor, interpolated
+    @param[in] inflatedRectanglesVector
+    [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
+    the vertices of the inflated rectangle that corresponds to a specific
+    hole inside the coveyor
+    @param[in] inflatedRectanglesIndices [const std::vector<int>&]
+    A vector that is used to identify a hole's corresponding inflated
+    rectangle.
+    Used because the rectangles used are inflated rectangles;
+    not all holes possess an inflated rectangle
+    @param[out] probabilitiesVector [std::vector<float>*] A vector
+    of probabilities, each position of which hints to the certainty degree
+    with which the associated candidate hole is associated.
+    While the returned set may be reduced in size, the size of this vector
+    is the same throughout and equal to the number of keypoints found and
+    published by the rgb node
+    @param[out] msgs [std::vector<std::string>*] Messages for
+    debug reasons
+    @return void
+   **/
+  void DepthFilters::checkHolesRectangleEdgesPlaneConstitution(
+    const cv::Mat& inImage,
+    const PointCloudPtr& initialPointCloud,
+    const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
+    const std::vector<int>& inflatedRectanglesIndices,
+    std::vector<float>* probabilitiesVector,
+    std::vector<std::string>* msgs)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("checkHolesRectangleEdgesPlaneConstitution", "applyFilter");
+    #endif
+
+
+    // For each inflated rectangle, store in visitedPoints
+    // the points that constitute the rectangle.
+    // We will test if these points all lie on one plane.
+    for (unsigned int i = 0; i < inflatedRectanglesVector.size(); i++)
+    {
+      // The canvas image will hold the rectangles.
+      cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+      // Draw the rectangle that corresponds to it
+      for(int j = 0; j < 4; j++)
+      {
+        cv::line(
+          canvas,
+          inflatedRectanglesVector[i][j],
+          inflatedRectanglesVector[i][(j + 1) % 4],
+          cv::Scalar(255, 255, 255), 1, 8);
+      }
+
+      std::set<unsigned int> visitedPoints;
+      for (unsigned int rows = 0; rows < inImage.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < inImage.cols; cols++)
+        {
+          if (canvas.data[rows * inImage.cols + cols] != 0)
+          {
+            visitedPoints.insert(rows * inImage.cols + cols);
+          }
+        }
+      }
+
+      // From each set of points lying on the edges of the rectangle,
+      // construct the point cloud that will be checked for plane constitution
+      PointCloudXYZPtr edgePointsPointCloud (new PointCloudXYZ);
+
+      edgePointsPointCloud->width = visitedPoints.size();
+      edgePointsPointCloud->height = 1;
+      edgePointsPointCloud->points.resize
+        (edgePointsPointCloud->width * edgePointsPointCloud->height);
+
+      edgePointsPointCloud->header.frame_id =
+        initialPointCloud->header.frame_id;
+      edgePointsPointCloud->header.stamp =
+        initialPointCloud->header.stamp;
+
+      int pointCloudPointsIndex = 0;
+      for(std::set<unsigned int>::iterator it = visitedPoints.begin();
+        it != visitedPoints.end(); it++)
+      {
+        edgePointsPointCloud->points[pointCloudPointsIndex].x =
+          initialPointCloud->points[*visitedPoints.find(*it)].x;
+
+        edgePointsPointCloud->points[pointCloudPointsIndex].y =
+          initialPointCloud->points[*visitedPoints.find(*it)].y;
+
+        edgePointsPointCloud->points[pointCloudPointsIndex].z =
+          initialPointCloud->points[*visitedPoints.find(*it)].z;
+
+        pointCloudPointsIndex++;
+      }
+
+      // Check if the edgePointsPointCloud points are on a plane
+      std::vector<pcl::PointIndices::Ptr> inliersVector;
+      int numPlanes = PlanesDetection::locatePlanes(edgePointsPointCloud,
+        false, &inliersVector);
+
+      // The probability (in all probability) of an inflated rectangle
+      // residing on one plane will be the ratio of
+      // (max points on one plane) / (all inflated rectangle points)
+      int maxPoints = 0;
+      for (unsigned int iv = 0; iv < inliersVector.size(); iv++)
+      {
+        if (inliersVector[iv]->indices.size() > maxPoints)
+        {
+          maxPoints = inliersVector[iv]->indices.size();
+        }
+      }
+
+      if (visitedPoints.size() > 0)
+      {
+        probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+          static_cast<float> (maxPoints) / visitedPoints.size();
+
+        msgs->push_back(TOSTR(
+            probabilitiesVector->at(inflatedRectanglesIndices[i])));
+      }
+      else
+      {
+        probabilitiesVector->at(inflatedRectanglesIndices[i]) = 0.0;
+
+        msgs->push_back(TOSTR(0));
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("checkHolesRectangleEdgesPlaneConstitution");
     #endif
   }
 
