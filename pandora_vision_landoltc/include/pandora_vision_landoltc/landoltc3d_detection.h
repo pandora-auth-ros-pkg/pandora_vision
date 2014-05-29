@@ -54,6 +54,7 @@
 #include "vision_communications/LandoltcPredatorMsg.h"
 #include "pandora_vision_landoltc/landoltc3d_detector.h"
 
+
 //!< default frame height
 #define DEFAULT_HEIGHT 480
 
@@ -113,6 +114,11 @@ private:
   //!< Variable for checking if Predator is On
   bool PredatorOn;
   
+  //!< The dynamic reconfigure (landoltc3d) parameters' server
+  dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc3d_cfgConfig> server;
+  
+  dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc3d_cfgConfig>::CallbackType f;
+  
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
@@ -126,6 +132,14 @@ private:
   @return void
   **/
   void predatorCallback(const vision_communications::LandoltcPredatorMsg& msg);
+  
+  /**
+  @brief The function called when a parameter is changed
+  @param[in] config [const pandora_vision_landoltc::landoltc3d_cfgConfig&]
+  @param[in] level [const uint32_t] The level 
+  @return void
+  **/
+  void parametersCallback(const pandora_vision_landoltc::landoltc3d_cfgConfig& config, const uint32_t& level);
 
   /**
   @brief main function called for publishing messages in
@@ -135,6 +149,7 @@ private:
   @return void
   **/
   void landoltc3dCallback();
+  
 
 public:
 
