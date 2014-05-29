@@ -64,6 +64,9 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
     _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
     &LandoltC3dDetection::imageCallback, this);
   }
+  
+  //!< The dynamic reconfigure parameter's callback
+  server.setCallback(boost::bind(&LandoltC3dDetection::parametersCallback, this, _1, _2));
       
   ROS_INFO("[landoltc3d_node] : Created LandoltC3d Detection instance");
 
@@ -300,6 +303,23 @@ void LandoltC3dDetection::startTransition(int newState)
 void LandoltC3dDetection::completeTransition()
 {
   ROS_INFO("[Landoltc3d_node] : Transition Complete");
+}
+
+/**
+  @brief The function called when a parameter is changed
+  @param[in] config [const pandora_vision_landoltc::landoltc3d_cfgConfig&]
+  @param[in] level [const uint32_t] The level 
+  @return void
+**/
+void LandoltC3dDetection::parametersCallback(const pandora_vision_landoltc::landoltc3d_cfgConfig& config,
+const uint32_t& level)
+{
+  //!< Threshold parameters
+  Landoltc3DParameters::gradientThreshold = config.gradientThreshold;
+  Landoltc3DParameters::centerThreshold = config.centerThreshold;
+  Landoltc3DParameters::huMomentsPrec = config.huMomentsPrec;
+  Landoltc3DParameters::adaptiveThresholdSubtractSize = config.adaptiveThresholdSubtractSize;
+  Landoltc3DParameters::bradleyPerc = config.bradleyPerc;    
 }
 
 } // namespace pandora_vision
