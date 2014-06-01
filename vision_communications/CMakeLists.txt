@@ -14,7 +14,7 @@ add_message_files(
   CandidateHolesVectorMsg.msg
   HoleDirectionMsg.msg
   HolesDirectionsVectorMsg.msg
-  VictimDirectionMsg.msg
+  FaceDirectionMsg.msg
   HolePositionMsg.msg
   HolesPositionsVectorMsg.msg
   EnhancedHoleMsg.msg
