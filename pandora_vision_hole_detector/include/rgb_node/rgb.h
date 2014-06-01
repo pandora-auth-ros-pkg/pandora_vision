@@ -77,9 +77,8 @@ namespace pandora_vision
       // locates are published to
       std::string candidateHolesTopic_;
 
-      // Class HoleDetector instance that finds and locates tha position
-      // potentional holes in current frame
-      HoleDetector _holeDetector;
+      // A histogramm for the texture of walls
+      cv::MatND wallsHistogram_;
 
       // The dynamic reconfigure (RGB) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>
