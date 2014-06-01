@@ -63,7 +63,7 @@ VictimDetection::VictimDetection(const std::string& ns) : _nh(ns), victimNowON(f
   /// Subscribe to input image's topic
   /// image_transport::ImageTransport it(_nh);
   _frameSubscriber = image_transport::ImageTransport(_nh).subscribe(
-                       imageTopic, 1, &VictimDetection::imageCallback, this);
+            _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
   
    /// Initialize face detector
   _faceDetector = new FaceDetector(cascade_path, model_path, bufferSize);
@@ -109,7 +109,19 @@ void VictimDetection::getGeneralParams()
     ROS_FATAL("[victim_node] : Victim alert topic name param not found");
     ROS_BREAK();
   }
+   
+  //! Subscribers
     
+  //! Declare subsciber's topic name
+  if (_nh.getParam("subscribed_topic_names/enhanded_hole_alert", param))
+  {
+    _enhancedHolesTopic = param;
+  }
+  else
+  {
+    ROS_FATAL("[victim_node] : Victim subscribed topic name param not found");
+    ROS_BREAK();
+  }  
   //!< Get the camera to be used by hole node;
   if (_nh.getParam("camera_name", cameraName))
   {
@@ -177,18 +189,6 @@ void VictimDetection::getGeneralParams()
     ROS_DEBUG_STREAM("VFOV : " << vfov);
   }
   
-  //!< Get the images's topic;
-  if (_nh.hasParam("/" + cameraName + "/topic_name"))
-  {
-    _nh.getParam("/" + cameraName + "/topic_name", imageTopic);
-    ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-  }
-  else
-  {
-    imageTopic = "/camera_head/image_raw";
-    ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-  }
-
 }
 
 /**
@@ -199,53 +199,48 @@ void VictimDetection::getFaceDetectorParameters()
 {
 
   //!< Get the path of haar_cascade xml file if available;
-  if (_nh.hasParam("cascade_path"))
+  if ( _nh.getParam("cascade_path", cascade_path))
   {
-    _nh.getParam("cascade_path", cascade_path);
-    ROS_DEBUG_STREAM("cascade_path : " << cascade_path);
+    cascade_path = packagePath + cascade_path;
+    ROS_INFO_STREAM("[victim_node]: cascade_path : " << cascade_path);
   }
   else
   {
-    std::string temp = "/data/haarcascade_frontalface_alt_tree.xml";
-    cascade_path.assign(packagePath);
-    cascade_path.append(temp);
-    ROS_DEBUG_STREAM("cascade_path : " << cascade_path);
+    model_path = packagePath + "/data/haarcascade_frontalface_alt_tree.xml";
+    ROS_INFO_STREAM("[victim_node]: cascade_path : " << cascade_path);
   }
 
   //!< Get the model.xml url;
-  if (_nh.hasParam("model_url"))
+  if (_nh.getParam("model_url", model_url))
   {
-    _nh.getParam("model_url", model_url);
-    ROS_DEBUG_STREAM("modelURL : " << model_url);
+    ROS_INFO_STREAM("[victim_node]: modelURL : " << model_url);
   }
   else
   {
     model_url = "https://pandora.ee.auth.gr/vision/model.xml";
-    ROS_DEBUG_STREAM("modelURL : " << model_url);
+    ROS_INFO_STREAM("[victim_node]: modelURL : " << model_url);
   }
 
   //!< Get the path of model_path xml file to be loaded
-  if (_nh.hasParam("model_path"))
+  if (_nh.getParam("model_path",  model_path))
   {
-    _nh.getParam("model_path",  model_path);
-    ROS_DEBUG_STREAM(" model_path : " <<  model_path);
+    model_path = packagePath + model_path;
+    ROS_INFO_STREAM("[victim_node]: model_path : " <<  model_path);
   }
   else
   {
     model_path = packagePath + "/data/model.xml";
-    ROS_DEBUG_STREAM(" model_path : " <<  model_path);
+    ROS_INFO_STREAM("[victim_node]: model_path : " <<  model_path);
   }
 
 
-  if (_nh.hasParam("bufferSize"))
+  if ( _nh.getParam("bufferSize", bufferSize))
   {
-    _nh.getParam("bufferSize", bufferSize);
-    ROS_DEBUG_STREAM("bufferSize : " << bufferSize);
+    ROS_DEBUG_STREAM("[victim_node] : bufferSize : " << bufferSize);
   }
   else
   {
     bufferSize = 5;
-    ROS_DEBUG_STREAM("bufferSize : " << bufferSize);
   }
 }
 
