@@ -49,7 +49,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include "vision_communications/FaceDirectionMsg.h"
+#include "pandora_common_msgs/GeneralAlertMsg.h"
 #include "state_manager/state_client.h"
 
 #include "pandora_vision_victim/face_detector.h"
@@ -123,7 +123,7 @@ private:
   std::string model_path;
   std::string model_url;
   int bufferSize;
-
+  
   /**
    * @brief Get parameters referring to view and frame characteristics from
    * launch file
@@ -154,7 +154,7 @@ private:
 public:
 
   //!< The Constructor
-  VictimDetection();
+  explicit VictimDetection(const std::string& ns);
 
   //!< The Destructor
   virtual ~VictimDetection();
@@ -171,7 +171,8 @@ public:
    * @return void
   */
   void completeTransition(void);
-
+  
+  std::string param;
 };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_FACE_FACE_DETECTION_H

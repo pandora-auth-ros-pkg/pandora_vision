@@ -46,7 +46,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_node");
-  pandora_vision::VictimDetection victim_finder;
+  pandora_vision::VictimDetection victim_finder("victim");
   ros::spin();
   return 0;
 }

@@ -42,7 +42,7 @@ namespace pandora_vision
 /**
   @brief Constructor
 **/
-VictimDetection::VictimDetection() : _nh(), victimNowON(false)
+VictimDetection::VictimDetection(const std::string& ns) : _nh(ns), victimNowON(false)
 {
   /// Get general parameters for image processing
   getGeneralParams();
@@ -94,23 +94,48 @@ VictimDetection::~VictimDetection()
 void VictimDetection::getGeneralParams()
 {
   packagePath = ros::package::getPath("pandora_vision_victim");
-
-  //!< Get the camera to be used by hole node;
-  if (_nh.hasParam("camera_name"))
+  
+   //! Publishers
+    
+  //! Declare publisher and advertise topic
+  //! where algorithm results are posted
+  if (_nh.getParam("published_topic_names/victim_alert", param))
   {
-    _nh.getParam("camera_name", cameraName);
+    _victimDirectionPublisher = 
+      _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(param, 10, true);
+  }
+  else
+  {
+    ROS_FATAL("[victim_node] : Victim alert topic name param not found");
+    ROS_BREAK();
+  }
+    
+  //!< Get the camera to be used by hole node;
+  if (_nh.getParam("camera_name", cameraName))
+  {
     ROS_DEBUG_STREAM("camera_name : " << cameraName);
   }
   else
   {
-    cameraName = "camera";
-    ROS_DEBUG_STREAM("camera_name : " << cameraName);
+    ROS_FATAL("[victim_node] : Camera name not found");
+    ROS_BREAK();
   }
-
-  //!< Get the Height parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/image_height"))
+  
+  //!< Get the images's frame_id;
+  if (_nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId))
   {
-    _nh.getParam("/" + cameraName + "/image_height", frameHeight);
+    ;
+    ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+  }
+  else
+  {
+    cameraFrameId = "/camera";
+    ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+  }
+  
+  //!< Get the Height parameter if available;
+  if (_nh.getParam("/" + cameraName + "/image_height", frameHeight))
+  {
     ROS_DEBUG_STREAM("height : " << frameHeight);
   }
   else
@@ -120,9 +145,8 @@ void VictimDetection::getGeneralParams()
   }
 
   //!< Get the Width parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/image_width"))
+  if (_nh.getParam("/" + cameraName + "/image_width", frameWidth))
   {
-    _nh.getParam("/" + cameraName + "/image_width", frameWidth);
     ROS_DEBUG_STREAM("width : " << frameWidth);
   }
   else
@@ -130,7 +154,29 @@ void VictimDetection::getGeneralParams()
     frameWidth = DEFAULT_WIDTH;
     ROS_DEBUG_STREAM("width : " << frameWidth);
   }
+  
+   //!< Get the HFOV parameter if available;
+  if ( _nh.getParam("/" + cameraName + "/hfov", hfov))
+  {
+    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  }
+  else
+  {
+    hfov = HFOV;
+    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  }
 
+  //!< Get the VFOV parameter if available;
+  if ( _nh.getParam("/" + cameraName + "/vfov", vfov))
+  {
+    ROS_DEBUG_STREAM("VFOV : " << vfov);
+  }
+  else
+  {
+    vfov = VFOV;
+    ROS_DEBUG_STREAM("VFOV : " << vfov);
+  }
+  
   //!< Get the images's topic;
   if (_nh.hasParam("/" + cameraName + "/topic_name"))
   {
@@ -141,42 +187,6 @@ void VictimDetection::getGeneralParams()
   {
     imageTopic = "/camera_head/image_raw";
     ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
-  }
-
-  //!< Get the images's frame_id;
-  if (_nh.hasParam("/" + cameraName + "/camera_frame_id"))
-  {
-    _nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId);
-    ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-  }
-  else
-  {
-    cameraFrameId = "/camera";
-    ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
-  }
-
-  //!< Get the HFOV parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/hfov"))
-  {
-    _nh.getParam("/" + cameraName + "/hfov", hfov);
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
-  }
-  else
-  {
-    hfov = HFOV;
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
-  }
-
-  //!< Get the VFOV parameter if available;
-  if (_nh.hasParam("/" + cameraName + "/vfov"))
-  {
-    _nh.getParam("/" + cameraName + "/vfov", vfov);
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
-  }
-  else
-  {
-    vfov = VFOV;
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
   }
 
 }
