@@ -97,7 +97,7 @@ private:
   ros::Time victimFrameTimestamp;
 
   //!< The topic subscribed to for the camera
-  std::string imageTopic;
+  std::string _enhancedHolesTopic;
   std::string cameraFrameId;
    
   //!< Publishers for FaceDetector result messages
