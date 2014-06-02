@@ -107,11 +107,19 @@ namespace pandora_vision
     ROS_INFO("Mean and Standard Deviation of HSV :");
     for (int ii = 0; ii < meanStdHSV.size(); ii++)
       ROS_INFO_STREAM(" " <<meanStdHSV[ii]);
-
+    
+    double dominantValue1 = 0;
+    double dominantValue2 = 0;
     //! Find the dominant color component and their density values
-    findDominantColor(h_hist, h_bins, &dominantVal[0], &dominantVal[1] );
-    findDominantColor(s_hist, s_bins, &dominantVal[2], &dominantVal[3] );
-    findDominantColor(v_hist, v_bins, &dominantVal[4], &dominantVal[5] );
+    findDominantColor(h_hist, h_bins, &dominantValue1, &dominantValue2 );
+    dominantVal.push_back(dominantValue1);
+    dominantVal.push_back(dominantValue2);
+    findDominantColor(s_hist, s_bins, &dominantValue1, &dominantValue2 );
+    dominantVal.push_back(dominantValue1);
+    dominantVal.push_back(dominantValue2);
+    findDominantColor(v_hist, v_bins, &dominantValue1, &dominantValue2 );
+    dominantVal.push_back(dominantValue1);
+    dominantVal.push_back(dominantValue2);
      
     ROS_INFO("Dominant values and Densities of every colorcom HSV");
     for (int ii = 0; ii < dominantVal.size(); ii++)
@@ -168,14 +176,14 @@ namespace pandora_vision
       meanStdHSV.erase(meanStdHSV.begin(), meanStdHSV.begin()+meanStdHSV.size());
     cv::Scalar avg, st;
     cv::meanStdDev(hsv_planes[0], avg, st);
-    meanStdHSV[0] = avg.val[0];
-    meanStdHSV[1] = st.val[0];
+    meanStdHSV.push_back(avg.val[0]);
+    meanStdHSV.push_back(st.val[0]);
     cv::meanStdDev(hsv_planes[1], avg, st);
-    meanStdHSV[2] = avg.val[0];
-    meanStdHSV[3] = st.val[0];
+    meanStdHSV.push_back(avg.val[0]);
+    meanStdHSV.push_back(st.val[0]);
     cv::meanStdDev(hsv_planes[2], avg, st);
-    meanStdHSV[4] = avg.val[0];
-    meanStdHSV[5] = st.val[0];
+    meanStdHSV.push_back(avg.val[0]);
+    meanStdHSV.push_back(st.val[0]);
   }    
 
   /**
@@ -338,11 +346,10 @@ namespace pandora_vision
     std = 2.0 / (maxVal * hsv.cols * hsv.rows) * sqrt(sum);
    
     //!< Construct the final feature vector
-    std::vector<double> ColorAnglesAndStd(4);
-    colorAnglesAndStd[0] = rgAngle;
-    colorAnglesAndStd[1] = gbAngle;
-    colorAnglesAndStd[2] = rbAngle;
-    colorAnglesAndStd[3] = std;
+    colorAnglesAndStd.push_back(rgAngle);
+    colorAnglesAndStd.push_back(gbAngle);
+    colorAnglesAndStd.push_back(rbAngle);
+    colorAnglesAndStd.push_back(std);
   }
   
   /**
@@ -352,17 +359,15 @@ namespace pandora_vision
   */ 
   void ChannelsStatisticsExtractor::extractColorFeatureVector()
   {
- 
-    colorFeatureVector.reserve(28);
-    colorFeatureVector.insert(colorFeatureVector.end(),
+    _colorFeatureVector.insert(_colorFeatureVector.end(),
         meanStdHSV.begin(), meanStdHSV.end());
-    colorFeatureVector.insert(colorFeatureVector.end(),
+    _colorFeatureVector.insert(_colorFeatureVector.end(),
         dominantVal.begin(), dominantVal.end());
-    colorFeatureVector.insert(colorFeatureVector.end(),
+    _colorFeatureVector.insert(_colorFeatureVector.end(),
         huedft.begin(), huedft.end());
-    colorFeatureVector.insert(colorFeatureVector.end(),
+    _colorFeatureVector.insert(_colorFeatureVector.end(),
         satdft.begin(), satdft.end());
-    colorFeatureVector.insert(colorFeatureVector.end(),
+    _colorFeatureVector.insert(_colorFeatureVector.end(),
         colorAnglesAndStd.begin(), colorAnglesAndStd.end());
   } 
   
@@ -372,6 +377,25 @@ namespace pandora_vision
   */ 
   std::vector<double> ChannelsStatisticsExtractor::getFeatures()
   {
-    return colorFeatureVector;
+    if( _colorFeatureVector.size()!=28){
+      ROS_FATAL("Clean the vector");
+      ROS_INFO_STREAM("vector's size"<< _colorFeatureVector.size() );
+     } 
+    return _colorFeatureVector;
+  }
+  
+  /**
+   * @brief Function that cleans up colorFeatureVector, to add
+   * new elements for next frame
+   * @return void
+ */ 
+  void ChannelsStatisticsExtractor::emptyCurrentFrameFeatureVector()
+  {
+    meanStdHSV.clear();
+    dominantVal.clear();
+    huedft.clear();
+    satdft.clear();
+    colorAnglesAndStd.clear();
+    _colorFeatureVector.clear();
   }
 }// namespace pandora_vision

@@ -174,6 +174,8 @@ private:
   */
   void imageCallback(const vision_communications::EnhancedHolesVectorMsg& msg);
   
+  void dummyimageCallback(const sensor_msgs::Image& msg);
+   
 public:
 
   //!< The Constructor

@@ -56,11 +56,16 @@ namespace pandora_vision
 
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
-
-    /// Subscribe to input image's topic
-    /// image_transport::ImageTransport it(_nh);
+    
+    //!< Subscribe to input image's topic
+    //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = _nh.subscribe(
-              _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
+                       "/kinect/image", 1, &VictimDetection::dummyimageCallback, this);
+                       
+    //~ /// Subscribe to input image's topic
+    //~ /// image_transport::ImageTransport it(_nh);
+    //~ _frameSubscriber = _nh.subscribe(
+              //~ _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
     _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize);
@@ -209,6 +214,28 @@ namespace pandora_vision
     else
       bufferSize = 5;
   }
+  
+  /**
+   * @brief Function called when new ROS message appears, for camera
+   * @param msg [const sensor_msgs::Image&] The message
+   * @return void
+  */
+  void VictimDetection::dummyimageCallback(const sensor_msgs::Image& msg)
+  {
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    _rgbImage = in_msg->image.clone();
+    victimFrameTimestamp = msg.header.stamp;
+
+    if (_rgbImage.empty() )
+    {
+      ROS_ERROR("[face_node] : No more Frames ");
+      return;
+    }
+    isDepthEnabled = false;
+    isHole = true;
+    checkState();
+  }
 
   /**
    * @brief Function called when new message appears from hole_detector_node
@@ -284,10 +311,10 @@ namespace pandora_vision
   */
   void VictimDetection::victimDetect()
   {
-    if(!victimNowON)
-      return;
-    
-    _victimDetector->victimFusion(_stateIndicator, _rgbdImages);
+    //~ if(!victimNowON)
+      //~ return;
+    //~ 
+    _victimDetector->victimFusion(2, _rgbdImages);
     
     if(!_rgbdImages.size())
       _rgbdImages.erase(_rgbdImages.begin(), 
