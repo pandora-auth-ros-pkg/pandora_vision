@@ -64,7 +64,7 @@ namespace pandora_vision
   void DepthSystemValidator::extractDepthFeatures(cv::Mat inImage)
   {
     ///Extract statistics oriented features for depth image
-    
+    _channelsStatisticsDetector.findDepthChannelsStatisticsFeatures(inImage);
     ///Extract edge orientation features for depth image
     _edgeOrientationDetector.findEdgeFeatures(inImage);
      
@@ -72,8 +72,7 @@ namespace pandora_vision
     _haralickFeatureDetector.findHaralickFeatures(inImage);
     
     if(!_depthFeatureVector.empty())
-      _depthFeatureVector.erase(_depthFeatureVector.begin(),
-        _depthFeatureVector.size() + _depthFeatureVector.begin());
+      _depthFeatureVector.clear();
     
     setDepthFeatureVector();
   }
@@ -85,9 +84,12 @@ namespace pandora_vision
   */ 
   void DepthSystemValidator::setDepthFeatureVector()
   {
-    ///Append to depthFeatureVector features according to color
+    ///Append to rgbFeatureVector features according to color
     ///histogramms and other statistics
-    
+    std::vector<double> channelsStatictisFeatureVector = 
+        _channelsStatisticsDetector.getDepthFeatures();
+    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
+          _depthFeatureVector.push_back(channelsStatictisFeatureVector[i]);
     
     ///Append to depthFeatureVector features according to edge orientation
     std::vector<double> edgeOrientationFeatureVector = 
@@ -102,12 +104,14 @@ namespace pandora_vision
           _depthFeatureVector.push_back(haaralickFeatureVector[i]);  
           
     ///Deallocate memory
-  
-    edgeOrientationFeatureVector.erase(edgeOrientationFeatureVector.begin(),
-      edgeOrientationFeatureVector.size() + edgeOrientationFeatureVector.begin());
-       
-    haaralickFeatureVector.erase(haaralickFeatureVector.begin(),
-      haaralickFeatureVector.size() + haaralickFeatureVector.begin());
+    channelsStatictisFeatureVector.clear();
+    _channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
+    
+    edgeOrientationFeatureVector.clear();
+    _edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 
+    
+    haaralickFeatureVector.clear();
+    _haralickFeatureDetector.emptyCurrentFrameFeatureVector();   
   }
   
   /**
