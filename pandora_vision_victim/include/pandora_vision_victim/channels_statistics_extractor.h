@@ -56,15 +56,16 @@ namespace pandora_vision
     //!< Vector of mean value and std value of every color component
     std::vector<double> meanStdHSV;
     //!< Vector of dominant color component and their density values
-    std::vector<double>dominantVal;
+    std::vector<double> dominantVal;
     //!< Vector of first 6 components of a Fourier transform of the 
     //!< image components H(hue) and S(saturation).
-    std::vector<double>huedft;
-    std::vector<double>satdft;
+    std::vector<double> huedft;
+    std::vector<double> satdft;
     //!< Compute the colour angles of rgb color components
-    std::vector<double>colorAnglesAndStd;
+    std::vector<double> colorAnglesAndStd;
+    
     //!< Compute a vector of all color features
-    std::vector<double>colorFeatureVector;
+    std::vector<double> _colorFeatureVector;
     
      /**
      * @brief This function returns the histogram of one color component from 
@@ -145,6 +146,13 @@ namespace pandora_vision
      * @return featureVector
      */ 
     std::vector<double> getFeatures();
+    
+    /**
+     * @brief Function that cleans up colorFeatureVector, to add
+     * new elements for next frame
+     * @return void
+     */ 
+    void emptyCurrentFrameFeatureVector();
   };
   
 }// namespace pandora_vision
