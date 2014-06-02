@@ -67,7 +67,18 @@ namespace pandora_vision
     //!< Compute a vector of all color features
     std::vector<double> _colorFeatureVector;
     
-     /**
+    //!< Vector of mean value and std value of the depth Image
+    std::vector<double> _depthMeanStd;
+    //!< Vector of dominant color component and their density values
+    std::vector<double> _depthDominantVal;
+    //!< Vector of first 6 components of a Fourier transform of the 
+    //!< image components.
+    std::vector<double> _depthdft;
+    
+    //!< Compute a vector of all depth features
+    std::vector<double> _depthStatisticsVector;
+    
+    /**
      * @brief This function returns the histogram of one color component from 
      * the src image.
      * @param planes [cv::Mat] contains the pixel values of a color component.
@@ -78,10 +89,18 @@ namespace pandora_vision
     cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
     
     /**
-     * @brief This function computes the average and standard deviation value of 
-     * every color component(HSV) and returns a feature vector.
+     * @brief This function computes the average and standard deviation value  
+     * of every color component(HSV).
+     * @return void
     */ 
     void computeMeanStdHSV();
+    
+    /**
+     * @brief This function computes the average and standard deviation value  
+     * of a grayscale image.
+     * @return void
+    */ 
+    void computeMeanStd();
     
     /**
      * @brief This function computes the dominant Color and it's density value 
@@ -127,6 +146,14 @@ namespace pandora_vision
     void findChannelsStatisticsFeatures(cv::Mat src);
     
     /**
+     * @brief This is the main function which calls all other for the 
+     * computation of the statistics feature for depth image.
+     * @param src [cv::Mat] depth image to be processed
+     * @return void
+    */ 
+    void findDepthChannelsStatisticsFeatures(cv::Mat src);
+    
+    /**
      * @brief This function calculates all necessary histogramms
      * for color extraction.
      * @param hsvFrame [cv::Mat] current frame to be processed
@@ -142,10 +169,23 @@ namespace pandora_vision
     void extractColorFeatureVector();
     
     /**
+     * @brief This function extract a feature vector according to statistcs 
+     * features for the depth image.
+     * @return void
+     */ 
+    void extractDepthFeatureVector();
+    
+    /**
      * @brief Function returning the color statistics feature vector
      * @return featureVector
      */ 
-    std::vector<double> getFeatures();
+    std::vector<double> getRgbFeatures();
+    
+    /**
+     * @brief Function returning the depth feature vector
+     * @return featureVector
+    */ 
+    std::vector<double> getDepthFeatures();
     
     /**
      * @brief Function that cleans up colorFeatureVector, to add
@@ -153,6 +193,13 @@ namespace pandora_vision
      * @return void
      */ 
     void emptyCurrentFrameFeatureVector();
+    
+    /**
+     * @brief Function that cleans up depthFeatureVector, to add
+     * new elements for next frame
+     * @return void
+    */ 
+    void emptyCurrentDepthFrameFeatureVector();
   };
   
 }// namespace pandora_vision

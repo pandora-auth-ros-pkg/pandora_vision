@@ -90,7 +90,7 @@ namespace pandora_vision
     ///Append to rgbFeatureVector features according to color
     ///histogramms and other statistics
     std::vector<double> channelsStatictisFeatureVector = 
-        _channelsStatisticsDetector.getFeatures();
+        _channelsStatisticsDetector.getRgbFeatures();
     for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
           _rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
     
