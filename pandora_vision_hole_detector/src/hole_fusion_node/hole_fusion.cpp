@@ -657,120 +657,6 @@ namespace pandora_vision
 
 
   /**
-    @brief With an input a conveyor of holes, this method, depending on
-    the depth image's interpolation method, has holes assimilating,
-    amalgamating or being connected with holes that can be assimilated,
-    amalgamated or connected with or by them. The interpolation method is
-    a basic criterion for the mode of merging holes because the two
-    filters that verify the validity of each merger are depth-based ones.
-    If there is no valid depth image on which to run these filters, it is
-    sure that the depth sensor is closer to the scene it is witnessing
-    than 0.5-0.6m. In this way of operation, the merging of holes does not
-    consider employing validator filters and simply merges holes that can
-    be merged with each other (assimilated, amalgamated, or connected).
-    @param[in,out] conveyor [HolesConveyor*] The conveyor of holes to be
-    merged with one another, where applicable.
-    @return void
-   **/
-  void HoleFusion::mergeHoles(HolesConveyor* conveyor)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("mergeHoles", "processCandidateHoles");
-    #endif
-
-    // Keep a copy of the initial (not merged) candidate holes for
-    // debugging and exibition purposes
-    HolesConveyor conveyorBeforeMerge;
-
-    HolesConveyorUtils::copyTo(*conveyor, &conveyorBeforeMerge);
-
-
-    #ifdef DEBUG_SHOW
-    std::vector<std::string> msgs;
-    std::vector<cv::Mat> canvases;
-    std::vector<std::string> titles;
-
-    if(Parameters::Debug::show_merge_holes)
-    {
-      // Push back the identifier of each keypoint
-      for (int i = 0; i < conveyorBeforeMerge.keyPoints.size(); i++)
-      {
-        msgs.push_back(TOSTR(i));
-      }
-
-      canvases.push_back(
-        Visualization::showHoles(
-          "",
-          interpolatedDepthImage_,
-          conveyorBeforeMerge,
-          -1,
-          msgs));
-
-      titles.push_back(
-        TOSTR(conveyor->keyPoints.size()) + " holes before merging");
-    }
-    #endif
-
-
-    // Try to merge holes that can be assimilated, amalgamated or connected
-    if (Parameters::Depth::interpolation_method == 0)
-    {
-      for (int i = 0; i < 3; i++)
-      {
-        HoleMerger::applyMergeOperation(
-          conveyor,
-          interpolatedDepthImage_,
-          pointCloud_,
-          i);
-      }
-    }
-    else
-    {
-      for (int i = 0; i < 3; i++)
-      {
-        HoleMerger::applyMergeOperationWithoutValidation(
-          conveyor,
-          interpolatedDepthImage_,
-          pointCloud_,
-          i);
-      }
-    }
-
-
-    #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_merge_holes)
-    {
-      msgs.clear();
-      // Push back the identifier of each keypoint
-      for (int i = 0; i < conveyor->keyPoints.size(); i++)
-      {
-        msgs.push_back(TOSTR(i));
-      }
-
-      canvases.push_back(
-        Visualization::showHoles(
-          "",
-          interpolatedDepthImage_,
-          *conveyor,
-          -1,
-          msgs));
-
-      titles.push_back(
-        TOSTR(conveyor->keyPoints.size()) + " holes after merging");
-
-      Visualization::multipleShow("Merged Keypoints",
-        canvases, titles, Parameters::Debug::show_merge_holes_size, 1);
-    }
-    #endif
-
-    #ifdef DEBUG_TIME
-    Timer::tick("mergeHoles");
-    #endif
-  }
-
-
-
-  /**
     @brief The function called when a parameter is changed
     @param[in] config
     [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
@@ -1098,15 +984,11 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    /*//////////////////////////////////////////////////////////////////////////
-    // Uncomment for testing artificial holes' merging process
-    HolesConveyor dummy;
-    testDummyHolesMerging(&dummy);
-    return;
-    //////////////////////////////////////////////////////////////////////////*/
-
     // Apply the {assimilation, amalgamation, connection} processes
-    mergeHoles(&rgbdHolesConveyor);
+    HoleMerger::mergeHoles(&rgbdHolesConveyor,
+      Parameters::Depth::interpolation_method,
+      interpolatedDepthImage_,
+      pointCloud_);
 
     // Apply all active filters and obtain a 2D vector containing the
     // probabilities of validity of each candidate hole, produced by all
@@ -1645,94 +1527,6 @@ namespace pandora_vision
     #endif
 
     return valid;
-  }
-
-
-
-  /**
-    @brief Tests the merging operations on artificial holes
-    @param[out] dummy [HolesConveyor*] The hole candidates
-    @return void
-   **/
-  void HoleFusion::testDummyHolesMerging(HolesConveyor* dummy)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("testDummyHolesMerging", "processCandidateHoles");
-    #endif
-
-    // Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(20, 20), cv::Point2f(30, 30), 50, 50, 30, 30, dummy);
-
-    // Invalid
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(80, 80), cv::Point2f(90, 90), 50, 50, 30, 30, dummy);
-
-
-    // 0-th assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(370.0, 130.0), cv::Point2f(372.0, 132.0), 80, 80, 76, 76,
-      dummy);
-
-    // 0-th overlapper
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(372.0, 132.0), cv::Point2f(374.0, 134.0), 80, 80, 76, 76,
-      dummy);
-
-    // 0-th assimilable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(380.0, 140.0), cv::Point2f(382.0, 142.0), 20, 20, 16, 16,
-      dummy);
-
-    // 0-th amalgamatable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(420.0, 140.0), cv::Point2f(422.0, 142.0), 120, 40, 116, 36,
-      dummy);
-
-    // 0-th connectable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(510.0, 80.0), cv::Point2f(512.0, 82.0), 40, 40, 36, 36,
-      dummy);
-
-
-    // 1-st assimilator - amalgamator - connector
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(300.0, 300.0), cv::Point2f(302.0, 302.0), 100, 100, 96, 96,
-      dummy);
-
-    // 1-st connectable
-    HolesConveyorUtils::appendDummyConveyor(
-      cv::Point2f(410.0, 350.0), cv::Point2f(412.0, 352.0), 50, 50, 46, 46,
-      dummy);
-
-
-    HolesConveyorUtils::shuffle(dummy);
-
-    ROS_INFO_NAMED ("hole_detector",
-      "keypoints before: %d ", HolesConveyorUtils::size(*dummy));
-
-    std::vector<std::string> msgs;
-    Visualization::showHoles("before", interpolatedDepthImage_, *dummy,
-      1, msgs);
-
-    for (int i = 0; i < 3; i++)
-    {
-      HoleMerger::applyMergeOperation(
-        dummy,
-        interpolatedDepthImage_,
-        pointCloud_,
-        i);
-    }
-
-    ROS_INFO_NAMED ("hole_detector",
-      "keypoints after: %d ", HolesConveyorUtils::size(*dummy));
-
-    Visualization::showHoles("after", interpolatedDepthImage_, *dummy,
-      1, msgs);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("testDummyHolesMerging");
-    #endif
   }
 
 } // namespace pandora_vision
