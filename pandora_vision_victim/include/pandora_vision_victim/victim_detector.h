@@ -38,27 +38,65 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTOR_H 
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTOR_H 
 
-#include <math.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <opencv2/opencv.hpp>
-#include "opencv2/core/core.hpp"
-#include "opencv2/contrib/contrib.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/image_encodings.h>
-#include "pandora_vision_face/skin_detector.h"
-
+#include "pandora_vision_victim/face_detector.h"
+#include "pandora_vision_victim/rgb_system_validator.h"
+#include "pandora_vision_victim/depth_system_validator.h"
 namespace pandora_vision
 {
   class VictimDetector
   {
     private:
-    public:
+    /// Rgb image to be processed
+    cv::Mat _rgbImage;
     
+    /// Depth image to be processed
+    cv::Mat _depthImage;
+    
+    /// Instance of class face_detector
+    FaceDetector* _faceDetector;
+  
+    ///Instance of class rgbSystemValidator
+    RgbSystemValidator _rgbSystemValidator;
+    
+    ///Instance of class depthSystemValidator
+    DepthSystemValidator _depthSystemValidator;
+    
+    /// Flag that indicates current state, according to the information
+    /// received from hole_detector_node
+    int _stateIndicator;
+    
+    public:
+    //!< The Constructor
+    explicit VictimDetector(std::string cascade_path, 
+        std::string model_path, int bufferSize);
+
+    //!< The Destructor
+    virtual ~VictimDetector();
+    
+    /**
+     *@brief Function that enables suitable subsystems, according
+     * to the current State 
+     * @param [int] _stateIndicator
+     * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
+     * vector can be either 2 or 1, if we have both rgbd information or not
+     * @return void
+    */ 
+    void victimFusion( int _stateIndicator, std::vector<cv::Mat> _rgbdImages);
+    
+    /**
+     *@brief Function that extracts handles rgb subsystem
+     *@param [cv::Mat] current frame to be processed
+     *@return void
+    */ 
+    void rgbFeaturesDetect(cv::Mat _rgbImage);
+    
+    /**
+     *@brief Function that extracts handles depth subsystem
+     *@param [cv::Mat] current frame to be processed
+     *@return void
+    */ 
+    void depthFeaturesDetect(cv::Mat _depthImage);
+     
   }; 
 }
+#endif  
