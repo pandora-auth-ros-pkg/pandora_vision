@@ -38,10 +38,6 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
-#include <iostream>
-#include <stdlib.h>
-#include <string>
-#include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -50,6 +46,8 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include "pandora_common_msgs/GeneralAlertMsg.h"
+#include "vision_communications/EnhancedHolesVectorMsg.h"
+#include "vision_communications/EnhancedHoleMsg.h"
 #include "state_manager/state_client.h"
 
 #include "pandora_vision_victim/face_detector.h"
@@ -73,16 +71,16 @@ class VictimDetection : public StateClient
 {
 private:
 
-  //!< The NodeHandle
+  /// The NodeHandle
   ros::NodeHandle _nh;
 
   float ratioX;
   float ratioY;
 
-  //!< Horizontal field of view in rad
+  /// Horizontal field of view in rad
   double hfov;
 
-  //!< Vertical Field Of View (rad)
+  /// Vertical Field Of View (rad)
   double vfov;
 
   int frameWidth;
@@ -90,40 +88,54 @@ private:
 
   std::string cameraName;
   std::string packagePath;
-  //!< Frame processed by FaceDetector
-  cv::Mat victimFrame;
+  
+  /// Rgb Frame processed by FaceDetector
+  cv::Mat _rgbImage;
+  /// Depth Frame processed by FaceDetector
+  cv::Mat _depthImage;
 
-  //!<FaceDetector frame timestamp
+  /// FaceDetector frame timestamp
   ros::Time victimFrameTimestamp;
 
-  //!< The topic subscribed to for the camera
+  /// The topic subscribed to for the camera
   std::string _enhancedHolesTopic;
   std::string cameraFrameId;
    
-  //!< Publishers for FaceDetector result messages
+  /// Publishers for FaceDetector result messages
   ros::Publisher _victimDirectionPublisher;
 
-  //!< The subscriber that listens to the frame
-  //!< topic advertised by the central node
-  image_transport::Subscriber _frameSubscriber;
+  /// The subscriber that listens to the frame
+  /// topic advertised by the central node
+  ros::Subscriber _frameSubscriber;
 
-  //!< Variable used for State Managing
+  /// Variable used for State Managing
   bool victimNowON;
 
-  //!< Current state of robot
+  /// Current state of robot
   int curState;
-  //!< Previous state of robot
+  /// Previous state of robot
   int prevState;
   
-  ///Instance of class face_detector
+  /// Instance of class face_detector
   FaceDetector* _faceDetector;
   
-  ///Parameters for the FaceDetector instance
+  /// Parameters for the FaceDetector instance
   std::string cascade_path;
   std::string model_path;
   std::string model_url;
   int bufferSize;
   
+  /// Flag that indicates if we have depth information
+  /// from kinect sensor
+  bool isDepthEnabled;
+  /// Flag that indicates if there is one or more holes in current
+  /// frame in order to enable a suitable mask
+  bool isHole;
+  
+  ///Vector of holes found in current frame
+  std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
+  
+  int _stateIndicator;
   /**
    * @brief Get parameters referring to view and frame characteristics from
    * launch file
@@ -142,15 +154,23 @@ private:
    * present faces in a given frame
    * @return void
   */
-  void victimDetect(bool isDepthEnabled, bool isMaskEnabled);
-
+  void victimDetect();
+  
+  
   /**
-   * Function called when new ROS message appears, for front camera
-   * @param msg [const sensor_msgs::ImageConstPtr&] The message
+   * @brief This method check in which state we are, according to
+   * the information sent from hole_detector_node
    * @return void
   */
-  void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+  void checkState();
 
+  /**
+   * Function called when new message appears from hole_detector_node
+   * @param msg [vision_communications::EnhancedHolesVectorMsg&] The message
+   * @return void
+  */
+  void imageCallback(const vision_communications::EnhancedHolesVectorMsg& msg);
+  
 public:
 
   //!< The Constructor
