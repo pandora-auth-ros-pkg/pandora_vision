@@ -34,6 +34,8 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_RGB_SYSTEM_VALIDATOR_H 
+#define PANDORA_VISION_VICTIM_RGB_SYSTEM_VALIDATOR_H 
 
 #include "ros/ros.h"
 #include "pandora_vision_victim/edge_orientation_extractor.h"
@@ -45,7 +47,7 @@ namespace pandora_vision
   class RgbSystemValidator
   {
     ///Feature vector for rgb features
-    std::vector<double> rgbFeatureVector;
+    std::vector<double> _rgbFeatureVector;
     
     ///Instance of class  ChannelsStatisticsExtractor 
     ///to detect color features for the given frame
@@ -80,5 +82,14 @@ namespace pandora_vision
      */ 
     void setRgbFeatureVector();
     
+    /**
+     * @brief This function returns current feature vector according
+     * to the features found in rgb image
+     * @return [std::vector<double>] _rgbFeatureVector, feature vector 
+     * for current rgb image
+     */ 
+    std::vector<double> getRgbFeatureVector();
+    
   };
 } 
+#endif

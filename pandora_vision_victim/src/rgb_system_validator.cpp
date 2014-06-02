@@ -45,7 +45,6 @@ namespace pandora_vision
   RgbSystemValidator::RgbSystemValidator()
   {
     ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
-
   }
   
   /**
@@ -74,9 +73,9 @@ namespace pandora_vision
     ///Extract haralick features for rgb image 
     _haralickFeatureDetector.findHaralickFeatures(inImage);
     
-    if(!rgbFeatureVector.empty())
-      rgbFeatureVector.erase(rgbFeatureVector.begin(),
-        rgbFeatureVector.size() + rgbFeatureVector.begin());
+    if(!_rgbFeatureVector.empty())
+      _rgbFeatureVector.erase(_rgbFeatureVector.begin(),
+        _rgbFeatureVector.size() + _rgbFeatureVector.begin());
     
     setRgbFeatureVector();
   }
@@ -93,19 +92,19 @@ namespace pandora_vision
     std::vector<double> channelsStatictisFeatureVector = 
         _channelsStatisticsDetector.getFeatures();
     for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
+          _rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
     
     ///Append to rgbFeatureVector features according to edge orientation
     std::vector<double> edgeOrientationFeatureVector = 
         _edgeOrientationDetector.getFeatures();
-    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
+    for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
+          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
     
     ///Append to rgbFeatureVector features according to haaralick features
     std::vector<double> haaralickFeatureVector = 
         _haralickFeatureDetector.getFeatures();
-    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          rgbFeatureVector.push_back(haaralickFeatureVector[i]);  
+    for(int i = 0; i < haaralickFeatureVector.size(); i++ )
+          _rgbFeatureVector.push_back(haaralickFeatureVector[i]);  
           
     ///Deallocate memory
     channelsStatictisFeatureVector.erase(channelsStatictisFeatureVector.begin(),
@@ -116,5 +115,16 @@ namespace pandora_vision
        
     haaralickFeatureVector.erase(haaralickFeatureVector.begin(),
       haaralickFeatureVector.size() + haaralickFeatureVector.begin());
+  }
+  
+  /**
+   * @brief This function returns current feature vector according
+   * to the features found in rgb image
+   * @return [std::vector<double>] _rgbFeatureVector, feature vector 
+   * for current rgb image
+   */ 
+  std::vector<double> RgbSystemValidator::getRgbFeatureVector()
+  {
+    return _rgbFeatureVector;
   }
 } 

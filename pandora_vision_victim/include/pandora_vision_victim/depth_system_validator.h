@@ -34,9 +34,62 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H 
+#define PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H 
 
 #include "ros/ros.h"
+#include "pandora_vision_victim/edge_orientation_extractor.h"
+#include "pandora_vision_victim/channels_statistics_extractor.h"
+#include "pandora_vision_victim/haralickfeature_extractor.h"
 
 namespace pandora_vision
 {
+  class DepthSystemValidator
+  {
+    ///Feature vector for depth features
+    std::vector<double> _depthFeatureVector;
+    
+    ///Instance of class  ChannelsStatisticsExtractor 
+    ///to detect color features for the given frame
+    ChannelsStatisticsExtractor _channelsStatisticsDetector;
+    ///Instance of class  EdgeOrientationExtractor 
+    ///to detect edge orientation features for the given frame
+    EdgeOrientationExtractor _edgeOrientationDetector;
+    ///Instance of class  HaralickFeatureExtractor 
+    ///to detect haralick features for the given frame
+    HaralickFeaturesExtractor _haralickFeatureDetector;
+     
+    public:
+    
+    ///Constructor
+    DepthSystemValidator();
+    
+    ///Destructor
+    ~DepthSystemValidator();
+    
+    /**
+     * @brief This function extract features according to the
+     * predifined features for the depth image
+     * @param inImage [cv::Mat] current depth frame to be processed
+     * @return void
+     */ 
+    void extractDepthFeatures(cv::Mat inImage);
+    
+    /**
+     * @brief This function creates feature vector according to the
+     * predifined features for the depth image
+     * @return void
+     */ 
+    void setDepthFeatureVector();
+    
+    /**
+     * @brief This function returns current feature vector according
+     * to the features found in rgb image
+     * @return [std::vector<double>] _rgbFeatureVector, feature vector 
+     * for current rgb image
+     */ 
+    std::vector<double> getDepthFeatureVector();
+    
+  };
 } 
+#endif

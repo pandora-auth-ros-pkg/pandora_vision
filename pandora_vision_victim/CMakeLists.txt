@@ -38,6 +38,7 @@ include_directories(include
 add_executable(victim_node 
     src/victim_node.cpp
     src/victim_detection.cpp
+    src/victim_detector.cpp
     src/rgb_system_validator.cpp
     src/depth_system_validator.cpp
     src/face_detector.cpp

@@ -50,8 +50,7 @@
 #include "vision_communications/EnhancedHoleMsg.h"
 #include "state_manager/state_client.h"
 
-#include "pandora_vision_victim/face_detector.h"
-#include "pandora_vision_victim/rgb_system_validator.h"
+#include "pandora_vision_victim/victim_detector.h"
 
 //!< Horizontal field of view in degrees
 #define HFOV 61.14
@@ -115,10 +114,7 @@ private:
   int curState;
   /// Previous state of robot
   int prevState;
-  
-  /// Instance of class face_detector
-  FaceDetector* _faceDetector;
-  
+    
   /// Parameters for the FaceDetector instance
   std::string cascade_path;
   std::string model_path;
@@ -135,7 +131,14 @@ private:
   ///Vector of holes found in current frame
   std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
   
+  /// Flag that indicates current state, according to the information
+  /// received from hole_detector_node
   int _stateIndicator;
+  
+  /// Instance of class VictimDetector
+  VictimDetector* _victimDetector;
+  
+  std::vector<cv::Mat> _rgbdImages;
   /**
    * @brief Get parameters referring to view and frame characteristics from
    * launch file

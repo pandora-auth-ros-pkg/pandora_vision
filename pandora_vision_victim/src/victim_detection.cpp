@@ -62,8 +62,8 @@ namespace pandora_vision
     _frameSubscriber = _nh.subscribe(
               _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
     
-     /// Initialize face detector
-    _faceDetector = new FaceDetector(cascade_path, model_path, bufferSize);
+     /// Initialize victim detector
+    _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize);
     
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -80,7 +80,7 @@ namespace pandora_vision
   VictimDetection::~VictimDetection()
   {
     ROS_DEBUG("[victim_node] : Destroying Victim Detection instance");
-    delete _faceDetector;
+   
   }
 
   /**
@@ -240,7 +240,7 @@ namespace pandora_vision
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
     
-    victimDetect();
+    checkState();
   }
   
   /**
@@ -251,22 +251,30 @@ namespace pandora_vision
   void VictimDetection::checkState()
   {
     ///!< First case, where all subsystems are enabled
-    if(isDepthEnabled == true && isHole == true)
+    if(isDepthEnabled == true && isHole == true){
       _stateIndicator = 1;
-      
+      _rgbdImages.push_back(_rgbImage);
+      _rgbdImages.push_back(_depthImage);
+    }  
     ///!< Second case, where only rgb systems are enabled  
-    if(isDepthEnabled == false && isHole == true)
+    if(isDepthEnabled == false && isHole == true){
         _stateIndicator = 2;
-        
+        _rgbdImages.push_back(_rgbImage);
+    }    
     ///!< Third case, where only Viola Jones subsystems for both
     ///!< rgb and depth Image are enabled
-    if(isDepthEnabled == true && isHole == false)
+    if(isDepthEnabled == true && isHole == false){
         _stateIndicator = 3;
-        
+        _rgbdImages.push_back(_rgbImage);
+        _rgbdImages.push_back(_depthImage);
+    }    
     ///!< Fourth case, where only Viola Jones subsystem for rgb image
     ///!< is enabled
-    if(isDepthEnabled == false && isHole == false)
+    if(isDepthEnabled == false && isHole == false){
         _stateIndicator = 4;
+        _rgbdImages.push_back(_rgbImage);
+    }
+    victimDetect();    
   }
   
   /**
@@ -279,38 +287,12 @@ namespace pandora_vision
     if(!victimNowON)
       return;
     
-    switch(_stateIndicator){
-      case 1:
-         ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable Viola Jones for depth image
-        _faceDetector->findFaces(_depthImage);
-        ///Enable rgb_system validator for rgb image
-        ///Enable rgb_system validator for depth image
-        break;  
-      
-      case 2:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable rgb_system validator for rgb image
-        break;
-      
-      case 3:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable Viola Jones for depth image
-        _faceDetector->findFaces(_depthImage);
-        break;
-        
-      case 4:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        break;
-      
-      default:
-        ROS_ERROR("[victim_node] : Invalid state for victim_node");
-        break;
-    }
+    _victimDetector->victimFusion(_stateIndicator, _rgbdImages);
+    
+    if(!_rgbdImages.size())
+      _rgbdImages.erase(_rgbdImages.begin(), 
+        _rgbdImages.size()+ _rgbdImages.begin());
+   
   }
 
 
