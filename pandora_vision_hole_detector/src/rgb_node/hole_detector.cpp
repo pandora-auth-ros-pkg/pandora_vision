@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou, Alexandros Philotheou
+ * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
 #include "rgb_node/hole_detector.h"
