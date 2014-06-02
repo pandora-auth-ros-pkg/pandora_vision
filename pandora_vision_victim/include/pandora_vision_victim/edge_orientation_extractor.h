@@ -120,6 +120,13 @@ namespace pandora_vision
     void findEdgeFeatures(cv::Mat src);
     
     std::vector<double> getFeatures();
+    
+    /**
+     * @brief Function that cleans up EdgeFeatureVector, to add
+     * new elements for next frame
+     * @return void
+    */ 
+    void emptyCurrentFrameFeatureVector();
   };
   
 }// namespace pandora_vision

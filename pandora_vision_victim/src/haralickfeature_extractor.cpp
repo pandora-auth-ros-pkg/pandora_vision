@@ -73,7 +73,7 @@ namespace pandora_vision
   **/
   cv::Mat HaralickFeaturesExtractor::calculateGLCM(const cv::Mat& in)
   {
-    cv::Mat out = cv::Mat::zeros(256, 256, CV_32FC1);
+    cv::Mat out = cv::Mat::zeros(256, 256, CV_64FC1);
     
     cv::Mat temp;
     
@@ -287,7 +287,7 @@ namespace pandora_vision
   **/
   void HaralickFeaturesExtractor::getSumAverage(const cv::Mat& in)
   {
-    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_32FC1);
+    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -317,7 +317,7 @@ namespace pandora_vision
   **/  
   void HaralickFeaturesExtractor::getSumVariance(const cv::Mat& in)
   {
-    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_32FC1);
+    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -347,7 +347,7 @@ namespace pandora_vision
   **/  
   void HaralickFeaturesExtractor::getSumEntropy(const cv::Mat& in)
   {
-    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_32FC1);
+    cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -380,7 +380,7 @@ namespace pandora_vision
   **/   
   void HaralickFeaturesExtractor::getDifferenceVariance(const cv::Mat& in)
   {
-    cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_32FC1);
+    cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -415,7 +415,7 @@ namespace pandora_vision
   **/   
   void HaralickFeaturesExtractor::getDifferenceEntropy(const cv::Mat& in)
   {
-    cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_32FC1);
+    cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -448,9 +448,9 @@ namespace pandora_vision
   **/
   void HaralickFeaturesExtractor::getInfoMeasuresCorr(const cv::Mat& in)
   {
-    cv::Mat px = cv::Mat::zeros(1, in.rows, CV_32FC1);
+    cv::Mat px = cv::Mat::zeros(1, in.rows, CV_64FC1);
     
-    cv::Mat py = cv::Mat::zeros(1, in.rows, CV_32FC1);
+    cv::Mat py = cv::Mat::zeros(1, in.rows, CV_64FC1);
     
     for(int y = 0; y < in.rows; y++)
     {
@@ -521,11 +521,21 @@ namespace pandora_vision
   **/     
   std::vector<double> HaralickFeaturesExtractor::getFeatures()
   {
-    for(int i = 0; i < _haralickFeatures.size(); i++)
-      ROS_INFO_STREAM(" "<< _haralickFeatures.at(i));
+    //~ for(int i = 0; i < _haralickFeatures.size(); i++)
+      //~ ROS_INFO_STREAM(" "<< _haralickFeatures.at(i));
     return _haralickFeatures;
   }
   
+  /**
+    @brief Function that cleans up haralickFeatureVector, to add
+    new elements for next frame
+    @return void
+  */ 
+  void HaralickFeaturesExtractor::emptyCurrentFrameFeatureVector()
+  {
+    _haralickFeatures.clear();
+  }
+    
   /**
     @brief This is the main function called to extract haralick features
     @param image [cv::Mat] The current frame to be processed

@@ -67,16 +67,16 @@ namespace pandora_vision
     ///for rgb image
     _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
     
-    //~ ///Extract edge orientation features for rgb image
-    //~ _edgeOrientationDetector.findEdgeFeatures(inImage);
-     //~ 
-    //~ ///Extract haralick features for rgb image 
-    //~ _haralickFeatureDetector.findHaralickFeatures(inImage);
-    //~ 
-    //~ if(!_rgbFeatureVector.empty())
-      //~ _rgbFeatureVector.erase(_rgbFeatureVector.begin(),
-        //~ _rgbFeatureVector.size() + _rgbFeatureVector.begin());
-    //~ 
+    ///Extract edge orientation features for rgb image
+    _edgeOrientationDetector.findEdgeFeatures(inImage);
+     
+    ///Extract haralick features for rgb image 
+    _haralickFeatureDetector.findHaralickFeatures(inImage);
+    
+    
+    if(!_rgbFeatureVector.empty())
+      _rgbFeatureVector.clear();
+    
     setRgbFeatureVector();
   }
   
@@ -94,29 +94,27 @@ namespace pandora_vision
     for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
           _rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
     
-    //~ ///Append to rgbFeatureVector features according to edge orientation
-    //~ std::vector<double> edgeOrientationFeatureVector = 
-        //~ _edgeOrientationDetector.getFeatures();
-    //~ for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          //~ _rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
-    //~ 
-    //~ ///Append to rgbFeatureVector features according to haaralick features
-    //~ std::vector<double> haaralickFeatureVector = 
-        //~ _haralickFeatureDetector.getFeatures();
-    //~ for(int i = 0; i < haaralickFeatureVector.size(); i++ )
-          //~ _rgbFeatureVector.push_back(haaralickFeatureVector[i]);  
-          //~ 
-    ///Deallocate memory
-    channelsStatictisFeatureVector.erase(channelsStatictisFeatureVector.begin(),
-      channelsStatictisFeatureVector.size() + channelsStatictisFeatureVector.begin());
+    ///Append to rgbFeatureVector features according to edge orientation
+    std::vector<double> edgeOrientationFeatureVector = 
+        _edgeOrientationDetector.getFeatures();
+    for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
+          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
     
+    ///Append to rgbFeatureVector features according to haaralick features
+    std::vector<double> haaralickFeatureVector = 
+        _haralickFeatureDetector.getFeatures();
+    for(int i = 0; i < haaralickFeatureVector.size(); i++ )
+          _rgbFeatureVector.push_back(haaralickFeatureVector[i]);  
+          
+    ///Deallocate memory
+    channelsStatictisFeatureVector.clear();
     _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
     
-    //~ edgeOrientationFeatureVector.erase(edgeOrientationFeatureVector.begin(),
-      //~ edgeOrientationFeatureVector.size() + edgeOrientationFeatureVector.begin());
-       //~ 
-    //~ haaralickFeatureVector.erase(haaralickFeatureVector.begin(),
-      //~ haaralickFeatureVector.size() + haaralickFeatureVector.begin());
+    edgeOrientationFeatureVector.clear();
+    _edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 
+    
+    haaralickFeatureVector.clear();
+    _haralickFeatureDetector.emptyCurrentFrameFeatureVector();
   }
   
   /**

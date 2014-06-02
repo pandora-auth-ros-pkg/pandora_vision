@@ -69,17 +69,16 @@ namespace pandora_vision
     cvtColor( src, src, CV_BGR2GRAY );
     
     //!<block size
-    ROS_INFO_STREAM("src image size= "<< src.size());
     int colsBlockSize = src.cols/4;
     int rowsBlockSize = src.rows/4;
-    if(src.rows % colsBlockSize == 0 && src.cols % rowsBlockSize == 0)
-      ROS_INFO("Correct Division");
+    if(src.rows % 4 != 0 && src.cols % 4 != 0)
+      ROS_INFO("[victim_node] : Incorrect Division");
       
     edgeFeatures = partition(src, colsBlockSize, rowsBlockSize);
     
-    ROS_INFO_STREAM("EdgeFeatures= ");
-    for (int ii = 0; ii < edgeFeatures.size(); ii++)
-       ROS_INFO_STREAM( " " << edgeFeatures[ii]);
+    //~ ROS_INFO_STREAM("EdgeFeatures= ");
+    //~ for (int ii = 0; ii < edgeFeatures.size(); ii++)
+       //~ ROS_INFO_STREAM( " " << edgeFeatures[ii]);
   
   }
   
@@ -291,5 +290,15 @@ namespace pandora_vision
   std::vector<double> EdgeOrientationExtractor::getFeatures()
   {
     return edgeFeatures;
+  }
+  
+  /**
+   * @brief Function that cleans up EdgeFeatureVector, to add
+   * new elements for next frame
+   * @return void
+  */ 
+  void EdgeOrientationExtractor::emptyCurrentFrameFeatureVector()
+  {
+    edgeFeatures.clear();
   }
 }// namespace pandora_vision
