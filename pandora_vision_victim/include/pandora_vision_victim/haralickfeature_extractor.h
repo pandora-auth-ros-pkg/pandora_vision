@@ -197,6 +197,13 @@ namespace pandora_vision
     @param void return
     */ 
     void findHaralickFeatures(cv::Mat image);
+    
+    /**
+    @brief Function that cleans up haralickFeatureVector, to add
+    new elements for next frame
+    @return void
+    */ 
+    void emptyCurrentFrameFeatureVector();
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H

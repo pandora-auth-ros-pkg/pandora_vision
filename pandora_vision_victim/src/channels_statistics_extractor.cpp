@@ -104,9 +104,9 @@ namespace pandora_vision
     
     //!Find the mean value and std value of every color component
     computeMeanStdHSV();
-    ROS_INFO("Mean and Standard Deviation of HSV :");
-    for (int ii = 0; ii < meanStdHSV.size(); ii++)
-      ROS_INFO_STREAM(" " <<meanStdHSV[ii]);
+    //~ ROS_INFO("Mean and Standard Deviation of HSV :");
+    //~ for (int ii = 0; ii < meanStdHSV.size(); ii++)
+      //~ ROS_INFO_STREAM(" " <<meanStdHSV[ii]);
     
     double dominantValue1 = 0;
     double dominantValue2 = 0;
@@ -121,28 +121,28 @@ namespace pandora_vision
     dominantVal.push_back(dominantValue1);
     dominantVal.push_back(dominantValue2);
      
-    ROS_INFO("Dominant values and Densities of every colorcom HSV");
-    for (int ii = 0; ii < dominantVal.size(); ii++)
-      ROS_INFO_STREAM(" " <<dominantVal[ii]);
+    //~ ROS_INFO("Dominant values and Densities of every colorcom HSV");
+    //~ for (int ii = 0; ii < dominantVal.size(); ii++)
+      //~ ROS_INFO_STREAM(" " <<dominantVal[ii]);
      
     //!< Compute the modules of first 6 components of a Fourier transform of the 
     //!< image components H(hue) and S(saturation).
     huedft = computeDFT(hsv_planes[0]);
     satdft = computeDFT(hsv_planes[1]);
      
-    ROS_INFO("6 first Dft of Hue:");
-    for (int ii= 0; ii< huedft.size(); ii++)
-      ROS_INFO_STREAM(" " << huedft[ii]);
-    ROS_INFO("6 first Dft of Sat");
-    for (int ii = 0; ii< satdft.size(); ii++)
-      ROS_INFO_STREAM(" " << satdft[ii]);
+    //~ ROS_INFO("6 first Dft of Hue:");
+    //~ for (int ii= 0; ii< huedft.size(); ii++)
+      //~ ROS_INFO_STREAM(" " << huedft[ii]);
+    //~ ROS_INFO("6 first Dft of Sat");
+    //~ for (int ii = 0; ii< satdft.size(); ii++)
+      //~ ROS_INFO_STREAM(" " << satdft[ii]);
     
     //!< Compute the colour angles of rgb color components
     computeColorAngles();
-    ROS_INFO("Color Angles and normalized intensity std");
-    for (int ii = 0; ii< colorAnglesAndStd.size(); ii++)
-      ROS_INFO_STREAM(" " << colorAnglesAndStd[ii]);
-    
+    //~ ROS_INFO("Color Angles and normalized intensity std");
+    //~ for (int ii = 0; ii< colorAnglesAndStd.size(); ii++)
+      //~ ROS_INFO_STREAM(" " << colorAnglesAndStd[ii]);
+    //~ 
     extractColorFeatureVector();
   }
   /**
