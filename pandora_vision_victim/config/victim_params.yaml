@@ -1,4 +1,6 @@
 camera_name: kinect
 bufferSize: 5
+isDepthEnabled: false
+isHole: false
 cascade_path: /data/haarcascade_frontalface_alt_tree.xml
 model_path: /data/model.xml    

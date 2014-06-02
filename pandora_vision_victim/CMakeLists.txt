@@ -4,6 +4,7 @@ project(pandora_vision_victim)
 find_package(catkin REQUIRED COMPONENTS 
     roscpp
     pandora_common_msgs
+    vision_communications
     state_manager
     state_manager_communications
     cv_bridge
@@ -18,6 +19,7 @@ catkin_package(
     CATKIN_DEPENDS
       roscpp
       pandora_common_msgs
+      vision_communications
       state_manager
       state_manager_communications
       cv_bridge
