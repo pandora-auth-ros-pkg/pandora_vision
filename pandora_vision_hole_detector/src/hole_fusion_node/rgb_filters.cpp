@@ -804,7 +804,7 @@ namespace pandora_vision
         rectangleToModelCorrelation < blobToModelCorrelation)
       {
         probabilitiesVector->at(rectanglesIndices[i]) =
-          blobToModelCorrelation - rectangleToModelCorrelation ;
+          blobToModelCorrelation - rectangleToModelCorrelation;
       }
 
       msgs->push_back(TOSTR(probabilitiesVector->at(rectanglesIndices[i])));

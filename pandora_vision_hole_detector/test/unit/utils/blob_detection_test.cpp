@@ -67,12 +67,14 @@ namespace pandora_vision
         const int& y,
         cv::Mat* image );
 
-      //! Sets up two images: square_, which features a single non-zero value
+      //! Sets up three images: square_, which features a single non-zero value
       //! square of size 100 with its upper left vertex at (100, 100),
-      //! and squares_, which features two non-zero value squares of size 100.
+      //! squares_, which features two non-zero value squares of size 100.
       //! The first one (order matters here) has its upper left vertex at
-      //! (100, 100) and the second one its lower right vertex at
-      //! (WIDTH - 1, HEIGHT - 1)
+      //! ( 100, 100 ) and the second one its lower right vertex at
+      //! ( WIDTH - 1, HEIGHT - 1 )
+      //! and corner_ which features a semi-closed square with its lower right
+      //! vertex at ( 99, 99 )
       virtual void SetUp()
       {
         WIDTH = 640;
@@ -155,6 +157,19 @@ namespace pandora_vision
 
         ASSERT_EQ( HEIGHT, square_.rows );
         ASSERT_EQ( WIDTH, square_.cols );
+
+        // Construct image corner_
+        corner_ = cv::Mat::zeros ( HEIGHT, WIDTH, CV_8UC1 );
+
+        for ( int rows = 0; rows < 99; rows++ )
+        {
+          corner_.at< unsigned char >( rows, 99 ) = 255;
+        }
+
+        for ( int cols = 0; cols < 99; cols++ )
+        {
+          corner_.at< unsigned char >( 99, cols ) = 255;
+        }
       }
 
 
@@ -173,6 +188,9 @@ namespace pandora_vision
       // C' (WIDTH - 1, HEIGHT - 1)
       // D' (WIDTH - 1, HEIGHT - 100)
       cv::Mat squares_;
+
+      // A semi-closed square with its lower right vertex at ( 9, 9 )
+      cv::Mat corner_;
 
       // The vector holding the outline points
       // of the square in the square_ image
@@ -228,21 +246,21 @@ namespace pandora_vision
      * Test square_
      **************************************************************************/
 
-    cv::KeyPoint k ( 101, 101, 1 );
+    cv::KeyPoint ks ( 101, 101, 1 );
 
-    std::vector< cv::Point2f > blobOutlineVector;
+    std::vector< cv::Point2f > blobOutlineVectorSquare;
     float blobArea = 0.0;
 
     // Run BlobDetection::brushfireKeypoint
     BlobDetection::brushfireKeypoint
-      ( k, &square_, &blobOutlineVector, &blobArea );
+      ( ks, &square_, &blobOutlineVectorSquare, &blobArea );
 
     // As a preliminary test, check if the number of outline points found
     // is equal to the one it should be. The four vertices of the square are not
     // included in the square's outline due to the cross-expanding nature of the
     // brushfire algorithm
     ASSERT_EQ ( squareOutlinePointsVector_.size() - 4,
-      blobOutlineVector.size() );
+      blobOutlineVectorSquare.size() );
 
     // The square's area should be the number of visited points of the brushfire
     // algorithm, which, excluding the square's four vertices, is 100 x 100 - 4
@@ -251,12 +269,12 @@ namespace pandora_vision
     // Check whether the outline points found are actually the outline points
     // of the square in square_
     int count_b_in_s = 0;
-    for ( int b = 0; b < blobOutlineVector.size(); b++ )
+    for ( int b = 0; b < blobOutlineVectorSquare.size(); b++ )
     {
       for ( int s = 0; s < squareOutlinePointsVector_.size(); s++ )
       {
-        if (blobOutlineVector[b].x == squareOutlinePointsVector_[s].x
-          && blobOutlineVector[b].y == squareOutlinePointsVector_[s].y)
+        if (blobOutlineVectorSquare[b].x == squareOutlinePointsVector_[s].x
+          && blobOutlineVectorSquare[b].y == squareOutlinePointsVector_[s].y)
         {
           count_b_in_s++;
         }
@@ -264,6 +282,25 @@ namespace pandora_vision
     }
 
     EXPECT_EQ ( squareOutlinePointsVector_.size() - 4, count_b_in_s );
+
+
+    /***************************************************************************
+     * Test corner_
+     **************************************************************************/
+
+    cv::KeyPoint kc ( 5, 5, 1 );
+
+    std::vector< cv::Point2f > blobOutlineVectorCorner;
+    blobArea = 0.0;
+
+    // Run BlobDetection::brushfireKeypoint
+    BlobDetection::brushfireKeypoint
+      ( kc, &corner_, &blobOutlineVectorCorner, &blobArea );
+
+    // The square's area should be the number of visited points of the brushfire
+    // algorithm, which, excluding the square's four vertices, is 100 x 100 - 1
+    // vertex (the lower right one)
+    EXPECT_EQ ( 9999, blobArea );
   }
 
 
@@ -361,6 +398,24 @@ namespace pandora_vision
     // of the brushfire algorithm, which,
     // excluding the square's four vertices, is 100 x 100 - 4
     EXPECT_EQ ( 9996, visited_1.size() );
+
+
+    /***************************************************************************
+     * Test corner_
+     **************************************************************************/
+
+    cv::Point2f kc ( 5, 5 );
+
+    std::set< unsigned int > visited;
+
+    // Run BlobDetection::brushfireKeypoint
+    BlobDetection::brushfirePoint
+      ( kc, &corner_, &visited );
+
+    // The square's area should be the number of visited points of the brushfire
+    // algorithm, which, excluding the square's four vertices, is 100 x 100 - 1
+    // vertex (the lower right one)
+    EXPECT_EQ ( 9999, visited.size() );
   }
 
 
@@ -378,9 +433,12 @@ namespace pandora_vision
     // The vector of outline points
     std::vector< cv::Point2f > blobOutlineVector_1;
 
+    // The blob's area
+    float area = 0.0;
+
     //Run BlobDetection::raycastKeypoint
     BlobDetection::raycastKeypoint
-      ( k_1, &squares_, 360, &blobOutlineVector_1 );
+      ( k_1, &squares_, 360, false, &blobOutlineVector_1, &area );
 
     // Due to the approximate nature of the raycastKeypoint algorithm,
     // the number of outline points found should be smaller or equal to the
@@ -397,13 +455,14 @@ namespace pandora_vision
 
     //Run BlobDetection::raycastKeypoint
     BlobDetection::raycastKeypoint
-      ( k_0, &squares_, 360, &blobOutlineVector_0 );
+      ( k_0, &squares_, 360, false, &blobOutlineVector_0, &area );
 
     // Due to the approximate nature of the raycastKeypoint algorithm,
     // the number of outline points found should be smaller or equal to the
     // actual number of outline points of the square
     EXPECT_GE ( squaresOutlinePointsVector_[0].size(),
       blobOutlineVector_0.size() );
+
   }
 
 
@@ -436,7 +495,7 @@ namespace pandora_vision
 
     //Run BlobDetection::raycastKeypoints
     BlobDetection::raycastKeypoints
-      ( &inKeyPoints, &squares_, 360, &blobsOutlineVector, &blobsArea );
+      ( inKeyPoints, &squares_, 360, &blobsOutlineVector, &blobsArea );
 
 
     for ( int sq = 0; sq < 2; sq++ )
@@ -449,6 +508,39 @@ namespace pandora_vision
 
       EXPECT_GE ( 10000, blobsArea[sq] );
     }
+
+
+    /***************************************************************************
+     * Test corner_
+     **************************************************************************/
+
+    // Clear the keypoints vector
+    inKeyPoints.clear();
+
+    // Place a new keypoint in the keypoints vector
+    cv::KeyPoint kc ( 5, 5, 1 );
+
+    inKeyPoints.push_back( kc );
+
+    // Clear the outline vector
+    blobsOutlineVector.clear();
+
+    // Clear the areas vector
+    blobsArea.clear();
+
+    //Run BlobDetection::raycastKeypoints
+    BlobDetection::raycastKeypoints
+      ( inKeyPoints, &corner_, 360, &blobsOutlineVector, &blobsArea );
+
+    // There will be exactly one keypoint, although the rays hit the edges
+    // of the image
+    EXPECT_EQ ( 1, blobsOutlineVector.size() );
+
+    // Approximately, the area of the square will be more than 9500 px2,
+    // but less than 10000 px2
+    EXPECT_LT ( 9500, blobsArea[0] );
+    EXPECT_GT ( 10000, blobsArea[0] );
+
   }
 
 }  // namespace pandora_vision
