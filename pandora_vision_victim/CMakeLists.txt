@@ -52,6 +52,19 @@ add_dependencies(victim_node
     ${catkin_EXPORTED_TARGETS}
 )
 
+########################### victimTrainer ############################
+if(VICTIM_ENABLE_TRAIN)
+  add_executable(victim_train_node
+                  src/rgb_system_validator.cpp
+                  src/depth_system_validator.cpp
+                  src/channels_statistics_extractor.cpp
+                  src/edge_orientation_extractor.cpp
+                  src/haralickfeature_extractor.cpp
+                  src/training.cpp
+  )
+  target_link_libraries(victim_train_node ${catkin_LIBRARIES} )
+endif()
+
 ########################### modelTRainer ############################
 if(MODEL_ENABLE_TRAIN)
   add_executable(model_train 
