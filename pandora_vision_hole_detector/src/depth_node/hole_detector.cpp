@@ -101,7 +101,7 @@ namespace pandora_vision
     #endif
 
     // The final vectors of keypoints, rectangles and blobs' outlines.
-    struct HolesConveyor conveyor;
+    HolesConveyor conveyor;
 
     /**
       Get me blobs that their center point is inside the image,

@@ -179,7 +179,7 @@ namespace pandora_vision
   float Parameters::HoleFusion::connect_holes_max_distance = 0.2;
 
   // The threshold for texture matching
-  float Parameters::HoleFusion::match_texture_threshold = 0.5;
+  float Parameters::HoleFusion::match_texture_threshold = 0.8;
 
   // Color homogeneity parameters
   int Parameters::HoleFusion::num_bins_threshold = 10;
