@@ -228,9 +228,8 @@ namespace pandora_vision
      * @param type [ConvolutionType] the type of convolution.
      * @return dest [cv::Mat&] the convoluted image.
     */ 
-
   void EdgeOrientationExtractor::conv2(const cv::Mat &img, 
-            const cv::Mat& kernel,ConvolutionType type, cv::Mat* dest)
+            const cv::Mat& kernel, ConvolutionType type, cv::Mat* dest)
   {
     cv::Mat source = img;
     cv::Mat dest2;

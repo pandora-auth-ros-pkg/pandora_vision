@@ -127,4 +127,4 @@ namespace pandora_vision
   {
     return _rgbFeatureVector;
   }
-} 
+}// namespace pandora_vision 

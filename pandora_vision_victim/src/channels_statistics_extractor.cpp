@@ -445,7 +445,7 @@ namespace pandora_vision
   */ 
   std::vector<double> ChannelsStatisticsExtractor::getRgbFeatures()
   {
-    if( _colorFeatureVector.size()!=28){
+    if( _colorFeatureVector.size() != 28){
       ROS_FATAL("Clean the vector");
       ROS_INFO_STREAM("vector's size"<< _colorFeatureVector.size() );
      } 
@@ -458,7 +458,7 @@ namespace pandora_vision
   */ 
   std::vector<double> ChannelsStatisticsExtractor::getDepthFeatures()
   {
-    if( _depthStatisticsVector.size()!=28){
+    if( _depthStatisticsVector.size() != 28){
       ROS_FATAL("Clean the vector");
       ROS_INFO_STREAM("vector's size"<< _depthStatisticsVector.size() );
      } 

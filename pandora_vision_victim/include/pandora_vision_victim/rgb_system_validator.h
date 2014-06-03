@@ -91,5 +91,5 @@ namespace pandora_vision
     std::vector<double> getRgbFeatureVector();
     
   };
-} 
-#endif
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_RGB_SYSTEM_VALIDATOR_H

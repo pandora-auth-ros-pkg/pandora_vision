@@ -124,4 +124,4 @@ namespace pandora_vision
   {
     return _depthFeatureVector;
   }
-} 
+}// namespace pandora_vision 

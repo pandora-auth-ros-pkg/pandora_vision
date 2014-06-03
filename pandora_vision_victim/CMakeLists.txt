@@ -66,12 +66,22 @@ set(ROSLINT_CPP_OPTS
     
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
   RELATIVE ${PROJECT_SOURCE_DIR} 
-            
+  
+  include/victim_detection.h          
+  include/victim_detector.h          
   include/face_detector.h
-  include/color_extractor.h
+  include/rgb_system_validator.h
+  include/depth_system_validator.h
+  include/channels_statistics_extractor.h
+  include/edge_orientation_extractor.h
   include/haralickfeature_extractor.h
+  src/victim_detection.cpp
+  src/victim_detector.cpp
   src/face_detector.cpp
-  src/color_extractor.cpp
+  src/rgb_system_validator.cpp
+  src/depth_system_validator.cpp
+  src/channels_statistics_extractor.cpp
+  src/edge_orientation_extractor.cpp
   src/haralickfeature_extractor.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
