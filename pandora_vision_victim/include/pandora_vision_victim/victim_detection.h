@@ -200,6 +200,6 @@ public:
   std::string param;
 };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_FACE_FACE_DETECTION_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 
 

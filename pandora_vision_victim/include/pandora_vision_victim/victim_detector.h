@@ -98,5 +98,5 @@ namespace pandora_vision
     void depthFeaturesDetect(cv::Mat _depthImage);
      
   }; 
-}
-#endif  
+}// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTOR_H

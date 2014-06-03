@@ -91,5 +91,5 @@ namespace pandora_vision
     std::vector<double> getDepthFeatureVector();
     
   };
-} 
-#endif
+}// namespace pandora_vision 
+#endif  // PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H
