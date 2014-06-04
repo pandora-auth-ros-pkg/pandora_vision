@@ -93,7 +93,7 @@ class LandoltC3dDetector
   cv::Rect predator_bbox;
   //!<Predator Probability
   float confidence;
-  
+  //!<Boolean value used for fusion decision
   bool PredatorOn;
   
   public:
@@ -198,7 +198,7 @@ class LandoltC3dDetector
   /**
   @brief Function for calculating perspective transform, in
   order to get better angle calculation precision
-  @param rec [cv::rec] Rectangle enclosing a 'C'
+  @param rec [cv::Rect] Rectangle enclosing a 'C'
   @param in [cv::Mat&] Input Image
   @return [cv::Mat] Output Image 
   **/    
@@ -219,8 +219,20 @@ class LandoltC3dDetector
     
   void fusion();
   
+  /**
+  @brief Function for storing bounding box and probability sent
+  from Predator
+  @param bbox [cv::Rect] Predator bounding box
+  @param posterior [float] Predator Probability
+  @return void
+  **/
   void setPredatorValues(cv::Rect bbox, float posterior);
   
+  /**
+  @brief Function used for fusion, in order to decide whether Predator
+  is ON or OFF
+  @return void
+  **/
   void setPredatorOn(bool flag);
     
 };
