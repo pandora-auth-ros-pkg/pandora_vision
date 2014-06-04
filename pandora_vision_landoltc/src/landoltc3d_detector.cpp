@@ -765,12 +765,24 @@ void LandoltC3dDetector::fusion()
   }
 }
 
+/**
+  @brief Function for storing bounding box and probability sent
+  from Predator
+  @param bbox [cv::Rect] Predator bounding box
+  @param posterior [float] Predator Probability
+  @return void
+**/
 void LandoltC3dDetector::setPredatorValues(cv::Rect bbox, float posterior)
 {
   predator_bbox = bbox;
   confidence = posterior;
 }
 
+/**
+  @brief Function used for fusion, in order to decide whether Predator
+  is ON or OFF
+  @return void
+**/
 void LandoltC3dDetector::setPredatorOn(bool flag)
 {
   PredatorOn = flag;
