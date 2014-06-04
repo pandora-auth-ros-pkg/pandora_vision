@@ -618,8 +618,10 @@ namespace pandora_vision
       rectanglesIndices_0,
       &intermediatePointsImageVector_0 );
 
-
+    // Generate the histogram of walls
     cv::MatND histogram;
+    Histogram::getHistogram
+      ( &histogram, Parameters::Histogram::secondary_channel );
 
     // Apply all active filters and obtain a 2D vector containing the
     // probabilities of validity of each candidate hole, produced by all
