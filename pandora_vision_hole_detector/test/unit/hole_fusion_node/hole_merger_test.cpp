@@ -1080,7 +1080,7 @@ namespace pandora_vision
     int interpolationMethod = 0;
 
     // Apply reasonable thresholds
-    Parameters::HoleFusion::checker_depth_diff_threshold = 0.4;
+    Parameters::HoleFusion::checker_depth_diff_threshold = 0.8;
     Parameters::HoleFusion::checker_depth_area_threshold = 0.8;
 
     // Restore conveyor to its original state

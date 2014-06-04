@@ -137,13 +137,13 @@ namespace pandora_vision
 
   // Hole checkers and their thresholds`
   int Parameters::HoleFusion::run_checker_depth_diff = 1;
-  float Parameters::HoleFusion::checker_depth_diff_threshold = 0.4;
+  float Parameters::HoleFusion::checker_depth_diff_threshold = 0.8;
 
   int Parameters::HoleFusion::run_checker_depth_area = 3;
-  float Parameters::HoleFusion::checker_depth_area_threshold = 0.4;
+  float Parameters::HoleFusion::checker_depth_area_threshold = 0.8;
 
   int Parameters::HoleFusion::run_checker_brushfire_outline_to_rectangle = 4;
-  float Parameters::HoleFusion::checker_brushfire_outline_to_rectangle_threshold = 0.4;
+  float Parameters::HoleFusion::checker_brushfire_outline_to_rectangle_threshold = 0.75;
 
   int Parameters::HoleFusion::run_checker_outline_of_rectangle = 2;
   float Parameters::HoleFusion::checker_outline_of_rectangle_threshold = 0.75;
