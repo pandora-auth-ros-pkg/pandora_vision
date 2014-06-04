@@ -49,8 +49,6 @@ LandoltC3dDetector::LandoltC3dDetector()
   
   _edges = 0;
   
-  _bradley = false;
-  
 }
 
 //!< Destructor
@@ -633,7 +631,6 @@ void LandoltC3dDetector::findLandoltContours(const cv::Mat& inImage, int rows, i
       temp.color = _fillColors;
       temp.bbox = _rectangles;
       _landoltc3d.push_back(temp);      
-      //do stuff
       flag = false;
     } 
     
@@ -672,10 +669,12 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 
   findCenters(dst.rows, dst.cols, gradXF, gradYF);
   
+  #ifdef SHOW_DEBUG_IMAGE
   for(std::size_t i = 0; i < _centers.size(); i++)
   {
     cv::circle(*input, _centers.at(i), 2, (0, 0, 255), -1);
   }
+  #endif
   
   convertScaleAbs( gradX, abs_grad_x );
   
@@ -683,8 +682,10 @@ void LandoltC3dDetector::begin(cv::Mat* input)
       
   addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst ); 
   
-  cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-  cv::THRESH_BINARY_INV, 7, Landoltc3DParameters::adaptiveThresholdSubtractSize);
+  //~ cv::adaptiveThreshold(dst, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+  //~ cv::THRESH_BINARY_INV, 7, Landoltc3DParameters::adaptiveThresholdSubtractSize);
+  
+  applyBradleyThresholding(dst, &thresholded);
 
   cv::erode(thresholded, thresholded, erodeKernel);
   
@@ -703,6 +704,8 @@ void LandoltC3dDetector::begin(cv::Mat* input)
     cv::imshow("Raw", *input);
     cv::waitKey(1);
   #endif
+  
+  fusion();
 
   clear();
 
@@ -715,8 +718,64 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 **/
 void LandoltC3dDetector::fusion()
 {
+  if(!PredatorOn)
+  {
+    
+    for(int i = 0; i < _landoltc3d.size(); i++)
+    {
+      LandoltC3D* temp = &(_landoltc3d.at(i));
+      if((*temp).count == 1)
+      {
+        _landoltc3d.at(i).probability = 0.2;
+      }
+      else if((*temp).count == 2)
+      {
+        _landoltc3d.at(i).probability = 0.4;
+      }
+      else if((*temp).count == 3)
+      {
+        _landoltc3d.at(i).probability = 0.6;
+      }
+      else if((*temp).count == 4)
+      {
+        _landoltc3d.at(i).probability = 0.8;
+      }
+      else if((*temp).count == 5)
+      {
+        _landoltc3d.at(i).probability = 1;
+      }
+      ROS_INFO("Probability is %f", _landoltc3d.at(i).probability);    
+   
+    }
+    
+  }
+  else
+  {
+    for(int i = 0; i< _landoltc3d.size(); i++)
+    {
+      if(predator_bbox.contains(_landoltc3d.at(i).center))
+      {
+        
+        _landoltc3d.at(i).probability = confidence;
+        ROS_INFO("Probability is %f", confidence);
+        //more to be added
+      }
+    }
   
+  }
 }
+
+void LandoltC3dDetector::setPredatorValues(cv::Rect bbox, float posterior)
+{
+  predator_bbox = bbox;
+  confidence = posterior;
+}
+
+void LandoltC3dDetector::setPredatorOn(bool flag)
+{
+  PredatorOn = flag;
+}
+  
 
 /**
   @brief Clearing vector values

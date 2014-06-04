@@ -53,7 +53,7 @@ struct LandoltC3D{
   std::vector<float> angles;
   std::vector<cv::Scalar> color;
   std::vector<cv::Rect> bbox;
-  int probability;
+  float probability;
   LandoltC3D() {}
 };
 
@@ -89,8 +89,12 @@ class LandoltC3dDetector
   int _edges;
   //!<Vector containing LandoltC3D structs
   std::vector<LandoltC3D> _landoltc3d;
-  //!<Boolean value for alternating thresholding value
-  bool _bradley;
+  //!<Predator Bounding Box
+  cv::Rect predator_bbox;
+  //!<Predator Probability
+  float confidence;
+  
+  bool PredatorOn;
   
   public:
   
@@ -214,6 +218,10 @@ class LandoltC3dDetector
   **/
     
   void fusion();
+  
+  void setPredatorValues(cv::Rect bbox, float posterior);
+  
+  void setPredatorOn(bool flag);
     
 };
 } // namespace pandora_vision
