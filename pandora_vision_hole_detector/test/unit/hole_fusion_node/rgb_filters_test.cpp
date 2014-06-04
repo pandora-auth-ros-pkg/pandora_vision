@@ -628,11 +628,6 @@ namespace pandora_vision
       4, // Four rgb filters in total
       std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
 
-    // Set the execution order for ease of testing
-    Parameters::HoleFusion::run_checker_color_homogeneity = 1;
-    Parameters::HoleFusion::run_checker_luminosity_diff = 2;
-    Parameters::HoleFusion::run_checker_texture_diff = 0;
-    Parameters::HoleFusion::run_checker_texture_backproject = 0;
 
     // Run RgbFilters::applyFilter
     RgbFilters::checkHoles(
@@ -730,12 +725,6 @@ namespace pandora_vision
     std::vector<std::vector<float> > probabilitiesVector2D_10(
       4, // Four rgb filters in total
       std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
-
-    // Set the execution order for ease of testing
-    Parameters::HoleFusion::run_checker_color_homogeneity = 1;
-    Parameters::HoleFusion::run_checker_luminosity_diff = 2;
-    Parameters::HoleFusion::run_checker_texture_diff = 0;
-    Parameters::HoleFusion::run_checker_texture_backproject = 0;
 
     // Run RgbFilters::applyFilter
     RgbFilters::checkHoles(
