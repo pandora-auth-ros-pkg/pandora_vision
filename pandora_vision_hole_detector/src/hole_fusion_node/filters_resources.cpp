@@ -244,16 +244,7 @@ namespace pandora_vision
       enable_intermediatePointsImageVector)
     {
       // The intermediate points set vector depends on the
-      // inflated rectangles vectors
-      if (!enable_inflatedRectanglesVectorAndIndices)
-      {
-        createInflatedRectanglesVector(conveyor,
-          image,
-          inflationSize,
-          inflatedRectanglesVector,
-          inflatedRectanglesIndices);
-      }
-
+      // inflated rectangles vectors, which has been created previously
       createIntermediateHolesPointsVectors(conveyor,
         image,
         *inflatedRectanglesVector,
