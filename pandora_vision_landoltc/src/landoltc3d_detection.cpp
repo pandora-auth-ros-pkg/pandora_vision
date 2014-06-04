@@ -58,12 +58,20 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
   {
     _landoltc3dPredator = _nh.subscribe(predator_topic_name, 1,
     &LandoltC3dDetection::predatorCallback, this);
+    
   }
   else
   {
     _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
     &LandoltC3dDetection::imageCallback, this);
   }
+  
+  
+  //!<Setting Predator value ON or OFF for the 3DLandoltC Detector
+  //!<This is used for the fusion function later, in order to assign
+  //!<probabilities according to the predator state
+  
+  _landoltc3dDetector.setPredatorOn(PredatorOn);
   
   //!< The dynamic reconfigure parameter's callback
   server.setCallback(boost::bind(&LandoltC3dDetection::parametersCallback, this, _1, _2));
@@ -234,6 +242,8 @@ void LandoltC3dDetection::predatorCallback(const vision_communications::Landoltc
   cv::Rect bounding_box = cv::Rect(msg.x, msg.y, msg.width, msg.height);
   float posterior = msg.posterior;
   //ROS_INFO("Getting Frame From Predator");
+  _landoltc3dDetector.setPredatorValues(bounding_box, posterior);
+  
   landoltc3dCallback();
 }
 
