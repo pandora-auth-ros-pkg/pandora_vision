@@ -523,12 +523,8 @@ namespace pandora_vision
       // If the luminosity of the inside of the candidate hole is greater
       // than the luminosity of the points beyond it and restricted by the
       // edges of its bounding box, it surely is not a hole
-      if (meanBlobLuminosity > meanBoundingBoxLuminosity
-        || meanBoundingBoxLuminosity == 0)
-      {
-        probabilitiesVector->at(rectanglesIndices[i]) = 0.0;
-      }
-      else
+      if (meanBlobLuminosity < meanBoundingBoxLuminosity
+        && meanBoundingBoxLuminosity != 0)
       {
         probabilitiesVector->at(rectanglesIndices[i]) =
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
