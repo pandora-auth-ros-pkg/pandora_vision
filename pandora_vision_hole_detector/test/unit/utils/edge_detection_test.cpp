@@ -341,11 +341,12 @@ namespace pandora_vision
     // Traverse all available edge detectors
     for ( int p = 0; p < 5; p++ )
     {
+      Parameters::Edge::edge_detection_method = p;
+
       // Test the toggle switch
       for ( int t = 1; t < 3; t++ )
       {
         Parameters::Edge::mixed_edges_toggle_switch == t;
-        Parameters::Edge::edge_detection_method = p;
 
         // Convert squares_ into a CV_32FC1 type image
         cv::Mat squares_32FC1 = cv::Mat::zeros ( squares_.size(), CV_32FC1 );
@@ -478,17 +479,26 @@ namespace pandora_vision
 
     // Construct the pair to be connected: it is the two ends of the unfinished
     // square
-    std::pair< GraphNode, GraphNode > p;
+    std::pair< GraphNode, GraphNode > p_1;
 
-    p.first.x = 399;
-    p.first.y = 300;
+    p_1.first.x = 399;
+    p_1.first.y = 300;
 
-    p.second.x = 300;
-    p.second.y = 399;
+    p_1.second.x = 300;
+    p_1.second.y = 399;
+
+    std::pair< GraphNode, GraphNode > p_2;
+
+    p_2.first.x = 300;
+    p_2.first.y = 399;
+
+    p_2.second.x = 399;
+    p_2.second.y = 300;
 
     // Construct the vector of pairs
     std::vector< std::pair< GraphNode, GraphNode > > pairs;
-    pairs.push_back( p );
+    pairs.push_back( p_1 );
+    pairs.push_back( p_2 );
 
 
     // Connect by arc
@@ -498,6 +508,9 @@ namespace pandora_vision
 
     // Connect the two points by arc
     EdgeDetection::connectPairs ( &squares_edges, pairs, 1 );
+
+    // Uncomment for visual inspection
+    //Visualization::show("squares_edges arc", squares_edges, 0);
 
     // The number of non-zero pixels after the connection of the two points
     int nonZerosAfter = cv::countNonZero( squares_edges );
@@ -521,6 +534,485 @@ namespace pandora_vision
     // If the two points where connected, that means that there should be more
     // non-zero pixels after the connection
     EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("squares_edges line", squares_edges, 0);
+
+
+    // Commence full blown connectPairs test.
+
+    /////////////////////////// Features a U shape /////////////////////////////
+    cv::Mat u = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
+    for ( int rows = 100; rows < 200; rows++ )
+    {
+      u.at< unsigned char >( rows, 100 ) = 255;
+      u.at< unsigned char >( rows, 199 ) = 255;
+    }
+
+    for ( int cols = 100; cols < 200; cols++ )
+    {
+      u.at< unsigned char >( 199, cols ) = 255;
+    }
+
+    // Backup u
+    cv::Mat u_backup;
+    u.copyTo(u_backup);
+
+    // Construct the pair to be connected: it is the two ends of the unfinished
+    // square
+    std::pair< GraphNode, GraphNode > p_u_1;
+
+    p_u_1.first.x = 100;
+    p_u_1.first.y = 100;
+
+    p_u_1.second.x = 100;
+    p_u_1.second.y = 199;
+
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_u_1;
+    pairs_u_1.push_back( p_u_1 );
+
+    // Connect by arc
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( u );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &u, pairs_u_1, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( u );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("u arc forward", u , 0);
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_u_2;
+
+    // Reverse the order of the graph nodes
+    std::pair< GraphNode, GraphNode > p_u_2;
+
+    p_u_2.first.x = 100;
+    p_u_2.first.y = 199;
+
+    p_u_2.second.x = 100;
+    p_u_2.second.y = 100;
+
+    pairs_u_2.push_back( p_u_2 );
+
+    // Reset u
+    u_backup.copyTo(u);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( u );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &u, pairs_u_2, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( u );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("u arc reverse", u , 0);
+
+    // Connect by line
+
+    // Reset u
+    u_backup.copyTo(u);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( u );
+
+    // Connect the two points by line
+    EdgeDetection::connectPairs ( &u, pairs_u_1, 0 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( u );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("u line", u , 0);
+
+
+    /////////////////////////// Features a C shape /////////////////////////////
+    cv::Mat c = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
+    for ( int rows = 100; rows < 200; rows++ )
+    {
+      c.at< unsigned char >( rows, 100 ) = 255;
+    }
+
+    for ( int cols = 100; cols < 200; cols++ )
+    {
+      c.at< unsigned char >( 100, cols ) = 255;
+      c.at< unsigned char >( 199, cols ) = 255;
+    }
+
+    // Backup c
+    cv::Mat c_backup;
+    c.copyTo(c_backup);
+
+    // Construct the pair to be connected: it is the two ends of the unfinished
+    // square
+    std::pair< GraphNode, GraphNode > p_c_1;
+
+    p_c_1.first.x = 100;
+    p_c_1.first.y = 199;
+
+    p_c_1.second.x = 199;
+    p_c_1.second.y = 199;
+
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_c_1;
+    pairs_c_1.push_back( p_c_1 );
+
+    // Connect by arc
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( c );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &c, pairs_c_1, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( c );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("c arc forward", c , 0);
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_c_2;
+
+    // Reverse the order of the graph nodes
+    std::pair< GraphNode, GraphNode > p_c_2;
+
+    p_c_2.first.x = 199;
+    p_c_2.first.y = 199;
+
+    p_c_2.second.x = 100;
+    p_c_2.second.y = 199;
+
+    pairs_c_2.push_back( p_c_2 );
+
+    // Reset c
+    c_backup.copyTo(c);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( c );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &c, pairs_c_2, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( c );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("c arc reverse", c , 0);
+
+    // Connect by line
+
+    // Reset c
+    c_backup.copyTo(c);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( c );
+
+    // Connect the two points by line
+    EdgeDetection::connectPairs ( &c, pairs_c_1, 0 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( c );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("c line", c , 0);
+
+
+    /////////////////////////// Features a pi shape ////////////////////////////
+    cv::Mat pi = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
+    for ( int rows = 100; rows < 200; rows++ )
+    {
+      pi.at< unsigned char >( rows, 100 ) = 255;
+      pi.at< unsigned char >( rows, 199 ) = 255;
+    }
+
+    for ( int cols = 100; cols < 200; cols++ )
+    {
+      pi.at< unsigned char >( 100, cols ) = 255;
+    }
+
+    // Backup pi
+    cv::Mat pi_backup;
+    pi.copyTo(pi_backup);
+
+    // Construct the pair to be connected: it is the two ends of the unfinished
+    // square
+    std::pair< GraphNode, GraphNode > p_pi_1;
+
+    p_pi_1.first.x = 199;
+    p_pi_1.first.y = 100;
+
+    p_pi_1.second.x = 199;
+    p_pi_1.second.y = 199;
+
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_pi_1;
+    pairs_pi_1.push_back( p_pi_1 );
+
+    // Connect by arc
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( pi );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &pi, pairs_pi_1, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( pi );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("pi arc forward", pi , 0);
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_pi_2;
+
+    // Reverse the order of the graph nodes
+    std::pair< GraphNode, GraphNode > p_pi_2;
+
+    p_pi_2.first.x = 199;
+    p_pi_2.first.y = 199;
+
+    p_pi_2.second.x = 199;
+    p_pi_2.second.y = 100;
+
+    pairs_pi_2.push_back( p_pi_2 );
+
+    // Reset pi
+    pi_backup.copyTo(pi);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( pi );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &pi, pairs_pi_2, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( pi );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("pi arc reverse", pi , 0);
+
+    // Connect by line
+
+    // Reset pi
+    pi_backup.copyTo(pi);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( pi );
+
+    // Connect the two points by line
+    EdgeDetection::connectPairs ( &pi, pairs_pi_1, 0 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( pi );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("pi line", pi , 0);
+
+
+    /////////////////////// Features a backwards C shape ///////////////////////
+    cv::Mat bc = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
+    for ( int rows = 100; rows < 200; rows++ )
+    {
+      bc.at< unsigned char >( rows, 199 ) = 255;
+    }
+
+    for ( int cols = 100; cols < 200; cols++ )
+    {
+      bc.at< unsigned char >( 100, cols ) = 255;
+      bc.at< unsigned char >( 199, cols ) = 255;
+    }
+
+    // Backup bc
+    cv::Mat bc_backup;
+    bc.copyTo(bc_backup);
+
+    // Construct the pair to be connected: it is the two ends of the unfinished
+    // square
+    std::pair< GraphNode, GraphNode > p_bc_1;
+
+    p_bc_1.first.x = 100;
+    p_bc_1.first.y = 100;
+
+    p_bc_1.second.x = 199;
+    p_bc_1.second.y = 100;
+
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_bc_1;
+    pairs_bc_1.push_back( p_bc_1 );
+
+    // Connect by arc
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( bc );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &bc, pairs_bc_1, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( bc );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("bc arc forward", bc , 0);
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_bc_2;
+
+    // Reverse the order of the graph nodes
+    std::pair< GraphNode, GraphNode > p_bc_2;
+
+    p_bc_2.first.x = 199;
+    p_bc_2.first.y = 100;
+
+    p_bc_2.second.x = 100;
+    p_bc_2.second.y = 100;
+
+    pairs_bc_2.push_back( p_bc_2 );
+
+    // Reset bc
+    bc_backup.copyTo(bc);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( bc );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &bc, pairs_bc_2, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( bc );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("bc arc reverse", bc , 0);
+
+    // Connect by line
+
+    // Reset bc
+    bc_backup.copyTo(bc);
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( bc );
+
+    // Connect the two points by line
+    EdgeDetection::connectPairs ( &bc, pairs_bc_1, 0 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( bc );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_LT( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("bc line", bc , 0);
+
+    /////////////////////// Features a | | shape ///////////////////////
+    // This is made to test that if no outline point is found,
+    // the image is preserved and the points are not connected
+    cv::Mat ii = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+
+    for ( int rows = 100; rows < 200; rows++ )
+    {
+      ii.at< unsigned char >( rows, 100 ) = 255;
+      ii.at< unsigned char >( rows, 199 ) = 255;
+    }
+
+
+    // Backup ii
+    cv::Mat ii_backup;
+    ii.copyTo(ii_backup);
+
+    // Construct the pair to be connected: it is the two ends of the unfinished
+    // square
+    std::pair< GraphNode, GraphNode > p_ii_1;
+
+    p_ii_1.first.x = 100;
+    p_ii_1.first.y = 100;
+
+    p_ii_1.second.x = 100;
+    p_ii_1.second.y = 199;
+
+
+    // Construct the vector of pairs
+    std::vector< std::pair< GraphNode, GraphNode > > pairs_ii_1;
+    pairs_ii_1.push_back( p_ii_1 );
+
+    // Connect by arc
+
+    // The number of non-zero pixels before the connection of the two points
+    nonZerosBefore = cv::countNonZero( ii );
+
+    // Connect the two points by arc
+    EdgeDetection::connectPairs ( &ii, pairs_ii_1, 1 );
+
+    // The number of non-zero pixels after the connection of the two points
+    nonZerosAfter = cv::countNonZero( ii );
+
+    // If the two points where connected, that means that there should be more
+    // non-zero pixels after the connection
+    EXPECT_EQ( nonZerosBefore, nonZerosAfter );
+
+    // Uncomment for visual inspection
+    //Visualization::show("ii failure", ii , 0);
+
   }
 
 
@@ -760,51 +1252,63 @@ namespace pandora_vision
   //! Test EdgeDetection::produceEdgesViaSegmentation
   TEST_F ( EdgeDetectionTest, ProduceEdgesViaSegmentationTest )
   {
-    // Convert squares_ into a CV_8UC3 image
-    cv::Mat squares_8UC3 = cv::Mat::zeros ( squares_.size(), CV_8UC3 );
-    cv::cvtColor( squares_, squares_8UC3, CV_GRAY2BGR );
-
-    // Add an unfinished square to the squares_8UC3 image
-    for ( int rows = 300; rows < 400; rows++ )
+    // Traverse all available edge detectors
+    for ( int p = 0; p < 5; p++ )
     {
-      squares_8UC3.at< cv::Vec3b >( rows, 300 ) = 128;
+      Parameters::Edge::edge_detection_method = p;
+
+      // Posterize?
+      for ( int f = 0; f < 2; f++ )
+      {
+        Parameters::Rgb::posterize_after_segmentation = f;
+
+        // Convert squares_ into a CV_8UC3 image
+        cv::Mat squares_8UC3 = cv::Mat::zeros ( squares_.size(), CV_8UC3 );
+        cv::cvtColor( squares_, squares_8UC3, CV_GRAY2BGR );
+
+        // Add an unfinished square to the squares_8UC3 image
+        for ( int rows = 300; rows < 400; rows++ )
+        {
+          squares_8UC3.at< cv::Vec3b >( rows, 300 ) = 128;
+        }
+
+        for ( int cols = 300; cols < 400; cols++ )
+        {
+          squares_8UC3.at< cv::Vec3b >( 300, cols ) = 128;
+        }
+
+
+        // Uncomment for visual inspection
+        //Visualization::show("Before calling produceEdgesViaSegmentation 0",
+        //squares_8UC3, 0);
+
+        // Segmentation using cv::pyrMeanShiftFiltering
+        cv::Mat edges_0;
+
+        // Run EdgeDetection::segmentation
+        // segmentation method = 0
+        EdgeDetection::produceEdgesViaSegmentation ( squares_8UC3, &edges_0 );
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::show("After calling produceEdgesViaSegmentation 0",
+         *  edges_0, 0);
+         */
+
+        // The image should not be blank
+        ASSERT_LT ( 0, cv::countNonZero ( edges_0 ) );
+
+        // The edges image should be of type CV_8UC1
+        ASSERT_EQ ( CV_8UC1, edges_0.type() );
+
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::show("Before calling produceEdgesViaSegmentation 1",
+         *squares_8UC3, 0);
+         */
+      }
     }
-
-    for ( int cols = 300; cols < 400; cols++ )
-    {
-      squares_8UC3.at< cv::Vec3b >( 300, cols ) = 128;
-    }
-
-
-    // Uncomment for visual inspection
-    //Visualization::show("Before calling produceEdgesViaSegmentation 0",
-    //squares_8UC3, 0);
-
-    // Segmentation using cv::pyrMeanShiftFiltering
-    cv::Mat edges_0;
-
-    // Run EdgeDetection::segmentation
-    // segmentation method = 0
-    EdgeDetection::produceEdgesViaSegmentation ( squares_8UC3, &edges_0 );
-
-    // Uncomment for visual inspection
-    /*
-     *Visualization::show("After calling produceEdgesViaSegmentation 0",
-     *  edges_0, 0);
-     */
-
-    // The image should not be blank
-    ASSERT_LT ( 0, cv::countNonZero ( edges_0 ) );
-
-    // The edges image should be of type CV_8UC1
-    ASSERT_EQ ( CV_8UC1, edges_0.type() );
-
-
-    // Uncomment for visual inspection
-    /*
-     *Visualization::show("Before calling produceEdgesViaSegmentation 1",
-     *squares_8UC3, 0);
-     */
   }
 
 

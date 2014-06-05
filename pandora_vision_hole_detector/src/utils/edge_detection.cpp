@@ -652,6 +652,12 @@ namespace pandora_vision
               }
             }
           }
+
+          // An outline point could not be found
+          if (!inLimitsOne && !inLimitsTwo)
+          {
+            break;
+          }
         }
 
         if (foundOutlinePoint)
