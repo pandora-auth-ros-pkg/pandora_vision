@@ -238,6 +238,8 @@ namespace pandora_vision
     EdgeDetection::applyCanny ( squares_, &squares_edges );
 
     ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+
+    EXPECT_LT ( 0, cv::countNonZero( squares_edges ) );
   }
 
 
@@ -249,6 +251,8 @@ namespace pandora_vision
     EdgeDetection::applyScharr ( squares_, &squares_edges );
 
     ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+
+    EXPECT_LT ( 0, cv::countNonZero( squares_edges ) );
   }
 
 
@@ -260,6 +264,8 @@ namespace pandora_vision
     EdgeDetection::applySobel ( squares_, &squares_edges );
 
     ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+
+    EXPECT_LT ( 0, cv::countNonZero( squares_edges ) );
   }
 
 
@@ -271,6 +277,8 @@ namespace pandora_vision
     EdgeDetection::applyLaplacian ( squares_, &squares_edges );
 
     ASSERT_EQ ( CV_8UC1, squares_edges.type() );
+
+    EXPECT_LT ( 0, cv::countNonZero( squares_edges ) );
   }
 
 
@@ -278,6 +286,31 @@ namespace pandora_vision
   //! Test EdgeDetection::applyEdgeContamination
   TEST_F ( EdgeDetectionTest, ApplyEdgeContaminationTest)
   {
+    // Modify the squares_ image. Add squares adjacent to the corners of it.
+
+    // The edges of this square are not touching the image's borders.
+    // Remove "- 1" for that.
+    EdgeDetectionTest::generateRectangle
+      ( cv::Point2f ( 1, 1 ),
+        10,
+        10,
+        &squares_ );
+
+    EdgeDetectionTest::generateRectangle
+      ( cv::Point2f ( 1, HEIGHT - 1 - 10 ),
+        10,
+        10,
+        &squares_ );
+
+    EdgeDetectionTest::generateRectangle
+      ( cv::Point2f ( WIDTH - 1 - 10, 1 ),
+        10,
+        10,
+        &squares_ );
+
+    // Uncomment for visual inspection
+    //Visualization::show("Modified squares_ image", squares_, 0);
+
     // Obtain the edges image for the squares_ image.
     // Here, it does not matter with which operator the edges image is produced,
     // provided that the the value tested below changes accordingly
@@ -285,13 +318,13 @@ namespace pandora_vision
     EdgeDetection::applyLaplacian ( squares_, &squares_edges );
 
     // The number of non-zero pixels before the appliance of edge contamination
-    EXPECT_EQ ( 2 * ( 3 * 396 - 4 ) , cv::countNonZero ( squares_edges ) );
+    EXPECT_EQ ( 2 * ( 3 * 396 - 4 ) + 3 * ( 3 * 36 - 4 ),
+      cv::countNonZero ( squares_edges ) );
 
     // Uncomment for visual inspection
     //Visualization::show("Before calling applyEdgeContamination", squares_edges, 0);
 
     EdgeDetection::applyEdgeContamination ( &squares_edges );
-
 
     // Uncomment for visual inspection
     //Visualization::show("After calling applyEdgeContamination", squares_edges, 0);
@@ -305,39 +338,63 @@ namespace pandora_vision
   //! Test EdgeDetection::computeDepthEdges
   TEST_F ( EdgeDetectionTest, ComputeDepthEdgesTest )
   {
-    // Convert squares_ into a CV_32FC1 type image
-    cv::Mat squares_32FC1 = cv::Mat::zeros ( squares_.size(), CV_32FC1 );
-
-    for ( int rows = 0; rows < squares_.rows; rows++ )
+    // Traverse all available edge detectors
+    for ( int p = 0; p < 5; p++ )
     {
-      for ( int cols = 0; cols < squares_.cols; cols++ )
+      // Test the toggle switch
+      for ( int t = 1; t < 3; t++ )
       {
-        squares_32FC1.at< float >( rows, cols ) =
-          static_cast< float >(squares_.at< unsigned char >( rows, cols )) / 255;
+        Parameters::Edge::mixed_edges_toggle_switch == t;
+        Parameters::Edge::edge_detection_method = p;
+
+        // Convert squares_ into a CV_32FC1 type image
+        cv::Mat squares_32FC1 = cv::Mat::zeros ( squares_.size(), CV_32FC1 );
+
+        for ( int rows = 0; rows < squares_.rows; rows++ )
+        {
+          for ( int cols = 0; cols < squares_.cols; cols++ )
+          {
+            squares_32FC1.at< float >( rows, cols ) =
+              static_cast< float >(squares_.at< unsigned char >( rows, cols )) / 255;
+          }
+        }
+
+        // Add an unfinished square to the squares_32FC1 image
+        for ( int rows = 300; rows < 400; rows++ )
+        {
+          squares_32FC1.at< float >( rows, 300 ) = 2.0;
+        }
+
+        for ( int cols = 300; cols < 400; cols++ )
+        {
+          squares_32FC1.at< float >( 300, cols ) = 2.0;
+        }
+
+        // Uncomment for visual inspection
+        /*
+         *Visualization::showScaled("Before calling computeDepthEdges",
+         * squares_32FC1, 0);
+         */
+
+        cv::Mat denoisedEdges;
+        EdgeDetection::computeDepthEdges ( squares_32FC1, &denoisedEdges );
+
+        // Uncomment for visual inspection
+        //Visualization::show("After calling computeDepthEdges", denoisedEdges, 0);
+
+        ASSERT_EQ ( CV_8UC1, denoisedEdges.type() );
+
+        // Canny cannot locate any edges in the squares_32FC1 image
+        if ( p == 0 )
+        {
+          EXPECT_EQ ( 0, cv::countNonZero( denoisedEdges ) );
+        }
+        else
+        {
+          EXPECT_LT ( 0, cv::countNonZero( denoisedEdges ) );
+        }
       }
     }
-
-    // Add an unfinished square to the squares_32FC1 image
-    for ( int rows = 300; rows < 400; rows++ )
-    {
-      squares_32FC1.at< float >( rows, 300 ) = 2.0;
-    }
-
-    for ( int cols = 300; cols < 400; cols++ )
-    {
-      squares_32FC1.at< float >( 300, cols ) = 2.0;
-    }
-
-    // Uncomment for visual inspection
-    //Visualization::showScaled("Before calling computeDepthEdges", squares_32FC1, 0);
-
-    cv::Mat denoisedEdges;
-    EdgeDetection::computeDepthEdges ( squares_32FC1, &denoisedEdges );
-
-    // Uncomment for visual inspection
-    //Visualization::show("After calling computeDepthEdges", denoisedEdges, 0);
-
-    ASSERT_EQ ( CV_8UC1, denoisedEdges.type() );
 
   }
 
@@ -366,59 +423,33 @@ namespace pandora_vision
 
     // The final edges image
     // extractionMethod = 0
-    // segmentationMethod = 0
-    cv::Mat denoisedEdges_00;
+    cv::Mat denoisedEdges_0;
 
     // A dummy histogram
     cv::MatND histogram = cv::Mat::zeros ( squares_.size(), CV_8UC1 );
 
     // Run EdgeDetection::computeRgbEdges
     EdgeDetection::computeRgbEdges
-      ( squares_8UC3, 0, 0, histogram, &denoisedEdges_00 );
+      ( squares_8UC3, 0, histogram, &denoisedEdges_0 );
+
+    EXPECT_LT ( 0, cv::countNonZero( denoisedEdges_0 ) );
 
     // Uncomment for visual inspection
-    //Visualization::show("After calling computeRgbEdges 0:0", denoisedEdges_00, 0);
-
-    // The final edges image
-    // extractionMethod = 0
-    // segmentationMethod = 1
-    cv::Mat denoisedEdges_01;
-
-    // Run EdgeDetection::computeRgbEdges
-    EdgeDetection::computeRgbEdges
-      ( squares_8UC3, 0, 1, histogram, &denoisedEdges_01 );
-
-    // Uncomment for visual inspection
-    //Visualization::show("After calling computeRgbEdges 0:1", denoisedEdges_01, 0);
+    //Visualization::show("After calling computeRgbEdges 0", denoisedEdges_0, 0);
 
     // The final edges image
     // extractionMethod = 1
-    // segmentationMethod = 0
-    cv::Mat denoisedEdges_10;
+    cv::Mat denoisedEdges_1;
 
     // Run EdgeDetection::computeRgbEdges
     EdgeDetection::computeRgbEdges
-      ( squares_8UC3, 1, 0, histogram, &denoisedEdges_10 );
+      ( squares_8UC3, 1, histogram, &denoisedEdges_1 );
+
+    // Because of the void histogram, the edges image is blank
+    EXPECT_EQ ( 0, cv::countNonZero( denoisedEdges_1 ) );
 
     // Uncomment for visual inspection
-    //Visualization::show("After calling computeRgbEdges 1:0", denoisedEdges_10, 0);
-
-    // The final edges image
-    // extractionMethod = 1
-    // segmentationMethod = 1
-    cv::Mat denoisedEdges_11;
-
-    // Run EdgeDetection::computeRgbEdges
-    EdgeDetection::computeRgbEdges
-      ( squares_8UC3, 1, 1, histogram, &denoisedEdges_11 );
-
-    // Uncomment for visual inspection
-    //Visualization::show("After calling computeRgbEdges 1:1", denoisedEdges_11, 0);
-
-    ASSERT_EQ ( CV_8UC1, denoisedEdges_00.type() );
-    ASSERT_EQ ( CV_8UC1, denoisedEdges_10.type() );
-    ASSERT_EQ ( CV_8UC1, denoisedEdges_01.type() );
-    ASSERT_EQ ( CV_8UC1, denoisedEdges_11.type() );
+    //Visualization::show("After calling computeRgbEdges 1", denoisedEdges_1, 0);
 
   }
 
@@ -754,7 +785,7 @@ namespace pandora_vision
 
     // Run EdgeDetection::segmentation
     // segmentation method = 0
-    EdgeDetection::produceEdgesViaSegmentation ( squares_8UC3, 0, &edges_0 );
+    EdgeDetection::produceEdgesViaSegmentation ( squares_8UC3, &edges_0 );
 
     // Uncomment for visual inspection
     /*
@@ -774,25 +805,6 @@ namespace pandora_vision
      *Visualization::show("Before calling produceEdgesViaSegmentation 1",
      *squares_8UC3, 0);
      */
-
-    // Segmentation using cv::medianBlur
-    cv::Mat edges_1;
-
-    // Run EdgeDetection::segmentation
-    // segmentation method = 1
-    EdgeDetection::produceEdgesViaSegmentation ( squares_8UC3, 1, &edges_1 );
-
-    // Uncomment for visual inspection
-    /*
-     *Visualization::show("After calling produceEdgesViaSegmentation 1",
-     *  edges_1, 0);
-     */
-
-    // The image should be blank
-    ASSERT_EQ ( 0, cv::countNonZero ( edges_1 ) );
-
-    // The edges image should be of type CV_8UC1
-    ASSERT_EQ ( CV_8UC1, edges_1.type() );
   }
 
 
@@ -819,26 +831,15 @@ namespace pandora_vision
     //Visualization::show("Before calling segmentation", squares_8UC3, 0);
 
     // Segmentation using cv::pyrMeanShiftFiltering
-    cv::Mat segmented_0;
+    cv::Mat segmented;
 
     // Run EdgeDetection::segmentation
-    EdgeDetection::segmentation ( squares_8UC3, 0, &segmented_0 );
+    EdgeDetection::segmentation ( squares_8UC3, &segmented );
 
     // Uncomment for visual inspection
-    //Visualization::show("After calling segmentation 0", segmented_0, 0);
+    //Visualization::show("After calling segmentation", segmented, 0);
 
-    // Segmentation using cv::medianBlur
-    cv::Mat segmented_1;
-
-    // Run EdgeDetection::segmentation
-    EdgeDetection::segmentation ( squares_8UC3, 0, &segmented_1 );
-
-    // Uncomment for visual inspection
-    //Visualization::show("After calling segmentation 1", segmented_1, 0);
-
-    // The type of the output images should still be CV_8UC3
-    ASSERT_EQ ( CV_8UC3, segmented_0.type() );
-    ASSERT_EQ ( CV_8UC3, segmented_1.type() );
+    ASSERT_EQ ( CV_8UC3, segmented.type() );
   }
 
 } // namespace pandora_vision
