@@ -137,7 +137,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     
-      //!< Get the HFOV parameter if available;
+    //!< Get the HFOV parameter if available;
     if (_nh.getParam("/" + cameraName + "/hfov", hfov)) 
       ROS_DEBUG_STREAM("HFOV : " << hfov);
     else 
