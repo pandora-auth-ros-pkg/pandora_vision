@@ -93,9 +93,9 @@ int main()
   // Read in the data. This can fail if no valid
   // input filename is given.
 
-  std::string path_to_images = ros::package::getPath("pandora_vision_face") + "att_faces";
+  std::string path_to_images = ros::package::getPath("pandora_vision_victim") + "att_faces";
 
-  std::string fn_csv = ros::package::getPath("pandora_vision_face") + "/data/csv.ext";
+  std::string fn_csv = ros::package::getPath("pandora_vision_victim") + "/data/csv.ext";
   try
   {
     read_csv(fn_csv, images, labels);
@@ -124,7 +124,7 @@ int main()
   std::string result_message = cv::format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
   std::cout << result_message << std::endl;
 
-  std::string outFile(ros::package::getPath("pandora_vision_face") + "/data/model.xml");
+  std::string outFile(ros::package::getPath("pandora_vision_victim") + "/data/model.xml");
 
   std::cout << "Saving model to " << outFile << std::endl;
 

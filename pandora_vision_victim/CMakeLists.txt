@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_victim)
 set(CMAKE_BUILD_TYPE Debug)
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
     vision_communications
@@ -28,14 +28,14 @@ catkin_package(
       roslint
     INCLUDE_DIRS
       include
-    LIBRARIES 
+    LIBRARIES
 )
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(victim_node 
+add_executable(victim_node
     src/victim_node.cpp
     src/victim_detection.cpp
     src/victim_detector.cpp
@@ -47,7 +47,7 @@ add_executable(victim_node
     src/haralickfeature_extractor.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
-add_dependencies(victim_node 
+add_dependencies(victim_node
     vision_communications_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
@@ -67,21 +67,21 @@ endif()
 
 ########################### modelTRainer ############################
 if(MODEL_ENABLE_TRAIN)
-  add_executable(model_train 
+  add_executable(model_train
                   src/model_trainer.cpp
   )
   target_link_libraries(model_train ${catkin_LIBRARIES} )
 endif()
 
 #~ To check lint : catkin_make roslint_pandora_vision_victim
-set(ROSLINT_CPP_OPTS 
+set(ROSLINT_CPP_OPTS
     "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string")
     
-FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS 
-  RELATIVE ${PROJECT_SOURCE_DIR} 
+FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
+  RELATIVE ${PROJECT_SOURCE_DIR}
   
-  include/victim_detection.h          
-  include/victim_detector.h          
+  include/victim_detection.h
+  include/victim_detector.h
   include/face_detector.h
   include/rgb_system_validator.h
   include/depth_system_validator.h
@@ -98,5 +98,3 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/haralickfeature_extractor.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
-
-
