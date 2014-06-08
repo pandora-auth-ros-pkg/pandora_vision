@@ -91,7 +91,7 @@ namespace pandora_vision
           &conveyor );
 
         // In total, there should be three holes
-        ASSERT_EQ ( 3, HolesConveyorUtils::size( conveyor ) );
+        ASSERT_EQ ( 3, conveyor.size() );
 
       }
 
@@ -123,13 +123,13 @@ namespace pandora_vision
     const int& x,
     const int& y )
   {
-    // What will be returned: the internal elements of one hole
-    HolesConveyor conveyor;
+    // A single hole
+    HoleConveyor hole;
 
     // The hole's keypoint
     cv::KeyPoint k ( upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back( k );
+    hole.keypoint = k;
 
 
     // The four vertices of the rectangle
@@ -147,7 +147,7 @@ namespace pandora_vision
     rectangle.push_back( vertex_3 );
     rectangle.push_back( vertex_4 );
 
-    conveyor.rectangles.push_back(rectangle);
+    hole.rectangle = rectangle;
 
 
     // The outline points of the hole will be obtained through the depiction
@@ -174,7 +174,11 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back( outline );
+    hole.outline = outline;
+
+    // Push back hole into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back( hole );
 
     return conveyor;
 
@@ -449,7 +453,7 @@ namespace pandora_vision
     // exploring method
     EXPECT_EQ ( 3 * (10000 - 4), nonZero );
 
-    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    for ( int h = 0; h < conveyor.size(); h++ )
     {
       // Each mask should have 100 X 100 points minus the square's four corners
       // due to the nature of the brushfire exploring method
@@ -519,7 +523,7 @@ namespace pandora_vision
       &holesMasksSetVector );
 
 
-    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    for ( int h = 0; h < conveyor.size(); h++ )
     {
       // Each mask should have 100 X 100 points minus the square's four corners
       // due to the nature of the brushfire exploring method

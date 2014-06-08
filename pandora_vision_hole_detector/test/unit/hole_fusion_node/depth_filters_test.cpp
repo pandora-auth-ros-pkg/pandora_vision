@@ -256,12 +256,12 @@ namespace pandora_vision
     const int& y )
   {
     // What will be returned: the internal elements of one hole
-    HolesConveyor conveyor;
+    HoleConveyor hole;
 
     // The hole's keypoint
     cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back(k);
+    hole.keypoint = k;
 
 
     // The four vertices of the rectangle
@@ -279,7 +279,7 @@ namespace pandora_vision
     rectangle.push_back(vertex_3);
     rectangle.push_back(vertex_4);
 
-    conveyor.rectangles.push_back(rectangle);
+    hole.rectangle = rectangle;
 
 
     // The outline points of the hole will be obtained through the depiction
@@ -306,7 +306,11 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back(outline);
+    hole.outline = outline;
+
+    // Push hole into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back(hole);
 
     return conveyor;
 
@@ -545,7 +549,7 @@ namespace pandora_vision
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_0(
       5, // Five depth filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
 
     // Set the execution order for ease of testing
@@ -634,7 +638,7 @@ namespace pandora_vision
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_10(
       5, // Five depth filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
     // Run DepthFilters::checkHoles
     DepthFilters::checkHoles(
