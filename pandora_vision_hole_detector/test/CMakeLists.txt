@@ -55,7 +55,7 @@ catkin_add_gtest(depth_hole_detector_test
 add_library(depth_node_lib
   ../src/depth_node/hole_detector.cpp)
 
-target_link_libraries(depth_hole_detector_test ${catkin_LIBRARIES} utils_lib depth_node_lib gtest_main)
+target_link_libraries(depth_hole_detector_test ${catkin_LIBRARIES} depth_node_lib utils_lib gtest_main)
 
 
 ################################# rgb node #####################################
@@ -65,7 +65,7 @@ catkin_add_gtest(rgb_hole_detector_test
 add_library(rgb_node_lib
   ../src/rgb_node/hole_detector.cpp)
 
-target_link_libraries(rgb_hole_detector_test ${catkin_LIBRARIES} utils_lib rgb_node_lib gtest_main)
+target_link_libraries(rgb_hole_detector_test ${catkin_LIBRARIES} rgb_node_lib utils_lib gtest_main)
 
 ############################# hole fusion node #################################
 
@@ -104,7 +104,7 @@ catkin_add_gtest(filters_resources_test
 add_library(filters_resources_lib
   ../src/hole_fusion_node/filters_resources.cpp)
 
-target_link_libraries(filters_resources_test ${catkin_LIBRARIES} utils_lib filters_resources_lib gtest_main)
+target_link_libraries(filters_resources_test ${catkin_LIBRARIES} filters_resources_lib utils_lib gtest_main)
 
 ###### planes_detection_test.cpp ######
 catkin_add_gtest(planes_detection_test
@@ -123,7 +123,7 @@ add_library(rgb_filters_lib
   ../src/hole_fusion_node/filters_resources.cpp
   ../src/hole_fusion_node/rgb_filters.cpp)
 
-target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} utils_lib rgb_filters_lib gtest_main)
+target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} rgb_filters_lib utils_lib gtest_main)
 
 
 ############## Functional Tests ###############

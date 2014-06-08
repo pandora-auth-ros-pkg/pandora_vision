@@ -671,6 +671,16 @@ namespace pandora_vision
     // greater than that of the pixels after
     EXPECT_GT( nonZerosBefore, nonZerosAfter );
 
+    // Erode once more
+    Morphology::erosion( &corners_, 1 );
+
+    // The number of non-zero pixels after erosion
+    nonZerosAfter = cv::countNonZero( corners_ );
+
+    // The number of non-zero pixels before the erosion should be
+    // greater than that of the pixels after
+    EXPECT_EQ( 0 , nonZerosAfter );
+
   }
 
 

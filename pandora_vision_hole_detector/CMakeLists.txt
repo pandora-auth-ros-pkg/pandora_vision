@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_hole_detector)
 
-set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 
 # Uncomment for generating coverage statistics.
@@ -17,8 +17,8 @@ set(CMAKE_BUILD_TYPE Release)
 # step 6: cd into build directory
 # step 7: lcov --capture --directory . --output-file coverage.info
 # step 8: genhtml coverage.info
-#SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
-#SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
+SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -183,6 +183,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   test/unit/utils/blob_detection_test.cpp
   test/unit/utils/edge_detection_test.cpp
   test/unit/utils/hole_filters_test.cpp
+  test/unit/utils/holes_conveyor_test.cpp
   test/unit/utils/message_conversions_test.cpp
   test/unit/utils/morphological_operators_test.cpp
   test/unit/utils/noise_elimination_test.cpp
