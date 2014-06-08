@@ -47,6 +47,10 @@ catkin_add_gtest(noise_elimination_test
   unit/utils/noise_elimination_test.cpp)
 target_link_libraries(noise_elimination_test ${catkin_LIBRARIES} utils_lib gtest_main)
 
+catkin_add_gtest(wavelets_test
+  unit/utils/wavelets_test.cpp)
+target_link_libraries(wavelets_test ${catkin_LIBRARIES} utils_lib gtest_main)
+
 
 ################################ depth node ####################################
 catkin_add_gtest(depth_hole_detector_test

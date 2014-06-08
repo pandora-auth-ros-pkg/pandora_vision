@@ -187,6 +187,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   test/unit/utils/message_conversions_test.cpp
   test/unit/utils/morphological_operators_test.cpp
   test/unit/utils/noise_elimination_test.cpp
+  test/unit/utils/wavelets_test.cpp
 
   ################## depth node ###################
   test/unit/depth_node/hole_detector_test.cpp
