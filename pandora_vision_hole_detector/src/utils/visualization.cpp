@@ -94,7 +94,7 @@ namespace pandora_vision
             big.at<cv::Vec3b>(startRow + i, startCol + j)[2] =
               imgs[im].at<unsigned char>(i, j);
           }
-          else
+          else if(imgs[im].channels() == 3)
           {
             big.at<cv::Vec3b>(startRow + i, startCol + j) =
               imgs[im].at<cv::Vec3b>(i, j);
@@ -297,7 +297,7 @@ namespace pandora_vision
     const std::vector<cv::KeyPoint>& keypoints)
   {
     cv::Mat img;
-    if (inImage.type() != CV_8UC3 || inImage.type() != CV_8UC1)
+    if (inImage.depth() != CV_8U)
     {
       img = scaleImageForVisualization(inImage, Parameters::Image::scale_method);
     }
