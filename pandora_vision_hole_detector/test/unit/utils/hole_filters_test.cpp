@@ -220,7 +220,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleFilters::validateKeypointsToRectangles
+  //! Tests HoleFilters::validateKeypointsToRectangles
   TEST_F ( HoleFiltersTest, ValidateKeypointsToRectanglesTest )
   {
     // Test two keypoints VS four rectangles
@@ -289,7 +289,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleFilters::validateBlobs
+  //! Tests HoleFilters::validateBlobs
   TEST_F ( HoleFiltersTest, ValidateBlobsTest )
   {
     // The keyPoints argument

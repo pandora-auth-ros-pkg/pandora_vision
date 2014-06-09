@@ -344,7 +344,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::applyMergeOperation
+  //! Tests HoleMerger::applyMergeOperation
   TEST_F ( HoleMergerTest, ApplyMergeOperationTest )
   {
     // Keep a backup of the original conveyor
@@ -618,7 +618,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::applyMergeOperationWithoutValidation
+  //! Tests HoleMerger::applyMergeOperationWithoutValidation
   TEST_F ( HoleMergerTest, ApplyMergeOperationWithoutValidation )
   {
     // Keep a backup of the original conveyor
@@ -864,7 +864,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::isCapableOfAssimilating
+  //! Tests HoleMerger::isCapableOfAssimilating
   TEST_F ( HoleMergerTest, IsCapableOfAssimilatingTest )
   {
     // Construct the hole mask sets for all the holes
@@ -897,7 +897,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::isCapableOfAmalgamating
+  //! Tests HoleMerger::isCapableOfAmalgamating
   TEST_F ( HoleMergerTest, IsCapableOfAmalgamatingTest )
   {
     // Construct the hole mask sets for all the holes
@@ -930,7 +930,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::amalgamateOnce
+  //! Tests HoleMerger::amalgamateOnce
   TEST_F ( HoleMergerTest, AmalgamateOnceTest )
   {
     // Construct the hole mask sets for all the holes
@@ -966,7 +966,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::isCapableOfConnecting
+  //! Tests HoleMerger::isCapableOfConnecting
   TEST_F ( HoleMergerTest, IsCapableOfConnectingTest )
   {
     // Construct the hole mask sets for all the holes
@@ -1061,7 +1061,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::connectOnce
+  //! Tests HoleMerger::connectOnce
   TEST_F ( HoleMergerTest, ConnectOnceTest )
   {
     // Construct the hole mask sets for all the holes
@@ -1099,7 +1099,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleMerger::mergeHoles
+  //! Tests HoleMerger::mergeHoles
   TEST_F ( HoleMergerTest, MergeHolesTest )
   {
     // Keep a backup of the original conveyor
