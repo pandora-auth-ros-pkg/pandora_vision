@@ -358,7 +358,7 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::applyFilter
+  //! Tests RgbFilters::applyFilter
   TEST_F ( RgbFiltersTest, ApplyFilterTest )
   {
     // Generate the needed resources for an inflation size of value 0
@@ -562,7 +562,7 @@ namespace pandora_vision
 
 
 
-  // Test RgbFilters::checkHoles
+  // Tests RgbFilters::checkHoles
   TEST_F ( RgbFiltersTest, CheckHolesTest )
   {
     // Generate the needed resources for an inflation size of value 0
@@ -769,7 +769,7 @@ namespace pandora_vision
 
 
 
-  // Test RgbFilters::checkHolesColorHomogeneity
+  // Tests RgbFilters::checkHolesColorHomogeneity
   TEST_F ( RgbFiltersTest, CheckHolesColorHomogeneityTest )
   {
     // Generate the needed resources
@@ -802,7 +802,7 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::checkHolesLuminosityDiff
+  //! Tests RgbFilters::checkHolesLuminosityDiff
   TEST_F ( RgbFiltersTest, CheckHolesLuminosityDiffTest )
   {
     // Generate the needed resources for an inflation size of value 0
@@ -917,7 +917,7 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::checkHolesTextureBackProject
+  //! Tests RgbFilters::checkHolesTextureBackProject
   TEST_F ( RgbFiltersTest, CheckHolesTextureBackProjectTest )
   {
     // Generate the needed resources for an inflation size of value 0
@@ -1038,7 +1038,7 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::checkHolesTextureDiff
+  //! Tests RgbFilters::checkHolesTextureDiff
   TEST_F ( RgbFiltersTest, CheckHolesTextureDiffTest )
   {
     // Histogram generation : secondary channel toggle

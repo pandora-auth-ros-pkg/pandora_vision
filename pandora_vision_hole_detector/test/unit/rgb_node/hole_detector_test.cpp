@@ -170,7 +170,7 @@ namespace pandora_vision
 
 
 
-  //! Test HoleDetector::findHoles
+  //! Tests HoleDetector::findHoles
   TEST_F ( HoleDetectorTest, FindHolesTest )
   {
     // Obtain the histogram of images of walls

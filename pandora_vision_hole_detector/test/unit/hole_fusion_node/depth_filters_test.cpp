@@ -318,7 +318,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::applyFilter
+  //! Tests DepthFilters::applyFilter
   TEST_F ( DepthFiltersTest, ApplyFilterTest )
   {
     // Inflations size : 0
@@ -512,7 +512,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHoles
+  //! Tests DepthFilters::checkHoles
   TEST_F ( DepthFiltersTest, CheckHolesTest )
   {
     // Inflations size : 0
@@ -703,7 +703,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthArea
+  //! Tests DepthFilters::checkHolesDepthArea
   TEST_F ( DepthFiltersTest, CheckHolesDepthAreaTest )
   {
     // Generate the vector of holes' mask (set)
@@ -734,7 +734,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthDiff
+  //! Tests DepthFilters::checkHolesDepthDiff
   TEST_F ( DepthFiltersTest, CheckHolesDepthDiffTest )
   {
     // Generate the inflated rectangles and corresponding indices vectors
@@ -882,7 +882,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthHomogeneity
+  //! Tests DepthFilters::checkHolesDepthHomogeneity
   TEST_F ( DepthFiltersTest, CheckHolesDepthHomogeneityTest)
   {
     // Generate the vector of holes' mask (set)
@@ -913,7 +913,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesOutlineToRectanglePlaneConstitution
+  //! Tests DepthFilters::checkHolesOutlineToRectanglePlaneConstitution
   TEST_F ( DepthFiltersTest, CheckHolesOutlineToRectanglePlaneConstitutionTest )
   {
     // Generate the inflated rectangles and corresponding indices vectors
@@ -1002,7 +1002,7 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesRectangleEdgesPlaneConstitution
+  //! Tests DepthFilters::checkHolesRectangleEdgesPlaneConstitution
   TEST_F ( DepthFiltersTest, CheckHolesRectangleEdgesPlaneConstitutionTest )
   {
 

@@ -121,7 +121,7 @@ namespace pandora_vision
   };
 
 
-  //! Test MessageConversions::convertImageToMessage
+  //! Tests MessageConversions::convertImageToMessage
   TEST_F ( MessageConversionsTest, ConvertImageToMessageTest )
   {
     // A grayscale image
@@ -228,7 +228,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::convertPointCloudMessageToImage
+  //! Tests MessageConversions::convertPointCloudMessageToImage
   TEST_F ( MessageConversionsTest, ConvertPointCloudMessageToImageTest )
   {
     // Create a grayscale image
@@ -347,7 +347,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::createCandidateHolesVector
+  //! Tests MessageConversions::createCandidateHolesVector
   TEST_F ( MessageConversionsTest, CreateCandidateHolesVectorTest )
   {
     // The vector of messages of candidate holes
@@ -387,7 +387,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::createCandidateHolesVectorMessage
+  //! Tests MessageConversions::createCandidateHolesVectorMessage
   TEST_F ( MessageConversionsTest, CreateCandidateHolesVectorMessageTest )
   {
     // Create a grayscale image
@@ -477,7 +477,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::extractImageFromMessage
+  //! Tests MessageConversions::extractImageFromMessage
   TEST_F ( MessageConversionsTest, ExtractImageFromMessageTest )
   {
     // Create a grayscale image
@@ -525,7 +525,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::extractImageFromMessageContainer
+  //! Tests MessageConversions::extractImageFromMessageContainer
   TEST_F ( MessageConversionsTest, ExtractImageFromMessageContainerTest )
   {
     // Create a grayscale image
@@ -575,7 +575,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::fromCandidateHoleMsgToConveyor
+  //! Tests MessageConversions::fromCandidateHoleMsgToConveyor
   TEST_F ( MessageConversionsTest, FromCandidateHoleMsgToConveyorTest )
   {
     // The vector of candidate holes
@@ -675,7 +675,7 @@ namespace pandora_vision
 
 
 
-  //! Test MessageConversions::unpackMessage
+  //! Tests MessageConversions::unpackMessage
   TEST_F ( MessageConversionsTest, UnpackMessageTest )
   {
     // The overall message
