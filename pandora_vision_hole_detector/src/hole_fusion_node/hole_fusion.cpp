@@ -697,14 +697,6 @@ namespace pandora_vision
     Parameters::HoleFusion::holes_validity_threshold_urgent =
       config.holes_validity_threshold_urgent;
 
-
-    // Depth and RGB image representation method.
-    // 0 if the image used is the one obtained from the sensor,
-    // unadulterated
-    // 1 through wavelet representation
-    Parameters::Image::image_representation_method =
-      config.image_representation_method;
-
     // Method to scale the CV_32FC1 image to CV_8UC1
     Parameters::Image::scale_method =
       config.scale_method;
