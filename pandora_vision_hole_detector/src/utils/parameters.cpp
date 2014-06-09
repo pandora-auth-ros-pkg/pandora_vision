@@ -240,7 +240,6 @@ namespace pandora_vision
   int Parameters::Outline::minimum_curve_points = 100;
 
 
-
   // Parameters specific to the RGB node
 
   // Show the rgb image that arrives in the rgb node
@@ -255,7 +254,7 @@ namespace pandora_vision
 
   // The threshold applied to the backprojection of the RGB image
   // captured by the image sensor
-  int Parameters::Rgb::compute_edges_backprojection_threshold = 128;
+  int Parameters::Rgb::backprojection_threshold = 128;
 
   // Parameters specific to the pyrMeanShiftFiltering method
   int Parameters::Rgb::spatial_window_radius = 13;
