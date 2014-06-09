@@ -369,8 +369,8 @@ namespace pandora_vision
 
     // The threshold applied to the backprojection of the RGB image
     // captured by the image sensor
-    Parameters::Rgb::compute_edges_backprojection_threshold =
-      config.compute_edges_backprojection_threshold;
+    Parameters::Rgb::backprojection_threshold =
+      config.backprojection_threshold;
 
     // Parameters specific to the pyrMeanShiftFiltering method
     Parameters::Rgb::spatial_window_radius =
