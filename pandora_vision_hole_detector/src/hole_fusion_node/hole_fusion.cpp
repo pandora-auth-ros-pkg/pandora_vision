@@ -100,11 +100,12 @@ namespace pandora_vision
     server.setCallback(boost::bind(&HoleFusion::parametersCallback,
         this, _1, _2));
 
+    // Set the initial on/off state of the Hole Detector package to off
+    isOn_ = false;
+
+    clientInitialize();
 
     ROS_INFO_NAMED("hole_detector", "[Hole Fusion node] Initiated");
-
-    // Start the synchronizer
-    unlockSynchronizer();
 
     #ifdef DEBUG_TIME
     Timer::tick("HoleFusion");
@@ -359,6 +360,18 @@ namespace pandora_vision
 
 
   /**
+    @brief Completes the transition to a new state
+    @param void
+    @return void
+   **/
+  void HoleFusion::completeTransition(void)
+  {
+    ROS_INFO_NAMED("hole_detector", "[Hole Detector] : Transision Complete");
+  }
+
+
+
+  /**
     @brief Callback for the candidate holes via the depth node
     @param[in] depthCandidateHolesVector
     [const vision_communications::CandidateHolesVectorMsg&]
@@ -524,6 +537,29 @@ namespace pandora_vision
       ROS_INFO_NAMED ("hole_detector",
         "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
     }
+  }
+
+
+
+  /**
+    @brief Computes the on/off state of the Hole Detector package
+    given a state
+    @param[in] state [const int&] The robot's state
+    @return [bool] True if the Hole Fusion is able to unlock the
+    synchronizer node and thus process a new point cloud
+   **/
+  bool HoleFusion::isHoleDetectorOn(const int& state)
+  {
+    return (state ==
+      state_manager_communications::robotModeMsg::MODE_START_AUTONOMOUS)
+      || (state ==
+        state_manager_communications::robotModeMsg::MODE_EXPLORATION)
+      || (state ==
+        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+      || (state ==
+        state_manager_communications::robotModeMsg::MODE_ARM_APPROACH)
+      || (state ==
+        state_manager_communications::robotModeMsg::MODE_DF_HOLD);
   }
 
 
@@ -1164,15 +1200,60 @@ namespace pandora_vision
 
 
   /**
+    @brief The node's state manager
+    @param[in] newState [const int&] The robot's new state
+    @return void
+   **/
+  void HoleFusion::startTransition(int newState)
+  {
+    // The new on/off state of the Hole Detector package
+    bool toBeOn = isHoleDetectorOn(newState);
+
+    // off -> on
+    if (!isOn_ && toBeOn)
+    {
+      // Set the Hole Detector's on/off state to the new one.
+      // In this case, it has to be before the call to unlockSynchronizer
+      isOn_ = toBeOn;
+
+      // If all three callbacks have finished execution and they are waiting
+      // a new input while the state changed, the synchronizer needs to be
+      // unclocked manually here.
+      // By contrast, if the number of nodes ready is non-zero,
+      // while maybe impossible due to the halted state of the Hole Detector,
+      // the last callback that finishes execution will attempt to unlock the
+      // synchonizer, thus a manual unlock is not needed.
+      if (numNodesReady_ == 0)
+      {
+        unlockSynchronizer();
+      }
+    }
+    else
+    {
+      isOn_ = toBeOn;
+    }
+
+    transitionComplete(newState);
+  }
+
+
+
+  /**
     @brief Requests from the synchronizer to process a new point cloud
     @return void
    **/
   void HoleFusion::unlockSynchronizer()
   {
-    ROS_INFO_NAMED("hole_detector", "Sending unlock message");
+    // The Hole Fusion node can request from the synchronizer node to process
+    // a new point cloud only if the on/off state of the Hole Detector package
+    // is set to on
+    if (isOn_)
+    {
+      ROS_INFO_NAMED("hole_detector", "Sending unlock message");
 
-    std_msgs::Empty unlockMsg;
-    unlockPublisher_.publish(unlockMsg);
+      std_msgs::Empty unlockMsg;
+      unlockPublisher_.publish(unlockMsg);
+    }
   }
 
 
