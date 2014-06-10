@@ -78,6 +78,19 @@ namespace pandora_vision
       <vision_communications::EnhancedHolesVectorMsg>(
         enhancedHolesTopic_, 1000, true);
 
+    // Advertise the topic where the Hole Fusion node requests from the
+    // synchronizer node to subscribe to the input point cloud topic
+    synchronizerSubscribeToInputPointCloudPublisher_ =
+      nodeHandle_.advertise <std_msgs::Empty>(
+        synchronizerSubscribeToInputPointCloudTopic_, 1000, true);
+
+    // Advertise the topic where the Hole Fusion node requests from the
+    // synchronizer node to leave its subscription to the
+    // input point cloud topic
+    synchronizerLeaveSubscriptionToInputPointCloudPublisher_=
+      nodeHandle_.advertise <std_msgs::Empty>(
+        synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1000, true);
+
     // Subscribe to the topic where the depth node publishes
     // candidate holes
     depthCandidateHolesSubscriber_= nodeHandle_.subscribe(
@@ -536,6 +549,43 @@ namespace pandora_vision
     {
       ROS_INFO_NAMED ("hole_detector",
         "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
+    }
+
+    // Read the name of the topic that the Hole Fusion node uses to publish
+    // messages so that the synchronizer node subscribes to the
+    // input point cloud
+    if (nodeHandle_.getParam(ns +
+        "/hole_fusion_node/published_topics/make_synchronizer_subscribe_to_input",
+        synchronizerSubscribeToInputPointCloudTopic_))
+    {
+      ROS_INFO_NAMED("hole_detector",
+        "[Hole Fusion Node] Advertising to topic where the synchronizer"
+        " expects messages dictating its subscription to the input point cloud");
+    }
+    else
+    {
+      ROS_INFO_NAMED ("hole_detector",
+        "[Hole Fusion Node] Could not find topic"
+        " make_synchronizer_subscribe_to_input");
+    }
+
+    // Read the name of the topic that the Hole Fusion node uses to publish
+    // messages so that the synchronizer node leaves its subscription to the
+    // input point cloud
+    if (nodeHandle_.getParam(ns +
+        "/hole_fusion_node/published_topics/make_synchronizer_leave_subscription_to_input",
+        synchronizerLeaveSubscriptionToInputPointCloudTopic_))
+    {
+      ROS_INFO_NAMED("hole_detector",
+        "[Hole Fusion Node] Advertising to topic where the synchronizer"
+        " expects messages dictating its leave of subscription to the"
+        " input point cloud");
+    }
+    else
+    {
+      ROS_INFO_NAMED ("hole_detector",
+        "[Hole Fusion Node] Could not find topic"
+        " make_synchronizer_leave_subscription_to_input");
     }
   }
 
@@ -1212,6 +1262,12 @@ namespace pandora_vision
     // off -> on
     if (!isOn_ && toBeOn)
     {
+      // The on/off state of the Hole Detector Package is off, so the
+      // synchronizer is not subscribed to the input point cloud.
+      // Make him subscribe to it now
+      std_msgs::Empty msg;
+      synchronizerSubscribeToInputPointCloudPublisher_.publish(msg);
+
       // Set the Hole Detector's on/off state to the new one.
       // In this case, it has to be before the call to unlockSynchronizer
       isOn_ = toBeOn;
@@ -1227,6 +1283,19 @@ namespace pandora_vision
       {
         unlockSynchronizer();
       }
+    }
+    // on -> off
+    else if (isOn_ && !toBeOn)
+    {
+      isOn_ = toBeOn;
+
+      // The on/off state of the Hole Detector package is on and is to be off.
+      // The synchronizer node is subscribed to the input point cloud and now
+      // it should leave its subscription to it so that the processing
+      // resources of the robot's computer pertaining to the Hole Detector
+      // package are minimized
+      std_msgs::Empty msg;
+      synchronizerLeaveSubscriptionToInputPointCloudPublisher_.publish(msg);
     }
     else
     {
