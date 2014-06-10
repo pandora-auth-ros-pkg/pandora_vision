@@ -103,6 +103,23 @@ namespace pandora_vision
       // pertaining to the valid holes found by the Hole Detector package
       std::string enhancedHolesTopic_;
 
+      // The publisher that the Hole Fusion node uses to request from the
+      // synchronizer node to subscribe to the input point cloud
+      ros::Publisher synchronizerSubscribeToInputPointCloudPublisher_;
+
+      // The name of the topic that the Hole Fusion node uses to request from
+      // the synchronizer node to subscribe to the input point cloud
+      std::string synchronizerSubscribeToInputPointCloudTopic_;
+
+      // The publisher that the Hole Fusion node uses to request from the
+      // synchronizer node to leave its subscription to the input point cloud
+      ros::Publisher synchronizerLeaveSubscriptionToInputPointCloudPublisher_;
+
+      // The name of the topic that the Hole Fusion node uses to request from
+      // the synchronizer node to leave its subscription to the
+      // input point cloud
+      std::string synchronizerLeaveSubscriptionToInputPointCloudTopic_;
+
       // The ROS subscriber for acquisition of candidate holes originated
       // from the depth node
       ros::Subscriber depthCandidateHolesSubscriber_;
