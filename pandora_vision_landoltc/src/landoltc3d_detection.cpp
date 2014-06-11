@@ -47,7 +47,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(true) 
+LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(false) 
 {
   getGeneralParams();
   
@@ -75,7 +75,13 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
   
   //!< The dynamic reconfigure parameter's callback
   server.setCallback(boost::bind(&LandoltC3dDetection::parametersCallback, this, _1, _2));
-      
+  
+  //!< initialize states - robot starts in STATE_OFF
+  curState = state_manager_communications::robotModeMsg::MODE_OFF;
+  prevState = state_manager_communications::robotModeMsg::MODE_OFF;
+
+  clientInitialize();
+        
   ROS_INFO("[landoltc3d_node] : Created LandoltC3d Detection instance");
 
 }

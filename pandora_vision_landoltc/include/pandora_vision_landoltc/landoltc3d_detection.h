@@ -49,11 +49,10 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include "state_manager/state_client.h"
 #include "vision_communications/LandoltcAlertsVectorMsg.h"
 #include "vision_communications/LandoltcPredatorMsg.h"
 #include "pandora_vision_landoltc/landoltc3d_detector.h"
-
+#include "state_manager/state_client.h"
 
 //!< default frame height
 #define DEFAULT_HEIGHT 480
@@ -63,8 +62,8 @@
 
 namespace pandora_vision
 {
-class LandoltC3dDetection
-{
+class LandoltC3dDetection : public StateClient {
+
 private:
   //!<Subscriber of RGB Image
   ros::Subscriber _inputImageSubscriber;
