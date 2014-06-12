@@ -107,13 +107,11 @@ void LandoltC3dDetector::applyMask()
     
       cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
     
-      //~ cv::imshow("padded", padded); 
-    
       findRotation(padded, temp);
     
       #ifdef SHOW_DEBUG_IMAGE
-      //~ //cv::imshow("padded", padded);
-      //~ //cv::waitKey(200);
+      cv::imshow("padded", padded);
+      cv::waitKey(20);
       #endif
     }
   }
@@ -342,8 +340,8 @@ void LandoltC3dDetector::findRotation(const cv::Mat&in, LandoltC3D* temp)
   }
   
   #ifdef SHOW_DEBUG_IMAGE
-    //~ cv::imshow("paddedptr", paddedptr); 
-    //~ cv::waitKey(5); 
+  cv::imshow("paddedptr", paddedptr); 
+  cv::waitKey(5); 
   #endif
     
   _edges = 0;
@@ -425,8 +423,6 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
       }
     }
   }
-  
-  //cv::imshow("bradley",*output);
   
   //~ delete[] integralImg;
 }
@@ -689,7 +685,10 @@ void LandoltC3dDetector::begin(cv::Mat* input)
 
   cv::erode(thresholded, thresholded, erodeKernel);
   
-  //cv::imshow("thresholded", thresholded);
+  #ifdef SHOW_DEBUG_IMAGE
+  cv::imshow("thresholded", thresholded);
+  cv::waitKey(10);
+  #endif
   
   findLandoltContours(thresholded, thresholded.rows, thresholded.cols, _refContours[0]);
 
@@ -702,7 +701,7 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   #ifdef SHOW_DEBUG_IMAGE
     cv::imshow("Raw", *input);
-    cv::waitKey(1);
+    cv::waitKey(10);
   #endif
   
   fusion();

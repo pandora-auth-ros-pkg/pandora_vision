@@ -47,9 +47,16 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(false) 
+LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(true) 
 {
   getGeneralParams();
+  
+  //!< Convert field of view from degrees to rads
+  hfov = hfov * CV_PI / 180;
+  vfov = vfov * CV_PI / 180;
+  
+  ratioX = hfov / frameWidth;
+  ratioY = vfov / frameHeight;
   
   //!< Initiliaze and preprocess reference image
   _landoltc3dDetector.initializeReferenceImage(patternPath);
@@ -163,8 +170,8 @@ void LandoltC3dDetection::getGeneralParams()
   }
   else
   {
-    ROS_DEBUG("[landoltc3d_node] : Parameter frameHeight not found. Using Default");
-    cameraName = "camera";
+    ROS_FATAL("[landoltc3d_node] : Camera name not found");
+    ROS_BREAK();
   }
 
   //!< Get the Height parameter if available;
@@ -189,6 +196,28 @@ void LandoltC3dDetection::getGeneralParams()
   {
     ROS_DEBUG("[landoltc3d_node] : Parameter frameWidth not found. Using Default");
     frameWidth = DEFAULT_WIDTH;
+  }
+  
+  //!< Get the HFOV parameter if available;
+  if (_nh.getParam("/" + cameraName + "/hfov", hfov)) 
+  {
+    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  }
+  else 
+  {
+    hfov = HFOV;
+    ROS_DEBUG_STREAM("HFOV : " << hfov);
+  }
+  
+  //!< Get the VFOV parameter if available;
+  if (_nh.getParam("/" + cameraName + "/vfov", vfov)) 
+  {
+    ROS_DEBUG_STREAM("VFOV : " << vfov);
+  }
+  else 
+  {
+    vfov = VFOV;
+    ROS_DEBUG_STREAM("VFOV : " << vfov);
   }
 
   //!< Get the listener's topic;
