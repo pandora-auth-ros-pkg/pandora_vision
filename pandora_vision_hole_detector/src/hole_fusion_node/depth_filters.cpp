@@ -456,20 +456,32 @@ namespace pandora_vision
         conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.y,
         conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.x) - mean;
 
+
       // The keypoint's distance from the depth sensor should be greater than
       // that of the mean distance of the vertices of the candidate hole's
       // bounding box
       if (value > 0)
       {
-        // The gaussian mean
-        float m = Parameters::HoleFusion::holes_gaussian_mean;
+        // The probability is binary. If there is a valid depth difference,
+        // this hole is marked as valid
+        if (Parameters::HoleFusion::depth_difference_probability_assignment_method == 0 )
+        {
+          probabilitiesVector->at(inflatedRectanglesIndices[i]) = 1;
+        }
+        // The probability is gaussian-based. The validity of a hole is a
+        // continuous function based on a normal distribution
+        else if (Parameters::HoleFusion::depth_difference_probability_assignment_method == 1)
+        {
+          // The gaussian mean
+          float m = Parameters::HoleFusion::holes_gaussian_mean;
 
-        // The gaussian standard deviation
-        float s = Parameters::HoleFusion::holes_gaussian_stddev;
+          // The gaussian standard deviation
+          float s = Parameters::HoleFusion::holes_gaussian_stddev;
 
-        // The gaussian probability of this hole being valid
-        probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-          exp(-pow((value - m) / s, 2) / 2);
+          // The gaussian probability of this hole being valid
+          probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+            exp(-pow((value - m) / s, 2) / 2);
+        }
       }
 
       msgs->push_back(TOSTR(
