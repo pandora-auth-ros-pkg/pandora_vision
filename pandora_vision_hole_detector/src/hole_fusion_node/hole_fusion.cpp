@@ -48,8 +48,6 @@ namespace pandora_vision
     Timer::start("HoleFusion");
     #endif
 
-    ros::Duration(0.5).sleep();
-
     // Acquire the names of topics which the Hole Fusion node will be having
     // transactionary affairs with
     getTopicNames();
