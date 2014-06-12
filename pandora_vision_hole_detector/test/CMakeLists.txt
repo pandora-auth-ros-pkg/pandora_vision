@@ -136,9 +136,9 @@ target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} rgb_filters_lib utils
 
 ############## Functional Tests ###############
 
-catkin_download_test_data(
-    hole_detector_test.bag
-    https://pandora.ee.auth.gr/rosbags/2014_bags/hole_detector_test.bag
-    DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/test
-    MD5 322a0014f47bcfbb0ad16a317738b0dc)
+#catkin_download_test_data(
+#    hole_detector_test.bag
+#    https://pandora.ee.auth.gr/rosbags/2014_bags/hole_detector_test.bag
+#    DESTINATION functional
+#    )
 add_rostest(functional/hole_detector_test.launch)

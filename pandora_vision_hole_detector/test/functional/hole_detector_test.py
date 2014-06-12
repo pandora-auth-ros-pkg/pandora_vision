@@ -56,10 +56,14 @@ class HoleDetectorTest(test_base.TestBase):
     def test_hole_detector(self):
 
        self.playFromBag(block = True)
+       rospy.sleep(1.5)
        self.assertTrue(self.replied)
-       self.assertEqual(len(self.alertList), 1)
-       alert1 = self.alertList[0]
-       alert2 = self.alertList[1]
+       #  how many alert messages have been published
+       self.assertEqual(len(self.alertList), 1) 
+       #  how many alerts have been sent with the first message
+       self.assertEqual(len(self.alertList[0].holesDirections), 2)
+       alert1 = self.alertList[0].holesDirections[0]
+       alert2 = self.alertList[0].holesDirections[1]
        expectedX = 399 - 320
        expectedYaw = math.atan((2 * float(expectedX) / 640) * math.tan(58 * math.pi / 360))
        expectedY = 240 - 360
@@ -68,14 +72,11 @@ class HoleDetectorTest(test_base.TestBase):
        self.assertAlmostEqual(alert1.pitch, expectedPitch)
        self.assertGreater(alert1.probability > 0.9)
 
-
-    
-
 if __name__ == '__main__':
 
     rospy.sleep(15)
     rospy.init_node(NAME, anonymous=True, log_level=rospy.DEBUG)
-    subscriber_topics = ["/vision/holes_direction"]
+    subscriber_topics = [("/vision/holes_direction", "vision_communications", "HolesDirectionsVectorMsg")]
     publisher_topics = []
     HoleDetectorTest.connect(subscriber_topics, publisher_topics)
     rostest.rosrun(PKG, NAME, HoleDetectorTest, sys.argv)

@@ -1,11 +1,11 @@
 <launch>
 
-  <param name="/use_sim_time" value="true"/> 
+  <!--<param name="/use_sim_time" value="true"/> -->
 
   <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector_standalone.launch" />
 
   <node pkg="pandora_testing_tools" type="bag_player_for_tests" name="player" 
-    args="--bags $(find pandora_vision_hole_detector)/test/hole_detector_test.bag --clock" /> 
+    args="--bags $(find pandora_vision_hole_detector)/test/functional/simple_pcl_frame.bag" /> 
 
   <test test-name="HoleDetectorTest" pkg="pandora_vision_hole_detector"
     type="hole_detector_test.py" />
