@@ -60,6 +60,12 @@
 //!< default frame width
 #define DEFAULT_WIDTH 640
 
+//!< Horizontal field of view in degrees
+#define HFOV 61.14  
+
+//!< vertical field of view in degrees 
+#define VFOV 48 
+
 namespace pandora_vision
 {
 class LandoltC3dDetection : public StateClient {
@@ -91,6 +97,18 @@ private:
   
   //!<Frame Width
   int frameWidth;
+  
+  //!<RatioX
+  float ratioX;
+  
+  //!<RatioY
+  float ratioY;
+
+  //!< Horizontal Field Of View (rad)
+  double hfov;
+
+  //!< Vertical Field Of View (rad)
+  double vfov;
   
   //!<Camera Name
   std::string cameraName;
