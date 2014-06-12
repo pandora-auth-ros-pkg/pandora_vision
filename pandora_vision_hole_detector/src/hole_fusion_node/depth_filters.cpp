@@ -437,7 +437,8 @@ namespace pandora_vision
 
     for(unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
     {
-      float mean = 0;
+      // The mean distance of this hole's bounding box vertices
+      float mean = 0.0;
 
       for(unsigned int j = 0 ; j < 4; j++)
       {
@@ -449,19 +450,27 @@ namespace pandora_vision
 
       mean /= inflatedRectanglesVector[i].size();
 
+      // The difference between the distance of this hole's keypoint and
+      // the mean distance of the vertices of its bounding box
       float value = depthImage.at<float>(
         conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.y,
         conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.x) - mean;
 
-      // The gaussian mean
-      float m = Parameters::HoleFusion::holes_gaussian_mean;
+      // The keypoint's distance from the depth sensor should be greater than
+      // that of the mean distance of the vertices of the candidate hole's
+      // bounding box
+      if (value > 0)
+      {
+        // The gaussian mean
+        float m = Parameters::HoleFusion::holes_gaussian_mean;
 
-      // The gaussian standard deviation
-      float s = Parameters::HoleFusion::holes_gaussian_stddev;
+        // The gaussian standard deviation
+        float s = Parameters::HoleFusion::holes_gaussian_stddev;
 
-      // The gaussian probability of this hole being valid
-      probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-        exp(-pow((value - m) / s, 2) / 2);
+        // The gaussian probability of this hole being valid
+        probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+          exp(-pow((value - m) / s, 2) / 2);
+      }
 
       msgs->push_back(TOSTR(
           probabilitiesVector->at(inflatedRectanglesIndices[i])));
