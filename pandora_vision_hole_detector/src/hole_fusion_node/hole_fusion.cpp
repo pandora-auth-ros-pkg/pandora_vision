@@ -377,7 +377,7 @@ namespace pandora_vision
    **/
   void HoleFusion::completeTransition(void)
   {
-    ROS_INFO_NAMED("hole_detector", "[Hole Detector] : Transision Complete");
+    ROS_INFO_NAMED("hole_detector", "[Hole Detector] : Transition Complete");
   }
 
 

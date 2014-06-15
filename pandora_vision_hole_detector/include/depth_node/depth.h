@@ -86,10 +86,10 @@ namespace pandora_vision
       /**
         @brief Callback for the depth image received by the synchronizer node.
 
-        The depth image received by the synchronizer node is unpacked in a
-        cv::Mat image and stripped of its noise. Holes are then located inside
-        this image and information about them, along with the denoised image,
-        is then sent to the hole fusion node
+        The depth image message received by the synchronizer node is unpacked
+        in a cv::Mat image and stripped of its noise.
+        Holes are then located inside this image and information about them,
+        along with the denoised image, is then sent to the hole fusion node
         @param msg [const sensor_msgs::Image&] The depth image message
         @return void
        **/
@@ -106,7 +106,7 @@ namespace pandora_vision
       /**
         @brief The function called when a parameter is changed
         @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
-        @param[in] level [const uint32_t] The level (?)
+        @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallback(

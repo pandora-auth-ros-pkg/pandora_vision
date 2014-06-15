@@ -104,6 +104,12 @@ namespace pandora_vision
   float Parameters::Edge::contrast_enhance_alpha = 2;
   float Parameters::Edge::contrast_enhance_beta = 2;
 
+  // The opencv edge detection method:
+  // 0 for the Canny edge detector
+  // 1 for the Scharr edge detector
+  // 2 for the Sobel edge detector
+  // 3 for the Laplacian edge detector
+  // 4 for mixed Scharr / Sobel edge detection
   int Parameters::Edge::edge_detection_method = 2;
 
   // Threshold parameters
