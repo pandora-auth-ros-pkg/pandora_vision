@@ -45,10 +45,8 @@ namespace pandora_vision
   RgbDepthSynchronizer::RgbDepthSynchronizer(void)
     : invocationTime_(0.0), meanProcessingTime_(0.0), ticks_(0)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("RgbDepthSynchronizer");
-    #endif
-
+    // The synchronizer node starts off in life locked, waiting for the
+    // hole fusion node to unlock him
     isLocked_ = true;
 
     // Acquire the names of topics which the synchronizer node will be having
@@ -95,10 +93,6 @@ namespace pandora_vision
       <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1000);
 
     ROS_INFO_NAMED("hole_detector", "[Synchronizer node] Initiated");
-
-    #ifdef DEBUG_TIME
-    Timer::tick("RgbDepthSynchronizer");
-    #endif
   }
 
 
@@ -155,22 +149,6 @@ namespace pandora_vision
       {
         ROS_ERROR_NAMED("hole_detector",
           "[Synchronizer Node] Input dimension width failed to be read");
-      }
-    }
-
-    // Read "point_step" from the nodehandle
-    if (nodeHandle_.hasParam(ns + "/synchronizer_node/point_step"))
-    {
-      if (nodeHandle_.getParam(ns + "/synchronizer_node/point_step",
-          Parameters::Image::POINT_STEP))
-      {
-        ROS_INFO_NAMED("hole_detector",
-          "[Synchronizer Node] Input dimension point_step read");
-      }
-      else
-      {
-        ROS_ERROR_NAMED("hole_detector",
-          "[Synchronizer Node] Input dimension point_step failed to be read");
       }
     }
   }

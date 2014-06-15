@@ -213,7 +213,6 @@ namespace pandora_vision
   // synchronizer node
   int Parameters::Image::HEIGHT = 480;
   int Parameters::Image::WIDTH = 640;
-  int Parameters::Image::POINT_STEP = 32;
 
   // Depth and RGB images' representation method.
   // 0 if image used is used as obtained from the image sensor
