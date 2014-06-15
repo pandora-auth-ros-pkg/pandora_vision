@@ -81,10 +81,10 @@ namespace pandora_vision
   /**
     @brief Callback for the depth image received by the synchronizer node.
 
-    The depth image received by the synchronizer node is unpacked in a
-    cv::Mat image and stripped of its noise. Holes are then located inside
-    this image and information about them, along with the denoised image,
-    is then sent to the hole fusion node
+    The depth image message received by the synchronizer node is unpacked
+    in a cv::Mat image and stripped of its noise.
+    Holes are then located inside this image and information about them,
+    along with the denoised image, is then sent to the hole fusion node
     @param msg [const sensor_msgs::Image&] The depth image message
     @return void
    **/
