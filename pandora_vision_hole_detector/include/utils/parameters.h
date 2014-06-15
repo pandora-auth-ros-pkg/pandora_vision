@@ -246,7 +246,6 @@ namespace pandora_vision
       // synchronizer node
       static int HEIGHT;
       static int WIDTH;
-      static int POINT_STEP;
 
       // Depth and RGB images' representation method.
       // 0 if image used is used as obtained from the image sensor
