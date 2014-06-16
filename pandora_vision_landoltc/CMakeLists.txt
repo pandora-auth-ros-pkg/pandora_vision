@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
     vision_communications
     state_manager
     state_manager_communications
-    vision_communications
     cv_bridge
     image_transport
     sensor_msgs
@@ -30,7 +29,6 @@ catkin_package(
       vision_communications
       state_manager
       state_manager_communications
-      vision_communications
       cv_bridge
       image_transport
       sensor_msgs
@@ -105,3 +103,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
+##################################### Testing ##################################
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
