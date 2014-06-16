@@ -248,7 +248,7 @@ namespace pandora_vision
 
   // Loose ends connection parameters
   int Parameters::Outline::AB_to_MO_ratio = 4;
-  int Parameters::Outline::minimum_curve_points = 100;
+  int Parameters::Outline::minimum_curve_points = 50;
 
 
   // Parameters specific to the RGB node

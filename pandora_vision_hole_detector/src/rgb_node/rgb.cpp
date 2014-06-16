@@ -365,6 +365,7 @@ namespace pandora_vision
 
 
     //------------------- Loose ends connection parameters ---------------------
+
     Parameters::Outline::AB_to_MO_ratio = config.AB_to_MO_ratio;
 
     // In wavelet mode, the image shrinks by a factor of 4
