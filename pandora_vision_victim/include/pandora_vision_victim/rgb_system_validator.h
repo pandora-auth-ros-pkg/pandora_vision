@@ -58,7 +58,13 @@ namespace pandora_vision
     ///Instance of class  HaralickFeatureExtractor 
     ///to detect haralick features for the given frame
     HaralickFeaturesExtractor _haralickFeatureDetector;
-     
+    
+    /// Svm classifier used for rgb subsystem
+    CvSVM _rgbSvm;
+    
+    /// Set up SVM's parameters
+    CvSVMParams params;
+      
     public:
     
     ///Constructor
