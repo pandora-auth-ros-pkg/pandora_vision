@@ -64,10 +64,7 @@ namespace pandora_vision
     /// Flag that indicates current state, according to the information
     /// received from hole_detector_node
     int _stateIndicator;
-    
-    std::string _rgb_classifier_path;
-    std::string _depth_classifier_path;
-    
+        
     public:
     //!< The Constructor
     explicit VictimDetector(std::string cascade_path, 

@@ -42,11 +42,13 @@ namespace pandora_vision
   /**
    @brief Constructor
   */ 
-  RgbSystemValidator::RgbSystemValidator()
+  RgbSystemValidator::RgbSystemValidator(std::string rgb_classifier_path)
   {
-    params.svm_type    = CvSVM::C_SVC;
-    params.kernel_type = CvSVM::LINEAR;
-    params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
+    _rgb_classifier_path = rgb_classifier_path;
+        
+    _params.svm_type    = CvSVM::C_SVC;
+    _params.kernel_type = CvSVM::LINEAR;
+    _params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
 
     ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
   }

@@ -63,12 +63,14 @@ namespace pandora_vision
     CvSVM _rgbSvm;
     
     /// Set up SVM's parameters
-    CvSVMParams params;
-      
+    CvSVMParams _params;
+    
+    std::string _rgb_classifier_path;
+          
     public:
     
     ///Constructor
-    RgbSystemValidator();
+    explicit RgbSystemValidator( std::string rgb_classifier_path);
     
     ///Destructor
     ~RgbSystemValidator();

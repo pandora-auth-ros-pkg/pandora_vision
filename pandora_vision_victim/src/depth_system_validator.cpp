@@ -42,8 +42,9 @@ namespace pandora_vision
   /**
    @brief Constructor
   */ 
-  DepthSystemValidator::DepthSystemValidator()
+  DepthSystemValidator::DepthSystemValidator(std::string depth_classifier_path)
   {
+    _depth_classifier_path = depth_classifier_path;
     ROS_DEBUG("[victim_node] : DepthSystemValidator instance created");
   }
   
