@@ -58,11 +58,13 @@ namespace pandora_vision
     ///Instance of class  HaralickFeatureExtractor 
     ///to detect haralick features for the given frame
     HaralickFeaturesExtractor _haralickFeatureDetector;
-     
+    
+    std::string _depth_classifier_path;
+         
     public:
     
     ///Constructor
-    DepthSystemValidator();
+    explicit DepthSystemValidator(std::string depth_classifier_path);
     
     ///Destructor
     ~DepthSystemValidator();

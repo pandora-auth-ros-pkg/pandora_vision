@@ -44,13 +44,12 @@ namespace pandora_vision
   */ 
   VictimDetector::VictimDetector(std::string cascade_path, 
     std::string model_path, int bufferSize, std::string rgb_classifier_path,
-        std::string depth_classifier_path)
+    std::string depth_classifier_path):_rgbSystemValidator(rgb_classifier_path),
+    _depthSystemValidator(depth_classifier_path) 
   {
     /// Initialize face detector
     _faceDetector = new FaceDetector(cascade_path, model_path, bufferSize);
     
-    _rgb_classifier_path = rgb_classifier_path;
-    _depth_classifier_path = depth_classifier_path;
     ROS_DEBUG("[victim_node] : VictimDetector instance created");
   }
   
