@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_victim)
+
+#~ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Debug)
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs

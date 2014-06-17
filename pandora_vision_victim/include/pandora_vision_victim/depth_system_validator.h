@@ -60,6 +60,12 @@ namespace pandora_vision
     HaralickFeaturesExtractor _haralickFeatureDetector;
     
     std::string _depth_classifier_path;
+    
+     /// Svm classifier used for rgb subsystem
+    CvSVM _depthSvm;
+    
+    /// Set up SVM's parameters
+    CvSVMParams _params;
          
     public:
     
