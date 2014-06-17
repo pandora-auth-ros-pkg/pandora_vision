@@ -49,7 +49,9 @@ namespace pandora_vision
     _params.svm_type    = CvSVM::C_SVC;
     _params.kernel_type = CvSVM::LINEAR;
     _params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
-
+    
+    ///Load classifier path for rgb subsystem
+    _rgbSvm.load(rgb_classifier_path.c_str());
     ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
   }
   
@@ -84,6 +86,7 @@ namespace pandora_vision
       _rgbFeatureVector.clear();
     
     setRgbFeatureVector();
+    predict();
   }
   
   /**
@@ -132,5 +135,44 @@ namespace pandora_vision
   std::vector<double> RgbSystemValidator::getRgbFeatureVector()
   {
     return _rgbFeatureVector;
+  }
+  /**
+    * @brief Function that loads the trained classifier and makes a prediction
+    * according to the featurevector given for each image
+    * @return void
+  */ 
+  void RgbSystemValidator::predict()
+  {
+    cv::Mat samples_mat = vectorToMat(_rgbFeatureVector);
+        
+    prediction = _rgbSvm.predict(samples_mat, true);
+    ROS_INFO_STREAM("Rgb_subsystem prediction: "<< prediction);
+  }
+  
+  /**
+   * @brief Function that converts a given vector of doubles
+   * in cv:Mat in order to use it to opencv function predict()
+   * @param [std::vector <double>] data, input vector to be 
+   * converted
+   * @return [cv::Mat] output Mat of size size_of_vectorx1
+  */ 
+  cv::Mat RgbSystemValidator::vectorToMat(std::vector<double> data)
+  {
+    int size = data.size();
+    cv::Mat mat(size, 1, CV_32F);
+    for(int i = 0; i < size; ++i)
+    {
+        mat.at<float>(i, 0) = data[i];
+    }
+    return mat;
+  }
+  
+  /**
+    * @brief This function prediction according to the rgb classifier
+    * @return [float] prediction
+  */ 
+  float RgbSystemValidator::getPrediction()
+  {
+    return prediction;
   }
 }// namespace pandora_vision 

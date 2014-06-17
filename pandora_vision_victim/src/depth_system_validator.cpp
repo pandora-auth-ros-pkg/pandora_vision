@@ -45,6 +45,13 @@ namespace pandora_vision
   DepthSystemValidator::DepthSystemValidator(std::string depth_classifier_path)
   {
     _depth_classifier_path = depth_classifier_path;
+    
+    ///Load classifier path for rgb subsystem
+    _depthSvm.load(depth_classifier_path.c_str());
+    
+    _params.svm_type    = CvSVM::C_SVC;
+    _params.kernel_type = CvSVM::LINEAR;
+    _params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
     ROS_DEBUG("[victim_node] : DepthSystemValidator instance created");
   }
   

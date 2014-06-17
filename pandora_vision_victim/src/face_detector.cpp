@@ -101,7 +101,6 @@ namespace pandora_vision
   */
   int FaceDetector::findFaces(cv::Mat frame)
   {
-
     cv::Mat tmp;
     tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
