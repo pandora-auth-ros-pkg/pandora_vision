@@ -144,7 +144,9 @@ namespace pandora_vision
   void RgbSystemValidator::predict()
   {
     cv::Mat samples_mat = vectorToMat(_rgbFeatureVector);
-        
+    
+    ///Normalize the data from [-1,1]
+    cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);    
     prediction = _rgbSvm.predict(samples_mat, true);
     ROS_INFO_STREAM("Rgb_subsystem prediction: "<< prediction);
   }
@@ -165,6 +167,8 @@ namespace pandora_vision
         mat.at<float>(i, 0) = data[i];
     }
     return mat;
+    
+    
   }
   
   /**
