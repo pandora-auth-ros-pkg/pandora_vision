@@ -46,9 +46,9 @@ namespace pandora_vision
   {
     _rgb_classifier_path = rgb_classifier_path;
         
-    _params.svm_type    = CvSVM::C_SVC;
+    _params.svm_type = CvSVM::ONE_CLASS;
     _params.kernel_type = CvSVM::LINEAR;
-    _params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
+    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
     
     ///Load classifier path for rgb subsystem
     _rgbSvm.load(rgb_classifier_path.c_str());
@@ -136,6 +136,7 @@ namespace pandora_vision
   {
     return _rgbFeatureVector;
   }
+  
   /**
     * @brief Function that loads the trained classifier and makes a prediction
     * according to the featurevector given for each image

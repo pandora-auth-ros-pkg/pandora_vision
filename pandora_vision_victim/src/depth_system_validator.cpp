@@ -132,4 +132,46 @@ namespace pandora_vision
   {
     return _depthFeatureVector;
   }
+  
+    /**
+    * @brief Function that loads the trained classifier and makes a prediction
+    * according to the featurevector given for each image
+    * @return void
+  */ 
+  void DepthSystemValidator::predict()
+  {
+    cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
+    
+    ///Normalize the data from [-1,1]
+    cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);    
+    prediction = _depthSvm.predict(samples_mat, true);
+    ROS_INFO_STREAM("Depth_subsystem prediction: "<< prediction);
+  }
+  
+  /**
+   * @brief Function that converts a given vector of doubles
+   * in cv:Mat in order to use it to opencv function predict()
+   * @param [std::vector <double>] data, input vector to be 
+   * converted
+   * @return [cv::Mat] output Mat of size size_of_vectorx1
+  */ 
+  cv::Mat DepthSystemValidator::vectorToMat(std::vector<double> data)
+  {
+    int size = data.size();
+    cv::Mat mat(size, 1, CV_32F);
+    for(int i = 0; i < size; ++i)
+    {
+        mat.at<float>(i, 0) = data[i];
+    }
+    return mat;
+  }
+  
+  /**
+    * @brief This function prediction according to the rgb classifier
+    * @return [float] prediction
+  */ 
+  float DepthSystemValidator::getPrediction()
+  {
+    return prediction;
+  }
 }// namespace pandora_vision 

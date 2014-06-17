@@ -98,6 +98,30 @@ namespace pandora_vision
      */ 
     std::vector<double> getDepthFeatureVector();
     
+    /**
+     * @brief Function that loads the trained classifier and makes a prediction
+     * according to the featurevector given for each image
+     * @return void
+    */ 
+    void predict();
+    
+    /**
+     * @brief Function that converts a given vector of doubles
+     * in cv:Mat in order to use it to opencv function predict()
+     * @param [std::vector <double>] data, input vector to be 
+     * converted
+     * @return [cv::Mat] output Mat of size size_of_vectorx1
+    */ 
+    cv::Mat vectorToMat(std::vector<double> data);
+    
+    /**
+     * @brief This function prediction according to the rgb classifier
+     * @return [float] prediction
+     */ 
+    float getPrediction();
+    
+    float prediction; 
+    
   };
 }// namespace pandora_vision 
 #endif  // PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H
