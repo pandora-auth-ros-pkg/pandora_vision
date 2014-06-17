@@ -48,7 +48,7 @@ namespace pandora_vision
     getGeneralParams();
     
     /// Get parameters referring to faceDetector instance
-    getFaceDetectorParameters();
+    getVictimDetectorParameters();
 
     /// Convert field of view from degrees to rads
     hfov = hfov * CV_PI / 180;
@@ -68,7 +68,8 @@ namespace pandora_vision
               //~ _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
-    _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize);
+    _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize,
+      rgb_classifier_path, depth_classifier_path);
     
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
@@ -166,7 +167,7 @@ namespace pandora_vision
     @brief Get parameters referring to the face detection algorithm
     @return void
   **/
-  void VictimDetection::getFaceDetectorParameters()
+  void VictimDetection::getVictimDetectorParameters()
   {
     //!< Get the path of haar_cascade xml file if available;
     if ( _nh.getParam("cascade_path", cascade_path)){
@@ -194,6 +195,30 @@ namespace pandora_vision
     else{
       model_path = packagePath + "/data/model.xml";
       ROS_INFO_STREAM("[victim_node]: model_path : " <<  model_path);
+    }
+    
+    //!< Get the path of rgb classifier
+    if (_nh.getParam("rgb_classifier_path",  rgb_classifier_path)){
+      rgb_classifier_path = packagePath + rgb_classifier_path;
+      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
+            <<  rgb_classifier_path);
+    }
+    else{
+      rgb_classifier_path = packagePath + "/data/rgb_svm_classifier.xml";
+      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
+            <<  rgb_classifier_path);
+    }
+    
+    //!< Get the path of depth classifier
+    if (_nh.getParam("depth_classifier_path",  depth_classifier_path)){
+      depth_classifier_path = packagePath + depth_classifier_path;
+      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
+            <<  depth_classifier_path);
+    }
+    else{
+      depth_classifier_path = packagePath + "/data/depth_svm_classifier.xml";
+      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
+            <<  depth_classifier_path);
     }
     
     /// Parameter that changes respectivly if we have depth information

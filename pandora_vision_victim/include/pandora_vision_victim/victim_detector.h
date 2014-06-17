@@ -65,10 +65,14 @@ namespace pandora_vision
     /// received from hole_detector_node
     int _stateIndicator;
     
+    std::string _rgb_classifier_path;
+    std::string _depth_classifier_path;
+    
     public:
     //!< The Constructor
     explicit VictimDetector(std::string cascade_path, 
-        std::string model_path, int bufferSize);
+        std::string model_path, int bufferSize, std::string rgb_classifier_path,
+        std::string depth_classifier_path);
 
     //!< The Destructor
     virtual ~VictimDetector();
