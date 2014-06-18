@@ -651,8 +651,6 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
-  clear();
-  
   bilateralFilter(gray, dst, 2, 4, 1);
     
   gray = dst.clone();
