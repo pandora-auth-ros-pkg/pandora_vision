@@ -47,7 +47,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(true) 
+LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(false) 
 {
   getGeneralParams();
   
