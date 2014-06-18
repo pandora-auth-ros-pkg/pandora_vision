@@ -300,11 +300,40 @@ void LandoltC3dDetection::landoltc3dCallback()
     
   _landoltc3dDetector.begin(&landoltCFrame);
   
+  std::vector<LandoltC3D> _landoltc3d = _landoltc3dDetector.getDetectedLandolt();
+  //~ ROS_INFO("Size is %d", _landoltc3d.size());
+  
   //!< Create message of Landoltc Detector
-  vision_communications::LandoltcAlertsVectorMsg Landoltc3dVectorMsg;
-  vision_communications::LandoltcAlertMsg Landoltc3dcodeMsg;
-  Landoltc3dVectorMsg.header.frame_id = cameraFrameId;
-  Landoltc3dVectorMsg.header.stamp = ros::Time::now();
+  vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
+  vision_communications::LandoltcAlertMsg landoltc3dcodeMsg;
+  
+  bool noAngle = true;
+
+  landoltc3dVectorMsg.header.frame_id = cameraFrameId;
+  landoltc3dVectorMsg.header.stamp = ros::Time::now();
+  
+  for(int i = 0; i < _landoltc3d.size(); i++){
+     
+    landoltc3dcodeMsg.yaw = 
+      ratioX * (_landoltc3d.at(i).center.x  - static_cast<double>(frameWidth/2));
+    landoltc3dcodeMsg.pitch = 
+      -ratioY * (_landoltc3d.at(i).center.y  - static_cast<double>(frameHeight/2));
+    landoltc3dcodeMsg.posterior = _landoltc3d[i].probability;
+    
+    for(int j = 0; j < _landoltc3d[i].angles.size(); j++)
+      landoltc3dcodeMsg.angles.push_back( _landoltc3d[i].angles.at(j));
+    
+    if (_landoltc3d[i].angles.size() > 0)
+      landoltc3dVectorMsg.landoltcAlerts.push_back(landoltc3dcodeMsg);
+    else
+        noAngle = false;
+  }
+  
+  if(noAngle == true && _landoltc3d.size() > 0)
+    _landoltc3dPublisher.publish(landoltc3dVectorMsg);
+   
+  
+  _landoltc3dDetector.clear();
 }
 
 /**

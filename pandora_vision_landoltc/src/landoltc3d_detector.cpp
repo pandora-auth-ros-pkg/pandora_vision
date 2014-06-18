@@ -651,6 +651,8 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   _coloredContours = cv::Mat::zeros(input->rows, input->cols, input->type());
   thresholded = cv::Mat::zeros(input->rows, input->cols, CV_8UC1);
   
+  clear();
+  
   bilateralFilter(gray, dst, 2, 4, 1);
     
   gray = dst.clone();
@@ -706,8 +708,6 @@ void LandoltC3dDetector::begin(cv::Mat* input)
   
   fusion();
 
-  clear();
-
 }
 
 /**
@@ -756,8 +756,7 @@ void LandoltC3dDetector::fusion()
       {
         
         _landoltc3d.at(i).probability = confidence;
-        ROS_INFO("Probability is %f", confidence);
-        //more to be added
+        //ROS_INFO("Probability is %f", confidence);
       }
     }
   
@@ -800,6 +799,17 @@ void LandoltC3dDetector::clear()
   _rectangles.clear();
   _fillColors.clear();
   _landoltc3d.clear();
+}
+
+/**
+  @brief Returns detected landoltc3d, for publishing them later
+  @param void
+  @return [std::vector<LandoltC3D>] Vector of detected Landolts
+**/
+
+std::vector<LandoltC3D> LandoltC3dDetector::getDetectedLandolt()
+{
+  return _landoltc3d;
 }
 
 

@@ -234,6 +234,13 @@ class LandoltC3dDetector
   @return void
   **/
   void setPredatorOn(bool flag);
+  
+  /**
+  @brief Returns detected landoltc3d, for publishing them later
+  @param void
+  @return [std::vector<LandoltC3D>] Vector of detected Landolts
+  **/
+  std::vector<LandoltC3D> getDetectedLandolt();
     
 };
 } // namespace pandora_vision
