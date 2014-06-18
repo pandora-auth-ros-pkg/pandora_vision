@@ -35,6 +35,10 @@ catkin_add_gtest(holes_conveyor_test
   unit/utils/holes_conveyor_test.cpp)
 target_link_libraries(holes_conveyor_test ${catkin_LIBRARIES} utils_lib gtest_main)
 
+catkin_add_gtest(message_conversions_test
+  unit/utils/message_conversions_test.cpp)
+target_link_libraries(message_conversions_test ${catkin_LIBRARIES} utils_lib gtest_main)
+
 catkin_add_gtest(morphological_operators_test
   unit/utils/morphological_operators_test.cpp)
 target_link_libraries(morphological_operators_test ${catkin_LIBRARIES} utils_lib gtest_main)
@@ -42,6 +46,14 @@ target_link_libraries(morphological_operators_test ${catkin_LIBRARIES} utils_lib
 catkin_add_gtest(noise_elimination_test
   unit/utils/noise_elimination_test.cpp)
 target_link_libraries(noise_elimination_test ${catkin_LIBRARIES} utils_lib gtest_main)
+
+catkin_add_gtest(visualization_test
+  unit/utils/visualization_test.cpp)
+target_link_libraries(visualization_test ${catkin_LIBRARIES} utils_lib gtest_main)
+
+catkin_add_gtest(wavelets_test
+  unit/utils/wavelets_test.cpp)
+target_link_libraries(wavelets_test ${catkin_LIBRARIES} utils_lib gtest_main)
 
 
 ################################ depth node ####################################
@@ -51,7 +63,7 @@ catkin_add_gtest(depth_hole_detector_test
 add_library(depth_node_lib
   ../src/depth_node/hole_detector.cpp)
 
-target_link_libraries(depth_hole_detector_test ${catkin_LIBRARIES} utils_lib depth_node_lib gtest_main)
+target_link_libraries(depth_hole_detector_test ${catkin_LIBRARIES} depth_node_lib utils_lib gtest_main)
 
 
 ################################# rgb node #####################################
@@ -61,7 +73,7 @@ catkin_add_gtest(rgb_hole_detector_test
 add_library(rgb_node_lib
   ../src/rgb_node/hole_detector.cpp)
 
-target_link_libraries(rgb_hole_detector_test ${catkin_LIBRARIES} utils_lib rgb_node_lib gtest_main)
+target_link_libraries(rgb_hole_detector_test ${catkin_LIBRARIES} rgb_node_lib utils_lib gtest_main)
 
 ############################# hole fusion node #################################
 
@@ -100,7 +112,7 @@ catkin_add_gtest(filters_resources_test
 add_library(filters_resources_lib
   ../src/hole_fusion_node/filters_resources.cpp)
 
-target_link_libraries(filters_resources_test ${catkin_LIBRARIES} utils_lib filters_resources_lib gtest_main)
+target_link_libraries(filters_resources_test ${catkin_LIBRARIES} filters_resources_lib utils_lib gtest_main)
 
 ###### planes_detection_test.cpp ######
 catkin_add_gtest(planes_detection_test
@@ -119,16 +131,14 @@ add_library(rgb_filters_lib
   ../src/hole_fusion_node/filters_resources.cpp
   ../src/hole_fusion_node/rgb_filters.cpp)
 
-target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} utils_lib rgb_filters_lib gtest_main)
+target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} rgb_filters_lib utils_lib gtest_main)
 
 
 ############## Functional Tests ###############
 
-#if(TARGET tests)
-#  add_executable(hole_detector_test EXCLUDE_FROM_ALL functional/hole_detector_test.cpp)
-#  target_link_libraries(hole_detector_test ${catkin_LIBRARIES} ${GTEST_LIBRARIES} vision_communications_gencpp)
-#endif()
-#add_rostest_gtest(hole_detector_test functional/hole_detector_test.launch functional/hole_detector_test.cpp)
-#target_link_libraries(hole_detector_test ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
-#add_dependencies(hole_detector_test vision_communications_gencpp node_tests node_tests_msgs_gencpp)
-#add_rostest(functional/hole_detector_test.launch)
+#catkin_download_test_data(
+#    hole_detector_test.bag
+#    https://pandora.ee.auth.gr/rosbags/2014_bags/hole_detector_test.bag
+#    DESTINATION functional
+#    )
+add_rostest(functional/hole_detector_test.launch)

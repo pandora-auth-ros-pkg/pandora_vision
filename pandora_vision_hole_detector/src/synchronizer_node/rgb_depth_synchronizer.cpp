@@ -37,6 +37,10 @@
 
 #include "synchronizer_node/rgb_depth_synchronizer.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -45,10 +49,8 @@ namespace pandora_vision
   RgbDepthSynchronizer::RgbDepthSynchronizer(void)
     : invocationTime_(0.0), meanProcessingTime_(0.0), ticks_(0)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("RgbDepthSynchronizer");
-    #endif
-
+    // The synchronizer node starts off in life locked, waiting for the
+    // hole fusion node to unlock him
     isLocked_ = true;
 
     // Acquire the names of topics which the synchronizer node will be having
@@ -60,13 +62,22 @@ namespace pandora_vision
     // The parameters concerned are needed only if in simulation mode
     getSimulationDimensions();
 
-    // Subscribe to the RGB point cloud topic
-    inputPointCloudSubscriber_ = nodeHandle_.subscribe(inputPointCloudTopic_, 1,
-      &RgbDepthSynchronizer::synchronizedCallback, this);
-
     // Subscribe to the hole_fusion lock/unlock topic
     unlockSubscriber_ = nodeHandle_.subscribe(unlockTopic_, 1,
-      &RgbDepthSynchronizer::holeFusionCallback, this);
+      &RgbDepthSynchronizer::unlockCallback, this);
+
+    // Subscribe to the topic where the Hole Fusion node requests from the
+    // synchronizer node to subscribe to the input point cloud topic
+    subscribeToInputPointCloudSubscriber_ = nodeHandle_.subscribe(
+      subscribeToInputPointCloudTopic_, 1,
+      &RgbDepthSynchronizer::subscribeToInputPointCloudCallback, this);
+
+    // Subscribe to the topic where the Hole Fusion node requests from the
+    // synchronizer node to leave its subscription to the
+    // input point cloud topic
+    leaveSubscriptionToInputPointCloudSubscriber_ = nodeHandle_.subscribe(
+      leaveSubscriptionToInputPointCloudTopic_, 1,
+      &RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback, this);
 
 
     // Advertise the synchronized point cloud
@@ -82,10 +93,6 @@ namespace pandora_vision
       <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1000);
 
     ROS_INFO_NAMED("hole_detector", "[Synchronizer node] Initiated");
-
-    #ifdef DEBUG_TIME
-    Timer::tick("RgbDepthSynchronizer");
-    #endif
   }
 
 
@@ -144,22 +151,6 @@ namespace pandora_vision
           "[Synchronizer Node] Input dimension width failed to be read");
       }
     }
-
-    // Read "point_step" from the nodehandle
-    if (nodeHandle_.hasParam(ns + "/synchronizer_node/point_step"))
-    {
-      if (nodeHandle_.getParam(ns + "/synchronizer_node/point_step",
-          Parameters::Image::POINT_STEP))
-      {
-        ROS_INFO_NAMED("hole_detector",
-          "[Synchronizer Node] Input dimension point_step read");
-      }
-      else
-      {
-        ROS_ERROR_NAMED("hole_detector",
-          "[Synchronizer Node] Input dimension point_step failed to be read");
-      }
-    }
   }
 
 
@@ -206,6 +197,46 @@ namespace pandora_vision
     {
       ROS_ERROR_NAMED("hole_detector",
         "[Synchronizer Node] Could not find topic unlock_topic");
+    }
+
+    // Read the name of the topic that the Hole Fusion node uses to request from
+    // the synchronizer node to subscribe to the input point cloud
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/subscribed_topics/subscribe_to_input",
+        subscribeToInputPointCloudTopic_))
+    {
+      // Make the topic's name absolute
+      subscribeToInputPointCloudTopic_ =
+        ns + "/" + subscribeToInputPointCloudTopic_;
+
+      ROS_INFO_NAMED("hole_detector",
+        "[Synchronizer Node] Subscribed to the Hole Fusion input cloud"
+        "subscription request topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED("hole_detector",
+        "[Synchronizer Node] Could not find topic ");
+    }
+
+    // Read the name of the topic that the Hole Fusion node uses to request from
+    // the synchronizer node to leave its subscription to the input point cloud
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/subscribed_topics/leave_subscription_to_input",
+        leaveSubscriptionToInputPointCloudTopic_))
+    {
+      // Make the topic's name absolute
+      leaveSubscriptionToInputPointCloudTopic_ =
+        ns + "/" + leaveSubscriptionToInputPointCloudTopic_;
+
+      ROS_INFO_NAMED("hole_detector",
+        "[Synchronizer Node] Subscribed to the Hole Fusion input cloud"
+        "subscription leave request topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED("hole_detector",
+        "[Synchronizer Node] Could not find topic ");
     }
 
     // Read the name of the topic that the synchronizer node will be publishing
@@ -266,13 +297,19 @@ namespace pandora_vision
 
 
   /**
-    @brief The synchronized callback for the point cloud and rgb image
+    @brief The synchronized callback for the point cloud
     obtained by the depth sensor.
+
+    If the synchronizer node is unlocked, it extracts a depth image from
+    the input point cloud's depth measurements, a RGB image from the colour
+    measurements of the input point cloud and then publishes these images
+    to their respective recipients. Finally, the input point cloud is
+    published directly to the hole fusion node.
     @param[in] pointCloudMessage [const PointCloudPtr&]
     The input point cloud
     @return void
    **/
-  void RgbDepthSynchronizer::synchronizedCallback(
+  void RgbDepthSynchronizer::inputPointCloudCallback(
     const PointCloudPtr& pointCloudMessage)
   {
     if (!isLocked_)
@@ -373,22 +410,67 @@ namespace pandora_vision
 
 
   /**
-    @brief The callback for the hole_fusion node request for the
-    lock/unlock of the rgb_depth_synchronizer node
-    @param[in] lockMsg [const std_msgs::Empty] An empty message
+    @brief The callback executed when the Hole Fusion node requests
+    from the synchronizer node to leave its subscription to the
+    input point cloud topic.
+    This happens when the state of the hole detector package is set
+    to "off" so as to minimize processing resources.
+    @param[in] msg [const std_msgs::Empty&] An empty message used to
+    trigger the callback
     @return void
    **/
-  void RgbDepthSynchronizer::holeFusionCallback(const std_msgs::Empty& lockMsg)
+  void RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback(
+    const std_msgs::Empty& msg)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("holeFusionCallback");
-    #endif
+    // Shutdown the input point cloud subscriber
+    inputPointCloudSubscriber_.shutdown();
+  }
 
+
+
+  /**
+    @brief The callback executed when the Hole Fusion node requests
+    from the synchronizer node to subscribe to the input point cloud.
+    This happens when the hole detector is in an "off" state, where the
+    synchronizer node is not subscribed to the input point cloud and
+    transitions to an "on" state, where the synchronizer node needs to be
+    subscribed to the input point cloud topic in order for the hole detector
+    to function.
+    @param[in] msg [const std_msgs::Empty&] An empty message used to
+    trigger the callback
+    @return void
+   **/
+  void RgbDepthSynchronizer::subscribeToInputPointCloudCallback(
+    const std_msgs::Empty& msg)
+  {
+    // Subscribe to the input point cloud topic
+    inputPointCloudSubscriber_ = nodeHandle_.subscribe(inputPointCloudTopic_, 1,
+      &RgbDepthSynchronizer::inputPointCloudCallback, this);
+  }
+
+
+
+  /**
+    @brief The callback for the hole_fusion node request for the
+    lock/unlock of the rgb_depth_synchronizer node.
+
+    The synchronizer node, when subscribed to the input point cloud topic,
+    receives in a second as many callbacks as the number of depth sensor's
+    point cloud publications per second (currently 25). Because its
+    function is to synchronize the input of the depth and rgb nodes,
+    it needs to stay locked for the time that these nodes process their
+    input. When both these nodes have finished processing their input
+    images and the hole fusion node has processed the point cloud sent
+    to him by the synchronizer node, the synchronizer
+    (who has been locked all this time), can now be unlocked and therefore
+    receive a new point cloud.
+    @param[in] lockMsg [const std_msgs::Empty] An empty message used to
+    trigger the callback
+    @return void
+   **/
+  void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
+  {
     isLocked_ = false;
-
-    #ifdef DEBUG_TIME
-    Timer::tick("holeFusionCallback");
-    #endif
   }
 
 } // namespace pandora_vision

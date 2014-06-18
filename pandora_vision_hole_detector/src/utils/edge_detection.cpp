@@ -37,12 +37,16 @@
 
 #include "utils/edge_detection.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-    @brief Applies the Canny edge transform
-    @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-    @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
+    @brief Applies the Canny edge detector
+    @param[in] inImage [const cv::Mat&] Input image in CV_8U depth
+    @param[out] outImage [cv::Mat*] The processed image in CV_8U depth
     @return void
    **/
   void EdgeDetection::applyCanny(const cv::Mat& inImage, cv::Mat* outImage)
@@ -60,26 +64,19 @@ namespace pandora_vision
     #endif
 
     inImage.copyTo(*outImage);
-    cv::Mat detected_edges;
-    cv::Mat dst;
-    int ratio = Parameters::Edge::canny_ratio;
-    int kernel_size = Parameters::Edge::canny_kernel_size;
-    int lowThreshold = Parameters::Edge::canny_low_threshold;
 
-    // Reduce noise with a kernel 3x3
-    cv::blur(*outImage, detected_edges, cv::Size(
+    // Reduce noise with a kernel with size
+    // Parameters::Edge::canny_blur_noise_kernel_size ^ 2
+    cv::blur(*outImage, *outImage,
+      cv::Size(
         Parameters::Edge::canny_blur_noise_kernel_size,
         Parameters::Edge::canny_blur_noise_kernel_size));
 
     // Canny detector
-    cv::Canny(detected_edges, detected_edges, lowThreshold,
-      lowThreshold * ratio, kernel_size);
-
-    // Using Canny's output as a mask, we display our result
-    dst = cv::Scalar::all(0);
-
-    outImage->copyTo(dst, detected_edges);
-    *outImage = dst; //??????????????
+    cv::Canny(*outImage, *outImage,
+      Parameters::Edge::canny_low_threshold,
+      Parameters::Edge::canny_low_threshold * Parameters::Edge::canny_ratio,
+      Parameters::Edge::canny_kernel_size);
 
     #ifdef DEBUG_TIME
     Timer::tick("applyCanny");
@@ -110,7 +107,10 @@ namespace pandora_vision
 
     // appropriate values for scale, delta and ddepth
     int scale = 1;
-    int delta = 0; // the value for the non-edges
+
+    // the value for the non-edges
+    int delta = 0;
+
     int ddepth = CV_16S;
 
     cv::Mat edges;
@@ -163,7 +163,10 @@ namespace pandora_vision
 
     // appropriate values for scale, delta and ddepth
     int scale = 1;
-    int delta = 0; // the value for the non-edges
+
+    // the value for the non-edges
+    int delta = 0;
+
     int ddepth = CV_16S;
 
     cv::Mat edges;
@@ -216,7 +219,10 @@ namespace pandora_vision
 
     // appropriate values for scale, delta and ddepth
     int scale = 1;
-    int delta = 0; // the value for the non-edges
+
+    // the value for the non-edges
+    int delta = 0;
+
     int ddepth = CV_16S;
 
     cv::Mat edges;
@@ -233,8 +239,9 @@ namespace pandora_vision
 
 
   /**
-    @brief Applies contamination to the edges image. It keeps only the edges
-    that are not iteratively neighbors to the image's limits
+    @brief Applies contamination to an image of edges.
+    It keeps only the edges that are not iteratively neighbors
+    to the image's limits
     @param[in,out] inImage [cv::Mat*] Input image in CV_8UC1 format
     @return void
    **/
@@ -248,19 +255,22 @@ namespace pandora_vision
     int cols = inImage->cols;
     std::set<unsigned int> current, next, visited;
 
-    for(unsigned int i = 0 ; i < rows ; i++)  // Border blacken
+    // Make the vertical borders of the image black
+    for(unsigned int i = 0 ; i < rows ; i++)
     {
       inImage->data[i * inImage->cols] = 0;
       inImage->data[i * inImage->cols + cols - 1] = 0;
     }
 
-    for(unsigned int j = 0 ; j < cols ; j++)  // Border blacken
+    // Make the horizontal borders of the image black
+    for(unsigned int j = 0 ; j < cols ; j++)
     {
       inImage->data[j] = 0;
       inImage->data[(rows - 1) * inImage->cols + j] = 0;
     }
 
-    for(unsigned int i = 1 ; i < rows - 1 ; i++)  // Find outer white borders
+    // Vertically, find the outer white borders
+    for(unsigned int i = 1 ; i < rows - 1 ; i++)
     {
       if(inImage->data[i * inImage->cols + 1] > 0)
       {
@@ -274,7 +284,8 @@ namespace pandora_vision
       }
     }
 
-    for(unsigned int j = 1 ; j < cols - 1 ; j++)  // Find outer white borders
+    // Horizontally, find the outer white borders
+    for(unsigned int j = 1 ; j < cols - 1 ; j++)
     {
       if(inImage->data[1 * inImage->cols + j] > 0)
       {
@@ -289,7 +300,10 @@ namespace pandora_vision
       }
     }
 
-    while(current.size() != 0)  // Iterative contamination
+    // Iterative contamination.
+    // Find all the pixels that are iteratively neighboring non-zero value
+    // pixels that lie next to the borders of the image
+    while(current.size() != 0)
     {
       for(std::set<unsigned int>::iterator i = current.begin() ;
         i != current.end() ; i++)
@@ -357,133 +371,13 @@ namespace pandora_vision
 
 
   /**
-    @brief Apply the anisotropic diffusion technique as to facilitate the
-    edge detection of low contrast regions.
-    @param[in] inImage [const cv::Mat &] The input image in CV_32FC1 format
-    @param[out] outImage [cv::Mat*] The output image in CV_32FC1 format
-    @param[in] iterations [const int&] The number of iterations to execute.
-    @param[in] method [const int&] Diffusion equation 0 or 1. see below for more
-    @documentation http://www.csse.uwa.edu.au/~pk/research/matlabfns/
-    @return void
-   **/
-  void EdgeDetection::anisotropicDiffusion (const cv::Mat& inImage,
-    cv::Mat* outImage, const int& iterations, const int& method)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("anisotropicDiffusion");
-    #endif
-
-    int kappa = 1;
-    float lamda = 0.25;
-
-    inImage.copyTo(*outImage);
-
-    cv::Mat deltaNorth = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat deltaSouth = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat deltaEast  = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat deltaWest  = cv::Mat::zeros(outImage->size(), CV_32FC1);
-
-    cv::Mat cN = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat cS = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat cE = cv::Mat::zeros(outImage->size(), CV_32FC1);
-    cv::Mat cW = cv::Mat::zeros(outImage->size(), CV_32FC1);
-
-    for (unsigned int iter = 0; iter < iterations; iter++)
-    {
-      for (unsigned int rows = 1; rows < outImage->rows - 1; rows++)
-      {
-        for (unsigned int cols = 1; cols < outImage->cols - 1; cols ++)
-        {
-          deltaNorth.at<float>(rows, cols) =
-            outImage->at<float>(rows, cols - 1) -
-            outImage->at<float>(rows, cols);
-
-          deltaSouth.at<float>(rows, cols) =
-            outImage->at<float>(rows, cols + 1) -
-            outImage->at<float>(rows, cols);
-
-          deltaEast.at<float>(rows, cols) =
-            outImage->at<float>(rows + 1, cols) -
-            outImage->at<float>(rows, cols);
-
-          deltaWest.at<float>(rows, cols) =
-            outImage->at<float>(rows - 1, cols) -
-            outImage->at<float>(rows, cols);
-        }
-      }
-
-      if (method == 0)
-      {
-        for (unsigned int rows = 0; rows < outImage->rows; rows++)
-        {
-          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
-          {
-            cN.at<float>(rows, cols) =
-              exp(-pow((deltaNorth.at<float>(rows, cols) / kappa), 2));
-            cS.at<float>(rows, cols) =
-              exp(-pow((deltaSouth.at<float>(rows, cols) / kappa), 2));
-            cE.at<float>(rows, cols) =
-              exp(-pow((deltaEast.at<float>(rows, cols) / kappa), 2));
-            cW.at<float>(rows, cols) =
-              exp(-pow((deltaWest.at<float>(rows, cols) / kappa), 2));
-
-          }
-        }
-      }
-      else if (method == 1)
-      {
-        for (unsigned int rows = 0; rows < outImage->rows; rows++)
-        {
-          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
-          {
-            cN.at<float>(rows, cols) =
-              1 / (1 + pow((deltaNorth.at<float>(rows, cols) / kappa), 2));
-            cS.at<float>(rows, cols) =
-              1 / (1 + pow((deltaSouth.at<float>(rows, cols) / kappa), 2));
-            cE.at<float>(rows, cols) =
-              1 / (1 + pow((deltaEast.at<float>(rows, cols) / kappa), 2));
-            cW.at<float>(rows, cols) =
-              1 / (1 + pow((deltaWest.at<float>(rows, cols) / kappa), 2));
-          }
-        }
-      }
-      else if (method == 2)
-      {
-        for (unsigned int rows = 0; rows < outImage->rows; rows++)
-        {
-          for (unsigned int cols = 0; cols < outImage->cols; cols ++)
-          {
-            cN.at<float>(rows, cols) =
-              exp(pow((deltaNorth.at<float>(rows, cols) * kappa), 2));
-            cS.at<float>(rows, cols) =
-              exp(pow((deltaSouth.at<float>(rows, cols) * kappa), 2));
-            cE.at<float>(rows, cols) =
-              exp(pow((deltaEast.at<float>(rows, cols) * kappa), 2));
-            cW.at<float>(rows, cols) =
-              exp(+pow((deltaWest.at<float>(rows, cols) * kappa), 2));
-
-          }
-        }
-      }
-
-      *outImage += lamda * (cN.mul(deltaNorth) + cS.mul(deltaSouth)
-        + cE.mul(deltaEast) + cW.mul(deltaWest));
-    }
-    #ifdef DEBUG_TIME
-    Timer::tick("anisotropicDiffusion");
-    #endif
-  }
-
-
-
-  /**
     @brief Takes as input a depth image containing floats,
     locates the edges in it and tries to clear as much noise as possible
     in the edges image. As noise we identify everything that is not,
     or does not look like, hole-like shapes,
     with the knowledge that these shapes might be open curves, or that
-    holes-like shapes in a edge image are not connected to anything else,
-    ergo they are standalone shapes in it.
+    holes-like shapes in an image of edges are not connected to
+    anything else, ergo they are standalone shapes in it.
     It outputs a binary image that contains areas that we wish to validate
     as holes.
     @param[in] inImage [const cv::Mat&] The depth image extracted from the
@@ -506,56 +400,53 @@ namespace pandora_vision
     Timer::start("computeEdges", "findHoles");
     #endif
 
+    // The input depth image, in CV_8UC1 format
+    cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
+      inImage, Parameters::Image::scale_method);
 
+    // The denoised edges image of the input depth image, in CV_32FC1 format
     cv::Mat denoisedDepthImageEdges;
-    cv::Mat visualizableDenoisedImage;
-    cv::Mat tempImg;
 
-    inImage.copyTo(tempImg);
-
-    // Facilitate the edge detection by converting the 32FC1 image \
-    values to a range of 0-255
-      visualizableDenoisedImage = Visualization::scaleImageForVisualization
-      (tempImg, Parameters::Image::scale_method);
-
-
-    // from now onwards every image is in the range of 0-255
+    // Detect edges in the visualizableDepthImage
+    // From now onwards every image is in the range of 0-255
     if (Parameters::Edge::edge_detection_method == 0)
     {
-      applyCanny(visualizableDenoisedImage, &denoisedDepthImageEdges);
+      applyCanny(visualizableDepthImage, &denoisedDepthImageEdges);
     }
     else if (Parameters::Edge::edge_detection_method == 1)
     {
-      applyScharr(visualizableDenoisedImage, &denoisedDepthImageEdges);
+      applyScharr(visualizableDepthImage, &denoisedDepthImageEdges);
     }
     else if (Parameters::Edge::edge_detection_method == 2)
     {
-      applySobel(visualizableDenoisedImage, &denoisedDepthImageEdges);
+      applySobel(visualizableDepthImage, &denoisedDepthImageEdges);
     }
     else if (Parameters::Edge::edge_detection_method == 3)
     {
-      applyLaplacian(visualizableDenoisedImage, &denoisedDepthImageEdges);
+      applyLaplacian(visualizableDepthImage, &denoisedDepthImageEdges);
     }
     else if (Parameters::Edge::edge_detection_method == 4) // Mixed mode
     {
       if (Parameters::Edge::mixed_edges_toggle_switch == 1)
       {
-        applyScharr(visualizableDenoisedImage, &denoisedDepthImageEdges);
+        applyScharr(visualizableDepthImage, &denoisedDepthImageEdges);
         Parameters::Edge::mixed_edges_toggle_switch = 2;
       }
       else if (Parameters::Edge::mixed_edges_toggle_switch == 2)
       {
-        applySobel(visualizableDenoisedImage, &denoisedDepthImageEdges);
+        applySobel(visualizableDepthImage, &denoisedDepthImageEdges);
         Parameters::Edge::mixed_edges_toggle_switch = 1;
       }
     }
 
-
+    // Apply a threshold to the image of edges
+    // to get rid of low value - insignificant - edges
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
       Parameters::Edge::denoised_edges_threshold, 255, 3);
 
     // Make all non zero pixels have a value of 255
-    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges, 0, 255, 0);
+    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges, 0, 255,
+      cv::THRESH_BINARY);
 
     // Denoise the edges found
     denoisedDepthImageEdges.copyTo(*edges);
@@ -574,16 +465,14 @@ namespace pandora_vision
     in the edges image. As noise we identify everything that is not,
     or does not look like, hole-like shapes,
     with the knowledge that these shapes might be open curves, or that
-    holes-like shapes in a edge image are not connected to anything else,
-    ergo they are standalone shapes in it.
+    holes-like shapes in an image of edges are not connected to
+    anything else, ergo they are standalone shapes in it.
     It outputs a binary image that contains areas that we wish to validate
     as holes.
     @param[in] inImage [const cv::Mat&] The RGB image of type CV_32FC1
     @param[in] extractionMethod [const int&] Chooses by which process the
     edges will be extracted. 0 for extraction via segmentation,
     1 for extraction via backprojection and watersheding
-    @param[in] segmentationMethod [const int&] The method by which the
-    segmentation of @param inImage will be performed.
     @param[in] inHistogram [const cv::MatND&] The model histogram needed
     in order to obtain the backprojection of @param inImage
     @param[out] edges [cv::Mat*] The final denoised edges image that
@@ -591,8 +480,9 @@ namespace pandora_vision
     @return void
    **/
   void EdgeDetection::computeRgbEdges(const cv::Mat& inImage,
-    const int& extractionMethod, const int& segmentationMethod,
-    const cv::MatND& inHistogram, cv::Mat* edges)
+    const int& extractionMethod,
+    const cv::MatND& inHistogram,
+    cv::Mat* edges)
   {
     if (inImage.type() != CV_8UC3)
     {
@@ -606,10 +496,13 @@ namespace pandora_vision
     Timer::start("computeRgbEdges", "findHoles");
     #endif
 
+    // The edges are detected on the segmented RGB image
     if (extractionMethod == 0)
     {
-      produceEdgesViaSegmentation(inImage, segmentationMethod, edges);
+      produceEdgesViaSegmentation(inImage, edges);
     }
+    // The edges are produced directly as a result of the watersheding
+    // of the rgb image with its backprojection
     else if (extractionMethod == 1)
     {
       produceEdgesViaBackprojection(inImage, inHistogram, edges);
@@ -623,7 +516,7 @@ namespace pandora_vision
     cv::threshold(*edges, *edges, 0, 255, 0);
 
     // Denoise the edges image
-    EdgeDetection::denoiseEdges(edges);
+    denoiseEdges(edges);
 
     #ifdef DEBUG_TIME
     Timer::tick("computeRgbEdges");
@@ -633,13 +526,14 @@ namespace pandora_vision
 
 
   /**
-    @brief Connects each point of a number of pair of points  with a line or an
-    elliptic arc
+    @brief Connects each point of a number of pair of points with a line
+    or an elliptic arc
     @param[in,out] inImage [cv::Mat*] The image whose selected points will be
     connected and line or the elliptic arc drawn on
     @param[in] pairs [const std::vector<std::pair<GraphNode,GraphNode> >&]
     The vector of pair points
-    @param[in] method [const int&] Denotes the connection type. 0 for line,
+    @param[in] method [const int&] Denotes the connection type.
+    0 for line,
     1 for elliptic arc
     @return void
    **/
@@ -673,6 +567,7 @@ namespace pandora_vision
     Timer::start("connectPairs", "denoiseEdges");
     #endif
 
+    // Connects each pair of points via a line
     if (method == 0)
     {
       for (unsigned int i = 0; i < pairs.size(); i++)
@@ -684,25 +579,31 @@ namespace pandora_vision
           cv::Scalar(255, 255, 255), 1, 8);
       }
     }
+    // Connects each pair of points via an arc
     else if (method == 1)
     {
-
+      // The input image. On it the elliptical arcs will be drawn
       cv::Mat inImageDrawnOnce;
-      cv::Mat addedArcs =  cv::Mat(inImage->rows, inImage->cols, CV_8UC1,
-        cv::Scalar::all(0));
+
+      // The image on which only the elliptical arcs will be drawn
+      cv::Mat addedArcs = cv::Mat::zeros(inImage->size(), CV_8UC1);
 
       for (unsigned int i = 0; i < pairs.size(); i++)
       {
         inImage->copyTo(inImageDrawnOnce);
 
+        // The euclidean distance of the pair
         float pairsDistance = sqrt(
           pow((pairs[i].first.x - pairs[i].second.x), 2) +
           pow((pairs[i].first.y - pairs[i].second.y), 2));
 
+        // The middle point of the segment connecting the pair points
         cv::Point2f bisectorPoint(
           round((pairs[i].first.y + pairs[i].second.y) / 2),
           round((pairs[i].first.x + pairs[i].second.x) / 2));
 
+        // The angle that the line connecting the two pair points
+        // forms with the horizontal axis
         float bisectorAngle = atan2(
           pairs[i].second.x - pairs[i].first.x,
           pairs[i].first.y - pairs[i].second.y);
@@ -711,9 +612,19 @@ namespace pandora_vision
         // the pair points, move on it one point at a time, in opposite
         // directions. The first non-zero point found will be one of the
         // curve that the pair lies on.
+
+        // Indicator that a non-zero value point has been found
         bool foundOutlinePoint = false;
+
+        // The outline point found
         cv::Point2f outlinePoint;
+
         int counter = 0;
+
+        // Since there are two rays leaving the bisector point,
+        // in opposite directions,
+        // these two variables indicate the presence of the tip of the each ray
+        // within the image's borders
         bool inLimitsOne = true;
         bool inLimitsTwo = true;
 
@@ -721,6 +632,7 @@ namespace pandora_vision
         {
           counter++;
 
+          // Has the tip of the first ray gone out of bounds?
           if (bisectorPoint.y + counter * cos(bisectorAngle) > inImage->rows - 1
             || bisectorPoint.y + counter * cos(bisectorAngle) < 0 ||
             bisectorPoint.x + counter * sin(bisectorAngle) > inImage->cols - 1
@@ -729,6 +641,7 @@ namespace pandora_vision
             inLimitsOne = false;
           }
 
+          // Has the tip of the second ray gone out of bounds?
           if (bisectorPoint.y - counter * cos(bisectorAngle) > inImage->rows - 1
             || bisectorPoint.y - counter * cos(bisectorAngle) < 0 ||
             bisectorPoint.x - counter * sin(bisectorAngle) > inImage->cols - 1
@@ -739,6 +652,9 @@ namespace pandora_vision
 
           if (inLimitsOne)
           {
+            // Sweep the neighbors of the tip of the ray in order to find
+            // a valid non-zero value point, aka the outline point
+            // that is being sought
             for (int m = -1; m < 2; m++)
             {
               for (int n = -1; n < 2; n++)
@@ -759,6 +675,9 @@ namespace pandora_vision
 
           if (inLimitsTwo)
           {
+            // Sweep the neighbors of the tip of the ray in order to find
+            // a valid non-zero value point, aka the outline point
+            // that is being sought
             for (int m = -1; m < 2; m++)
             {
               for (int n = -1; n < 2; n++)
@@ -770,68 +689,94 @@ namespace pandora_vision
                   outlinePoint = cv::Point2f(
                     bisectorPoint.x + n - counter * sin(bisectorAngle),
                     bisectorPoint.y + m - counter * cos(bisectorAngle));
+
                   foundOutlinePoint = true;
                 }
               }
             }
           }
+
+          // An outline point could not be found
+          if (!inLimitsOne && !inLimitsTwo)
+          {
+            break;
+          }
         }
 
         if (foundOutlinePoint)
         {
+          // The distance between the outline point found, and the middle point
+          // of the segment that connects the pair points
           float outlineBisectorPointDist = sqrt(
             pow(bisectorPoint.x - outlinePoint.x, 2) +
             pow(bisectorPoint.y - outlinePoint.y, 2));
 
-
-          // If the curve is close to a straight line,
-          // do not connect pair[i].first and pair[i].second
+          // If the curve that the pair points lie on approximates
+          // a straight line, do not connect the two pair points
           if (pairsDistance >=
             Parameters::Outline::AB_to_MO_ratio * outlineBisectorPointDist)
           {
             continue;
           }
 
+          // The major axis of the elliptical curve connecting the pair points
           float majorAxis = pairsDistance / 2;
 
+          // The minor axis of the elliptical curve connecting the pair points
           float minorAxis = outlineBisectorPointDist / 2 < pairsDistance / 4 ?
             outlineBisectorPointDist / 2 : pairsDistance / 4;
 
+          // The angle that the line that connects the first pair point and the
+          // outline point found forms with the horizontal axis
           float pairFirstToOutlinePointAngle = atan2(
             outlinePoint.y - pairs[i].first.x,
             outlinePoint.x - pairs[i].first.y);
 
+          // The angle that the line that connects the second pair point and the
+          // outline point found forms with the horizontal axis
           float pairSecondToOutlinePointAngle = atan2(
             outlinePoint.y - pairs[i].second.x,
             outlinePoint.x - pairs[i].second.y);
 
-          // map the angles to the standard polar system
+          // Map the angles to the standard polar system
           if (pairFirstToOutlinePointAngle > 0)
           {
-            pairFirstToOutlinePointAngle = 3.1415926535897
+            pairFirstToOutlinePointAngle = M_PI
               - std::abs(pairFirstToOutlinePointAngle);
           }
           else
           {
-            pairFirstToOutlinePointAngle = -3.1415926535897
+            pairFirstToOutlinePointAngle = - M_PI
               + std::abs(pairFirstToOutlinePointAngle);
           }
 
           if (pairSecondToOutlinePointAngle > 0)
           {
-            pairSecondToOutlinePointAngle = 3.1415926535897
+            pairSecondToOutlinePointAngle = M_PI
               - std::abs(pairSecondToOutlinePointAngle);
           }
           else
           {
-            pairSecondToOutlinePointAngle = -3.1415926535897
+            pairSecondToOutlinePointAngle = - M_PI
               + std::abs(pairSecondToOutlinePointAngle);
           }
 
-          float pairsAngle;
+
+          // The angle between the line that connects the two pair points
+          // and the horizontal axis
           float defaultAngle = atan2(
             pairs[i].first.x - pairs[i].second.x,
             pairs[i].first.y - pairs[i].second.y);
+
+          // The angle between the line that connects the two pair points
+          // and the horizontal axis. In order for the arc to accurately
+          // connect the two pair points, we need to know its orientation.
+          // It's one thing connecting point A to point B with an arc,
+          // and another connecting point B to point A with an arc.
+          // In other words, the arc has to have a starting point and an ending
+          // point in order for the total connected curve to have the same
+          // curvature orientation
+          float pairsAngle;
 
           // Both pair points are above the X axis
           if (pairFirstToOutlinePointAngle > 0 &&
@@ -839,7 +784,7 @@ namespace pandora_vision
           {
             if (pairFirstToOutlinePointAngle < pairSecondToOutlinePointAngle)
             {
-              pairsAngle = defaultAngle + 3.1415926535897;
+              pairsAngle = defaultAngle + M_PI;
             }
             else
             {
@@ -857,7 +802,7 @@ namespace pandora_vision
             }
             else
             {
-              pairsAngle = defaultAngle + 3.1415926535897;
+              pairsAngle = defaultAngle + M_PI;
             }
           }
 
@@ -866,9 +811,9 @@ namespace pandora_vision
             pairSecondToOutlinePointAngle > 0)
           {
             if (-pairFirstToOutlinePointAngle
-              + pairSecondToOutlinePointAngle < 3.1415926535897)
+              + pairSecondToOutlinePointAngle < M_PI)
             {
-              pairsAngle = defaultAngle + 3.1415926535897;
+              pairsAngle = defaultAngle + M_PI;
             }
             else
             {
@@ -881,23 +826,24 @@ namespace pandora_vision
             pairSecondToOutlinePointAngle < 0)
           {
             if (pairFirstToOutlinePointAngle
-              - pairSecondToOutlinePointAngle < 3.1415926535897)
+              - pairSecondToOutlinePointAngle < M_PI)
             {
               pairsAngle = defaultAngle;
             }
             else
             {
-              pairsAngle = defaultAngle + 3.1415926535897;
+              pairsAngle = defaultAngle + M_PI;
             }
           }
 
+          // Draw the elliptical curve on the inImageDrawnOnce image
           // size arg 1: length of the major axis. always pairsDistance / 2
           // size arg 2: length of the minor axis.
           cv::ellipse(
             inImageDrawnOnce,
             bisectorPoint,
             cv::Size(majorAxis, minorAxis),
-            pairsAngle * 180 / 3.1415926535897,
+            pairsAngle * 180 / M_PI,
             0,
             180,
             cv::Scalar(255, 255, 255));
@@ -943,29 +889,30 @@ namespace pandora_vision
 
 
   /**
-   * @brief Enhances an image's contrast, regardless of its format.
-   * @param[in] inImage [const cv::Mat &] The input image
-   * @param[out] outImage [cv::Mat*] The contrast-enhanced image
-   * @return void
-   **/
-  void EdgeDetection::enhanceContrast(const cv::Mat& inImage, cv::Mat* outImage)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("enhanceContrast");
-    #endif
+    @brief Takes an input image of edges of CV_8U depth
+    and tries to isolate hole-like shapes so as to facilitate
+    the blob detection process.
 
-    inImage.convertTo(*outImage, -1, Parameters::Edge::contrast_enhance_alpha,
-      Parameters::Edge::contrast_enhance_beta);
-
-    #ifdef DEBUG_TIME
-    Timer::tick("enhanceContrast");
-    #endif
-  }
-
-
-  /**
-    @brief Takes an input image in unsigned char format and tries to isolate
-    hole-like shapes so as to facilitate the blob detection process
+    The execution flow is as follows: first, all pixels connected
+    directly or indirectly to the image's borders are eliminated,
+    leaving behind all standalone shapes and curves.
+    Next, all open-ended curves are contidionally closed.
+    The reason behind this is that the open-ended curves might be
+    edges of holes that have either been smudged by the appliance of
+    a threshold after the production of edges, or that have in the first
+    place not been detected due to low contrast in a hole's borders.
+    After the connection of the end-points of open-ended shapes,
+    pruning is applied to get rid of all minor open-ended curves not
+    closed by the connection process. The result here is a binary image
+    featuring only closed shapes, but whose insides may be cluttered with
+    non-zero value pixels, since the edges of what may be inside a hole
+    are still detected and present in the current product image.
+    What we want, based on this image, is to find only the external
+    limits of each closed curve, because these pixels will be the
+    outline of each blob. A method is then invoked to do just so.
+    The end product of this method is a binary image with closed curves.
+    Everything inside each closed curve is black and everything outside
+    all closed curves is void.
     @param[in,out] img [cv::Mat*] The input image in unsigned char format
     @return void
    **/
@@ -1004,11 +951,11 @@ namespace pandora_vision
     }
     #endif
 
+    // Perform edge contamination:
+    // remove all non-zero pixels iteratively adjacent to the image's borders
     cv::Mat contaminatedEdges;
     img->copyTo(contaminatedEdges);
 
-    // Perform edge contamination:
-    // remove all non-zero pixels adjacent to the image's borders
     applyEdgeContamination(&contaminatedEdges);
 
     #ifdef DEBUG_TIME
@@ -1063,7 +1010,7 @@ namespace pandora_vision
 
     // By pruning the thinned image,
     // all pixels that are open-ended are eliminated,
-    // thus leaving behind only those shapes whose ends are connected, aka the
+    // leaving thus behind only shapes whose ends are connected, aka the
     // closed shapes
     cv::Mat thinnedClosedLines;
     thinnedImage.copyTo(thinnedClosedLines);
@@ -1285,7 +1232,7 @@ namespace pandora_vision
     @brief Identifies in which curve a point lies on and returns the
     curve's two end points. If a point does not lie on a curve,
     the pair returned has both coordinates (x,y) set to zero, and the
-    size of @param ret is one.
+    size of ret is one.
     @param[in] img [cv::Mat*] The input binary image
     @param[in] x_ [const int&] The x coordinate of the point
     @param[in] y_ [const int&] The y coordinate of the point
@@ -1501,6 +1448,7 @@ namespace pandora_vision
       }
     }
 
+    // Delete pointers inside nodes
     for(unsigned int d = 0 ; d < nodes.size(); d++)
     {
       delete nodes[d];
@@ -1568,9 +1516,12 @@ namespace pandora_vision
 
   /**
     @brief With an binary input image (quantized in 0 and 255 levels),
-    this function fills closed regions, at first, and then extracts the outline
-    of each region. Used when there is a closed region with garbage pixels with
-    a value of 255 within it.
+    this function fills closed regions, at first, and then extracts
+    the outline of each region. Used when there is a closed region
+    with garbage pixels with a value of 255 within it.
+    Caution: The outline of ALL shapes is computed: if there are
+    closed shapes inside other closed shapes, their outline is detected
+    and included in the output image.
     @param[in,out] inImage [cv::Mat*] The input image
     @return void
    **/
@@ -1583,6 +1534,7 @@ namespace pandora_vision
 
       return;
     }
+
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
@@ -1596,11 +1548,12 @@ namespace pandora_vision
       imgs.push_back(tmp);
     }
     #endif
+
     #ifdef DEBUG_TIME
     Timer::start("getShapesClearBorder", "denoiseEdges");
     #endif
 
-    // Kernel for obtaining boundary pixels
+    // Kernels for obtaining boundary pixels
     static const char kernels[8][3][3] = {
       { {0, 2, 2},
         {2, 1, 2},
@@ -1699,6 +1652,7 @@ namespace pandora_vision
       // If not, we need to iterate the floodfill procedure
       cv::Mat prunedFloodFill;
       inImage->copyTo(prunedFloodFill);
+
       Morphology::pruningStrictIterative(&prunedFloodFill, 1000);
 
       // Check the prunedFloodFill image for the numerosity of zeros
@@ -1851,6 +1805,7 @@ namespace pandora_vision
     }
 
 
+    // Kernels for obtaining boundary pixels
     static const char kernels[8][3][3] = {
       { {0, 2, 2},
         {2, 1, 2},
@@ -1935,9 +1890,9 @@ namespace pandora_vision
 
   /**
     @brief This method takes as input a RGB image and uses
-    its backprojection (which is based on the precalculated
-    histogram @param inHistogram) in order to identify whole regions whose
-    histogram matches @param inHistogram, although the backprojection image
+    its backprojection, which is based on the precalculated
+    histogram inHistogram, in order to identify whole regions whose
+    histogram matches inHistogram, albeit the backprojection image
     might be sparcely populated. After the identification of the regions
     of interest, this method extracts their edges and returns the image
     depicting them.
@@ -1963,12 +1918,6 @@ namespace pandora_vision
     Timer::start("produceEdgesViaBackprojection", "computeRgbEdges");
     #endif
 
-    #ifdef DEBUG_SHOW
-    std::string msg;
-    std::vector<cv::Mat> imgs;
-    std::vector<std::string> msgs;
-    #endif
-
     // Backprojection of the RGB inImage
     cv::Mat backprojectedFrame = cv::Mat::zeros(inImage.size(), CV_8UC1);
 
@@ -1977,188 +1926,9 @@ namespace pandora_vision
     Histogram::getBackprojection(inImage, inHistogram,
       &backprojectedFrame, Parameters::Histogram::secondary_channel);
 
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      backprojectedFrame.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Backprojection ";
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    cv::threshold(backprojectedFrame, backprojectedFrame,
-      Parameters::Rgb::compute_edges_backprojection_threshold, 255,
-      cv::THRESH_BINARY);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      backprojectedFrame.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Backprojection thresholded to 128"; // should be parameterized
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // The foreground image needed by the watershed algorithm
-    cv::Mat foreground = cv::Mat::zeros(inImage.size(), CV_8UC1);
-
-    // Copy the backprojection to the foreground image
-    backprojectedFrame.copyTo(foreground);
-
-    // Dilate
-    Morphology::dilationRelative(&foreground,
-      Parameters::Rgb::watershed_foreground_dilation_factor);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      foreground.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Backprojection dilated by " +
-        TOSTR(Parameters::Rgb::watershed_foreground_dilation_factor);
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // All non-zero pixels have now a value of 255
-    cv::threshold(foreground, foreground, 0, 255, cv::THRESH_BINARY);
-
-    // Erode. The erosion factor should be greater
-    // than the dilation factor used above
-    Morphology::erosion(&foreground,
-      Parameters::Rgb::watershed_foreground_erosion_factor);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      foreground.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Foreground eroded by " +
-        TOSTR(Parameters::Rgb::watershed_foreground_erosion_factor);
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // The background image needed by the watershed algorithm
-    cv::Mat background = cv::Mat::zeros(inImage.size(), CV_8UC1);
-
-    // Copy the backprojection to the background image
-    backprojectedFrame.copyTo(background);
-
-    // Dilate
-    Morphology::dilationRelative(&background,
-      Parameters::Rgb::watershed_background_dilation_factor);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      background.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Backprojection dilated by " +
-        TOSTR(Parameters::Rgb::watershed_background_dilation_factor);
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // All non-zero pixels have now a value of 255
-    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY);
-
-    // All zero value pixels turn to white, all white to black
-    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY_INV);
-
-    // Erode. The erosion factor should be greater
-    // than the dilation factor used above. This erosion happens so that
-    // the background pixels belong surely to the background
-    Morphology::erosion(&background,
-      Parameters::Rgb::watershed_background_erosion_factor);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      background.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Background eroded by " +
-        TOSTR(Parameters::Rgb::watershed_background_erosion_factor);
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // All zero value pixels' values are elevated to 128.
-    // These belong neither to foreground, nor to background:
-    // they are labeled as so-called "unknown"
-    cv::threshold(background, background, 0, 128, cv::THRESH_BINARY);
-
-    // Create the markers image, needed by the watershed algorighm
-    cv::Mat markers(inImage.size(), CV_8UC1, cv::Scalar(0));
-
-    // The markers array is composed by the foreground, background and
-    // unknown pixels
-    markers = foreground + background;
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      background.copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Markers";
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    // Convert the marker image of type CV_8UC1, to CV_32S
-    cv::Mat markers32S;
-    markers.convertTo(markers32S, CV_32S);
-
-    // Watershed the input image, with regard to the markers constructed
-    // Each pixel p is transformed into
-    // 255p + 255 before conversion
-    cv::watershed(inImage, markers32S);
-
-    // Convert the markers image to back to type CV_8UC1.
-    // This image identifies the whole area that matches the histogram
-    // inHistogram in the input image
-    markers32S.convertTo(*outImage, CV_8U, 255, 255);
-
-    // All zero value pixels turn to white, all white to black.
-    // In essence, this is the edges of the area whose histogram
-    // matches inHistogram
-    cv::threshold(*outImage, *outImage, 0, 255, cv::THRESH_BINARY_INV);
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      cv::Mat tmp;
-      outImage->copyTo(tmp);
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += " : Edges from watershed";
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-    #endif
-
-    #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)
-    {
-      Visualization::multipleShow("Final edges", imgs, msgs,
-        Parameters::Debug::show_produce_edges_size, 1);
-    }
-    #endif
+    // Locate the inImage's edges by watersheding it based on its
+    // backprojection
+    watershedViaBackprojection(inImage, backprojectedFrame, true, outImage);
 
     #ifdef DEBUG_TIME
     Timer::tick("produceEdgesViaBackprojection");
@@ -2172,14 +1942,12 @@ namespace pandora_vision
     and extracts its edges.
     @param[in] inImage [const cv::Mat&] The input RGB image,
     of type CV_8UC3
-    @param[in] segmentationMethod [const int&] The method by which the
-    segmentation of @param inImage will be performed.
     @param[out] outImage [cv::Mat*] The output edges image,
     of type CV_8UC1
     @return void
    **/
   void EdgeDetection::produceEdgesViaSegmentation (const cv::Mat& inImage,
-    const int& segmentationMethod, cv::Mat* edges)
+    cv::Mat* edges)
   {
     if (inImage.type() != CV_8UC3)
     {
@@ -2216,7 +1984,7 @@ namespace pandora_vision
     inImage.copyTo(segmentedHoleFrame);
 
     // Segment the input image.
-    segmentation(inImage, segmentationMethod, &segmentedHoleFrame);
+    segmentation(inImage, &segmentedHoleFrame);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_produce_edges)
@@ -2330,13 +2098,10 @@ namespace pandora_vision
   /**
     @brief Segments a RGB image
     @param[in] inImage [const cv::Mat&] The RGB image to be segmented
-    @param[in] segmentationMethod [const int&] The method by which the
-    segmentation of @param inImage will be performed.
     @param[out] outImage [cv::Mat*] The posterized image
     @return void
    **/
-  void EdgeDetection::segmentation(const cv::Mat& inImage,
-    const int& segmentationMethod, cv::Mat* outImage)
+  void EdgeDetection::segmentation(const cv::Mat& inImage, cv::Mat* outImage)
   {
     if (inImage.type() != CV_8UC3)
     {
@@ -2350,33 +2115,246 @@ namespace pandora_vision
     Timer::start("segmentation", "produceEdgesViaSegmentation");
     #endif
 
-    // Segment the input image
-    if (segmentationMethod == 0)
-    {
-      // Termination criteria for the segmentation below
-      cv::TermCriteria criteria(
-        CV_TERMCRIT_ITER | CV_TERMCRIT_EPS,
-        Parameters::Image::term_criteria_max_iterations,
-        Parameters::Image::term_criteria_max_epsilon);
+    // Termination criteria for the segmentation below
+    cv::TermCriteria criteria(
+      CV_TERMCRIT_ITER | CV_TERMCRIT_EPS,
+      Parameters::Image::term_criteria_max_iterations,
+      Parameters::Image::term_criteria_max_epsilon);
 
-      // Segment the image
-      cv::pyrMeanShiftFiltering(inImage, *outImage,
-        Parameters::Rgb::spatial_window_radius,
-        Parameters::Rgb::color_window_radius,
-        Parameters::Rgb::maximum_level_pyramid_segmentation,
-        criteria);
-    }
-    else if (segmentationMethod == 1)
-    {
-      for ( int i = 1; i < 15; i = i + 4 )
-      {
-        cv::medianBlur(inImage, *outImage, i);
-      }
-    }
+    // Segment the image
+    cv::pyrMeanShiftFiltering(inImage, *outImage,
+      Parameters::Rgb::spatial_window_radius,
+      Parameters::Rgb::color_window_radius,
+      Parameters::Rgb::maximum_level_pyramid_segmentation,
+      criteria);
 
       #ifdef DEBUG_TIME
       Timer::tick("segmentation");
       #endif
+  }
+
+
+  /**
+    @brief Watersheds a RGB image based on its backprojection.
+    @param[in] inImage [cv::Mat&] The input RGB image in CV_8UC3 format
+    @param[in] backproject [cv::Mat&] The backprojection of inImage
+    @param[in] edges [const bool&] This parameter determines whether
+    outImage will be an image containing the edges of inImage (true)
+    or an image containing the homogenous backprojection of it
+    @param[out] outImage [cv::Mat*] The output image in CV_8UC1 format
+   **/
+  void EdgeDetection::watershedViaBackprojection(const cv::Mat& inImage,
+    const cv::Mat& backproject, const bool& edges, cv::Mat* outImage)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("watershedViaBackprojection");
+    #endif
+
+    #ifdef DEBUG_SHOW
+    std::string msg;
+    std::vector<cv::Mat> imgs;
+    std::vector<std::string> msgs;
+    #endif
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      backproject.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection ";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // Threshold the backprojection
+    cv::threshold(backproject, backproject,
+      Parameters::Rgb::backprojection_threshold, 255, cv::THRESH_BINARY);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      backproject.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection thresholded";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // The foreground image needed by the watershed algorithm
+    cv::Mat foreground = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+    // Copy the backprojection to the foreground image
+    backproject.copyTo(foreground);
+
+    // Dilate
+    Morphology::dilationRelative(&foreground,
+      Parameters::Rgb::watershed_foreground_dilation_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      foreground.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection dilated by " +
+        TOSTR(Parameters::Rgb::watershed_foreground_dilation_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All non-zero pixels have now a value of 255
+    cv::threshold(foreground, foreground, 0, 255, cv::THRESH_BINARY);
+
+    // Erode. The erosion factor should be greater
+    // than the dilation factor used above
+    Morphology::erosion(&foreground,
+      Parameters::Rgb::watershed_foreground_erosion_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      foreground.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Foreground eroded by " +
+        TOSTR(Parameters::Rgb::watershed_foreground_erosion_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // The background image needed by the watershed algorithm
+    cv::Mat background = cv::Mat::zeros(inImage.size(), CV_8UC1);
+
+    // Copy the backprojection to the background image
+    backproject.copyTo(background);
+
+    // Dilate
+    Morphology::dilationRelative(&background,
+      Parameters::Rgb::watershed_background_dilation_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Backprojection dilated by " +
+        TOSTR(Parameters::Rgb::watershed_background_dilation_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All non-zero pixels have now a value of 255
+    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY);
+
+    // All zero value pixels turn to white, all white to black
+    cv::threshold(background, background, 0, 255, cv::THRESH_BINARY_INV);
+
+    // Erode. The erosion factor should be greater
+    // than the dilation factor used above. This erosion happens so that
+    // the background pixels belong surely to the background
+    Morphology::erosion(&background,
+      Parameters::Rgb::watershed_background_erosion_factor);
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Background eroded by " +
+        TOSTR(Parameters::Rgb::watershed_background_erosion_factor);
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // All zero value pixels' values are elevated to 128.
+    // These belong neither to foreground, nor to background:
+    // they are labeled as so-called "unknown"
+    cv::threshold(background, background, 0, 128, cv::THRESH_BINARY);
+
+    // Create the markers image, needed by the watershed algorighm
+    cv::Mat markers(inImage.size(), CV_8UC1, cv::Scalar(0));
+
+    // The markers array is composed by the foreground, background and
+    // unknown pixels
+    markers = foreground + background;
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      background.copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Markers";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    // Convert the marker image of type CV_8UC1, to CV_32S
+    cv::Mat markers32S;
+    markers.convertTo(markers32S, CV_32S);
+
+    // Watershed the input image, with regard to the markers constructed
+    // Each pixel p is transformed into
+    // 255p + 255 before conversion
+    cv::watershed(inImage, markers32S);
+
+    // Convert the markers image to back to type CV_8UC1.
+    // This image identifies whole areas that the backprojection partially
+    // recognizes to be matching the histogram on which it is based
+    if (edges)
+    {
+      // Convert image markers32S into an edges image
+      markers32S.convertTo(*outImage, CV_8U, 255, 255);
+
+      // All zero value pixels turn to white, all white to black.
+      // In essence, this is the edges of the area whose histogram
+      // matches inHistogram
+      cv::threshold(*outImage, *outImage, 0, 255, cv::THRESH_BINARY_INV);
+    }
+    else
+    {
+      // Convert image markers32S into a depth of 8U
+      markers32S.convertTo(*outImage, CV_8U);
+
+      // All non-white pixels turn to black
+      cv::threshold(*outImage, *outImage,
+        Parameters::Rgb::backprojection_threshold, 255, cv::THRESH_BINARY);
+    }
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      cv::Mat tmp;
+      outImage->copyTo(tmp);
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Edges from watershed";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+    #endif
+
+    #ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_produce_edges && edges)
+    {
+      Visualization::multipleShow("Final edges", imgs, msgs,
+        Parameters::Debug::show_produce_edges_size, 1);
+    }
+    #endif
+
+    #ifdef DEBUG_TIME
+    Timer::tick("watershedViaBackprojection");
+    #endif
   }
 
 } // namespace pandora_vision

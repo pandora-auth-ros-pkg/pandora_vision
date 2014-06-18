@@ -228,8 +228,8 @@ namespace pandora_vision
 
 
 
-  //! Test BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
-  TEST_F ( BoundingBoxDetectionTest, FindRotatedBoundingBoxesFromOutlineTest )
+  //! Tests BoundingBoxDetection::findRotatedBoundingBoxesFromOutline
+  TEST_F ( BoundingBoxDetectionTest, findRotatedBoundingBoxesFromOutlineTest )
   {
     // The square's area
     std::vector< float > blobsArea;

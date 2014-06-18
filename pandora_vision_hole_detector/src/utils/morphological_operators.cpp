@@ -37,6 +37,10 @@
 
 #include "utils/morphological_operators.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -387,13 +391,13 @@ namespace pandora_vision
           {
             maxRight = img->data[p - img->cols - 1];
           }
-          if (img->data[p + img->cols - 1] > maxRight)
-          {
-            maxRight = img->data[p + img->cols - 1];
-          }
           if (img->data[p - 1] > maxRight)
           {
             maxRight = img->data[p - 1];
+          }
+          if (img->data[p + img->cols - 1] > maxRight)
+          {
+            maxRight = img->data[p + img->cols - 1];
           }
 
           helper.data[p] = maxRight;
@@ -1017,7 +1021,7 @@ namespace pandora_vision
     bool isRunning;
     static unsigned int limit = 0;
 
-    static unsigned int *pts =
+    unsigned int *pts =
       new unsigned int[outImage->cols * outImage->rows];
 
     limit = 0;
@@ -1057,6 +1061,10 @@ namespace pandora_vision
         break;
       }
     }
+
+    // Delete pointer pts
+    delete[] pts;
+
     #ifdef DEBUG_TIME
     Timer::tick("thinning");
     #endif

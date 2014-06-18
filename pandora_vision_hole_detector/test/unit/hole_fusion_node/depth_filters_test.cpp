@@ -229,13 +229,6 @@ namespace pandora_vision
     const float& depthIn,
     cv::Mat* image )
   {
-    if ( image->type() != CV_32FC1 )
-    {
-      std::cerr << "Image of invalid type. Please use CV_32FC1" << std::endl;
-
-      return;
-    }
-
     // Fill the inside of the desired rectangle with the @param depthIn provided
     for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
@@ -263,12 +256,12 @@ namespace pandora_vision
     const int& y )
   {
     // What will be returned: the internal elements of one hole
-    HolesConveyor conveyor;
+    HoleConveyor hole;
 
     // The hole's keypoint
     cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back(k);
+    hole.keypoint = k;
 
 
     // The four vertices of the rectangle
@@ -286,7 +279,7 @@ namespace pandora_vision
     rectangle.push_back(vertex_3);
     rectangle.push_back(vertex_4);
 
-    conveyor.rectangles.push_back(rectangle);
+    hole.rectangle = rectangle;
 
 
     // The outline points of the hole will be obtained through the depiction
@@ -313,7 +306,11 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back(outline);
+    hole.outline = outline;
+
+    // Push hole into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back(hole);
 
     return conveyor;
 
@@ -321,8 +318,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::applyFilter
-  TEST_F ( DepthFiltersTest, ApplyFilterTest )
+  //! Tests DepthFilters::applyFilter
+  TEST_F ( DepthFiltersTest, applyFilterTest )
   {
     // Inflations size : 0
 
@@ -378,7 +375,7 @@ namespace pandora_vision
         // size of value 0
         for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
         {
-          EXPECT_LT ( 0.3, probabilitiesVector_0[i] );
+          EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
         }
       }
 
@@ -515,8 +512,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHoles
-  TEST_F ( DepthFiltersTest, CheckHolesTest )
+  //! Tests DepthFilters::checkHoles
+  TEST_F ( DepthFiltersTest, checkHolesTest )
   {
     // Inflations size : 0
 
@@ -552,7 +549,7 @@ namespace pandora_vision
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_0(
       5, // Five depth filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
 
     // Set the execution order for ease of testing
@@ -579,7 +576,7 @@ namespace pandora_vision
       {
         if ( f == 0 )
         {
-          EXPECT_LT ( 0.3, probabilitiesVector2D_0[f][h] );
+          EXPECT_EQ ( 0.0, probabilitiesVector2D_0[f][h] );
         }
 
         if ( f == 1 )
@@ -641,7 +638,7 @@ namespace pandora_vision
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_10(
       5, // Five depth filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
     // Run DepthFilters::checkHoles
     DepthFilters::checkHoles(
@@ -706,8 +703,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthArea
-  TEST_F ( DepthFiltersTest, CheckHolesDepthAreaTest )
+  //! Tests DepthFilters::checkHolesDepthArea
+  TEST_F ( DepthFiltersTest, checkHolesDepthAreaTest )
   {
     // Generate the vector of holes' mask (set)
     std::vector< std::set< unsigned int > > holesMasksSetVector;
@@ -737,8 +734,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthDiff
-  TEST_F ( DepthFiltersTest, CheckHolesDepthDiffTest )
+  //! Tests DepthFilters::checkHolesDepthDiff
+  TEST_F ( DepthFiltersTest, checkHolesDepthDiffTest )
   {
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 0
@@ -752,26 +749,33 @@ namespace pandora_vision
       &inflatedRectanglesVector_0,
       &inflatedRectanglesIndices_0 );
 
-    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
     std::vector<std::string> msgs;
-    std::vector<float> probabilitiesVector_0( 3, 0.0 );
 
-    // Run DepthFilters::checkHolesDepthDiff
-    DepthFilters::checkHolesDepthDiff(
-      squares_,
-      conveyor,
-      inflatedRectanglesVector_0,
-      inflatedRectanglesIndices_0,
-      &msgs,
-      &probabilitiesVector_0 );
-
-
-
-    for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+    for ( int p = 0; p < 2; p++ )
     {
-      // All three holes should have an inflated rectangle for inflation
-      // size of value 0
-      EXPECT_LT ( 0.3, probabilitiesVector_0[i] );
+      Parameters::HoleFusion::depth_difference_probability_assignment_method = p;
+
+      // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+      std::vector<float> probabilitiesVector_0( 3, 0.0 );
+
+      // Run DepthFilters::checkHolesDepthDiff
+      DepthFilters::checkHolesDepthDiff(
+        squares_,
+        conveyor,
+        inflatedRectanglesVector_0,
+        inflatedRectanglesIndices_0,
+        &msgs,
+        &probabilitiesVector_0 );
+
+
+      for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+      {
+        // All three holes should have an inflated rectangle for inflation
+        // size of value 0
+        EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
+      }
+
+      msgs.clear();
     }
 
 
@@ -790,7 +794,6 @@ namespace pandora_vision
 
     // Needed vectors by the DepthFilters::checkHolesDepthDiff method
     std::vector<float> probabilitiesVector_2( 3, 0.0 );
-    msgs.clear();
 
     // Run DepthFilters::checkHolesDepthDiff
     DepthFilters::checkHolesDepthDiff(
@@ -825,28 +828,32 @@ namespace pandora_vision
       &inflatedRectanglesVector_8,
       &inflatedRectanglesIndices_8 );
 
-    // Needed vectors by the DepthFilters::checkHolesDepthDiff method
-    std::vector< float > probabilitiesVector_8( 3, 0.0 );
-    msgs.clear();
+    for ( int p = 0; p < 2; p++ )
+    {
+      Parameters::HoleFusion::depth_difference_probability_assignment_method = p;
 
-    // Run DepthFilters::checkHolesDepthDiff
-    DepthFilters::checkHolesDepthDiff(
-      squares_,
-      conveyor,
-      inflatedRectanglesVector_8,
-      inflatedRectanglesIndices_8,
-      &msgs,
-      &probabilitiesVector_8);
+      // Needed vectors by the DepthFilters::checkHolesDepthDiff method
+      std::vector< float > probabilitiesVector_8( 3, 0.0 );
+      msgs.clear();
 
-
-    // Only the last two holes should have an inflated rectangle
-    // for inflation size of value 2
-    ASSERT_EQ ( 0.0, probabilitiesVector_8[0] );
-    ASSERT_EQ ( 0.0, probabilitiesVector_8[1] );
-    ASSERT_LT ( 0.0, probabilitiesVector_8[2] );
+      // Run DepthFilters::checkHolesDepthDiff
+      DepthFilters::checkHolesDepthDiff(
+        squares_,
+        conveyor,
+        inflatedRectanglesVector_8,
+        inflatedRectanglesIndices_8,
+        &msgs,
+        &probabilitiesVector_8);
 
 
-    EXPECT_EQ ( 1.0, probabilitiesVector_8[2] );
+      // Only the last two holes should have an inflated rectangle
+      // for inflation size of value 2
+      ASSERT_EQ ( 0.0, probabilitiesVector_8[0] );
+      ASSERT_EQ ( 0.0, probabilitiesVector_8[1] );
+      ASSERT_LT ( 0.0, probabilitiesVector_8[2] );
+
+      EXPECT_EQ ( 1.0, probabilitiesVector_8[2] );
+    }
 
 
     // Generate the inflated rectangles and corresponding indices vectors
@@ -885,8 +892,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesDepthHomogeneity
-  TEST_F ( DepthFiltersTest, CheckHolesDepthHomogeneityTest)
+  //! Tests DepthFilters::checkHolesDepthHomogeneity
+  TEST_F ( DepthFiltersTest, checkHolesDepthHomogeneityTest)
   {
     // Generate the vector of holes' mask (set)
     std::vector< std::set< unsigned int > > holesMasksSetVector;
@@ -916,8 +923,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesOutlineToRectanglePlaneConstitution
-  TEST_F ( DepthFiltersTest, CheckHolesOutlineToRectanglePlaneConstitutionTest )
+  //! Tests DepthFilters::checkHolesOutlineToRectanglePlaneConstitution
+  TEST_F ( DepthFiltersTest, checkHolesOutlineToRectanglePlaneConstitutionTest )
   {
     // Generate the inflated rectangles and corresponding indices vectors
     // for an inflation size of value 0
@@ -1005,8 +1012,8 @@ namespace pandora_vision
 
 
 
-  //! Test DepthFilters::checkHolesRectangleEdgesPlaneConstitution
-  TEST_F ( DepthFiltersTest, CheckHolesRectangleEdgesPlaneConstitutionTest )
+  //! Tests DepthFilters::checkHolesRectangleEdgesPlaneConstitution
+  TEST_F ( DepthFiltersTest, checkHolesRectangleEdgesPlaneConstitutionTest )
   {
 
 
