@@ -37,6 +37,10 @@
 
 #include "depth_node/depth.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -45,12 +49,6 @@ namespace pandora_vision
    **/
   Depth::Depth(void)
   {
-    #ifdef DEBUG_TIME
-    Timer::start("Depth");
-    #endif
-
-    ros::Duration(0.5).sleep();
-
     // Acquire the names of topics which the depth node will be having
     // transactionary affairs with
     getTopicNames();
@@ -66,14 +64,9 @@ namespace pandora_vision
       candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (depth) parameter's callback
-    server.setCallback(boost::bind(&Depth::parametersCallback,
-        this, _1, _2));
+    server.setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));
 
     ROS_INFO_NAMED("hole_detector", "[Depth node] Initiated");
-
-    #ifdef DEBUG_TIME
-    Timer::tick("Depth");
-    #endif
   }
 
 
@@ -90,12 +83,16 @@ namespace pandora_vision
 
 
   /**
-    @brief Callback for depth image
+    @brief Callback for the depth image received by the synchronizer node.
+
+    The depth image message received by the synchronizer node is unpacked
+    in a cv::Mat image and stripped of its noise.
+    Holes are then located inside this image and information about them,
+    along with the denoised image, is then sent to the hole fusion node
     @param msg [const sensor_msgs::Image&] The depth image message
     @return void
    **/
-  void Depth::inputDepthImageCallback(
-    const sensor_msgs::Image& msg)
+  void Depth::inputDepthImageCallback(const sensor_msgs::Image& msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputDepthImageCallback", "", true);
@@ -103,7 +100,9 @@ namespace pandora_vision
 
     ROS_INFO_NAMED("hole_detector", "Depth node callback");
 
-    // Obtain the depth image
+    // Obtain the depth image. Since the image is in a format of
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be CV_32FC1.
     cv::Mat depthImage;
     MessageConversions::extractImageFromMessage(msg, &depthImage,
       sensor_msgs::image_encodings::TYPE_32FC1);
@@ -115,7 +114,10 @@ namespace pandora_vision
     }
     #endif
 
-    // Perform noise elimination on the depth image
+    // Perform noise elimination on the depth image.
+    // Every pixel of noise will be eliminated and substituted by an
+    // appropriate non-zero value, depending on the amount of noise present
+    // in the input depth image.
     cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImage,
       &interpolatedDepthImage);
@@ -130,20 +132,27 @@ namespace pandora_vision
     // low-low, wavelet analysis driven, part
     if (Parameters::Image::image_representation_method == 1)
     {
+      // Find the minimum and maximum values in depth distance in the
+      // interpolated depth image
       double min;
       double max;
-      cv::minMaxIdx(depthImage, &min, &max);
+      cv::minMaxIdx(interpolatedDepthImage, &min, &max);
 
+      // Obtain the low-low part of the interpolated depth image via
+      // wavelet analysis
       Wavelets::getLowLow(interpolatedDepthImage, min, max,
         &interpolatedDepthImage);
     }
 
-    // Finds possible holes
+    // Locate potential holes in the interpolated depth image
     HolesConveyor holes = HoleDetector::findHoles(interpolatedDepthImage);
 
     // Create the candidate holes message
     vision_communications::CandidateHolesVectorMsg depthCandidateHolesMsg;
 
+    // Pack information about holes found and the interpolated depth image
+    // inside a message.
+    // This message will be published to and received by the hole fusion node
     MessageConversions::createCandidateHolesVectorMessage(holes,
       interpolatedDepthImageSent,
       &depthCandidateHolesMsg,
@@ -217,7 +226,7 @@ namespace pandora_vision
   /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
+    @param[in] level [const uint32_t]
     @return void
    **/
   void Depth::parametersCallback(
@@ -226,7 +235,8 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED("hole_detector", "[Depth node] Parameters callback called");
 
-    // Blob detection - specific parameters
+    //////////////////// Blob detection - specific parameters //////////////////
+
     Parameters::Blob::blob_min_threshold =
       config.blob_min_threshold;
     Parameters::Blob::blob_max_threshold =
@@ -234,15 +244,15 @@ namespace pandora_vision
     Parameters::Blob::blob_threshold_step =
       config.blob_threshold_step;
 
-    //!< In wavelet mode, the image shrinks by a factor of 4
-    if (config.image_representation_method == 0)
+    if (Parameters::Image::image_representation_method == 0)
     {
       Parameters::Blob::blob_min_area =
         config.blob_min_area;
       Parameters::Blob::blob_max_area =
         config.blob_max_area;
     }
-    else if (config.image_representation_method == 1)
+    // In wavelet mode, the image shrinks by a factor of 4
+    else if (Parameters::Image::image_representation_method == 1)
     {
       Parameters::Blob::blob_min_area =
         static_cast<int>(config.blob_min_area / 4);
@@ -266,7 +276,8 @@ namespace pandora_vision
       config.blob_filter_by_circularity;
 
 
-    // Debug
+    ////////////////////////////// Debug parameters ////////////////////////////
+
     Parameters::Debug::show_find_holes =
       config.show_find_holes;
     Parameters::Debug::show_find_holes_size =
@@ -288,7 +299,7 @@ namespace pandora_vision
       config.show_get_shapes_clear_border_size;
 
 
-    // Parameters specific to the Depth node
+    /////////////////// Parameters specific to the Depth node //////////////////
 
     // Show the depth image that arrives in the depth node
     Parameters::Depth::show_depth_image =
@@ -301,9 +312,9 @@ namespace pandora_vision
     Parameters::Depth::interpolation_method = config.interpolation_method;
 
 
-    // Edge detection specific parameters
+    //------------------- Edge detection specific parameters -------------------
 
-    // canny parameters
+    // Canny parameters
     Parameters::Edge::canny_ratio =
       config.canny_ratio;
     Parameters::Edge::canny_kernel_size =
@@ -326,20 +337,11 @@ namespace pandora_vision
       config.denoised_edges_threshold;
 
 
-    // Image representation specific parameters
-
-    // Depth image representation method.
-    // 0 if the depth image used is the one obtained from the depth sensor,
-    // unadulterated
-    // 1 through wavelet representation
-    Parameters::Image::image_representation_method =
-      config.image_representation_method;
-
     // Method to scale the CV_32FC1 image to CV_8UC1
     Parameters::Image::scale_method = config.scale_method;
 
 
-    // Outline discovery specific parameters
+    //----------------- Outline discovery specific parameters ------------------
 
     // The detection method used to obtain the outline of a blob
     // 0 for detecting by means of brushfire
@@ -354,21 +356,21 @@ namespace pandora_vision
     Parameters::Outline::raycast_keypoint_partitions =
       config.raycast_keypoint_partitions;
 
-    //<! Loose ends connection parameters
+    //-------------------- Loose ends connection parameters --------------------
+
     Parameters::Outline::AB_to_MO_ratio = config.AB_to_MO_ratio;
 
-    //!< In wavelet mode, the image shrinks by a factor of 4
-    if (config.image_representation_method == 0)
+    // In wavelet mode, the image shrinks by a factor of 4
+    if (Parameters::Image::image_representation_method == 0)
     {
       Parameters::Outline::minimum_curve_points =
         config.minimum_curve_points;
     }
-    else if (config.image_representation_method == 1)
+    else if (Parameters::Image::image_representation_method == 1)
     {
       Parameters::Outline::minimum_curve_points =
         static_cast<int>(config.minimum_curve_points / 4);
     }
-
   }
 
 } // namespace pandora_vision

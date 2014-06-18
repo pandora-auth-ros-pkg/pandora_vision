@@ -32,11 +32,15 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Authors: Despoina Paschalidou, Alexandros Philotheou
 *********************************************************************/
 
 #include "rgb_node/rgb.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -48,7 +52,9 @@ namespace pandora_vision
     // transactionary affairs with
     getTopicNames();
 
-    // Calculate histogram according to a given set of images
+    // Calculate the collective histogram of images of wooden walls:
+    // the rgb node, depending on the procedure of edges extraction of
+    // rgb image, is going to need it
     Histogram::getHistogram(&wallsHistogram_,
       Parameters::Histogram::secondary_channel);
 
@@ -57,14 +63,13 @@ namespace pandora_vision
     rgbImageSubscriber_= nodeHandle_.subscribe( rgbImageTopic_, 1,
       &Rgb::inputRgbImageCallback, this);
 
-    // Advertise the candidate holes found by the depth node
+    // Advertise the candidate holes found by the rgb node
     candidateHolesPublisher_ = nodeHandle_.advertise
       <vision_communications::CandidateHolesVectorMsg>(
       candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (RGB) parameter's callback
-    server.setCallback(boost::bind(&Rgb::parametersCallback,
-        this, _1, _2));
+    server.setCallback(boost::bind(&Rgb::parametersCallback, this, _1, _2));
 
     ROS_INFO_NAMED("hole_detector", "[RGB node] Initiated");
   }
@@ -82,10 +87,15 @@ namespace pandora_vision
 
 
   /**
-    @brief Function called when new ROS message appears, for camera
-    @param msg [const sensor_msgs::ImageConstPtr&] The message
+    @brief Callback for the rgb image received by the synchronizer node.
+
+    The rgb image message received by the synchronizer node is unpacked
+    in a cv::Mat image. Holes are then located inside this image and
+    information about them, along with the rgb image, is then sent to the
+    hole fusion node
+    @param msg [const sensor_msgs::Image&] The rgb image message
     @return void
-  */
+  **/
   void Rgb::inputRgbImageCallback(const sensor_msgs::Image& msg)
   {
     ROS_INFO_NAMED("hole_detector", "RGB node callback");
@@ -94,42 +104,47 @@ namespace pandora_vision
     Timer::start("inputRgbImageCallback", "", true);
     #endif
 
-    cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    _holeFrame = in_msg->image.clone();
+    // Obtain the rgb image. Since the image is in a format of
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be CV_8UC3.
+    cv::Mat rgbImage;
+    MessageConversions::extractImageFromMessage(msg, &rgbImage,
+      sensor_msgs::image_encodings::BGR8);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Rgb::show_rgb_image)
     {
-      Visualization::show("RGB image", _holeFrame, 1);
+      Visualization::show("RGB image", rgbImage, 1);
     }
     #endif
 
     // Regardless of the image representation method, the RGB node
     // will publish the RGB image of original size to the Hole Fusion node
-    cv::Mat holeFrameSent;
-    _holeFrame.copyTo(holeFrameSent);
+    cv::Mat rgbImageSent;
+    rgbImage.copyTo(rgbImageSent);
 
     // A value of 1 means that the rgb image is subtituted by its
     // low-low, wavelet analysis driven, part
     if (Parameters::Image::image_representation_method == 1)
     {
-      Wavelets::getLowLow(_holeFrame, &_holeFrame);
+      // Obtain the low-low part of the rgb image via wavelet analysis
+      Wavelets::getLowLow(rgbImage, &rgbImage);
     }
 
-    // Find candidate holes in the current frame
-    HolesConveyor conveyor =
-      HoleDetector::findHoles(_holeFrame, wallsHistogram_);
+    // Locate potential holes in the rgb image
+    HolesConveyor conveyor = HoleDetector::findHoles(rgbImage, wallsHistogram_);
 
-    // With candidate holes found, create the message that includes them
-    // and the original RGB image and send them over to the HoleFusion node
+    // Create the candidate holes message
     vision_communications::CandidateHolesVectorMsg rgbCandidateHolesMsg;
 
+    // Pack information about holes found and the rgb image inside a message.
+    // This message will be published to and received by the hole fusion node
     MessageConversions::createCandidateHolesVectorMessage(conveyor,
-      holeFrameSent,
+      rgbImageSent,
       &rgbCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_8UC3, msg);
 
+    // Publish the candidate holes message
     candidateHolesPublisher_.publish(rgbCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
@@ -194,7 +209,7 @@ namespace pandora_vision
   /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_hole_detector::rgb_cfgConfig&]
-    @param[in] level [const uint32_t] The level (?)
+    @param[in] level [const uint32_t]
     @return void
    **/
   void Rgb::parametersCallback(
@@ -203,7 +218,8 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED("hole_detector", "[RGB node] Parameters callback called");
 
-    // Blob detection - specific parameters
+    //////////////////// Blob detection - specific parameters //////////////////
+
     Parameters::Blob::blob_min_threshold =
       config.blob_min_threshold;
 
@@ -214,7 +230,7 @@ namespace pandora_vision
       config.blob_threshold_step;
 
     // In wavelet mode, the image shrinks by a factor of 4
-    if (config.image_representation_method == 0)
+    if (Parameters::Image::image_representation_method == 0)
     {
       Parameters::Blob::blob_min_area =
         config.blob_min_area;
@@ -222,7 +238,7 @@ namespace pandora_vision
       Parameters::Blob::blob_max_area =
         config.blob_max_area;
     }
-    else if (config.image_representation_method == 1)
+    else if (Parameters::Image::image_representation_method == 1)
     {
       Parameters::Blob::blob_min_area =
         static_cast<int>(config.blob_min_area / 4);
@@ -253,7 +269,8 @@ namespace pandora_vision
       config.blob_filter_by_circularity;
 
 
-    // Debug
+    ////////////////////////////// Debug parameters ////////////////////////////
+
     Parameters::Debug::show_find_holes =
       config.show_find_holes;
     Parameters::Debug::show_find_holes_size =
@@ -280,14 +297,27 @@ namespace pandora_vision
       config.show_get_shapes_clear_border_size;
 
 
-    // Edge detection parameters
+    //////////////////// Parameters specific to the RGB node ///////////////////
+
+    // Show the rgb image that arrives in the rgb node
+    Parameters::Rgb::show_rgb_image =
+      config.show_rgb_image;
+
+    //------------------- Edge detection specific parameters -------------------
+
+    // The opencv edge detection method:
+    // 0 for the Canny edge detector
+    // 1 for the Scharr edge detector
+    // 2 for the Sobel edge detector
+    // 3 for the Laplacian edge detector
+    // 4 for mixed Scharr / Sobel edge detection
     Parameters::Edge::edge_detection_method =
       config.edge_detection_method;
 
     Parameters::Edge::denoised_edges_threshold =
       config.denoised_edges_threshold;
 
-    // canny parameters
+    // Canny parameters
     Parameters::Edge::canny_ratio =
       config.canny_ratio;
 
@@ -307,7 +337,8 @@ namespace pandora_vision
       config.contrast_enhance_alpha;
 
 
-    // Parameters needed for histogram calculation
+    //------------- Parameters needed for histogram calculation ----------------
+
     Parameters::Histogram::number_of_hue_bins =
       config.number_of_hue_bins;
 
@@ -321,19 +352,7 @@ namespace pandora_vision
       config.secondary_channel;
 
 
-    // RGB image representation method.
-    // 0 if the depth image used is the one obtained from the depth sensor,
-    // unadulterated
-    // 1 through wavelet representation
-    Parameters::Image::image_representation_method =
-      config.image_representation_method;
-
-  // Term criteria for segmentation purposes
-    Parameters::Image::term_criteria_max_iterations =
-      config.term_criteria_max_iterations;
-    Parameters::Image::term_criteria_max_epsilon =
-      config.term_criteria_max_epsilon;
-
+    //----------------- Outline discovery specific parameters ------------------
 
     // The detection method used to obtain the outline of a blob
     // 0 for detecting by means of brushfire
@@ -348,37 +367,30 @@ namespace pandora_vision
     Parameters::Outline::raycast_keypoint_partitions =
       config.raycast_keypoint_partitions;
 
-    //<! Loose ends connection parameters
+
+    //------------------- Loose ends connection parameters ---------------------
+
     Parameters::Outline::AB_to_MO_ratio = config.AB_to_MO_ratio;
 
-    //!< In wavelet mode, the image shrinks by a factor of 4
-    if (config.image_representation_method == 0)
+    // In wavelet mode, the image shrinks by a factor of 4
+    if (Parameters::Image::image_representation_method == 0)
     {
       Parameters::Outline::minimum_curve_points =
         config.minimum_curve_points;
     }
-    else if (config.image_representation_method == 1)
+    else if (Parameters::Image::image_representation_method == 1)
     {
       Parameters::Outline::minimum_curve_points =
         static_cast<int>(config.minimum_curve_points / 4);
     }
 
 
-    // Show the rgb image that arrives in the rgb node
-    Parameters::Rgb::show_rgb_image =
-      config.show_rgb_image;
-
-    // RGB image segmentation parameters
-
     // Selects the method for extracting a RGB image's edges.
     // Choices are via segmentation and via backprojection
     Parameters::Rgb::edges_extraction_method =
       config.edges_extraction_method;
 
-    // The threshold applied to the backprojection of the RGB image
-    // captured by the image sensor
-    Parameters::Rgb::compute_edges_backprojection_threshold =
-      config.compute_edges_backprojection_threshold;
+    //------------------- RGB image segmentation parameters --------------------
 
     // Parameters specific to the pyrMeanShiftFiltering method
     Parameters::Rgb::spatial_window_radius =
@@ -388,19 +400,28 @@ namespace pandora_vision
     Parameters::Rgb::maximum_level_pyramid_segmentation =
       config.maximum_level_pyramid_segmentation;
 
+    // Term criteria for the pyrMeanShiftFiltering method
+    Parameters::Image::term_criteria_max_iterations =
+      config.term_criteria_max_iterations;
+    Parameters::Image::term_criteria_max_epsilon =
+      config.term_criteria_max_epsilon;
+
     // True to posterize the product of the segmentation
     Parameters::Rgb::posterize_after_segmentation =
       config.posterize_after_segmentation;
-
-    // Applies advanced blurring to achieve segmentation or normal
-    Parameters::Rgb::segmentation_blur_method =
-      config.segmentation_blur_method;
 
     // FloodFill options regarding minimum and maximum colour difference
     Parameters::Rgb::floodfill_lower_colour_difference =
       config.floodfill_lower_colour_difference;
     Parameters::Rgb::floodfill_upper_colour_difference =
       config.floodfill_upper_colour_difference;
+
+    //------------ RGB image edges via backprojection parameters ---------------
+
+    // The threshold applied to the backprojection of the RGB image
+    // captured by the image sensor
+    Parameters::Rgb::backprojection_threshold =
+      config.backprojection_threshold;
 
     // Watershed-specific parameters
     Parameters::Rgb::watershed_foreground_dilation_factor =
@@ -411,7 +432,6 @@ namespace pandora_vision
       config.watershed_background_dilation_factor;
     Parameters::Rgb::watershed_background_erosion_factor =
       config.watershed_background_erosion_factor;
-
   }
 
 } // namespace pandora_vision

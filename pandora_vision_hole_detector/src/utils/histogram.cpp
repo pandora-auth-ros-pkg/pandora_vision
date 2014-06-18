@@ -37,6 +37,10 @@
 
 #include "utils/histogram.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -175,7 +179,7 @@ namespace pandora_vision
     }
     else
     {
-      return;
+      histSize[1] = Parameters::Histogram::number_of_value_bins;
     }
 
     // hue varies from 0 to 179, saturation and value from 0 to 255

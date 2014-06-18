@@ -37,6 +37,8 @@
 
 #include "hole_fusion_node/rgb_filters.h"
 #include "hole_fusion_node/filters_resources.h"
+#include "utils/histogram.h"
+#include "utils/parameters.h"
 #include "gtest/gtest.h"
 #include <stdlib.h>
 #include <sys/time.h>
@@ -215,16 +217,17 @@ namespace pandora_vision
           upperLeftSquare +
           middleSquare;
 
-        // Set the colour value for each point of the squares_ image to 50
+        // Construct the squares_ image. The entire image is at a colour of
+        // value approximate the the colour value of the images of walls
         for ( int rows = 0; rows < squares_.rows; rows++ )
         {
           for ( int cols = 0; cols < squares_.cols; cols++ )
           {
             if (squares_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
             {
-              squares_.at< cv::Vec3b >( rows, cols ).val[0] = 255;
-              squares_.at< cv::Vec3b >( rows, cols ).val[1] = 255;
-              squares_.at< cv::Vec3b >( rows, cols ).val[2] = 255;
+              squares_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+              squares_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+              squares_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
             }
           }
         }
@@ -266,13 +269,6 @@ namespace pandora_vision
     const unsigned char rgbIn,
     cv::Mat* image )
   {
-    if ( image->type() != CV_8UC3 )
-    {
-      std::cerr << "Image of invalid type. Please use CV_8UC3. " << std::endl;
-
-      return;
-    }
-
     // Fill the inside of the desired rectangle with the @param rgbIn provided
     for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
@@ -299,13 +295,13 @@ namespace pandora_vision
     const int& x,
     const int& y )
   {
-    // What will be returned: the internal elements of one hole
-    HolesConveyor conveyor;
+    // A single hole
+    HoleConveyor hole;
 
     // The hole's keypoint
     cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back(k);
+    hole.keypoint = k;
 
 
     // The four vertices of the rectangle
@@ -323,7 +319,7 @@ namespace pandora_vision
     rectangle.push_back(vertex_3);
     rectangle.push_back(vertex_4);
 
-    conveyor.rectangles.push_back(rectangle);
+    hole.rectangle = rectangle;
 
 
     // The outline points of the hole will be obtained through the depiction
@@ -350,7 +346,11 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back(outline);
+    hole.outline = outline;
+
+    // Push hole back into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back( hole );
 
     return conveyor;
 
@@ -358,8 +358,8 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::applyFilter
-  TEST_F ( RgbFiltersTest, ApplyFilterTest )
+  //! Tests RgbFilters::applyFilter
+  TEST_F ( RgbFiltersTest, applyFilterTest )
   {
     // Generate the needed resources for an inflation size of value 0
 
@@ -415,7 +415,7 @@ namespace pandora_vision
     for ( int m = 1; m < 3; m++ )
     {
       // The vector of probabilities returned
-      std::vector< float > probabilitiesVector_0( conveyor.keyPoints.size(), 0.0 );
+      std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
       std::vector< std::string > msgs;
       std::vector< cv::Mat > imgs;
       cv::MatND histogram;
@@ -513,7 +513,7 @@ namespace pandora_vision
 
     for ( int m = 1; m < 3; m++ )
     {
-      std::vector< float > probabilitiesVector_10( conveyor.keyPoints.size(), 0.0 );
+      std::vector< float > probabilitiesVector_10( conveyor.size(), 0.0 );
       std::vector< std::string > msgs;
       std::vector< cv::Mat > imgs;
       cv::MatND histogram;
@@ -554,16 +554,16 @@ namespace pandora_vision
         EXPECT_EQ ( 0.0, probabilitiesVector_10[0] );
         EXPECT_EQ ( 0.0, probabilitiesVector_10[1] );
         EXPECT_EQ ( 0.0, probabilitiesVector_10[2] );
-        EXPECT_LT ( 0.9, probabilitiesVector_10[3] );
-        EXPECT_LT ( 0.9, probabilitiesVector_10[4] );
+        EXPECT_LT ( 0.8, probabilitiesVector_10[3] );
+        EXPECT_LT ( 0.8, probabilitiesVector_10[4] );
       }
     }
   }
 
 
 
-  // Test RgbFilters::checkHoles
-  TEST_F ( RgbFiltersTest, CheckHolesTest )
+  // Tests RgbFilters::checkHoles
+  TEST_F ( RgbFiltersTest, checkHolesTest )
   {
     // Generate the needed resources for an inflation size of value 0
 
@@ -615,21 +615,18 @@ namespace pandora_vision
       rectanglesIndices_0,
       &intermediatePointsImageVector_0 );
 
-
+    // Generate the histogram of walls
     cv::MatND histogram;
+    Histogram::getHistogram
+      ( &histogram, Parameters::Histogram::secondary_channel );
 
     // Apply all active filters and obtain a 2D vector containing the
     // probabilities of validity of each candidate hole, produced by all
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_0(
       4, // Four rgb filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
-    // Set the execution order for ease of testing
-    Parameters::HoleFusion::run_checker_color_homogeneity = 1;
-    Parameters::HoleFusion::run_checker_luminosity_diff = 2;
-    Parameters::HoleFusion::run_checker_texture_diff = 0;
-    Parameters::HoleFusion::run_checker_texture_backproject = 0;
 
     // Run RgbFilters::applyFilter
     RgbFilters::checkHoles(
@@ -726,13 +723,7 @@ namespace pandora_vision
     // active filters
     std::vector<std::vector<float> > probabilitiesVector2D_10(
       4, // Four rgb filters in total
-      std::vector< float >( conveyor.keyPoints.size(), 0.0 ) );
-
-    // Set the execution order for ease of testing
-    Parameters::HoleFusion::run_checker_color_homogeneity = 1;
-    Parameters::HoleFusion::run_checker_luminosity_diff = 2;
-    Parameters::HoleFusion::run_checker_texture_diff = 0;
-    Parameters::HoleFusion::run_checker_texture_backproject = 0;
+      std::vector< float >( conveyor.size(), 0.0 ) );
 
     // Run RgbFilters::applyFilter
     RgbFilters::checkHoles(
@@ -770,16 +761,16 @@ namespace pandora_vision
         EXPECT_EQ ( 0.0, probabilitiesVector2D_10[f][0] );
         EXPECT_EQ ( 0.0, probabilitiesVector2D_10[f][1] );
         EXPECT_EQ ( 0.0, probabilitiesVector2D_10[f][2] );
-        EXPECT_LT ( 0.9, probabilitiesVector2D_10[f][3] );
-        EXPECT_LT ( 0.9, probabilitiesVector2D_10[f][4] );
+        EXPECT_LT ( 0.8, probabilitiesVector2D_10[f][3] );
+        EXPECT_LT ( 0.8, probabilitiesVector2D_10[f][4] );
       }
     }
   }
 
 
 
-  // Test RgbFilters::checkHolesColorHomogeneity
-  TEST_F ( RgbFiltersTest, CheckHolesColorHomogeneityTest )
+  // Tests RgbFilters::checkHolesColorHomogeneity
+  TEST_F ( RgbFiltersTest, checkHolesColorHomogeneityTest )
   {
     // Generate the needed resources
     std::vector<cv::Mat> holesMasksImageVector;
@@ -789,12 +780,11 @@ namespace pandora_vision
       &holesMasksImageVector );
 
     // The vector of probabilities returned
-    std::vector<float> probabilitiesVector( conveyor.keyPoints.size(), 0.0 );
+    std::vector<float> probabilitiesVector( conveyor.size(), 0.0 );
     std::vector<std::string> msgs;
 
     // Run RgbFilters::checkHolesColorHomogeneity
     RgbFilters::checkHolesColorHomogeneity(
-      conveyor,
       squares_,
       holesMasksImageVector,
       &probabilitiesVector,
@@ -812,8 +802,8 @@ namespace pandora_vision
 
 
 
-  //! Test RgbFilters::checkHolesLuminosityDiff
-  TEST_F ( RgbFiltersTest, CheckHolesLuminosityDiffTest )
+  //! Tests RgbFilters::checkHolesLuminosityDiff
+  TEST_F ( RgbFiltersTest, checkHolesLuminosityDiffTest )
   {
     // Generate the needed resources for an inflation size of value 0
 
@@ -848,12 +838,11 @@ namespace pandora_vision
       &intermediatePointsSetVector_0 );
 
     // The vector of probabilities returned
-    std::vector< float > probabilitiesVector_0( conveyor.keyPoints.size(), 0.0 );
+    std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
     std::vector< std::string > msgs;
 
     // Run RgbFilters::checkHolesLuminosityDiff
     RgbFilters::checkHolesLuminosityDiff(
-      conveyor,
       squares_,
       holesMasksSetVector_0,
       intermediatePointsSetVector_0,
@@ -902,12 +891,11 @@ namespace pandora_vision
       &intermediatePointsSetVector_10 );
 
     // The vector of probabilities returned
-    std::vector< float > probabilitiesVector_10( conveyor.keyPoints.size(), 0.0 );
+    std::vector< float > probabilitiesVector_10( conveyor.size(), 0.0 );
     msgs.clear();
 
     // Run RgbFilters::checkHolesLuminosityDiff
     RgbFilters::checkHolesLuminosityDiff(
-      conveyor,
       squares_,
       holesMasksSetVector_10,
       intermediatePointsSetVector_10,
@@ -922,9 +910,323 @@ namespace pandora_vision
     EXPECT_EQ ( 0.0, probabilitiesVector_10[0] );
     EXPECT_EQ ( 0.0, probabilitiesVector_10[1] );
     EXPECT_EQ ( 0.0, probabilitiesVector_10[2] );
-    EXPECT_LT ( 0.9, probabilitiesVector_10[3] );
-    EXPECT_LT ( 0.9, probabilitiesVector_10[4] );
+    EXPECT_LT ( 0.8, probabilitiesVector_10[3] );
+    EXPECT_LT ( 0.8, probabilitiesVector_10[4] );
 
+  }
+
+
+
+  //! Tests RgbFilters::checkHolesTextureBackProject
+  TEST_F ( RgbFiltersTest, checkHolesTextureBackProjectTest )
+  {
+    // Generate the needed resources for an inflation size of value 0
+
+    // The vector of set masks
+    std::vector< std::set< unsigned int > > holesMasksSetVector_0;
+
+    FiltersResources::createHolesMasksSetVector(
+      conveyor,
+      squares_,
+      &holesMasksSetVector_0 );
+
+    // The vectors of inflated rectangles and in-bounds inflated rectangles'
+    // indices
+    std::vector< std::vector< cv::Point2f > > rectanglesVector_0;
+    std::vector< int > rectanglesIndices_0;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      0,
+      &rectanglesVector_0,
+      &rectanglesIndices_0 );
+
+    // The intermediate points vector of sets
+    std::vector<std::set<unsigned int> > intermediatePointsSetVector_0;
+
+    FiltersResources::createIntermediateHolesPointsSetVector(
+      conveyor,
+      squares_,
+      rectanglesVector_0,
+      rectanglesIndices_0,
+      &intermediatePointsSetVector_0 );
+
+    // The vector of probabilities returned
+    std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
+    std::vector< std::string > msgs;
+
+    // Generate the histogram of walls
+    cv::MatND histogram;
+    Histogram::getHistogram
+      ( &histogram, Parameters::Histogram::secondary_channel );
+
+    // Run RgbFilters::checkHolesTextureBackProject
+    RgbFilters::checkHolesTextureBackProject(
+      squares_,
+      histogram,
+      holesMasksSetVector_0,
+      intermediatePointsSetVector_0,
+      rectanglesIndices_0,
+      &probabilitiesVector_0,
+      &msgs);
+
+    // All probabilities amount to zero: the size of each set inside the
+    // intermediatePointsSetVector_0 vector is zero
+    for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+    {
+      EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
+    }
+
+
+    // Generate the needed resources for an inflation size of value 10
+
+    // The vector of set masks
+    std::vector< std::set< unsigned int > > holesMasksSetVector_10;
+
+    FiltersResources::createHolesMasksSetVector(
+      conveyor,
+      squares_,
+      &holesMasksSetVector_10 );
+
+    // The vectors of inflated rectangles and in-bounds inflated rectangles'
+    // indices
+    std::vector< std::vector< cv::Point2f > > rectanglesVector_10;
+    std::vector< int > rectanglesIndices_10;
+
+    FiltersResources::createInflatedRectanglesVector(
+      conveyor,
+      squares_,
+      10,
+      &rectanglesVector_10,
+      &rectanglesIndices_10 );
+
+    // The intermediate points vector of sets
+    std::vector< std::set< unsigned int> > intermediatePointsSetVector_10;
+
+    FiltersResources::createIntermediateHolesPointsSetVector(
+      conveyor,
+      squares_,
+      rectanglesVector_10,
+      rectanglesIndices_10,
+      &intermediatePointsSetVector_10 );
+
+    // The vector of probabilities returned
+    std::vector< float > probabilitiesVector_10( conveyor.size(), 0.0 );
+    msgs.clear();
+
+    // Run RgbFilters::checkHolesTextureBackProject
+    RgbFilters::checkHolesTextureBackProject(
+      squares_,
+      histogram,
+      holesMasksSetVector_10,
+      intermediatePointsSetVector_10,
+      rectanglesIndices_10,
+      &probabilitiesVector_10,
+      &msgs);
+
+    // The inflated rectangles of the lower right and upper right rectangles
+    // are out of the image's bounds.
+    // The upper left rectangle is surrounded by a black rectangle, so there goes
+    // The surrounding rectangle and the middle one are just fine
+    EXPECT_EQ ( 0.0, probabilitiesVector_10[0] );
+    EXPECT_EQ ( 0.0, probabilitiesVector_10[1] );
+    EXPECT_EQ ( 0.0, probabilitiesVector_10[2] );
+    EXPECT_LT ( 0.0, probabilitiesVector_10[3] );
+    EXPECT_LT ( 0.0, probabilitiesVector_10[4] );
+  }
+
+
+
+  //! Tests RgbFilters::checkHolesTextureDiff
+  TEST_F ( RgbFiltersTest, checkHolesTextureDiffTest )
+  {
+    // Histogram generation : secondary channel toggle
+    for ( int sec = 1; sec < 3; sec++ )
+    {
+      Parameters::Histogram::secondary_channel = sec;
+
+      // Generate the needed resources for an inflation size of value 0
+
+      // The vector of image masks
+      std::vector< cv::Mat > holesMasksImageVector_0;
+
+      FiltersResources::createHolesMasksImageVector(
+        conveyor,
+        squares_,
+        &holesMasksImageVector_0 );
+
+      // The vectors of inflated rectangles and in-bounds inflated rectangles'
+      // indices
+      std::vector< std::vector< cv::Point2f > > rectanglesVector_0;
+      std::vector< int > rectanglesIndices_0;
+
+      FiltersResources::createInflatedRectanglesVector(
+        conveyor,
+        squares_,
+        0,
+        &rectanglesVector_0,
+        &rectanglesIndices_0 );
+
+      // The intermediate points vector of images
+      std::vector< cv::Mat > intermediatePointsImageVector_0;
+
+      FiltersResources::createIntermediateHolesPointsImageVector(
+        conveyor,
+        squares_,
+        rectanglesVector_0,
+        rectanglesIndices_0,
+        &intermediatePointsImageVector_0 );
+
+      // There shouldn't be any non-zero pixels inside each mask
+      for ( int i = 0; i < intermediatePointsImageVector_0.size(); i++ )
+      {
+        int nonZero = 0;
+        for ( int rows = 0; rows < HEIGHT; rows++ )
+        {
+          for (int cols = 0; cols < WIDTH; cols++)
+          {
+            if (intermediatePointsImageVector_0[i].at
+              < unsigned char >( rows, cols ) != 0)
+            {
+              nonZero++;
+            }
+          }
+        }
+        EXPECT_EQ ( 0, nonZero );
+      }
+
+      // The vector of probabilities returned
+      std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
+      std::vector< std::string > msgs;
+
+      // Generate the histogram of walls
+      cv::MatND histogram;
+      Histogram::getHistogram
+        ( &histogram, Parameters::Histogram::secondary_channel );
+
+      // Run RgbFilters:checkHolesTextureDiff:
+      RgbFilters::checkHolesTextureDiff(
+        squares_,
+        histogram,
+        holesMasksImageVector_0,
+        intermediatePointsImageVector_0,
+        rectanglesIndices_0,
+        &probabilitiesVector_0,
+        &msgs);
+
+      // All probabilities amount to zero: the size of each set inside the
+      // intermediatePointsImageVector_0 vector is zero
+      for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+      {
+        EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
+      }
+    }
+
+
+    // Histogram generation : secondary channel toggle
+    for ( int sec = 1; sec < 3; sec++ )
+    {
+      Parameters::Histogram::secondary_channel = sec;
+
+      // Generate the needed resources for an inflation size of value 10
+
+      // The vector of set masks
+      std::vector< cv::Mat > holesMasksImageVector_10;
+
+      FiltersResources::createHolesMasksImageVector(
+        conveyor,
+        squares_,
+        &holesMasksImageVector_10 );
+
+      // The vectors of inflated rectangles and in-bounds inflated rectangles'
+      // indices
+      std::vector< std::vector< cv::Point2f > > rectanglesVector_10;
+      std::vector< int > rectanglesIndices_10;
+
+      FiltersResources::createInflatedRectanglesVector(
+        conveyor,
+        squares_,
+        10,
+        &rectanglesVector_10,
+        &rectanglesIndices_10 );
+
+      // The intermediate points vector of images
+      std::vector< cv::Mat > intermediatePointsImageVector_10;
+
+      FiltersResources::createIntermediateHolesPointsImageVector(
+        conveyor,
+        squares_,
+        rectanglesVector_10,
+        rectanglesIndices_10,
+        &intermediatePointsImageVector_10 );
+
+      // There should be more than zero non-zero pixels inside each mask
+      for ( int i = 0; i < intermediatePointsImageVector_10.size(); i++ )
+      {
+        int nonZero = 0;
+        for ( int rows = 0; rows < HEIGHT; rows++ )
+        {
+          for (int cols = 0; cols < WIDTH; cols++)
+          {
+            if (intermediatePointsImageVector_10[i].at
+              < unsigned char >( rows, cols ) != 0)
+            {
+              nonZero++;
+            }
+          }
+        }
+        EXPECT_LT ( 0, nonZero );
+      }
+
+      // The vector of probabilities returned
+      std::vector< float > probabilitiesVector_10( conveyor.size(), 0.0 );
+      std::vector< std::string > msgs;
+
+      // Set the texture threshold to 0.9, or else all probabilities would be
+      // equal to zero
+      Parameters::HoleFusion::match_texture_threshold = 0.9;
+
+      // Generate the histogram of walls
+      cv::MatND histogram;
+      Histogram::getHistogram
+        ( &histogram, Parameters::Histogram::secondary_channel );
+
+      // Run RgbFilters:checkHolesTextureDiff:
+      RgbFilters::checkHolesTextureDiff(
+        squares_,
+        histogram,
+        holesMasksImageVector_10,
+        intermediatePointsImageVector_10,
+        rectanglesIndices_10,
+        &probabilitiesVector_10,
+        &msgs);
+
+      if ( sec == 1 )
+      {
+        for ( int p = 0; p < 5; p++ )
+        {
+          // For some reason, using the saturation as the secondary channel for
+          // the generation of the histograms, gives all probabilities
+          // equal to zero. Crappy behaviour.
+          EXPECT_EQ ( 0.0, probabilitiesVector_10[p] );
+        }
+      }
+
+      if ( sec == 2 )
+      {
+        // The inflated rectangles of the lower right and upper right rectangles
+        // are out of the image's bounds.
+        // The upper left rectangle is surrounded by a black rectangle,
+        // so there goes.
+        // The surrounding rectangle and the middle one are just fine
+        EXPECT_EQ ( 0.0, probabilitiesVector_10[0] );
+        EXPECT_EQ ( 0.0, probabilitiesVector_10[1] );
+        EXPECT_EQ ( 0.0, probabilitiesVector_10[2] );
+        EXPECT_LT ( 0.0, probabilitiesVector_10[3] );
+        EXPECT_LT ( 0.0, probabilitiesVector_10[4] );
+      }
+    }
   }
 
 } // namespace pandora_vision

@@ -91,7 +91,7 @@ namespace pandora_vision
           &conveyor );
 
         // In total, there should be three holes
-        ASSERT_EQ ( 3, HolesConveyorUtils::size( conveyor ) );
+        ASSERT_EQ ( 3, conveyor.size() );
 
       }
 
@@ -123,13 +123,13 @@ namespace pandora_vision
     const int& x,
     const int& y )
   {
-    // What will be returned: the internal elements of one hole
-    HolesConveyor conveyor;
+    // A single hole
+    HoleConveyor hole;
 
     // The hole's keypoint
     cv::KeyPoint k ( upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    conveyor.keyPoints.push_back( k );
+    hole.keypoint = k;
 
 
     // The four vertices of the rectangle
@@ -147,7 +147,7 @@ namespace pandora_vision
     rectangle.push_back( vertex_3 );
     rectangle.push_back( vertex_4 );
 
-    conveyor.rectangles.push_back(rectangle);
+    hole.rectangle = rectangle;
 
 
     // The outline points of the hole will be obtained through the depiction
@@ -174,7 +174,11 @@ namespace pandora_vision
       }
     }
 
-    conveyor.outlines.push_back( outline );
+    hole.outline = outline;
+
+    // Push back hole into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back( hole );
 
     return conveyor;
 
@@ -182,8 +186,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createCheckerRequiredVectors
-  TEST_F ( FiltersResourcesTest, CreateCheckerRequiredVectorsTest )
+  //! Tests FiltersResources::createCheckerRequiredVectors
+  TEST_F ( FiltersResourcesTest, createCheckerRequiredVectorsTest )
   {
     // The needed resources
     std::vector< cv::Mat > holesMasksImageVector;
@@ -406,8 +410,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createHolesMasksVectors
-  TEST_F ( FiltersResourcesTest, CreateHolesMasksVectorsTest )
+  //! Tests FiltersResources::createHolesMasksVectors
+  TEST_F ( FiltersResourcesTest, createHolesMasksVectorsTest )
   {
     // The vector of images of masks
     std::vector< cv::Mat > holesMasksImageVector;
@@ -449,7 +453,7 @@ namespace pandora_vision
     // exploring method
     EXPECT_EQ ( 3 * (10000 - 4), nonZero );
 
-    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    for ( int h = 0; h < conveyor.size(); h++ )
     {
       // Each mask should have 100 X 100 points minus the square's four corners
       // due to the nature of the brushfire exploring method
@@ -460,8 +464,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createHolesMasksImageVector
-  TEST_F ( FiltersResourcesTest, CreateHolesMasksImageVectorTest )
+  //! Tests FiltersResources::createHolesMasksImageVector
+  TEST_F ( FiltersResourcesTest, createHolesMasksImageVectorTest )
   {
     // The vector of images of masks
     std::vector< cv::Mat > holesMasksImageVector;
@@ -506,8 +510,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createHolesMasksSetVector
-  TEST_F ( FiltersResourcesTest, CreateHolesMasksSetVectorTest )
+  //! Tests FiltersResources::createHolesMasksSetVector
+  TEST_F ( FiltersResourcesTest, createHolesMasksSetVectorTest )
   {
     // The indices of points inside the holes in conveyor
     std::vector< std::set< unsigned int > > holesMasksSetVector;
@@ -519,7 +523,7 @@ namespace pandora_vision
       &holesMasksSetVector );
 
 
-    for ( int h = 0; h < HolesConveyorUtils::size( conveyor ); h++ )
+    for ( int h = 0; h < conveyor.size(); h++ )
     {
       // Each mask should have 100 X 100 points minus the square's four corners
       // due to the nature of the brushfire exploring method
@@ -545,8 +549,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createInflatedRectanglesVector
-  TEST_F ( FiltersResourcesTest, CreateInflatedRectanglesVectorTest )
+  //! Tests FiltersResources::createInflatedRectanglesVector
+  TEST_F ( FiltersResourcesTest, createInflatedRectanglesVectorTest )
   {
     // The vector holding the inflated rectangles vertices per hole for
     // inflation size equal to zero
@@ -614,8 +618,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createIntermediateHolesPointsVectors
-  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsVectorsTest )
+  //! Tests FiltersResources::createIntermediateHolesPointsVectors
+  TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsVectorsTest )
   {
     // First off, we need to obtain the inflated rectangles vector and the
     // corresponding vector of indices of holes with valid inflated rectangles
@@ -739,8 +743,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createIntermediateHolesPointsImageVector
-  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsImageVectorTest )
+  //! Tests FiltersResources::createIntermediateHolesPointsImageVector
+  TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsImageVectorTest )
   {
     // First off, we need to obtain the inflated rectangles vector and the
     // corresponding vector of indices of holes with valid inflated rectangles
@@ -843,8 +847,8 @@ namespace pandora_vision
 
 
 
-  //! Test FiltersResources::createIntermediateHolesPointsSetVector
-  TEST_F ( FiltersResourcesTest, CreateIntermediateHolesPointsSetVectorTest )
+  //! Tests FiltersResources::createIntermediateHolesPointsSetVector
+  TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsSetVectorTest )
   {
     // First off, we need to obtain the inflated rectangles vector and the
     // corresponding vector of indices of holes with valid inflated rectangles

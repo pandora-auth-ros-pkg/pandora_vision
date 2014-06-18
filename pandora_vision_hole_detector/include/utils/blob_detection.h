@@ -41,7 +41,7 @@
 #include "utils/morphological_operators.h"
 
 /**
-  @namespace vision
+  @namespace pandora_vision
   @brief The main namespace for PANDORA vision
  **/
 namespace pandora_vision
@@ -55,8 +55,8 @@ namespace pandora_vision
     public:
 
       /**
-        @brief Implements the brushfire algorithm for one blob keypoint in
-        order to find its outline points
+        @brief Implements the brushfire algorithm for one blob keypoint
+        in order to find its outline points
         @param[in] inKeyPoint [const cv::KeyPoint&] The keypoint
         @param[in] edgesImage [cv::Mat*] The input image
         @param[out] blobOutlineVector [std::vector<cv::Point2f>*]
@@ -71,8 +71,8 @@ namespace pandora_vision
         float* blobArea);
 
       /**
-        @brief Implements the brushfire algorithm for all blob keypoints in
-        order to find blobs' outlines
+        @brief Implements the brushfire algorithm for all blob keypoints
+        in order to find blobs' outlines
         @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
         @param[in] edgesImage [cv::Mat*] The input image
         @param[out] blobsOutlineVector [std::vector<std::vector<cv::Point2f> >*]
@@ -118,21 +118,27 @@ namespace pandora_vision
         towards which the outline of the blob will be sought,
         or the number of partitions in which the blob will be divided by
         the rays. Same deal.
+        @param[in] findArea [const bool&] Indicates whether to calculate
+        the area of the blob
         @param[out] blobOutlineVector [std::vector<cv::Point2f>*]
         The output vector containing the blobs' (rough approximate) outline
+        @param[out] blobArea [float*] The blob's area. Non-zero if @param
+        findArea true
         @return void
        **/
       static void raycastKeypoint(
         const cv::KeyPoint& inKeyPoint,
         cv::Mat* edgesImage,
         const int& partitions,
-        std::vector<cv::Point2f>* blobOutlineVector);
+        const bool& findArea,
+        std::vector<cv::Point2f>* blobOutlineVector,
+        float* blobArea);
 
       /**
         @brief Implements a raycast algorithm for all blob keypoints in order
         to find blobs' outlines. The output is a vector containing a coherent
         vector of points.
-        @param[in,out] inKeyPoints [std::vector<cv::KeyPoint>*] The keypoints
+        @param[in] inKeyPoints [const std::vector<cv::KeyPoint>&] The keypoints
         @param[in] edgesImage [cv::Mat*] The input image
         @param[in] partitions [const int&] The number of directions
         towards which the outline of the blob will be sought,
@@ -144,7 +150,7 @@ namespace pandora_vision
         @return void
        **/
       static void raycastKeypoints(
-        std::vector<cv::KeyPoint>* inKeyPoints,
+        const std::vector<cv::KeyPoint>& inKeyPoints,
         cv::Mat* edgesImage,
         const int& partitions,
         std::vector<std::vector<cv::Point2f> >* blobsOutlineVector,

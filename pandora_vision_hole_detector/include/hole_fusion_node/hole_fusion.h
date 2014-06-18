@@ -41,6 +41,7 @@
 #include <dirent.h>
 #include <ros/package.h>
 #include <std_msgs/Empty.h>
+#include "state_manager/state_client.h"
 #include "vision_communications/CandidateHolesVectorMsg.h"
 #include "vision_communications/CandidateHoleMsg.h"
 #include "vision_communications/HolesDirectionsVectorMsg.h"
@@ -59,7 +60,7 @@
 #include "hole_fusion_node/hole_merger.h"
 
 /**
-  @namespace vision
+  @namespace pandora_vision
   @brief The main namespace for PANDORA vision
  **/
 namespace pandora_vision
@@ -69,7 +70,7 @@ namespace pandora_vision
     @brief Provides functionalities and methods for fusing holes obtained
     through Depth and RGB analysis
    **/
-  class HoleFusion
+  class HoleFusion : public StateClient
   {
     private:
 
@@ -101,6 +102,23 @@ namespace pandora_vision
       // additional information, in respect to the valid holes topic,
       // pertaining to the valid holes found by the Hole Detector package
       std::string enhancedHolesTopic_;
+
+      // The publisher that the Hole Fusion node uses to request from the
+      // synchronizer node to subscribe to the input point cloud
+      ros::Publisher synchronizerSubscribeToInputPointCloudPublisher_;
+
+      // The name of the topic that the Hole Fusion node uses to request from
+      // the synchronizer node to subscribe to the input point cloud
+      std::string synchronizerSubscribeToInputPointCloudTopic_;
+
+      // The publisher that the Hole Fusion node uses to request from the
+      // synchronizer node to leave its subscription to the input point cloud
+      ros::Publisher synchronizerLeaveSubscriptionToInputPointCloudPublisher_;
+
+      // The name of the topic that the Hole Fusion node uses to request from
+      // the synchronizer node to leave its subscription to the
+      // input point cloud
+      std::string synchronizerLeaveSubscriptionToInputPointCloudTopic_;
 
       // The ROS subscriber for acquisition of candidate holes originated
       // from the depth node
@@ -156,6 +174,9 @@ namespace pandora_vision
       // A histogramm for the texture of walls
       cv::MatND wallsHistogram_;
 
+      // The on/off state of the Hole Detector package
+      bool isOn_;
+
       // The dynamic reconfigure (hole fusion's) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole_detector::
         hole_fusion_cfgConfig> server;
@@ -170,8 +191,10 @@ namespace pandora_vision
         are printed in the console, with an order specified by the
         hole_fusion_cfg of the dynamic reconfigure utility
         @param[in] conveyor [const HolesConveyor&] The conveyor
-        containing candidate holes
-        @return A two dimensional vector containing the probabilities of
+        containing candidate holes that are to be checked against selected
+        filters
+        @return [std::vector<std::vector<float> >]
+        A two dimensional vector containing the probabilities of
         validity of each candidate hole. Each row of it pertains to a specific
         filter applied, each column to a particular hole
        **/
@@ -179,11 +202,18 @@ namespace pandora_vision
         const HolesConveyor& conveyor);
 
       /**
-        @brief Callback for the candidate holes via the depth node
+        @brief Callback for the candidate holes via the depth node.
+
+        This method sets the interpolated depth image and the
+        candidate holes acquired from the depth node.
+        If the rgb and point cloud callback counterparts have done
+        what must be, it resets the number of ready nodes, unlocks
+        the synchronizer and calls for processing of the candidate
+        holes.
         @param[in] depthCandidateHolesVector
         [const vision_communications::CandidateHolesVectorMsg&]
-        The message containing the necessary information to filter hole
-        candidates acquired through the depth node
+        The message containing the necessary information acquired through
+        the depth node
         @return void
        **/
       void depthCandidateHolesCallback(
@@ -219,28 +249,18 @@ namespace pandora_vision
       void getTopicNames();
 
       /**
-        @brief With an input a conveyor of holes, this method, depending on
-        the depth image's interpolation method, has holes assimilating,
-        amalgamating or being connected with holes that can be assimilated,
-        amalgamated or connected with or by them. The interpolation method is
-        a basic criterion for the mode of merging holes because the two
-        filters that verify the validity of each merger are depth-based ones.
-        If there is no valid depth image on which to run these filters, it is
-        sure that the depth sensor is closer to the scene it is witnessing
-        than 0.5-0.6m. In this way of operation, the merging of holes does not
-        consider employing validator filters and simply merges holes that can
-        be merged with each other (assimilated, amalgamated, or connected).
-        @param[in,out] conveyor [HolesConveyor*] The conveyor of holes to be
-        merged with one another, where applicable.
-        @return void
+        @brief Computes the on/off state of the Hole Detector package
+        given a state
+        @param[in] state [const int&] The robot's state
+        @return [bool] True if the hole fusion node's state is set to "on"
        **/
-      void mergeHoles(HolesConveyor* conveyor);
+      bool isHoleDetectorOn(const int& state);
 
       /**
         @brief The function called when a parameter is changed
         @param[in] config
         [const pandora_vision_hole_detector::hole_fusion_cfgConfig&]
-        @param[in] level [const uint32_t] The level (?)
+        @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallback(
@@ -249,16 +269,38 @@ namespace pandora_vision
 
       /**
         @brief Callback for the point cloud that the synchronizer node
-        publishes
-        @param[in] msg [const PointCloudPtr&] The message
-        containing the point cloud
+        publishes.
+
+        This method interpolates the input point cloud so that depth-based
+        filters using it have an integral input and sets it and header-related
+        variables.
+        If the depth and RGB callback counterparts have done
+        what must be, it resets the number of ready nodes, unlocks
+        the synchronizer and calls for processing of the candidate
+        holes.
+        @param[in] msg [const PointCloudPtr&] The message containing
+        the point cloud
         @return void
        **/
       void pointCloudCallback(const PointCloudPtr& msg);
 
       /**
-        @brief Implements a strategy to combine
-        information from both sources in order to accurately find valid holes
+        @brief Implements a strategy to combine information from both
+        the depth and rgb image and holes sources in order to accurately
+        find valid holes.
+
+        It first assimilates all the holes that can be assimilated into other
+        ones, amalgamates holes that can be amalgamated with others and
+        connectes nearby holes with each other. Then, it passes each of the
+        resulting holes through a series of depth-based (if depth analysis
+        is possible) filters and rgb-based filters in order to extract a series
+        of probabilities for each hole. Each probability is a measure of each
+        candidate hole's validity: the more a value of a probability, the more
+        a candidate hole is indeed a hole in space. Next, a selection regime
+        is implemented in order to assess a hole's validity in the totality
+        of the filters it has been through. Finally, information about the
+        valid holes is published, along with enhanced information about them.
+        @param void
         @return void
        **/
       void processCandidateHoles();
@@ -267,13 +309,16 @@ namespace pandora_vision
         @brief Publishes the enhanced holes' information.
         @param[in] conveyor [const HolesConveyor&] The overall unique holes
         found by the depth and RGB nodes.
+        @param[in] validHolesMap [std::map<int, float>*] A map containing the
+        indices of the valid holes inside the conveyor and their respective
+        validity probabilities
         @param[in] interpolationMethod [const int&] The interpolation method
         used. 0 if depth analysis is applicable, 1 or 2 for special cases,
         where the amount of noise in the depth image is overwhelming
         @return void
        **/
       void publishEnhancedHoles (const HolesConveyor& conveyor,
-        const int& interpolationMethod);
+        std::map<int, float>* validHolesMap, const int& interpolationMethod);
 
       /**
         @brief Publishes the valid holes' information.
@@ -288,7 +333,14 @@ namespace pandora_vision
 
       /**
         @brief Callback for the candidate holes via the rgb node
-        @param[in] depthCandidateHolesVector
+
+        This method sets the RGB image and the candidate holes acquired
+        from the rgb node.
+        If the depth and point cloud callback counterparts have done
+        what must be, it resets the number of ready nodes, unlocks
+        the synchronizer and calls for processing of the candidate
+        holes.
+        @param[in] rgbCandidateHolesVector
         [const vision_communications::CandidateHolesVectorMsg&]
         The message containing the necessary information to filter hole
         candidates acquired through the rgb node
@@ -300,9 +352,17 @@ namespace pandora_vision
 
       /**
         @brief Sets the depth values of a point cloud according to the
-        values of a depth image
+        values of a depth image.
+
+        Needed by the depth-based filters that employ a point cloud analysis.
+        The values of the point cloud published by the synchronizer node to
+        the hole fusion node contain the unadulterated values of the point
+        cloud directly obtained by the depth sensor,
+        hence they contain NaNs and zero-value pixels that
+        would otherwise, if not for this method, obstruct the function of the
+        above filters.
         @param[in] inImage [const cv::Mat&] The depth image in CV_32FC1 format
-        @param[out] pointCloudXYZPtr [PointCloudXYZPtr*] The point cloud
+        @param[out] pointCloudPtr [PointCloudPtr*] The point cloud
         @return void
        **/
       void setDepthValuesInPointCloud(const cv::Mat& inImage,
@@ -365,6 +425,29 @@ namespace pandora_vision
         @brief The HoleFusion deconstructor
        **/
       ~HoleFusion(void);
+
+      /**
+        @brief The node's state manager.
+
+        If the current state is set to off, the synchronizer node is not
+        subscribed to the input point cloud. Otherwise, it is. In the event
+        of an "off" state instruction while "on", this method instructs the
+        synchronizer to leave its subscription from the input point cloud.
+        In the event of an "on" state instruction while "off", the this method
+        instructs the synchronizer node to subscribe to the input point cloud
+        and, if no callback of the three is called on the hole fusion node,
+        unlocks the synchronizer, so that normal processing can start/continue.
+        @param[in] newState [const int&] The robot's new state
+        @return void
+       **/
+      void startTransition(int newState);
+
+      /**
+        @brief Completes the transition to a new state
+        @param void
+        @return void
+       **/
+      void completeTransition(void);
 
   };
 

@@ -37,6 +37,10 @@
 
 #include "hole_fusion_node/depth_filters.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -182,9 +186,9 @@ namespace pandora_vision
         }
     }
 
-    for(int i = 0; i < conveyor.keyPoints.size(); i++)
+    for(int i = 0; i < conveyor.size(); i++)
     {
-      if(msgs_.size() == conveyor.keyPoints.size())
+      if(msgs_.size() == conveyor.size())
       {
         finalMsgs.push_back(msgs_[i]);
       }
@@ -353,7 +357,7 @@ namespace pandora_vision
     Timer::start("checkHolesDepthArea", "applyFilter");
     #endif
 
-    for(unsigned int i = 0 ; i < conveyor.keyPoints.size() ; i++)
+    for(unsigned int i = 0 ; i < conveyor.size() ; i++)
     {
       // The mean depth value of the points inside the i-th hole
       float mean = 0.0;
@@ -388,10 +392,6 @@ namespace pandora_vision
       if(low < 0 && high > 0)
       {
         probabilitiesVector->at(i) = 1.0;
-      }
-      else
-      {
-        probabilitiesVector->at(i) = 0.0;
       }
 
       msgs->push_back(TOSTR(low) + std::string(" / ") + TOSTR(high));
@@ -441,7 +441,8 @@ namespace pandora_vision
 
     for(unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
     {
-      float mean = 0;
+      // The mean distance of this hole's bounding box vertices
+      float mean = 0.0;
 
       for(unsigned int j = 0 ; j < 4; j++)
       {
@@ -453,19 +454,41 @@ namespace pandora_vision
 
       mean /= inflatedRectanglesVector[i].size();
 
+      // The difference between the distance of this hole's keypoint and
+      // the mean distance of the vertices of its bounding box
       float value = depthImage.at<float>(
-        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.y,
-        conveyor.keyPoints[inflatedRectanglesIndices[i]].pt.x) - mean;
+        conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.y,
+        conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.x) - mean;
 
-      // The gaussian mean
-      float m = Parameters::HoleFusion::holes_gaussian_mean;
 
-      // The gaussian standard deviation
-      float s = Parameters::HoleFusion::holes_gaussian_stddev;
+      // The keypoint's distance from the depth sensor should be greater than
+      // that of the mean distance of the vertices of the candidate hole's
+      // bounding box
+      if (value > 0)
+      {
+        // The probability is binary. If there is a valid depth difference,
+        // this hole is marked as valid. A tolerance level of 3cm is employed
+        // because of the noise in depth measurements
+        if (Parameters::HoleFusion::depth_difference_probability_assignment_method == 0
+          && value > 0.03)
+        {
+          probabilitiesVector->at(inflatedRectanglesIndices[i]) = 1;
+        }
+        // The probability is gaussian-based. The validity of a hole is a
+        // continuous function based on a normal distribution
+        else if (Parameters::HoleFusion::depth_difference_probability_assignment_method == 1)
+        {
+          // The gaussian mean
+          float m = Parameters::HoleFusion::holes_gaussian_mean;
 
-      // The gaussian probability of this hole being valid
-      probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-        exp(-pow((value - m) / s, 2) / 2);
+          // The gaussian standard deviation
+          float s = Parameters::HoleFusion::holes_gaussian_stddev;
+
+          // The gaussian probability of this hole being valid
+          probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+            exp(-pow((value - m) / s, 2) / 2);
+        }
+      }
 
       msgs->push_back(TOSTR(
           probabilitiesVector->at(inflatedRectanglesIndices[i])));
@@ -526,14 +549,14 @@ namespace pandora_vision
     // Take a pointer on the interpolatedDepthImageEdges image
     unsigned char* ptr = interpolatedDepthImageEdges.ptr();
 
-    for (unsigned int o = 0; o < conveyor.outlines.size(); o++)
+    for (unsigned int i = 0; i < conveyor.size(); i++)
     {
       // The number of non-zero value pixels in the
-      // interpolatedDepthImageEdges image, inside mask o
+      // interpolatedDepthImageEdges image, inside mask i
       int numWhites = 0;
 
-      for (std::set<unsigned int>::iterator it = holesMasksSetVector[o].begin();
-        it != holesMasksSetVector[o].end(); it++)
+      for (std::set<unsigned int>::iterator it = holesMasksSetVector[i].begin();
+        it != holesMasksSetVector[i].end(); it++)
       {
         if (ptr[*it] != 0)
         {
@@ -541,10 +564,13 @@ namespace pandora_vision
         }
       }
 
-      probabilitiesVector->at(o) =
-        static_cast<float>(numWhites) / (holesMasksSetVector[o].size());
+      if (holesMasksSetVector[i].size() > 0)
+      {
+        probabilitiesVector->at(i) =
+          static_cast<float>(numWhites) / (holesMasksSetVector[i].size());
+      }
 
-      msgs->push_back(TOSTR(probabilitiesVector->at(o)));
+      msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 
     #ifdef DEBUG_TIME
@@ -653,18 +679,17 @@ namespace pandora_vision
           }
         }
 
-        probabilitiesVector->at(inflatedRectanglesIndices[i]) =
-          static_cast<float> (maxPoints) / intermediatePointsSetVector[i].size();
+        if (intermediatePointsSetVector[i].size() > 0)
+        {
+          probabilitiesVector->at(inflatedRectanglesIndices[i]) =
+            static_cast<float> (maxPoints) /
+            intermediatePointsSetVector[i].size();
+        }
 
         msgs->push_back(TOSTR(
             probabilitiesVector->at(inflatedRectanglesIndices[i])));
       }
-      else
-      {
-         probabilitiesVector->at(inflatedRectanglesIndices[i]) = 0.0;
 
-        msgs->push_back(TOSTR(0));
-      }
     }
 
     #ifdef DEBUG_TIME
@@ -795,16 +820,10 @@ namespace pandora_vision
       {
         probabilitiesVector->at(inflatedRectanglesIndices[i]) =
           static_cast<float> (maxPoints) / visitedPoints.size();
-
-        msgs->push_back(TOSTR(
-            probabilitiesVector->at(inflatedRectanglesIndices[i])));
       }
-      else
-      {
-        probabilitiesVector->at(inflatedRectanglesIndices[i]) = 0.0;
 
-        msgs->push_back(TOSTR(0));
-      }
+      msgs->push_back(TOSTR(
+          probabilitiesVector->at(inflatedRectanglesIndices[i])));
     }
 
     #ifdef DEBUG_TIME

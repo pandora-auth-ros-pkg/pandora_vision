@@ -45,6 +45,10 @@
 #include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
 #include <pandora_vision_hole_detector/rgb_cfgConfig.h>
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
@@ -128,6 +132,12 @@ namespace pandora_vision
       static float contrast_enhance_alpha;
       static float contrast_enhance_beta;
 
+      // The opencv edge detection method:
+      // 0 for the Canny edge detector
+      // 1 for the Scharr edge detector
+      // 2 for the Sobel edge detector
+      // 3 for the Laplacian edge detector
+      // 4 for mixed Scharr / Sobel edge detection
       static int edge_detection_method;
 
       // Threshold parameters
@@ -197,6 +207,10 @@ namespace pandora_vision
       static int run_checker_texture_backproject;
       static float checker_texture_backproject_threshold;
 
+      // 0 for binary probability assignment on positive depth difference
+      // 1 for gaussian probability assignment on positive depth difference
+      static int depth_difference_probability_assignment_method;
+
       // Plane detection
       static float filter_leaf_size;
       static int max_iterations;
@@ -242,7 +256,6 @@ namespace pandora_vision
       // synchronizer node
       static int HEIGHT;
       static int WIDTH;
-      static int POINT_STEP;
 
       // Depth and RGB images' representation method.
       // 0 if image used is used as obtained from the image sensor
@@ -293,15 +306,12 @@ namespace pandora_vision
 
       // The threshold applied to the backprojection of the RGB image
       // captured by the image sensor
-      static int compute_edges_backprojection_threshold;
+      static int backprojection_threshold;
 
       // Parameters specific to the pyrMeanShiftFiltering method
       static int spatial_window_radius;
       static int color_window_radius;
       static int maximum_level_pyramid_segmentation;
-
-      // Applies advanced blurring to achieve segmentation or normal
-      static int segmentation_blur_method;
 
       // True to posterize the product of the segmentation
       static bool posterize_after_segmentation;

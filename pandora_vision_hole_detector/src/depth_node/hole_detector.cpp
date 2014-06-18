@@ -37,13 +37,22 @@
 
 #include "depth_node/hole_detector.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
   /**
-    @brief Finds the holes provided a depth image in CV_32FC1 format
+    @brief Finds holes, provided a depth image in CV_32FC1 format.
+
+    First, the edges of the interpolated depth image are detected.
+    Then, keypoints of blobs are detected in the above image.
+    Finally, the potential holes' outline is found, along with the bounding
+    boxes of those outlines.
     @param[in] interpolatedDepthImage [const cv::Mat&] The interpolated
     depth image in CV_32FC1 format
-    @return HolesConveyor The struct that contains the holes
+    @return HolesConveyor The struct that contains the holes found
    **/
   HolesConveyor HoleDetector::findHoles(const cv::Mat& interpolatedDepthImage)
   {
@@ -60,12 +69,12 @@ namespace pandora_vision
       msg += " : Interpolated depth image";
       msgs.push_back(msg);
       cv::Mat tmp = Visualization::scaleImageForVisualization(
-        interpolatedDepthImage, 0);
+        interpolatedDepthImage, Parameters::Image::scale_method);
       imgs.push_back(tmp);
     }
     #endif
 
-    // Edge computation
+    // Detect edges in the interpolatedDepth image
     cv::Mat denoisedDepthImageEdges;
     EdgeDetection::computeDepthEdges(interpolatedDepthImage,
       &denoisedDepthImageEdges);
@@ -101,19 +110,19 @@ namespace pandora_vision
     #endif
 
     // The final vectors of keypoints, rectangles and blobs' outlines.
-    struct HolesConveyor conveyor;
+    HolesConveyor conveyor;
 
     /**
       Get me blobs that their center point is inside the image,
-      their bounding box is also inside the image, and their area is
+      their bounding box is also entirely inside the image, and their area is
       greater than Parameters::bounding_box_min_area_threshold.
       Each keypoint is associated with exactly one rectangle.
       The end product here is a set of keypoints, a set of rectangles that
       enclose them and a set of the outlines of the blobs found, all tightly
-      packed in the conveyor object.
+      packed in the conveyor struct.
      **/
     HoleFilters::validateBlobs(
-      &keyPoints,
+      keyPoints,
       &denoisedDepthImageEdges,
       Parameters::Outline::outline_detection_method,
       &conveyor);
@@ -128,11 +137,9 @@ namespace pandora_vision
         Visualization::showHoles(
           msg,
           interpolatedDepthImage,
+          conveyor,
           -1,
-          conveyor.keyPoints,
-          conveyor.rectangles,
-          std::vector<std::string>(),
-          conveyor.outlines)
+          std::vector<std::string>())
         );
     }
     #endif
@@ -140,6 +147,14 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     if(Parameters::Debug::show_find_holes) // Debug
     {
+      // A vector of keypoints
+      std::vector<cv::KeyPoint> keypointsVector;
+
+      for (int i = 0; i < conveyor.size(); i++)
+      {
+        keypointsVector.push_back(conveyor.holes[i].keypoint);
+      }
+
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Keypoints sent to hole_fusion");
       msgs.push_back(msg);
@@ -148,7 +163,7 @@ namespace pandora_vision
           msg,
           interpolatedDepthImage,
           -1,
-          conveyor.keyPoints)
+          keypointsVector)
         );
     }
     if(Parameters::Debug::show_find_holes)

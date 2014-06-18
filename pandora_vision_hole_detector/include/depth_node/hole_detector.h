@@ -38,13 +38,11 @@
 #ifndef DEPTH_NODE_HOLE_DETECTOR_H
 #define DEPTH_NODE_HOLE_DETECTOR_H
 
-#define SHOW_DEBUG_IMAGE
-
 #include "utils/holes_conveyor.h"
 #include "utils/hole_filters.h"
 
 /**
-  @namespace vision
+  @namespace pandora_vision
   @brief The main namespace for PANDORA vision
  **/
 namespace pandora_vision
@@ -60,9 +58,14 @@ namespace pandora_vision
 
       /**
         @brief Finds the holes provided a depth image in CV_32FC1 format
+
+        First, the edges of the interpolated depth image are detected.
+        Then, keypoints of blobs are detected in the above image.
+        Finally, the potential holes' outline is found, along with the bounding
+        boxes of those outlines.
         @param[in] interpolatedDepthImage [const cv::Mat&] The interpolated
         depth image in CV_32FC1 format
-        @return HolesConveyor The struct that contains the holes
+        @return HolesConveyor The struct that contains the holes found
        **/
       static HolesConveyor findHoles(const cv::Mat& interpolatedDepthImage);
 

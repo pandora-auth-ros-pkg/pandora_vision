@@ -4,6 +4,22 @@ project(pandora_vision_hole_detector)
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 
+# Uncomment for generating coverage statistics.
+# CMAKE_BUILD_TYPE should not be set.
+# CXX should be set to g++, NOT clang.
+#
+# Usage:
+# step 1: cd into build directory
+# step 2: lcov --directory . --zerocounters
+# step 3: cd ..
+# step 4: catkin_make
+# step 5: catkin_make run_tests -DCMAKE_BUILD_TYPE=Coverage
+# step 6: cd into build directory
+# step 7: lcov --capture --directory . --output-file coverage.info
+# step 8: genhtml coverage.info
+#SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
+#SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   vision_communications
@@ -167,8 +183,11 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   test/unit/utils/blob_detection_test.cpp
   test/unit/utils/edge_detection_test.cpp
   test/unit/utils/hole_filters_test.cpp
+  test/unit/utils/holes_conveyor_test.cpp
+  test/unit/utils/message_conversions_test.cpp
   test/unit/utils/morphological_operators_test.cpp
   test/unit/utils/noise_elimination_test.cpp
+  test/unit/utils/wavelets_test.cpp
 
   ################## depth node ###################
   test/unit/depth_node/hole_detector_test.cpp

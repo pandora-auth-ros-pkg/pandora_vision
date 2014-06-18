@@ -193,13 +193,6 @@ namespace pandora_vision
     const int& y,
     cv::Mat* image )
   {
-    if ( image->type() != CV_32FC1 )
-    {
-      std::cerr << "Image of invalid type. Please use CV_32FC1" << std::endl;
-
-      return;
-    }
-
     // Fill the inside of the desired rectangle with the @param value provided
     for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
@@ -212,8 +205,8 @@ namespace pandora_vision
 
 
 
-  // Test NoiseElimination::brushfireNear
-  TEST_F ( NoiseEliminationTest, BrushfireNearTest )
+  // Tests NoiseElimination::brushfireNear
+  TEST_F ( NoiseEliminationTest, brushfireNearTest )
   {
     cv::Mat image;
 
@@ -261,10 +254,9 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::brushfireNearStep
-  TEST_F ( NoiseEliminationTest, BrushfireNearStepTest )
+  //! Tests NoiseElimination::brushfireNearStep
+  TEST_F ( NoiseEliminationTest, brushfireNearStepTest )
   {
-
     // Uncomment for visual inspection
     /*
      *Visualization::showScaled
@@ -303,12 +295,86 @@ namespace pandora_vision
 
     // All pixels should be still black
     ASSERT_EQ ( 0, cv::countNonZero ( blank ) );
+
+
+    // Test an image with square concentrations of noise in each corner of it.
+    // The rest of the pixels are at random values
+    cv::Mat corners_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
+
+    unsigned int seed = 0;
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        corners_.at< float >( rows, cols ) =
+          static_cast<float>( rand_r(&seed) % 1000 ) / 1000;
+      }
+    }
+
+
+    // upper left
+    for ( int rows = 1; rows < 100; rows++ )
+    {
+      for ( int cols = 1; cols < 100; cols++ )
+      {
+        corners_.at< float >( rows, cols ) = 0.0;
+      }
+    }
+
+    // lower left
+    for ( int rows = HEIGHT - 1 - 100; rows < HEIGHT - 1; rows++ )
+    {
+      for ( int cols = 1; cols < 100; cols++ )
+      {
+        corners_.at< float >( rows, cols ) = 0.0;
+      }
+    }
+
+    // upper right
+    for ( int rows = 1; rows < 100; rows++ )
+    {
+      for ( int cols = WIDTH - 1 - 100; cols < WIDTH - 1; cols++ )
+      {
+        corners_.at< float >( rows, cols ) = 0.0;
+      }
+    }
+
+    // lower right
+    for ( int rows = HEIGHT - 1 - 100; rows < HEIGHT - 1; rows++ )
+    {
+      for ( int cols = WIDTH - 1 - 100; cols < WIDTH - 1; cols++ )
+      {
+        corners_.at< float >( rows, cols ) = 0.0;
+      }
+    }
+
+
+
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( corners_.at< float >( rows, cols ) == 0.0 )
+        {
+          // The number of non zero pixels before calling any brushfireNearStep
+          int nonZerosOne = cv::countNonZero( corners_ );
+
+          // Run NoiseElimination::brushfireNearStep on image corners_
+          NoiseElimination::brushfireNearStep ( &corners_, rows * WIDTH + cols );
+
+          // The number of non zero pixels after removing the upper left noise
+          // concentration
+          int nonZerosTwo = cv::countNonZero( corners_ );
+
+          EXPECT_LT ( nonZerosOne, nonZerosTwo );
+        }
+      }
+    }
   }
 
 
-
-  //! Test NoiseElimination::chooseInterpolationMethod
-  TEST_F ( NoiseEliminationTest, ChooseInterpolationMethodTest )
+  //! Tests NoiseElimination::chooseInterpolationMethod
+  TEST_F ( NoiseEliminationTest, chooseInterpolationMethodTest )
   {
     // On interpolationMethod0, Parameters::Depth::interpolation_method
     // should be equal to 0
@@ -337,8 +403,8 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::interpolateImageBorders
-  TEST_F ( NoiseEliminationTest, InterpolateImageBordersTest )
+  //! Tests NoiseElimination::interpolateImageBorders
+  TEST_F ( NoiseEliminationTest, interpolateImageBordersTest )
   {
     // Create an image whose borders are non-zero but the rest of it is
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
@@ -372,8 +438,8 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::interpolateZeroPixel
-  TEST_F ( NoiseEliminationTest, InterpolateZeroPixelTest )
+  //! Tests NoiseElimination::interpolateZeroPixel
+  TEST_F ( NoiseEliminationTest, interpolateZeroPixelTest )
   {
     // The return value of NoiseElimination::interpolateZeroPixel
     int ret;
@@ -421,8 +487,8 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::interpolation
-  TEST_F ( NoiseEliminationTest, InterpolationTest )
+  //! Tests NoiseElimination::interpolation
+  TEST_F ( NoiseEliminationTest, interpolationTest )
   {
     cv::Mat interpolated = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
@@ -446,8 +512,8 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::interpolationIteration
-  TEST_F ( NoiseEliminationTest, InterpolationIterationTest )
+  //! Tests NoiseElimination::interpolationIteration
+  TEST_F ( NoiseEliminationTest, interpolationIterationTest )
   {
     // The number of zero pixels before the call to interpolationIteration
     int nonZerosBefore = cv::countNonZero( interpolationMethod2 );
@@ -465,9 +531,12 @@ namespace pandora_vision
 
 
 
-  //! Test NoiseElimination::performeNoiseElimination
-  TEST_F ( NoiseEliminationTest, PerformeNoiseEliminationTest )
+  //! Tests NoiseElimination::performeNoiseElimination
+  TEST_F ( NoiseEliminationTest, performeNoiseEliminationTest )
   {
+    // Remove the noise in interpolationMethod0
+    Parameters::Depth::interpolation_method = 0;
+
     // The interpolated input image
     cv::Mat interpolated;
 
@@ -477,12 +546,32 @@ namespace pandora_vision
 
     // There shouldn't be any black pixels in interpolated
     EXPECT_EQ ( WIDTH * HEIGHT, cv::countNonZero( interpolated ) );
+
+    // Remove the noise in interpolationMethod1
+    Parameters::Depth::interpolation_method = 1;
+
+    // Run NoiseElimination::performeNoiseElimination
+    NoiseElimination::performNoiseElimination(
+      interpolationMethod1, &interpolated );
+
+    // There shouldn't be any black pixels in interpolated
+    EXPECT_EQ ( WIDTH * HEIGHT, cv::countNonZero( interpolated ) );
+
+    // Remove the noise in interpolationMethod2
+    Parameters::Depth::interpolation_method = 2;
+
+    // Run NoiseElimination::performeNoiseElimination
+    NoiseElimination::performNoiseElimination(
+      interpolationMethod2, &interpolated );
+
+    // There shouldn't be any black pixels in interpolated
+    EXPECT_EQ ( WIDTH * HEIGHT, cv::countNonZero( interpolated ) );
   }
 
 
 
-  //! Test NoiseElimination::transformNoiseToWhite
-  TEST_F ( NoiseEliminationTest, TransformNoiseToWhiteTest )
+  //! Tests NoiseElimination::transformNoiseToWhite
+  TEST_F ( NoiseEliminationTest, transformNoiseToWhiteTest )
   {
     // Count how many noisy pixels there are on interpolationMethod0
     int numZero = 0;

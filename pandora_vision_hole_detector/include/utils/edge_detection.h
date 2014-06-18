@@ -42,7 +42,7 @@
 #include "utils/morphological_operators.h"
 
 /**
-  @namespace vision
+  @namespace pandora_vision
   @brief The main namespace for PANDORA vision
  **/
 namespace pandora_vision
@@ -80,9 +80,9 @@ namespace pandora_vision
     public:
 
       /**
-        @brief Applies the Canny edge transform
-        @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
-        @param[out] outImage [cv::Mat*] The processed image in CV_8UC1 format
+        @brief Applies the Canny edge detector
+        @param[in] inImage [const cv::Mat&] Input image in CV_8U depth
+        @param[out] outImage [cv::Mat*] The processed image in CV_8U depth
         @return void
        **/
       static void applyCanny (const cv::Mat& inImage, cv::Mat* outImage);
@@ -120,27 +120,13 @@ namespace pandora_vision
       static void applyEdgeContamination (cv::Mat* inImage);
 
       /**
-        @brief Apply the anisotropic diffusion technique as to facilitate the
-        edge detection of low contrast regions.
-        @param[in] inImage [const cv::Mat &] The input image in CV_32FC1 format
-        @param[out] outImage [cv::Mat*] The output image in CV_32FC1 format
-        @param[in] iterations [const int&] The number of iterations to execute.
-        @param[in] method [const int&] Diffusion equation 0 or 1. see below for
-        more
-        @documentation http://www.csse.uwa.edu.au/~pk/research/matlabfns/
-        @return void
-       **/
-      static void anisotropicDiffusion (const cv::Mat& inImage,
-        cv::Mat* outImage, const int& iterations, const int& method);
-
-      /**
         @brief Takes as input a depth image containing floats,
         locates the edges in it and tries to clear as much noise as possible
         in the edges image. As noise we identify everything that is not,
         or does not look like, hole-like shapes,
         with the knowledge that these shapes might be open curves, or that
-        holes-like shapes in a edge image are not connected to anything else,
-        ergo they are standalone shapes in it.
+        holes-like shapes in an image of edges are not connected to
+        anything else, ergo they are standalone shapes in it.
         It outputs a binary image that contains areas that we wish to validate
         as holes.
         @param[in] inImage [const cv::Mat&] The depth image extracted from the
@@ -157,16 +143,14 @@ namespace pandora_vision
         in the edges image. As noise we identify everything that is not,
         or does not look like, hole-like shapes,
         with the knowledge that these shapes might be open curves, or that
-        holes-like shapes in a edge image are not connected to anything else,
-        ergo they are standalone shapes in it.
+        holes-like shapes in an image of edges are not connected to
+        anything else, ergo they are standalone shapes in it.
         It outputs a binary image that contains areas that we wish to validate
         as holes.
         @param[in] inImage [const cv::Mat&] The RGB image of type CV_32FC1
         @param[in] extractionMethod [const int&] Chooses by which process the
         edges will be extracted. 0 for extraction via segmentation,
         1 for extraction via backprojection and watersheding
-        @param[in] segmentationMethod [const int&] The method by which the
-        segmentation of @param inImage will be performed.
         @param[in] inHistogram [const cv::MatND&] The model histogram needed
         in order to obtain the backprojection of @param inImage
         @param[out] edges [cv::Mat*] The final denoised edges image that
@@ -174,17 +158,19 @@ namespace pandora_vision
         @return void
        **/
       static void computeRgbEdges(const cv::Mat& inImage,
-        const int& extractionMethod, const int& segmentationMethod,
-        const cv::MatND& inHistogram, cv::Mat* edges);
+        const int& extractionMethod,
+        const cv::MatND& inHistogram,
+        cv::Mat* edges);
 
       /**
-        @brief Connects each point of a number of pair of points  with a line or
-        an elliptic arc
+        @brief Connects each point of a number of pair of points with a line
+        or an elliptic arc
         @param[in,out] inImage [cv::Mat*] The image whose selected points will
         be connected and line or the elliptic arc drawn on
         @param[in] pairs [const std::vector<std::pair<GraphNode,GraphNode> >&]
         The vector of pair points
-        @param[in] method [const int&] Denotes the connection type. 0 for line,
+        @param[in] method [const int&] Denotes the connection type.
+        0 for line,
         1 for elliptic arc
         @return void
        **/
@@ -193,16 +179,30 @@ namespace pandora_vision
         const int& method);
 
       /**
-        @brief Enhances an image's contrast, regardless of its format.
-        @param[in] inImage [const cv::Mat &] The input image
-        @param[out] outImage [cv::Mat*] The contrast-enhanced image
-        @return void
-       **/
-      static void enhanceContrast(const cv::Mat& inImage, cv::Mat* outImage);
+        @brief Takes an input image of edges of CV_8U depth
+        and tries to isolate hole-like shapes so as to facilitate
+        the blob detection process.
 
-      /**
-        @brief Takes an input image in unsigned char format and tries to isolate
-        hole-like shapes so as to facilitate the blob detection process
+        The execution flow is as follows: first, all pixels connected
+        directly or indirectly to the image's borders are eliminated,
+        leaving behind all standalone shapes and curves.
+        Next, all open-ended curves are contidionally closed.
+        The reason behind this is that the open-ended curves might be
+        edges of holes that have either been smudged by the appliance of
+        a threshold after the production of edges, or that have in the first
+        place not been detected due to low contrast in a hole's borders.
+        After the connection of the end-points of open-ended shapes,
+        pruning is applied to get rid of all minor open-ended curves not
+        closed by the connection process. The result here is a binary image
+        featuring only closed shapes, but whose insides may be cluttered with
+        non-zero value pixels, since the edges of what may be inside a hole
+        are still detected and present in the current product image.
+        What we want, based on this image, is to find only the external
+        limits of each closed curve, because these pixels will be the
+        outline of each blob. A method is then invoked to do just so.
+        The end product of this method is a binary image with closed curves.
+        Everything inside each closed curve is black and everything outside
+        all closed curves is void.
         @param[in,out] img [cv::Mat*] The input image in unsigned char format
         @return void
        **/
@@ -235,9 +235,12 @@ namespace pandora_vision
 
       /**
         @brief With an binary input image (quantized in 0 and 255 levels),
-        this function fills closed regions, at first, and then extracts the
-        outline of each region. Used when there is a closed region with garbage
-        pixels with a value of 255 within it.
+        this function fills closed regions, at first, and then extracts
+        the outline of each region. Used when there is a closed region
+        with garbage pixels with a value of 255 within it.
+        Caution: The outline of ALL shapes is computed: if there are
+        closed shapes inside other closed shapes, their outline is detected
+        and included in the output image.
         @param[in,out] inImage [cv::Mat*] The input image
         @return void
        **/
@@ -259,9 +262,9 @@ namespace pandora_vision
 
       /**
         @brief This method takes as input a RGB image and uses
-        its backprojection (which is based on the precalculated
-        histogram histogram_) in order to identify whole regions whose
-        histogram matches histogram_, although the backprojection image
+        its backprojection, which is based on the precalculated
+        histogram inHistogram, in order to identify whole regions whose
+        histogram matches inHistogram, albeit the backprojection image
         might be sparcely populated. After the identification of the regions
         of interest, this method extracts their edges and returns the image
         depicting them.
@@ -280,25 +283,32 @@ namespace pandora_vision
         and extracts its edges.
         @param[in] inImage [const cv::Mat&] The input RGB image,
         of type CV_8UC3
-        @param[in] segmentationMethod [const int&] The method by which the
-        segmentation of @param inImage will be performed.
         @param[out] outImage [cv::Mat*] The output edges image,
         of type CV_8UC1
         @return void
        **/
       static void produceEdgesViaSegmentation (const cv::Mat& inImage,
-        const int& segmentationMethod, cv::Mat* edges);
+        cv::Mat* edges);
 
       /**
         @brief Segments a RGB image
         @param[in] inImage [const cv::Mat&] The RGB image to be segmented
-        @param[in] segmentationMethod [const int&] The method by which the
-        segmentation of @param inImage will be performed.
         @param[out] outImage [cv::Mat*] The posterized image
         @return void
        **/
-      static void segmentation(const cv::Mat& inImage,
-        const int& segmentationMethod, cv::Mat* outImage);
+      static void segmentation(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Watersheds a RGB image based on its backprojection.
+        @param[in] inImage [cv::Mat&] The input RGB image in CV_8UC3 format
+        @param[in] backproject [cv::Mat&] The backprojection of inImage
+        @param[in] edges [const bool&] This parameter determines whether
+        outImage will be an image containing the edges of inImage (true)
+        or an image containing the homogenous backprojection of it
+        @param[out] outImage [cv::Mat*] The output image in CV_8UC1 format
+       **/
+      static void watershedViaBackprojection(const cv::Mat& inImage,
+        const cv::Mat& backproject, const bool& edges, cv::Mat* outImage);
 
   };
 

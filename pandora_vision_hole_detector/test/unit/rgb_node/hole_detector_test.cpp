@@ -74,8 +74,6 @@ namespace pandora_vision
         WIDTH = 640;
         HEIGHT = 480;
 
-
-
         // Construct the lower right square
         cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 
@@ -158,25 +156,11 @@ namespace pandora_vision
     const unsigned char rgbIn,
     cv::Mat* image )
   {
-    if ( image->type() != CV_8UC3 )
-    {
-      std::cerr << "Image of invalid type. Please use CV_8UC3" << std::endl;
-
-      return;
-    }
-
     // Fill the inside of the desired rectangle with the @param rgbIn provided
     for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
       for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
       {
-        if (rows == upperLeft.y || rows == upperLeft.y + y - 1
-          || cols == upperLeft.x || cols == upperLeft.x + x - 1)
-        {
-          image->at< cv::Vec3b >( rows, cols ).val[0] = 1;
-          image->at< cv::Vec3b >( rows, cols ).val[1] = 1;
-          image->at< cv::Vec3b >( rows, cols ).val[2] = 1;
-        }
         image->at< cv::Vec3b >( rows, cols ).val[0] = rgbIn;
         image->at< cv::Vec3b >( rows, cols ).val[1] = rgbIn;
         image->at< cv::Vec3b >( rows, cols ).val[2] = rgbIn;
@@ -186,8 +170,8 @@ namespace pandora_vision
 
 
 
-  //! Test HoleDetector::findHoles
-  TEST_F ( HoleDetectorTest, FindHolesTest )
+  //! Tests HoleDetector::findHoles
+  TEST_F ( HoleDetectorTest, findHolesTest )
   {
     // Obtain the histogram of images of walls
     cv::MatND wallsHistogram;
@@ -202,7 +186,7 @@ namespace pandora_vision
       HoleDetector::findHoles ( squares_, wallsHistogram );
 
     // The number of keypoints found
-    int size = HolesConveyorUtils::size( conveyor );
+    int size = conveyor.size();
 
     // There should be one keypoint: the one of the upper left square.
     // The lower right square and the upper right square are
@@ -215,14 +199,14 @@ namespace pandora_vision
     {
       // The location of the keypoint should near the center of the square
       // in which it lies
-      EXPECT_NEAR ( conveyor.keyPoints[k].pt.x,
-        conveyor.rectangles[k][0].x + 50, 1 );
+      EXPECT_NEAR ( conveyor.holes[k].keypoint.pt.x,
+        conveyor.holes[k].rectangle[0].x + 50, 1 );
 
       // The hole should have exactly four vertices
-      EXPECT_EQ ( 4, conveyor.rectangles[k].size() );
+      EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
       // There should be 400 outline points
-      EXPECT_EQ ( 400, conveyor.outlines[k].size() );
+      EXPECT_EQ ( 400, conveyor.holes[k].outline.size() );
     }
 
 
@@ -236,7 +220,7 @@ namespace pandora_vision
     conveyor = HoleDetector::findHoles ( squares_, wallsHistogram );
 
     // The number of keypoints found
-    size = HolesConveyorUtils::size( conveyor );
+    size = conveyor.size();
 
     // There should be one keypoint: the one of the upper left square.
     // The lower right square and the upper right square are
@@ -249,14 +233,14 @@ namespace pandora_vision
     {
       // The location of the keypoint should near the center of the square
       // in which it lies
-      EXPECT_NEAR ( conveyor.keyPoints[k].pt.x,
-        conveyor.rectangles[k][0].x + 50, 1 );
+      EXPECT_NEAR ( conveyor.holes[k].keypoint.pt.x,
+        conveyor.holes[k].rectangle[0].x + 50, 1 );
 
       // The hole should have exactly four vertices
-      EXPECT_EQ ( 4, conveyor.rectangles[k].size() );
+      EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
       // There should be 400 minus 4 (vertices) * 3 (points) outline points
-      EXPECT_EQ ( 400 - 4 * 3, conveyor.outlines[k].size() );
+      EXPECT_EQ ( 400 - 4 * 3, conveyor.holes[k].outline.size() );
     }
   }
 
