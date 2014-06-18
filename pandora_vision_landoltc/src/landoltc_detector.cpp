@@ -717,8 +717,16 @@ void LandoltCDetector::thinningIter(cv::Mat* in, int iter)
   cv::bitwise_and(*in, temp, *in);
 }
 
+
+/**
+  @brief Returns detected landoltc, for publishing them later
+  @param void
+  @return [std::vector<LandoltC>] Vector of detected Landolts
+**/
+
 std::vector<LandoltC> LandoltCDetector::getDetectedLandolt()
 {
   return _landoltc;
 }
+
 } // namespace pandora_vision
