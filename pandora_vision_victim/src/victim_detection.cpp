@@ -340,11 +340,11 @@ namespace pandora_vision
       //~ return;
     //~ 
     _victimDetector->victimFusion(2, _rgbdImages);
+    //~ _victimDetector->victimFusion(_stateIndicator, _rgbdImages);
     
     if(!_rgbdImages.size())
       _rgbdImages.erase(_rgbdImages.begin(), 
         _rgbdImages.size()+ _rgbdImages.begin());
-   
   }
 
 
