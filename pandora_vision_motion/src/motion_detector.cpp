@@ -140,6 +140,19 @@ namespace pandora_vision
         }  
     }
   }
+  
+  /**@brief Creates the continuous table of motion in current frame
+    @return int[] table of motion position and size
+  */
+  int* MotionDetector::getMotionPosition()
+  {
+    int* table = new int[4];
+    for(int ii = 0; ii < 4; ii++)
+    {
+      
+    }
+    return table;
+  }
     
   /**
       @brief Function that defines the type of movement 
