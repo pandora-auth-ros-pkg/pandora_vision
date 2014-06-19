@@ -127,6 +127,11 @@ namespace pandora_vision
      @return void 
     */
     void detectMotionPosition(cv::Mat diff); 
+    
+    /**@brief Creates the continuous table of motion in current frame
+    @return int[] table of motion position and size
+    */
+    int* getMotionPosition();
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_MOTION_DETECTOR_H
