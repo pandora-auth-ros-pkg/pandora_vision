@@ -29,6 +29,7 @@
     <include file="$(find pandora_vision_face)/launch/face_node.launch" />
 -->
     <include file="$(find pandora_vision_datamatrix)/launch/datamatrix_node.launch" />
+    <include file="$(find pandora_vision_landoltc)/launch/predator-landoltc3d.launch" />
   
   </group>
   
