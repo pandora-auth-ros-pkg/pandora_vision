@@ -25,7 +25,9 @@
     <include file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
     <include file="$(find pandora_vision_landoltc)/launch/landoltc_node.launch" />
     <include file="$(find pandora_vision_motion)/launch/motion_node.launch" />
+<!--
     <include file="$(find pandora_vision_face)/launch/face_node.launch" />
+-->
     <include file="$(find pandora_vision_datamatrix)/launch/datamatrix_node.launch" />
   
   </group>
