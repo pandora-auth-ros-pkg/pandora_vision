@@ -97,7 +97,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
        
-    //!< Get the camera to be used by qr node;
+    //!< Get the camera to be used by motion node;
     if (_nh.getParam("camera_name", cameraName)) 
     {
       ROS_DEBUG_STREAM("camera_name : " << cameraName);
