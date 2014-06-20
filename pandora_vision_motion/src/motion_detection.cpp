@@ -93,7 +93,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_FATAL("Motion alert topic name param not found");
+      ROS_FATAL("[Motion_node]: Motion alert topic name param not found");
       ROS_BREAK();
     }
        
@@ -104,7 +104,7 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_FATAL("Camera name not found");
+      ROS_FATAL("[Motion_node]: Camera name not found");
       ROS_BREAK(); 
     }
 
@@ -144,11 +144,11 @@ namespace pandora_vision
     //! Get the images's frame_id;
     if (_nh.getParam("/" + cameraName + "/camera_frame_id", cameraFrameId)) 
     {
-      ROS_DEBUG_STREAM("camera_frame_id : " << cameraFrameId);
+      ROS_DEBUG_STREAM("[Motion_node]: camera_frame_id : " << cameraFrameId);
     }
     else 
     {
-     ROS_FATAL("Camera name not found");
+     ROS_FATAL("[Motion_node]: Camera name not found");
      ROS_BREAK();
     }
   }
