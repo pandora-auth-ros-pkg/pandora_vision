@@ -102,6 +102,9 @@
 #define RGBD_MODE 0
 #define RGB_ONLY_MODE 1
 
+// The string identifier of the hole detector package.
+// It must comply with the sub-namespace set in the package's launchers
+#define PKG_NAME "hole_detector"
 
 /**
   @namespace vision

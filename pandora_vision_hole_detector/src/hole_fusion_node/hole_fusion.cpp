@@ -132,7 +132,7 @@ namespace pandora_vision
 
     clientInitialize();
 
-    ROS_INFO_NAMED("hole_detector", "[Hole Fusion node] Initiated");
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Initiated");
   }
 
 
@@ -142,7 +142,7 @@ namespace pandora_vision
    **/
   HoleFusion::~HoleFusion(void)
   {
-    ROS_INFO_NAMED("hole_detector", "[Hole Fusion node] Terminated");
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Terminated");
   }
 
 
@@ -154,7 +154,7 @@ namespace pandora_vision
    **/
   void HoleFusion::completeTransition(void)
   {
-    ROS_INFO_NAMED("hole_detector", "[Hole Detector] : Transition Complete");
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Detector] : Transition Complete");
   }
 
 
@@ -182,7 +182,7 @@ namespace pandora_vision
     Timer::start("depthCandidateHolesCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED("hole_detector", "Hole Fusion Depth callback");
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Depth callback");
 
     // Clear the current depthHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -365,7 +365,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED("hole_detector",
+      ROS_ERROR_NAMED(PKG_NAME,
         "[Hole Fusion node] Pre filtering process failure");
     }
 
@@ -424,12 +424,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       pointCloudTopic_ = ns + "/" + pointCloudTopic_;
 
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Subscribed to the internal point cloud topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic point_cloud_internal_topic");
     }
 
@@ -442,12 +442,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       depthCandidateHolesTopic_ = ns + "/" + depthCandidateHolesTopic_;
 
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Subscribed to the Depth candidate holes topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic depth_candidate_holes_topic");
     }
 
@@ -460,12 +460,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       rgbCandidateHolesTopic_ = ns + "/" + rgbCandidateHolesTopic_;
 
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Subscribed to the Rgb candidate holes topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic rgb_candidate_holes_topic");
     }
 
@@ -478,12 +478,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       unlockTopic_ = ns + "/" + unlockTopic_;
 
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to the unlock topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic synchronizer_unlock_topic");
     }
 
@@ -493,12 +493,12 @@ namespace pandora_vision
         ns + "/hole_fusion_node/published_topics/hole_detector_output_topic",
         validHolesTopic_))
     {
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to the valid holes topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic hole_detector_output_topic");
     }
 
@@ -509,12 +509,12 @@ namespace pandora_vision
         ns + "/hole_fusion_node/published_topics/enhanced_holes_topic",
         enhancedHolesTopic_))
     {
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to the enhanced holes topic");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
     }
 
@@ -525,14 +525,13 @@ namespace pandora_vision
         "/hole_fusion_node/published_topics/make_synchronizer_subscribe_to_input",
         synchronizerSubscribeToInputPointCloudTopic_))
     {
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to topic where the synchronizer"
         " expects messages dictating its subscription to the input point cloud");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
-        "[Hole Fusion Node] Could not find topic"
+      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
         " make_synchronizer_subscribe_to_input");
     }
 
@@ -543,15 +542,14 @@ namespace pandora_vision
         "/hole_fusion_node/published_topics/make_synchronizer_leave_subscription_to_input",
         synchronizerLeaveSubscriptionToInputPointCloudTopic_))
     {
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to topic where the synchronizer"
         " expects messages dictating its leave of subscription to the"
         " input point cloud");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
-        "[Hole Fusion Node] Could not find topic"
+      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
         " make_synchronizer_leave_subscription_to_input");
     }
 
@@ -561,13 +559,13 @@ namespace pandora_vision
         "/hole_fusion_node/published_topics/debug_valid_holes_image",
         debugValidHolesTopic_))
     {
-      ROS_INFO_NAMED("hole_detector",
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Advertising to topic where an image of the"
         " valid holes is published");
     }
     else
     {
-      ROS_INFO_NAMED ("hole_detector",
+      ROS_INFO_NAMED (PKG_NAME,
         "[Hole Fusion Node] Could not find topic debug_valid_holes_image");
     }
   }
@@ -607,8 +605,7 @@ namespace pandora_vision
     const pandora_vision_hole_detector::hole_fusion_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED("hole_detector",
-      "[Hole Fusion node] Parameters callback called");
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
 
     ////////////////////////////// Debug parameters ////////////////////////////
 
@@ -864,7 +861,7 @@ namespace pandora_vision
     Timer::start("pointCloudCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED("hole_detector", "Hole Fusion Point Cloud callback");
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Point Cloud callback");
 
     // Convert the header of the point cloud message
     std_msgs::Header header;
@@ -952,7 +949,7 @@ namespace pandora_vision
    **/
   void HoleFusion::processCandidateHoles()
   {
-    ROS_INFO_NAMED("hole_detector", "Processing candidate holes");
+    ROS_INFO_NAMED(PKG_NAME, "Processing candidate holes");
 
     #ifdef DEBUG_TIME
     Timer::start("processCandidateHoles", "", true);
@@ -1324,7 +1321,7 @@ namespace pandora_vision
     Timer::start("rgbCandidateHolesCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED("hole_detector", "Hole Fusion RGB callback");
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion RGB callback");
 
     // Clear the current rgbHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -1483,7 +1480,7 @@ namespace pandora_vision
     // is set to on
     if (isOn_)
     {
-      ROS_INFO_NAMED("hole_detector", "Sending unlock message");
+      ROS_INFO_NAMED(PKG_NAME, "Sending unlock message");
 
       std_msgs::Empty unlockMsg;
       unlockPublisher_.publish(unlockMsg);
@@ -1654,7 +1651,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED("hole_detector",
+        ROS_ERROR_NAMED(PKG_NAME,
           "[Hole Fusion node] Validation process failure");
       }
 
@@ -1674,7 +1671,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED("hole_detector",
+        ROS_ERROR_NAMED(PKG_NAME,
           "[Hole Fusion node] Validation process failure");
       }
 

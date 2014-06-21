@@ -465,8 +465,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED("hole_detector",
-        "[Hole Fusion node] Filtering process failure");
+      ROS_ERROR_NAMED(PKG_NAME, "[Hole Fusion node] Filtering process failure");
     }
 
     // Debugging images and messages of validity probabilities
