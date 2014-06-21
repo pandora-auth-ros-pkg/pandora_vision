@@ -127,6 +127,9 @@ namespace pandora_vision
     // Set the initial on/off state of the Hole Detector package to off
     isOn_ = false;
 
+    // Initialize the filtering mode variable to an invalid value
+    filteringMode_ = -1;
+
     clientInitialize();
 
     ROS_INFO_NAMED("hole_detector", "[Hole Fusion node] Initiated");
@@ -267,7 +270,7 @@ namespace pandora_vision
       conveyor,
       interpolatedDepthImage_,
       Parameters::HoleFusion::rectangle_inflation_size,
-      Parameters::Depth::interpolation_method,
+      filteringMode_,
       &holesMasksImageVector,
       &holesMasksSetVector,
       &inflatedRectanglesVector,
@@ -289,7 +292,7 @@ namespace pandora_vision
     int depthActiveFilters = 0;
 
     // If depth analysis is possible
-    if (Parameters::Depth::interpolation_method == 0)
+    if (filteringMode_ == RGBD_MODE)
     {
       if (Parameters::HoleFusion::run_checker_color_homogeneity > 0)
       {
@@ -338,7 +341,7 @@ namespace pandora_vision
     }
     // Depth analysis is not possible. Reserve positions in the probabilities
     // vector only for the amount of RGB filters active.
-    else
+    else if (filteringMode_ == RGB_ONLY_MODE)
     {
       if (Parameters::HoleFusion::run_checker_color_homogeneity_urgent > 0)
       {
@@ -360,6 +363,11 @@ namespace pandora_vision
         rgbActiveFilters++;
       }
     }
+    else
+    {
+      ROS_ERROR_NAMED("hole_detector",
+        "[Hole Fusion node] Pre filtering process failure");
+    }
 
 
     // The 2D vector that contains the probabilities from the rgb filtering
@@ -373,7 +381,7 @@ namespace pandora_vision
     // Apply all active filters, depending on the interpolation method
     Filters::applyFilters(
       conveyor,
-      Parameters::Depth::interpolation_method,
+      filteringMode_,
       interpolatedDepthImage_,
       rgbImage_,
       wallsHistogram_,
@@ -889,6 +897,20 @@ namespace pandora_vision
     NoiseElimination::performNoiseElimination(depthImage,
       &interpolatedDepthImage);
 
+    // The noise elimination method above defines the interpolation method.
+    // Only in interpolation_method of zero can the depth filters through which
+    // each candidate hole is passed be utilized: there is no valid depth
+    // information available if the value of interpolation_method is set to
+    // other than zero.
+    if (Parameters::Depth::interpolation_method == 0)
+    {
+      filteringMode_ = RGBD_MODE;
+    }
+    else
+    {
+      filteringMode_ = RGB_ONLY_MODE;
+    }
+
     // Set the interpolatedDepthImage's values as the depth values
     // of the point cloud
     setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloud_);
@@ -987,7 +1009,7 @@ namespace pandora_vision
 
     // Apply the {assimilation, amalgamation, connection} processes
     HoleMerger::mergeHoles(&rgbdHolesConveyor,
-      Parameters::Depth::interpolation_method,
+      filteringMode_,
       interpolatedDepthImage_,
       pointCloud_);
 
@@ -1015,9 +1037,7 @@ namespace pandora_vision
 
     // Publish the enhanced holes message
     // regardless of the amount of valid holes
-    publishEnhancedHoles(rgbdHolesConveyor,
-      &validHolesMap,
-      Parameters::Depth::interpolation_method);
+    publishEnhancedHoles(rgbdHolesConveyor, &validHolesMap);
 
     #ifdef DEBUG_SHOW
     if (Parameters::HoleFusion::show_final_holes)
@@ -1121,19 +1141,16 @@ namespace pandora_vision
 
 
   /**
-    @brief Publishes the enhanced holes' information.
-    @param[in] conveyor [const HolesConveyor&] The overall valid holes
-    found by the depth and RGB nodes.
-    @param[in] validHolesMap [std::map<int, float>*] A map containing the
-    indices of the valid holes inside the conveyor and their respective
-    validity probabilities
-    @param[in] interpolationMethod [const int&] The interpolation method
-    used. 0 if depth analysis is applicable, 1 or 2 for special cases,
-    where the amount of noise in the depth image is overwhelming
+    @brief Publishes the holes' enhanced information.
+    @param[in] conveyor [const HolesConveyor&]
+    The overall valid holes found by the depth and RGB nodes.
+    @param[in] validHolesMap [std::map<int, float>*]
+    A map containing the indices of the valid holes inside the conveyor
+    and their respective validity probabilities
     @return void
    **/
   void HoleFusion::publishEnhancedHoles (const HolesConveyor& conveyor,
-    std::map<int, float>* validHolesMap , const int& interpolationMethod)
+    std::map<int, float>* validHolesMap)
   {
     // The overall message of enhanced holes that will be published
     vision_communications::EnhancedHolesVectorMsg enhancedHolesMsg;
@@ -1152,7 +1169,7 @@ namespace pandora_vision
       enhancedHolesMsg.depthImage);
 
     // Set whether depth analysis is applicable
-    enhancedHolesMsg.isDepth = (interpolationMethod == 0);
+    enhancedHolesMsg.isDepth = (filteringMode_ == RGBD_MODE);
 
     // Set the message's header
     enhancedHolesMsg.header.stamp = timestamp_;
@@ -1524,7 +1541,7 @@ namespace pandora_vision
 
       // Apply a weight to each probability according to its weight order.
       // If depth analysis was not possible, use the urgent weight order.
-      if (Parameters::Depth::interpolation_method == 0)
+      if (filteringMode_ == RGBD_MODE)
       {
         if (Parameters::HoleFusion::run_checker_color_homogeneity > 0)
         {
@@ -1605,7 +1622,7 @@ namespace pandora_vision
           exponent++;
         }
       }
-      else
+      else if (filteringMode_ == RGB_ONLY_MODE)
       {
         if (Parameters::HoleFusion::run_checker_color_homogeneity_urgent > 0)
         {
@@ -1642,6 +1659,11 @@ namespace pandora_vision
           exponent++;
         }
       }
+      else
+      {
+        ROS_ERROR_NAMED("hole_detector",
+          "[Hole Fusion node] Validation process failure");
+      }
 
       // The total validity probability of the i-th hole
       sum /= (pow(2, exponent) - 1);
@@ -1649,13 +1671,18 @@ namespace pandora_vision
       // The validity acceptance threshold
       float threshold = 0.0;
 
-      if (Parameters::Depth::interpolation_method == 0)
+      if (filteringMode_ == RGBD_MODE)
       {
         threshold = Parameters::HoleFusion::holes_validity_threshold_normal;
       }
-      else
+      else if (filteringMode_ == RGB_ONLY_MODE)
       {
         threshold = Parameters::HoleFusion::holes_validity_threshold_urgent;
+      }
+      else
+      {
+        ROS_ERROR_NAMED("hole_detector",
+          "[Hole Fusion node] Validation process failure");
       }
 
       if (sum > threshold)
