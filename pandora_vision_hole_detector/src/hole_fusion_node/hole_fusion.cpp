@@ -650,13 +650,6 @@ namespace pandora_vision
      config.show_final_holes;
 
 
-    // The interpolation method for noise removal
-    // 0 for averaging the pixel's neighbor values
-    // 1 for brushfire near
-    // 2 for brushfire far
-    Parameters::Depth::interpolation_method =
-      config.interpolation_method;
-
     // Threshold parameters
     Parameters::Edge::denoised_edges_threshold =
       config.denoised_edges_threshold;

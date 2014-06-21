@@ -305,12 +305,6 @@ namespace pandora_vision
     Parameters::Depth::show_depth_image =
      config.show_depth_image;
 
-    // The interpolation method for noise removal
-    // 0 for averaging the pixel's neighbor values
-    // 1 for brushfire near
-    // 2 for brushfire far
-    Parameters::Depth::interpolation_method = config.interpolation_method;
-
 
     //------------------- Edge detection specific parameters -------------------
 
