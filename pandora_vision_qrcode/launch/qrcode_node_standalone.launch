@@ -3,12 +3,14 @@
   <include file="$(find state_manager)/launch/stateManager.launch" />
   
   <include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" >
-    <arg name="camID" value="/dev/video1"/>
+    <arg name="camID" value="/dev/video0"/>
     <arg name="name" value="camera_left"/>
     <arg name="topic_name" value="camera_left/image"/>
     <arg name="frame_id" value="camera_left_link"/>
   </include>
   
+  <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
+<!--
   <include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" >
     <arg name="camID" value="/dev/video0"/>
     <arg name="name" value="camera_right"/>
@@ -20,6 +22,7 @@
     <arg name="camera" value="kinect" />
   </include>
   <param name="kinect/topic_name" value="kinect/rgb/image_raw"/>
+-->
   
   <include file="$(find pandora_vision_qrcode)/launch/qrcode_node.launch" />
   
