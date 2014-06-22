@@ -407,6 +407,12 @@ namespace pandora_vision
 
 
 
+  /**
+    @brief Retrieves the parent to the frame_id of the input point cloud,
+    so as to set the frame_id of the output messages of valid holes.
+    @param void
+    @return void
+   **/
   void HoleFusion::getParentFrameId()
   {
     // Parse robot description
@@ -414,25 +420,29 @@ namespace pandora_vision
 
     bool res = nodeHandle_.hasParam(model_param_name);
 
-    std::string robot_model_str="";
+    std::string robot_description = "";
 
     // The parameter was not found.
     // Set the parent of the frame_id to a default value.
-    if(!res || !nodeHandle_.getParam(model_param_name, robot_model_str))
+    if(!res || !nodeHandle_.getParam(model_param_name, robot_description))
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "Robot description couldn't be retrieved from the parameter server.");
 
-      parent_frame_id_ = "kinect_frame";
+      parent_frame_id_ = "kinect_rgb_frame";
+
+      return;
     }
 
     boost::shared_ptr<urdf::ModelInterface> model(
-      urdf::parseURDF(robot_model_str));
+      urdf::parseURDF(robot_description));
 
     // Get current link and its parent
     boost::shared_ptr<const urdf::Link> currentLink = model->getLink(frame_id_);
 
     boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
+
+    // Set the parent frame_id to the parent of the frame_id_
     parent_frame_id_ = parentLink->name;
   }
 
@@ -903,8 +913,11 @@ namespace pandora_vision
 
     // Store the frame_id and timestamp of the point cloud under processing.
     // The respective variables in the headers of the published messages will
-    // be set to these values
-    frame_id_ = header.frame_id;
+    // be set to these values.
+    // Because the frame_id will be used to retrieve its parent frame_id from
+    // the robot's description, and the frame_id starts with a forward slash,
+    // remove it, in order for the search to be successful.
+    frame_id_ = header.frame_id.substr(1);
     timestamp_ = header.stamp;
 
     // The parent frame_id cannot be set in the constructor because the
@@ -913,7 +926,7 @@ namespace pandora_vision
     // set the parent frame_id string once
     if (parent_frame_id_.compare("") == 0)
     {
-      //getParentFrameId();
+      getParentFrameId();
     }
 
     // Because the input point cloud is marked as const,
@@ -1296,8 +1309,7 @@ namespace pandora_vision
 
     // Publish the message containing the information about all holes found
     holesVectorMsg.header.stamp = timestamp_;
-    holesVectorMsg.header.frame_id = "kinect_frame";
-    //holesVectorMsg.header.frame_id = frame_id_;
+    holesVectorMsg.header.frame_id = parent_frame_id_;
 
     validHolesPublisher_.publish(holesVectorMsg);
 
