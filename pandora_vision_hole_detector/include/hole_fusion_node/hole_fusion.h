@@ -264,6 +264,12 @@ namespace pandora_vision
         HolesConveyor* conveyor,
         const cv::Mat& inImage);
 
+      /**
+        @brief Retrieves the parent to the frame_id of the input point cloud,
+        so as to set the frame_id of the output messages of valid holes.
+        @param void
+        @return void
+       **/
       void getParentFrameId();
 
       /**

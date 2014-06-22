@@ -1,37 +1,58 @@
 <launch>
 
-  <!-- Launchers depended on -->
+  <!-- ======================= Launchers depended on ======================= -->
 
-  <!-- State manager and changer -->
+  <!--State manager and changer -->
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
-  <!-- Robot description -->
-  <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
 
+  <!-- =========================== The namespace =========================== -->
 
-  <!-- The namespace -->
   <arg name="namespace" default="pandora_vision/hole_detector" />
 
-  <arg name="openni" default="false" />
-  <arg name="openni2" default="false" />
+
+  <!-- ========================== Source selection ========================= -->
 
   <!-- Kinect: choose the openni driver -->
+  <arg name="openni" default="false" />
+
   <group if="$(arg openni)">
     <include file="$(find openni_launch)/launch/openni.launch">
       <arg name="device_id" value="#1" />
+      <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
     </include>
   </group>
 
+
   <!-- Xtion: choose the openni2 driver -->
+  <arg name="openni2" default="false" />
+
   <group if="$(arg openni2)">
     <include file="$(find openni2_launch)/launch/openni2.launch">
       <arg name="device_id" value="#1" />
+      <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
     </include>
   </group>
 
-  <!-- Synchronizer node -->
+
+  <!-- If the source is not a physical device, it is a bag: play "path" bag -->
+  <group unless="$(arg openni)">
+    <group unless="$(arg openni2)">
+
+      <arg name="path" default="$(find pandora_vision_hole_detector)/test/functional/simple_pcl_frame.bag" />
+
+      <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
+        <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
+      </node>
+
+    </group>
+  </group>
+
+
+  <!-- ========================= Synchronizer node ========================= -->
+
   <node
     name="synchronizer_node"
     type="synchronizer_node"
@@ -46,9 +67,11 @@
 
     <rosparam file="$(find pandora_vision_hole_detector)/cfg/synchronizer_node_topics.yaml"
               command="load" />
- </node>
+  </node>
 
-  <!-- Depth node -->
+
+  <!-- ============================ Depth node ============================= -->
+
   <node
     name="depth_node"
     type="depth_node"
@@ -61,7 +84,9 @@
               command="load" />
   </node>
 
-  <!-- RGB node -->
+
+  <!-- ============================= RGB node ============================== -->
+
   <node
     name="rgb_node"
     type="rgb_node"
@@ -74,7 +99,9 @@
               command="load" />
   </node>
 
-  <!-- Hole Fusion node -->
+
+  <!-- ========================= Hole Fusion node ========================== -->
+
   <node
     name="hole_fusion_node"
     type="hole_fusion_node"
