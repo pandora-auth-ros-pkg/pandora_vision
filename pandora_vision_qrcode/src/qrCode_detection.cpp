@@ -246,9 +246,9 @@ namespace pandora_vision
   /**
   @brief Function that retrieves the parent to the frame_id.
   @param void
-  @return void
+  @return bool Returns true is frame_id found or false if not
   **/
-  void QrCodeDetection::getParentFrameId()
+  bool QrCodeDetection::getParentFrameId()
   {
     // Parse robot description
     const std::string model_param_name = "/robot_description";
@@ -260,7 +260,7 @@ namespace pandora_vision
     {
       ROS_ERROR("[QrCode_node]:Robot description couldn't be retrieved from the parameter server.");
       _parent_frame_id = _frame_id;
-      return;
+      return false;
     }
 
     boost::shared_ptr<urdf::ModelInterface> model(
@@ -268,9 +268,13 @@ namespace pandora_vision
 
     // Get current link and its parent
     boost::shared_ptr<const urdf::Link> currentLink = model->getLink(_frame_id);
-    boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
-    // Set the parent frame_id to the parent of the frame_id
-    _parent_frame_id = parentLink->name;
+    if(currentLink){
+      boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
+      // Set the parent frame_id to the parent of the frame_id
+      _parent_frame_id = parentLink->name;
+      return true;
+     } 
+     return false;
   }
   
   /**
@@ -285,7 +289,8 @@ namespace pandora_vision
     qrcodeFrame = in_msg->image.clone();
     qrcodeFrameTimestamp = msg.header.stamp;
     _frame_id = msg.header.frame_id;
-
+    
+    ROS_INFO_STREAM("FRAME_ID "<<_frame_id);
     if (qrcodeFrame.empty())
     {
       ROS_ERROR("[QrCode_node] : No more Frames");
@@ -297,7 +302,7 @@ namespace pandora_vision
       return;
     
     if( _frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
-      getParentFrameId();
+      bool _indicator = getParentFrameId();
       _frame_ids_map.insert( std::pair<std::string, std::string>(
          _frame_id,_parent_frame_id));
     } 

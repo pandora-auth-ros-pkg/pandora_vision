@@ -1,4 +1,4 @@
-camera_name: [camera_left]
+camera_name: [kinect]
 debugQrCode: false
 qrcodeSharpenBlur: 5
 qrcodeSharpenWeight: 0.8

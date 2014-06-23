@@ -164,9 +164,9 @@ namespace pandora_vision {
       
       /**
        *@brief Function that retrieves the parent to the frame_id
-       *@return void 
+       *@return bool Returns true is frame_id found or false if not 
       */ 
-      void getParentFrameId();
+      bool getParentFrameId();
        
       //!< Current state of robot
       int curState;
