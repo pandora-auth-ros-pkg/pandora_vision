@@ -46,7 +46,7 @@ namespace pandora_vision
   */
   MotionDetector::MotionDetector()
   { 
-    kernel_erode = getStructuringElement(cv::MORPH_RECT, cv::Size(2,2));
+    kernel_erode = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
     bg = 
     cv::BackgroundSubtractorMOG2 (MotionParameters::history,
       MotionParameters::varThreshold, MotionParameters::bShadowDetection);
@@ -89,8 +89,8 @@ namespace pandora_vision
       255, cv::THRESH_BINARY);
     motionIdentification(temp);
     cv::Mat kernel = 
-      getStructuringElement(cv::MORPH_CROSS , cv::Size(3,3), cv::Point( -1, -1 ));
-    cv::morphologyEx(temp, temp, cv::MORPH_CLOSE, kernel, cv::Point(-1,-1), 8);
+      getStructuringElement(cv::MORPH_CROSS , cv::Size(3, 3), cv::Point( -1, -1 ));
+    cv::morphologyEx(temp, temp, cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), 8);
  
     detectMotionPosition(temp);
      
@@ -120,15 +120,15 @@ namespace pandora_vision
       /// Loop over image and detect changes
       for(int j = 1; j < diff.cols-11; j+=2){ // height
         for(int i = 1; i < diff.rows-11; i+=2){ // width
-            if(static_cast<int>(diff.at<uchar>(j,i)) == 255){
+            if(static_cast<int>(diff.at<uchar>(j, i)) == 255){
                 number_of_changes++;
-                if(min_x>i) 
+                if(min_x > i) 
                   min_x = i;
-                if(max_x<i) 
+                if(max_x < i) 
                   max_x = i;
-                if(min_y>j) 
+                if(min_y > j) 
                   min_y = j;
-                if(max_y<j) 
+                if(max_y < j) 
                   max_y = j;
                 }
             }
