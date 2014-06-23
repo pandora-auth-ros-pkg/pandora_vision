@@ -215,7 +215,7 @@ namespace pandora_vision
       return;
     }
     
-     std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
+    std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
       
     if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
       bool _indicator = getParentFrameId();
@@ -259,7 +259,7 @@ namespace pandora_vision
     }
     if(motionMessage.probability > 0.1)
     {
-      motionMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;;
+      motionMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
       motionMessage.header.stamp = ros::Time::now();
       ROS_DEBUG_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
       _motionPublisher.publish(motionMessage);
