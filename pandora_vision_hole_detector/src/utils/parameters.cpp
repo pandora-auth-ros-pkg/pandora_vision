@@ -204,7 +204,7 @@ namespace pandora_vision
   int Parameters::HoleFusion::non_zero_points_in_box_blob_histogram = 0;
 
   // Merger parameters
-  float Parameters::HoleFusion::merger_depth_diff_threshold = 0.6;
+  float Parameters::HoleFusion::merger_depth_diff_threshold = 0.4;
   float Parameters::HoleFusion::merger_depth_area_threshold = 1.0;
 
   // Holes validity thresholds
