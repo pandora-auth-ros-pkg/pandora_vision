@@ -34,7 +34,6 @@
     <include file="$(find pandora_vision_predator)/launch/predator_node.launch" />
 -->
     
-
   </group>
   
 </launch>
