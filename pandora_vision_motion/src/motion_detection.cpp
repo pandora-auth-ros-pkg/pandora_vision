@@ -261,7 +261,7 @@ namespace pandora_vision
     {
       motionMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;;
       motionMessage.header.stamp = ros::Time::now();
-      ROS_INFO_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
+      ROS_DEBUG_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
       _motionPublisher.publish(motionMessage);
     }
   }
