@@ -93,7 +93,7 @@ namespace pandora_vision
     if (_nh.getParam("published_topic_names/motion_alert", param))
     {
     _motionPublisher = 
-      _nh.advertise<vision_communications::MotionMsg>(param, 10);
+      _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(param, 10);
     }
     else
     {
@@ -240,7 +240,7 @@ namespace pandora_vision
       return;
     }
     //!< Create message of Motion Detector
-    vision_communications::MotionMsg motionMessage;
+    pandora_common_msgs::GeneralAlertMsg motionMessage;
     switch (_motionDetector.detectMotion(motionFrame))
     {
       case 0:
