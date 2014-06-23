@@ -156,4 +156,4 @@ target_link_libraries(rgb_filters_test ${catkin_LIBRARIES} rgb_filters_lib utils
 #    https://pandora.ee.auth.gr/rosbags/2014_bags/hole_detector_test.bag
 #    DESTINATION functional
 #    )
-#add_rostest(functional/hole_detector_test.launch)
+add_rostest(functional/hole_detector_test.launch)
