@@ -14,5 +14,4 @@
   
   <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
   
-  
 </launch>
