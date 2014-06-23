@@ -18,7 +18,6 @@
  */
 
 #include "pandora_vision_predator/predator_node.h"
-#define SHOW_DEBUG_IMAGE true
 
 namespace pandora_vision
 {

@@ -42,6 +42,8 @@
 #include <urdf_parser/urdf_parser.h>
 #include <map>
 
+//~ #define SHOW_DEBUG_IMAGE 
+
 //!< default frame height
 #define DEFAULT_HEIGHT 480
 
