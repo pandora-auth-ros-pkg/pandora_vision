@@ -29,9 +29,11 @@
     <include file="$(find pandora_vision_landoltc)/launch/landoltc_node.launch" />
     <include file="$(find pandora_vision_motion)/launch/motion_node_standalone.launch" />
     <include file="$(find pandora_vision_datamatrix)/launch/datamatrix_node.launch" />
-<!--
     <include file="$(find pandora_vision_landoltc)/launch/predator-landoltc3d.launch" />
+<!--
+    <include file="$(find pandora_vision_predator)/launch/predator_node.launch" />
 -->
+    
 
   </group>
   

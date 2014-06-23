@@ -39,7 +39,8 @@
 #include "vision_communications/LandoltcPredatorMsg.h"
 
 #include "../tld/TLD.h"
-
+#include <urdf_parser/urdf_parser.h>
+#include <map>
 
 //!< default frame height
 #define DEFAULT_HEIGHT 480
@@ -90,8 +91,8 @@ class Predator
     std::string cameraName;
     
     //!<Frame ID
-    
-    std::string cameraFrameId;
+    std::string _parent_frame_id; 
+    std::string _frame_id;
     
     //!<Pointer to TLD Instance
     
@@ -143,6 +144,15 @@ class Predator
     
     double hfov;
     double vfov;
+    
+    /**
+    @brief Function that retrieves the parent to the frame_id
+    @return bool Returns true is frame_id found or false if not 
+    */ 
+    bool getParentFrameId();
+      
+    std::map<std::string, std::string> _frame_ids_map;
+      
   public:
   
   
@@ -170,7 +180,6 @@ class Predator
   @param posterior [const float&] Confidence
   @return void
   **/
-  
   void sendMessage(const cv::Rect& rec, const float& posterior, const sensor_msgs::ImageConstPtr& frame);
   
   
