@@ -44,7 +44,7 @@ namespace pandora_vision
    **/
   QrCodeDetection::QrCodeDetection(const std::string& ns) : _nh(ns), qrcodeNowON(false)
   {
-    //!< Sete initial value of parent frame id to null
+    //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
     _frame_id = "";
     
@@ -296,7 +296,7 @@ namespace pandora_vision
          _frame_id, _parent_frame_id));
       
        for (it=_frame_ids_map.begin(); it!=_frame_ids_map.end(); ++it)
-          std::cout << it->first << " => " << it->second << '\n';
+          ROS_DEBUG_STREAM("" << it->first << " => " << it->second );
     } 
     
     qrDetect();

@@ -58,7 +58,7 @@
 #define HFOV 61.14  
 
 //!< vertical field of view in degrees 
-#define VFOV 48     
+#define VFOV 48
 
 //!< default frame height
 #define DEFAULT_HEIGHT 480
