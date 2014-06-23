@@ -2,6 +2,5 @@
   <include file="$(find state_manager)/launch/stateManager.launch" />
   <include file="$(find pandora_vision_launchers)/launch/all_nodes.launch" />
   <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
-
 </launch>
 
