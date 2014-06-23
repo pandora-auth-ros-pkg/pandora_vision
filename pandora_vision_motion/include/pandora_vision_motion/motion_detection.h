@@ -40,7 +40,7 @@
 
 #include "ros/ros.h"
 
-#include "vision_communications/MotionMsg.h"
+#include "pandora_vision_motion/motion_detector.h"
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
