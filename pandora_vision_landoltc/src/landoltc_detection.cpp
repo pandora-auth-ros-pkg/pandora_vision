@@ -242,7 +242,7 @@ void LandoltCDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     return;
   }
   
-  std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
+  std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
     
   if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
     bool _indicator = getParentFrameId();
@@ -298,11 +298,11 @@ void LandoltCDetection::landoltcCallback()
     else
         noAngle = false;
   }
-  ROS_INFO_STREAM("[landoltc_node] : Landoltc found");
-  if(noAngle == true && _landoltc.size() > 0)
-    _landoltcPublisher.publish(landoltcVectorMsg);
-   
   
+  if(noAngle == true && _landoltc.size() > 0){
+    _landoltcPublisher.publish(landoltcVectorMsg);
+    ROS_INFO_STREAM("[landoltc_node] : Landoltc found");
+  }
   _landoltcDetector.clear();
 }
 

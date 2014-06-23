@@ -270,7 +270,7 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     return;
   }
   
-  std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
+  std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
     
   if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
     bool _indicator = getParentFrameId();
@@ -285,15 +285,14 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 }
 
-void LandoltC3dDetection::predatorCallback(const 
-    vision_communications::LandoltcPredatorMsg& msg)
+void LandoltC3dDetection::predatorCallback(const vision_communications::LandoltcPredatorMsg& msg)
 {
   cv_bridge::CvImagePtr in_msg;
   in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
   landoltCFrame = in_msg -> image.clone();
   _frame_id  = msg.header.frame_id;
   
-   std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
+  std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
     
   if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
     bool _indicator = getParentFrameId();
