@@ -66,7 +66,8 @@ namespace pandora_vision
   void EdgeOrientationExtractor::findEdgeFeatures(cv::Mat src)
   {
     GaussianBlur( src, src, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT );
-    cvtColor( src, src, CV_BGR2GRAY );
+    if(src.channels() !=1)
+      cvtColor( src, src, CV_BGR2GRAY );
     
     //!<block size
     int colsBlockSize = src.cols/4;

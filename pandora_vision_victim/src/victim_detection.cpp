@@ -283,6 +283,7 @@ namespace pandora_vision
       cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::BGR8);
     _depthImage = in_msg->image.clone();
     
+    
     isDepthEnabled = msg.isDepth;
     
     _enhancedHoles = msg.enhancedHoles;

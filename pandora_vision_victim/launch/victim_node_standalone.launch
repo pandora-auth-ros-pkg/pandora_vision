@@ -1,6 +1,6 @@
 <launch>
     
-  <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector.launch" />
+  <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector_standalone.launch" />
   <include file="$(find pandora_vision_victim)/launch/victim_node.launch" />
   
 </launch>
