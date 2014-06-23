@@ -544,7 +544,8 @@ namespace pandora_vision
   void HaralickFeaturesExtractor::findHaralickFeatures(cv::Mat image)
   {
     cv::Mat temp = cv::Mat(image.rows, image.cols, CV_8UC1);
-    cv::cvtColor(image, temp, CV_BGR2GRAY);
+     if(image.channels() !=1)
+      cv::cvtColor(image, temp, CV_BGR2GRAY);
     cv::Mat out = calculateGLCM(temp);
     
     getAngularSecondMoment(out);
