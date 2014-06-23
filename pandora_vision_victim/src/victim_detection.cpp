@@ -57,15 +57,15 @@ namespace pandora_vision
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
     
-    //!< Subscribe to input image's topic
-    //!< image_transport::ImageTransport it(_nh);
-    _frameSubscriber = _nh.subscribe(
-                       "/kinect/image", 1, &VictimDetection::dummyimageCallback, this);
-                       
-    //~ /// Subscribe to input image's topic
-    //~ /// image_transport::ImageTransport it(_nh);
+    //~ //!< Subscribe to input image's topic
+    //~ //!< image_transport::ImageTransport it(_nh);
     //~ _frameSubscriber = _nh.subscribe(
-              //~ _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
+                       //~ "/kinect/image", 1, &VictimDetection::dummyimageCallback, this);
+                       
+    /// Subscribe to input image's topic
+    /// image_transport::ImageTransport it(_nh);
+    _frameSubscriber = _nh.subscribe(
+              _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
     _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize,
