@@ -2,11 +2,17 @@
   
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
+  
   <include file="$(find openni_launch)/launch/openni.launch" >
     <arg name="camera" value="kinect" />
+    <arg name="publish_tf" value="false" />
+    <arg name="depth_registration" value="true" />
   </include>
-  <param name="kinect/topic_name" value="kinect_rgb_optical_frame" />
+  <param name="kinect/topic_name" value="/kinect/rgb/image_raw" />
   
   <include file="$(find pandora_vision_motion)/launch/motion_node.launch" />
+  
+  <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
+  
   
 </launch>
