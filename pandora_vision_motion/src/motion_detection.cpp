@@ -215,7 +215,7 @@ namespace pandora_vision
       return;
     }
     
-    std::map<std::string,std::string>::iterator it = _frame_ids_map.begin();
+    std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
       
     if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
       bool _indicator = getParentFrameId();
