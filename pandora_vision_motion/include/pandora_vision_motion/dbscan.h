@@ -42,6 +42,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 namespace pandora_vision{
   
@@ -65,9 +66,10 @@ namespace pandora_vision{
       VisitedPoints _visitedPoints;
       //! Vector of clustered data 
       ClusteredPoints _clusteredPoints;
+      NoisePoints _noise;
       std::map<int, int> _labels;
       
-      vector<Rect>& data;
+      std::vector<cv::Rect>& _data;
       
       /**
        @brief Function that initializes all vectors to begin with the
@@ -93,18 +95,30 @@ namespace pandora_vision{
        @param pt2: Second point
        @return their distance
       */ 
-      double dist2d(cv::Point2d pt1, cv::Point2d pt2)
+      double dist2d(cv::Point2d pt1, cv::Point2d pt2);
       
       /**
        @brief Function that returns all points with P's eps-neighborhood
        @param P:current point,we are processeing
        @return vector of all point in the neighborhoud 
       */ 
-      std::vector<int> regionQuery(int p)
+      std::vector<int> regionQuery(int p);
       
-      void expandCluster(int p, vector<int> neighbours);
+       /**
+       @brief If a point is found to be a dense part of a cluster, its 
+       ε-neighborhood is also part of that cluster. Hence, all points that 
+       are found within the ε-neighborhood are added, as is their own ε-neighborhood when 
+       they are also dense. This process continues until the density-connected cluster 
+       is completely found.
+       @param p Point p, whose ε-neighborhood we are calculating
+       @param  neighbours, found neighbours for current point
+       @param void
+      */ 
+      void expandCluster(int p, std::vector<int> neighbours);
       
-      double calculateDistance(int ai, int bi); 
+      double calculateDistanceMatrix(int ai, int bi); 
+      
+      double *DP;
       public:
       
       //!< Class constructor
@@ -114,80 +128,14 @@ namespace pandora_vision{
       
       void dbscan_cluster();
       
-      
-      double* dp;
-      //memoization table in case of complex dist functions
-  #define DP(i,j) dp[(data.size()*i)+j]
-
-      
-     
-      
-      double distanceFunc(int ai,int bi)
-      {
-          if(DP(ai,bi)!=-1)
-              return DP(ai,bi);
-          Rect a = data[ai];
-          Rect b = data[bi];
-          /*
-          Point2d cena= Point2d(a.x+a.width/2,
-                                a.y+a.height/2);
-          Point2d cenb = Point2d(b.x+b.width/2,
-                                b.y+b.height/2);
-          double dist = sqrt(pow(cena.x-cenb.x,2) + pow(cena.y-cenb.y,2));
-          DP(ai,bi)=dist;
-          DP(bi,ai)=dist;*/
-          Point2d tla =Point2d(a.x,a.y);
-          Point2d tra =Point2d(a.x+a.width,a.y);
-          Point2d bla =Point2d(a.x,a.y+a.height);
-          Point2d bra =Point2d(a.x+a.width,a.y+a.height);
-
-          Point2d tlb =Point2d(b.x,b.y);
-          Point2d trb =Point2d(b.x+b.width,b.y);
-          Point2d blb =Point2d(b.x,b.y+b.height);
-          Point2d brb =Point2d(b.x+b.width,b.y+b.height);
-
-          double minDist = 9999999;
-
-          minDist = min(minDist,dist2d(tla,tlb));
-          minDist = min(minDist,dist2d(tla,trb));
-          minDist = min(minDist,dist2d(tla,blb));
-          minDist = min(minDist,dist2d(tla,brb));
-
-          minDist = min(minDist,dist2d(tra,tlb));
-          minDist = min(minDist,dist2d(tra,trb));
-          minDist = min(minDist,dist2d(tra,blb));
-          minDist = min(minDist,dist2d(tra,brb));
-
-          minDist = min(minDist,dist2d(bla,tlb));
-          minDist = min(minDist,dist2d(bla,trb));
-          minDist = min(minDist,dist2d(bla,blb));
-          minDist = min(minDist,dist2d(bla,brb));
-
-          minDist = min(minDist,dist2d(bra,tlb));
-          minDist = min(minDist,dist2d(bra,trb));
-          minDist = min(minDist,dist2d(bra,blb));
-          minDist = min(minDist,dist2d(bra,brb));
-          DP(ai,bi)=minDist;
-          DP(bi,ai)=minDist;
-          return DP(ai,bi);
-      }
-
-      vector<vector<Rect> > getGroups()
-      {
-          vector<vector<Rect> > ret;
-          for(int i=0;i<=C;i++)
-          {
-              ret.push_back(vector<Rect>());
-              for(int j=0;j<data.size();j++)
-              {
-                  if(labels[j]==i)
-                  {
-                      ret[ret.size()-1].push_back(data[j]);
-                  }
-              }
-          }
-          return ret;
-      }
+      /**
+       @brief Function that returns all clusters calculated from the given
+       set of points
+       @param void
+       @return vector of clusters 
+      */ 
+      std::vector<std::vector<cv::Rect> > getGroups();
+          
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_DBSCAN
