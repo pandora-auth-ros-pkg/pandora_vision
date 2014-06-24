@@ -2,9 +2,14 @@
 
   <!-- ======================= Launchers depended on ======================= -->
 
-  <!--State manager and changer -->
+  <!--State manager -->
 
   <include file="$(find state_manager)/launch/stateManager.launch" />
+
+
+  <!-- ============================= Namespace ============================= -->
+
+  <arg name="namespace" default="pandora_vision/hole_detector" />
 
 
   <!-- ========================= Synchronizer node ========================= -->
@@ -16,10 +21,6 @@
     respawn="False"
     output="screen"
     ns="$(arg namespace)">
-
-    <!-- The width and height variables needed when in simulation mode -->
-    <param name="width" value="640" />
-    <param name="height" value="480" />
 
     <rosparam file="$(find pandora_vision_hole_detector)/cfg/synchronizer_node_topics.yaml"
               command="load" />
@@ -72,7 +73,9 @@
 
 
   <node pkg="pandora_testing_tools" type="bag_player_for_tests" name="player"
-    args="--bags $(find pandora_vision_hole_detector)/test/functional/simple_pcl_frame.bag" />
+    args="--bags $(find pandora_vision_hole_detector)/test/functional/simple_pcl_frame.bag">
+      <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
+  </node>
 
   <test test-name="HoleDetectorTest" pkg="pandora_vision_hole_detector" type="hole_detector_test.py" />
 
