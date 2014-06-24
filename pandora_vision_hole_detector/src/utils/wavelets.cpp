@@ -68,7 +68,7 @@ namespace pandora_vision
           }
         }
 
-        temp.at<float>(i, k)=y;
+        temp.at<float>(i, k) = y;
       }
     }
 
@@ -106,7 +106,7 @@ namespace pandora_vision
           }
         }
 
-        temp.at<float>(k, i)=y;
+        temp.at<float>(k, i) = y;
       }
     }
 
