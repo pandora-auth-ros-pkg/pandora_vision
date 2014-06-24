@@ -69,9 +69,8 @@ namespace pandora_vision
       static_cast<float>(HazmatParameters::MOThreshold)
     );
             
-    //Convert field of view from degrees to rads
-    ratioX_ = hfov_ / frameWidth_;
-    ratioY_ = vfov_ / frameHeight_;
+    hfov_ = (hfov_ / 180.0) * M_PI;
+    vfov_ = (vfov_ / 180.0) * M_PI;
 
     hazmatFrame_ = cv::Mat( frameWidth_, frameHeight_, CV_8U );
       
@@ -296,8 +295,15 @@ namespace pandora_vision
       hazmatVectorMsg.header.stamp = hazmatFrameTimestamp_;
       for (unsigned int i = 0; i < a.size() ; i++)
       {
-        hazmatMsg.yaw = ratioX_ * ( a[i].x - frameWidth_ / 2 );
-        hazmatMsg.pitch = - ratioY_ * ( a[i].y - frameHeight_ / 2 );
+        // Hazmat's center coordinates relative to the center of the frame
+        float x = a[i].x
+          - static_cast<float>(frameWidth_) / 2;
+        float y = static_cast<float>(frameHeight_) / 2
+          - a[i].y;
+
+        // Hazmat center's yaw and pitch
+        hazmatMsg.yaw = atan(2 * x / frameWidth_ * tan(hfov_ / 2));
+        hazmatMsg.pitch = atan(2 * y / frameHeight_ * tan(vfov_ / 2));
         hazmatMsg.patternType = a[i].pattern_num;
         hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
               

@@ -58,11 +58,13 @@ namespace pandora_vision
       //nodeHandle
       ros::NodeHandle _nh;
       HazmatEpsilonDetector* hazmatDetector_;
-      float ratioX_;
-      float ratioY_;
       
-      double hfov_;  //horizontal Field Of View (rad)
-      double vfov_;
+      //  TODO(Despoina Paschalidou)
+      //  hfov and vfov parameters are different from camera to camera.
+      //  Integrate into hazmatDetect() for different cameras (parent_frame_ids) 
+
+      double hfov_; // horizontal field of view (rad)
+      double vfov_; // vertical field of view (rad)
       int frameWidth_; //frame width
       int frameHeight_;  //frame height
       

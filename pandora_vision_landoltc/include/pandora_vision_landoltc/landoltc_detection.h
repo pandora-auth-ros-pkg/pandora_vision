@@ -96,12 +96,6 @@ private:
   /// Frame width
   int frameWidth;
   
-  //!<RatioX
-  float ratioX;
-  
-  //!<RatioY
-  float ratioY;
-
   //!< Horizontal Field Of View (rad)
   double hfov;
 

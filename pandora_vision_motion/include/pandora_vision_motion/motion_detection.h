@@ -80,9 +80,12 @@ namespace pandora_vision
       /// Instance of class MotionDetector
       MotionDetector _motionDetector;
       
+      //  TODO(Despoina Paschalidou)
+      //  hfov and vfov parameters are different from camera to camera.
+      //  Integrate into motionDetect() for different cameras (parent_frame_ids) 
+      
       /// Horizontal Field Of View (rad)
       double hfov;
-
       /// Vertical Field Of View (rad)
       double vfov;
       
