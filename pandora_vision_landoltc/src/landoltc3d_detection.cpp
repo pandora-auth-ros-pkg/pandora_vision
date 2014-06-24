@@ -55,9 +55,6 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
   hfov = hfov * CV_PI / 180;
   vfov = vfov * CV_PI / 180;
   
-  ratioX = hfov / frameWidth;
-  ratioY = vfov / frameHeight;
-  
   //!< Initiliaze and preprocess reference image
   _landoltc3dDetector.initializeReferenceImage(patternPath);
   
@@ -341,10 +338,16 @@ void LandoltC3dDetection::landoltc3dCallback()
   
   for(int i = 0; i < _landoltc3d.size(); i++){
      
-    landoltc3dcodeMsg.yaw = 
-      ratioX * (_landoltc3d.at(i).center.x  - static_cast<double>(frameWidth/2));
-    landoltc3dcodeMsg.pitch = 
-      -ratioY * (_landoltc3d.at(i).center.y  - static_cast<double>(frameHeight/2));
+    // Landoltc center's coordinates relative to the center of the frame
+    float x = _landoltc3d.at(i).center.x
+      - static_cast<float>(frameWidth) / 2;
+    float y = static_cast<float>(frameHeight) / 2
+      - _landoltc3d.at(i).center.y;
+
+    // Landoltc center's yaw and pitch
+    landoltc3dcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+    landoltc3dcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+
     landoltc3dcodeMsg.posterior = _landoltc3d[i].probability;
     
     for(int j = 0; j < _landoltc3d[i].angles.size(); j++)

@@ -54,9 +54,6 @@ namespace pandora_vision
     //!< Convert field of view from degrees to rads
     hfov = hfov * CV_PI / 180;
     vfov = vfov * CV_PI / 180;
-
-    ratioX = hfov / frameWidth;
-    ratioY = vfov / frameHeight;
     
     for(int ii = 0; ii < _imageTopics.size(); ii++ ){
       //!< subscribe to input image's topic
@@ -268,17 +265,22 @@ namespace pandora_vision
     datamatrixcodeVectorMsg.header.stamp = ros::Time::now();
 
     _datamatrixDetector.detect_datamatrix(datamatrixFrame);
-    std::vector<DataMatrixQode> list_datamatrixes = _datamatrixDetector.get_detected_datamatrix();
+    std::vector<DataMatrixQode> list_datamatrices = _datamatrixDetector.get_detected_datamatrix();
     
-    for(int i = 0; i < static_cast<int>(list_datamatrixes.size()); i++)
+    for(int i = 0; i < static_cast<int>(list_datamatrices.size()); i++)
     {
-      datamatrixcodeMsg.datamatrixContent = list_datamatrixes[i].message;
-      datamatrixcodeMsg.yaw = ratioX *
-        (list_datamatrixes[i].datamatrix_center.x - 
-          static_cast<double>(frameWidth) / 2);
-      datamatrixcodeMsg.pitch = -ratioY *
-        (list_datamatrixes[i].datamatrix_center.y - 
-          static_cast<double>(frameWidth) / 2);
+      datamatrixcodeMsg.datamatrixContent = list_datamatrices[i].message;
+
+      // Datamatrix center's coordinates relative to the center of the frame
+      float x = list_datamatrices[i].datamatrix_center.x
+        - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+        - list_datamatrices[i].datamatrix_center.y;
+
+      // Datamatrix center's yaw and pitch
+      datamatrixcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      datamatrixcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+
       datamatrixcodeVectorMsg.dataMatrixAlerts.push_back(datamatrixcodeMsg);
 
       ROS_INFO("[Datamatrix_node]:Datamatrix found.");

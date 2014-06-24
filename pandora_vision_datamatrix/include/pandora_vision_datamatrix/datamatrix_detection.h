@@ -89,14 +89,15 @@ namespace pandora_vision
     //!< pandora_vision_datamatrix package path
     std::string packagePath;
     
-    float ratioX;
-    float ratioY;
+    //  TODO(Despoina Paschalidou)
+    //  hfov and vfov parameters are different from camera to camera.
+    //  Integrate into datamatrixDetect() for different cameras (parent_frame_ids) 
 
     //!< Horizontal field of view in rad
     double hfov;
-
     //!< Vertical Field Of View (rad)
     double vfov;
+
     int frameWidth;
     int frameHeight;
     
