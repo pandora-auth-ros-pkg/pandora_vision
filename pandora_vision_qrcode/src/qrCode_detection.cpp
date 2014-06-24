@@ -57,9 +57,6 @@ namespace pandora_vision
     //!< Convert field of view from degrees to rads
     hfov = hfov * CV_PI / 180;
     vfov = vfov * CV_PI / 180;
-
-    ratioX = hfov / frameWidth;
-    ratioY = vfov / frameHeight;
     
     for(int ii = 0; ii < _imageTopics.size(); ii++ ){
       //!< subscribe to input image's topic
@@ -327,12 +324,15 @@ namespace pandora_vision
     {
       qrcodeMsg.QRcontent = list_qrcodes[i].qrcode_desc;
 
-      qrcodeMsg.yaw = ratioX *
-        (list_qrcodes[i].qrcode_center.x - 
-          static_cast<double>(frameWidth) / 2);
-      qrcodeMsg.pitch = -ratioY *
-        (list_qrcodes[i].qrcode_center.y - 
-          static_cast<double>(frameWidth) / 2);
+      // Qr's center coordinates relative to the center of the frame
+      float x = list_qrcodes[i].qrcode_center.x
+        - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+        - list_qrcodes[i].qrcode_center.y;
+
+      // Qr center's yaw and pitch
+      qrcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      qrcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
 
       qrcodeVectorMsg.qrAlerts.push_back(qrcodeMsg);
 

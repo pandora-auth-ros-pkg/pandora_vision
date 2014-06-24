@@ -77,8 +77,9 @@ namespace pandora_vision {
 
       QrCodeDetector _qrcodeDetector;
 
-      float ratioX;
-      float ratioY;
+      //  TODO(Despoina Paschalidou)
+      //  hfov and vfov parameters are different from camera to camera.
+      //  Integrate into qrDetect() for different cameras (parent_frame_ids) 
 
       //!< Horizontal Field Of View (rad)
       double hfov;
@@ -164,7 +165,7 @@ namespace pandora_vision {
       
       /**
        *@brief Function that retrieves the parent to the frame_id
-       *@return bool Returns true is frame_id found or false if not 
+       *@return bool Returns true if frame_id found or false if not 
       */ 
       bool getParentFrameId();
        
