@@ -54,18 +54,6 @@
 #include <urdf_parser/urdf_parser.h>
 #include <map>
 
-//!< Horizontal field of view in degrees
-#define HFOV 61.14  
-
-//!< vertical field of view in degrees 
-#define VFOV 48
-
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
-
 namespace pandora_vision {
 
   class QrCodeDetection : public StateClient {
@@ -82,11 +70,16 @@ namespace pandora_vision {
       //  Integrate into qrDetect() for different cameras (parent_frame_ids) 
 
       //!< Horizontal Field Of View (rad)
-      double hfov;
+      std::vector<double> _hfov;
 
       //!< Vertical Field Of View (rad)
-      double vfov;
+      std::vector<double> _vfov;
 
+      std::vector<int> _frameWidth;
+      std::vector<int> _frameHeight;
+      
+      double hfov;
+      double vfov;
       int frameWidth;
       int frameHeight;
       
@@ -179,6 +172,7 @@ namespace pandora_vision {
       
       std::map<std::string, std::string> _frame_ids_map;
       
+      int _camera_indicator;
     public:
 
       //!< The Constructor
