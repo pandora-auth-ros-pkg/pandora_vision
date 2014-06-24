@@ -43,11 +43,12 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(motion_node 
+add_executable(motion_node
     src/motion_node.cpp
     src/motion_detection.cpp
     src/motion_detector.cpp
     src/motion_parameters.cpp
+    src/dbscan.cpp
 )
 target_link_libraries(motion_node ${catkin_LIBRARIES} )
 add_dependencies(motion_node
@@ -69,6 +70,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/motion_detector.cpp
   src/motion_detection.cpp
   src/motion_parameters.cpp
+  src/dbscan.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
