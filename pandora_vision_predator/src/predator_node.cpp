@@ -54,9 +54,6 @@ Predator::Predator(const std::string& ns): _nh(ns)
   //!< Convert field of view from degrees to rads
   hfov = hfov * CV_PI / 180;
   vfov = vfov * CV_PI / 180;
-
-  ratioX = hfov / frameWidth;
-  ratioY = vfov / frameHeight;
   
   ROS_INFO("[predator_node] : Created Predator instance");
   
@@ -434,30 +431,30 @@ void Predator::getGeneralParams()
   }
 
   //! Get the Height parameter if available;
-  if (_nh.getParam("/" + cameraName + "/image_height", frameHeight))
+  if (_nh.getParam("image_height", frameHeight))
     ROS_DEBUG_STREAM("height : " << frameHeight);
   else
   {
-    ROS_DEBUG("[motion_node] : Parameter frameHeight not found. Using Default");
-    frameHeight = DEFAULT_HEIGHT;
+    ROS_FATAL("[predtator_node] : Parameter frameHeight not found. ");
+    ROS_BREAK();
   }
     
   //! Get the Width parameter if available;
-  if ( _nh.getParam("/" + cameraName + "/image_width", frameWidth))
+  if ( _nh.getParam("image_width", frameWidth))
     ROS_DEBUG_STREAM("width : " << frameWidth);
   else
   {
-    ROS_DEBUG("[motion_node] : Parameter frameWidth not found. Using Default");
-    frameWidth = DEFAULT_WIDTH;
+    ROS_FATAL("[predator_node] : Parameter frameWidth not found");
+    ROS_BREAK();
   }
     
   //!< Get the HFOV parameter if available;
-  if ( _nh.getParam("/" + cameraName + "/hfov", hfov))
+  if ( _nh.getParam("hfov", hfov))
     ROS_DEBUG_STREAM("HFOV : " << hfov);
   else
   {
-    hfov = HFOV;
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
+    ROS_FATAL("[predator_node] : Horizontal field of view not found");
+    ROS_BREAK();
   }
   
   //!< Get the VFOV parameter if available;
@@ -465,8 +462,8 @@ void Predator::getGeneralParams()
     ROS_DEBUG_STREAM("VFOV : " << vfov);
   else
   {
-    vfov = VFOV;
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
+    ROS_FATAL("[predator_node] : Vertical field of view not found");
+    ROS_BREAK();
   }
   
   //!< Get the listener's topic;
@@ -474,8 +471,8 @@ void Predator::getGeneralParams()
     ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
   else
   {
-    ROS_FATAL("Imagetopic not found");
-    ROS_BREAK(); 
+    ROS_FATAL("[predator_node] : Imagetopic name not found");
+    ROS_BREAK();
   }
 }
 
@@ -512,10 +509,16 @@ void Predator::sendMessage(const cv::Rect& rec, const float& posterior,
       int center_x = rec.x + rec.width/2;
       int center_y = rec.y + rec.height/2;
       
-      predatorAlertMsg.yaw = ratioX * ( center_x -
-                                     static_cast<double>(frameWidth) / 2 );
-      predatorAlertMsg.pitch = -ratioY * ( center_y -
-                                      static_cast<double>(frameHeight) / 2 );
+      // Predator's center's coordinates relative to the center of the frame
+      float x = center_x
+        - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+        - center_y;
+
+      //Predator center's yaw and pitch
+      predatorAlertMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      predatorAlertMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+          
       _predatorPublisher.publish(predatorAlertMsg);
     }  
   }

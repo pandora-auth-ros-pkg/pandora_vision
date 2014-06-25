@@ -44,16 +44,6 @@
 
 //~ #define SHOW_DEBUG_IMAGE 
 
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
-//!< default horizontal field of view
-#define HFOV 61.14
-//!< default vertical field of view
-#define VFOV 48 
-
 namespace pandora_vision
 {
 
@@ -140,9 +130,6 @@ class Predator
     @return void
     **/
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-    
-    float ratioX;
-    float ratioY;
     
     double hfov;
     double vfov;
