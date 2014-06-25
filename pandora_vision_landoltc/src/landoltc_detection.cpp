@@ -133,39 +133,39 @@ void LandoltCDetection::getGeneralParams()
   }
 
   //!< Get the Height parameter if available;
-  if (_nh.getParam("/" + cameraName + "/image_height", frameHeight))
+  if (_nh.getParam("image_height", frameHeight))
     ROS_DEBUG_STREAM("height : " << frameHeight);
   else
   {
-    ROS_DEBUG("[landoltc_node] : Parameter frameHeight not found. Using Default");
-    frameHeight = DEFAULT_HEIGHT;
+    ROS_FATAL("[landoltc_node] : Parameter frameHeight not found. Using Default");
+    ROS_BREAK();
   }
 
   //!< Get the Width parameter if available;
-  if ( _nh.getParam("/" + cameraName + "/image_width", frameWidth))
+  if ( _nh.getParam("image_width", frameWidth))
     ROS_DEBUG_STREAM("width : " << frameWidth);
   else
   {
-    ROS_DEBUG("[landoltc_node] : Parameter frameWidth not found. Using Default");
-    frameWidth = DEFAULT_WIDTH;
+    ROS_FATAL("[landoltc_node] : Parameter frameWidth not found. Using Default");
+    ROS_BREAK();
   }
 
   //!< Get the HFOV parameter if available;
-  if (_nh.getParam("/" + cameraName + "/hfov", hfov)) 
+  if (_nh.getParam("hfov", hfov)) 
     ROS_DEBUG_STREAM("HFOV : " << hfov);
   else 
   {
-    hfov = HFOV;
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
+    ROS_FATAL("[landoltc_node] : Horizontal field of view not found. Using Default");
+    ROS_BREAK();
   }
   
   //!< Get the VFOV parameter if available;
-  if (_nh.getParam("/" + cameraName + "/vfov", vfov)) 
+  if (_nh.getParam("vfov", vfov)) 
     ROS_DEBUG_STREAM("VFOV : " << vfov);
   else 
   {
-    vfov = VFOV;
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
+    ROS_FATAL("[landoltc_node] : Vertical field of view not found. Using Default");
+    ROS_BREAK();;
   }
     
   //!< Get the listener's topic;
@@ -173,8 +173,8 @@ void LandoltCDetection::getGeneralParams()
     ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
   else
   {
-    ROS_DEBUG("[landoltc_node] : Parameter imageTopic not found. Using Default");
-    imageTopic = "/kinect/rgb/image_raw";
+    ROS_FATAL("[landoltc_node] : Parameter imageTopic not found");
+    ROS_BREAK();
   }
 
 }

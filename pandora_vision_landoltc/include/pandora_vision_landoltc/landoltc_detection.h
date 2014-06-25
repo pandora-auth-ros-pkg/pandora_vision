@@ -55,17 +55,6 @@
 #include <urdf_parser/urdf_parser.h>
 #include <map>
 
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
-
-//!< Horizontal field of view in degrees
-#define HFOV 61.14  
-
-//!< vertical field of view in degrees 
-#define VFOV 48 
 
 namespace pandora_vision
 {
