@@ -113,25 +113,23 @@ namespace pandora_vision
     XmlRpc::XmlRpcValue cameras_list;
     _nh.getParam("camera_sensors", cameras_list);
     ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray); 
-    ROS_INFO("KOUKOU");
     std::string key;
     for (int ii = 0; ii < cameras_list.size(); ii++)
     {
       ROS_ASSERT(
         cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeStruct);
       
-      ROS_INFO("KOUKOU1");
       key = "name";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeString);
       cameraName = static_cast<std::string>(cameras_list[ii][key]);
-      ROS_INFO_STREAM("[QrCode_node]: camera_name : " << cameraName);
+      ROS_INFO_STREAM("[Datamatrix_node]: camera_name : " << cameraName);
       
       //!< Get the listener's topic for camera
       if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
-        ROS_INFO_STREAM("[QrCode_node]: imageTopic for camera : " << imageTopic);
+        ROS_INFO_STREAM("[Datamatrix_node]: imageTopic for camera : " << imageTopic);
       else
       {
-       ROS_FATAL("[QrCode_node]: Image topic name not found");
+       ROS_FATAL("[Datamatrix_node]: Image topic name not found");
        ROS_BREAK(); 
       }
       _imageTopics.push_back("/"+imageTopic);
@@ -139,28 +137,28 @@ namespace pandora_vision
       key = "image_height";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameHeight = static_cast<int>(cameras_list[ii][key]);
-      ROS_INFO_STREAM("[QrCode_node]: image_height : " << frameHeight);
+      ROS_INFO_STREAM("[Datamatrix_node]: image_height : " << frameHeight);
         
       _frameHeight.push_back(frameHeight);
         
       key = "image_width";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameWidth = static_cast<int>(cameras_list[ii][key]);
-      ROS_INFO_STREAM("[QrCode_node]: image_width : " << frameWidth);
+      ROS_INFO_STREAM("[Datamatrix_node]: image_width : " << frameWidth);
         
       _frameWidth.push_back(frameWidth);  
       
       key = "hfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       hfov = static_cast<int>(cameras_list[ii][key]);
-      ROS_INFO_STREAM("[QrCode_node]: hfov : " << hfov);
+      ROS_INFO_STREAM("[Datamatrix_node]: hfov : " << hfov);
         
       _hfov.push_back(hfov);  
       
       key = "vfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeDouble);
       vfov = static_cast<double>(cameras_list[ii][key]);
-      ROS_INFO_STREAM("[QrCode_node]: vfov : " << vfov);
+      ROS_INFO_STREAM("[Datamatrix_node]: vfov : " << vfov);
         
       _vfov.push_back(vfov);  
     
