@@ -70,7 +70,6 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/motion_detector.cpp
   src/motion_detection.cpp
   src/motion_parameters.cpp
-  src/dbscan.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
