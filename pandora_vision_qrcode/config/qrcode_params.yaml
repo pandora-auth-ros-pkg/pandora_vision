@@ -1,10 +1,10 @@
 debugQrCode: false
 qrcodeSharpenBlur: 5
 qrcodeSharpenWeight: 0.8
-cameras: 
+camera_sensors: 
   - name: 'kinect'
     hfov: 58
-    vfov: 45
+    vfov: 45.0
     image_width: 640
     image_height: 480
   - name: 'left_camera'

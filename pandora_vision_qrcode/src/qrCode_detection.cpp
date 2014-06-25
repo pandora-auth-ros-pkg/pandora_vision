@@ -126,105 +126,63 @@ namespace pandora_vision
       else
         ROS_WARN("Cannot find qrcode debug show topic");
     }
-             
+    
     XmlRpc::XmlRpcValue cameras_list;
-    if(_nh.getParam("camera_name", cameras_list)){
-      ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
-      
-      for(int ii = 0; ii < cameras_list.size(); ii++){
-        ROS_ASSERT(cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeString);
-        cameraName = static_cast<std::string>(cameras_list[ii]);
-        ROS_INFO_STREAM("[QrCode_node]: camera_name : " << cameraName);
-        
-        //!< Get the listener's topic for camera
-        if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
-          ROS_INFO_STREAM("[QrCode_node]: imageTopic for camera : " << imageTopic);
-        else
-        {
-         ROS_FATAL("[QrCode_node]: Image topic name not found");
-         ROS_BREAK(); 
-        }
-        _imageTopics.push_back("/"+imageTopic);
-        
-      }
-    }
-    else
+    _nh.getParam("camera_sensors", cameras_list);
+    ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray); 
+    ROS_INFO("KOUKOU");
+    std::string key;
+    for (int ii = 0; ii < cameras_list.size(); ii++)
     {
-      ROS_FATAL("[QrCode_node]: Camera_name not found");
-      ROS_BREAK(); 
-    }
-    //!< Get the Height parameter if available
-    XmlRpc::XmlRpcValue frameHeight_list;
-    if(_nh.getParam("image_height", frameHeight_list)){
-      ROS_ASSERT(frameHeight_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+      ROS_ASSERT(
+        cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeStruct);
       
-      for(int ii = 0; ii < frameHeight_list.size(); ii++){
-        ROS_ASSERT(frameHeight_list[ii].getType() == XmlRpc::XmlRpcValue::TypeInt);
-        frameHeight = static_cast<int>(frameHeight_list[ii]);
-        
-        ROS_INFO_STREAM("[QrCode_node]: image_height : " << frameHeight);
-        
-        _frameHeight.push_back(frameHeight);
+      ROS_INFO("KOUKOU1");
+      key = "name";
+      ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeString);
+      cameraName = static_cast<std::string>(cameras_list[ii][key]);
+      ROS_INFO_STREAM("[QrCode_node]: camera_name : " << cameraName);
+      
+      //!< Get the listener's topic for camera
+      if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
+        ROS_INFO_STREAM("[QrCode_node]: imageTopic for camera : " << imageTopic);
+      else
+      {
+       ROS_FATAL("[QrCode_node]: Image topic name not found");
+       ROS_BREAK(); 
       }
-    }
-    else{
-      ROS_FATAL("[QrCode_node]: Frame height for current camera not found");
-      ROS_BREAK();
-    }    
-    //!< Get the Width parameter if available
-    XmlRpc::XmlRpcValue frameWidth_list;
-    if(_nh.getParam("image_width", frameWidth_list)){
-      ROS_ASSERT(frameWidth_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+      _imageTopics.push_back("/"+imageTopic);
       
-      for(int ii = 0; ii < frameWidth_list.size(); ii++){
-        ROS_ASSERT(frameHeight_list[ii].getType() == XmlRpc::XmlRpcValue::TypeInt);
-        frameWidth = static_cast<int>(frameWidth_list[ii]);
+      key = "image_height";
+      ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
+      frameHeight = static_cast<int>(cameras_list[ii][key]);
+      ROS_INFO_STREAM("[QrCode_node]: image_height : " << frameHeight);
         
-        ROS_INFO_STREAM("[QrCode_node]: width : " << frameWidth);
+      _frameHeight.push_back(frameHeight);
         
-         _frameWidth.push_back(frameWidth);
-      }   
-    }
-    else{
-      ROS_FATAL("[QrCode_node]: Frame width for current camera not found");
-      ROS_BREAK();
-    }
-    //!< Get the horizontal field of view if available
-    XmlRpc::XmlRpcValue hfov_list;
-    if(_nh.getParam("hfov", hfov_list)){
-      ROS_ASSERT(hfov_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+      key = "image_width";
+      ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
+      frameWidth = static_cast<int>(cameras_list[ii][key]);
+      ROS_INFO_STREAM("[QrCode_node]: image_width : " << frameWidth);
+        
+      _frameWidth.push_back(frameWidth);  
       
-      for(int ii = 0; ii < hfov_list.size(); ii++){
-        ROS_ASSERT(hfov_list[ii].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-        hfov = static_cast<int>(hfov_list[ii]);
+      key = "hfov";
+      ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
+      hfov = static_cast<int>(cameras_list[ii][key]);
+      ROS_INFO_STREAM("[QrCode_node]: hfov : " << hfov);
         
-        ROS_INFO_STREAM("[QrCode_node]: Horizontal field of view of current camera : " << hfov);
-        
-         _hfov.push_back(hfov);
-      }   
-    }
-    else{
-      ROS_FATAL("[QrCode_node]: Horizontal field of view for current camera not found");
-      ROS_BREAK();
-    }
-    //!< Get the vertical field of view if available
-    XmlRpc::XmlRpcValue vfov_list;
-    if(_nh.getParam("vfov", vfov_list)){
-      ROS_ASSERT(vfov_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+      _hfov.push_back(hfov);  
       
-      for(int ii = 0; ii < vfov_list.size(); ii++){
-        ROS_ASSERT(vfov_list[ii].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-        vfov = static_cast<int>(vfov_list[ii]);
+      key = "vfov";
+      ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+      vfov = static_cast<double>(cameras_list[ii][key]);
+      ROS_INFO_STREAM("[QrCode_node]: vfov : " << vfov);
         
-        ROS_INFO_STREAM("[QrCode_node]: Vertical of view of current camera : " << vfov);
-        
-         _vfov.push_back(vfov);
-      }   
+      _vfov.push_back(vfov);  
+    
     }
-    else{
-      ROS_FATAL("[QrCode_node]: Vertical field of view for current camera not found");
-      ROS_BREAK();
-    }
+
   }
 
   /**
