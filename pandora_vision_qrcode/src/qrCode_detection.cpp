@@ -130,14 +130,13 @@ namespace pandora_vision
     XmlRpc::XmlRpcValue cameras_list;
     _nh.getParam("camera_sensors", cameras_list);
     ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray); 
-    ROS_INFO("KOUKOU");
+
     std::string key;
     for (int ii = 0; ii < cameras_list.size(); ii++)
     {
       ROS_ASSERT(
         cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeStruct);
       
-      ROS_INFO("KOUKOU1");
       key = "name";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeString);
       cameraName = static_cast<std::string>(cameras_list[ii][key]);
