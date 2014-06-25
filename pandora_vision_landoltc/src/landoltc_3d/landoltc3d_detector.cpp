@@ -90,24 +90,22 @@ void LandoltC3dDetector::initializeReferenceImage(std::string path)
 void LandoltC3dDetector::applyMask()
 {
   for(int i = 0; i < _landoltc3d.size(); i++)
-  {
-    LandoltC3D* temp = &(_landoltc3d.at(i));
-    
-    for (int j = 0; j < (*temp).color.size(); j++)
+  {    
+    for (int j = 0; j < _landoltc3d.at(i).color.size(); j++)
     {
       _mask = cv::Mat(_coloredContours.rows, _coloredContours.cols, CV_8UC1);
     
-      cv::inRange(_coloredContours, (*temp).color[j], (*temp).color[j], _mask);
+      cv::inRange(_coloredContours, _landoltc3d.at(i).color[j], _landoltc3d.at(i).color[j], _mask);
     
-      cv::Mat out = getWarpPerspectiveTransform(_mask, (*temp).bbox[j]);
+      cv::Mat out = getWarpPerspectiveTransform(_mask, _landoltc3d.at(i).bbox[j]);
     
-      cv::Mat cropped = _mask((*temp).bbox[j]).clone(); 
+      cv::Mat cropped = _mask(_landoltc3d.at(i).bbox[j]).clone(); 
     
       cv::Mat padded;
     
       cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
     
-      findRotation(padded, temp);
+      findRotation(padded, &(_landoltc3d.at(i)));
     
       if(Landoltc3DParameters::visualization)
       {
@@ -712,24 +710,23 @@ void LandoltC3dDetector::fusion()
     
     for(int i = 0; i < _landoltc3d.size(); i++)
     {
-      LandoltC3D* temp = &(_landoltc3d.at(i));
-      if((*temp).count == 1)
+      if(_landoltc3d.at(i).angles.size() == 1)
       {
         _landoltc3d.at(i).probability = 0.2;
       }
-      else if((*temp).count == 2)
+      else if(_landoltc3d.at(i).angles.size() == 2)
       {
         _landoltc3d.at(i).probability = 0.4;
       }
-      else if((*temp).count == 3)
+      else if(_landoltc3d.at(i).angles.size() == 3)
       {
         _landoltc3d.at(i).probability = 0.6;
       }
-      else if((*temp).count == 4)
+      else if(_landoltc3d.at(i).angles.size() == 4)
       {
         _landoltc3d.at(i).probability = 0.8;
       }
-      else if((*temp).count == 5)
+      else if(_landoltc3d.at(i).angles.size() == 5)
       {
         _landoltc3d.at(i).probability = 1;
       }

@@ -113,7 +113,7 @@ void LandoltC3dDetection::getGeneralParams()
   if (_nh.getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltc3dPublisher = 
-      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>(param, 10);
+      _nh.advertise<vision_communications::LandoltcAlertMsg>(param, 10);
   }
   else
   {
@@ -328,13 +328,11 @@ void LandoltC3dDetection::landoltc3dCallback()
   //~ ROS_INFO("Size is %d", _landoltc3d.size());
   
   //!< Create message of Landoltc Detector
-  vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
+  //~ vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
   vision_communications::LandoltcAlertMsg landoltc3dcodeMsg;
-  
-  bool noAngle = true;
 
-  landoltc3dVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
-  landoltc3dVectorMsg.header.stamp = ros::Time::now();
+  landoltc3dcodeMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+  landoltc3dcodeMsg.header.stamp = ros::Time::now();
   
   for(int i = 0; i < _landoltc3d.size(); i++){
      
@@ -348,20 +346,21 @@ void LandoltC3dDetection::landoltc3dCallback()
     landoltc3dcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
     landoltc3dcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
 
-    landoltc3dcodeMsg.posterior = _landoltc3d[i].probability;
+    landoltc3dcodeMsg.posterior = _landoltc3d.at(i).probability;
     
-    for(int j = 0; j < _landoltc3d[i].angles.size(); j++)
-      landoltc3dcodeMsg.angles.push_back( _landoltc3d[i].angles.at(j));
+    if(_landoltc3d.at(i).angles.size() == 0) continue;
     
-    if (_landoltc3d[i].angles.size() > 0)
-      landoltc3dVectorMsg.landoltcAlerts.push_back(landoltc3dcodeMsg);
-    else
-        noAngle = false;
+    for(int j = 0; j < _landoltc3d.at(i).angles.size(); j++)
+    {
+      landoltc3dcodeMsg.angles.push_back( _landoltc3d.at(i).angles.at(j));
+    }
+      
+    _landoltc3dPublisher.publish(landoltc3dcodeMsg);
+      
+    ROS_INFO_STREAM("[landoltc3d_node] : Landoltc3D found");
+    landoltc3dcodeMsg.angles.clear();
+    
   }
-  
-  if(noAngle == true && _landoltc3d.size() > 0)
-    _landoltc3dPublisher.publish(landoltc3dVectorMsg);
-   
   
   _landoltc3dDetector.clear();
 }
