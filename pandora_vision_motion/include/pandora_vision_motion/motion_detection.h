@@ -58,18 +58,6 @@
 #include <urdf_parser/urdf_parser.h>
 #include <map>
 
-//!< Horizontal field of view in degrees
-#define HFOV 61.14  
-
-//!< vertical field of view in degrees 
-#define VFOV 48
-
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
-
 namespace pandora_vision
 {
   class MotionDetection : public StateClient 
@@ -79,11 +67,7 @@ namespace pandora_vision
       ros::NodeHandle _nh;
       /// Instance of class MotionDetector
       MotionDetector _motionDetector;
-      
-      //  TODO(Despoina Paschalidou)
-      //  hfov and vfov parameters are different from camera to camera.
-      //  Integrate into motionDetect() for different cameras (parent_frame_ids) 
-      
+            
       /// Horizontal Field Of View (rad)
       double hfov;
       /// Vertical Field Of View (rad)
