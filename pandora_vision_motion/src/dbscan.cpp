@@ -42,7 +42,7 @@ namespace pandora_vision
   /**
    @brief Class constructor 
   */
-  DBSCAN::DBSCAN(std::vector<cv::Rect>& data, double eps, int minPts): _data(data)
+  DBSCAN::DBSCAN(const std::vector<cv::Rect>& data, double eps, int minPts): _data(data)
   {
     _cluster_id = -1;
     _eps = eps;
@@ -94,7 +94,7 @@ namespace pandora_vision
   */ 
   double DBSCAN::dist2d(cv::Point2d pt1, cv::Point2d pt2)
   {
-      return sqrt(pow(pt1.x-pt2.x,2) + pow(pt1.y-pt2.y,2));
+      return sqrt(pow(pt1.x-pt2.x, 2) + pow(pt1.y-pt2.y, 2));
   }
   
   /**
@@ -107,7 +107,7 @@ namespace pandora_vision
     std::vector<int> res;
     for(int i = 0; i < _data.size(); i++)
     {
-        if(calculateDistanceMatrix(p,i) <= _eps)
+        if(calculateDistanceMatrix(p, i) <= _eps)
             res.push_back(i);
     }
     return res;
@@ -156,7 +156,7 @@ namespace pandora_vision
         clusters.push_back(std::vector<cv::Rect>());
         for(int j = 0; j < _data.size(); j++)
         {
-            if(_labels[j]==i)
+            if(_labels[j] == i)
               clusters[clusters.size()-1].push_back(_data[j]);
         }
     }
@@ -218,25 +218,25 @@ namespace pandora_vision
 
     double minDist = 9999999;
 
-    minDist = std::min(minDist,dist2d(tla,tlb));
-    minDist = std::min(minDist,dist2d(tla,trb));
-    minDist = std::min(minDist,dist2d(tla,blb));
-    minDist = std::min(minDist,dist2d(tla,brb));
+    minDist = std::min(minDist, dist2d(tla, tlb));
+    minDist = std::min(minDist, dist2d(tla, trb));
+    minDist = std::min(minDist, dist2d(tla, blb));
+    minDist = std::min(minDist, dist2d(tla, brb));
 
-    minDist = std::min(minDist,dist2d(tra,tlb));
-    minDist = std::min(minDist,dist2d(tra,trb));
-    minDist = std::min(minDist,dist2d(tra,blb));
-    minDist = std::min(minDist,dist2d(tra,brb));
+    minDist = std::min(minDist, dist2d(tra, tlb));
+    minDist = std::min(minDist, dist2d(tra, trb));
+    minDist = std::min(minDist, dist2d(tra, blb));
+    minDist = std::min(minDist, dist2d(tra, brb));
 
-    minDist = std::min(minDist,dist2d(bla,tlb));
-    minDist = std::min(minDist,dist2d(bla,trb));
-    minDist = std::min(minDist,dist2d(bla,blb));
-    minDist = std::min(minDist,dist2d(bla,brb));
+    minDist = std::min(minDist, dist2d(bla, tlb));
+    minDist = std::min(minDist, dist2d(bla, trb));
+    minDist = std::min(minDist, dist2d(bla, blb));
+    minDist = std::min(minDist, dist2d(bla, brb));
 
-    minDist = std::min(minDist,dist2d(bra,tlb));
-    minDist = std::min(minDist,dist2d(bra,trb));
-    minDist = std::min(minDist,dist2d(bra,blb));
-    minDist = std::min(minDist,dist2d(bra,brb));
+    minDist = std::min(minDist, dist2d(bra, tlb));
+    minDist = std::min(minDist, dist2d(bra, trb));
+    minDist = std::min(minDist, dist2d(bra, blb));
+    minDist = std::min(minDist, dist2d(bra, brb));
     
     DP[pt1, pt2] = minDist;
     DP[pt2, pt1] = minDist;
