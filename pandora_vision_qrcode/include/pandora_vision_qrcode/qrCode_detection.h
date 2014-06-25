@@ -65,10 +65,6 @@ namespace pandora_vision {
 
       QrCodeDetector _qrcodeDetector;
 
-      //  TODO(Despoina Paschalidou)
-      //  hfov and vfov parameters are different from camera to camera.
-      //  Integrate into qrDetect() for different cameras (parent_frame_ids) 
-
       //!< Horizontal Field Of View (rad)
       std::vector<double> _hfov;
 
