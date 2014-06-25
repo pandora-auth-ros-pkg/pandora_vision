@@ -101,7 +101,7 @@ void LandoltCDetection::getGeneralParams()
   if (_nh.getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltcPublisher = 
-      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>(param, 10);
+      _nh.advertise<vision_communications::LandoltcAlertMsg>(param, 10);
   }
   else
   {
@@ -271,11 +271,11 @@ void LandoltCDetection::landoltcCallback()
   std::vector<LandoltC> _landoltc = _landoltcDetector.getDetectedLandolt();
   
   //!< Create message of Landoltc Detector
-  vision_communications::LandoltcAlertsVectorMsg landoltcVectorMsg;
+  //~ vision_communications::LandoltcAlertsVectorMsg landoltcVectorMsg;
   vision_communications::LandoltcAlertMsg landoltccodeMsg;
 
-  landoltcVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
-  landoltcVectorMsg.header.stamp = ros::Time::now();
+  landoltccodeMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+  landoltccodeMsg.header.stamp = ros::Time::now();
   
   for(int i = 0; i < _landoltc.size(); i++){
      
@@ -296,12 +296,9 @@ void LandoltCDetection::landoltcCallback()
     for(int j = 0; j < _landoltc.at(i).angles.size(); j++)
       landoltccodeMsg.angles.push_back( _landoltc.at(i).angles.at(j));
     
-    landoltcVectorMsg.landoltcAlerts.push_back(landoltccodeMsg);
-  }
-  
-  if(_landoltc.size() > 0){
-    _landoltcPublisher.publish(landoltcVectorMsg);
+    _landoltcPublisher.publish(landoltccodeMsg);
     ROS_INFO_STREAM("[landoltc_node] : Landoltc found");
+    landoltccodeMsg.angles.clear();
   }
   
   _landoltcDetector.clear();
