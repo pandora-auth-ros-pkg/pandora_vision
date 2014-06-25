@@ -42,7 +42,7 @@ namespace pandora_vision
   /**
    @brief Class constructor 
   */
-  DBSCAN::DBSCAN(const std::vector<cv::Rect>& data, double eps, int minPts): _data(data)
+  DBSCAN::DBSCAN(std::vector<cv::Rect>& data, double eps, int minPts): _data(data) 
   {
     _cluster_id = -1;
     _eps = eps;
