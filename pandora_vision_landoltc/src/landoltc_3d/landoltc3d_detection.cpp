@@ -113,7 +113,7 @@ void LandoltC3dDetection::getGeneralParams()
   if (_nh.getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltc3dPublisher = 
-      _nh.advertise<vision_communications::LandoltcAlertMsg>(param, 10);
+      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>(param, 10);
   }
   else
   {
@@ -328,11 +328,11 @@ void LandoltC3dDetection::landoltc3dCallback()
   //~ ROS_INFO("Size is %d", _landoltc3d.size());
   
   //!< Create message of Landoltc Detector
-  //~ vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
+  vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
   vision_communications::LandoltcAlertMsg landoltc3dcodeMsg;
 
-  landoltc3dcodeMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
-  landoltc3dcodeMsg.header.stamp = ros::Time::now();
+  landoltc3dVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+  landoltc3dVectorMsg.header.stamp = ros::Time::now();
   
   for(int i = 0; i < _landoltc3d.size(); i++){
      
@@ -354,14 +354,18 @@ void LandoltC3dDetection::landoltc3dCallback()
     {
       landoltc3dcodeMsg.angles.push_back( _landoltc3d.at(i).angles.at(j));
     }
-      
-    _landoltc3dPublisher.publish(landoltc3dcodeMsg);
+    
+    landoltc3dVectorMsg.landoltcAlerts.push_back(landoltc3dcodeMsg);  
+    
       
     ROS_INFO_STREAM("[landoltc3d_node] : Landoltc3D found");
     landoltc3dcodeMsg.angles.clear();
     
   }
-  
+  if(_landoltc3d.size() > 0){
+    _landoltc3dPublisher.publish(landoltc3dVectorMsg);
+    landoltc3dVectorMsg.landoltcAlerts.clear();
+  }  
   _landoltc3dDetector.clear();
 }
 
