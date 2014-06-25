@@ -122,7 +122,7 @@ namespace pandora_vision{
       public:
       
       //!< Class constructor
-      explicit DBSCAN(std::vector<cv::Rect>& _data, double eps, int minPts);
+      explicit DBSCAN(const std::vector<cv::Rect>& _data, double eps, int minPts);
       
       ~DBSCAN();
       
