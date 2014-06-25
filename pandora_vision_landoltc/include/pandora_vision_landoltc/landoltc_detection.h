@@ -171,17 +171,17 @@ public:
     @param newState [int] The robot's new state
     @return void
   */
-    void startTransition(int newState);
+  void startTransition(int newState);
 
   /**
     @brief After completion of state transition
     @return void
   */
-    void completeTransition(void);
+  void completeTransition(void);
     
-    int curState;
-    int prevState;
-    std::string param;
+  int curState;
+  int prevState;
+  std::string param;
 };
 } // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTION_H

@@ -46,7 +46,7 @@ namespace pandora_vision
 @return void
 **/
 
-LandoltCDetection::LandoltCDetection(const std::string& ns) : _nh(ns), landoltcNowON(true)
+LandoltCDetection::LandoltCDetection(const std::string& ns) : _nh(ns), landoltcNowON(false)
 {
   //!< Set initial value of parent frame id to null
   _parent_frame_id = "";
