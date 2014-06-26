@@ -292,6 +292,8 @@ namespace pandora_vision
        **/
       bool isHoleDetectorOn(const int& state);
 
+      void makeValidHolesUnique(HolesConveyor* allHoles,
+        std::map<int, float>* validHolesMap);
       /**
         @brief The function called when a parameter is changed
         @param[in] config
