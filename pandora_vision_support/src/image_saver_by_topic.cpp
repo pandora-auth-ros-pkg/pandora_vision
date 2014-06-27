@@ -63,6 +63,8 @@ unsigned int Params::height = 0;
 static int drag = 0;
 static cv::Point point;
 static cv::Rect bbox;
+static int xx = 0;
+static int yy = 0;
 
 //! Static initialization of the counter
 static unsigned int counter = 0;
@@ -80,6 +82,8 @@ static void mouseHandler(int event, int x, int y, int flags, void *param)
   
   cv::Mat *img = (cv::Mat *)param;
 
+  xx = x;
+  yy = y;
   /* user press left button */
   if (event == CV_EVENT_LBUTTONDOWN && !drag) 
   {
@@ -93,7 +97,7 @@ static void mouseHandler(int event, int x, int y, int flags, void *param)
     cv::Mat imgCopy;
     //img->copyTo(imgCopy);
     imgCopy = img->clone();
-
+    
     cv::rectangle(imgCopy, point, cv::Point(x, y), CV_RGB(255, 0, 0), 3, 8, 0);
 
     cv::imshow("image", imgCopy);
@@ -103,7 +107,7 @@ static void mouseHandler(int event, int x, int y, int flags, void *param)
   /* user release left button */
   if (event == CV_EVENT_LBUTTONUP && drag) 
   {
-    bbox = cv::Rect(point.x, point.y, x - point.x, y - point.y);
+    bbox = cv::Rect(point.x + 4, point.y + 4, x - point.x - 8, y - point.y - 8);
     drag = 0;
     
     //! Cast counter to string
@@ -141,8 +145,16 @@ void imageCallback(const sensor_msgs::Image& msg)
   cv_bridge::CvImagePtr in_msg;
   in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   current_frame = in_msg -> image.clone();
-  //! Show the image
-  cv::imshow("image", current_frame);
+  
+  if(!drag)
+  {
+    //! Show the image
+    cv::imshow("image", current_frame);
+  }
+  else
+  {
+    cv::rectangle(current_frame, point, cv::Point(xx, yy), CV_RGB(255, 0, 0), 3, 8, 0);
+  }
 
   cv::setMouseCallback("image", mouseHandler, &current_frame);
 
