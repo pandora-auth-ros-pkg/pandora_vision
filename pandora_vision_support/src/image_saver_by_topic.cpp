@@ -60,14 +60,81 @@ std::string Params::folder = "~/Desktop";
 unsigned int Params::width = 0;
 unsigned int Params::height = 0;
 
+static int drag = 0;
+static cv::Point point;
+static cv::Rect bbox;
+
+//! Static initialization of the counter
+static unsigned int counter = 0;
+
+/**
+  @brief Function for capturing mouse events
+  @param event [int] Mouse Even
+  @param x [int] Bounding box x-coordinate
+  @param y [int] Bounding box y-coordinate
+  @param flags [int]
+  @param param [void*] Pointer to parameter passed in mousecallback function
+**/
+static void mouseHandler(int event, int x, int y, int flags, void *param)
+{
+  
+  cv::Mat *img = (cv::Mat *)param;
+
+  /* user press left button */
+  if (event == CV_EVENT_LBUTTONDOWN && !drag) 
+  {
+    point = cv::Point(x, y);
+    drag = 1;
+  }
+
+  /* user drag the mouse */
+  if (event == CV_EVENT_MOUSEMOVE && drag) 
+  {
+    cv::Mat imgCopy;
+    //img->copyTo(imgCopy);
+    imgCopy = img->clone();
+
+    cv::rectangle(imgCopy, point, cv::Point(x, y), CV_RGB(255, 0, 0), 3, 8, 0);
+
+    cv::imshow("image", imgCopy);
+    cv::waitKey(20);
+  }
+
+  /* user release left button */
+  if (event == CV_EVENT_LBUTTONUP && drag) 
+  {
+    bbox = cv::Rect(point.x, point.y, x - point.x, y - point.y);
+    drag = 0;
+    
+    //! Cast counter to string
+    std::ostringstream convert;
+    convert << counter;
+    
+    //! Produce image path
+    std::string file_name = Params::folder + "/image_" 
+      + convert.str() + ".png";
+    
+    cv::Mat rect_image = (*img)(bbox);
+    //! Resize if requested by the user
+    if(Params::width != 0 && Params::height != 0)
+    {
+      cv::resize(rect_image, rect_image, cv::Size(Params::width,
+        Params::height));
+    } 
+    
+    //! Save the image
+    cv::imwrite( file_name.c_str() , rect_image );
+    counter++;
+    ROS_INFO("Image saved : %s", file_name.c_str());
+  }
+}
+
 /**
  * @brief Callback for the requested image topic. Shows the image and 
  * provides the keybinding 's' to save the image
  **/
 void imageCallback(const sensor_msgs::Image& msg)
 {
-  //! Static initialization of the counter
-  static unsigned int counter = 0;
   
   //!< Current frame to be processed
   cv::Mat current_frame;
@@ -77,7 +144,9 @@ void imageCallback(const sensor_msgs::Image& msg)
   //! Show the image
   cv::imshow("image", current_frame);
 
-  //! Catch key presses in the opencv window
+  cv::setMouseCallback("image", mouseHandler, &current_frame);
+
+  //! Catch key presses in the opencv window  
   int keyCode = cv::waitKey(5)&255;
   switch (keyCode)
   {
@@ -126,7 +195,8 @@ int main(int argc, char** argv)
   
   //! Check the arguments. If 3 no resizing is requested.
   ROS_WARN("Image saver intializes... \n\tPress 's' to save image\n\t\
-Press '0' to set the counter to 0");
+Press '0' to set the counter to 0\n\tDraw a rectangle with mouse to \
+save image");
   if(argc != 3 && argc != 5)
   {
     ROS_ERROR("You haven't provided correct input. \nUsage:\n\trosrun \
