@@ -44,6 +44,7 @@ namespace pandora_vision
   **/
   VictimDetection::VictimDetection(const std::string& ns) : _nh(ns), victimNowON(false)
   {
+    
     /// Get general parameters for image processing
     getGeneralParams();
     
@@ -57,15 +58,15 @@ namespace pandora_vision
     ratioX = hfov / frameWidth;
     ratioY = vfov / frameHeight;
     
-    //~ //!< Subscribe to input image's topic
-    //~ //!< image_transport::ImageTransport it(_nh);
-    //~ _frameSubscriber = _nh.subscribe(
-                       //~ "/kinect/image", 1, &VictimDetection::dummyimageCallback, this);
-                       
-    /// Subscribe to input image's topic
-    /// image_transport::ImageTransport it(_nh);
+    //!< Subscribe to input image's topic
+    //!< image_transport::ImageTransport it(_nh);
     _frameSubscriber = _nh.subscribe(
-              _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
+                       "/kinect/rgb/image_color", 1, &VictimDetection::dummyimageCallback, this);
+                       
+    //~ /// Subscribe to input image's topic
+    //~ /// image_transport::ImageTransport it(_nh);
+    //~ _frameSubscriber = _nh.subscribe(
+              //~ _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
     _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize,
@@ -76,7 +77,8 @@ namespace pandora_vision
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
     clientInitialize();
-
+    _rgbImage = cv::Mat::zeros(frameWidth, frameHeight, CV_8UC3);
+    
     ROS_INFO("[victim_node] : Created Victim Detection instance");
   }
 
@@ -115,7 +117,10 @@ namespace pandora_vision
       
     //! Declare subsciber's topic name
     if (_nh.getParam("subscribed_topic_names/enhanded_hole_alert", param))
+    {
+      ROS_INFO_STREAM("PARAM"<< param);
       _enhancedHolesTopic = param;
+    }  
     else{
       ROS_FATAL("[victim_node] : Victim subscribed topic name param not found");
       ROS_BREAK();
@@ -270,19 +275,22 @@ namespace pandora_vision
   void VictimDetection::imageCallback(
       const vision_communications::EnhancedHolesVectorMsg& msg)
   {
+    ROS_INFO("KOUKOU");
+    
     cv_bridge::CvImagePtr in_msg;
-    in_msg = 
-      cv_bridge::toCvCopy(msg.rgbImage, sensor_msgs::image_encodings::BGR8);
+    in_msg = cv_bridge::toCvCopy(msg.rgbImage, sensor_msgs::image_encodings::BGR8);
+       ROS_INFO("RGB IMAGE SAVED");
     _rgbImage = in_msg->image.clone();
+     
     if (_rgbImage.empty()){
       ROS_FATAL("[victim_node] : No more frames ");
       ROS_BREAK();
     }
-    
-    in_msg = 
-      cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::BGR8);
-    _depthImage = in_msg->image.clone();
-    
+ 
+    //~ in_msg = 
+      //~ cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::MONO8);
+    //~ _depthImage = in_msg->image.clone();
+    //~ 
     
     isDepthEnabled = msg.isDepth;
     
@@ -293,7 +301,8 @@ namespace pandora_vision
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
     
-    checkState();
+    //~ checkState();
+    
   }
   
   /**
@@ -337,10 +346,10 @@ namespace pandora_vision
   */
   void VictimDetection::victimDetect()
   {
-    //~ if(!victimNowON)
-      //~ return;
-    //~ 
-    _victimDetector->victimFusion(2, _rgbdImages);
+    if(!victimNowON)
+      return;
+    
+    _victimDetector->victimFusion(4, _rgbdImages);
     //~ _victimDetector->victimFusion(_stateIndicator, _rgbdImages);
     
     if(!_rgbdImages.size())
