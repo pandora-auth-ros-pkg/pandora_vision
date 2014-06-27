@@ -35,7 +35,7 @@
 * Author:Despoina Paschalidou
 *********************************************************************/
 
-#include "pandora_vision_face/skin_detection.h"
+#include "pandora_vision_victim/victim_detection.h"
 
 /**
   @brief Main function of the face node
@@ -45,8 +45,8 @@
  **/
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "skin_node");
-  pandora_vision::SkinDetection skin_finder;
+  ros::init(argc, argv, "victim_node");
+  pandora_vision::VictimDetection victim_finder("victim");
   ros::spin();
   return 0;
 }

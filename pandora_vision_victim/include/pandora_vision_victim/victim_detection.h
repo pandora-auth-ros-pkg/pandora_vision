@@ -32,17 +32,12 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Aprilis George
-* 		  Despoina Paschalidou
+* Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_FACE_FACE_DETECTION_H 
-#define PANDORA_VISION_FACE_FACE_DETECTION_H 
+#ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
+#define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
-#include <iostream>
-#include <stdlib.h>
-#include <string>
-#include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
 #include <ros/package.h>
@@ -50,96 +45,90 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include "vision_communications/FaceDirectionMsg.h"
-#include "pandora_vision_face/face_detector.h"
-#include "pandora_vision_face/time_calculator.h"
+#include "pandora_common_msgs/GeneralAlertMsg.h"
+#include "vision_communications/EnhancedHolesVectorMsg.h"
+#include "vision_communications/EnhancedHoleMsg.h"
 #include "state_manager/state_client.h"
-
-//!< Horizontal field of view in degrees
-#define HFOV 61.14
-
-//!< vertical field of view in degrees
-#define VFOV 48
-
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
+#include <urdf_parser/urdf_parser.h>
+#include <map>
+#include "pandora_vision_victim/victim_detector.h"
 
 namespace pandora_vision
 {
-class FaceDetection : public StateClient
+class VictimDetection : public StateClient
 {
 private:
 
-  //!< The NodeHandle
+  /// The NodeHandle
   ros::NodeHandle _nh;
 
-  FaceDetector* _faceDetector;
-
-  float ratioX;
-  float ratioY;
-
-  //!< Horizontal field of view in rad
+  /// Horizontal field of view in rad
   double hfov;
 
-  //!< Vertical Field Of View (rad)
+  /// Vertical Field Of View (rad)
   double vfov;
 
   int frameWidth;
   int frameHeight;
 
   std::string cameraName;
+  std::string packagePath;
+  
+  /// Rgb Frame processed by FaceDetector
+  cv::Mat _rgbImage;
+  /// Depth Frame processed by FaceDetector
+  cv::Mat _depthImage;
 
-  //!< Frame processed by FaceDetector
-  cv::Mat faceFrame;
+  /// FaceDetector frame timestamp
+  ros::Time victimFrameTimestamp;
 
-  //!<FaceDetector frame timestamp
-  ros::Time faceFrameTimestamp;
-
-  //!< Timer used for FaceCallaback
-  ros::Timer faceTimer;
-
-  //!< The topic subscribed to for the camera
-  std::string imageTopic;
+  /// The topic subscribed to for the camera
+  std::string _enhancedHolesTopic;
   std::string cameraFrameId;
-
-  //!< time durations for every callback Timer
-  double faceTime;
-
-  //!< Publishers for FaceDetector result messages
+   
+  /// Publishers for FaceDetector result messages
   ros::Publisher _victimDirectionPublisher;
 
-  //!< The subscriber that listens to the frame
-  //!< topic advertised by the central node
+  /// The subscriber that listens to the frame
+  /// topic advertised by the central node
   ros::Subscriber _frameSubscriber;
 
-  //!< variables for changing in dummy msg mode for debugging
-  bool faceDummy;
+  /// Variable used for State Managing
+  bool victimNowON;
 
-  //!< Variable used for State Managing
-  bool faceNowON;
-
-
-  //!< parameters for the FaceDetector:
+  /// Current state of robot
+  int curState;
+  /// Previous state of robot
+  int prevState;
+    
+  /// Parameters for the FaceDetector instance
   std::string cascade_path;
   std::string model_path;
   std::string model_url;
+  std::string rgb_classifier_path;
+  std::string depth_classifier_path;
+  
   int bufferSize;
-  bool skinEnabled;
-
-  //!< Paths for Skin Detector
-  std::string skinHist;
-  std::string wallHist;
-  std::string wall2Hist;
-  std::string packagePath;
-
-  //!< Current state of robot
-  int curState;
-  //!< Previous state of robot
-  int prevState;
-
+  
+  /// Flag that indicates if we have depth information
+  /// from kinect sensor
+  bool isDepthEnabled;
+  /// Flag that indicates if there is one or more holes in current
+  /// frame in order to enable a suitable mask
+  bool isHole;
+  
+  ///Vector of holes found in current frame
+  //~ std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
+  vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
+  
+  /// Flag that indicates current state, according to the information
+  /// received from hole_detector_node
+  int _stateIndicator;
+  
+  /// Instance of class VictimDetector
+  VictimDetector* _victimDetector;
+  
+  std::vector<cv::Mat> _rgbdImages;
   /**
    * @brief Get parameters referring to view and frame characteristics from
    * launch file
@@ -148,40 +137,53 @@ private:
   void getGeneralParams();
 
   /**
-   * @brief Get parameters referring to facedetection algorithm
-   * @return void
-  */
-  void getFaceParams();
-
-  void getTimerParams();
+    *@brief Get parameters referring to the face detection algorithm
+    *@return void
+  **/
+  void getVictimDetectorParameters();
 
   /**
    * @brief This method uses a FaceDetector instance to detect all
    * present faces in a given frame
-   * @param timer [ros:TimerEvemt] the timer used to call
-   * faceCallback
    * @return void
   */
-  void faceCallback(const ros::TimerEvent&);
+  void victimDetect(DetectionImages imgs);
+  
+  
+  /**
+   * @brief This method check in which state we are, according to
+   * the information sent from hole_detector_node
+   * @return void
+  */
+  void checkState();
 
   /**
-   * Function called when new ROS message appears, for front camera
-   * @param msg [const sensor_msgs::Image&] The message
+   * Function called when new message appears from hole_detector_node
+   * @param msg [vision_communications::EnhancedHolesVectorMsg&] The message
    * @return void
   */
-  void imageCallback(const sensor_msgs::Image& msg);
-
+  void imageCallback(const vision_communications::EnhancedHolesVectorMsg& msg);
+  
+  void dummyimageCallback(const sensor_msgs::Image& msg);
+  
+  /**
+    @brief Function that retrieves the parent to the frame_id
+    @return bool Returns true is frame_id found or false if not 
+  */ 
+  bool getParentFrameId();
+  
+  std::map<std::string, std::string> _frame_ids_map;
+  
+  std::string _frame_id;
+  std::string _parent_frame_id;
+   
 public:
 
   //!< The Constructor
-  FaceDetection();
+  explicit VictimDetection(const std::string& ns);
 
   //!< The Destructor
-  ~FaceDetection();
-
-  void createFaceMessage(vision_communications::FaceDirectionMsg *faceMessage);
-  void createDummyFaceMessage(float *center_x, float *center_y, 
-    vision_communications::FaceDirectionMsg *faceMessage);
+  virtual ~VictimDetection();
 
   /**
    * @brief Node's state manager
@@ -195,9 +197,10 @@ public:
    * @return void
   */
   void completeTransition(void);
-
+  
+  std::string param;
 };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_FACE_FACE_DETECTION_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 
 
