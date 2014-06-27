@@ -1,8 +1,8 @@
 camera_name: kinect
 bufferSize: 5
 isDepthEnabled: false
-isHole: false
 cascade_path: /data/cascade.xml
+isHole: false
 model_path: /data/model.xml
 rgb_classifier_path: /data/rgb_svm_classifier.xml    
 depth_classifier_path: /data/depth_svm_classifier.xml    

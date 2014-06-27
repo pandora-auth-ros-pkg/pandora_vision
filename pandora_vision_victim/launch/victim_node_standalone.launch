@@ -1,9 +1,12 @@
 <launch>
     
-<!--
-  <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector_standalone.launch" />
--->
-    <include file="$(find state_manager)/launch/stateManager.launch" />
+  <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector_standalone.launch" >
+   <arg name="openni" value="true" />
+  </include>
+  
+  <include file="$(find pandora_vision_victim)/launch/victim_node.launch" />
+ <!-- 
+  <include file="$(find state_manager)/launch/stateManager.launch" />
 
  <include file="$(find openni_launch)/launch/openni.launch" >
     <arg name="camera" value="kinect" />
@@ -12,8 +15,8 @@
   </include>
   <param name="kinect/topic_name" value="/kinect/rgb/image_raw" />
   
-    <include file="$(find pandora_vision_victim)/launch/victim_node.launch" />
-<!--
+    
+
     <rosparam file="$(find pandora_vision_victim)/config/victim_topics.yaml" 
         command="load" ns="victim"/>
     

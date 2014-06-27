@@ -54,6 +54,7 @@ namespace pandora_vision
                            int bufferSize)
   {
     trained_cascade.load(cascade_path);
+    //~ ROS_ERROR("%s", cascade_path.c_str());
     if(trained_cascade.empty())
     {
       ROS_ERROR("[Face Detector]: Cannot load cascade classifier");
@@ -63,11 +64,12 @@ namespace pandora_vision
     trained_model = cv::createFisherFaceRecognizer();
     trained_model->load(model_path);
 
-    _bufferSize = bufferSize;
+    _bufferSize = 1;
    
     now = 0;
 
     probability = 1.;
+    probability_buffer = std::vector<float>(_bufferSize);
   }
 
   /**
@@ -86,8 +88,7 @@ namespace pandora_vision
 
     if (!probability_buffer.empty())
     {
-      probability_buffer.erase (probability_buffer.begin(),
-                                probability_buffer.begin() + probability_buffer.size());
+      probability_buffer.clear();
     }
   }
 
@@ -101,7 +102,7 @@ namespace pandora_vision
   */
   int FaceDetector::findFaces(cv::Mat frame)
   {
-    
+    int facesNum = 0;
     cv::Mat tmp;
     tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
@@ -109,10 +110,10 @@ namespace pandora_vision
     createRectangles(&tmp);
 
     //! Clear vector of faces before using it for the current frame
-    faces_total.erase (faces_total.begin(), faces_total.begin() +
-                       faces_total.size());
+    faces_total.clear();
 
-    int facesNum = detectFace(frame);
+    facesNum = detectFace(frame);
+    ROS_INFO_STREAM("Number of faces: "<< facesNum);
 
     int totalArea = 0;
     if(facesNum)
@@ -132,18 +133,15 @@ namespace pandora_vision
           cv::noArray()) / 255.) / static_cast<float>(totalArea);
     }
     //! Clear value from last scan and calculate probability
-    probability = 0.;
-    for(int i = 0 ; i < _bufferSize ; i++)
-    {
+    probability = 0.0;
+    for(int i = 0 ; i < _bufferSize ; i++){
       probability += (probability_buffer[i]);
     }
     probability = probability / _bufferSize;
     
-    ROS_INFO_STREAM("probability"<< probability);
+    //~ ROS_INFO_STREAM("probability"<< probability);
     now = (now + 1) % _bufferSize; //prepare index for next frame
-    
-    probability_buffer.clear();
-    
+        
     return facesNum;
   }
 
@@ -183,7 +181,7 @@ namespace pandora_vision
     cv::Rect faceRect;
     cv::Point start;
     cv::Point end;
-    for(int i = 0; i < ( faces_total.size() ? (faces_total.size()) : 0) ; i++)
+    for(int i = 0; i < faces_total.size(); i++)
     {
       faceRect = faces_total.at(i);
       start = cv::Point( faceRect.x , faceRect.y );
@@ -249,9 +247,10 @@ namespace pandora_vision
   */
   int FaceDetector::detectFace(cv::Mat img)
   {
-    cv::Mat original(img.size().width, img.size().height, CV_8UC1);
+    cv::Mat original(img.size().width,img.size().height,CV_8UC1);
+    std::cout<<"W/H "<<img.size().width << " " << img.size().height<<"\n";
     original = img.clone();
-    cv::Mat gray(img.size().width, img.size().height, CV_8UC1);
+    cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
     cvtColor(original, gray, CV_BGR2GRAY);
     std::vector< cv::Rect_<int> > thrfaces;
 
@@ -262,22 +261,27 @@ namespace pandora_vision
     {
       //! Find the faces in the frame:
       trained_cascade.detectMultiScale(gray, thrfaces);
+      ROS_INFO_STREAM("thrfaces.size()" <<thrfaces.size());
       for(int i = 0; i < thrfaces.size(); i++)
       {
         //! Process face by face:
         cv::Rect face_i = thrfaces[i];
         cv::Mat face = gray(face_i);
         cv::Mat face_resized;
-        cv::resize(face, face_resized, cv::Size(im_width, im_height), 1.0, 1.0, cv::INTER_CUBIC);
+        cv::resize(face, face_resized, cv::Size(im_width, im_height), 
+          1.0, 1.0, cv::INTER_CUBIC);
         int prediction = trained_model->predict(face_resized);
-        //~ ROS_INFO_STREAM("Prediction " << prediction);
+        ROS_INFO_STREAM("Prediction " << prediction);
         rectangle(original, face_i, CV_RGB(0, 255, 0), 1);
         //! Add every element created for each frame, to the total amount of faces
         faces_total.push_back (thrfaces.at(i));
       }
     }
+    
+    cv::imshow("face_detector", original);
+    cv::waitKey(30);
     int res = thrfaces.size();
-    thrfaces.erase (thrfaces.begin(), thrfaces.begin() + thrfaces.size());
+    thrfaces.clear();
     return res;
   }
 
