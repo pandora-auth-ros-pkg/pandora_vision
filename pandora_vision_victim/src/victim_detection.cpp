@@ -421,7 +421,7 @@ namespace pandora_vision
       }
       cv::Rect rect(minx, miny, maxx - minx, maxy - miny);
       cv::Mat temp = _rgbImage(rect);
-      cv::resize(temp, temp, cv::Size(640,480));
+      cv::resize(temp, temp, cv::Size(640, 480));
       imgs.rgbMasks.push_back(temp);
       if(isDepthEnabled)
       {
@@ -455,7 +455,7 @@ namespace pandora_vision
       float x = facesTable[i * 4]
           - static_cast<float>(frameWidth) / 2;
       float y = static_cast<float>(frameHeight) / 2
-          - facesTable[i * 4 + 1] ;
+          - facesTable[i * 4 + 1];
                                       
       victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
       victimMessage.header.stamp = ros::Time::now();
