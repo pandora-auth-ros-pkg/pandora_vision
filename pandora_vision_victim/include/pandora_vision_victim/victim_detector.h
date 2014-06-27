@@ -43,61 +43,79 @@
 #include "pandora_vision_victim/depth_system_validator.h"
 namespace pandora_vision
 {
+  
+  enum FromHoleDetector
+  { 
+    GOT_NOTHING = 1,
+    GOT_ALL = 4,
+    GOT_MASK = 2,
+    GOT_DEPTH = 3
+  };
+  
+  
+  struct DetectionImages
+  {
+    cv::Mat rgb;
+    cv::Mat depth;
+    std::vector<cv::Mat> rgbMasks;
+    std::vector<cv::Mat> depthMasks;
+  };
+  
   class VictimDetector
   {
     private:
-    /// Rgb image to be processed
-    cv::Mat _rgbImage;
+      
+      
     
-    /// Depth image to be processed
-    cv::Mat _depthImage;
-    
-    /// Instance of class face_detector
-    FaceDetector* _faceDetector;
-  
-    ///Instance of class rgbSystemValidator
-    RgbSystemValidator _rgbSystemValidator;
-    
-    ///Instance of class depthSystemValidator
-    DepthSystemValidator _depthSystemValidator;
-    
-    /// Flag that indicates current state, according to the information
-    /// received from hole_detector_node
-    int _stateIndicator;
+      ///Instance of class rgbSystemValidator
+      RgbSystemValidator _rgbSystemValidator;
+      
+      ///Instance of class depthSystemValidator
+      DepthSystemValidator _depthSystemValidator;
+      
+      /// Flag that indicates current state, according to the information
+      /// received from hole_detector_node
+      int _stateIndicator;
         
     public:
-    //!< The Constructor
-    explicit VictimDetector(std::string cascade_path, 
-        std::string model_path, int bufferSize, std::string rgb_classifier_path,
-        std::string depth_classifier_path);
+    
+      DetectionImages dImages;
+    
+      FromHoleDetector detectionMode;
+      
+      //!< The Constructor
+      explicit VictimDetector(std::string cascade_path, 
+          std::string model_path, int bufferSize, std::string rgb_classifier_path,
+          std::string depth_classifier_path);
 
-    //!< The Destructor
-    virtual ~VictimDetector();
-    
-    /**
-     *@brief Function that enables suitable subsystems, according
-     * to the current State 
-     * @param [int] _stateIndicator
-     * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
-     * vector can be either 2 or 1, if we have both rgbd information or not
-     * @return void
-    */ 
-    void victimFusion( int _stateIndicator, std::vector<cv::Mat> _rgbdImages);
-    
-    /**
-     *@brief Function that extracts handles rgb subsystem
-     *@param [cv::Mat] current frame to be processed
-     *@return void
-    */ 
-    void rgbFeaturesDetect(cv::Mat _rgbImage);
-    
-    /**
-     *@brief Function that extracts handles depth subsystem
-     *@param [cv::Mat] current frame to be processed
-     *@return void
-    */ 
-    void depthFeaturesDetect(cv::Mat _depthImage);
-     
+      //!< The Destructor
+      virtual ~VictimDetector();
+      
+      /**
+       *@brief Function that enables suitable subsystems, according
+       * to the current State 
+       * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
+       * vector can be either 2 or 1, if we have both rgbd information or not
+       * @return void
+      */ 
+      int victimFusion( DetectionImages imgs );
+      
+      /**
+       *@brief Function that extracts handles rgb subsystem
+       *@param [cv::Mat] current frame to be processed
+       *@return void
+      */ 
+      void rgbFeaturesDetect(cv::Mat _rgbImage);
+      
+      /**
+       *@brief Function that extracts handles depth subsystem
+       *@param [cv::Mat] current frame to be processed
+       *@return void
+      */ 
+      void depthFeaturesDetect(cv::Mat _depthImage);
+      /// Instance of class face_detector
+      FaceDetector* _faceDetector;
+      
   }; 
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTOR_H

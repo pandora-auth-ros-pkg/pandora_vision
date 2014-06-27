@@ -65,57 +65,36 @@ namespace pandora_vision
   /**
    *@brief Function that enables suitable subsystems, according
    * to the current State 
-   * @param [int] _stateIndicator
    * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
    * vector can be either 2 or 1, if we have both rgbd information or not
    * @return void
   */ 
-  void VictimDetector::victimFusion( 
-      int _stateIndicator, std::vector<cv::Mat> _rgbdImages)
+  int VictimDetector::victimFusion(DetectionImages imgs)
   {
-      if(_rgbdImages.size() == 1)
-        _rgbImage = _rgbdImages[0];
-      else{
-         _rgbImage = _rgbdImages[0];
-         _depthImage = _rgbdImages[1];
-      }  
-        
-    switch(_stateIndicator){
-      case 1:
-         ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable Viola Jones for depth image
-        _faceDetector->findFaces(_depthImage);
-        ///Enable rgb_system validator for rgb image
-        rgbFeaturesDetect(_rgbImage);
-        ///Enable rgb_system validator for depth image
-        depthFeaturesDetect(_depthImage);
-        break;  
-      
-      case 2:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable rgb_system validator for rgb image
-         rgbFeaturesDetect(_rgbImage);
-        break;
-      
-      case 3:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        ///Enable Viola Jones for depth image
-        _faceDetector->findFaces(_depthImage);
-        break;
-        
-      case 4:
-        ///Enable Viola Jones for rgb image
-        _faceDetector->findFaces(_rgbImage);
-        break;
-      
-      default:
-        ROS_ERROR("[victim_node] : Invalid state for victim_node");
-        break;
+    int faceNum = 0;
+    ///Enable Viola Jones for rgb image
+    faceNum = _faceDetector->findFaces(imgs.rgb);
+    if(detectionMode == GOT_ALL || detectionMode == GOT_DEPTH)
+    {
+      _faceDetector->findFaces(imgs.depth);
     }
+    if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
+    {
+      for(int i = 0 ; i < imgs.rgbMasks.size(); i++){
+        //~ cv::imshow("rgb mask",imgs.rgbMasks.at(i));
+        //~ cv::waitKey(30);
+        rgbFeaturesDetect(imgs.rgbMasks.at(i));
+      }  
+    }
+    if(detectionMode == GOT_ALL)
+    {
+      for(int i = 0 ; i < imgs.depthMasks.size(); i++){
+        depthFeaturesDetect(imgs.depthMasks.at(i));
+      }
+    }
+    return faceNum;
   }
+  
     
   /**
    *@brief Function that extracts handles rgb subsystem

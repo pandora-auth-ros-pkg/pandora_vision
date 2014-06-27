@@ -44,6 +44,9 @@ namespace pandora_vision
   **/
   VictimDetection::VictimDetection(const std::string& ns) : _nh(ns), victimNowON(false)
   {
+     //!< Set initial value of parent frame id to null
+    _parent_frame_id = "";
+    _frame_id = "";
     
     /// Get general parameters for image processing
     getGeneralParams();
@@ -54,9 +57,6 @@ namespace pandora_vision
     /// Convert field of view from degrees to rads
     hfov = hfov * CV_PI / 180;
     vfov = vfov * CV_PI / 180;
-
-    ratioX = hfov / frameWidth;
-    ratioY = vfov / frameHeight;
     
     //!< Subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
@@ -126,45 +126,51 @@ namespace pandora_vision
       ROS_BREAK();
     }  
     
-    //!< Get the camera to be used by hole node;
-    if (_nh.getParam("camera_name", cameraName))
+        
+    //!< Get the camera to be used by motion node;
+    if (_nh.getParam("camera_name", cameraName)) 
       ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    else{
-      ROS_FATAL("[victim_node] : Camera name not found");
+    else 
+    {
+      ROS_FATAL("[Motion_node]: Camera name not found");
+      ROS_BREAK(); 
+    }
+
+    //! Get the Height parameter if available;
+    if (_nh.getParam("image_height", frameHeight)) 
+      ROS_DEBUG_STREAM("height : " << frameHeight);
+    else 
+    {
+      ROS_FATAL("[motion_node] : Parameter frameHeight not found. Using Default");
       ROS_BREAK();
     }
-      
-    //!< Get the Height parameter if available;
-    if (_nh.getParam("/" + cameraName + "/image_height", frameHeight))
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    else{
-      frameHeight = DEFAULT_HEIGHT;
-      ROS_DEBUG_STREAM("height : " << frameHeight);
+    
+    //! Get the Width parameter if available;
+    if ( _nh.getParam("image_width", frameWidth)) 
+      ROS_DEBUG_STREAM("width : " << frameWidth);
+    else 
+    {
+      ROS_FATAL("[motion_node] : Parameter frameWidth not found. Using Default");
+      ROS_BREAK();
     }
-
-    //!< Get the Width parameter if available;
-    if (_nh.getParam("/" + cameraName + "/image_width", frameWidth))
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    else{
-      frameWidth = DEFAULT_WIDTH;
-      ROS_DEBUG_STREAM("width : " << frameWidth);
+  
+    //!< Get the HFOV parameter if available;
+    if (_nh.getParam("hfov", hfov)) 
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    else 
+    {
+     ROS_FATAL("[motion_node]: Horizontal field of view not found");
+     ROS_BREAK();
     }
     
-     //!< Get the HFOV parameter if available;
-    if ( _nh.getParam("/" + cameraName + "/hfov", hfov))
-      ROS_DEBUG_STREAM("HFOV : " << hfov);
-    else{
-      hfov = HFOV;
-      ROS_DEBUG_STREAM("HFOV : " << hfov);
-    }
-
     //!< Get the VFOV parameter if available;
-    if ( _nh.getParam("/" + cameraName + "/vfov", vfov))
+    if (_nh.getParam("vfov", vfov)) 
       ROS_DEBUG_STREAM("VFOV : " << vfov);
-    else{
-      vfov = VFOV;
-      ROS_DEBUG_STREAM("VFOV : " << vfov);
-    }
+    else 
+    {
+     ROS_FATAL("[motion_node]: Vertical field of view not found");
+     ROS_BREAK();
+    }  
     
   }
 
@@ -246,6 +252,43 @@ namespace pandora_vision
   }
   
   /**
+  @brief Function that retrieves the parent to the frame_id.
+  @param void
+  @return bool Returns true is frame_id found or false if not
+  **/
+  bool VictimDetection::getParentFrameId()
+  {
+    // Parse robot description
+    const std::string model_param_name = "/robot_description";
+    bool res = _nh.hasParam(model_param_name);
+
+    std::string robot_description = "";
+
+    if(!res || !_nh.getParam(model_param_name, robot_description))
+    {
+      ROS_ERROR("[Motion_node]:Robot description couldn't be retrieved from the parameter server.");
+      return false;
+    }
+  
+    boost::shared_ptr<urdf::ModelInterface> model(
+      urdf::parseURDF(robot_description));
+
+    // Get current link and its parent
+    boost::shared_ptr<const urdf::Link> currentLink = model->getLink(_frame_id);
+    if(currentLink){
+      boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
+      // Set the parent frame_id to the parent of the frame_id
+      _parent_frame_id = parentLink->name;
+      return true;
+    }
+    else
+      _parent_frame_id = _frame_id;
+      
+    return false;
+  }
+  
+  
+  /**
    * @brief Function called when new ROS message appears, for camera
    * @param msg [const sensor_msgs::Image&] The message
    * @return void
@@ -256,7 +299,7 @@ namespace pandora_vision
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     _rgbImage = in_msg->image.clone();
     victimFrameTimestamp = msg.header.stamp;
-
+    
     if (_rgbImage.empty() )
     {
       ROS_ERROR("[face_node] : No more Frames ");
@@ -278,26 +321,58 @@ namespace pandora_vision
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg.rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
     _rgbImage = in_msg->image.clone();
-     
+    
+    if(_frame_id.c_str()[0] == '/')
+      _frame_id = _frame_id.substr(1);
+      
+       
     if (_rgbImage.empty()){
       ROS_FATAL("[victim_node] : No more frames ");
       ROS_BREAK();
     }
- 
+    
     in_msg = 
       cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     _depthImage = in_msg->image.clone();
     
-    isDepthEnabled = msg.isDepth;
+    //~ isDepthEnabled = msg.isDepth;
+    isDepthEnabled = false;
     
-    _enhancedHoles = msg.enhancedHoles;
-    if (_enhancedHoles.size() > 0)
+    _frame_id = msg.header.frame_id; 
+    _enhancedHoles = msg;
+    if (_enhancedHoles.enhancedHoles.size() > 0)
       isHole = true;
-      
+    
+    
+    
+    //~ for(unsigned int k = 0 ; k < msg.enhancedHoles.size() ; k++)
+    //~ {
+      //~ for(int i = 0; i < 4; i++ ){
+        //~ cv::line(_rgbImage, 
+          //~ cv::Point(msg.enhancedHoles[k].verticesX[i],
+            //~ msg.enhancedHoles[k].verticesY[i]),
+          //~ cv::Point(msg.enhancedHoles[k].verticesX[(i+1)%4],
+            //~ msg.enhancedHoles[k].verticesY[(i+1)%4]), 
+          //~ CV_RGB(255, 0, 0), 1, 8);
+      //~ }
+    //~ }
+    //~ 
+    //~ cv::imshow("blabla",_rgbImage);
+    //~ cv::waitKey(30);
+    
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
     
     checkState();
+    
+    std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
+      
+    if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
+      bool _indicator = getParentFrameId();
+      
+      _frame_ids_map.insert( it , std::pair<std::string, std::string>(
+         _frame_id, _parent_frame_id));
+    } 
     
   }
   
@@ -308,32 +383,53 @@ namespace pandora_vision
   */
   void VictimDetection::checkState()
   {
-    _rgbdImages.clear();
-    ///!< First case, where all subsystems are enabled
-    if(isDepthEnabled == true && isHole == true){
-      _stateIndicator = 1;
-      _rgbdImages.push_back(_rgbImage);
-      _rgbdImages.push_back(_depthImage);
-    }  
-    ///!< Second case, where only rgb systems are enabled  
-    if(isDepthEnabled == false && isHole == true){
-        _stateIndicator = 2;
-        _rgbdImages.push_back(_rgbImage);
-    }    
-    ///!< Third case, where only Viola Jones subsystems for both
-    ///!< rgb and depth Image are enabled
-    if(isDepthEnabled == true && isHole == false){
-        _stateIndicator = 3;
-        _rgbdImages.push_back(_rgbImage);
-        _rgbdImages.push_back(_depthImage);
-    }    
-    ///!< Fourth case, where only Viola Jones subsystem for rgb image
-    ///!< is enabled
-    if(isDepthEnabled == false && isHole == false){
-        _stateIndicator = 4;
-        _rgbdImages.push_back(_rgbImage);
+    //~ _rgbdImages.clear();
+    DetectionImages imgs; 
+    _stateIndicator = 2 * isDepthEnabled + isHole + 1;
+    
+    imgs.rgb = _rgbImage;
+    switch(_stateIndicator)
+    {
+      case 1:
+        _victimDetector->detectionMode = GOT_NOTHING;
+        break;
+      case 2:
+        _victimDetector->detectionMode = GOT_MASK;
+        break;
+      case 3:
+        _victimDetector->detectionMode = GOT_DEPTH;
+        imgs.depth = _depthImage;
+        break;
+      case 4:
+        _victimDetector->detectionMode = GOT_ALL;
+        imgs.depth = _depthImage;
+        break;
     }
-    victimDetect();    
+    for(unsigned int i = 0 ; i < _enhancedHoles.enhancedHoles.size();
+      i++)
+    {
+      
+      int minx = 10000, maxx = -1, miny = 10000, maxy = -1;
+      for(unsigned int j = 0 ; j < 4 ; j++)
+      {
+        int xx = _enhancedHoles.enhancedHoles[i].verticesX[j];
+        int yy = _enhancedHoles.enhancedHoles[i].verticesY[j];
+        minx = xx < minx ? xx : minx;
+        maxx = xx > maxx ? xx : maxx;
+        miny = yy < miny ? yy : miny;
+        maxy = yy > maxy ? yy : maxy;
+      }
+      cv::Rect rect(minx, miny, maxx - minx, maxy - miny);
+      cv::Mat temp = _rgbImage(rect);
+      cv::resize(temp, temp, cv::Size(640,480));
+      imgs.rgbMasks.push_back(temp);
+      if(isDepthEnabled)
+      {
+        temp = _depthImage(rect);
+        imgs.depthMasks.push_back(temp);
+      }
+    }
+    victimDetect(imgs);    
   }
   
   /**
@@ -341,17 +437,36 @@ namespace pandora_vision
    * present faces in a given frame
    * @return void
   */
-  void VictimDetection::victimDetect()
+  void VictimDetection::victimDetect(DetectionImages imgs)
   {
     if(!victimNowON)
       return;
+    int facesNum = 0;
+    facesNum = _victimDetector->victimFusion(imgs);
     
-    _victimDetector->victimFusion(4, _rgbdImages);
-    //~ _victimDetector->victimFusion(_stateIndicator, _rgbdImages);
+    //!< Create message of Victim Detector
+    pandora_common_msgs::GeneralAlertMsg victimMessage;
     
-    if(!_rgbdImages.size())
-      _rgbdImages.erase(_rgbdImages.begin(), 
-        _rgbdImages.size()+ _rgbdImages.begin());
+    if(facesNum > 0){
+    int* facesTable = _victimDetector->_faceDetector->getFacePositionTable();
+    
+    for(int i = 0;  i < facesNum; i++){
+      // Victim's center coordinates relative to the center of the frame
+      float x = facesTable[i * 4]
+          - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+          - facesTable[i * 4 + 1] ;
+                                      
+      victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+      victimMessage.header.stamp = ros::Time::now();
+      victimMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));;
+      victimMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));;
+      victimMessage.probability = _victimDetector->_faceDetector->getProbability();
+      ROS_INFO_STREAM( "[victim_node] :Victim ");
+      _victimDirectionPublisher.publish(victimMessage);
+     }
+     delete facesTable; 
+    } 
   }
 
 
