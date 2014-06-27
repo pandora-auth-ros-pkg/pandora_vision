@@ -2199,7 +2199,7 @@ namespace pandora_vision
           }
         }
       }
-      else if (filteringMode_ = RGB_ONLY_MODE)
+      else if (filteringMode_ == RGB_ONLY_MODE)
       {
         // Color homogeneity
         if (Parameters::HoleFusion::run_checker_color_homogeneity_urgent > 0)
