@@ -49,20 +49,9 @@
 #include "vision_communications/EnhancedHolesVectorMsg.h"
 #include "vision_communications/EnhancedHoleMsg.h"
 #include "state_manager/state_client.h"
-
+#include <urdf_parser/urdf_parser.h>
+#include <map>
 #include "pandora_vision_victim/victim_detector.h"
-
-//!< Horizontal field of view in degrees
-#define HFOV 61.14
-
-//!< vertical field of view in degrees
-#define VFOV 48
-
-//!< default frame height
-#define DEFAULT_HEIGHT 480
-
-//!< default frame width
-#define DEFAULT_WIDTH 640
 
 namespace pandora_vision
 {
@@ -72,9 +61,6 @@ private:
 
   /// The NodeHandle
   ros::NodeHandle _nh;
-
-  float ratioX;
-  float ratioY;
 
   /// Horizontal field of view in rad
   double hfov;
@@ -132,7 +118,8 @@ private:
   bool isHole;
   
   ///Vector of holes found in current frame
-  std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
+  //~ std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
+  vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
   
   /// Flag that indicates current state, according to the information
   /// received from hole_detector_node
@@ -160,7 +147,7 @@ private:
    * present faces in a given frame
    * @return void
   */
-  void victimDetect();
+  void victimDetect(DetectionImages imgs);
   
   
   /**
@@ -178,6 +165,17 @@ private:
   void imageCallback(const vision_communications::EnhancedHolesVectorMsg& msg);
   
   void dummyimageCallback(const sensor_msgs::Image& msg);
+  
+  /**
+    @brief Function that retrieves the parent to the frame_id
+    @return bool Returns true is frame_id found or false if not 
+  */ 
+  bool getParentFrameId();
+  
+  std::map<std::string, std::string> _frame_ids_map;
+  
+  std::string _frame_id;
+  std::string _parent_frame_id;
    
 public:
 

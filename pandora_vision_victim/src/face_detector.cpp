@@ -198,12 +198,10 @@ namespace pandora_vision
   */
   int* FaceDetector::getFacePositionTable()
   {
-    //!
-    cv::Rect faceRect;
     int* table = new int[ 4 * faces_total.size() ];
     for(int ii = 0; ii < faces_total.size(); ii++)
     {
-      faceRect = faces_total.at(ii);
+      cv::Rect faceRect = faces_total.at(ii);
 
       //! Face center_x
       table[ii * 4]   = round( faceRect.x + faceRect.width * 0.5 );
@@ -248,7 +246,6 @@ namespace pandora_vision
   int FaceDetector::detectFace(cv::Mat img)
   {
     cv::Mat original(img.size().width,img.size().height,CV_8UC1);
-    std::cout<<"W/H "<<img.size().width << " " << img.size().height<<"\n";
     original = img.clone();
     cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
     cvtColor(original, gray, CV_BGR2GRAY);
@@ -281,6 +278,7 @@ namespace pandora_vision
     cv::imshow("face_detector", original);
     cv::waitKey(30);
     int res = thrfaces.size();
+ 
     thrfaces.clear();
     return res;
   }

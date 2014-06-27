@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     sensor_msgs
     roslint
+    urdf
 )
 
 
@@ -29,6 +30,7 @@ catkin_package(
       image_transport
       sensor_msgs
       roslint
+      urdf
     INCLUDE_DIRS
       include
     LIBRARIES

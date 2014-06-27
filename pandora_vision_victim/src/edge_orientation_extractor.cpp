@@ -72,6 +72,8 @@ namespace pandora_vision
     //!<block size
     int colsBlockSize = src.cols/4;
     int rowsBlockSize = src.rows/4;
+    ROS_INFO_STREAM("src.cols" << src.cols);
+    ROS_INFO_STREAM("src.rows" << src.rows);
     if(src.rows % 4 != 0 && src.cols % 4 != 0)
       ROS_INFO("[victim_node] : Incorrect Division");
       
