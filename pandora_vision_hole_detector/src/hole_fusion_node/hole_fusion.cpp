@@ -641,6 +641,10 @@ namespace pandora_vision
   void HoleFusion::makeValidHolesUnique(
     HolesConveyor* allHoles, std::map<int, float>* validHolesMap)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("makeValidHolesUnique", "processCandidateHoles");
+    #endif
+
     // Each set inside the map refers a valid hole inside the allHoles conveyor.
     // The entries of each set are indices to valid holes inside
     // the allHoles conveyor.
@@ -776,6 +780,10 @@ namespace pandora_vision
     // unique holes found.
     HolesConveyorUtils::replace(uniqueHoles, allHoles);
     *validHolesMap = finalMap;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("makeValidHolesUnique");
+    #endif
   }
 
 
@@ -1265,38 +1273,30 @@ namespace pandora_vision
     // If there are valid holes, publish them
     if (validHolesMap.size() > 0)
     {
-      publishValidHoles(rgbdHolesConveyor, &validHolesMap);
+      publishValidHoles(allHoles, &validHolesMap);
     }
 
     // Publish the enhanced holes message
     // regardless of the amount of valid holes
-    publishEnhancedHoles(rgbdHolesConveyor, &validHolesMap);
+    publishEnhancedHoles(allHoles, &validHolesMap);
 
     #ifdef DEBUG_SHOW
     if (Parameters::HoleFusion::show_final_holes)
     {
-      // The holes conveyor containing only the valid holes
-      HolesConveyor validHolesConveyor;
-
       // Contains the validity probability for each hole considered valid
       std::vector<std::string> msgs;
 
       for (std::map<int, float>::iterator it = validHolesMap.begin();
         it != validHolesMap.end(); it++)
       {
-        HolesConveyorUtils::append(
-          HolesConveyorUtils::getHole(rgbdHolesConveyor, it->first),
-          &validHolesConveyor);
-
         msgs.push_back(TOSTR(it->second));
       }
-
 
       // Valid holes on top of the interpolated depth image
       cv::Mat depthValidHolesImage =
         Visualization::showHoles("Valid Holes",
           interpolatedDepthImage_,
-          validHolesConveyor,
+          allHoles,
           -1,
           msgs);
 
@@ -1304,7 +1304,7 @@ namespace pandora_vision
       cv::Mat rgbValidHolesImage =
         Visualization::showHoles("ValidHoles",
           rgbImage_,
-          validHolesConveyor,
+          allHoles,
           -1,
           msgs);
 
