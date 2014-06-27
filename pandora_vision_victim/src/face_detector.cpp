@@ -245,9 +245,9 @@ namespace pandora_vision
   */
   int FaceDetector::detectFace(cv::Mat img)
   {
-    cv::Mat original(img.size().width,img.size().height,CV_8UC1);
+    cv::Mat original(img.size().width, img.size().height, CV_8UC1);
     original = img.clone();
-    cv::Mat gray(img.size().width,img.size().height,CV_8UC1);
+    cv::Mat gray(img.size().width, img.size().height, CV_8UC1);
     cvtColor(original, gray, CV_BGR2GRAY);
     std::vector< cv::Rect_<int> > thrfaces;
 
