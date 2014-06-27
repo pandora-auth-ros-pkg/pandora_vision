@@ -638,8 +638,26 @@ namespace pandora_vision
 
 
 
-  void HoleFusion::makeValidHolesUnique(
-    HolesConveyor* allHoles, std::map<int, float>* validHolesMap)
+  /**
+    @brief Takes as input a container of holes and a map of indices
+    of holes referring to the container to validity probabilities.
+    It outputs the most probable unique valid holes and a map
+    adjusted to fit the altered container of holes.
+
+    Inside the allHoles container, reside holes that have originated
+    from the Depth and RGB nodes, plus any merges between them. Having
+    acquired the validity probability of each one of them, this method
+    locates valid holes that refer to the same physical hole in space
+    inside the allHoles container and picks the one with the largest
+    validity probability.
+    @param[in,out] allHoles [HolesConveyor*] The conveyor of holes.
+    @param[in,out] validHolesMap [std::map<int, float>*] The std::map
+    that maps holes inside the allHoles conveyor to their validity
+    probability
+    @return void
+   **/
+  void HoleFusion::makeValidHolesUnique(HolesConveyor* allHoles,
+    std::map<int, float>* validHolesMap)
   {
     #ifdef DEBUG_TIME
     Timer::start("makeValidHolesUnique", "processCandidateHoles");
