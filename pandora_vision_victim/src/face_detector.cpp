@@ -101,6 +101,7 @@ namespace pandora_vision
   */
   int FaceDetector::findFaces(cv::Mat frame)
   {
+    
     cv::Mat tmp;
     tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
@@ -138,8 +139,11 @@ namespace pandora_vision
     }
     probability = probability / _bufferSize;
     
+    ROS_INFO_STREAM("probability"<< probability);
     now = (now + 1) % _bufferSize; //prepare index for next frame
-
+    
+    probability_buffer.clear();
+    
     return facesNum;
   }
 
@@ -253,7 +257,7 @@ namespace pandora_vision
 
     int im_width = 92;
     int im_height = 112;
-
+    
     if(!trained_cascade.empty())
     {
       //! Find the faces in the frame:
@@ -266,7 +270,7 @@ namespace pandora_vision
         cv::Mat face_resized;
         cv::resize(face, face_resized, cv::Size(im_width, im_height), 1.0, 1.0, cv::INTER_CUBIC);
         int prediction = trained_model->predict(face_resized);
-        ROS_INFO_STREAM("Prediction " << prediction);
+        //~ ROS_INFO_STREAM("Prediction " << prediction);
         rectangle(original, face_i, CV_RGB(0, 255, 0), 1);
         //! Add every element created for each frame, to the total amount of faces
         faces_total.push_back (thrfaces.at(i));
