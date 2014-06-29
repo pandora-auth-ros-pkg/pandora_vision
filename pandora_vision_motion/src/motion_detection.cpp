@@ -48,6 +48,10 @@ namespace pandora_vision
     _parent_frame_id = "";
     _frame_id = "";
     
+    /// Convert field of view from degrees to rads
+    hfov = hfov * CV_PI / 180;
+    vfov = vfov * CV_PI / 180;
+    
     //!< Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
    
@@ -259,10 +263,17 @@ namespace pandora_vision
     }
     if(motionMessage.probability > 0.1)
     {
+      int* bounding_boxes = _motionDetector.getMotionPosition();
+      
+      float x = bounding_boxes[0]
+          - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+          - bounding_boxes[1];
+          
       motionMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
-      motionMessage.header.stamp = ros::Time::now();
-      motionMessage.yaw = 0;
-      motionMessage.pitch = 0;
+      motionMessage.header.stamp = motionFrameTimestamp;
+      motionMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      motionMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
       ROS_INFO_STREAM( "[Motion_node] :Motion found with probability: "<< motionMessage.probability);
       _motionPublisher.publish(motionMessage);
     }
