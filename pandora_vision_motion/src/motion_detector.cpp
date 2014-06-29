@@ -94,9 +94,9 @@ namespace pandora_vision
  
     detectMotionPosition(temp);
      
-    #ifdef SHOW_DEBUG_IMAGE
+    ROS_INFO_STREAM("MotionParameters::visualization" << MotionParameters::visualization); 
+    if(MotionParameters::visualization)
       debugShow(temp);
-    #endif  
    
     return typeOfMovement;
   }
