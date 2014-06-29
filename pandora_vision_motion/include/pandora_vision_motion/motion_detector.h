@@ -44,7 +44,7 @@
 #include <vector>
 #include "pandora_vision_motion/motion_parameters.h"
 
-//~ #define SHOW_DEBUG_IMAGE
+#define SHOW_DEBUG_IMAGE
 
 namespace pandora_vision 
 {
@@ -74,7 +74,8 @@ namespace pandora_vision
     int max_deviation;
     
     cv::Mat result;
-
+    
+    cv::Rect_<int> _bounding_box;
     /**
       @brief Class Constructor
       Initializes all varialbes for thresholding
