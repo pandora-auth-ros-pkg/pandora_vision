@@ -334,6 +334,7 @@ namespace pandora_vision
     MotionParameters::diff_threshold = config.diff_threshold;
     MotionParameters::motion_high_thres= config.motion_high_thres;
     MotionParameters::motion_low_thres= config.motion_low_thres;
+    MotionParameters::visualization= config.visualization;
     
   }
 }// namespace pandora_vision
