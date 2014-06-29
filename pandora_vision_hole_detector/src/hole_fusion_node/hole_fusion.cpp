@@ -1948,17 +1948,17 @@ namespace pandora_vision
     if (Parameters::HoleFusion::validation_process ==
       VALIDATION_VIA_THRESHOLDING)
     {
-      valid = validationViaThresholding(probabilitiesVector2D);
+      valid = validateHolesViaThresholding(probabilitiesVector2D);
     }
     else if (Parameters::HoleFusion::validation_process ==
       VALIDATION_VIA_WEIGHTING)
     {
-      valid = validationViaWeighting(probabilitiesVector2D);
+      valid = validateHolesViaWeighting(probabilitiesVector2D);
     }
     else if (Parameters::HoleFusion::validation_process ==
       VALIDATION_VIA_THRESHOLDED_WEIGHTING)
     {
-      valid = validationViaThresholdedWeighting(probabilitiesVector2D);
+      valid = validateHolesViaThresholdedWeighting(probabilitiesVector2D);
     }
     else
     {
@@ -1990,7 +1990,7 @@ namespace pandora_vision
     @return [std::map<int, float>] The indices of the valid holes and their
     respective validity probabilities
    **/
-  std::map<int, float> HoleFusion::validationViaWeighting(
+  std::map<int, float> HoleFusion::validateHolesViaWeighting(
     const std::vector<std::vector<float> >& probabilitiesVector2D)
   {
     #ifdef DEBUG_TIME
@@ -2211,7 +2211,7 @@ namespace pandora_vision
     @return [std::map<int, float>] The indices of the valid holes and their
     respective validity probabilities
    **/
-  std::map<int, float> HoleFusion::validationViaThresholdedWeighting(
+  std::map<int, float> HoleFusion::validateHolesViaThresholdedWeighting(
     const std::vector<std::vector<float> >& probabilitiesVector2D)
   {
     #ifdef DEBUG_TIME
@@ -2309,13 +2309,6 @@ namespace pandora_vision
         // Depth homogeneity
         if (Parameters::HoleFusion::run_checker_depth_homogeneity > 0)
         {
-          if (probabilitiesVector2D[
-            Parameters::HoleFusion::run_checker_depth_homogeneity - 1][i] <
-            Parameters::HoleFusion::checker_depth_homogeneity_threshold)
-          {
-            continue;
-          }
-
           if (probabilitiesVector2D[
             Parameters::HoleFusion::run_checker_depth_homogeneity - 1][i] <
             Parameters::HoleFusion::checker_depth_homogeneity_threshold)
@@ -2525,7 +2518,7 @@ namespace pandora_vision
     @return [std::map<int, float>] The indices of the valid holes and their
     respective validity probabilities
    **/
-  std::map<int, float> HoleFusion::validationViaThresholding(
+  std::map<int, float> HoleFusion::validateHolesViaThresholding(
     const std::vector<std::vector<float> >& probabilitiesVector2D)
   {
     #ifdef DEBUG_TIME
