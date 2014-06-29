@@ -506,7 +506,7 @@ namespace pandora_vision
         @return [std::map<int, float>] The indices of the valid holes and their
         respective validity probabilities
        **/
-      std::map<int, float> validationViaWeighting(
+      std::map<int, float> validateHolesViaWeighting(
         const std::vector<std::vector<float> >& probabilitiesVector2D);
 
       /**
@@ -531,7 +531,7 @@ namespace pandora_vision
         @return [std::map<int, float>] The indices of the valid holes and their
         respective validity probabilities
        **/
-      std::map<int, float> validationViaThresholdedWeighting(
+      std::map<int, float> validateHolesViaThresholdedWeighting(
         const std::vector<std::vector<float> >& probabilitiesVector2D);
 
       /**
@@ -551,7 +551,7 @@ namespace pandora_vision
         @return [std::map<int, float>] The indices of the valid holes and their
         respective validity probabilities
        **/
-      std::map<int, float> validationViaThresholding(
+      std::map<int, float> validateHolesViaThresholding(
         const std::vector<std::vector<float> >& probabilitiesVector2D);
 
 
