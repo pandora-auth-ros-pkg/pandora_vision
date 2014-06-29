@@ -76,7 +76,7 @@ namespace pandora_vision
     // valid holes will be published to
     validHolesPublisher_ = nodeHandle_.advertise
       <vision_communications::HolesDirectionsVectorMsg>(
-        validHolesTopic_, 1000, true);
+        validHolesTopic_, 10, true);
 
     // Advertise the topic that information about the final holes,
     // will be published to
@@ -84,7 +84,7 @@ namespace pandora_vision
     // image_view /pandora_vision/hole_detector/debug_valid_holes_image
     // _image_transport:=compressed
     debugValidHolesPublisher_ = imageTransport_.advertise
-      (debugValidHolesTopic_, 1000, true);
+      (debugValidHolesTopic_, 1, true);
 
     // Advertise the topic that information about holes found by the Depth
     // and RGB nodes will be published to
@@ -92,7 +92,7 @@ namespace pandora_vision
     // image_view /pandora_vision/hole_detector/debug_respective_holes_image
     // _image_transport:=compressed
     debugRespectiveHolesPublisher_ = imageTransport_.advertise
-      (debugRespectiveHolesTopic_, 1000, true);
+      (debugRespectiveHolesTopic_, 1, true);
 
     // Advertise the topic that the image of the final holes,
     // will be published to
