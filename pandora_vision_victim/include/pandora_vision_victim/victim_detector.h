@@ -64,9 +64,8 @@ namespace pandora_vision
   class VictimDetector
   {
     private:
-      
-      
-    
+      /// Instance of class face_detector
+      FaceDetector* _faceDetector;
       ///Instance of class rgbSystemValidator
       RgbSystemValidator _rgbSystemValidator;
       
@@ -113,8 +112,18 @@ namespace pandora_vision
        *@return void
       */ 
       void depthFeaturesDetect(cv::Mat _depthImage);
-      /// Instance of class face_detector
-      FaceDetector* _faceDetector;
+   
+      /**
+       @brief Function thta returns position of victim, according to all subsystems
+       @return int[] table of victim's positions and sizes 
+      */ 
+      int* getVictimPosition();
+      
+      /**
+        @brief Returns the probability of the victims detected in the frame
+        @return [float] probability value
+      */
+      float getProbability();
       
   }; 
 }// namespace pandora_vision

@@ -170,8 +170,19 @@ namespace pandora_vision
     * @brief This function prediction according to the rgb classifier
     * @return [float] prediction
   */ 
-  float DepthSystemValidator::getPrediction()
+  float DepthSystemValidator::getProbability()
   {
+    double A = 1;
+    double B = -9.9;
+    double fApB = prediction*A+B;
+    
+    float probability;
+    if (fApB >= 0)
+      probability = exp(-fApB)/(1.0+exp(-fApB));
+    else
+      probability = 1.0/(1+exp(fApB));
+      
+    return probability;
     return prediction;
   }
 }// namespace pandora_vision 

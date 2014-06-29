@@ -119,7 +119,7 @@ namespace pandora_vision
      * @brief This function prediction according to the rgb classifier
      * @return [float] prediction
      */ 
-    float getPrediction();
+    float getProbability();
     
     float prediction; 
   };

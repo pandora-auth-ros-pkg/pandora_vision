@@ -116,5 +116,24 @@ namespace pandora_vision
     _depthSystemValidator.extractDepthFeatures(_depthImage); 
   }
   
+  /**
+   @brief Function thta returns position of victim, according to all subsystems
+   @return int[] table of victim's positions and sizes 
+  */ 
+  int* VictimDetector::getVictimPosition()
+  {
+    int* facesTable = _faceDetector->getFacePositionTable();
+    
+    return facesTable;
+  }
+  
+  /**
+    @brief Returns the probability of the victims detected in the frame
+    @return [float] probability value
+  */
+  float VictimDetector::getProbability()
+  {
+    return _faceDetector->getProbability();
+  }
 }// namespace pandora_vision
 

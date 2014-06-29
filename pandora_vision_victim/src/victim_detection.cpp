@@ -343,9 +343,7 @@ namespace pandora_vision
     _enhancedHoles = msg;
     if (_enhancedHoles.enhancedHoles.size() > 0)
       isHole = true;
-    
-    
-    
+        
     //~ for(unsigned int k = 0 ; k < msg.enhancedHoles.size() ; k++)
     //~ {
       //~ for(int i = 0; i < 4; i++ ){
@@ -449,24 +447,24 @@ namespace pandora_vision
     pandora_common_msgs::GeneralAlertMsg victimMessage;
     
     if(facesNum > 0){
-    int* facesTable = _victimDetector->_faceDetector->getFacePositionTable();
+    int* victimsPositions = _victimDetector->getVictimPosition();
     
     for(int i = 0;  i < facesNum; i++){
       // Victim's center coordinates relative to the center of the frame
-      float x = facesTable[i * 4]
+      float x = victimsPositions[i * 4]
           - static_cast<float>(frameWidth) / 2;
       float y = static_cast<float>(frameHeight) / 2
-          - facesTable[i * 4 + 1];
+          - victimsPositions[i * 4 + 1];
                                       
       victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
       victimMessage.header.stamp = ros::Time::now();
-      victimMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));;
-      victimMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));;
-      victimMessage.probability = _victimDetector->_faceDetector->getProbability();
+      victimMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      victimMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+      victimMessage.probability = _victimDetector->getProbability();
       ROS_INFO_STREAM( "[victim_node] :Victim ");
       _victimDirectionPublisher.publish(victimMessage);
      }
-     delete facesTable; 
+     delete victimsPositions; 
     } 
   }
 
