@@ -172,17 +172,11 @@ namespace pandora_vision
   */ 
   float DepthSystemValidator::getProbability()
   {
-    double A = 1;
-    double B = -9.9;
-    double fApB = prediction*A+B;
-    
     float probability;
-    if (fApB >= 0)
-      probability = exp(-fApB)/(1.0+exp(-fApB));
-    else
-      probability = 1.0/(1+exp(fApB));
-      
+    //~ Normalize probability to [-1,1]
+    probability = tanh(0.5 * (prediction - 7.0) );
+    //~ Normalize probability to [0,1]
+    probability = (1 + probability) / 2.0 ;
     return probability;
-    return prediction;
   }
 }// namespace pandora_vision 
