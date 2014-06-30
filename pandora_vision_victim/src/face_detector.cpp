@@ -275,8 +275,8 @@ namespace pandora_vision
       }
     }
     
-    //~ cv::imshow("face_detector", original);
-    //~ cv::waitKey(30);
+    cv::imshow("face_detector", original);
+    cv::waitKey(30);
     int res = thrfaces.size();
  
     thrfaces.clear();

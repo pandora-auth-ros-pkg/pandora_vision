@@ -81,8 +81,8 @@ namespace pandora_vision
     if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++){
-        //~ cv::imshow("rgb mask",imgs.rgbMasks.at(i));
-        //~ cv::waitKey(30);
+        cv::imshow("rgb mask",imgs.rgbMasks.at(i));
+        cv::waitKey(30);
         rgbFeaturesDetect(imgs.rgbMasks.at(i));
       }  
     }
@@ -104,6 +104,9 @@ namespace pandora_vision
   void VictimDetector::rgbFeaturesDetect(cv::Mat _rgbImage)
   {
     _rgbSystemValidator.extractRgbFeatures(_rgbImage); 
+    float probability = _rgbSystemValidator.getProbability();
+    
+    ROS_INFO_STREAM("Rgb subsystem probability value: " << probability);
   }
   
   /**
@@ -114,6 +117,10 @@ namespace pandora_vision
   void VictimDetector::depthFeaturesDetect(cv::Mat _depthImage)
   {
     _depthSystemValidator.extractDepthFeatures(_depthImage); 
+    
+    float probability = _depthSystemValidator.getProbability();
+    
+    ROS_INFO_STREAM("Rgb subsystem probability value: " << probability);
   }
   
   /**

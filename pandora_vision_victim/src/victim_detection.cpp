@@ -476,7 +476,6 @@ namespace pandora_vision
    */
   void VictimDetection::startTransition(int newState)
   {
-
     curState = newState;
 
     //!< check if face detection algorithm should be running now
