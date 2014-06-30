@@ -335,8 +335,7 @@ namespace pandora_vision
       cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     _depthImage = in_msg->image.clone();
     
-    //~ isDepthEnabled = msg.isDepth;
-    isDepthEnabled = false;
+    isDepthEnabled = msg.isDepth;
     
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;

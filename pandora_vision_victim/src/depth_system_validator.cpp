@@ -49,10 +49,11 @@ namespace pandora_vision
     ///Load classifier path for rgb subsystem
     _depthSvm.load(depth_classifier_path.c_str());
     
-    _params.svm_type    = CvSVM::C_SVC;
-    _params.kernel_type = CvSVM::LINEAR;
-    _params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
-    ROS_DEBUG("[victim_node] : DepthSystemValidator instance created");
+    _params.svm_type = CvSVM::C_SVC;
+    _params.kernel_type = CvSVM::RBF;
+    _params.C = 312.5;
+    _params.gamma = 0.50625;
+    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100000, 1e-6);
   }
   
   /**
