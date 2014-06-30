@@ -120,7 +120,7 @@ namespace pandora_vision
     
     float probability = _depthSystemValidator.getProbability();
     
-    ROS_INFO_STREAM("Rgb subsystem probability value: " << probability);
+    ROS_INFO_STREAM("Depth subsystem probability value: " << probability);
   }
   
   /**
@@ -140,7 +140,9 @@ namespace pandora_vision
   */
   float VictimDetector::getProbability()
   {
-    return _faceDetector->getProbability();
+    float p = _faceDetector->getProbability();
+    ROS_INFO("Viola Jones probab %f", p);
+    return p;
   }
 }// namespace pandora_vision
 

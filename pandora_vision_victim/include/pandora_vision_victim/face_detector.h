@@ -57,6 +57,7 @@ namespace pandora_vision
 
     //!< Total probability of face found in a frame
     float probability;
+    float prediction;
 
     //!< Image buffer used to store frames
     std::vector<cv::Mat> frame_buffer;

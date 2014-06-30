@@ -337,6 +337,7 @@ namespace pandora_vision
     
     isDepthEnabled = msg.isDepth;
     
+    
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;
     _enhancedHoles = msg;
@@ -427,6 +428,7 @@ namespace pandora_vision
         imgs.depthMasks.push_back(temp);
       }
     }
+    
     victimDetect(imgs);    
   }
   
@@ -459,7 +461,7 @@ namespace pandora_vision
       victimMessage.header.stamp = ros::Time::now();
       victimMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
       victimMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
-      victimMessage.probability = _victimDetector->getProbability();
+      victimMessage.probability = _victimDetector->getProbability();  // error!
       ROS_INFO_STREAM( "[victim_node] :Victim ");
       _victimDirectionPublisher.publish(victimMessage);
      }

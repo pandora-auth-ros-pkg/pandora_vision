@@ -114,33 +114,6 @@ namespace pandora_vision
 
     facesNum = detectFace(frame);
     ROS_INFO_STREAM("Number of faces: "<< facesNum);
-
-    int totalArea = 0;
-    if(facesNum)
-    {
-      totalArea = round( cv::norm(tmp, cv::NORM_L1, cv::noArray()) / 255.);
-    }
-   
-    if(totalArea == 0)
-    {
-      //! if no face was found, probability for this frame is 0
-      probability_buffer[now] = 0.;
-    }
-    else
-    {
-      probability_buffer[now] = round( 
-        cv::norm(tmp, cv::NORM_L1, 
-          cv::noArray()) / 255.) / static_cast<float>(totalArea);
-    }
-    //! Clear value from last scan and calculate probability
-    probability = 0.0;
-    for(int i = 0 ; i < _bufferSize ; i++){
-      probability += (probability_buffer[i]);
-    }
-    probability = probability / _bufferSize;
-    
-    //~ ROS_INFO_STREAM("probability"<< probability);
-    now = (now + 1) % _bufferSize; //prepare index for next frame
         
     return facesNum;
   }
@@ -234,6 +207,10 @@ namespace pandora_vision
   */
   float FaceDetector::getProbability()
   {
+    //~ Normalize probability to [-1,1]
+    probability = tanh(0.5 * (prediction - 7.0) );
+    //~ Normalize probability to [0,1]
+    probability = (1 + probability) / 2.0 ;
     return probability;
   }
 
@@ -248,10 +225,13 @@ namespace pandora_vision
     cv::Mat original(img.size().width, img.size().height, CV_8UC1);
     original = img.clone();
     cv::Mat gray(img.size().width, img.size().height, CV_8UC1);
-    cvtColor(original, gray, CV_BGR2GRAY);
+    if(original.channels() != 1)
+    {
+      cvtColor(original, gray, CV_BGR2GRAY);
+    }
     std::vector< cv::Rect_<int> > thrfaces;
 
-    int im_width = 92;
+    int im_width = 92;  // dyn reconf
     int im_height = 112;
     
     if(!trained_cascade.empty())
@@ -267,7 +247,7 @@ namespace pandora_vision
         cv::Mat face_resized;
         cv::resize(face, face_resized, cv::Size(im_width, im_height), 
           1.0, 1.0, cv::INTER_CUBIC);
-        int prediction = trained_model->predict(face_resized);
+        prediction = trained_model->predict(face_resized);      // check for multiple faces
         ROS_INFO_STREAM("Prediction " << prediction);
         rectangle(original, face_i, CV_RGB(0, 255, 0), 1);
         //! Add every element created for each frame, to the total amount of faces
@@ -275,7 +255,7 @@ namespace pandora_vision
       }
     }
     
-    cv::imshow("face_detector", original);
+    cv::imshow("face_detector_2", original);
     cv::waitKey(30);
     int res = thrfaces.size();
  
