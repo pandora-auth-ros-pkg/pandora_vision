@@ -70,7 +70,7 @@ namespace pandora_vision
    * @param inImage [cv::Mat] current depth frame to be processed
    * @return void
   */ 
-  void DepthSystemValidator::extractDepthFeatures(cv::Mat inImage)
+  float DepthSystemValidator::calculateSvmDepthProbability(cv::Mat inImage)
   {
     ///Extract statistics oriented features for depth image
     _channelsStatisticsDetector.findDepthChannelsStatisticsFeatures(inImage);
@@ -84,6 +84,8 @@ namespace pandora_vision
       _depthFeatureVector.clear();
     
     setDepthFeatureVector();
+    
+    return predictionToProbability(predict());
   }
   
   /**
@@ -139,14 +141,15 @@ namespace pandora_vision
     * according to the featurevector given for each image
     * @return void
   */ 
-  void DepthSystemValidator::predict()
+  float DepthSystemValidator::predict()
   {
     cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
     
     ///Normalize the data from [-1,1]
     cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);    
-    prediction = _depthSvm.predict(samples_mat, true);
+    float prediction = _depthSvm.predict(samples_mat, true);
     ROS_INFO_STREAM("Depth_subsystem prediction: "<< prediction);
+    return prediction;
   }
   
   /**
@@ -171,7 +174,7 @@ namespace pandora_vision
     * @brief This function prediction according to the rgb classifier
     * @return [float] prediction
   */ 
-  float DepthSystemValidator::getProbability()
+  float DepthSystemValidator::predictionToProbability(float prediction)
   {
     float probability;
     //~ Normalize probability to [-1,1]
