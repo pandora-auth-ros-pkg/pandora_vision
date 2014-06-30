@@ -180,7 +180,7 @@ namespace pandora_vision
     //~ Normalize probability to [-1,1]
     probability = tanh(0.5 * (prediction - 7.0) );
     //~ Normalize probability to [0,1]
-    probability = (1 + probability) / 2.0 ;
+    probability = (1 + probability) / 2.0;
     return probability;
   }
 }// namespace pandora_vision 

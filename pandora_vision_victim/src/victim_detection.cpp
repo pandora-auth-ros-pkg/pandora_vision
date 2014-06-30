@@ -351,8 +351,8 @@ namespace pandora_vision
       EnhancedMat emat;
       emat.img = _rgbImage;
       imgs.rgb = emat;
-      imgs.rgb.bounding_box = cv::Rect(0,0,0,0);
-      imgs.rgb.keypoint = cv::Point2f(0,0);
+      imgs.rgb.bounding_box = cv::Rect(0, 0, 0, 0);
+      imgs.rgb.keypoint = cv::Point2f(0, 0);
     }
       
     switch(_stateIndicator)
@@ -369,8 +369,8 @@ namespace pandora_vision
           EnhancedMat emat;
           emat.img = _depthImage;
           imgs.depth = emat;
-          imgs.depth.bounding_box = cv::Rect(0,0,0,0);
-          imgs.depth.keypoint = cv::Point2f(0,0);
+          imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
+          imgs.depth.keypoint = cv::Point2f(0, 0);
         }
         break;
       case 4:
@@ -379,8 +379,8 @@ namespace pandora_vision
           EnhancedMat emat;
           emat.img = _depthImage;
           imgs.depth = emat;
-          imgs.depth.bounding_box = cv::Rect(0,0,0,0);
-          imgs.depth.keypoint = cv::Point2f(0,0);
+          imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
+          imgs.depth.keypoint = cv::Point2f(0, 0);
         }
         break;
     }

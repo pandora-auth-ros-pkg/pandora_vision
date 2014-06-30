@@ -171,7 +171,7 @@ namespace pandora_vision
       //~ Normalize probability to [-1,1]
       float temp_prob = tanh(0.5 * (prediction[i] - 20.0) );
       //~ Normalize probability to [0,1]
-      temp_prob = (1 + temp_prob) / 2.0 ;
+      temp_prob = (1 + temp_prob) / 2.0;
       p.push_back(temp_prob);
     }
     return p;
