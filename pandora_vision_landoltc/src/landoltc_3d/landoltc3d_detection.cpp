@@ -400,7 +400,9 @@ void LandoltC3dDetection::startTransition(int newState)
   }
 
   prevState = curState;
-
+  
+  //!< this needs to be called everytime a node finishes transition
+  transitionComplete(curState);
 }
 
 /**
