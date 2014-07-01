@@ -38,6 +38,10 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
+#include "pandora_vision_victim/face_detector.h"
+#include "pandora_vision_victim/rgb_system_validator.h"
+#include "pandora_vision_victim/depth_system_validator.h"
+
 #include <opencv2/opencv.hpp>
 
 #include <sensor_msgs/Image.h>
@@ -50,7 +54,6 @@
 #include "state_manager/state_client.h"
 #include <urdf_parser/urdf_parser.h>
 #include <map>
-#include "pandora_vision_victim/victim_detector.h"
 
 namespace pandora_vision
 {
@@ -88,9 +91,16 @@ namespace pandora_vision
       vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
       
       /// Instance of class VictimDetector
-      VictimDetector* _victimDetector;
+      //~ VictimDetector* _victimDetector;
       
       std::vector<cv::Mat> _rgbdImages;
+      
+      /// Instance of class face_detector
+      FaceDetector _faceDetector;
+      ///Instance of class rgbSystemValidator
+      RgbSystemValidator _rgbSystemValidator;
+      ///Instance of class depthSystemValidator
+      DepthSystemValidator _depthSystemValidator;
 
       /**
        * @brief This method check in which state we are, according to
@@ -124,6 +134,20 @@ namespace pandora_vision
       std::string _parent_frame_id;
       
       VictimParameters params;
+      
+      //----------------------------------------------------------------------//
+      DetectionImages dImages;
+      /**
+       *@brief Function that enables suitable subsystems, according
+       * to the current State 
+       * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
+       * vector can be either 2 or 1, if we have both rgbd information or not
+       * @return void
+      */ 
+      std::vector<DetectedVictim> victimFusion( 
+        DetectionImages imgs, 
+        DetectionMode detectionMode 
+      );
        
     public:
 

@@ -81,6 +81,8 @@ namespace pandora_vision
     //! The Constructor
     FaceDetector(std::string cascade_path, std::string model_path,
         int bufferSize);
+    //! Default constructor
+    FaceDetector(void){}
 
     //! The Destructor
     ~FaceDetector();

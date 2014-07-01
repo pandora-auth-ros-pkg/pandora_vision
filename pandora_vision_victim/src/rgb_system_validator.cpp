@@ -42,7 +42,12 @@ namespace pandora_vision
   /**
    @brief Constructor
   */ 
-  RgbSystemValidator::RgbSystemValidator(std::string rgb_classifier_path)
+  RgbSystemValidator::RgbSystemValidator(void)
+  {
+    ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
+  }
+  
+  void RgbSystemValidator::initialize(std::string rgb_classifier_path)
   {
     _rgb_classifier_path = rgb_classifier_path;
         
@@ -50,16 +55,11 @@ namespace pandora_vision
     _params.kernel_type = CvSVM::RBF;
     _params.C = 312.5;
     _params.gamma = 0.50625;
-    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 10000, 1e-6);
+    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 
+      10000, 1e-6);
     
     ///Load classifier path for rgb subsystem
     _rgbSvm.load(rgb_classifier_path.c_str());
-    ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
-  }
-  
-  RgbSystemValidator::RgbSystemValidator()
-  {
-    
   }
   
   /**

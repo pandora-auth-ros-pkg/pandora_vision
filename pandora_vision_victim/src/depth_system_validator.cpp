@@ -42,7 +42,11 @@ namespace pandora_vision
   /**
    @brief Constructor
   */ 
-  DepthSystemValidator::DepthSystemValidator(std::string depth_classifier_path)
+  DepthSystemValidator::DepthSystemValidator()
+  {
+  }
+  
+  void DepthSystemValidator::initialize(std::string depth_classifier_path)
   {
     _depth_classifier_path = depth_classifier_path;
     
@@ -53,11 +57,8 @@ namespace pandora_vision
     _params.kernel_type = CvSVM::RBF;
     _params.C = 312.5;
     _params.gamma = 0.50625;
-    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100000, 1e-6);
-  }
-  
-  DepthSystemValidator::DepthSystemValidator()
-  {
+    _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 
+      100000, 1e-6);
   }
   
   /**

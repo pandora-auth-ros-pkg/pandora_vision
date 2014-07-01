@@ -67,11 +67,23 @@ namespace pandora_vision
         1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
-    _victimDetector = new VictimDetector( 
+    //~ _victimDetector = new VictimDetector( 
+      //~ VictimParameters::cascade_path, 
+      //~ VictimParameters::model_path, 
+      //~ VictimParameters::bufferSize,
+      //~ VictimParameters::rgb_classifier_path, 
+      //~ VictimParameters::depth_classifier_path);
+      
+    /// Initialize the face detector and the svm classifiers
+    _faceDetector = FaceDetector(
       VictimParameters::cascade_path, 
       VictimParameters::model_path, 
-      VictimParameters::bufferSize,
-      VictimParameters::rgb_classifier_path, 
+      VictimParameters::bufferSize);
+      
+    _rgbSystemValidator.initialize(
+      VictimParameters::rgb_classifier_path);
+      
+    _depthSystemValidator.initialize(
       VictimParameters::depth_classifier_path);
     
     /// Initialize states - robot starts in STATE_OFF
@@ -219,16 +231,17 @@ namespace pandora_vision
       imgs.rgb.keypoint = cv::Point2f(0, 0);
     }
       
+    DetectionMode detectionMode;
     switch(stateIndicator)
     {
       case 1:
-        _victimDetector->detectionMode = GOT_NOTHING;
+        detectionMode = GOT_NOTHING;
         break;
       case 2:
-        _victimDetector->detectionMode = GOT_MASK;
+        detectionMode = GOT_MASK;
         break;
       case 3:
-        _victimDetector->detectionMode = GOT_DEPTH;
+        detectionMode = GOT_DEPTH;
         {
           EnhancedMat emat;
           depthImage.copyTo(emat.img);
@@ -238,7 +251,7 @@ namespace pandora_vision
         }
         break;
       case 4:
-      _victimDetector->detectionMode = GOT_ALL;
+        detectionMode = GOT_ALL;
         {
           EnhancedMat emat;
           depthImage.copyTo(emat.img);
@@ -282,7 +295,7 @@ namespace pandora_vision
     }
 
     std::vector<DetectedVictim> final_victims = 
-      _victimDetector->victimFusion(imgs);
+      victimFusion(imgs, detectionMode);
 
     //!< Message alert creation
     for(int i = 0;  i < final_victims.size() ; i++)
@@ -317,6 +330,95 @@ namespace pandora_vision
       
       _victimDirectionPublisher.publish(victimMessage);
     } 
+  }
+  
+    /**
+   *@brief Function that enables suitable subsystems, according
+   * to the current State 
+   * @param [std::vector<cv::Mat>] vector of images to be processed. Size of
+   * vector can be either 2 or 1, if we have both rgbd information or not
+   * @return void
+  */ 
+  std::vector<DetectedVictim> VictimDetection::victimFusion(
+    DetectionImages imgs,
+    DetectionMode detectionMode)
+  {
+    std::vector<DetectedVictim> final_probabilities;
+    
+    std::vector<DetectedVictim> rgb_vj_probabilities;
+    std::vector<DetectedVictim> depth_vj_probabilities;
+    std::vector<DetectedVictim> rgb_svm_probabilities;
+    std::vector<DetectedVictim> depth_svm_probabilities;
+    
+    DetectedVictim temp;
+    
+    ///Enable Viola Jones for rgb image 
+    rgb_vj_probabilities = _faceDetector.findFaces(imgs.rgb.img);
+    
+    if(detectionMode == GOT_ALL || detectionMode == GOT_DEPTH)
+    {
+      depth_vj_probabilities = _faceDetector.findFaces(imgs.depth.img);
+      
+    }
+    if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
+    {
+      for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
+      {
+        temp.probability = _rgbSystemValidator.calculateSvmRgbProbability(
+            imgs.rgbMasks.at(i).img);
+        temp.keypoint = imgs.rgbMasks[i].keypoint;
+        rgb_svm_probabilities.push_back(temp);
+      }  
+    }
+    if(detectionMode == GOT_ALL)
+    {
+      for(int i = 0 ; i < imgs.depthMasks.size(); i++)
+      {
+        temp.probability = _depthSystemValidator.calculateSvmDepthProbability(
+            imgs.depthMasks.at(i).img);
+        temp.keypoint = imgs.depthMasks[i].keypoint;
+        depth_svm_probabilities.push_back(temp);
+      }
+    }
+    
+    // SVM mask merging
+    if(detectionMode == GOT_ALL)
+    {
+      for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
+      {
+        temp.probability = (VictimParameters::depth_svm_weight * depth_svm_probabilities[i].probability + 
+          VictimParameters::rgb_svm_weight * rgb_svm_probabilities[i].probability) / 
+            (VictimParameters::depth_svm_weight + 
+            VictimParameters::rgb_svm_weight);
+        temp.keypoint = depth_svm_probabilities[i].keypoint;
+        final_probabilities.push_back(temp);
+      }
+    }
+    if(detectionMode == GOT_MASK)
+    {
+      for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
+      {
+        temp.probability = rgb_svm_probabilities[i].probability * VictimParameters::rgb_svm_weight;
+        temp.keypoint = rgb_svm_probabilities[i].keypoint;
+        final_probabilities.push_back(temp);
+      }
+    }
+    
+    // VJ mask merging (?)
+    for(unsigned int i = 0 ; i < rgb_vj_probabilities.size() ; i++)
+    {
+      temp.probability = rgb_vj_probabilities[i].probability * VictimParameters::rgb_vj_weight;
+      temp.keypoint = rgb_vj_probabilities[i].keypoint;
+      final_probabilities.push_back(temp);
+    }
+    for(unsigned int i = 0 ; i < depth_vj_probabilities.size() ; i++)
+    {
+      temp.probability = depth_vj_probabilities[i].probability * VictimParameters::depth_vj_weight;
+      temp.keypoint = depth_vj_probabilities[i].keypoint;
+      final_probabilities.push_back(temp);
+    }
+    
+    return final_probabilities;
   }
 
 

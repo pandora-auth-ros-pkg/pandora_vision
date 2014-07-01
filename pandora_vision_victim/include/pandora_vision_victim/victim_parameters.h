@@ -53,6 +53,28 @@ namespace pandora_vision
     float probability;
   };
 
+  enum DetectionMode
+  { 
+    GOT_NOTHING = 1,
+    GOT_ALL = 4,
+    GOT_MASK = 2,
+    GOT_DEPTH = 3
+  };
+  
+  struct EnhancedMat
+  {
+    cv::Mat img;
+    cv::Rect bounding_box;
+    cv::Point2f keypoint;
+  };
+
+  struct DetectionImages
+  {
+    EnhancedMat rgb;
+    EnhancedMat depth;
+    std::vector<EnhancedMat> rgbMasks;
+    std::vector<EnhancedMat> depthMasks;
+  };
   
   class VictimParameters
   {

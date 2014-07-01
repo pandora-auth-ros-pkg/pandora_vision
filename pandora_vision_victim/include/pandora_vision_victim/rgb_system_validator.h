@@ -70,10 +70,11 @@ namespace pandora_vision
         
     public:
     
+    ///Constructor
     RgbSystemValidator();
     
-    ///Constructor
-    explicit RgbSystemValidator( std::string rgb_classifier_path);
+    
+    void initialize( std::string rgb_classifier_path);
     
     ///Destructor
     ~RgbSystemValidator();
