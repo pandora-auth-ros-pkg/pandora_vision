@@ -71,9 +71,6 @@ private:
   int frameWidth;
   int frameHeight;
 
-  std::string cameraName;
-  std::string packagePath;
-  
   /// Rgb Frame processed by FaceDetector
   cv::Mat _rgbImage;
   /// Depth Frame processed by FaceDetector
@@ -83,7 +80,6 @@ private:
   ros::Time victimFrameTimestamp;
 
   /// The topic subscribed to for the camera
-  std::string _enhancedHolesTopic;
   std::string cameraFrameId;
    
   /// Publishers for FaceDetector result messages
@@ -118,7 +114,6 @@ private:
   bool isHole;
   
   ///Vector of holes found in current frame
-  //~ std::vector<vision_communications::EnhancedHoleMsg> _enhancedHoles;
   vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
   
   /// Flag that indicates current state, according to the information

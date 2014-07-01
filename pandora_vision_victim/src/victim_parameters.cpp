@@ -39,6 +39,8 @@
 
 namespace pandora_vision
 {
+  //----------------------------Parameters----------------------------//
+  //!< Dynamic reconfigure parameters
   double VictimParameters::rgb_vj_weight = 0.2;
   double VictimParameters::depth_vj_weight = 0;
   double VictimParameters::rgb_svm_weight = 0.9;
@@ -46,11 +48,23 @@ namespace pandora_vision
   
   bool VictimParameters::debug_img = false;
   
+  //!< Static parameters
+  std::string VictimParameters::packagePath = "";
+  std::string VictimParameters::victimAlertTopic = "";
+  std::string VictimParameters::enhancedHolesTopic = "";
+  std::string VictimParameters::cameraName = "";
+  int VictimParameters::frameHeight = "";
+  int VictimParameters::frameWidth = "";
+  
+  //----------------------------Methods----------------------------//
+  
   VictimParameters::VictimParameters(void)
   {
     //!< The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&VictimParameters::parametersCallback,
         this, _1, _2));
+        
+    getGeneralParams();
   }
   
     /**
@@ -68,5 +82,93 @@ namespace pandora_vision
     VictimParameters::rgb_svm_weight = config.rgb_svm_weight;
     VictimParameters::depth_svm_weight = config.depth_svm_weight;
     VictimParameters::debug_img = config.debug_img;
+  }
+  
+  /**
+   @brief Get parameters referring to the view and
+   *frame characteristics
+   @return void
+  **/
+  void VictimParameters::getGeneralParams(void)
+  {
+    VictimParameters::packagePath = ros::package::getPath("pandora_vision_victim");
+    
+    std::string str_param;
+    int int_param;
+    
+    if (_nh.getParam("published_topic_names/victim_alert", str_param))
+    {
+      VictimParameters::victimAlertTopic = str_param;
+    }
+    else
+    {
+      ROS_FATAL("[victim_node] : Victim alert topic name param not found");
+      ROS_BREAK();
+    }
+
+    //! Declare subsciber's topic name
+    if (_nh.getParam("subscribed_topic_names/enhanded_hole_alert", str_param))
+    {
+      ROS_INFO_STREAM("PARAM"<< str_param);
+      VictimParameters::enhancedHolesTopic = str_param;
+    }  
+    else
+    {
+      ROS_FATAL("[victim_node] : Victim subscribed topic name param not found");
+      ROS_BREAK();
+    }  
+    
+        
+    //!< Get the camera to be used by motion node;
+    if (_nh.getParam("camera_name", str_param)) 
+    {
+      VictimParameters::cameraName = str_param;
+      ROS_DEBUG_STREAM("camera_name : " << str_param);
+    }
+    else 
+    {
+      ROS_FATAL("[Motion_node]: Camera name not found");
+      ROS_BREAK(); 
+    }
+
+    //! Get the Height parameter if available;
+    if (_nh.getParam("image_height", int_param)) 
+    {
+      
+      ROS_DEBUG_STREAM("height : " << frameHeight);
+    }
+    else 
+    {
+      ROS_FATAL("[motion_node] : Parameter frameHeight not found. Using Default");
+      ROS_BREAK();
+    }
+    
+    //! Get the Width parameter if available;
+    if ( _nh.getParam("image_width", int_param)) 
+      ROS_DEBUG_STREAM("width : " << frameWidth);
+    else 
+    {
+      ROS_FATAL("[motion_node] : Parameter frameWidth not found. Using Default");
+      ROS_BREAK();
+    }
+  
+    //!< Get the HFOV parameter if available;
+    if (_nh.getParam("hfov", hfov)) 
+      ROS_DEBUG_STREAM("HFOV : " << hfov);
+    else 
+    {
+     ROS_FATAL("[motion_node]: Horizontal field of view not found");
+     ROS_BREAK();
+    }
+    
+    //!< Get the VFOV parameter if available;
+    if (_nh.getParam("vfov", vfov)) 
+      ROS_DEBUG_STREAM("VFOV : " << vfov);
+    else 
+    {
+     ROS_FATAL("[motion_node]: Vertical field of view not found");
+     ROS_BREAK();
+    }  
+    
   }
 }// namespace pandora_vision

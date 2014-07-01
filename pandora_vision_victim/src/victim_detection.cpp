@@ -47,10 +47,7 @@ namespace pandora_vision
      //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
     _frame_id = "";
-    
-    /// Get general parameters for image processing
-    getGeneralParams();
-    
+
     /// Get parameters referring to faceDetector instance
     getVictimDetectorParameters();
 
@@ -61,12 +58,20 @@ namespace pandora_vision
     //!< Subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
     //~ _frameSubscriber = _nh.subscribe(
-                       //~ "/kinect/rgb/image_color", 1, &VictimDetection::dummyimageCallback, this);
+      //~ "/kinect/rgb/image_color", 1, &VictimDetection::dummyimageCallback, this);
+                       
+                       
+    //! Declare publisher and advertise topic
+    //! where algorithm results are posted
+    _victimDirectionPublisher = 
+      _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(
+        VictimParameters::victimAlertTopic, 10, true);
                        
     /// Subscribe to input image's topic
     /// image_transport::ImageTransport it(_nh);
     _frameSubscriber = _nh.subscribe(
-              _enhancedHolesTopic, 1, &VictimDetection::imageCallback, this);
+      VictimParameters::enhancedHolesTopic, 
+        1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
     _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize,
@@ -91,88 +96,7 @@ namespace pandora_vision
    
   }
 
-  /**
-   @brief Get parameters referring to the view and
-   *frame characteristics
-   @return void
-  **/
-  void VictimDetection::getGeneralParams()
-  {
-    packagePath = ros::package::getPath("pandora_vision_victim");
-    
-    //! Publishers
-      
-    //! Declare publisher and advertise topic
-    //! where algorithm results are posted
-    if (_nh.getParam("published_topic_names/victim_alert", param)){
-      _victimDirectionPublisher = 
-        _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(param, 10, true);
-    }
-    else{
-      ROS_FATAL("[victim_node] : Victim alert topic name param not found");
-      ROS_BREAK();
-    }
-     
-    //! Subscribers
-      
-    //! Declare subsciber's topic name
-    if (_nh.getParam("subscribed_topic_names/enhanded_hole_alert", param))
-    {
-      ROS_INFO_STREAM("PARAM"<< param);
-      _enhancedHolesTopic = param;
-    }  
-    else{
-      ROS_FATAL("[victim_node] : Victim subscribed topic name param not found");
-      ROS_BREAK();
-    }  
-    
-        
-    //!< Get the camera to be used by motion node;
-    if (_nh.getParam("camera_name", cameraName)) 
-      ROS_DEBUG_STREAM("camera_name : " << cameraName);
-    else 
-    {
-      ROS_FATAL("[Motion_node]: Camera name not found");
-      ROS_BREAK(); 
-    }
-
-    //! Get the Height parameter if available;
-    if (_nh.getParam("image_height", frameHeight)) 
-      ROS_DEBUG_STREAM("height : " << frameHeight);
-    else 
-    {
-      ROS_FATAL("[motion_node] : Parameter frameHeight not found. Using Default");
-      ROS_BREAK();
-    }
-    
-    //! Get the Width parameter if available;
-    if ( _nh.getParam("image_width", frameWidth)) 
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    else 
-    {
-      ROS_FATAL("[motion_node] : Parameter frameWidth not found. Using Default");
-      ROS_BREAK();
-    }
   
-    //!< Get the HFOV parameter if available;
-    if (_nh.getParam("hfov", hfov)) 
-      ROS_DEBUG_STREAM("HFOV : " << hfov);
-    else 
-    {
-     ROS_FATAL("[motion_node]: Horizontal field of view not found");
-     ROS_BREAK();
-    }
-    
-    //!< Get the VFOV parameter if available;
-    if (_nh.getParam("vfov", vfov)) 
-      ROS_DEBUG_STREAM("VFOV : " << vfov);
-    else 
-    {
-     ROS_FATAL("[motion_node]: Vertical field of view not found");
-     ROS_BREAK();
-    }  
-    
-  }
 
   /**
     @brief Get parameters referring to the face detection algorithm

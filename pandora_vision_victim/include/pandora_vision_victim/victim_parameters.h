@@ -53,6 +53,10 @@ namespace pandora_vision
   
   class VictimParameters
   {
+    private:
+    
+      void getGeneralParams(void);
+    
     public:
       //!< Weight parameters for the victim subsystems
       static double rgb_vj_weight;
@@ -60,8 +64,18 @@ namespace pandora_vision
       static double rgb_svm_weight;
       static double depth_svm_weight;
       
+      //!< Parameters for debug purposes
       static bool debug_img;
-    
+
+      //!< parameters referring to the view and frame characteristics
+      static std::string packagePath;
+      static std::string victimAlertTopic;
+      static std::string enhancedHolesTopic;
+      static std::string cameraName;
+      static int frameHeight;
+      static int frameWidth;
+      
+      //-----------------------------------------------------------------------//
       //!< The dynamic reconfigure (motion's) parameters' server
       dynamic_reconfigure::Server<pandora_vision_victim::victim_dyn_reconfConfig>
         server;
