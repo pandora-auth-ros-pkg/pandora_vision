@@ -44,7 +44,8 @@ namespace pandora_vision
   **/
   VictimDetection::VictimDetection(const std::string& ns) : 
     _nh(ns), 
-    params(ns)
+    params(ns),
+    imageTransport_(_nh)
   {
      //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
@@ -65,14 +66,6 @@ namespace pandora_vision
     _frameSubscriber = _nh.subscribe(
       VictimParameters::enhancedHolesTopic, 
         1, &VictimDetection::imageCallback, this);
-    
-     /// Initialize victim detector
-    //~ _victimDetector = new VictimDetector( 
-      //~ VictimParameters::cascade_path, 
-      //~ VictimParameters::model_path, 
-      //~ VictimParameters::bufferSize,
-      //~ VictimParameters::rgb_classifier_path, 
-      //~ VictimParameters::depth_classifier_path);
       
     /// Initialize the face detector and the svm classifiers
     _faceDetector = FaceDetector(
@@ -89,6 +82,9 @@ namespace pandora_vision
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
+    
+    _debugVictimsPublisher = imageTransport_.advertise
+      ("/pandora_vision/victim/debug_img", 1, true);
 
     clientInitialize();
     
@@ -101,10 +97,7 @@ namespace pandora_vision
   VictimDetection::~VictimDetection()
   {
     ROS_DEBUG("[victim_node] : Destroying Victim Detection instance");
-   
   }
-
-
   
   /**
   @brief Function that retrieves the parent to the frame_id.
@@ -184,7 +177,6 @@ namespace pandora_vision
 
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;
-    _enhancedHoles = msg;
 
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
@@ -192,9 +184,10 @@ namespace pandora_vision
     //! The actual victim detection
     detectVictims(
       msg.isDepth, 
-      _enhancedHoles.enhancedHoles.size() > 0,
+      msg.enhancedHoles.size() > 0,
       rgbImage,
-      depthImage
+      depthImage,
+      msg
     );
     
     //! Resolve frame ids (must explain more)
@@ -217,9 +210,24 @@ namespace pandora_vision
     bool depthEnabled, 
     bool holesEnabled,
     const cv::Mat& rgbImage,
-    const cv::Mat& depthImage
+    const cv::Mat& depthImage,
+    const vision_communications::EnhancedHolesVectorMsg& msg
   )
   {
+    
+    if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+    {
+      rgbImage.copyTo(debugImage);
+      rgb_vj_keypoints.clear();
+      rgb_svm_keypoints.clear();
+      depth_vj_keypoints.clear();
+      depth_svm_keypoints.clear();
+      rgb_vj_bounding_boxes.clear();
+      rgb_svm_bounding_boxes.clear();
+      depth_vj_bounding_boxes.clear();
+      depth_svm_bounding_boxes.clear();
+    }
+    
     DetectionImages imgs; 
     int stateIndicator = 2 * depthEnabled + holesEnabled + 1;
     
@@ -261,15 +269,15 @@ namespace pandora_vision
         }
         break;
     }
-    for(unsigned int i = 0 ; i < _enhancedHoles.enhancedHoles.size();
+    for(unsigned int i = 0 ; i < msg.enhancedHoles.size();
       i++)
     {
       
       int minx = 10000, maxx = -1, miny = 10000, maxy = -1;
       for(unsigned int j = 0 ; j < 4 ; j++)
       {
-        int xx = _enhancedHoles.enhancedHoles[i].verticesX[j];
-        int yy = _enhancedHoles.enhancedHoles[i].verticesY[j];
+        int xx = msg.enhancedHoles[i].verticesX[j];
+        int yy = msg.enhancedHoles[i].verticesY[j];
         minx = xx < minx ? xx : minx;
         maxx = xx > maxx ? xx : maxx;
         miny = yy < miny ? yy : miny;
@@ -282,8 +290,8 @@ namespace pandora_vision
       cv::resize(emat.img, emat.img, cv::Size(640, 480));
       emat.bounding_box = rect;
       emat.keypoint = cv::Point2f(
-        _enhancedHoles.enhancedHoles[i].keypointX,
-        _enhancedHoles.enhancedHoles[i].keypointY
+        msg.enhancedHoles[i].keypointX,
+        msg.enhancedHoles[i].keypointY
       );
 
       imgs.rgbMasks.push_back(emat);
@@ -307,9 +315,9 @@ namespace pandora_vision
       }
       
       float x = final_victims[i].keypoint.x
-          - static_cast<float>(VictimParameters::frameWidth) / 2;
+        - static_cast<float>(VictimParameters::frameWidth) / 2;
       float y = static_cast<float>(VictimParameters::frameHeight) / 2
-          - final_victims[i].keypoint.y;
+        - final_victims[i].keypoint.y;
           
       //!< Create message of Victim Detector
       pandora_common_msgs::GeneralAlertMsg victimMessage;
@@ -329,7 +337,119 @@ namespace pandora_vision
       victimMessage.probability = final_victims[i].probability;
       
       _victimDirectionPublisher.publish(victimMessage);
+      
+      //!< Debug purposes
+      if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+      {
+        cv::KeyPoint kp(final_victims[i].keypoint, 10);
+        cv::Rect re = final_victims[i].boundingBox;
+        switch(final_victims[i].source)
+        {
+          case RGB_VJ:
+            rgb_vj_keypoints.push_back(kp);
+            rgb_vj_bounding_boxes.push_back(re);
+            break;
+          case RGB_SVM:
+            rgb_svm_keypoints.push_back(kp);
+            rgb_svm_bounding_boxes.push_back(re);
+            break;
+          case DEPTH_VJ:
+            depth_vj_keypoints.push_back(kp);
+            depth_vj_bounding_boxes.push_back(re);
+            break;
+          case DEPTH_SVM:
+            depth_svm_keypoints.push_back(kp);
+            depth_svm_bounding_boxes.push_back(re);
+            break;
+        }
+
+      }
     } 
+    
+    //! Debug image
+    if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+    {
+      cv::drawKeypoints(debugImage, rgb_vj_keypoints, debugImage, 
+        CV_RGB(0, 255, 0),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < rgb_vj_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, rgb_vj_bounding_boxes[i], 
+          CV_RGB(0, 255, 0));
+      }
+        
+      cv::drawKeypoints(debugImage, depth_vj_keypoints, debugImage, 
+        CV_RGB(255, 100, 0),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < depth_vj_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, depth_vj_bounding_boxes[i], 
+          CV_RGB(255, 100, 0));
+      }
+        
+      cv::drawKeypoints(debugImage, rgb_svm_keypoints, debugImage, 
+        CV_RGB(0, 100, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < rgb_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, rgb_svm_bounding_boxes[i], 
+          CV_RGB(0, 100, 255));
+      }
+      
+      cv::drawKeypoints(debugImage, depth_svm_keypoints, debugImage, 
+        CV_RGB(0, 255, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < depth_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, depth_svm_bounding_boxes[i], 
+          CV_RGB(0, 255, 255));
+      }
+      
+      {
+        std::ostringstream convert;
+        convert << "RGB_VJ : "<< rgb_vj_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10,20),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 0), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "DEPTH_VJ : "<< depth_vj_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10,40),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10,60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10,80),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+      }
+    }
+    if(VictimParameters::debug_img_publisher)
+    {
+      // Convert the image into a message
+      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+      msgPtr->header = msg.header;
+      msgPtr->encoding = sensor_msgs::image_encodings::BGR8;
+      msgPtr->image = debugImage;
+      // Publish the image message
+      _debugVictimsPublisher.publish(*msgPtr->toImageMsg());
+    }
+    if(VictimParameters::debug_img)
+    {
+      cv::imshow("Victim detector", debugImage);
+      cv::waitKey(30);
+    }
   }
   
     /**
@@ -358,15 +478,15 @@ namespace pandora_vision
     if(detectionMode == GOT_ALL || detectionMode == GOT_DEPTH)
     {
       depth_vj_probabilities = _faceDetector.findFaces(imgs.depth.img);
-      
     }
     if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
         temp.probability = _rgbSystemValidator.calculateSvmRgbProbability(
-            imgs.rgbMasks.at(i).img);
+          imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
+        
         rgb_svm_probabilities.push_back(temp);
       }  
     }
@@ -375,8 +495,10 @@ namespace pandora_vision
       for(int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
         temp.probability = _depthSystemValidator.calculateSvmDepthProbability(
-            imgs.depthMasks.at(i).img);
+          imgs.depthMasks.at(i).img);
         temp.keypoint = imgs.depthMasks[i].keypoint;
+        temp.source = DEPTH_SVM;
+        temp.boundingBox = imgs.depthMasks[i].bounding_box;
         depth_svm_probabilities.push_back(temp);
       }
     }
@@ -386,11 +508,18 @@ namespace pandora_vision
     {
       for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
       {
-        temp.probability = (VictimParameters::depth_svm_weight * depth_svm_probabilities[i].probability + 
-          VictimParameters::rgb_svm_weight * rgb_svm_probabilities[i].probability) / 
-            (VictimParameters::depth_svm_weight + 
+        //! Weighted mean
+        temp.probability = 
+          (VictimParameters::depth_svm_weight * 
+            depth_svm_probabilities[i].probability + 
+          VictimParameters::rgb_svm_weight * 
+            rgb_svm_probabilities[i].probability) / 
+          (VictimParameters::depth_svm_weight + 
             VictimParameters::rgb_svm_weight);
+        
         temp.keypoint = depth_svm_probabilities[i].keypoint;
+        temp.source = RGB_SVM;
+        temp.boundingBox = depth_svm_probabilities[i].boundingBox;
         final_probabilities.push_back(temp);
       }
     }
@@ -398,8 +527,11 @@ namespace pandora_vision
     {
       for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
       {
-        temp.probability = rgb_svm_probabilities[i].probability * VictimParameters::rgb_svm_weight;
+        temp.probability = rgb_svm_probabilities[i].probability * 
+          VictimParameters::rgb_svm_weight;
         temp.keypoint = rgb_svm_probabilities[i].keypoint;
+        temp.source = DEPTH_SVM;
+        temp.boundingBox = rgb_svm_probabilities[i].boundingBox;
         final_probabilities.push_back(temp);
       }
     }
@@ -407,14 +539,20 @@ namespace pandora_vision
     // VJ mask merging (?)
     for(unsigned int i = 0 ; i < rgb_vj_probabilities.size() ; i++)
     {
-      temp.probability = rgb_vj_probabilities[i].probability * VictimParameters::rgb_vj_weight;
+      temp.probability = rgb_vj_probabilities[i].probability * 
+        VictimParameters::rgb_vj_weight;
       temp.keypoint = rgb_vj_probabilities[i].keypoint;
+      temp.source = RGB_VJ;
+      temp.boundingBox = rgb_vj_probabilities[i].boundingBox;
       final_probabilities.push_back(temp);
     }
     for(unsigned int i = 0 ; i < depth_vj_probabilities.size() ; i++)
     {
-      temp.probability = depth_vj_probabilities[i].probability * VictimParameters::depth_vj_weight;
+      temp.probability = depth_vj_probabilities[i].probability * 
+        VictimParameters::depth_vj_weight;
       temp.keypoint = depth_vj_probabilities[i].keypoint;
+      temp.source = DEPTH_VJ;
+      temp.boundingBox = depth_vj_probabilities[i].boundingBox;
       final_probabilities.push_back(temp);
     }
     

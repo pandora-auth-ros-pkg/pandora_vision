@@ -38,19 +38,50 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
 #define PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
 
-#include <dynamic_reconfigure/server.h>
-#include <pandora_vision_victim/victim_dyn_reconfConfig.h>
-#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <cstdlib>
+#include <limits>
+#include <map>
+#include <vector>
+
 #include "ros/ros.h"
 #include <ros/package.h>
 
+#include <dynamic_reconfigure/server.h>
+
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
+#include <urdf_parser/urdf_parser.h>
+
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <cv_bridge/cv_bridge.h>
+
+#include "pandora_common_msgs/GeneralAlertMsg.h"
+#include "vision_communications/EnhancedHolesVectorMsg.h"
+#include "vision_communications/EnhancedHoleMsg.h"
+#include "state_manager/state_client.h"
+#include <pandora_vision_victim/victim_dyn_reconfConfig.h>
+
 namespace pandora_vision
 {
+  
+  enum VictimSource
+  {
+    RGB_VJ,
+    DEPTH_VJ,
+    RGB_SVM,
+    DEPTH_SVM
+  };
   
   struct DetectedVictim
   {
     cv::Point2f keypoint;
     float probability;
+    cv::Rect boundingBox;
+    VictimSource source;
   };
 
   enum DetectionMode
@@ -94,6 +125,7 @@ namespace pandora_vision
       
       //!< Parameters for debug purposes
       static bool debug_img;
+      static bool debug_img_publisher;
 
       //!< parameters referring to the view and frame characteristics
       static std::string packagePath;

@@ -38,8 +38,6 @@
 #ifndef PANDORA_VISION_VICTIM_FACE_DETECTOR_H
 #define PANDORA_VISION_VICTIM_FACE_DETECTOR_H 
 
-#include <opencv2/opencv.hpp>
-#include "ros/ros.h"
 #include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision

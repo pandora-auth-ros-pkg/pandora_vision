@@ -36,7 +36,7 @@
 *********************************************************************/
 
 
-#include "pandora_vision_victim/haralickfeature_extractor.h"
+#include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
 
 namespace pandora_vision
 {

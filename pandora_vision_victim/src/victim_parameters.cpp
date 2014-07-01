@@ -47,6 +47,7 @@ namespace pandora_vision
   double VictimParameters::depth_svm_weight = 0;
   
   bool VictimParameters::debug_img = false;
+  bool VictimParameters::debug_img_publisher = false;
   
   //!< Static parameters
   std::string VictimParameters::packagePath = "";
@@ -63,8 +64,6 @@ namespace pandora_vision
   std::string VictimParameters::model_path = "";
   std::string VictimParameters::rgb_classifier_path = "";
   std::string VictimParameters::depth_classifier_path = "";
-  //~ bool VictimParameters::isDepthEnabled = false;
-  //~ bool VictimParameters::isHole = false;
   int VictimParameters::bufferSize = 1;
   
   //----------------------------Methods----------------------------//
@@ -95,6 +94,7 @@ namespace pandora_vision
     VictimParameters::rgb_svm_weight = config.rgb_svm_weight;
     VictimParameters::depth_svm_weight = config.depth_svm_weight;
     VictimParameters::debug_img = config.debug_img;
+    VictimParameters::debug_img_publisher = config.debug_img_publisher;
   }
   
   /**
@@ -105,7 +105,8 @@ namespace pandora_vision
   void VictimParameters::getGeneralParams(void)
   {
 
-    VictimParameters::packagePath = ros::package::getPath("pandora_vision_victim");
+    VictimParameters::packagePath =  
+      ros::package::getPath("pandora_vision_victim");
     
     std::string str_param;
     int int_param;
@@ -154,7 +155,8 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_FATAL("[motion_node] : Parameter frameHeight not found. Using Default");
+      ROS_FATAL
+        ("[motion_node] : Parameter frameHeight not found. Using Default");
       ROS_BREAK();
     }
     
@@ -166,7 +168,8 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_FATAL("[motion_node] : Parameter frameWidth not found. Using Default");
+      ROS_FATAL
+        ("[motion_node] : Parameter frameWidth not found. Using Default");
       ROS_BREAK();
     }
   
@@ -210,7 +213,8 @@ namespace pandora_vision
     //!< Get the path of haar_cascade xml file if available;
     if ( _nh.getParam("cascade_path", str_param))
     {
-      VictimParameters::cascade_path = VictimParameters::packagePath + str_param;
+      VictimParameters::cascade_path = VictimParameters::packagePath + 
+        str_param;
       ROS_INFO_STREAM("[victim_node]: cascade_path : " << str_param);
     }
     else
@@ -280,30 +284,7 @@ namespace pandora_vision
       ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
         <<  VictimParameters::depth_classifier_path);
     }
-    
-    //~ /// Parameter that changes respectivly if we have depth information
-    //~ if ( _nh.getParam("isDepthEnabled", bool_param))
-    //~ {
-      //~ VictimParameters::isDepthEnabled = bool_param;
-      //~ ROS_DEBUG_STREAM("[victim_node] : isDepthEnabled : " << bool_param);
-    //~ }
-    //~ else
-    //~ {
-      //~ VictimParameters::isDepthEnabled = false;
-    //~ }
-      //~ 
-    //~ /// Parameter that changes respectivly if we have information
-    //~ ///about the position of the hole
-    //~ if ( _nh.getParam("isHole", bool_param))
-    //~ {
-      //~ VictimParameters::isHole = bool_param;
-      //~ ROS_DEBUG_STREAM("[victim_node] : isHole : " << bool_param);
-    //~ }
-    //~ else
-    //~ {
-      //~ VictimParameters::isHole = false;
-    //~ }
-     
+
     if ( _nh.getParam("bufferSize", int_param))
     {
       VictimParameters::bufferSize = int_param;

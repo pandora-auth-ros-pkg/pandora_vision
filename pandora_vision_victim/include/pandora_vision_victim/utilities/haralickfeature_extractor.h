@@ -37,12 +37,6 @@
 #ifndef PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include "ros/ros.h"
 #include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision

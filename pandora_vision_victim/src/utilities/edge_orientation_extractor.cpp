@@ -35,7 +35,7 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/edge_orientation_extractor.h"
+#include "pandora_vision_victim/utilities/edge_orientation_extractor.h"
 
 namespace pandora_vision
 {

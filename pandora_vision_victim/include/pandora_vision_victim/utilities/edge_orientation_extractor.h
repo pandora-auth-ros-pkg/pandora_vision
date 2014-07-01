@@ -37,10 +37,6 @@
 #ifndef PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
 
-#include <opencv2/opencv.hpp>
-#include <iostream>
-#include <limits>
-#include "ros/ros.h"
 #include "pandora_vision_victim/victim_parameters.h"
 
 //~ #define SHOW_DEBUG_IMAGE

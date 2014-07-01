@@ -42,18 +42,6 @@
 #include "pandora_vision_victim/rgb_system_validator.h"
 #include "pandora_vision_victim/depth_system_validator.h"
 
-#include <opencv2/opencv.hpp>
-
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/image_encodings.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
-#include "pandora_common_msgs/GeneralAlertMsg.h"
-#include "vision_communications/EnhancedHolesVectorMsg.h"
-#include "vision_communications/EnhancedHoleMsg.h"
-#include "state_manager/state_client.h"
-#include <urdf_parser/urdf_parser.h>
-#include <map>
 
 namespace pandora_vision
 {
@@ -63,11 +51,6 @@ namespace pandora_vision
 
       /// The NodeHandle
       ros::NodeHandle _nh;
-
-      /// Rgb Frame processed by FaceDetector
-      //~ cv::Mat _rgbImage;
-      /// Depth Frame processed by FaceDetector
-      //~ cv::Mat _depthImage;
 
       /// FaceDetector frame timestamp
       ros::Time victimFrameTimestamp;
@@ -86,13 +69,7 @@ namespace pandora_vision
       int curState;
       /// Previous state of robot
       int prevState;
-      
-      ///Vector of holes found in current frame
-      vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
-      
-      /// Instance of class VictimDetector
-      //~ VictimDetector* _victimDetector;
-      
+
       std::vector<cv::Mat> _rgbdImages;
       
       /// Instance of class face_detector
@@ -111,7 +88,8 @@ namespace pandora_vision
         bool depthEnabled, 
         bool holesEnabled,
         const cv::Mat& rgbImage,
-        const cv::Mat& depthImage
+        const cv::Mat& depthImage,
+        const vision_communications::EnhancedHolesVectorMsg& msg
       );
 
       /**
@@ -134,6 +112,20 @@ namespace pandora_vision
       std::string _parent_frame_id;
       
       VictimParameters params;
+      
+      //! Debug purposes
+      // The image_transport nodehandle
+      image_transport::ImageTransport imageTransport_;
+      image_transport::Publisher _debugVictimsPublisher;
+      cv::Mat debugImage;
+      std::vector<cv::KeyPoint> rgb_vj_keypoints;
+      std::vector<cv::KeyPoint> rgb_svm_keypoints;
+      std::vector<cv::KeyPoint> depth_vj_keypoints;
+      std::vector<cv::KeyPoint> depth_svm_keypoints;
+      std::vector<cv::Rect> rgb_vj_bounding_boxes;
+      std::vector<cv::Rect> rgb_svm_bounding_boxes;
+      std::vector<cv::Rect> depth_vj_bounding_boxes;
+      std::vector<cv::Rect> depth_svm_bounding_boxes;
       
       //----------------------------------------------------------------------//
       DetectionImages dImages;

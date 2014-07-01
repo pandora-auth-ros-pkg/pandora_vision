@@ -107,6 +107,7 @@ namespace pandora_vision
       DetectedVictim dv;
       dv.probability = probs[i];
       dv.keypoint = keypoints[i];
+      dv.boundingBox = cv::Rect(dv.keypoint.x - 25, dv.keypoint.y - 25, 50, 50);
       candidateVictim.push_back(dv);
     }
     
@@ -216,11 +217,6 @@ namespace pandora_vision
         //! Add every element created for each frame, to the total amount of faces
         faces_total.push_back (thrfaces.at(i));
       }
-    }
-    if(VictimParameters::debug_img)
-    {
-      cv::imshow("face_detector_2", original);
-      cv::waitKey(30);
     }
  
     thrfaces.clear();
