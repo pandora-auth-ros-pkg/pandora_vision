@@ -42,18 +42,18 @@ namespace pandora_vision
   /**
     @brief Constructor
   **/
-  VictimDetection::VictimDetection(const std::string& ns) : _nh(ns), victimNowON(false)
+  VictimDetection::VictimDetection(const std::string& ns) : 
+    _nh(ns), 
+    victimNowON(false),
+    params(ns)
   {
      //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
     _frame_id = "";
 
-    /// Get parameters referring to faceDetector instance
-    getVictimDetectorParameters();
-
     /// Convert field of view from degrees to rads
-    hfov = hfov * CV_PI / 180;
-    vfov = vfov * CV_PI / 180;
+    VictimParameters::hfov = VictimParameters::hfov * CV_PI / 180;
+    VictimParameters::vfov = VictimParameters::vfov * CV_PI / 180;
     
     //!< Subscribe to input image's topic
     //!< image_transport::ImageTransport it(_nh);
@@ -74,15 +74,21 @@ namespace pandora_vision
         1, &VictimDetection::imageCallback, this);
     
      /// Initialize victim detector
-    _victimDetector = new VictimDetector(cascade_path, model_path, bufferSize,
-      rgb_classifier_path, depth_classifier_path);
+    _victimDetector = new VictimDetector( 
+      VictimParameters::cascade_path, 
+      VictimParameters::model_path, 
+      VictimParameters::bufferSize,
+      VictimParameters::rgb_classifier_path, 
+      VictimParameters::depth_classifier_path);
     
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_communications::robotModeMsg::MODE_OFF;
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
     clientInitialize();
-    _rgbImage = cv::Mat::zeros(frameWidth, frameHeight, CV_8UC3);
+    
+    _rgbImage = cv::Mat::zeros(VictimParameters::frameWidth, 
+      VictimParameters::frameHeight, CV_8UC3);
     
     ROS_INFO("[victim_node] : Created Victim Detection instance");
   }
@@ -96,84 +102,7 @@ namespace pandora_vision
    
   }
 
-  
 
-  /**
-    @brief Get parameters referring to the face detection algorithm
-    @return void
-  **/
-  void VictimDetection::getVictimDetectorParameters()
-  {
-    //!< Get the path of haar_cascade xml file if available;
-    if ( _nh.getParam("cascade_path", cascade_path)){
-      cascade_path = packagePath + cascade_path;
-      ROS_INFO_STREAM("[victim_node]: cascade_path : " << cascade_path);
-    }
-    else{
-      model_path = packagePath + "/data/haarcascade_frontalface_alt_tree.xml";
-      ROS_INFO_STREAM("[victim_node]: cascade_path : " << cascade_path);
-    }
-
-    //!< Get the model.xml url;
-    if (_nh.getParam("model_url", model_url))
-      ROS_INFO_STREAM("[victim_node]: modelURL : " << model_url);
-    else{
-      model_url = "https://pandora.ee.auth.gr/vision/model.xml";
-      ROS_INFO_STREAM("[victim_node]: modelURL : " << model_url);
-    }
-
-    //!< Get the path of model_path xml file to be loaded
-    if (_nh.getParam("model_path",  model_path)){
-      model_path = packagePath + model_path;
-      ROS_INFO_STREAM("[victim_node]: model_path : " <<  model_path);
-    }
-    else{
-      model_path = packagePath + "/data/model.xml";
-      ROS_INFO_STREAM("[victim_node]: model_path : " <<  model_path);
-    }
-    
-    //!< Get the path of rgb classifier
-    if (_nh.getParam("rgb_classifier_path",  rgb_classifier_path)){
-      rgb_classifier_path = packagePath + rgb_classifier_path;
-      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
-            <<  rgb_classifier_path);
-    }
-    else{
-      rgb_classifier_path = packagePath + "/data/rgb_svm_classifier.xml";
-      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
-            <<  rgb_classifier_path);
-    }
-    
-    //!< Get the path of depth classifier
-    if (_nh.getParam("depth_classifier_path",  depth_classifier_path)){
-      depth_classifier_path = packagePath + depth_classifier_path;
-      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
-            <<  depth_classifier_path);
-    }
-    else{
-      depth_classifier_path = packagePath + "/data/depth_svm_classifier.xml";
-      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
-            <<  depth_classifier_path);
-    }
-    
-    /// Parameter that changes respectivly if we have depth information
-    if ( _nh.getParam("isDepthEnabled", isDepthEnabled))
-      ROS_DEBUG_STREAM("[victim_node] : isDepthEnabled : " << isDepthEnabled);
-    else
-      isDepthEnabled = false;
-      
-    /// Parameter that changes respectivly if we have information
-    ///about the position of the hole
-    if ( _nh.getParam("isHole", isHole))
-      ROS_DEBUG_STREAM("[victim_node] : isHole : " << isHole);
-    else
-      isDepthEnabled = false;
-      
-    if ( _nh.getParam("bufferSize", bufferSize))
-      ROS_DEBUG_STREAM("[victim_node] : bufferSize : " << bufferSize);
-    else
-      bufferSize = 5;
-  }
   
   /**
   @brief Function that retrieves the parent to the frame_id.
@@ -219,6 +148,8 @@ namespace pandora_vision
   void VictimDetection::imageCallback(
       const vision_communications::EnhancedHolesVectorMsg& msg)
   {
+    VictimParameters::isHole = false;
+    
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg.rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
     _rgbImage = in_msg->image.clone();
@@ -236,14 +167,14 @@ namespace pandora_vision
       cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     _depthImage = in_msg->image.clone();
     
-    isDepthEnabled = msg.isDepth;
+    VictimParameters::isDepthEnabled = msg.isDepth;
     
     
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;
     _enhancedHoles = msg;
     if (_enhancedHoles.enhancedHoles.size() > 0)
-      isHole = true;
+      VictimParameters::isHole = true;
     
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
@@ -269,7 +200,8 @@ namespace pandora_vision
   void VictimDetection::checkState()
   {
     DetectionImages imgs; 
-    _stateIndicator = 2 * isDepthEnabled + isHole + 1;
+    _stateIndicator = 2 * VictimParameters::isDepthEnabled + 
+      VictimParameters::isHole + 1;
     
     {
       EnhancedMat emat;
@@ -334,7 +266,7 @@ namespace pandora_vision
       );
 
       imgs.rgbMasks.push_back(emat);
-      if(isDepthEnabled)
+      if(VictimParameters::isDepthEnabled)
       {
         emat.img = _depthImage(rect);
         imgs.depthMasks.push_back(emat);
@@ -355,10 +287,7 @@ namespace pandora_vision
       return;
 
     std::vector<DetectedVictim> final_victims = _victimDetector->victimFusion(imgs);
-    
-    //!< Create message of Victim Detector
-    pandora_common_msgs::GeneralAlertMsg victimMessage;
-    
+
     for(int i = 0;  i < final_victims.size() ; i++){
       
       if(final_victims[i].probability < 0.1)
@@ -367,16 +296,27 @@ namespace pandora_vision
       }
       
       float x = final_victims[i].keypoint.x
-          - static_cast<float>(frameWidth) / 2;
-      float y = static_cast<float>(frameHeight) / 2
+          - static_cast<float>(VictimParameters::frameWidth) / 2;
+      float y = static_cast<float>(VictimParameters::frameHeight) / 2
           - final_victims[i].keypoint.y;
+          
+      //!< Create message of Victim Detector
+      pandora_common_msgs::GeneralAlertMsg victimMessage;
                                       
       victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+      
       victimMessage.header.stamp = victimFrameTimestamp;
-      victimMessage.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-      victimMessage.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+      
+      victimMessage.yaw = 
+        atan(2 * x / VictimParameters::frameWidth 
+          * tan(VictimParameters::hfov / 2));
+      
+      victimMessage.pitch = 
+        atan(2 * y / VictimParameters::frameHeight 
+          * tan(VictimParameters::vfov / 2));
+          
       victimMessage.probability = final_victims[i].probability;
-      ROS_INFO_STREAM( "[victim_node] :Victim " << final_victims[i].probability);
+      
       _victimDirectionPublisher.publish(victimMessage);
     }
   }
@@ -393,7 +333,6 @@ namespace pandora_vision
 
     //!< check if face detection algorithm should be running now
     victimNowON = 
-    (curState == state_manager_communications::robotModeMsg::MODE_EXPLORATION) ||
     (curState == state_manager_communications::robotModeMsg::MODE_ARM_APPROACH) ||
     (curState == state_manager_communications::robotModeMsg::MODE_DF_HOLD);
 

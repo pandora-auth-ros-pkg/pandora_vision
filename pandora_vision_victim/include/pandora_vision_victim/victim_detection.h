@@ -39,8 +39,7 @@
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
 #include <opencv2/opencv.hpp>
-#include "ros/ros.h"
-#include <ros/package.h>
+
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
@@ -61,15 +60,6 @@ private:
 
   /// The NodeHandle
   ros::NodeHandle _nh;
-
-  /// Horizontal field of view in rad
-  double hfov;
-
-  /// Vertical Field Of View (rad)
-  double vfov;
-
-  int frameWidth;
-  int frameHeight;
 
   /// Rgb Frame processed by FaceDetector
   cv::Mat _rgbImage;
@@ -96,22 +86,6 @@ private:
   int curState;
   /// Previous state of robot
   int prevState;
-    
-  /// Parameters for the FaceDetector instance
-  std::string cascade_path;
-  std::string model_path;
-  std::string model_url;
-  std::string rgb_classifier_path;
-  std::string depth_classifier_path;
-  
-  int bufferSize;
-  
-  /// Flag that indicates if we have depth information
-  /// from kinect sensor
-  bool isDepthEnabled;
-  /// Flag that indicates if there is one or more holes in current
-  /// frame in order to enable a suitable mask
-  bool isHole;
   
   ///Vector of holes found in current frame
   vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
@@ -175,10 +149,10 @@ private:
 public:
 
   //!< The Constructor
-  explicit VictimDetection(const std::string& ns);
+  VictimDetection(const std::string& ns);
 
   //!< The Destructor
-  virtual ~VictimDetection();
+  ~VictimDetection();
 
   /**
    * @brief Node's state manager

@@ -37,9 +37,12 @@
 
 #ifndef PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
 #define PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
+
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_victim/victim_dyn_reconfConfig.h>
 #include <opencv2/opencv.hpp>
+#include "ros/ros.h"
+#include <ros/package.h>
 
 namespace pandora_vision
 {
@@ -55,7 +58,10 @@ namespace pandora_vision
   {
     private:
     
+      ros::NodeHandle _nh;
+    
       void getGeneralParams(void);
+      void getVictimDetectorParameters(void);
     
     public:
       //!< Weight parameters for the victim subsystems
@@ -74,6 +80,18 @@ namespace pandora_vision
       static std::string cameraName;
       static int frameHeight;
       static int frameWidth;
+      static double hfov;
+      static double vfov;
+      
+      //!< parameters referring to the face detection algorithm
+      static std::string cascade_path;
+      static std::string model_url;
+      static std::string model_path;
+      static std::string rgb_classifier_path;
+      static std::string depth_classifier_path;
+      static bool isDepthEnabled;
+      static bool isHole;
+      static int bufferSize;
       
       //-----------------------------------------------------------------------//
       //!< The dynamic reconfigure (motion's) parameters' server
@@ -83,7 +101,8 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_victim::victim_dyn_reconfConfig>
         ::CallbackType f;  
       
-      VictimParameters(void);
+      //!< Default contructor
+      VictimParameters(const std::string& ns);
         
       /**
         @brief The function called when a parameter is changed
