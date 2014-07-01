@@ -140,7 +140,7 @@ namespace pandora_vision
     _haralickFeatureDetector.emptyCurrentFrameFeatureVector();
   }
   
-   std::vector<double> SvmTraining::getRgbFeatureVector()
+  std::vector<double> SvmTraining::getRgbFeatureVector()
   {
     return _rgbFeatureVector;
   }
@@ -477,9 +477,9 @@ namespace pandora_vision
     std::stringstream test_labels_mat_file_stream;
     std::stringstream svm_file_stream;
     std::stringstream results_file_stream;
-    cv::Mat results=cv::Mat::zeros(test_num_files, 1, CV_64FC1);
+    cv::Mat results = cv::Mat::zeros(test_num_files, 1, CV_64FC1);
     float prediction;
-    double A,B;
+    double A, B;
 
 
     switch(type){
@@ -547,7 +547,7 @@ namespace pandora_vision
           //~ prediction = SVM.predict(test_mat.row(ii), true);
           //~ results.at<double>(ii, 0)= prediction;
         //~ }
-        //~ sigmoid_train(results, test_labels_mat, A, B);
+        //~ sigmoid_train(results, test_labels_mat, &A, &B);
         //~ std::cout << "A=" << A << std::endl;
         //~ std::cout << "B=" << B << std::endl;
         
@@ -556,7 +556,7 @@ namespace pandora_vision
          //~ for (int jj = 0; jj < results.cols; jj++)
           //~ if(results.at<float>(ii, jj) == 0)
               //~ results.at<float>(ii, jj) = -1;
-        SVM.predict(test_mat,results);
+        SVM.predict(test_mat, results);
         //std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
         saveToFile(results_file_stream.str(), "results", results);
         evaluate(results, test_labels_mat);
@@ -807,7 +807,7 @@ namespace pandora_vision
    * @return void
   */  
   void SvmTraining::sigmoid_train(cv::Mat dec_values, cv::Mat labels, 
-                                  double& A, double& B)
+                                  double* A, double* B)
   {
     double prior1 = 0, prior0 = 0;
 
@@ -817,20 +817,20 @@ namespace pandora_vision
       else 
         prior0+= 1;
     
-    int max_iter = 100;	// Maximal number of iterations
-    double min_step = 1e-10;	// Minimal step taken in line search
-    double sigma = 1e-12;	// For numerically strict PD of Hessian
+    int max_iter = 100;// Maximal number of iterations
+    double min_step = 1e-10;// Minimal step taken in line search
+    double sigma = 1e-12;// For numerically strict PD of Hessian
     double eps = 1e-5;
     double hiTarget = (prior1 + 1.0) / (prior1 + 2.0);
-    double loTarget=1 / (prior0 + 2.0);
-    double* t =new double[labels.rows];
+    double loTarget = 1 / (prior0 + 2.0);
+    double* t = new double[labels.rows];
     double fApB, p, q, h11, h22, h21, g1, g2, det, dA, dB, gd, stepsize;
-    double newA, newB, newf, d1, d2;
+    double newA, newB, newf, d1, d2, Avector, Bvector;
     int iter;
     
     // Initial Point and Initial Fun Value
-    A=0.0; 
-    B=log((prior0 + 1.0) / (prior1 + 1.0));
+    Avector = 0.0; 
+    Bvector = log((prior0 + 1.0) / (prior1 + 1.0));
     double fval = 0.0;
 
     for (int ii = 0; ii <labels.rows; ii++)
@@ -839,7 +839,7 @@ namespace pandora_vision
         t[ii] = hiTarget;
       else 
         t[ii]=loTarget;
-      fApB = dec_values.at<double>(ii, 0) * A + B;
+      fApB = dec_values.at<double>(ii, 0) * Avector + Bvector;
       if (fApB >= 0)
         fval += t[ii] * fApB + log(1 + exp(-fApB));
       else
@@ -855,11 +855,11 @@ namespace pandora_vision
       g2 = 0.0;
       for (int ii = 0; ii < dec_values.rows; ii++)
       {
-        fApB = dec_values.at<double>(ii, 0) * A + B;
+        fApB = dec_values.at<double>(ii, 0) * Avector + Bvector;
         if (fApB >= 0)
         {
-          p = exp(-fApB) /(1.0 + exp(-fApB));
-          q=1.0 / (1.0 + exp(-fApB));
+          p = exp(-fApB) / (1.0 + exp(-fApB));
+          q = 1.0 / (1.0 + exp(-fApB));
         }
         else
         {
@@ -886,11 +886,11 @@ namespace pandora_vision
       gd = g1 * dA + g2 * dB;
 
 
-      stepsize = 1;		// Line Search
+      stepsize = 1;// Line Search
       while (stepsize >= min_step)
       {
-        newA = A + stepsize * dA;
-        newB = B + stepsize * dB;
+        newA = Avector + stepsize * dA;
+        newB = Bvector + stepsize * dB;
 
         // New function value
         newf = 0.0;
@@ -905,8 +905,8 @@ namespace pandora_vision
         // Check sufficient decrease
         if (newf < fval + 0.0001 * stepsize * gd)
         {
-          A = newA;
-          B = newB;
+          Avector = newA;
+          Bvector = newB;
           fval = newf;
           break;
         }
@@ -924,6 +924,8 @@ namespace pandora_vision
     if (iter >= max_iter)
       std::cout << "Reaching maximal iterations in two-class probability estimates" << std::endl;
     free(t);
+    *A = Avector;
+    *B = Bvector;
   }
   
 }// namespace pandora_vision

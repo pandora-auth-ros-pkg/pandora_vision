@@ -242,7 +242,7 @@ public:
    * @param [double&] B, the vector B to be computed
    * @return void
   */  
-  void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double& A, double& B);
+  void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A, double* B);
 
   
   std::string path_to_samples;

@@ -99,6 +99,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utilities/channels_statistics_extractor.h
   include/utilities/edge_orientation_extractor.h
   include/utilities/haralickfeature_extractor.h
+  include/training.h
   src/victim_detection.cpp
   src/victim_detector.cpp
   src/victim_vj_detector.cpp
@@ -107,5 +108,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/utilities/channels_statistics_extractor.cpp
   src/utilities/edge_orientation_extractor.cpp
   src/utilities/haralickfeature_extractor.cpp
+  src/training.cpp
+
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
