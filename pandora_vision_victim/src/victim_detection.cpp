@@ -433,6 +433,13 @@ namespace pandora_vision
           cvPoint(10,80),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
       }
+      {
+        std::ostringstream convert;
+        convert << "Holes got : "<< msg.enhancedHoles.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10,100),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 0, 0), 1, CV_AA);
+      }
     }
     if(VictimParameters::debug_img_publisher)
     {
