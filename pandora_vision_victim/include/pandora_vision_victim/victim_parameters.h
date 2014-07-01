@@ -89,8 +89,8 @@ namespace pandora_vision
       static std::string model_path;
       static std::string rgb_classifier_path;
       static std::string depth_classifier_path;
-      static bool isDepthEnabled;
-      static bool isHole;
+      //~ static bool isDepthEnabled;
+      //~ static bool isHole;
       static int bufferSize;
       
       //-----------------------------------------------------------------------//

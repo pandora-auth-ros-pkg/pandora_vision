@@ -63,8 +63,8 @@ namespace pandora_vision
   std::string VictimParameters::model_path = "";
   std::string VictimParameters::rgb_classifier_path = "";
   std::string VictimParameters::depth_classifier_path = "";
-  bool VictimParameters::isDepthEnabled = false;
-  bool VictimParameters::isHole = false;
+  //~ bool VictimParameters::isDepthEnabled = false;
+  //~ bool VictimParameters::isHole = false;
   int VictimParameters::bufferSize = 1;
   
   //----------------------------Methods----------------------------//
@@ -281,28 +281,28 @@ namespace pandora_vision
         <<  VictimParameters::depth_classifier_path);
     }
     
-    /// Parameter that changes respectivly if we have depth information
-    if ( _nh.getParam("isDepthEnabled", bool_param))
-    {
-      VictimParameters::isDepthEnabled = bool_param;
-      ROS_DEBUG_STREAM("[victim_node] : isDepthEnabled : " << bool_param);
-    }
-    else
-    {
-      VictimParameters::isDepthEnabled = false;
-    }
-      
-    /// Parameter that changes respectivly if we have information
-    ///about the position of the hole
-    if ( _nh.getParam("isHole", bool_param))
-    {
-      VictimParameters::isHole = bool_param;
-      ROS_DEBUG_STREAM("[victim_node] : isHole : " << bool_param);
-    }
-    else
-    {
-      VictimParameters::isHole = false;
-    }
+    //~ /// Parameter that changes respectivly if we have depth information
+    //~ if ( _nh.getParam("isDepthEnabled", bool_param))
+    //~ {
+      //~ VictimParameters::isDepthEnabled = bool_param;
+      //~ ROS_DEBUG_STREAM("[victim_node] : isDepthEnabled : " << bool_param);
+    //~ }
+    //~ else
+    //~ {
+      //~ VictimParameters::isDepthEnabled = false;
+    //~ }
+      //~ 
+    //~ /// Parameter that changes respectivly if we have information
+    //~ ///about the position of the hole
+    //~ if ( _nh.getParam("isHole", bool_param))
+    //~ {
+      //~ VictimParameters::isHole = bool_param;
+      //~ ROS_DEBUG_STREAM("[victim_node] : isHole : " << bool_param);
+    //~ }
+    //~ else
+    //~ {
+      //~ VictimParameters::isHole = false;
+    //~ }
      
     if ( _nh.getParam("bufferSize", int_param))
     {

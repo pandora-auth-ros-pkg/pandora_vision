@@ -44,7 +44,6 @@ namespace pandora_vision
   **/
   VictimDetection::VictimDetection(const std::string& ns) : 
     _nh(ns), 
-    victimNowON(false),
     params(ns)
   {
      //!< Set initial value of parent frame id to null
@@ -54,12 +53,6 @@ namespace pandora_vision
     /// Convert field of view from degrees to rads
     VictimParameters::hfov = VictimParameters::hfov * CV_PI / 180;
     VictimParameters::vfov = VictimParameters::vfov * CV_PI / 180;
-    
-    //!< Subscribe to input image's topic
-    //!< image_transport::ImageTransport it(_nh);
-    //~ _frameSubscriber = _nh.subscribe(
-      //~ "/kinect/rgb/image_color", 1, &VictimDetection::dummyimageCallback, this);
-                       
                        
     //! Declare publisher and advertise topic
     //! where algorithm results are posted
@@ -86,9 +79,6 @@ namespace pandora_vision
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
 
     clientInitialize();
-    
-    _rgbImage = cv::Mat::zeros(VictimParameters::frameWidth, 
-      VictimParameters::frameHeight, CV_8UC3);
     
     ROS_INFO("[victim_node] : Created Victim Detection instance");
   }
@@ -119,7 +109,8 @@ namespace pandora_vision
 
     if(!res || !_nh.getParam(model_param_name, robot_description))
     {
-      ROS_ERROR("[Motion_node]:Robot description couldn't be retrieved from the parameter server.");
+      ROS_ERROR("[Motion_node]:Robot description couldn't be \
+        retrieved from the parameter server.");
       return false;
     }
   
@@ -148,44 +139,58 @@ namespace pandora_vision
   void VictimDetection::imageCallback(
       const vision_communications::EnhancedHolesVectorMsg& msg)
   {
-    VictimParameters::isHole = false;
+    
+    if(
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_ARM_APPROACH) ||
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_DF_HOLD)
+    )
+    {
+      ROS_WARN("A");
+      return;
+    }
     
     cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg.rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
-    _rgbImage = in_msg->image.clone();
+    in_msg = cv_bridge::toCvCopy(msg.rgbImage, 
+      sensor_msgs::image_encodings::TYPE_8UC3);
+    
+    cv::Mat rgbImage = in_msg->image.clone();
     
     if(_frame_id.c_str()[0] == '/')
       _frame_id = _frame_id.substr(1);
       
        
-    if (_rgbImage.empty()){
+    if (rgbImage.empty()){
       ROS_FATAL("[victim_node] : No more frames ");
       ROS_BREAK();
     }
     
-    in_msg = 
-      cv_bridge::toCvCopy(msg.depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
-    _depthImage = in_msg->image.clone();
+    in_msg = cv_bridge::toCvCopy(msg.depthImage, 
+      sensor_msgs::image_encodings::TYPE_8UC1);
     
-    VictimParameters::isDepthEnabled = msg.isDepth;
-    
-    
+    cv::Mat depthImage = in_msg->image.clone();
+
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;
     _enhancedHoles = msg;
-    if (_enhancedHoles.enhancedHoles.size() > 0)
-      VictimParameters::isHole = true;
-    
+
     victimFrameTimestamp = in_msg->header.stamp;
     cameraFrameId= in_msg->header.frame_id;
     
-    checkState();
+    //! The actual victim detection
+    detectVictims(
+      msg.isDepth, 
+      _enhancedHoles.enhancedHoles.size() > 0,
+      rgbImage,
+      depthImage
+    );
     
+    //! Resolve frame ids (must explain more)
     std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
-      
-    if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
+    if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) 
+    {
       bool _indicator = getParentFrameId();
-      
       _frame_ids_map.insert( it , std::pair<std::string, std::string>(
          _frame_id, _parent_frame_id));
     } 
@@ -197,21 +202,25 @@ namespace pandora_vision
    * the information sent from hole_detector_node
    * @return void
   */
-  void VictimDetection::checkState()
+  void VictimDetection::detectVictims(
+    bool depthEnabled, 
+    bool holesEnabled,
+    const cv::Mat& rgbImage,
+    const cv::Mat& depthImage
+  )
   {
     DetectionImages imgs; 
-    _stateIndicator = 2 * VictimParameters::isDepthEnabled + 
-      VictimParameters::isHole + 1;
+    int stateIndicator = 2 * depthEnabled + holesEnabled + 1;
     
     {
       EnhancedMat emat;
-      emat.img = _rgbImage;
+      rgbImage.copyTo(emat.img);
       imgs.rgb = emat;
       imgs.rgb.bounding_box = cv::Rect(0, 0, 0, 0);
       imgs.rgb.keypoint = cv::Point2f(0, 0);
     }
       
-    switch(_stateIndicator)
+    switch(stateIndicator)
     {
       case 1:
         _victimDetector->detectionMode = GOT_NOTHING;
@@ -223,7 +232,7 @@ namespace pandora_vision
         _victimDetector->detectionMode = GOT_DEPTH;
         {
           EnhancedMat emat;
-          emat.img = _depthImage;
+          depthImage.copyTo(emat.img);
           imgs.depth = emat;
           imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
           imgs.depth.keypoint = cv::Point2f(0, 0);
@@ -233,7 +242,7 @@ namespace pandora_vision
       _victimDetector->detectionMode = GOT_ALL;
         {
           EnhancedMat emat;
-          emat.img = _depthImage;
+          depthImage.copyTo(emat.img);
           imgs.depth = emat;
           imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
           imgs.depth.keypoint = cv::Point2f(0, 0);
@@ -257,7 +266,7 @@ namespace pandora_vision
       cv::Rect rect(minx, miny, maxx - minx, maxy - miny);
       
       EnhancedMat emat;
-      emat.img = _rgbImage(rect);
+      emat.img = rgbImage(rect);
       cv::resize(emat.img, emat.img, cv::Size(640, 480));
       emat.bounding_box = rect;
       emat.keypoint = cv::Point2f(
@@ -266,29 +275,19 @@ namespace pandora_vision
       );
 
       imgs.rgbMasks.push_back(emat);
-      if(VictimParameters::isDepthEnabled)
+      if(depthEnabled)
       {
-        emat.img = _depthImage(rect);
+        emat.img = depthImage(rect);
         imgs.depthMasks.push_back(emat);
       }
     }
-    
-    victimDetect(imgs);    
-  }
-  
-  /**
-   * @brief This method uses a FaceDetector instance to detect all
-   * present faces in a given frame
-   * @return void
-  */
-  void VictimDetection::victimDetect(DetectionImages imgs)
-  {
-    if(!victimNowON)
-      return;
 
-    std::vector<DetectedVictim> final_victims = _victimDetector->victimFusion(imgs);
+    std::vector<DetectedVictim> final_victims = 
+      _victimDetector->victimFusion(imgs);
 
-    for(int i = 0;  i < final_victims.size() ; i++){
+    //!< Message alert creation
+    for(int i = 0;  i < final_victims.size() ; i++)
+    {
       
       if(final_victims[i].probability < 0.1)
       {
@@ -318,7 +317,7 @@ namespace pandora_vision
       victimMessage.probability = final_victims[i].probability;
       
       _victimDirectionPublisher.publish(victimMessage);
-    }
+    } 
   }
 
 
@@ -331,13 +330,9 @@ namespace pandora_vision
   {
     curState = newState;
 
-    //!< check if face detection algorithm should be running now
-    victimNowON = 
-    (curState == state_manager_communications::robotModeMsg::MODE_ARM_APPROACH) ||
-    (curState == state_manager_communications::robotModeMsg::MODE_DF_HOLD);
-
     //!< shutdown if the robot is switched off
-    if (curState == state_manager_communications::robotModeMsg::MODE_TERMINATING)
+    if (curState == 
+      state_manager_communications::robotModeMsg::MODE_TERMINATING)
     {
       ros::shutdown();
       return;

@@ -54,121 +54,99 @@
 
 namespace pandora_vision
 {
-class VictimDetection : public StateClient
-{
-private:
+  class VictimDetection : public StateClient
+  {
+    private:
 
-  /// The NodeHandle
-  ros::NodeHandle _nh;
+      /// The NodeHandle
+      ros::NodeHandle _nh;
 
-  /// Rgb Frame processed by FaceDetector
-  cv::Mat _rgbImage;
-  /// Depth Frame processed by FaceDetector
-  cv::Mat _depthImage;
+      /// Rgb Frame processed by FaceDetector
+      //~ cv::Mat _rgbImage;
+      /// Depth Frame processed by FaceDetector
+      //~ cv::Mat _depthImage;
 
-  /// FaceDetector frame timestamp
-  ros::Time victimFrameTimestamp;
+      /// FaceDetector frame timestamp
+      ros::Time victimFrameTimestamp;
 
-  /// The topic subscribed to for the camera
-  std::string cameraFrameId;
-   
-  /// Publishers for FaceDetector result messages
-  ros::Publisher _victimDirectionPublisher;
+      /// The topic subscribed to for the camera
+      std::string cameraFrameId;
+       
+      /// Publishers for FaceDetector result messages
+      ros::Publisher _victimDirectionPublisher;
 
-  /// The subscriber that listens to the frame
-  /// topic advertised by the central node
-  ros::Subscriber _frameSubscriber;
+      /// The subscriber that listens to the frame
+      /// topic advertised by the central node
+      ros::Subscriber _frameSubscriber;
 
-  /// Variable used for State Managing
-  bool victimNowON;
+      /// Current state of robot
+      int curState;
+      /// Previous state of robot
+      int prevState;
+      
+      ///Vector of holes found in current frame
+      vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
+      
+      /// Instance of class VictimDetector
+      VictimDetector* _victimDetector;
+      
+      std::vector<cv::Mat> _rgbdImages;
 
-  /// Current state of robot
-  int curState;
-  /// Previous state of robot
-  int prevState;
-  
-  ///Vector of holes found in current frame
-  vision_communications::EnhancedHolesVectorMsg _enhancedHoles;
-  
-  /// Flag that indicates current state, according to the information
-  /// received from hole_detector_node
-  int _stateIndicator;
-  
-  /// Instance of class VictimDetector
-  VictimDetector* _victimDetector;
-  
-  std::vector<cv::Mat> _rgbdImages;
-  /**
-   * @brief Get parameters referring to view and frame characteristics from
-   * launch file
-   * @return void
-  */
-  void getGeneralParams();
+      /**
+       * @brief This method check in which state we are, according to
+       * the information sent from hole_detector_node
+       * @return void
+      */
+      void detectVictims(
+        bool depthEnabled, 
+        bool holesEnabled,
+        const cv::Mat& rgbImage,
+        const cv::Mat& depthImage
+      );
 
-  /**
-    *@brief Get parameters referring to the face detection algorithm
-    *@return void
-  **/
-  void getVictimDetectorParameters();
+      /**
+       * Function called when new message appears from hole_detector_node
+       * @param msg [vision_communications::EnhancedHolesVectorMsg&] The message
+       * @return void
+      */
+      void imageCallback(
+        const vision_communications::EnhancedHolesVectorMsg& msg);
 
-  /**
-   * @brief This method uses a FaceDetector instance to detect all
-   * present faces in a given frame
-   * @return void
-  */
-  void victimDetect(DetectionImages imgs);
-  
-  
-  /**
-   * @brief This method check in which state we are, according to
-   * the information sent from hole_detector_node
-   * @return void
-  */
-  void checkState();
+      /**
+        @brief Function that retrieves the parent to the frame_id
+        @return bool Returns true is frame_id found or false if not 
+      */ 
+      bool getParentFrameId();
+      
+      std::map<std::string, std::string> _frame_ids_map;
+      
+      std::string _frame_id;
+      std::string _parent_frame_id;
+      
+      VictimParameters params;
+       
+    public:
 
-  /**
-   * Function called when new message appears from hole_detector_node
-   * @param msg [vision_communications::EnhancedHolesVectorMsg&] The message
-   * @return void
-  */
-  void imageCallback(const vision_communications::EnhancedHolesVectorMsg& msg);
+      //!< The Constructor
+      VictimDetection(const std::string& ns);
 
-  /**
-    @brief Function that retrieves the parent to the frame_id
-    @return bool Returns true is frame_id found or false if not 
-  */ 
-  bool getParentFrameId();
-  
-  std::map<std::string, std::string> _frame_ids_map;
-  
-  std::string _frame_id;
-  std::string _parent_frame_id;
-  
-  VictimParameters params;
-   
-public:
+      //!< The Destructor
+      ~VictimDetection();
 
-  //!< The Constructor
-  VictimDetection(const std::string& ns);
+      /**
+       * @brief Node's state manager
+       * @param newState [int] The robot's new state
+       * @return void
+      */
+      void startTransition(int newState);
 
-  //!< The Destructor
-  ~VictimDetection();
+      /**
+       * @brief After completion of state transition
+       * @return void
+      */
+      void completeTransition(void);
 
-  /**
-   * @brief Node's state manager
-   * @param newState [int] The robot's new state
-   * @return void
-  */
-  void startTransition(int newState);
-
-  /**
-   * @brief After completion of state transition
-   * @return void
-  */
-  void completeTransition(void);
-  
-  std::string param;
-};
+  };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 
