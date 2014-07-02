@@ -43,7 +43,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole_detector/depth_cfgConfig.h>
 #include <pandora_vision_hole_detector/rgb_cfgConfig.h>
-#include <pandora_vision_hole_detector/hole_fusion_node_cfgConfig.h>
+#include <pandora_vision_hole_detector/hole_fusion_cfgConfig.h>
 #include <pandora_vision_hole_detector/debug_cfgConfig.h>
 #include <pandora_vision_hole_detector/filters_order_cfgConfig.h>
 #include <pandora_vision_hole_detector/filters_thresholds_cfgConfig.h>
