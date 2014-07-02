@@ -136,6 +136,7 @@ namespace pandora_vision
       //!< parameters referring to the view and frame characteristics
       static std::string packagePath;
       static std::string victimAlertTopic;
+      static std::string victimDebugImg;
       static std::string enhancedHolesTopic;
       static std::string cameraName;
       static int frameHeight;

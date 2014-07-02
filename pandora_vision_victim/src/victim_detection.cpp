@@ -83,7 +83,7 @@ namespace pandora_vision
     prevState = state_manager_communications::robotModeMsg::MODE_OFF;
     
     _debugVictimsPublisher = imageTransport_.advertise
-      ("/pandora_vision/victim/debug_img", 1, true);
+      (VictimParameters::victimDebugImg, 1, true);
 
     clientInitialize();
     

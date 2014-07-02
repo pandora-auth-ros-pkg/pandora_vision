@@ -1,4 +1,5 @@
 published_topic_names:  
   victim_alert : /vision/victim_alert
+  victim_debug_img : /vision/victim_debug_img
 subscribed_topic_names:  
   enhanded_hole_alert : /vision/enhanced_holes

@@ -52,6 +52,7 @@ namespace pandora_vision
   //!< Static parameters
   std::string VictimParameters::packagePath = "";
   std::string VictimParameters::victimAlertTopic = "";
+  std::string VictimParameters::victimDebugImg = "";
   std::string VictimParameters::enhancedHolesTopic = "";
   std::string VictimParameters::cameraName = "";
   int VictimParameters::frameHeight = 0;
@@ -105,6 +106,9 @@ namespace pandora_vision
     VictimParameters::depth_svm_weight = config.depth_svm_weight;
     VictimParameters::debug_img = config.debug_img;
     VictimParameters::debug_img_publisher = config.debug_img_publisher;
+    VictimParameters::rgb_svm_prob_scaling = config.rgb_svm_prob_scaling;
+    VictimParameters::rgb_svm_prob_translation = 
+      config.rgb_svm_prob_translation;
   }
   
   /**
@@ -121,6 +125,16 @@ namespace pandora_vision
     std::string str_param;
     int int_param;
     double double_param;
+    
+    if (_nh.getParam("published_topic_names/victim_debug_img", str_param))
+    {
+      VictimParameters::victimDebugImg = str_param;
+    }
+    else
+    {
+      ROS_FATAL("[victim_node] : victimDebugImg name param not found");
+      ROS_BREAK();
+    }
     
     if (_nh.getParam("published_topic_names/victim_alert", str_param))
     {
@@ -252,27 +266,6 @@ namespace pandora_vision
     else 
     {
      ROS_FATAL("[victim_node]: rgb_svm_gamma not found");
-     ROS_BREAK();
-    }  
-    
-    if (_nh.getParam("rgb_svm_prob_scaling", double_param))
-    { 
-      VictimParameters::rgb_svm_prob_scaling = double_param;
-      ROS_DEBUG_STREAM("rgb_svm_prob_scaling : " << double_param);
-    }
-    else 
-    {
-     ROS_FATAL("[victim_node]: rgb_svm_prob_scaling not found");
-     ROS_BREAK();
-    }  
-    if (_nh.getParam("rgb_svm_prob_translation", double_param))
-    { 
-      VictimParameters::rgb_svm_prob_translation = double_param;
-      ROS_DEBUG_STREAM("rgb_svm_prob_translation : " << double_param);
-    }
-    else 
-    {
-     ROS_FATAL("[victim_node]: rgb_svm_prob_translation not found");
      ROS_BREAK();
     }  
     
