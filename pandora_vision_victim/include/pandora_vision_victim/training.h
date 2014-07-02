@@ -43,9 +43,9 @@
 #include <opencv2/opencv.hpp>
 #include "ros/ros.h"
 #include <ros/package.h>
-#include "pandora_vision_victim/channels_statistics_extractor.h"
-#include "pandora_vision_victim/edge_orientation_extractor.h"
-#include "pandora_vision_victim/haralickfeature_extractor.h"
+#include "pandora_vision_victim/utilities/channels_statistics_extractor.h"
+#include "pandora_vision_victim/utilities/edge_orientation_extractor.h"
+#include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
 #include "pandora_vision_victim/depth_system_validator.h"
 #include "pandora_vision_victim/rgb_system_validator.h"
 

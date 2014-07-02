@@ -73,7 +73,6 @@ if(VICTIM_ENABLE_TRAIN)
                   src/utilities/channels_statistics_extractor.cpp
                   src/utilities/edge_orientation_extractor.cpp
                   src/utilities/haralickfeature_extractor.cpp
-                  src/training.cpp
   )
   target_link_libraries(victim_train_node ${catkin_LIBRARIES} )
 endif()

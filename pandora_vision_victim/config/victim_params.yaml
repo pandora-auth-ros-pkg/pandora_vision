@@ -12,8 +12,8 @@ model_image_height: 96
 
 rgb_svm_C: 312.5
 rgb_svm_gamma: 0.50625
-rgb_svm_prob_scaling: 0.5
-rgb_svm_prob_translation: 7.0
+rgb_svm_prob_scaling: 0.75
+rgb_svm_prob_translation: 1.75
 depth_svm_C: 312.5
 depth_svm_gamma: 0.50625
 depth_svm_prob_scaling: 0.5
