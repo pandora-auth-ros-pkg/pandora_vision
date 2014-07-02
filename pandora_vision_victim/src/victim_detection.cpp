@@ -292,7 +292,8 @@ namespace pandora_vision
       
       EnhancedMat emat;
       emat.img = rgbImage(rect);
-      cv::resize(emat.img, emat.img, cv::Size(640, 480));
+      cv::resize(emat.img, emat.img, 
+        cv::Size(VictimParameters::frameWidth, VictimParameters::frameHeight));
       emat.bounding_box = rect;
       emat.keypoint = cv::Point2f(
         msg.enhancedHoles[i].keypointX,

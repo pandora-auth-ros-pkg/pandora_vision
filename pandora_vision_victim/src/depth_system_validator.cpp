@@ -55,8 +55,8 @@ namespace pandora_vision
     
     _params.svm_type = CvSVM::C_SVC;
     _params.kernel_type = CvSVM::RBF;
-    _params.C = 312.5;
-    _params.gamma = 0.50625;
+    _params.C = VictimParameters::depth_svm_C;
+    _params.gamma = VictimParameters::depth_svm_gamma;
     _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 
       100000, 1e-6);
   }
@@ -182,7 +182,8 @@ namespace pandora_vision
   {
     float probability;
     //~ Normalize probability to [-1,1]
-    probability = tanh(0.5 * (prediction - 7.0) );
+    probability = tanh(VictimParameters::depth_svm_prob_scaling 
+      * (prediction - VictimParameters::depth_svm_prob_translation) );
     //~ Normalize probability to [0,1]
     probability = (1 + probability) / 2.0;
     ROS_INFO_STREAM("SVM DEPTH pred/prob :" << prediction <<" "<<probability);

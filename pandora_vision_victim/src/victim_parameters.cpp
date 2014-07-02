@@ -67,6 +67,15 @@ namespace pandora_vision
   std::string VictimParameters::rgb_classifier_path = "";
   std::string VictimParameters::depth_classifier_path = "";
   
+  double VictimParameters::rgb_svm_C = 312.5;
+  double VictimParameters::rgb_svm_gamma = 0.50625;
+  double VictimParameters::rgb_svm_prob_scaling = 0.5;
+  double VictimParameters::rgb_svm_prob_translation = 7.0;
+  double VictimParameters::depth_svm_C = 312.5;
+  double VictimParameters::depth_svm_gamma = 0.50625;
+  double VictimParameters::depth_svm_prob_scaling = 0.5;
+  double VictimParameters::depth_svm_prob_translation = 7.0;
+  
   //----------------------------Methods----------------------------//
   
   VictimParameters::VictimParameters(const std::string& ns):
@@ -144,7 +153,7 @@ namespace pandora_vision
     }
     else 
     {
-      ROS_FATAL("[Motion_node]: Camera name not found");
+      ROS_FATAL("[victim_node]: Camera name not found");
       ROS_BREAK(); 
     }
 
@@ -157,7 +166,7 @@ namespace pandora_vision
     else 
     {
       ROS_FATAL
-        ("[motion_node] : Parameter frameHeight not found. Using Default");
+        ("[victim_node] : Parameter frameHeight not found. Using Default");
       ROS_BREAK();
     }
     
@@ -170,7 +179,7 @@ namespace pandora_vision
     else 
     {
       ROS_FATAL
-        ("[motion_node] : Parameter frameWidth not found. Using Default");
+        ("[victim_node] : Parameter frameWidth not found. Using Default");
       ROS_BREAK();
     }
     
@@ -183,7 +192,7 @@ namespace pandora_vision
     else 
     {
       ROS_FATAL
-        ("[motion_node] : Parameter modelImageHeight not found. Using Default");
+        ("[victim_node] : Parameter modelImageHeight not found. Using Default");
       ROS_BREAK();
     }
     
@@ -196,7 +205,7 @@ namespace pandora_vision
     else 
     {
       ROS_FATAL
-        ("[motion_node] : Parameter modelImageWidth not found. Using Default");
+        ("[victim_node] : Parameter modelImageWidth not found. Using Default");
       ROS_BREAK();
     }
   
@@ -208,7 +217,7 @@ namespace pandora_vision
     }
     else 
     {
-     ROS_FATAL("[motion_node]: Horizontal field of view not found");
+     ROS_FATAL("[victim_node]: Horizontal field of view not found");
      ROS_BREAK();
     }
     
@@ -220,7 +229,93 @@ namespace pandora_vision
     }
     else 
     {
-     ROS_FATAL("[motion_node]: Vertical field of view not found");
+     ROS_FATAL("[victim_node]: Vertical field of view not found");
+     ROS_BREAK();
+    }  
+    
+    if (_nh.getParam("rgb_svm_C", double_param))
+    { 
+      VictimParameters::rgb_svm_C = double_param;
+      ROS_DEBUG_STREAM("rgb_svm_C : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: rgb_svm_C not found");
+     ROS_BREAK();
+    } 
+     
+    if (_nh.getParam("rgb_svm_gamma", double_param))
+    { 
+      VictimParameters::rgb_svm_gamma = double_param;
+      ROS_DEBUG_STREAM("rgb_svm_gamma : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: rgb_svm_gamma not found");
+     ROS_BREAK();
+    }  
+    
+    if (_nh.getParam("rgb_svm_prob_scaling", double_param))
+    { 
+      VictimParameters::rgb_svm_prob_scaling = double_param;
+      ROS_DEBUG_STREAM("rgb_svm_prob_scaling : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: rgb_svm_prob_scaling not found");
+     ROS_BREAK();
+    }  
+    if (_nh.getParam("rgb_svm_prob_translation", double_param))
+    { 
+      VictimParameters::rgb_svm_prob_translation = double_param;
+      ROS_DEBUG_STREAM("rgb_svm_prob_translation : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: rgb_svm_prob_translation not found");
+     ROS_BREAK();
+    }  
+    
+    if (_nh.getParam("depth_svm_C", double_param))
+    { 
+      VictimParameters::depth_svm_C = double_param;
+      ROS_DEBUG_STREAM("depth_svm_C : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: depth_svm_C not found");
+     ROS_BREAK();
+    } 
+     
+    if (_nh.getParam("depth_svm_gamma", double_param))
+    { 
+      VictimParameters::depth_svm_gamma = double_param;
+      ROS_DEBUG_STREAM("depth_svm_gamma : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: depth_svm_gamma not found");
+     ROS_BREAK();
+    }  
+    
+    if (_nh.getParam("depth_svm_prob_scaling", double_param))
+    { 
+      VictimParameters::depth_svm_prob_scaling = double_param;
+      ROS_DEBUG_STREAM("depth_svm_prob_scaling : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: depth_svm_prob_scaling not found");
+     ROS_BREAK();
+    }  
+    if (_nh.getParam("depth_svm_prob_translation", double_param))
+    { 
+      VictimParameters::depth_svm_prob_translation = double_param;
+      ROS_DEBUG_STREAM("depth_svm_prob_translation : " << double_param);
+    }
+    else 
+    {
+     ROS_FATAL("[victim_node]: depth_svm_prob_translation not found");
      ROS_BREAK();
     }  
   }

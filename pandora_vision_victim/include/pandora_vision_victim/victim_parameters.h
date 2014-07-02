@@ -107,6 +107,12 @@ namespace pandora_vision
     std::vector<EnhancedMat> depthMasks;
   };
   
+  struct BoundingBox
+  {
+    cv::Rect bounding_box;
+    cv::Point2f keypoint;
+  };
+  
   class VictimParameters
   {
     private:
@@ -145,16 +151,24 @@ namespace pandora_vision
       static std::string model_path;
       static std::string rgb_classifier_path;
       static std::string depth_classifier_path;
-      //~ static bool isDepthEnabled;
-      //~ static bool isHole;
       
-      //-----------------------------------------------------------------------//
+      //! parameters for svms
+      static double rgb_svm_C;
+      static double rgb_svm_gamma;
+      static double rgb_svm_prob_scaling;
+      static double rgb_svm_prob_translation;
+      static double depth_svm_C;
+      static double depth_svm_gamma;
+      static double depth_svm_prob_scaling;
+      static double depth_svm_prob_translation;
+      
+      //----------------------------------------------------------------------//
       //!< The dynamic reconfigure (motion's) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_victim::victim_dyn_reconfConfig>
-        server;
+      dynamic_reconfigure::Server
+        <pandora_vision_victim::victim_dyn_reconfConfig>server;
       //!< The dynamic reconfigure (depth) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_victim::victim_dyn_reconfConfig>
-        ::CallbackType f;  
+      dynamic_reconfigure::Server
+        <pandora_vision_victim::victim_dyn_reconfConfig>::CallbackType f;  
       
       //!< Default contructor
       VictimParameters(const std::string& ns);

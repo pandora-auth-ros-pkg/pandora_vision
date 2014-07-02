@@ -9,3 +9,13 @@ rgb_classifier_path: /data/rgb_svm_classifier.xml
 depth_classifier_path: /data/depth_svm_classifier.xml    
 model_image_width: 128
 model_image_height: 96
+
+rgb_svm_C: 312.5
+rgb_svm_gamma: 0.50625
+rgb_svm_prob_scaling: 0.5
+rgb_svm_prob_translation: 7.0
+depth_svm_C: 312.5
+depth_svm_gamma: 0.50625
+depth_svm_prob_scaling: 0.5
+depth_svm_prob_translation: 7.0
+

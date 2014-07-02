@@ -50,7 +50,9 @@ namespace pandora_vision
    @param bufferSize [int] number of frames in the frame buffer
    @return void
   */
-  VictimVJDetector::VictimVJDetector(std::string cascade_path, std::string model_path)
+  VictimVJDetector::VictimVJDetector(
+    std::string cascade_path, 
+    std::string model_path)
   {
     trained_cascade.load(cascade_path);
     //~ ROS_ERROR("%s", cascade_path.c_str());
@@ -86,15 +88,13 @@ namespace pandora_vision
     cv::Mat tmp;
     tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
 
-    createRectangles(&tmp);
-
     //! Clear vector of faces before using it for the current frame
     faces_total.clear();
 
     std::vector<DetectedVictim> candidateVictim;
     std::vector<float> preds = detectFace(frame);
     std::vector<float> probs = predictionToProbability(preds);
-    std::vector<cv::Point2f> keypoints = getAlertKeypoints();
+    std::vector<BoundingBox> keypoints = getAlertKeypoints();
     
     if(probs.size() != keypoints.size())
     {
@@ -105,8 +105,8 @@ namespace pandora_vision
     {
       DetectedVictim dv;
       dv.probability = probs[i];
-      dv.keypoint = keypoints[i];
-      dv.boundingBox = cv::Rect(dv.keypoint.x - 25, dv.keypoint.y - 25, 50, 50);
+      dv.keypoint = keypoints[i].keypoint;
+      dv.boundingBox = keypoints[i].bounding_box;
       candidateVictim.push_back(dv);
     }
     
@@ -114,47 +114,24 @@ namespace pandora_vision
   }
 
   /**
-    @brief Crate rectangles to current frame according to the positions
-      of faces found in previous frames
-    @param tmp [cv::Mat] The frame to be scanned for faces
-    @return void
-  */
-  void VictimVJDetector::createRectangles(cv::Mat *tmp)
-  {
-    cv::Rect faceRect;
-    cv::Point start;
-    cv::Point end;
-    for(int i = 0; i < faces_total.size(); i++)
-    {
-      faceRect = faces_total.at(i);
-      start = cv::Point( faceRect.x , faceRect.y );
-      end = cv::Point( faceRect.x + faceRect.width, faceRect.y + faceRect.height);
-      cv::rectangle(*tmp, start, end, cv::Scalar(255, 255, 255, 0), CV_FILLED);
-    }
-  }
-
-
-  /**
     @brief Creates the continuous table of faces found that contains
     information for each face in every set of 4 values:
     @return int[] table of face positions and sizes
   */
-  std::vector<cv::Point2f> VictimVJDetector::getAlertKeypoints()
+  std::vector<BoundingBox> VictimVJDetector::getAlertKeypoints()
   {
-    std::vector<cv::Point2f> table;
+    std::vector<BoundingBox> table;
     for(int ii = 0; ii < faces_total.size(); ii++)
     {
+      BoundingBox tbb;
       cv::Rect faceRect = faces_total.at(ii);
       cv::Point2f p (
         round( faceRect.x + faceRect.width * 0.5 ),
         round( faceRect.y + faceRect.height * 0.5 )
       );
-      table.push_back(p);
-
-      //! Face width (rectangle width)
-      //~ table[ii * 4 + 2] = faceRect.width;
-      //! Face height (rectangle height)
-      //~ table[ii * 4 + 3] = faceRect.height;
+      tbb.keypoint = p;
+      tbb.bounding_box = faceRect;
+      table.push_back(tbb);
     }
     return table;
   }
@@ -162,8 +139,9 @@ namespace pandora_vision
   /**
     @brief Returns the probability of the faces detected in the frame
     @return [float] probability value
-  */
-  std::vector<float> VictimVJDetector::predictionToProbability(std::vector<float> prediction)
+  */  
+  std::vector<float> VictimVJDetector::predictionToProbability
+    (std::vector<float> prediction)
   {
     std::vector<float> p;
     for(unsigned int i = 0 ; i < prediction.size() ; i++)

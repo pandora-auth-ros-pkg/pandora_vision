@@ -64,15 +64,6 @@ namespace pandora_vision
       @return [int] the number of faces found in each frame
     */
     std::vector<float> detectFace(cv::Mat frame);
-    
-    /**
-    @brief Crate rectangles to current frame according to the positions
-      of faces found in previous frames
-    @param tmp [cv::Mat] The frame to be scanned for faces
-    @return void
-   */
-    void createRectangles(cv::Mat *tmp);
-    
 
   public:
 
@@ -96,7 +87,7 @@ namespace pandora_vision
       information for each face in every set of 4 values.
       @return int[] table of face positions and sizes
     */
-    std::vector<cv::Point2f> getAlertKeypoints();
+    std::vector<BoundingBox> getAlertKeypoints();
 
     /**
       @brief Returns the probability of the faces detected in the frame
