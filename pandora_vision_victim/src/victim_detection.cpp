@@ -150,7 +150,9 @@ namespace pandora_vision
       (curState != 
         state_manager_communications::robotModeMsg::MODE_IDENTIFICATION) &&
       (curState != 
-        state_manager_communications::robotModeMsg::MODE_DF_HOLD)
+        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD) && 
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST)
     )
     {
       return;
