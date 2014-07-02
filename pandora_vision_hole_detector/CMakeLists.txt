@@ -37,7 +37,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 generate_dynamic_reconfigure_options(
   cfg/depth_cfg.cfg
-  cfg/hole_fusion_cfg.cfg
+  cfg/hole_fusion_node_cfg.cfg
+  cfg/debug_cfg.cfg
+  cfg/filters_order_cfg.cfg
+  cfg/filters_thresholds_cfg.cfg
+  cfg/general_cfg.cfg
+  cfg/validity_cfg.cfg
   cfg/rgb_cfg.cfg
   )
 
