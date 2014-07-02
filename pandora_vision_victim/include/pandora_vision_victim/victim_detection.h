@@ -126,6 +126,11 @@ namespace pandora_vision
       std::vector<cv::Rect> rgb_svm_bounding_boxes;
       std::vector<cv::Rect> depth_vj_bounding_boxes;
       std::vector<cv::Rect> depth_svm_bounding_boxes;
+      std::vector<cv::Rect> holes_bounding_boxes;
+      std::vector<float> rgb_vj_p;
+      std::vector<float> rgb_svm_p;
+      std::vector<float> depth_vj_p;
+      std::vector<float> depth_svm_p;
       
       //----------------------------------------------------------------------//
       DetectionImages dImages;

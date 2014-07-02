@@ -4,6 +4,8 @@ vfov: 45.0
 image_width: 640
 image_height: 480
 cascade_path: /data/cascade.xml
-model_path: /data/model.xml
+model_path: /data/model_dolls.xml
 rgb_classifier_path: /data/rgb_svm_classifier.xml    
 depth_classifier_path: /data/depth_svm_classifier.xml    
+model_image_width: 128
+model_image_height: 96

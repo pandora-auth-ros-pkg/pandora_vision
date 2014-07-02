@@ -225,6 +225,11 @@ namespace pandora_vision
       rgb_svm_bounding_boxes.clear();
       depth_vj_bounding_boxes.clear();
       depth_svm_bounding_boxes.clear();
+      holes_bounding_boxes.clear();
+      rgb_vj_p.clear();
+      rgb_svm_p.clear();
+      depth_vj_p.clear();
+      depth_svm_p.clear();
     }
     
     DetectionImages imgs; 
@@ -283,6 +288,7 @@ namespace pandora_vision
         maxy = yy > maxy ? yy : maxy;
       }
       cv::Rect rect(minx, miny, maxx - minx, maxy - miny);
+      holes_bounding_boxes.push_back(rect);
       
       EnhancedMat emat;
       emat.img = rgbImage(rect);
@@ -347,18 +353,22 @@ namespace pandora_vision
           case RGB_VJ:
             rgb_vj_keypoints.push_back(kp);
             rgb_vj_bounding_boxes.push_back(re);
+            rgb_vj_p.push_back(final_victims[i].probability);
             break;
           case RGB_SVM:
             rgb_svm_keypoints.push_back(kp);
             rgb_svm_bounding_boxes.push_back(re);
+            rgb_svm_p.push_back(final_victims[i].probability);
             break;
           case DEPTH_VJ:
             depth_vj_keypoints.push_back(kp);
             depth_vj_bounding_boxes.push_back(re);
+            depth_vj_p.push_back(final_victims[i].probability);
             break;
           case DEPTH_SVM:
             depth_svm_keypoints.push_back(kp);
             depth_svm_bounding_boxes.push_back(re);
+            depth_svm_p.push_back(final_victims[i].probability);
             break;
         }
 
@@ -375,6 +385,13 @@ namespace pandora_vision
       {
         cv::rectangle(debugImage, rgb_vj_bounding_boxes[i], 
           CV_RGB(0, 255, 0));
+        {
+          std::ostringstream convert;
+          convert << rgb_vj_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            rgb_vj_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 0), 1, CV_AA);
+        }
       }
         
       cv::drawKeypoints(debugImage, depth_vj_keypoints, debugImage, 
@@ -384,6 +401,13 @@ namespace pandora_vision
       {
         cv::rectangle(debugImage, depth_vj_bounding_boxes[i], 
           CV_RGB(255, 100, 0));
+        {
+          std::ostringstream convert;
+          convert << depth_vj_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            depth_vj_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
+        }
       }
         
       cv::drawKeypoints(debugImage, rgb_svm_keypoints, debugImage, 
@@ -393,6 +417,13 @@ namespace pandora_vision
       {
         cv::rectangle(debugImage, rgb_svm_bounding_boxes[i], 
           CV_RGB(0, 100, 255));
+        {
+          std::ostringstream convert;
+          convert << rgb_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            rgb_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+        }
       }
       
       cv::drawKeypoints(debugImage, depth_svm_keypoints, debugImage, 
@@ -402,6 +433,18 @@ namespace pandora_vision
       {
         cv::rectangle(debugImage, depth_svm_bounding_boxes[i], 
           CV_RGB(0, 255, 255));
+        {
+          std::ostringstream convert;
+          convert << depth_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            depth_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+        }
+      }
+      for(unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, holes_bounding_boxes[i], 
+          CV_RGB(0, 0, 0));
       }
       
       {

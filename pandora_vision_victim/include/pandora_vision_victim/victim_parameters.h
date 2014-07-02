@@ -134,6 +134,8 @@ namespace pandora_vision
       static std::string cameraName;
       static int frameHeight;
       static int frameWidth;
+      static int modelImageHeight;
+      static int modelImageWidth;
       static double hfov;
       static double vfov;
       

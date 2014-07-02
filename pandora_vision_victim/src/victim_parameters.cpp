@@ -56,6 +56,8 @@ namespace pandora_vision
   std::string VictimParameters::cameraName = "";
   int VictimParameters::frameHeight = 0;
   int VictimParameters::frameWidth = 0;
+  int VictimParameters::modelImageHeight = 0;
+  int VictimParameters::modelImageWidth = 0;
   double VictimParameters::vfov = 0.0;
   double VictimParameters::hfov = 0.0;
   
@@ -169,6 +171,32 @@ namespace pandora_vision
     {
       ROS_FATAL
         ("[motion_node] : Parameter frameWidth not found. Using Default");
+      ROS_BREAK();
+    }
+    
+    //! Get the Height parameter if available;
+    if (_nh.getParam("model_image_height", int_param)) 
+    {
+      VictimParameters::modelImageHeight = int_param;
+      ROS_DEBUG_STREAM("model image height : " << int_param);
+    }
+    else 
+    {
+      ROS_FATAL
+        ("[motion_node] : Parameter modelImageHeight not found. Using Default");
+      ROS_BREAK();
+    }
+    
+    //! Get the Width parameter if available;
+    if ( _nh.getParam("model_image_width", int_param)) 
+    {
+      VictimParameters::modelImageWidth = int_param;
+      ROS_DEBUG_STREAM("model image width : " << int_param);
+    }
+    else 
+    {
+      ROS_FATAL
+        ("[motion_node] : Parameter modelImageWidth not found. Using Default");
       ROS_BREAK();
     }
   

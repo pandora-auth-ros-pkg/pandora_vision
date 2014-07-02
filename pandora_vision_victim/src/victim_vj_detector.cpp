@@ -172,6 +172,7 @@ namespace pandora_vision
       float temp_prob = tanh(0.5 * (prediction[i] - 20.0) );
       //~ Normalize probability to [0,1]
       temp_prob = (1 + temp_prob) / 2.0;
+      ROS_INFO_STREAM("SVM RGB pred/prob :" << prediction[i] <<" "<<temp_prob);
       p.push_back(temp_prob);
     }
     return p;
@@ -195,8 +196,8 @@ namespace pandora_vision
     }
     std::vector< cv::Rect_<int> > thrfaces;
 
-    int im_width = 92;  // dyn reconf
-    int im_height = 112;
+    int im_width = VictimParameters::modelImageWidth;
+    int im_height = VictimParameters::modelImageHeight;
     
     if(!trained_cascade.empty())
     {
@@ -210,8 +211,10 @@ namespace pandora_vision
         cv::Mat face_resized;
         cv::resize(face, face_resized, cv::Size(im_width, im_height), 
           1.0, 1.0, cv::INTER_CUBIC);
-        predictions.push_back(trained_model->predict(face_resized));
-        ROS_INFO_STREAM("Prediction " << predictions[predictions.size() - 1]);
+        double local_conf = 0.0;
+        int pred_label = -1;
+        trained_model->predict(face_resized, pred_label, local_conf);
+        predictions.push_back(local_conf);
         rectangle(original, face_i, CV_RGB(0, 255, 0), 1);
         //! Add every element created for each frame, to the total amount of faces
         faces_total.push_back (thrfaces.at(i));

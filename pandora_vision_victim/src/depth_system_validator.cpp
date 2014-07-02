@@ -153,7 +153,6 @@ namespace pandora_vision
     ///Normalize the data from [-1,1]
     cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);    
     float prediction = _depthSvm.predict(samples_mat, true);
-    ROS_INFO_STREAM("Depth_subsystem prediction: "<< prediction);
     return prediction;
   }
   
@@ -186,6 +185,7 @@ namespace pandora_vision
     probability = tanh(0.5 * (prediction - 7.0) );
     //~ Normalize probability to [0,1]
     probability = (1 + probability) / 2.0;
+    ROS_INFO_STREAM("SVM DEPTH pred/prob :" << prediction <<" "<<probability);
     return probability;
   }
 }// namespace pandora_vision 
