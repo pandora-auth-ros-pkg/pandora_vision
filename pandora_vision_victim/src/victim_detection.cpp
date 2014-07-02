@@ -147,7 +147,7 @@ namespace pandora_vision
     
     if(
       (curState != 
-        state_manager_communications::robotModeMsg::MODE_ARM_APPROACH) &&
+        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION) &&
       (curState != 
         state_manager_communications::robotModeMsg::MODE_DF_HOLD)
     )
