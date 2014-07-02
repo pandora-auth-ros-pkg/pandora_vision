@@ -43,7 +43,7 @@
 namespace pandora_vision
 {
 
-  class FaceDetector
+  class VictimVJDetector
   {
     private:
    
@@ -77,13 +77,12 @@ namespace pandora_vision
   public:
 
     //! The Constructor
-    FaceDetector(std::string cascade_path, std::string model_path,
-        int bufferSize);
+    VictimVJDetector(std::string cascade_path, std::string model_path);
     //! Default constructor
-    FaceDetector(void){}
+    VictimVJDetector(void){}
 
     //! The Destructor
-    ~FaceDetector();
+    ~VictimVJDetector();
 
     /**
       @brief Searches for faces in current frame.

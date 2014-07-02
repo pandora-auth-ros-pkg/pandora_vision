@@ -3,7 +3,6 @@ hfov: 58.0
 vfov: 45.0
 image_width: 640
 image_height: 480
-bufferSize: 5
 cascade_path: /data/cascade.xml
 model_path: /data/model.xml
 rgb_classifier_path: /data/rgb_svm_classifier.xml    

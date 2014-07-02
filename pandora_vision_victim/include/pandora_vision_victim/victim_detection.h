@@ -38,7 +38,7 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
-#include "pandora_vision_victim/face_detector.h"
+#include "pandora_vision_victim/victim_vj_detector.h"
 #include "pandora_vision_victim/rgb_system_validator.h"
 #include "pandora_vision_victim/depth_system_validator.h"
 
@@ -73,7 +73,7 @@ namespace pandora_vision
       std::vector<cv::Mat> _rgbdImages;
       
       /// Instance of class face_detector
-      FaceDetector _faceDetector;
+      VictimVJDetector _victimDetector;
       ///Instance of class rgbSystemValidator
       RgbSystemValidator _rgbSystemValidator;
       ///Instance of class depthSystemValidator

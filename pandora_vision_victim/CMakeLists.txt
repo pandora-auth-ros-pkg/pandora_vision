@@ -50,7 +50,7 @@ add_executable(victim_node
     src/victim_detection.cpp
     src/rgb_system_validator.cpp
     src/depth_system_validator.cpp
-    src/face_detector.cpp
+    src/victim_vj_detector.cpp
     
     src/utilities/channels_statistics_extractor.cpp
     src/utilities/edge_orientation_extractor.cpp
@@ -102,7 +102,7 @@ FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utilities/haralickfeature_extractor.h
   src/victim_detection.cpp
   src/victim_detector.cpp
-  src/face_detector.cpp
+  src/victim_vj_detector.cpp
   src/rgb_system_validator.cpp
   src/depth_system_validator.cpp
   src/utilities/channels_statistics_extractor.cpp

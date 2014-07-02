@@ -64,7 +64,6 @@ namespace pandora_vision
   std::string VictimParameters::model_path = "";
   std::string VictimParameters::rgb_classifier_path = "";
   std::string VictimParameters::depth_classifier_path = "";
-  int VictimParameters::bufferSize = 1;
   
   //----------------------------Methods----------------------------//
   
@@ -285,14 +284,5 @@ namespace pandora_vision
         <<  VictimParameters::depth_classifier_path);
     }
 
-    if ( _nh.getParam("bufferSize", int_param))
-    {
-      VictimParameters::bufferSize = int_param;
-      ROS_DEBUG_STREAM("[victim_node] : bufferSize : " << int_param);
-    }
-    else
-    {
-      VictimParameters::bufferSize = 1;
-    }
   }
 }// namespace pandora_vision

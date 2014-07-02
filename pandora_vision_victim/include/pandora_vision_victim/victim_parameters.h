@@ -145,7 +145,6 @@ namespace pandora_vision
       static std::string depth_classifier_path;
       //~ static bool isDepthEnabled;
       //~ static bool isHole;
-      static int bufferSize;
       
       //-----------------------------------------------------------------------//
       //!< The dynamic reconfigure (motion's) parameters' server

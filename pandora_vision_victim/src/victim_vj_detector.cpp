@@ -35,7 +35,7 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#include "pandora_vision_victim/face_detector.h"
+#include "pandora_vision_victim/victim_vj_detector.h"
 
 namespace pandora_vision
 {
@@ -50,8 +50,7 @@ namespace pandora_vision
    @param bufferSize [int] number of frames in the frame buffer
    @return void
   */
-  FaceDetector::FaceDetector(std::string cascade_path, std::string model_path,
-                           int bufferSize)
+  VictimVJDetector::VictimVJDetector(std::string cascade_path, std::string model_path)
   {
     trained_cascade.load(cascade_path);
     //~ ROS_ERROR("%s", cascade_path.c_str());
@@ -70,7 +69,7 @@ namespace pandora_vision
    Deallocates all memory used for storing sequences of faces,
    matrices and images
   */
-  FaceDetector::~FaceDetector()
+  VictimVJDetector::~VictimVJDetector()
   {
   }
 
@@ -82,7 +81,7 @@ namespace pandora_vision
     @return Integer of the sum of faces found in all
     rotations of the frame
   */
-  std::vector<DetectedVictim> FaceDetector::findFaces(cv::Mat frame)
+  std::vector<DetectedVictim> VictimVJDetector::findFaces(cv::Mat frame)
   {
     cv::Mat tmp;
     tmp = cv::Mat::zeros(frame.size().width, frame.size().height , CV_8UC1);
@@ -120,7 +119,7 @@ namespace pandora_vision
     @param tmp [cv::Mat] The frame to be scanned for faces
     @return void
   */
-  void FaceDetector::createRectangles(cv::Mat *tmp)
+  void VictimVJDetector::createRectangles(cv::Mat *tmp)
   {
     cv::Rect faceRect;
     cv::Point start;
@@ -140,7 +139,7 @@ namespace pandora_vision
     information for each face in every set of 4 values:
     @return int[] table of face positions and sizes
   */
-  std::vector<cv::Point2f> FaceDetector::getAlertKeypoints()
+  std::vector<cv::Point2f> VictimVJDetector::getAlertKeypoints()
   {
     std::vector<cv::Point2f> table;
     for(int ii = 0; ii < faces_total.size(); ii++)
@@ -164,7 +163,7 @@ namespace pandora_vision
     @brief Returns the probability of the faces detected in the frame
     @return [float] probability value
   */
-  std::vector<float> FaceDetector::predictionToProbability(std::vector<float> prediction)
+  std::vector<float> VictimVJDetector::predictionToProbability(std::vector<float> prediction)
   {
     std::vector<float> p;
     for(unsigned int i = 0 ; i < prediction.size() ; i++)
@@ -184,7 +183,7 @@ namespace pandora_vision
     @param img [cv::Mat] the frame to be scaned.
     @return [int] the number of faces found in each frame
   */
-  std::vector<float> FaceDetector::detectFace(cv::Mat img)
+  std::vector<float> VictimVJDetector::detectFace(cv::Mat img)
   {
     std::vector<float> predictions;
     cv::Mat original(img.size().width, img.size().height, CV_8UC1);
