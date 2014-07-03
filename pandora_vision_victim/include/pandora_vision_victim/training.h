@@ -91,10 +91,12 @@ class SvmTraining
   int test_pos_files;
   int test_neg_files;
   int num_feat;
+  int nEigens;
   float accuracy;
   float precision;
   float recall;
   float fmeasure;
+  bool pcaEnabled;
   cv::Mat training_mat;
   cv::Mat labels_mat;
   cv::Mat test_mat;

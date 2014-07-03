@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Despoina Paschalidou, Marios Protopapas
 *********************************************************************/
 
 #include "pandora_vision_victim/training.h"
@@ -90,10 +90,6 @@ namespace pandora_vision
     test_labels_mat_file_stream << package_path << "/data/" <<  test_labels_mat_file;
     svm_file_stream << package_path << "/data/" << system + "_svm_classifier.xml";
     results_file_stream << package_path << "/data/" << system << "_results.xml";
-    
-    std::cout <<in_file_stream.str()<<std::endl;
-    std::cout <<labels_mat_file_stream.str()<<std::endl;
-
     
     if(exist(in_file_stream.str().c_str()) && exist(labels_mat_file_stream.str().c_str()))
     {
@@ -333,11 +329,11 @@ namespace pandora_vision
     cv::Mat img;
     std::vector<double> _featureVector;
 
-    training_mat = cv::Mat::zeros(pos_files + neg_files, num_feat, CV_64FC1);
-    labels_mat = cv::Mat::zeros(pos_files +neg_files, 1, CV_64FC1);
+    training_mat = cv::Mat::zeros(pos_files + neg_files, num_feat, CV_32FC1);
+    labels_mat = cv::Mat::zeros(pos_files + neg_files, 1, CV_32FC1);
 
     std::stringstream img_name;
-    for (int ii = 0; ii < pos_files+neg_files; ii++)
+    for (int ii = 0; ii < pos_files + neg_files; ii++)
     {
       if(type == 1)
       {
@@ -394,33 +390,52 @@ namespace pandora_vision
           std::cout <<  _featureVector[kk] << "  ";   
 
        }
+       std::cout <<std::endl;
               
       for (int jj = 0; jj < _featureVector.size(); jj++)
-        training_mat.at<double>(ii, jj) = _featureVector[jj];
+        training_mat.at<float>(ii, jj) = _featureVector[jj];
 
       if(ii < pos_files)
-        labels_mat.at<double>(ii, 0) = 1.0;
+        labels_mat.at<float>(ii, 0) = 1.0;
       
       else
-        labels_mat.at<double>(ii, 0) = -1.0;
+        labels_mat.at<float>(ii, 0) = -1.0;
 
         
       ///Empty stringstream for next image
       img_name.str("");   
       
     }
-    
+
     /// Perform pca to reduce the dimensions of the features
-
-    int nEigens = 23;
-
-    cv::PCA pca(training_mat, cv::Mat(), CV_PCA_DATA_AS_ROW);
-    cv::Mat mean = pca.mean.clone();
-    cv::Mat eigenvalues = pca.eigenvalues.clone();
-    cv::Mat eigenvectors = pca.eigenvectors.clone();
-    std::cout << "EigenValues" << eigenvalues << std::endl;
-    std::cout << "EigenVectors " << eigenvectors.size() << std::endl;
-    //pca.project(training_mat, training_mat);
+    char answer;
+    std::cout << "Do you want to perform pca to reduce the dimensions of the features (y/n)" << std::endl;
+    std::cin >> answer;
+    if(answer == 'y')
+    {
+      pcaEnabled = true;
+      cv::PCA pca(training_mat, cv::Mat(), CV_PCA_DATA_AS_ROW);
+      cv::Mat mean = pca.mean.clone();
+      cv::Mat eigenvalues = pca.eigenvalues.clone();
+      cv::Mat eigenvectors = pca.eigenvectors.clone();
+      std::cout << "EigenValues" << eigenvalues << std::endl;
+      std::cout << "EigenVectors" << eigenvectors.size() << std::endl;
+      std::cout << "Choose the numbers of dimensions to project your data"
+                << "based on the most important EigenValues (max=" 
+                << eigenvectors.cols <<" )" <<std::endl;
+ 
+      std::cin >>nEigens;
+      if( 0 < nEigens && nEigens <= eigenvectors.cols)
+      {
+        cv::PCA pca(training_mat, cv::Mat(), CV_PCA_DATA_AS_ROW,nEigens);
+        pca.project(training_mat, training_mat);
+      }
+      else 
+      {
+        std::cout << "Wrong dimensions number" << std::endl;
+        exit(0);
+      }
+    }
     
     /// Normalize the training matrix
     
@@ -456,8 +471,8 @@ namespace pandora_vision
     cv::Mat img;
     std::vector<double> _featureVector;
 
-    test_mat = cv::Mat::zeros(test_pos_files + test_neg_files, num_feat, CV_64FC1);
-    test_labels_mat = cv::Mat::zeros(test_pos_files + test_neg_files, 1, CV_64FC1);
+    test_mat = cv::Mat::zeros(test_pos_files + test_neg_files, num_feat, CV_32FC1);
+    test_labels_mat = cv::Mat::zeros(test_pos_files + test_neg_files, 1, CV_32FC1);
 
     std::stringstream img_name;
     for (int ii = 0; ii < test_pos_files + test_neg_files; ii++)
@@ -516,15 +531,16 @@ namespace pandora_vision
           std::cout <<  _featureVector[kk] << "  ";   
 
        }
+       std::cout << std::endl;
 
       for (int jj = 0; jj < _featureVector.size(); jj++)
-        test_mat.at<double>(ii, jj)=_featureVector[jj];
+        test_mat.at<float>(ii, jj)=_featureVector[jj];
                 
       if(ii < test_pos_files)
-        test_labels_mat.at<double>(ii, 0) = 1.0;
+        test_labels_mat.at<float>(ii, 0) = 1.0;
       
       else
-        test_labels_mat.at<double>(ii, 0) = -1.0;
+        test_labels_mat.at<float>(ii, 0) = -1.0;
 
       /// Empty stringstream for next image
       img_name.str("");   
@@ -533,14 +549,11 @@ namespace pandora_vision
     
     /// Perform pca to reduce the dimensions of the features
     
-    int nEigens = 23;
-    cv::PCA pca(test_mat, cv::Mat(), CV_PCA_DATA_AS_ROW);
-    cv::Mat mean = pca.mean.clone();
-    cv::Mat eigenvalues = pca.eigenvalues.clone();
-    cv::Mat eigenvectors = pca.eigenvectors.clone();
-    std::cout << "EigenValues" << eigenvalues << std::endl;
-    std::cout << "EigenVectors " << eigenvectors.size() << std::endl;
-    //pca.project(test_mat, test_mat);
+    if(pcaEnabled)
+    {
+    cv::PCA pca(test_mat, cv::Mat(), CV_PCA_DATA_AS_ROW, nEigens);
+    pca.project(test_mat, test_mat);
+    }
     
     /// Normalize the test matrix
     for (int kk = 0; kk < test_mat.rows; kk++)
