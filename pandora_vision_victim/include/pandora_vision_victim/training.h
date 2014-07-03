@@ -50,8 +50,7 @@
 #include "pandora_vision_victim/depth_system_validator.h"
 #include "pandora_vision_victim/rgb_system_validator.h"
 
-#define NUM_OF_POSITIVE_SAMPLES 3000
-#define NUM_OF_TEST_POSITIVE_SAMPLES 200
+
 #define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 0
 
 
@@ -87,8 +86,10 @@ class SvmTraining
 
   std::string package_path;  
     
-  int num_files;
-  int test_num_files;
+  int pos_files;
+  int neg_files;
+  int test_pos_files;
+  int test_neg_files;
   int num_feat;
   float accuracy;
   float precision;
@@ -98,6 +99,11 @@ class SvmTraining
   cv::Mat labels_mat;
   cv::Mat test_mat;
   cv::Mat test_labels_mat;
+  std::string system;
+  std::string training_mat_file;
+  std::string test_mat_file;
+  std::string labels_mat_file;
+  std::string test_labels_mat_file;
   
   /// Set up SVM's parameters
   CvSVMParams params; 
@@ -108,7 +114,7 @@ class SvmTraining
 public:
 
   //!< The Constructor
-  explicit SvmTraining(int _num_files, int _test_num_files, int _num_feat);
+  explicit SvmTraining(int type);
   
   //!< The Destructor
   virtual ~SvmTraining();
@@ -135,17 +141,6 @@ public:
    * for current rgb image
   */ 
   std::vector<double> getRgbFeatureVector();
-  
-  /**
-   * @brief This method constructs the training matrix 
-   * to be used for the training
-   * @param [std::string] file name to save the extracted training matrix
-   * @param [int] type, Value that indicates, if we train depth subsystem,
-   * or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
-   * @return void
-  */
-  void constructTrainingMatrix(std::string file_name, int type);
-  
       
   /**
    * @brief This function extract features according to the
@@ -171,24 +166,54 @@ public:
   std::vector<double> getDepthFeatureVector();
   
   /**
-   * @brief This method constructs the rgb test matrix 
-   * to be used for validation of the training
-   * @param [std::string] file name to save the extracted test matrix
+   * @brief This method constructs the rgb training matrix 
+   * to be used for the training
+   * @param [std::string] training_mat_file path 
+   * to save the extracted training matrix
+   * @param [std::string] labels_mat_file path 
+   * to save the extracted training matrix
    * @param [int] type, Value that indicates, if we train depth subsystem,
    * or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
    * @return void
   */
-  void constructTestMatrix(std::string file_name, int type);
+  void constructTrainingMatrix(std::string training_mat_file,
+                               std::string labels_mat_file,
+                               int type);
+                                            
+  /**
+   * @brief This method constructs the rgb test matrix 
+   * to be used for validation of the training
+   * @param [std::string] test_mat_file path 
+   * to save the extracted test matrix
+   * @param [std::string] test_labels_mat_file path 
+   * to save the extracted test matrix
+   * @param [int] type, Value that indicates, if we train depth subsystem,
+   * or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
+   * @return void
+  */
+  void constructTestMatrix(std::string test_mat_file,
+                           std::string test_labels_mat_file,
+                           int type);
   
   /**
    *@brief Function that implements the training for the subsystems
    * according to the given training sets. It applies svm and extracts
    * a suitable model
-   * @param [int] type, Value that indicates, if we train depth subsystem,
-   * or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
+   * @param [std::string] svm_file_stream 
+   * path to save the results of the training
    * @return void
   */ 
-  void trainSubSystem(int type);
+  void trainSubSystem(std::string svm_file, bool autotrain);
+  
+  /**
+   *@brief Function that implements the validation and the evaluation for 
+   * the subsystemsaccording to the given test sets. 
+   * It applies svm prediction and extracts a suitable model
+   * @param [std::string] results_file 
+   * path to save the results of the prediction
+   * @return void
+  */ 
+  void validateSubSystem(std::string results_file);
   
   /**
    *@brief Function that checks if a file exists
@@ -208,13 +233,27 @@ public:
   
    /**
    *@brief Function that loads the necessary files for the training
-   * @param [std::string] training_mat_file, name of the file that contains the training data
-   * @param [std::string] labels_mat_file, name of the file that contains the labels of each class
+   * @param [std::string] training_mat_file, name of the file that contains 
+   * the training data
+   * @param [std::string] labels_mat_file, name of the file that contains 
+   * the labels of each class
    * of the training data
    * @return void
   */ 
-  void loadFiles(std::string training_mat_file_stream, std::string labels_mat_file_stream,
-                  std::string test_mat_file, std::string test_labels_mat_file);
+  void loadTrainFiles(std::string training_mat_file_stream, 
+                 std::string labels_mat_file_stream);
+                 
+  /**
+   *@brief Function that loads the necessary files for the training
+   * @param [std::string] test_mat_file, name of the file that contains 
+   * the training data
+   * @param [std::string] test_labels_mat_file, name of the file that contains 
+   * the labels of each class
+   * of the training data
+   * @return void
+  */ 
+  void loadTestFiles(std::string test_mat_file_stream, 
+                 std::string test_labels_mat_file_stream);
                   
   /**
    *@brief Function that evaluates the training
