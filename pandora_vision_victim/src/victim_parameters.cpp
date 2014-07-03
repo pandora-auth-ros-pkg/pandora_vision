@@ -53,6 +53,7 @@ namespace pandora_vision
   std::string VictimParameters::packagePath = "";
   std::string VictimParameters::victimAlertTopic = "";
   std::string VictimParameters::victimDebugImg = "";
+  std::string VictimParameters::interpolatedDepthImg = "";
   std::string VictimParameters::enhancedHolesTopic = "";
   std::string VictimParameters::cameraName = "";
   int VictimParameters::frameHeight = 0;
@@ -133,6 +134,17 @@ namespace pandora_vision
     else
     {
       ROS_FATAL("[victim_node] : victimDebugImg name param not found");
+      ROS_BREAK();
+    }
+    
+    if (_nh.getParam("published_topic_names/victim_interpolated_depth_img", 
+      str_param))
+    {
+      VictimParameters::interpolatedDepthImg = str_param;
+    }
+    else
+    {
+      ROS_FATAL("[victim_node] : interpolatedDepthImg name param not found");
       ROS_BREAK();
     }
     

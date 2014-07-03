@@ -1,5 +1,7 @@
 <launch>
     
+  <arg name="openni" default="true" />
+  
   <include file="$(find pandora_vision_hole_detector)/launch/pandora_vision_hole_detector_standalone.launch" >
    <arg name="openni" value="true" />
    <arg name="output" value="log" />

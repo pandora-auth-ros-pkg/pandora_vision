@@ -137,6 +137,7 @@ namespace pandora_vision
       static std::string packagePath;
       static std::string victimAlertTopic;
       static std::string victimDebugImg;
+      static std::string interpolatedDepthImg;
       static std::string enhancedHolesTopic;
       static std::string cameraName;
       static int frameHeight;

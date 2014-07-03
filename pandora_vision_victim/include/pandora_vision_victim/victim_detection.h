@@ -117,6 +117,7 @@ namespace pandora_vision
       // The image_transport nodehandle
       image_transport::ImageTransport imageTransport_;
       image_transport::Publisher _debugVictimsPublisher;
+      image_transport::Publisher _interpolatedDepthPublisher;
       cv::Mat debugImage;
       std::vector<cv::KeyPoint> rgb_vj_keypoints;
       std::vector<cv::KeyPoint> rgb_svm_keypoints;

@@ -84,6 +84,8 @@ namespace pandora_vision
     
     _debugVictimsPublisher = imageTransport_.advertise
       (VictimParameters::victimDebugImg, 1, true);
+    _interpolatedDepthPublisher = imageTransport_.advertise
+      (VictimParameters::interpolatedDepthImg, 1, true);
 
     clientInitialize();
     
@@ -169,10 +171,10 @@ namespace pandora_vision
       ROS_BREAK();
     }
     
-    in_msg = cv_bridge::toCvCopy(msg.depthImage, 
+    cv_bridge::CvImagePtr in_msg_d = cv_bridge::toCvCopy(msg.depthImage, 
       sensor_msgs::image_encodings::TYPE_8UC1);
     
-    cv::Mat depthImage = in_msg->image.clone();
+    cv::Mat depthImage = in_msg_d->image.clone();
 
     _frame_id = msg.header.frame_id; 
     victimFrameTimestamp = msg.header.stamp;
@@ -188,6 +190,19 @@ namespace pandora_vision
       depthImage,
       msg
     );
+    
+    //! Interpolated depth image publishing
+    {
+      // Convert the image into a message
+      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+      msgPtr->header = msg.header;
+      msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
+      depthImage.copyTo(msgPtr->image);
+      
+      // Publish the image message
+      _interpolatedDepthPublisher.publish(*msgPtr->toImageMsg());
+    }
     
     //! Resolve frame ids (must explain more)
     std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
