@@ -73,7 +73,8 @@ namespace pandora_vision
       std::vector<cv::Mat> _rgbdImages;
       
       /// Instance of class face_detector
-      VictimVJDetector _victimDetector;
+      VictimVJDetector _rgbViolaJonesDetector;
+      //~ VictimVJDetector _victimDetector;
       ///Instance of class rgbSystemValidator
       RgbSystemValidator _rgbSystemValidator;
       ///Instance of class depthSystemValidator

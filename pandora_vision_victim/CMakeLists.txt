@@ -56,6 +56,11 @@ add_executable(victim_node
     src/utilities/edge_orientation_extractor.cpp
     src/utilities/haralickfeature_extractor.cpp
     
+    src/feature_extractors/mean_std_dev.cpp
+    src/feature_extractors/dominant_color.cpp
+    src/feature_extractors/dft_coeffs.cpp
+    src/feature_extractors/color_angles.cpp
+    
     src/victim_parameters.cpp
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )

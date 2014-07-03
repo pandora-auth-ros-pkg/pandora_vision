@@ -48,6 +48,9 @@ namespace pandora_vision
     s_bins = 256;
     v_bins = 256;
     ROS_INFO("[victim_node] : Created Color detection instance");
+    
+    //!---------------------EXPERIMENTAL-------------------------//
+    
   }
   
   /**
@@ -59,15 +62,25 @@ namespace pandora_vision
   }
   
   /**
-* @brief This function calculates all necessary histogramms
-* for color extraction.
-* @param hsvFrame [cv::Mat] current frame to be processed
+* @brief This is the main function which calls all others for the computation
+* of the color features.
+* @param src [cv::Mat] current frame to be processed
 * @return void
 */
-  void ChannelsStatisticsExtractor::setHistogramms(cv::Mat hsvFrame)
+  void ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(
+    const cv::Mat& src
+  )
   {
+    _colorFeatureVector.clear();
+    
+    inFrame = src.clone();
+    cv::Mat hsv;
+    //! Transform it to HSV
+    cvtColor( inFrame, hsv, CV_BGR2HSV );
+    
+    //!Preprocess current image, to find histogramms in HSV planes
     //!< Separate the image in 3 places (H,S,V) one for each channel
-    split( hsvFrame, hsv_planes );
+    split( hsv, hsv_planes );
 
     //!< Set the ranges ( for H,S,V)
     float h_ranges[] = { 0, 180 };
@@ -85,65 +98,59 @@ namespace pandora_vision
     s_hist = computeHist(hsv_planes[1], s_bins, s_histRange);
     v_hist = computeHist(hsv_planes[2], v_bins, v_histRange);
     
-  }
-  
-  /**
-* @brief This is the main function which calls all others for the computation
-* of the color features.
-* @param src [cv::Mat] current frame to be processed
-* @return void
-*/
-  void ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(const cv::Mat& src)
-  {
-    inFrame = src.clone();
-    cv::Mat hsv;
-    //! Transform it to HSV
-    cvtColor( inFrame, hsv, CV_BGR2HSV );
-    //!Preprocess current image, to find histogramms in HSV planes
-    setHistogramms(hsv);
-    
     //!Find the mean value and std value of every color component
-    computeMeanStdHSV();
-    //~ ROS_INFO("Mean and Standard Deviation of HSV :");
-    //~ for (int ii = 0; ii < meanStdHSV.size(); ii++)
-      //~ ROS_INFO_STREAM(" " <<meanStdHSV[ii]);
+    //!-----------------_EXPERIMENTAL_----------------------//
+    {
+      std::vector<double> f1 = MeanStdDevExtractor(&hsv_planes[0]).extract();
+      std::vector<double> f2 = MeanStdDevExtractor(&hsv_planes[1]).extract();
+      std::vector<double> f3 = MeanStdDevExtractor(&hsv_planes[2]).extract();
+      meanStdHSV = f1;
+      meanStdHSV.insert(meanStdHSV.end(), f2.begin(), f2.end());
+      meanStdHSV.insert(meanStdHSV.end(), f3.begin(), f3.end());
+      _colorFeatureVector.insert(
+        _colorFeatureVector.end(),
+        meanStdHSV.begin(),
+        meanStdHSV.end()
+      );
+    }
     
-    double dominantValue1 = 0;
-    double dominantValue2 = 0;
-    //! Find the dominant color component and their density values
-    findDominantColor(h_hist, h_bins, &dominantValue1, &dominantValue2 );
-    dominantVal.push_back(dominantValue1);
-    dominantVal.push_back(dominantValue2);
-    findDominantColor(s_hist, s_bins, &dominantValue1, &dominantValue2 );
-    dominantVal.push_back(dominantValue1);
-    dominantVal.push_back(dominantValue2);
-    findDominantColor(v_hist, v_bins, &dominantValue1, &dominantValue2 );
-    dominantVal.push_back(dominantValue1);
-    dominantVal.push_back(dominantValue2);
-     
-    //~ ROS_INFO("Dominant values and Densities of every colorcom HSV");
-    //~ for (int ii = 0; ii < dominantVal.size(); ii++)
-      //~ ROS_INFO_STREAM(" " <<dominantVal[ii]);
+    //!--------------------EXPERIMENTAL--------------------//
+    {
+      std::vector<double> f1 = DominantColorExtractor(&h_hist).extract();
+      std::vector<double> f2 = DominantColorExtractor(&s_hist).extract();
+      std::vector<double> f3 = DominantColorExtractor(&v_hist).extract();
+      dominantVal = f1;
+      dominantVal.insert(dominantVal.end(), f2.begin(), f2.end());
+      dominantVal.insert(dominantVal.end(), f3.begin(), f3.end());
+      _colorFeatureVector.insert(
+        _colorFeatureVector.end(),
+        dominantVal.begin(),
+        dominantVal.end()
+      );
+    }
      
     //!< Compute the modules of first 6 components of a Fourier transform of the
     //!< image components H(hue) and S(saturation).
-    huedft = computeDFT(hsv_planes[0]);
-    satdft = computeDFT(hsv_planes[1]);
-     
-    //~ ROS_INFO("6 first Dft of Hue:");
-    //~ for (int ii= 0; ii< huedft.size(); ii++)
-      //~ ROS_INFO_STREAM(" " << huedft[ii]);
-    //~ ROS_INFO("6 first Dft of Sat");
-    //~ for (int ii = 0; ii< satdft.size(); ii++)
-      //~ ROS_INFO_STREAM(" " << satdft[ii]);
-    
+    huedft = DFTCoeffsExtractor(&hsv_planes[0]).extract();
+    _colorFeatureVector.insert(
+      _colorFeatureVector.end(),
+      huedft.begin(),
+      huedft.end()
+    );
+    satdft = DFTCoeffsExtractor(&hsv_planes[1]).extract();
+    _colorFeatureVector.insert(
+      _colorFeatureVector.end(),
+      satdft.begin(),
+      satdft.end()
+    );
+
     //!< Compute the colour angles of rgb color components
-    computeColorAngles();
-    //~ ROS_INFO("Color Angles and normalized intensity std");
-    //~ for (int ii = 0; ii< colorAnglesAndStd.size(); ii++)
-      //~ ROS_INFO_STREAM(" " << colorAnglesAndStd[ii]);
-    //~
-    extractColorFeatureVector();
+    colorAnglesAndStd = ColorAnglesExtractor(&inFrame).extract();
+    _colorFeatureVector.insert(
+      _colorFeatureVector.end(),
+      colorAnglesAndStd.begin(),
+      colorAnglesAndStd.end()
+    );
   }
   
   /**
@@ -152,7 +159,8 @@ namespace pandora_vision
 * @param src [cv::Mat] depth image to be processed
 * @return void
 */
-  void ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(cv::Mat src)
+  void ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(
+    cv::Mat src)
   {
     if(src.channels() != 1)
     cv::cvtColor(src, src, CV_BGR2GRAY);
@@ -223,18 +231,18 @@ namespace pandora_vision
 */
   void ChannelsStatisticsExtractor::computeMeanStdHSV()
   {
-    if(!meanStdHSV.empty())
-      meanStdHSV.erase(meanStdHSV.begin(), meanStdHSV.begin()+meanStdHSV.size());
-    cv::Scalar avg, st;
-    cv::meanStdDev(hsv_planes[0], avg, st);
-    meanStdHSV.push_back(avg.val[0]);
-    meanStdHSV.push_back(st.val[0]);
-    cv::meanStdDev(hsv_planes[1], avg, st);
-    meanStdHSV.push_back(avg.val[0]);
-    meanStdHSV.push_back(st.val[0]);
-    cv::meanStdDev(hsv_planes[2], avg, st);
-    meanStdHSV.push_back(avg.val[0]);
-    meanStdHSV.push_back(st.val[0]);
+    //!-----------------_EXPERIMENTAL_----------------------//
+    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[0]));
+    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[1]));
+    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[2]));
+    std::vector<double> f1 = extractors[0]->extract();
+    std::vector<double> f2 = extractors[1]->extract();
+    std::vector<double> f3 = extractors[2]->extract();
+    std::vector<double> total = f1;
+    total.insert(total.end(), f2.begin(), f2.end());
+    total.insert(total.end(), f3.begin(), f3.end());
+
+    meanStdHSV = total;
   }
   
   /**
@@ -264,7 +272,6 @@ namespace pandora_vision
   {
     double maxVal = 0;
     double val = 0;
-
     for( int ii= 0; ii < histSize; ii++ )
     {
       double binVal = static_cast<double>(hist.at<float>(ii));
@@ -288,47 +295,8 @@ namespace pandora_vision
 */
   std::vector<double> ChannelsStatisticsExtractor::computeDFT(cv::Mat img)
   {
-    std::vector<double>temp(6);
-    cv::Mat padded;
-    
-    //!< Expand input image to optimal size
-    int rows = cv::getOptimalDFTSize( img.rows );
-    int cols = cv::getOptimalDFTSize( img.cols );
-    
-    //!< On the border add zero values
-    copyMakeBorder(img, padded, 0, rows - img.rows, 0, cols - img.cols,
-    cv::BORDER_CONSTANT, cv::Scalar::all(0));
-    cv::Mat planes[] = {cv::Mat_<float>(padded),
-                        cv::Mat::zeros(padded.size(), CV_32F)};
-    cv::Mat complexI;
-    
-    //!< Add to the expanded another plane with zeros
-    merge(planes, 2, complexI);
-    
-    //!< This way the result may fit in the source matrix
-    dft(complexI, complexI);
-    
-    //!< Normalize the dft coeffs
-    for (int ii = 0; ii < complexI.rows; ii++)
-      for(int jj = 0; jj < complexI.cols; jj++)
-          complexI.at<float>(ii, jj)=complexI.at<float>(ii, jj) /
-                                      (complexI.cols * complexI.rows);
-              
-
-    //!< Compute the magnitude
-    // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
-    split(complexI, planes);
-    
-    //!< planes[0] = magnitude
-    magnitude(planes[0], planes[1], planes[0]);
-    cv::Mat magI = planes[0];
-    temp[0] = static_cast<double>(magI.at<float>(0, 0));
-    temp[1] = static_cast<double>(magI.at<float>(0, 1));
-    temp[2] = static_cast<double>(magI.at<float>(1, 0));
-    temp[3] = static_cast<double>(magI.at<float>(0, 2));
-    temp[4] = static_cast<double>(magI.at<float>(1, 1));
-    temp[5] = static_cast<double>(magI.at<float>(2, 0));
-    return temp;
+    DFTCoeffsExtractor extr(&img);
+    return extr.extract();
   }
 
   /**
@@ -338,101 +306,8 @@ namespace pandora_vision
 */
   void ChannelsStatisticsExtractor::computeColorAngles()
   {
-    //!< Separate the image in 3 places (R,G,B) one for each channel
-    std::vector<cv::Mat> rgb_planes;
-    split( inFrame, rgb_planes );
-    //!< Compute the average pixel value of each r,g,b color component
-    cv::Scalar bmean = mean(rgb_planes[0]);
-    cv::Scalar gmean = mean(rgb_planes[1]);
-    cv::Scalar rmean = mean(rgb_planes[2]);
-    
-    //!< Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
-    //!< Corresponding average pixel value of each original colour vector
-    cv::Mat r0 = cv::Mat::zeros(inFrame.rows, inFrame.cols, CV_64FC1);
-    cv::Mat b0 = cv::Mat::zeros(inFrame.rows, inFrame.cols, CV_64FC1);
-    cv::Mat g0 = cv::Mat::zeros(inFrame.rows, inFrame.cols, CV_64FC1);
-    
-    for (int ii = 0; ii < inFrame.rows; ii++)
-      for (int jj = 0; jj < inFrame.cols; jj++)
-        b0.at<double>(ii, jj) = rgb_planes[0].at<uchar>(ii, jj) - bmean.val[0];
-    for (int ii = 0; ii < inFrame.rows; ii++)
-      for (int jj = 0; jj < inFrame.cols; jj++)
-        g0.at<double>(ii, jj) = rgb_planes[1].at<uchar>(ii, jj) - gmean.val[0];
-    for (int ii = 0; ii < inFrame.rows; ii++)
-      for (int jj = 0; jj < inFrame.cols; jj++)
-        r0.at<double>(ii, jj) = rgb_planes[2].at<uchar>(ii, jj) - rmean.val[0];
-
-    double rgdot = r0.dot(g0);
-    double gbdot = g0.dot(b0);
-    double rbdot = r0.dot(b0);
-    double rsum = 0, bsum = 0, gsum = 0;
-      
-    //!< Compute the dot product of rgb color components
-    for (int ii = 0; ii < r0.rows; ii++)
-      for(int jj = 0; jj < r0.cols; jj++)
-        {
-           rsum+= pow(r0.at<double>(ii, jj), 2);
-           gsum+= pow(g0.at<double>(ii, jj), 2);
-           bsum+= pow(b0.at<double>(ii, jj), 2);
-        }
-      
-    double rlength = sqrt(rsum);
-    double glength = sqrt(gsum);
-    double blength = sqrt(bsum);
-    rgdot/= (rlength*glength);
-    gbdot/= (glength*blength);
-    rbdot/= (rlength*blength);
-
-    //!< Compute the color angles
-    double rgAngle = acos(rgdot);
-    double gbAngle = acos(gbdot);
-    double rbAngle = acos(rbdot);
-    
-    cv::Mat hsv;
-    //!< Normalised intensity standard deviation
-    //!< Transform the src image to grayscale
-    cvtColor( inFrame, hsv, CV_BGR2GRAY );
-    
-    //!< Compute the mean intensity value
-    cv::Scalar meanI = mean(hsv);
-    
-   
-    //!< Find the maximum intensity value
-    double maxVal, std, sum = 0;
-    minMaxLoc( hsv, NULL, &maxVal );
-        
-    for(int ii = 0; ii < hsv.rows; ii++)
-      for(int jj = 0; jj < hsv.cols; jj++)
-      {
-        sum+= pow((hsv.at<uchar>(ii, jj) - meanI.val[0]), 2);
-      }
-      
-    std = 2.0 / (maxVal * hsv.cols * hsv.rows) * sqrt(sum);
-   
-    //!< Construct the final feature vector
-    colorAnglesAndStd.push_back(rgAngle);
-    colorAnglesAndStd.push_back(gbAngle);
-    colorAnglesAndStd.push_back(rbAngle);
-    colorAnglesAndStd.push_back(std);
-  }
-  
-  /**
-* @brief This function extract a feature vector according to color
-* and statistcs features.
-* @return void
-*/
-  void ChannelsStatisticsExtractor::extractColorFeatureVector()
-  {
-    _colorFeatureVector.insert(_colorFeatureVector.end(),
-        meanStdHSV.begin(), meanStdHSV.end());
-    _colorFeatureVector.insert(_colorFeatureVector.end(),
-        dominantVal.begin(), dominantVal.end());
-    _colorFeatureVector.insert(_colorFeatureVector.end(),
-        huedft.begin(), huedft.end());
-    _colorFeatureVector.insert(_colorFeatureVector.end(),
-        satdft.begin(), satdft.end());
-    _colorFeatureVector.insert(_colorFeatureVector.end(),
-        colorAnglesAndStd.begin(), colorAnglesAndStd.end());
+    ColorAnglesExtractor extr(&inFrame);
+    colorAnglesAndStd = extr.extract();
   }
   
   /**
@@ -503,4 +378,16 @@ namespace pandora_vision
     _depthdft.clear();
     _depthStatisticsVector.clear();
   }
+  
+  //!--------------------------EXPERIMENTAL--------------------------//
+  //~ std::vector<float> extract(const cv::Mat& img)
+  //~ {
+    //~ std::vector<float> ret;
+    //~ for(unsigned int i = 0 ; i < extractors.size() ; i++)
+    //~ {
+      //~ std::vector<float> f = extractors[i]->extract(inFrame);
+      //~ ret.insert(ret.end(), f.begin(), f.end());
+    //~ }
+    //~ return ret;
+  //~ }
 }// namespace pandora_vision

@@ -68,7 +68,7 @@ namespace pandora_vision
         1, &VictimDetection::imageCallback, this);
       
     /// Initialize the face detector and the svm classifiers
-    _victimDetector = VictimVJDetector(
+    _rgbViolaJonesDetector = VictimVJDetector(
       VictimParameters::cascade_path, 
       VictimParameters::model_path);
       
@@ -540,11 +540,11 @@ namespace pandora_vision
     DetectedVictim temp;
     
     ///Enable Viola Jones for rgb image 
-    rgb_vj_probabilities = _victimDetector.findFaces(imgs.rgb.img);
+    rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
     
     if(detectionMode == GOT_ALL || detectionMode == GOT_DEPTH)
     {
-      depth_vj_probabilities = _victimDetector.findFaces(imgs.depth.img);
+      depth_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.depth.img);
     }
     if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
     {
