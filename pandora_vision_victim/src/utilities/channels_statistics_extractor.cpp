@@ -99,7 +99,6 @@ namespace pandora_vision
     v_hist = computeHist(hsv_planes[2], v_bins, v_histRange);
     
     //!Find the mean value and std value of every color component
-    //!-----------------_EXPERIMENTAL_----------------------//
     {
       std::vector<double> f1 = MeanStdDevExtractor(&hsv_planes[0]).extract();
       std::vector<double> f2 = MeanStdDevExtractor(&hsv_planes[1]).extract();
@@ -113,8 +112,6 @@ namespace pandora_vision
         meanStdHSV.end()
       );
     }
-    
-    //!--------------------EXPERIMENTAL--------------------//
     {
       std::vector<double> f1 = DominantColorExtractor(&h_hist).extract();
       std::vector<double> f2 = DominantColorExtractor(&s_hist).extract();
@@ -229,21 +226,21 @@ namespace pandora_vision
 * every color component(HSV) and returns a feature vector.
 * @return void
 */
-  void ChannelsStatisticsExtractor::computeMeanStdHSV()
-  {
-    //!-----------------_EXPERIMENTAL_----------------------//
-    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[0]));
-    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[1]));
-    extractors.push_back(new MeanStdDevExtractor(&hsv_planes[2]));
-    std::vector<double> f1 = extractors[0]->extract();
-    std::vector<double> f2 = extractors[1]->extract();
-    std::vector<double> f3 = extractors[2]->extract();
-    std::vector<double> total = f1;
-    total.insert(total.end(), f2.begin(), f2.end());
-    total.insert(total.end(), f3.begin(), f3.end());
-
-    meanStdHSV = total;
-  }
+  //~ void ChannelsStatisticsExtractor::computeMeanStdHSV()
+  //~ {
+    //~ //!-----------------_EXPERIMENTAL_----------------------//
+    //~ extractors.push_back(new MeanStdDevExtractor(&hsv_planes[0]));
+    //~ extractors.push_back(new MeanStdDevExtractor(&hsv_planes[1]));
+    //~ extractors.push_back(new MeanStdDevExtractor(&hsv_planes[2]));
+    //~ std::vector<double> f1 = extractors[0]->extract();
+    //~ std::vector<double> f2 = extractors[1]->extract();
+    //~ std::vector<double> f3 = extractors[2]->extract();
+    //~ std::vector<double> total = f1;
+    //~ total.insert(total.end(), f2.begin(), f2.end());
+    //~ total.insert(total.end(), f3.begin(), f3.end());
+//~ 
+    //~ meanStdHSV = total;
+  //~ }
   
   /**
 * @brief This function computes the average and standard deviation value
@@ -299,16 +296,6 @@ namespace pandora_vision
     return extr.extract();
   }
 
-  /**
-* @brief This function computes the color angles of the image and the
-* normalized intensity std .
-* @return void
-*/
-  void ChannelsStatisticsExtractor::computeColorAngles()
-  {
-    ColorAnglesExtractor extr(&inFrame);
-    colorAnglesAndStd = extr.extract();
-  }
   
   /**
 * @brief This function extract a feature vector according to statistcs
@@ -350,22 +337,7 @@ namespace pandora_vision
      }
     return _depthStatisticsVector;
   }
-  
-  /**
-* @brief Function that cleans up colorFeatureVector, to add
-* new elements for next frame
-* @return void
-*/
-  void ChannelsStatisticsExtractor::emptyCurrentFrameFeatureVector()
-  {
-    meanStdHSV.clear();
-    dominantVal.clear();
-    huedft.clear();
-    satdft.clear();
-    colorAnglesAndStd.clear();
-    _colorFeatureVector.clear();
-  }
-  
+
   /**
 * @brief Function that cleans up depthFeatureVector, to add
 * new elements for next frame

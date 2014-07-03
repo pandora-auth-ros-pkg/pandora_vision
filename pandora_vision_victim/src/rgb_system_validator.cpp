@@ -126,7 +126,7 @@ namespace pandora_vision
           
     ///Deallocate memory
     channelsStatictisFeatureVector.clear();
-    _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
+    //~ _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
     
     edgeOrientationFeatureVector.clear();
     _edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 

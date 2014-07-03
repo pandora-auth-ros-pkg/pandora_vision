@@ -95,7 +95,7 @@ namespace pandora_vision
        * of every color component(HSV).
        * @return void
       */ 
-      void computeMeanStdHSV();
+      //~ void computeMeanStdHSV();
       
       /**
        * @brief This function computes the average and standard deviation value  
@@ -123,16 +123,7 @@ namespace pandora_vision
        * coefficients.
       */
       std::vector<double> computeDFT(cv::Mat img);
-      
-      /**
-       * @brief This function computes the color angles of the image and the 
-       * normalized intensity std . 
-       * @return void
-      */
-      void computeColorAngles();
   
-      //!-------------___EXPERIMENTAL__------------------//
-      std::vector<BaseFeatureExtractor*> extractors;
     
     public:
     
@@ -176,13 +167,6 @@ namespace pandora_vision
        * @return featureVector
       */ 
       std::vector<double> getDepthFeatures();
-      
-      /**
-       * @brief Function that cleans up colorFeatureVector, to add
-       * new elements for next frame
-       * @return void
-       */ 
-      void emptyCurrentFrameFeatureVector();
       
       /**
        * @brief Function that cleans up depthFeatureVector, to add
