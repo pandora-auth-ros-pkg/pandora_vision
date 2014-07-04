@@ -264,10 +264,10 @@ namespace pandora_vision
     switch(stateIndicator)
     {
       case 1:
-        detectionMode = GOT_NOTHING;
+        detectionMode = GOT_RGB;
         break;
       case 2:
-        detectionMode = GOT_MASK;
+        detectionMode = GOT_HOLES;
         break;
       case 3:
         detectionMode = GOT_DEPTH;
@@ -280,7 +280,7 @@ namespace pandora_vision
         }
         break;
       case 4:
-        detectionMode = GOT_ALL;
+        detectionMode = GOT_HOLES_AND_DEPTH;
         {
           EnhancedMat emat;
           depthImage.copyTo(emat.img);
@@ -316,9 +316,9 @@ namespace pandora_vision
         msg.enhancedHoles[i].keypointX,
         msg.enhancedHoles[i].keypointY
       );
-
       imgs.rgbMasks.push_back(emat);
-      if(depthEnabled)
+      
+      if(GOT_HOLES_AND_DEPTH || GOT_DEPTH)
       {
         emat.img = depthImage(rect);
         imgs.depthMasks.push_back(emat);
@@ -331,11 +331,6 @@ namespace pandora_vision
     //!< Message alert creation
     for(int i = 0;  i < final_victims.size() ; i++)
     {
-      
-      if(final_victims[i].probability < 0.1)
-      {
-        continue;
-      }
       
       float x = final_victims[i].keypoint.x
         - static_cast<float>(VictimParameters::frameWidth) / 2;
@@ -383,7 +378,7 @@ namespace pandora_vision
             depth_vj_bounding_boxes.push_back(re);
             depth_vj_p.push_back(final_victims[i].probability);
             break;
-          case DEPTH_SVM:
+          case DEPTH_RGB_SVM:
             depth_svm_keypoints.push_back(kp);
             depth_svm_bounding_boxes.push_back(re);
             depth_svm_p.push_back(final_victims[i].probability);
@@ -488,7 +483,7 @@ namespace pandora_vision
       }
       {
         std::ostringstream convert;
-        convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
+        convert << "DEPTH_RGB_SVM : "<< depth_svm_keypoints.size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10,80),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
@@ -542,36 +537,38 @@ namespace pandora_vision
     ///Enable Viola Jones for rgb image 
     rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
     
-    if(detectionMode == GOT_ALL || detectionMode == GOT_DEPTH)
+    if(detectionMode == GOT_HOLES_AND_DEPTH || detectionMode == GOT_DEPTH)
     {
       depth_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.depth.img);
     }
-    if(detectionMode == GOT_ALL || detectionMode == GOT_MASK)
+    if(detectionMode == GOT_HOLES || detectionMode == GOT_HOLES_AND_DEPTH)
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
         temp.probability = _rgbSystemValidator.calculateSvmRgbProbability(
           imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
-        
+        temp.source = RGB_SVM;
+        temp.boundingBox = imgs.depthMasks[i].bounding_box;
         rgb_svm_probabilities.push_back(temp);
       }  
     }
-    if(detectionMode == GOT_ALL)
+    if(detectionMode == GOT_HOLES_AND_DEPTH)
     {
       for(int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
         temp.probability = _depthSystemValidator.calculateSvmDepthProbability(
           imgs.depthMasks.at(i).img);
         temp.keypoint = imgs.depthMasks[i].keypoint;
-        temp.source = DEPTH_SVM;
+        temp.source = DEPTH_RGB_SVM;
         temp.boundingBox = imgs.depthMasks[i].bounding_box;
         depth_svm_probabilities.push_back(temp);
       }
     }
-    
+
     // SVM mask merging
-    if(detectionMode == GOT_ALL)
+    // Combine rgb & depth probabilities
+    if(detectionMode == GOT_HOLES_AND_DEPTH) 
     {
       for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
       {
@@ -585,19 +582,20 @@ namespace pandora_vision
             VictimParameters::rgb_svm_weight);
         
         temp.keypoint = depth_svm_probabilities[i].keypoint;
-        temp.source = RGB_SVM;
+        temp.source = DEPTH_RGB_SVM;
         temp.boundingBox = depth_svm_probabilities[i].boundingBox;
         final_probabilities.push_back(temp);
       }
     }
-    if(detectionMode == GOT_MASK)
+    // Only rgb svm probabilities
+    if(detectionMode == GOT_HOLES)
     {
-      for(unsigned int i = 0 ; i < depth_svm_probabilities.size() ; i++)
+      for(unsigned int i = 0 ; i < rgb_svm_probabilities.size() ; i++)
       {
         temp.probability = rgb_svm_probabilities[i].probability * 
           VictimParameters::rgb_svm_weight;
         temp.keypoint = rgb_svm_probabilities[i].keypoint;
-        temp.source = DEPTH_SVM;
+        temp.source = RGB_SVM;
         temp.boundingBox = rgb_svm_probabilities[i].boundingBox;
         final_probabilities.push_back(temp);
       }

@@ -73,7 +73,7 @@ namespace pandora_vision
     RGB_VJ,
     DEPTH_VJ,
     RGB_SVM,
-    DEPTH_SVM
+    DEPTH_RGB_SVM
   };
   
   struct DetectedVictim
@@ -86,9 +86,9 @@ namespace pandora_vision
 
   enum DetectionMode
   { 
-    GOT_NOTHING = 1,
-    GOT_ALL = 4,
-    GOT_MASK = 2,
+    GOT_RGB = 1,
+    GOT_HOLES_AND_DEPTH = 4,
+    GOT_HOLES = 2,
     GOT_DEPTH = 3
   };
   
