@@ -39,8 +39,8 @@
 
 namespace pandora_vision
 {
-  int TrainingParameters::numOfPositiveSamples = 10;
-  int TrainingParameters::numOfNegativeSamples = 10;
-  int TrainingParameters::numOfTestPositiveSamples = 10;
-  int TrainingParameters::numOfTestNegativeSamples = 10;
+  int TrainingParameters::numOfPositiveSamples = 1638;
+  int TrainingParameters::numOfNegativeSamples = 3012;
+  int TrainingParameters::numOfTestPositiveSamples = 200;
+  int TrainingParameters::numOfTestNegativeSamples = 200;
 }

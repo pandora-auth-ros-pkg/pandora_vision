@@ -68,11 +68,14 @@ add_dependencies(victim_node
 ########################### victimTrainer ############################
 if(VICTIM_ENABLE_TRAIN)
   add_executable(victim_train_node
+                  src/training.cpp
                   src/rgb_system_validator.cpp
                   src/depth_system_validator.cpp
                   src/utilities/channels_statistics_extractor.cpp
                   src/utilities/edge_orientation_extractor.cpp
                   src/utilities/haralickfeature_extractor.cpp
+                  src/victim_parameters.cpp
+                  src/training_parameters.cpp
   )
   target_link_libraries(victim_train_node ${catkin_LIBRARIES} )
 endif()

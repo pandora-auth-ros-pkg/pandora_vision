@@ -38,11 +38,13 @@
 #ifndef PANDORA_VISION_VICTIM_TRAINING_PARAMETERS_H
 #define PANDORA_VISION_VICTIM_TRAINING_PARAMETERS_H
 
+#include <dynamic_reconfigure/server.h>
+
 namespace pandora_vision
 {
   class TrainingParameters
   {
-    private:
+    public:
     
     static int numOfPositiveSamples;
     static int numOfNegativeSamples;

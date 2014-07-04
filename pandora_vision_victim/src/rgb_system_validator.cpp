@@ -188,10 +188,10 @@ namespace pandora_vision
     float probability;
     //~ Normalize probability to [-1,1]
     probability = tanh(VictimParameters::rgb_svm_prob_scaling * 
-      (prediction - VictimParameters::rgb_svm_prob_translation) );
+      (abs(prediction) - VictimParameters::rgb_svm_prob_translation) );
     //~ Normalize probability to [0,1]
     probability = (1 + probability) / 2.0;
-    ROS_INFO_STREAM("SVM RGB pred/prob :" << prediction <<" "<<probability);
+    ROS_INFO_STREAM("SVM RGB pred/prob :" << abs(prediction) <<" "<<probability);
     return probability;
   }
 }// namespace pandora_vision 
