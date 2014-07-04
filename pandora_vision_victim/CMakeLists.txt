@@ -79,6 +79,12 @@ if(VICTIM_ENABLE_TRAIN)
                   src/utilities/channels_statistics_extractor.cpp
                   src/utilities/edge_orientation_extractor.cpp
                   src/utilities/haralickfeature_extractor.cpp
+                  
+                  src/feature_extractors/mean_std_dev.cpp
+                  src/feature_extractors/dominant_color.cpp
+                  src/feature_extractors/dft_coeffs.cpp
+                  src/feature_extractors/color_angles.cpp
+                  
                   src/victim_parameters.cpp
                   src/training_parameters.cpp
   )
