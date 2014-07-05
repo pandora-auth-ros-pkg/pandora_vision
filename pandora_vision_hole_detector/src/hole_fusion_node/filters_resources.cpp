@@ -456,27 +456,55 @@ namespace pandora_vision
     for (int i = 0; i < conveyor.size(); i++)
     {
       // The image on which the i-th hole's outline will be drawn
-      cv::Mat holeMask = cv::Mat::zeros(image.size(), CV_8UC1);
+      cv::Mat holeOutline = cv::Mat::zeros(image.size(), CV_8UC1);
 
-      // Draw the outline points of the i-th hole onto holeMask
+      // Draw the outline points of the i-th hole onto holeOutline
       for(unsigned int j = 0; j < conveyor.holes[i].outline.size(); j++)
       {
-        holeMask.at<unsigned char>(
+        holeOutline.at<unsigned char>(
           conveyor.holes[i].outline[j].y,
           conveyor.holes[i].outline[j].x) = 255;
       }
 
+
       // The set of indices of points inside the i-th hole's outline
       std::set<unsigned int> holeMaskSet;
 
+      // The contour of the outline points of the i-th hole
+      std::vector<std::vector<cv::Point> > holeMaskVector;
 
-      // The point from which the brushfire will begin
-      cv::Point2f keypoint(
-        conveyor.holes[i].keypoint.pt.x, conveyor.holes[i].keypoint.pt.y);
+      // Hierarchical information about the above contour
+      std::vector<cv::Vec4i> hierarchy;
 
-      // Brushfire from the keypoint to the hole's outline
-      // to obtain the points inside it
-      BlobDetection::brushfirePoint(keypoint, &holeMask, &holeMaskSet);
+      // Detect the contours drawn in the holeOutline image.
+      // This actually transforms the unordered set of outline points to an
+      // ordered contour.
+      cv::findContours(holeOutline, holeMaskVector,
+        hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+
+      // The image on which the points inside the
+      // i-th hole's outline will be drawn.
+      cv::Mat holeMask = cv::Mat::zeros(image.size(), CV_8UC1);
+
+      // Draw the points inside the hole's outline
+      for (int d = 0; d < holeMaskVector.size(); d++)
+      {
+        cv::drawContours(holeMask, holeMaskVector,
+          d, cv::Scalar(255), CV_FILLED, 8, hierarchy);
+      }
+
+      // Insert the indices of points inside the i-th hole's outline
+      // into its respective set.
+      for (int rows = 0; rows < image.rows; rows++)
+      {
+        for (int cols = 0; cols < image.cols; cols++)
+        {
+          if (holeMask.at<unsigned char>(rows, cols) != 0)
+          {
+            holeMaskSet.insert(rows * image.cols + cols);
+          }
+        }
+      }
 
       holesMasksSetVector->push_back(holeMaskSet);
     }
