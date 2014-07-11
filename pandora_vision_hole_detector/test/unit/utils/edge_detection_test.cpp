@@ -1100,6 +1100,32 @@ namespace pandora_vision
 
 
 
+  // Tests EdgeDetection::floodFillPostprocess
+  TEST_F ( EdgeDetectionTest, floodFillPortprocess )
+  {
+    // Convert squares_ into a CV_8UC3 image
+    cv::Mat squares_8UC3 = cv::Mat::zeros ( squares_.size(), CV_8UC3 );
+    cv::cvtColor( squares_, squares_8UC3, CV_GRAY2BGR );
+
+    // Add an unfinished square to the squares_8UC3 image
+    for ( int rows = 300; rows < 400; rows++ )
+    {
+      squares_8UC3.at< cv::Vec3b >( rows, 300 ) = 128;
+    }
+
+    for ( int cols = 300; cols < 400; cols++ )
+    {
+      squares_8UC3.at< cv::Vec3b >( 300, cols ) = 128;
+    }
+
+    // Run EdgeDetection::floodFillPostprocess
+    EdgeDetection::floodFillPostprocess (&squares_8UC3);
+
+    ASSERT_EQ ( CV_8UC3, squares_8UC3.type() );
+  }
+
+
+
   //! Tests EdgeDetection::identifyCurveAndEndpoints
   TEST_F ( EdgeDetectionTest, identifyCurveAndEndpoints )
   {
@@ -1151,33 +1177,92 @@ namespace pandora_vision
     // The second end point's coordinates will be also be the origin
     EXPECT_EQ ( p_invalid.second.x, 0 );
     EXPECT_EQ ( p_invalid.second.y, 0 );
-
   }
 
 
 
-  // Tests EdgeDetection::floodFillPostprocess
-  TEST_F ( EdgeDetectionTest, floodFillPortprocess )
+  //! Tests EdgeDetection::identifyCurvesAndEndpoints
+  TEST_F ( EdgeDetectionTest, identifyCurvesAndEndpoints )
   {
-    // Convert squares_ into a CV_8UC3 image
-    cv::Mat squares_8UC3 = cv::Mat::zeros ( squares_.size(), CV_8UC3 );
-    cv::cvtColor( squares_, squares_8UC3, CV_GRAY2BGR );
+    // Three gamma shapes
+    cv::Mat gammas = cv::Mat::zeros( squares_.size(), CV_8UC1 );
 
-    // Add an unfinished square to the squares_8UC3 image
+    // Valid
+    for ( int rows = 10; rows < 40; rows++ )
+    {
+      gammas.at< unsigned char >( rows, 10 ) = 255;
+    }
+
+    for ( int cols = 10; cols < 50; cols++ )
+    {
+      gammas.at< unsigned char >( 10, cols ) = 255;
+    }
+
+    // Invalid
+    for ( int rows = 60; rows < 70; rows++ )
+    {
+      gammas.at< unsigned char >( rows, 60 ) = 255;
+    }
+
+    for ( int cols = 60; cols < 70; cols++ )
+    {
+      gammas.at< unsigned char >( 60, cols ) = 255;
+    }
+
+    // Valid
     for ( int rows = 300; rows < 400; rows++ )
     {
-      squares_8UC3.at< cv::Vec3b >( rows, 300 ) = 128;
+      gammas.at< unsigned char >( rows, 300 ) = 255;
     }
 
-    for ( int cols = 300; cols < 400; cols++ )
+    for ( int cols = 300; cols < 500; cols++ )
     {
-      squares_8UC3.at< cv::Vec3b >( 300, cols ) = 128;
+      gammas.at< unsigned char >( 300, cols ) = 255;
     }
 
-    // Run EdgeDetection::floodFillPostprocess
-    EdgeDetection::floodFillPostprocess (&squares_8UC3);
 
-    ASSERT_EQ ( CV_8UC3, squares_8UC3.type() );
+    std::vector< std::set<unsigned int > > lines;
+    std::vector< std::pair< GraphNode, GraphNode > > endPoints;
+
+    // Run EdgeDetection::identifyCurvesAndEndpoints
+    EdgeDetection::identifyCurvesAndEndpoints( &gammas, &lines, &endPoints );
+
+    // There should be as many lines as there are pairs of end-points
+    ASSERT_EQ (lines.size(), endPoints.size());
+
+    // The gammas image should be processed and turned void
+    int nonZero = cv::countNonZero( gammas );
+    ASSERT_EQ ( 0, nonZero );
+
+    // There should be two curves exceeding the length threshold,
+    // hence there are two different entries for curves and end-points
+    EXPECT_EQ( 2, lines.size() );
+    EXPECT_EQ( 2, endPoints.size() );
+
+    // Every curve found should have a length greater than the threshold set.
+    for ( int i = 0; i < lines.size(); i++ )
+    {
+      ASSERT_LT( Parameters::Outline::minimum_curve_points, lines[i].size() );
+    }
+
+
+    // The coordinates of the end-points found
+    EXPECT_EQ ( endPoints[0].second.x, 10 );
+    EXPECT_EQ ( endPoints[0].second.y, 49 );
+
+    // The second end point's coordinates
+    EXPECT_EQ ( endPoints[0].first.x, 39 );
+    EXPECT_EQ ( endPoints[0].first.y, 10 );
+
+
+    // The first end point's coordinates
+    EXPECT_EQ ( endPoints[1].second.x, 300 );
+    EXPECT_EQ ( endPoints[1].second.y, 499 );
+
+    // The second end point's coordinates
+    EXPECT_EQ ( endPoints[1].first.x, 399 );
+    EXPECT_EQ ( endPoints[1].first.y, 300 );
+
   }
 
 
