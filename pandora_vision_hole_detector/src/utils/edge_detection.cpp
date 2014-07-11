@@ -1081,41 +1081,20 @@ namespace pandora_vision
     #endif
 
     // In the image that features only open-ended shapes, find their end points.
-    // We will then check if they are eligible for connection, and if they are,
+    // if they are eligible for connection,
     // these points will be connected with each other
 
     std::vector<std::set<unsigned int> > lines;
     std::vector<std::pair<GraphNode, GraphNode> > farPts;
-    bool hasFinished = false;
 
-    while(!hasFinished)
+    identifyCurvesAndEndpoints(&thinnedOpenLines, &lines, &farPts);
+
+    for (int l = 0; l < lines.size(); l++)
     {
-      hasFinished = true;
-      for(unsigned int i = 1 ; i < thinnedOpenLines.rows - 1; i++)
+      if (lines[l].size() < Parameters::Outline::minimum_curve_points)
       {
-        for(unsigned int j = 1 ; j < thinnedOpenLines.cols - 1; j++)
-        {
-          if(thinnedOpenLines.at<unsigned char> (i, j) != 0)
-          {
-            std::set<unsigned int> ret;
-            std::pair<GraphNode, GraphNode> pts =
-              findNeighs(&thinnedOpenLines, i, j, &ret);
-
-            if(ret.size() > Parameters::Outline::minimum_curve_points)
-            {
-              lines.push_back(ret);
-              farPts.push_back(pts);
-            }
-
-            hasFinished = false;
-            break;
-          }
-        }
-
-        if(!hasFinished)
-        {
-          break;
-        }
+        lines.erase(lines.begin() + l);
+        farPts.erase(farPts.begin() + l);
       }
     }
 
@@ -1256,8 +1235,59 @@ namespace pandora_vision
 
 
   /**
+    @brief Fills an image with random colours per image segment
+    @param[in,out] image [cv::Mat*] The image to be processed
+    (see http://docs.opencv.org/modules/imgproc/doc/
+    miscellaneous_transformations.html#floodfill)
+    @return void
+   **/
+  void EdgeDetection::floodFillPostprocess(cv::Mat* image)
+  {
+    if (image->type() != CV_8UC3)
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "EdgeDetection::floodFillPostprocess Inappropriate image type.");
+
+      return;
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::start("floodFillPostprocess", "produceEdgesViaSegmentation");
+    #endif
+
+    cv::RNG rng = cv::theRNG();
+    cv::Mat mask = cv::Mat::zeros(image->rows + 2, image->cols + 2, CV_8UC1);
+
+    // Get a pointer on mask to speed-up execution
+    unsigned char* mask_ptr = mask.ptr();
+
+    for (int rows = 0; rows < image->rows; rows++)
+    {
+      for (int cols = 0; cols < image->cols; cols++)
+      {
+        if (mask_ptr[(rows + 1) * mask.cols + (cols + 1)] == 0)
+        {
+          cv::Scalar newVal(rng(256), rng(256), rng(256));
+
+          // Fill this segment with a random colour
+          cv::floodFill(*image, mask, cv::Point(cols, rows), newVal, 0,
+            cv::Scalar::all(Parameters::Rgb::floodfill_lower_colour_difference),
+            cv::Scalar::all(Parameters::Rgb::floodfill_upper_colour_difference)
+            );
+        }
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("floodFillPostprocess");
+    #endif
+  }
+
+
+
+  /**
     @brief Identifies in which curve a point lies on and returns the
-    curve's two end points. If a point does not lie on a curve,
+    curve's two end-points. If a point does not lie on a curve,
     the pair returned has both coordinates (x,y) set to zero, and the
     size of ret is one.
     @param[in] img [cv::Mat*] The input binary image
@@ -1268,11 +1298,11 @@ namespace pandora_vision
     @return edgePoints [std::pair<GraphNode, GraphNode>*] The curve's pair of
     end points
    **/
-  std::pair<GraphNode, GraphNode> EdgeDetection::findNeighs(
+  std::pair<GraphNode, GraphNode> EdgeDetection::identifyCurveAndEndpoints(
     cv::Mat* img, const int& x_, const int& y_, std::set<unsigned int>* ret)
   {
     #ifdef DEBUG_TIME
-    Timer::start("findNeighs", "denoiseEdges");
+    Timer::start("identifyCurveAndEndpoints", "denoiseEdges");
     #endif
 
     std::vector<unsigned int> current, next;
@@ -1423,11 +1453,6 @@ namespace pandora_vision
     }
 
     std::pair<GraphNode, GraphNode> edgePoints;
-    // If it is small avoid the fuzz
-    if(ret->size() < Parameters::Outline::minimum_curve_points)
-    {
-      return edgePoints;
-    }
 
     // Find larger dist between nodes
     int maxDist = 0;
@@ -1482,7 +1507,7 @@ namespace pandora_vision
     }
 
     #ifdef DEBUG_TIME
-    Timer::tick("findNeighs");
+    Timer::tick("identifyCurveAndEndpoints");
     #endif
 
     return edgePoints;
@@ -1491,52 +1516,59 @@ namespace pandora_vision
 
 
   /**
-    @brief Fills an image with random colours per image segment
-    @param[in,out] image [cv::Mat*] The image to be processed
-    (see http://docs.opencv.org/modules/imgproc/doc/
-    miscellaneous_transformations.html#floodfill)
+    @brief Given an image of CV_8UC1 format, this method locates and
+    identifies all continuous curves, along with their end-points.
+    @param[in,out] image [cv::Mat*] The image whose curves and their
+    endpoints one wishes to locate and identify. CAUTION: image is cleared
+    at the end of the process.
+    @param[out] lines [std::vector<std::set<unsigned int> >*]
+    A set containing the indices of points that constite
+    @param[out] endPoints [std::vector<std::pair<GraphNode, GraphNode> >*]
+    A vector of endpoints.
     @return void
    **/
-  void EdgeDetection::floodFillPostprocess(cv::Mat* image)
+  void EdgeDetection::identifyCurvesAndEndpoints(cv::Mat* image,
+    std::vector<std::set<unsigned int> >* lines,
+    std::vector<std::pair<GraphNode, GraphNode> >* endPoints)
   {
-    if (image->type() != CV_8UC3)
+    bool hasFinished = false;
+
+    while(!hasFinished)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "EdgeDetection::floodFillPostprocess Inappropriate image type.");
-
-      return;
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::start("floodFillPostprocess", "produceEdgesViaSegmentation");
-    #endif
-
-    cv::RNG rng = cv::theRNG();
-    cv::Mat mask = cv::Mat::zeros(image->rows + 2, image->cols + 2, CV_8UC1);
-
-    // Get a pointer on mask to speed-up execution
-    unsigned char* mask_ptr = mask.ptr();
-
-    for (int rows = 0; rows < image->rows; rows++)
-    {
-      for (int cols = 0; cols < image->cols; cols++)
+      hasFinished = true;
+      for(unsigned int i = 1 ; i < image->rows - 1; i++)
       {
-        if (mask_ptr[(rows + 1) * mask.cols + (cols + 1)] == 0)
+        for(unsigned int j = 1 ; j < image->cols - 1; j++)
         {
-          cv::Scalar newVal(rng(256), rng(256), rng(256));
+          // A point is potentially located along a curve only if its value
+          // is non-zero; otherwise it is not a point!
+          if(image->at<unsigned char> (i, j) != 0)
+          {
+            // Locate the indices of the points that constitute the curve on
+            // which point (i, j) is located, along with the end points of it.
+            std::set<unsigned int> ret;
+            std::pair<GraphNode, GraphNode> pts =
+              identifyCurveAndEndpoints(image, i, j, &ret);
 
-          // Fill this segment with a random colour
-          cv::floodFill(*image, mask, cv::Point(cols, rows), newVal, 0,
-            cv::Scalar::all(Parameters::Rgb::floodfill_lower_colour_difference),
-            cv::Scalar::all(Parameters::Rgb::floodfill_upper_colour_difference)
-            );
+            // Push the indices of the points constituting the curve on which
+            // point (i, j) is located, into the overall curves' indices vector.
+            lines->push_back(ret);
+
+            // Push the end-points of the curve into the overall vector of
+            // end-points
+            endPoints->push_back(pts);
+
+            hasFinished = false;
+            break;
+          }
+        }
+
+        if(!hasFinished)
+        {
+          break;
         }
       }
     }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("floodFillPostprocess");
-    #endif
   }
 
 

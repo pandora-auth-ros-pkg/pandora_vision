@@ -1100,8 +1100,8 @@ namespace pandora_vision
 
 
 
-  //! Tests EdgeDetection::findNeighs
-  TEST_F ( EdgeDetectionTest, findNeighsTest )
+  //! Tests EdgeDetection::identifyCurveAndEndpoints
+  TEST_F ( EdgeDetectionTest, identifyCurveAndEndpoints )
   {
     // A gamma shape
     cv::Mat gamma = cv::Mat::zeros( squares_.size(), CV_8UC1 );
@@ -1120,7 +1120,7 @@ namespace pandora_vision
 
     // Find the end points of a curve where a point trully lies on
     std::pair< GraphNode, GraphNode > p_valid =
-      EdgeDetection::findNeighs ( &gamma, 300, 451, &ret);
+      EdgeDetection::identifyCurveAndEndpoints ( &gamma, 300, 451, &ret);
 
     // The point should lie on a curve.
     // The curve should indeed be a curve: it is constituted by points
@@ -1139,7 +1139,7 @@ namespace pandora_vision
 
     // Find the end points of a curve where a point trully lies on
     std::pair< GraphNode, GraphNode > p_invalid =
-      EdgeDetection::findNeighs ( &gamma, 100, 200, &ret);
+      EdgeDetection::identifyCurveAndEndpoints ( &gamma, 100, 200, &ret);
 
     // The point should not lie on a curve.
     EXPECT_EQ ( 1, ret.size() );
