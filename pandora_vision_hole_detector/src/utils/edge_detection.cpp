@@ -1089,15 +1089,8 @@ namespace pandora_vision
 
     identifyCurvesAndEndpoints(&thinnedOpenLines, &lines, &farPts);
 
-    for (int l = 0; l < lines.size(); l++)
-    {
-      if (lines[l].size() < Parameters::Outline::minimum_curve_points)
-      {
-        lines.erase(lines.begin() + l);
-        farPts.erase(farPts.begin() + l);
-      }
-    }
-
+    // Because the thinnedOpenLines image was wiped clean via the execution
+    // of the identifyCurvesAndEndpoints method, re-paint the lines found on it
     for(unsigned int i = 0 ; i < lines.size() ; i++)
     {
       for(std::set<unsigned int>::iterator it = lines[i].begin() ;
@@ -1106,6 +1099,7 @@ namespace pandora_vision
         thinnedOpenLines.data[*it] = 255;
       }
     }
+
 
     // Connect the end points of open shapes
     connectPairs(&thinnedOpenLines, farPts, 1);
@@ -1302,7 +1296,7 @@ namespace pandora_vision
     cv::Mat* img, const int& x_, const int& y_, std::set<unsigned int>* ret)
   {
     #ifdef DEBUG_TIME
-    Timer::start("identifyCurveAndEndpoints", "denoiseEdges");
+    Timer::start("identifyCurveAndEndpoints", "identifyCurvesAndEndpoints");
     #endif
 
     std::vector<unsigned int> current, next;
@@ -1531,6 +1525,10 @@ namespace pandora_vision
     std::vector<std::set<unsigned int> >* lines,
     std::vector<std::pair<GraphNode, GraphNode> >* endPoints)
   {
+    #ifdef DEBUG_TIME
+    Timer::start("identifyCurvesAndEndpoints", "denoiseEdges");
+    #endif
+
     bool hasFinished = false;
 
     while(!hasFinished)
@@ -1550,13 +1548,16 @@ namespace pandora_vision
             std::pair<GraphNode, GraphNode> pts =
               identifyCurveAndEndpoints(image, i, j, &ret);
 
-            // Push the indices of the points constituting the curve on which
-            // point (i, j) is located, into the overall curves' indices vector.
-            lines->push_back(ret);
+            if(ret.size() > Parameters::Outline::minimum_curve_points)
+            {
+              // Push the indices of the points constituting the curve on which
+              // point (i, j) is located, into the overall curves' indices vector.
+              lines->push_back(ret);
 
-            // Push the end-points of the curve into the overall vector of
-            // end-points
-            endPoints->push_back(pts);
+              // Push the end-points of the curve into the overall vector of
+              // end-points
+              endPoints->push_back(pts);
+            }
 
             hasFinished = false;
             break;
@@ -1569,6 +1570,10 @@ namespace pandora_vision
         }
       }
     }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("identifyCurvesAndEndpoints");
+    #endif
   }
 
 
