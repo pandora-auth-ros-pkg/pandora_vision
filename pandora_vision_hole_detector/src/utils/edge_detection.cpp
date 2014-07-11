@@ -1281,9 +1281,7 @@ namespace pandora_vision
 
   /**
     @brief Identifies in which curve a point lies on and returns the
-    curve's two end-points. If a point does not lie on a curve,
-    the pair returned has both coordinates (x,y) set to zero, and the
-    size of ret is one.
+    curve's two end-points.
     @param[in] img [cv::Mat*] The input binary image
     @param[in] x_ [const int&] The x coordinate of the point
     @param[in] y_ [const int&] The y coordinate of the point
@@ -1512,6 +1510,7 @@ namespace pandora_vision
   /**
     @brief Given an image of CV_8UC1 format, this method locates and
     identifies all continuous curves, along with their end-points.
+    CAUTION: the length of each curve must exceed a certain threshold.
     @param[in,out] image [cv::Mat*] The image whose curves and their
     endpoints one wishes to locate and identify. CAUTION: image is cleared
     at the end of the process.
