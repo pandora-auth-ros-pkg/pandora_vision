@@ -126,7 +126,7 @@ namespace pandora_vision
           
     ///Deallocate memory
     channelsStatictisFeatureVector.clear();
-    //~ _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
+     _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
     
     edgeOrientationFeatureVector.clear();
     _edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 
@@ -136,11 +136,11 @@ namespace pandora_vision
   }
   
   /**
-   * @brief This function returns current feature vector according
-   * to the features found in rgb image
-   * @return [std::vector<double>] _rgbFeatureVector, feature vector 
-   * for current rgb image
-   */ 
+     * @brief This function returns current feature vector according
+     * to the features found in rgb image
+     * @return [std::vector<double>] _rgbFeatureVector, feature vector 
+     * for current rgb image
+  */ 
   std::vector<double> RgbSystemValidator::getRgbFeatureVector()
   {
     return _rgbFeatureVector;

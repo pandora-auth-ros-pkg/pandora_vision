@@ -38,6 +38,7 @@
 #include "pandora_vision_victim/feature_extractors/dominant_color.h"
 
 
+
 namespace pandora_vision
 {
   DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
@@ -62,11 +63,9 @@ namespace pandora_vision
         val = i;
       }
     }
-
-    ret.push_back(val);
-    ret.push_back(maxVal/(
-      VictimParameters::frameHeight * VictimParameters::frameWidth));
     
+    ret.push_back(val);
+    ret.push_back(maxVal/(VictimParameters::frameHeight * VictimParameters::frameWidth));
     return ret;
   }
 }

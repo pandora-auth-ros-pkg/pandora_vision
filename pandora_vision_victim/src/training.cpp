@@ -42,7 +42,9 @@ namespace pandora_vision
   /**
 @brief Constructor
 **/
-  SvmTraining::SvmTraining(int _num_files, int _test_num_files, int _num_feat) : _nh()
+  SvmTraining::SvmTraining(const std::string& ns,int _num_files, int _test_num_files, int _num_feat) :
+	  _nh(ns),
+	  vparams(ns)
   {
     num_files = _num_files;
     num_feat = _num_feat;
@@ -948,7 +950,7 @@ int main(int argc, char** argv)
   if(type == 1 || type == 2){
     std::cout << "Add total number of features required for your subsystem :" << std::endl;
     std::cin >> num_feat;
-    pandora_vision::SvmTraining victim_trainer(num_files, test_num_files, num_feat);
+    pandora_vision::SvmTraining victim_trainer("victim",num_files, test_num_files, num_feat);
     std::cout << "Add absolute path, where your samples are stored "<< std::endl;
     std::cin >> victim_trainer.path_to_samples;
     victim_trainer.trainSubSystem(type);

@@ -63,9 +63,12 @@ namespace pandora_vision
                        
     /// Subscribe to input image's topic
     /// image_transport::ImageTransport it(_nh);
-    _frameSubscriber = _nh.subscribe(
-      VictimParameters::enhancedHolesTopic, 
-        1, &VictimDetection::imageCallback, this);
+    
+     _frameSubscriber = _nh.subscribe(
+                       "/kinect/rgb/image_raw", 1, &VictimDetection::dummyimageCallback, this);
+    //~ _frameSubscriber = _nh.subscribe(
+      //~ VictimParameters::enhancedHolesTopic, 
+        //~ 1, &VictimDetection::imageCallback, this);
       
     /// Initialize the face detector and the svm classifiers
     _rgbViolaJonesDetector = VictimVJDetector(
@@ -137,6 +140,45 @@ namespace pandora_vision
     return false;
   }
 
+  /**
+   * @brief Function called when new ROS message appears, for camera
+   * @param msg [const sensor_msgs::Image&] The message
+   * @return void
+  */
+  void VictimDetection::dummyimageCallback(const sensor_msgs::Image& msg)
+  {
+    //ROS_INFO("ENTER DUMMY");
+      if(
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION) &&
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD) && 
+      (curState != 
+        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST)
+    )
+    {
+      return;
+    }
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv::Mat rgbImage = in_msg->image.clone();
+    victimFrameTimestamp = msg.header.stamp;
+    
+      //~ if(_frame_id.c_str()[0] == '/')
+      //~ _frame_id = _frame_id.substr(1);
+    
+    if (rgbImage.empty() )
+    {
+      ROS_ERROR("[victim_node] : No more Frames ");
+      return;
+    }
+    
+    //! The actual victim detection
+    dummyDetectVictims(false, rgbImage, msg);
+    //~ isDepthEnabled = false;
+    //~ isHole = true;
+    //~ checkState();
+  }
   /**
    * @brief Function called when new message appears from hole_detector_node
    * @param msg [pandora_vision_msgs::EnhancedHolesVectorMsg&] The message
@@ -215,6 +257,302 @@ namespace pandora_vision
          _frame_id, _parent_frame_id));
     } 
     
+  }
+  
+  /**
+   * @brief This method check in which state we are, according to
+   * the information sent from hole_detector_node
+   * @return void
+  */
+  void VictimDetection::dummyDetectVictims(
+    bool depthEnabled, 
+    const cv::Mat& rgbImage,
+    const sensor_msgs::Image& msg
+    )
+  {
+    
+    if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+    {
+      rgbImage.copyTo(debugImage);
+      rgb_vj_keypoints.clear();
+      rgb_svm_keypoints.clear();
+      depth_vj_keypoints.clear();
+      depth_svm_keypoints.clear();
+      rgb_vj_bounding_boxes.clear();
+      rgb_svm_bounding_boxes.clear();
+      depth_vj_bounding_boxes.clear();
+      depth_svm_bounding_boxes.clear();
+      holes_bounding_boxes.clear();
+      rgb_vj_p.clear();
+      rgb_svm_p.clear();
+      depth_vj_p.clear();
+      depth_svm_p.clear();
+    }
+    
+    DetectionImages imgs; 
+    int stateIndicator =1; //2 * depthEnabled + holesEnabled + 1;
+    
+    {
+      EnhancedMat emat;
+      rgbImage.copyTo(emat.img);
+      imgs.rgb = emat;
+      imgs.rgb.bounding_box = cv::Rect(0, 0, 0, 0);
+      imgs.rgb.keypoint = cv::Point2f(0, 0);
+    }
+      
+    DetectionMode detectionMode;
+    switch(stateIndicator)
+    {
+      case 1:
+        detectionMode = GOT_RGB;
+        break;
+      case 2:
+        detectionMode = GOT_HOLES;
+        break;
+      //~ case 3:
+        //~ detectionMode = GOT_DEPTH;
+        //~ {
+          //~ EnhancedMat emat;
+          //~ depthImage.copyTo(emat.img);
+          //~ imgs.depth = emat;
+          //~ imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
+          //~ imgs.depth.keypoint = cv::Point2f(0, 0);
+        //~ }
+        //~ break;
+      //~ case 4:
+        //~ detectionMode = GOT_HOLES_AND_DEPTH;
+        //~ {
+          //~ EnhancedMat emat;
+          //~ depthImage.copyTo(emat.img);
+          //~ imgs.depth = emat;
+          //~ imgs.depth.bounding_box = cv::Rect(0, 0, 0, 0);
+          //~ imgs.depth.keypoint = cv::Point2f(0, 0);
+        //~ }
+        //~ break;
+    }
+    //~ for(unsigned int i = 0 ; i < msg.enhancedHoles.size();
+      //~ i++)
+    //~ {
+      //~ 
+      //~ int minx = 10000, maxx = -1, miny = 10000, maxy = -1;
+      //~ for(unsigned int j = 0 ; j < 4 ; j++)
+      //~ {
+        //~ int xx = msg.enhancedHoles[i].verticesX[j];
+        //~ int yy = msg.enhancedHoles[i].verticesY[j];
+        //~ minx = xx < minx ? xx : minx;
+        //~ maxx = xx > maxx ? xx : maxx;
+        //~ miny = yy < miny ? yy : miny;
+        //~ maxy = yy > maxy ? yy : maxy;
+      //~ }
+      cv::Rect rect(VictimParameters::frameWidth/2-50, VictimParameters::frameHeight/2-50, 100, 100);
+      //~ holes_bounding_boxes.push_back(rect);
+      
+      EnhancedMat emat;
+      emat.img = rgbImage(rect);
+      cv::resize(emat.img, emat.img, 
+        cv::Size(VictimParameters::frameWidth, VictimParameters::frameHeight));
+      emat.bounding_box = rect;
+      emat.keypoint = cv::Point2f(
+       VictimParameters::frameWidth/2, VictimParameters::frameHeight/2
+      );
+      imgs.rgbMasks.push_back(emat);
+      
+      //~ if(GOT_HOLES_AND_DEPTH || GOT_DEPTH)
+      //~ {
+        //~ emat.img = depthImage(rect);
+        //~ imgs.depthMasks.push_back(emat);
+      //~ }
+    
+    std::vector<DetectedVictim> final_victims = 
+      victimFusion(imgs, detectionMode);
+    
+
+    //!< Message alert creation
+    for(int i = 0;  i < final_victims.size() ; i++)
+    {
+      if( final_victims[i].probability > 0.0001)
+      {
+       
+        float x = final_victims[i].keypoint.x
+          - static_cast<float>(VictimParameters::frameWidth) / 2;
+        float y = static_cast<float>(VictimParameters::frameHeight) / 2
+          - final_victims[i].keypoint.y;
+            
+        //!< Create message of Victim Detector
+        pandora_common_msgs::GeneralAlertMsg victimMessage;
+                                        
+        victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+        
+        victimMessage.header.stamp = victimFrameTimestamp;
+        
+        victimMessage.yaw = 
+          atan(2 * x / VictimParameters::frameWidth 
+            * tan(VictimParameters::hfov / 2));
+        
+        victimMessage.pitch = 
+          atan(2 * y / VictimParameters::frameHeight 
+            * tan(VictimParameters::vfov / 2));
+            
+        victimMessage.probability = final_victims[i].probability;
+        
+        _victimDirectionPublisher.publish(victimMessage);
+      }
+      //!< Debug purposes
+      if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+      {
+        cv::KeyPoint kp(final_victims[i].keypoint, 10);
+        cv::Rect re = final_victims[i].boundingBox;
+        switch(final_victims[i].source)
+        {
+          case RGB_VJ:
+            rgb_vj_keypoints.push_back(kp);
+            rgb_vj_bounding_boxes.push_back(re);
+            rgb_vj_p.push_back(final_victims[i].probability);
+            break;
+          case RGB_SVM:
+            rgb_svm_keypoints.push_back(kp);
+            rgb_svm_bounding_boxes.push_back(re);
+            rgb_svm_p.push_back(final_victims[i].probability);
+            break;
+          case DEPTH_VJ:
+            depth_vj_keypoints.push_back(kp);
+            depth_vj_bounding_boxes.push_back(re);
+            depth_vj_p.push_back(final_victims[i].probability);
+            break;
+          case DEPTH_RGB_SVM:
+            depth_svm_keypoints.push_back(kp);
+            depth_svm_bounding_boxes.push_back(re);
+            depth_svm_p.push_back(final_victims[i].probability);
+            break;
+        }
+
+      }
+    } 
+    
+    //! Debug image
+    if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
+    {
+      cv::drawKeypoints(debugImage, rgb_vj_keypoints, debugImage, 
+        CV_RGB(0, 255, 0),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < rgb_vj_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, rgb_vj_bounding_boxes[i], 
+          CV_RGB(0, 255, 0));
+        {
+          std::ostringstream convert;
+          convert << rgb_vj_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            rgb_vj_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 0), 1, CV_AA);
+        }
+      }
+        
+      cv::drawKeypoints(debugImage, depth_vj_keypoints, debugImage, 
+        CV_RGB(255, 100, 0),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < depth_vj_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, depth_vj_bounding_boxes[i], 
+          CV_RGB(255, 100, 0));
+        {
+          std::ostringstream convert;
+          convert << depth_vj_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            depth_vj_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
+        }
+      }
+        
+      cv::drawKeypoints(debugImage, rgb_svm_keypoints, debugImage, 
+        CV_RGB(0, 100, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < rgb_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, rgb_svm_bounding_boxes[i], 
+          CV_RGB(0, 100, 255));
+        {
+          std::ostringstream convert;
+          convert << rgb_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            rgb_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+        }
+      }
+      
+      cv::drawKeypoints(debugImage, depth_svm_keypoints, debugImage, 
+        CV_RGB(0, 255, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for(unsigned int i = 0 ; i < depth_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, depth_svm_bounding_boxes[i], 
+          CV_RGB(0, 255, 255));
+        {
+          std::ostringstream convert;
+          convert << depth_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            depth_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+        }
+      }
+      for(unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, holes_bounding_boxes[i], 
+          CV_RGB(0, 0, 0));
+      }
+      
+      {
+        std::ostringstream convert;
+        convert << "RGB_VJ : "<< rgb_vj_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 20),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 0), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "DEPTH_VJ : "<< depth_vj_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 40),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 80),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+      }
+      //~ {
+        //~ std::ostringstream convert;
+        //~ convert << "Holes got : "<< msg.enhancedHoles.size();
+        //~ cv::putText(debugImage, convert.str().c_str(),
+          //~ cvPoint(10, 100),
+          //~ cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 0, 0), 1, CV_AA);
+      //~ }
+    }
+    if(VictimParameters::debug_img_publisher)
+    {
+      // Convert the image into a message
+      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+      msgPtr->header = msg.header;
+      msgPtr->encoding = sensor_msgs::image_encodings::BGR8;
+      msgPtr->image = debugImage;
+      // Publish the image message
+      _debugVictimsPublisher.publish(*msgPtr->toImageMsg());
+    }
+    if(VictimParameters::debug_img)
+    {
+      cv::imshow("Victim detector", debugImage);
+      cv::waitKey(30);
+    }
   }
   
   /**
@@ -537,13 +875,13 @@ namespace pandora_vision
     DetectedVictim temp;
     
     ///Enable Viola Jones for rgb image 
-    rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
+    //rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
     
     if(detectionMode == GOT_HOLES_AND_DEPTH || detectionMode == GOT_DEPTH)
     {
       depth_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.depth.img);
     }
-    if(detectionMode == GOT_HOLES || detectionMode == GOT_HOLES_AND_DEPTH)
+    if(detectionMode == GOT_HOLES || detectionMode == GOT_HOLES_AND_DEPTH || detectionMode == GOT_RGB)
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
@@ -551,7 +889,7 @@ namespace pandora_vision
           imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
         temp.source = RGB_SVM;
-        temp.boundingBox = imgs.depthMasks[i].bounding_box;
+        temp.boundingBox = imgs.rgbMasks[i].bounding_box;
         rgb_svm_probabilities.push_back(temp);
       }  
     }
@@ -590,7 +928,8 @@ namespace pandora_vision
       }
     }
     // Only rgb svm probabilities
-    if(detectionMode == GOT_HOLES)
+    
+    if(detectionMode == GOT_HOLES || detectionMode == GOT_RGB)
     {
       for(unsigned int i = 0 ; i < rgb_svm_probabilities.size() ; i++)
       {

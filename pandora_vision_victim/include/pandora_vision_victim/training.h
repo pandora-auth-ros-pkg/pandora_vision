@@ -47,9 +47,10 @@
 #include "pandora_vision_victim/utilities/channels_statistics_extractor.h"
 #include "pandora_vision_victim/utilities/edge_orientation_extractor.h"
 #include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
-#include "pandora_vision_victim/depth_system_validator.h"
-#include "pandora_vision_victim/rgb_system_validator.h"
+//#include "pandora_vision_victim/depth_system_validator.h"
+//#include "pandora_vision_victim/rgb_system_validator.h"
 #include "pandora_vision_victim/training_parameters.h"
+#include "pandora_vision_victim/victim_parameters.h"
 
 #define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
 
@@ -63,6 +64,7 @@ class SvmTraining
   //!< The NodeHandle
   ros::NodeHandle _nh;
   
+  VictimParameters vparams;
   ///Feature vector for rgb features
   std::vector<double> _rgbFeatureVector;
   
@@ -107,7 +109,7 @@ class SvmTraining
 public:
 
   //!< The Constructor
-  explicit SvmTraining(int _num_files, int _test_num_files, int _num_feat);
+  explicit SvmTraining(const std::string& ns, int _num_files, int _test_num_files, int _num_feat);
   
   //!< The Destructor
   virtual ~SvmTraining();

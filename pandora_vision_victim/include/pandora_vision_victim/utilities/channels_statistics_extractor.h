@@ -56,18 +56,18 @@ namespace pandora_vision
       cv::Mat h_hist, s_hist, v_hist;
       
       //!< Vector of mean value and std value of every color component
-      std::vector<double> meanStdHSV;
+      std::vector<double> _meanStdHSV;
       //!< Vector of dominant color component and their density values
-      std::vector<double> dominantVal;
+      std::vector<double> _dominantVal;
       //!< Vector of first 6 components of a Fourier transform of the 
       //!< image components H(hue) and S(saturation).
-      std::vector<double> huedft;
-      std::vector<double> satdft;
+      std::vector<double> _huedft;
+      std::vector<double> _satdft;
       //!< Compute the colour angles of rgb color components
-      std::vector<double> colorAnglesAndStd;
+      std::vector<double> _colorAnglesAndStd;
       
       //!< Compute a vector of all color features
-      std::vector<double> _colorFeatureVector;
+      std::vector<double> _rgbStatisticsVector;
       
       //!< Vector of mean value and std value of the depth Image
       std::vector<double> _depthMeanStd;
@@ -148,7 +148,14 @@ namespace pandora_vision
        * @return void
       */ 
       void findDepthChannelsStatisticsFeatures(cv::Mat src);
-      
+
+      /**
+       * @brief This function extract a feature vector according to statistcs 
+       * features for the depth image.
+       * @return void
+       */ 
+       
+      void extractRgbFeatureVector();      
       /**
        * @brief This function extract a feature vector according to statistcs 
        * features for the depth image.
@@ -167,6 +174,13 @@ namespace pandora_vision
        * @return featureVector
       */ 
       std::vector<double> getDepthFeatures();
+      
+      /**
+       * @brief Function that cleans up depthFeatureVector, to add
+       * new elements for next frame
+       * @return void
+      */
+      void emptyCurrentFrameFeatureVector();
       
       /**
        * @brief Function that cleans up depthFeatureVector, to add

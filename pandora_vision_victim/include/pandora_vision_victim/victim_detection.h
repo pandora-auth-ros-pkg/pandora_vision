@@ -39,6 +39,7 @@
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
 
 #include "pandora_vision_victim/victim_vj_detector.h"
+//#include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/rgb_system_validator.h"
 #include "pandora_vision_victim/depth_system_validator.h"
 
@@ -92,7 +93,21 @@ namespace pandora_vision
         const cv::Mat& depthImage,
         const pandora_vision_msgs::EnhancedHolesVectorMsg& msg
       );
-
+      
+      /**
+        * @brief This method check in which state we are, according to
+        * the information sent from hole_detector_node
+        * @return void
+      */
+      void dummyDetectVictims(bool depthEnabled, const cv::Mat& rgbImage, const sensor_msgs::Image& msg);
+      
+      /**
+      * @brief Function called when new ROS message appears, for camera
+      * @param msg [const sensor_msgs::Image&] The message
+      * @return void
+      */
+      void dummyimageCallback(const sensor_msgs::Image& msg);
+      
       /**
        * Function called when new message appears from hole_detector_node
        * @param msg [pandora_vision_msgs::EnhancedHolesVectorMsg&] The message
