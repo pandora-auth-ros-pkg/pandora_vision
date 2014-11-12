@@ -40,16 +40,10 @@ include_directories(include
 )
 
 add_executable(hazmat_node
-          src/hazmat_node.cpp
-          src/hazmat_detection.cpp
-          src/hazmat_detector.cpp
-          src/hazmat_parameters.cpp
-          src/utils.cpp
-          src/sift.cpp
-          src/kdtree.cpp
-          src/minpq.cpp
-          src/xform.cpp
-          src/imgfeatures.cpp)
+      src/main.cpp
+      src/hazmat_detector.cpp
+      src/simple_hazmat_detector.cpp
+      src/sift_hazmat_detector.cpp)
 target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
 add_dependencies(hazmat_node
     ${catkin_EXPORTED_TARGETS}
@@ -61,13 +55,13 @@ download_extra_data(${PROJECT_NAME}_download_training_data
                     EXTRA_FILES patterns/extra_files.yaml)
 
 ########################### hazmatTrainNode ############################
-if(HAZMAT_ENABLE_TRAIN)
-  add_executable(hazmat_train src/hazmat_trainer.cpp
-          src/utils.cpp
-          src/sift.cpp
-          src/imgfeatures.cpp)
-  target_link_libraries(hazmat_train ${catkin_LIBRARIES} )
-endif()
+#if(HAZMAT_ENABLE_TRAIN)
+#  add_executable(hazmat_train src/hazmat_trainer.cpp
+#          src/utils.cpp
+#          src/sift.cpp
+#          src/imgfeatures.cpp)
+#  target_link_libraries(hazmat_train ${catkin_LIBRARIES} )
+#endif()
 
 
 #~ To check lint : catkin_make roslint_pandora_vision_hazmat
@@ -76,14 +70,10 @@ set(ROSLINT_CPP_OPTS
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-
-  include/defines.h
-  include/hazmat_detection.h
-  include/hazmat_detector.h
-  src/hazmat_detector.cpp
-  src/hazmat_detection.cpp
-  src/hazmat_trainer.cpp
+  // files for lint
 )
+
+
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
 if(CATKIN_ENABLE_TESTING)

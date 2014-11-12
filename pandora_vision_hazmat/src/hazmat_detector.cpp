@@ -1,702 +1,419 @@
-/*********************************************************************
-*
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*
-* Authors:  Tsakalis Vasilis, Despoina Paschalidou
-*********************************************************************/
 #include "pandora_vision_hazmat/hazmat_detector.h"
-namespace pandora_vision
+
+/**
+  @brief Creates a mask that defines the region of the frame where
+        features will be extracted.
+  @param frame [const cv::Mat &] : The input frame.
+  @param mask [cv::Mat *] : The output mask.
+  @param data [cv::Mat &] : An array with extra data.  
+  
+**/
+  
+void HazmatDetector::createMask(const cv::Mat &frame , cv::Mat *mask , 
+      const cv::Mat &data  )
 {
-  /**
-   @brief Default Constructor 
-  */ 
-  HazmatEpsilonDetector::HazmatEpsilonDetector(std::string _package_path)
+  if ( mask->data)
+    // If another mask has already been created do not change it.
+    return ;
+  else
+    // If not then initialize an empty matrix so that the feature
+    // search is performed on the entire frame. 
+    *mask = cv::Mat( frame.size() , frame.type() );
+  }
+
+// Allocating space for the static member variable.
+std::string HazmatDetector::fileName_ = std::string("input") ;
+
+
+// Data input function . 
+
+void HazmatDetector::readData( void )
+{
+  // Open the file for reading .
+  cv::FileStorage fs( fileName_ + ".xml" ,cv::FileStorage::READ);
+  std::cout << fileName_ + ".xml" << std::endl;
+  // Check if the file was opened succesfully .
+  if ( !fs.isOpened() )
   {
-    rows = DEFAULT_HEIGHT;
-    cols = DEFAULT_WIDTH;
-    
-    package_path = _package_path;
-    pattern_index_path = package_path + "/contents";
-  
-    initDetector();
-    frameNum = 0;
+    std::cerr << "XML file could not be opened!" << std::endl;
+    return ;
   }
   
-  /**
-    @brief Initialize hazmat detector. Loads hazmats from hard disk \
-    into memory.
-    @return void
-  **/
-  void HazmatEpsilonDetector::initDetector()
-  {
-    FILE* contents = fopen(pattern_index_path.c_str(), "r");
-    if (contents == NULL) 
-      printf("Can't open contents file");
-    
-    nPatterns = 0;
-        
-    char imgName[50];
-    while(true)
+  // Go to the xml node that contains the pattern names.
+  cv::FileNode inputNames = fs["PatternName"];
+  
+  // Check if the node has a sequence.
+  if ( inputNames.type() != cv::FileNode::SEQ)
     {
-      fgets(imgName, 49, contents);
-
-      if(imgName[0] == '\n') 
-        break;
-      
-      if (feof(contents) != 0) 
-        break;
-
-      nPatterns++;
+        std::cerr << "Input data  is not a string sequence! FAIL" 
+          << std::endl;
+        return ;
     }
-    /// Sets the position indicator associated with stream to the \
-    beginning of the file.
-    rewind(contents);
-    
-    /// Load features of patterns in memory
-    feats = new feature* [nPatterns];
-    nFeats = new int[nPatterns];
-    
-    for(int n = 0; n < nPatterns; n++)
-    {
-      fgets(imgName, 49, contents);
-      imgName[strlen(imgName)-1] = '\0';
-      
-      std::stringstream img_file_stream;
-      
-      img_file_stream << package_path << "/" << imgName << ".sift";
-    
-      /// Returns the number of features imported from every pattern
-      nFeats[n] = import_features(const_cast<char*>(img_file_stream.str().c_str())
-        , FEATURE_LOWE, &feats[n]);
-    } 
-    fclose(contents);
+  
+  // Initialize File iterator.
+  cv::FileNodeIterator it = inputNames.begin() ;
+  cv::FileNodeIterator itEnd = inputNames.end() ;
+  std::string inputName ;
+  std::vector<std::string> input;
+  
+  // Iterate over the node and get the names.
+  for ( ; it != itEnd ; ++it ) 
+  {
+   inputName = (std::string)(*it)["name"]  ;
+   input.push_back(inputName) ;
   }
   
-  /**
-    @brief Sets the hazmat parameters
-    @param clrVariance [int]
-    @param votingThr [float]
-    @param minAreaThr [float]
-    @param maxAreaThr [float]
-    @param sideLgth [int]
-    @param featThr [int]
-    @param MOThr [float]
-    @return void
-  **/
-  void HazmatEpsilonDetector::setHazmatParameters(
-    int clrVariance, float votingThr, float minAreaThr,
-    float maxAreaThr, int sideLgth, int featThr, float MOThr)
-  {
-    colorVariance = clrVariance;
-    votingThreshold = votingThr;
-    minAreaThreshold = minAreaThr;
-    maxAreaThreshold = maxAreaThr;
-    featureThreshold = featThr;
-    MOThreshold = MOThr;
-    sideLength = sideLgth;
-
-    calcMinMax();
-  }
+  // Close the file with the pattern names.
+  fs.release() ;
   
-  /**
-   @brief Default constructor
-  */ 
-  HazmatEpsilonDetector::~HazmatEpsilonDetector(){
-    delete[] nFeats;
-    delete[] minUV;
-    delete[] maxUV;
-  }
-   
-  /**
-    @brief (?)
-    @return void
-  **/  
-  void HazmatEpsilonDetector::calcMinMax()
-  {
-    minUV = new float* [nPatterns];
-    maxUV = new float* [nPatterns];
-    cv::Mat image;
-    for (int i = 0; i < nPatterns; i++)
-    {
-      minUV[i] = new float [2];
-      maxUV[i] = new float [2];
-    }
-    for (int i = 0; i < nPatterns; i++)
-    {
-      std::stringstream img_file_stream;
-      img_file_stream << package_path << "/patterns/enter" << i+1 << ".png";
-      
-      image = cv::imread(img_file_stream.str().c_str(), 1);
-      cvtColor(image, image, CV_BGR2YCrCb);
-      
-      int height, width, step, channels;
-      height = image.size().height;
-      width  = image.size().width;
-      step = image.step;
-      channels = image.channels();
-      
-      for (int j = 0; j < sideLength; j++)
-      {
-        for (int k = 0; k < sideLength; k++)
-        {
-          if( (j == 0) && (k == 0) ){
-            minUV[i][0] = (reinterpret_cast<uchar *>(image.data))
-              [((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 1];
-            minUV[i][1] = (reinterpret_cast<uchar *>(image.data))
-              [((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 2];
-            maxUV[i][0] = (reinterpret_cast<uchar *>(image.data))
-              [((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 1];
-            maxUV[i][1] = (reinterpret_cast<uchar *>(image.data))
-              [((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 2];
-          }  
-          else{
-            if(minUV[i][0] > (reinterpret_cast<uchar *>(image.data))
-              [((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 1])
-            {
-              minUV[i][0] = (reinterpret_cast<uchar *>(image.data))
-                [((height / 2) - (sideLength / 2) + j) * step +
-                  ((width / 2) - (sideLength / 2) + k) * channels + 1];
-            }
-            
-            if (minUV[i][1] > (reinterpret_cast<uchar *>(image.data))[
-              ((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 2])
-            {
-              minUV[i][1] = (reinterpret_cast<uchar *>(image.data))[
-                ((height / 2) - (sideLength / 2) + j) * step +
-                  ((width / 2) - (sideLength / 2) + k) * channels + 2];
-            }
-            
-            if(maxUV[i][0] < (reinterpret_cast<uchar *>(image.data))[
-              ((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 1])
-            {
-              maxUV[i][0] = (reinterpret_cast<uchar *>(image.data))[
-                ((height / 2) - (sideLength / 2) + j) * step +
-                  ((width / 2) - (sideLength / 2) + k) * channels + 1];
-            }
-            
-            if(maxUV[i][1] < (reinterpret_cast<uchar *>(image.data))[
-              ((height / 2) - (sideLength / 2) + j) * step +
-                ((width / 2) - (sideLength / 2) + k) * channels + 2])
-            {
-              maxUV[i][1] = (reinterpret_cast<uchar *>(image.data))[
-                ((height / 2) - (sideLength / 2) + j) * step +
-                  ((width / 2) - (sideLength / 2) + k) * channels + 2];
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-    @brief Calculates histograms for given hazmat signs
-    @return void
-  **/
-  void HazmatEpsilonDetector::calcHistograms()
-  {
-    cv::Mat* patterns = new cv::Mat[nPatterns];
-    cv::Mat image;
-    
-    for(int i = 0; i < nPatterns; i++)
-    {
-     std::stringstream img_file_stream;
-     img_file_stream << package_path << "/patterns/enter" << i+1 << ".png";
-     
-     image = cv::imread(img_file_stream.str().c_str(), 1);
-     cvtColor(image, image, CV_BGR2HSV);
-     patterns[i] = image;
-    }
-    
-    /// Quantize the hue to 30 levels and the saturation to 32 levels
-    int hbins = 30;
-    int histSize[] = {hbins};
-    /// hue varies from 0 to 179, see cvtColor
-    float hranges[] = { 0, 180 };
-    const float* ranges[] = { hranges};
-    /// Compute the histogram from the 0-th and 1-st channels
-    int channels[] = {0};
-    calcHist(patterns , nPatterns, channels, cv::Mat(), patternHistog, 1, 
-      histSize, ranges, true, false );
-    delete[] patterns;
-  }
-
-  /**
-    @brief Calculates the area of a rectangle from its four corners
-    @param pt1 [CvPoint2D64f]
-    @param pt2 [CvPoint2D64f]
-    @param pt3 [CvPoint2D64f]
-    @param pt4 [CvPoint2D64f]
-    @return float The area
-  **/
-  float HazmatEpsilonDetector::calculateRectangleArea(CvPoint2D64f pt1,
-    CvPoint2D64f pt2, CvPoint2D64f pt3, CvPoint2D64f pt4)
-  {
-    float sideA, sideB, sideC; 
-    sideA = sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2));
-    sideB = sqrt(pow((pt2.x - pt3.x), 2) + pow((pt2.y - pt3.y), 2));
-    sideC = sqrt(pow((pt1.x - pt3.x), 2) + pow((pt1.y - pt3.y), 2));
-     
-    float temp, triangleArea;
-    
-    temp = (sideA + sideB + sideC) / 2.0;
-    
-    triangleArea = sqrt( temp*(temp - sideA) * (temp - sideB) * (temp - sideC));
-    
-    float triangleArea2;
-    sideA = sqrt(pow((pt1.x - pt3.x), 2) + pow((pt1.y - pt3.y), 2));
-    sideB = sqrt(pow((pt1.x - pt4.x), 2) + pow((pt1.y - pt4.y), 2));
-    sideC = sqrt(pow((pt3.x - pt4.x), 2) + pow((pt3.y - pt4.y), 2));
-    
-    temp = (sideA + sideB + sideC) / 2.0;
-    
-    triangleArea2 = sqrt(temp*(temp - sideA)*(temp - sideB)*(temp - sideC));
-    
-    float rectangleArea = triangleArea + triangleArea2;
-    
-    return rectangleArea;
-  }
-
-  /**
-    @brief Reads contents from file "contents" and stores into memory \
-    the processed hazmats
-    @return void
-  **/
-  void HazmatEpsilonDetector::preprocessHazmat()
-  {
-    /// Read index of file contents
-    FILE* contents = fopen(pattern_index_path.c_str(), "r");
-    char imgName[50], featName[50];
-    
-    while( true )
-    {
-      // Get next pattern
-      fgets(imgName, 49, contents);
-      imgName[strlen(imgName)-1] = '\0';
-      
-      if( strlen(imgName) == 0) 
-        break;
-        
-      ROS_INFO_STREAM("Processing hazmat" << imgName);
-      
-      struct feature* feat;
-
-      /// Compute and store features
-      IplImage* img = cvLoadImage(imgName, 1);
-      if(!img) 
-        ROS_ERROR("No input image!");
-      
-      
-      int n = sift_features(img, &feat);
-      snprintf(featName, sizeof(featName), "%s.sift", imgName);
-      export_features(featName, feat, n);
-
-      /// Free memory
-      cvReleaseImage(&img);
-      delete feat;
-    }
-    fclose(contents);
-  }
+  // For every pattern name read the necessary training data.
+  std::string trainingDataDir = "trainingData//" + this->getFeaturesName() ;
+  std::string fileName ;
   
-  /**
-    @brief Finds a specific feature (?)
-    @param m [int *]
-    @param n [int]
-    @param testNum [int]
-    @param kd_root [struct kd_node *]
-    @return void
-  **/
-  std::vector <int>HazmatEpsilonDetector::findFeature(int *m, int n, 
-    int testNum, struct kd_node* kd_root)
-  {
-    struct feature** nbrs;
-    
-    std::vector <int> tempvector;
-    
-    for(int i = 0; i < testNum; i++)
-    {
-      int k = 
-        kdtree_bbf_knn( kd_root, feats[n] +i, 2, &nbrs, KDTREE_BBF_MAX_NN_CHKS );
-      if( k == 2 )
-      {
-        double d0 = descr_dist_sq( feats[n] +i, nbrs[0] );
-        double d1 = descr_dist_sq( feats[n] +i, nbrs[1] );
-        if( d0 < d1 * NN_SQ_DIST_RATIO_THR ){
-          feats[n][i].fwd_match = nbrs[0];
-          tempvector.push_back(i);
-          m[0]++;
-          
-        }
-      }
-      free(nbrs);
-    }
-    return tempvector;
-  } 
-  
-  /**
-    @brief Calculates the area of a pattern in an image 
-    @param H [CvMat*]
-    @param pattern_image [cv::Mat]
-    @return void
-  **/
-  void  HazmatEpsilonDetector::calculateArea(CvMat* H, cv::Mat pattern_image)
-  {
-    CvPoint2D64f point1 = {0, 0};
-    CvPoint2D64f point2 = {0, pattern_image.size().height};
-    CvPoint2D64f point3 = {pattern_image.size().width, 0};
-    CvPoint2D64f point4 = {pattern_image.size().width, 
-      pattern_image.size().height};
-    
-    /// Find the transformation of the 4 corners of the initial image
-    point1 = persp_xform_pt( point1, H );
-    point2 = persp_xform_pt( point2, H );
-    point3 = persp_xform_pt( point3, H );
-    point4 = persp_xform_pt( point4, H );
-    /// Calculate the final area according to the given points
-    area = calculateRectangleArea(point1, point2, point3, point4);
-  }
-  
-  /**
-    @brief (?)
-    @param SAD [float*]
-    @param SAD2 [float*]
-    @param img [IplImage*]
-    @param H [CvMat*]
-    @param _pattern_image [cv::Mat]
-    @param n [int]
-    @return CvPoint2D64f
-  **/
-  CvPoint2D64f HazmatEpsilonDetector::defineVariance(float* SAD, 
-    float* SAD2, IplImage* img, CvMat* H, cv::Mat _pattern_image, int n)  
+  for (int i = 0 ; i < input.size() ; i++) 
   { 
-    /// Convert cv::Mat to IplImage in order to use opensift library
-    IplImage* pattern_image = 
-      cvCreateImage( cvSize(cols, rows), IPL_DEPTH_8U, 3 );
+    // Open the training file associated with image #i .
+    fileName = trainingDataDir + "//" + input[i] + ".xml" ;
+    cv::FileStorage fs2( fileName ,cv::FileStorage::READ);
     
-    IplImage* temp = new IplImage(_pattern_image);
-    pattern_image = cvCloneImage(temp);
-     
-    IplImage* _xformed = cvCreateImage( cvGetSize( img ), IPL_DEPTH_8U, 3 );
-    cvWarpPerspective( pattern_image, _xformed, H, 
-      CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cv::Scalar( 0, 0, 0));
-    cv::Mat xformed(_xformed, false);
-   
-    cv::Mat color_image = cv::Mat( cv::Size(cols, rows), CV_8U, 3 );
-    xformed.copyTo(color_image);
-    cvtColor(color_image, color_image, CV_BGR2YCrCb);
-    cv::Mat _img(img, false);
-    
-    cv::Mat ycrcb_image = cv::Mat( cvSize(cols, rows), CV_8U, 3 );
-    _img.copyTo(ycrcb_image);
-    cvtColor(ycrcb_image, ycrcb_image, CV_BGR2YCrCb);
-
-    int color_image_height;
-    int color_image_width;
-    int color_image_step;
-    int color_image_channels;
-    
-    color_image_height = color_image.size().height;
-    color_image_width = color_image.size().width;
-    color_image_step = color_image.step;
-    color_image_channels = color_image.channels();
-    
-    int ycrycb_image_height;
-    int ycrycb_image_width;
-    int ycrycb_image_step;
-    int ycrycb_image_channels;
-    
-    ycrycb_image_height = ycrcb_image.size().height;
-    ycrycb_image_width = ycrcb_image.size().width;
-    ycrycb_image_step = ycrcb_image.step;
-    ycrycb_image_channels = ycrcb_image.channels();
-    
-    CvPoint2D64f point = 
-      {(_pattern_image.size().width) / 2, (_pattern_image.size().height) / 2};
-    point = persp_xform_pt( point, H );
-    votes = 0;
-              
-    //start voting
-    for (int counter = 0; counter < sideLength; counter++) {
-      for (int counter2 = 0; counter2 < sideLength; counter2++){
-        if (( (point.y - (sideLength / 2) + counter ) >= 0) && 
-            ( (point.y - (sideLength / 2) + counter ) < rows ))
-        {
-          if (( (point.x - (sideLength / 2) + counter2 ) >= 0) && 
-              ( (point.x - (sideLength / 2) + counter2 ) < cols ))
-            {
-              bool test1 = 
-                ( (reinterpret_cast<uchar*>(ycrcb_image.data)
-                [ ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  color_image_step +
-                  ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                    color_image_channels + 1 ] >= (minUV[n][0] - 333333333333333333333))
-              &&
-              ( (reinterpret_cast<uchar*>(ycrcb_image.data)
-                [ ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                    color_image_step +
-                  ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                    color_image_channels + 1] < (maxUV[n][0] + colorVariance))));
-                  
-              if(test1 == true)
-              {
-                bool test2 =
-                ( (reinterpret_cast<uchar*>(ycrcb_image.data)
-                [ ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  color_image_step +
-                  ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                    color_image_channels + 2 ]>= (minUV[n][1] - colorVariance)))
-                &&
-                ( (reinterpret_cast<uchar*>(ycrcb_image.data))
-                  [ ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                      color_image_step +
-                    ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                      color_image_channels + 2] <= (maxUV[n][1] + colorVariance));
-                if(test2 == true)
-                  votes = votes + 1;
-              }
-              
-            /// Find the absolute variance between the initial and the final image
-            *SAD = *SAD + fabsf(
-              (reinterpret_cast<uchar*>(ycrcb_image.data))[
-                ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  ycrycb_image_step +
-                ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                  ycrycb_image_channels + 1] -
-              (reinterpret_cast<uchar*>(color_image.data))[
-                ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  color_image_step +
-                ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                  color_image_channels + 1] );
-                  
-            *SAD2 = *SAD2 + fabsf(
-            (reinterpret_cast<uchar*>(ycrcb_image.data))[
-                ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  ycrycb_image_step +
-                ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                  ycrycb_image_channels + 2] -
-              (reinterpret_cast<uchar*>(color_image.data))[
-                ( static_cast<int>(point.y) - sideLength / 2 + counter) *
-                  color_image_step +
-                ( static_cast<int>(point.x) - sideLength / 2 + counter2) *
-                  color_image_channels + 2] );
-            }
-          }
-      }
-    }
-    
-    cvReleaseImage(&pattern_image);
-    cvReleaseImage(&_xformed);
-    delete temp;
-    return point;
-  }
-  
-  /**
-    @brief The core of hazmat detector
-    @param img [cv::Mat] Current frame to be processed
-    @return std::vector<HazmatEpsilon> of found hazmats in current frame
-  */ 
-  std::vector<HazmatEpsilon> HazmatEpsilonDetector::detectHazmat
-    (cv::Mat hazmatFrame)
-  {
-    std::vector<HazmatEpsilon> result;
-    
-    IplImage* img = cvCreateImage( cv::Size(cols, rows), IPL_DEPTH_8U, 3 );
-    IplImage* temp = new IplImage(hazmatFrame);
-    img = cvCloneImage(temp);
-      
-    initDetector();
-
-    /// SIFT process of screenshot
-    struct kd_node* kd_root;
-    
-    if (!img)
-      ROS_ERROR("Could not load image");
-      
-    struct feature* featShot;
-    
-    /// Finds SIFT features in an image.
-    int nShot = sift_features(img, &featShot);
-    
-    if (nShot > 0)
+    // Check if the file was properly opened.
+    if ( !fs2.isOpened() )
     {
-      kd_root = kdtree_build( featShot, nShot );
-      
-      /// Search screenshot for each pattern
-      int i;
-      int max = -1;
-      for( int n = 0; n < nPatterns; n++)
-      {
-        /// Find nearest neighboor for each feature in screenshot
-        int m = 0;
-        /// Number of imported features from each image
-        int num_of_features = nFeats[n];
-        
-        std::vector <int> feature_vector;
-        feature_vector = findFeature(&m, n, num_of_features, kd_root);
-   
-        /// Run RANSAC to find out a transformation that transforms
-        /// patterns into screenshot
-        if( m > featureThreshold )
-        {
-          CvMat* H;
-          H = ransac_xform( feats[n], num_of_features, FEATURE_FWD_MATCH, 
-            lsq_homog, 4, 0.01, homog_xfer_err, 3.0, NULL, NULL );
-          if( H )
-          {
-            std::stringstream img_file_stream;
-            img_file_stream << package_path << "/patterns/enter" 
-              << n+1  << ".png";
-            
-            cv::Mat pattern_image;
-            pattern_image = 
-              cv::imread(img_file_stream.str().c_str(), CV_LOAD_IMAGE_COLOR);
-            if (!pattern_image.data)
-              ROS_ERROR("could not load pattern image");
-
-            calculateArea(H, pattern_image);
-            
-            if (area >= minAreaThreshold && area <= maxAreaThreshold)
-            {
-              float SAD = 0;
-              float SAD2 = 0;
-              CvPoint2D64f point;
-              point = defineVariance(&SAD, &SAD2, img, H, pattern_image, n);
-              
-              ///check if the final image's results is within thresholds
-              if (votes > votingThreshold){
-                
-                float MO = ( SAD + SAD2 )/2;
-                if (MO < MOThreshold)
-                {
-                  HazmatEpsilon a;
-                  a.x = point.x;
-                  a.y = point.y;
-                  a.pattern_num = n+1;
-                  a.m = m;
-                  a.MO = MO;
-                  a.votes = votes;
-                  a.H = cvCloneMat(H);
-                  if (result.size() == 0)
-                    result.push_back(a);
-                  else
-                  {
-                    bool flag = false;
-                    for (int v = 0; v < result.size(); v++)
-                    {
-                      float check1 = fabsf( a.x - result[v].x);
-                      float check2 = fabsf( a.y - result[v].y);
-                      if ( (check1 <= 20) && (check2 <= 20) )
-                      {
-                        flag = true;
-                        float isHazmat = 0;
-                        float isNotHazmat = 0;
-                        ///Check if i already have a hazmat in the same place 
-                        ///and check which fits best
-                        if ( a.m > result[v].m)
-                          isHazmat = isHazmat + 0.4;
-                        else if(a.m  ==  result[v].m){
-                          isHazmat = isHazmat + 0.4;
-                          isNotHazmat = isNotHazmat + 0.4;
-                        } 
-                        else
-                          isNotHazmat = isNotHazmat +0.4;
-                          
-                        if (a.MO < result[v].MO)
-                          isHazmat = isHazmat + 0.3;
-                        else if( a.votes == result[v].votes )
-                        {
-                          isHazmat = isHazmat + 0.3;
-                          isNotHazmat = isNotHazmat + 0.3;
-                        }  
-                        else
-                          isNotHazmat = isNotHazmat + 0.3;
-                          
-                        if ( a.votes > result[v].votes ){
-                          isHazmat = isHazmat + 0.3;
-                        }
-                        else if( a.votes == result[v].votes )
-                        {
-                          isHazmat = isHazmat + 0.3;
-                          isNotHazmat = isNotHazmat + 0.3;
-                        }
-                        else
-                          isNotHazmat = isNotHazmat + 0.3;
-                        
-                        if ( isHazmat >= isNotHazmat)
-                        {
-                          result[v].x = a.x;
-                          result[v].y = a.y;
-                          result[v].pattern_num = a.pattern_num;
-                          result[v].m = a.m;
-                          result[v].MO = a.MO;
-                          result[v].votes = a.votes;
-                          result[v].H = a.H;
-                        }
-                      }
-                    }
-                    if (flag == false){
-                      result.push_back(a);
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          cvReleaseMat(&H);
-        }
-        if (feature_vector.size() > 0)
-        {
-          for (int l = 0; l < feature_vector.size(); l++)
-          {
-            feats[n][feature_vector[l]].fwd_match = NULL;
-          }
-        }
-        feature_vector.erase(feature_vector.begin(), feature_vector.end());
-      }
-      kdtree_release(kd_root);
-      free(featShot);
+      std::cerr << "File " << fileName << "could not be opened! " 
+        << std::endl;
+      continue;
     }
-    delete[] feats;
-    delete temp;
-    cvReleaseImage(&img);
-    return result;
+    
+    std::vector<cv::Point2f> keyPoints;
+    std::vector<cv::Point2f> boundingBox;
+    cv::Mat descriptors; 
+    
+    // Read the pattern's descriptors.
+    fs2["Descriptors"] >> descriptors;
+        
+    // Read the pattern' keypoints.
+    cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
+    
+    // Initialize node iterators.
+    cv::FileNodeIterator it = keyPointsNode.begin();
+    cv::FileNodeIterator itEnd = keyPointsNode.end();
+    
+    cv::Point2f tempPoint ;
+    
+    // Iterate over the node to get the keypoints.
+    for ( ; it != itEnd ; ++it ) 
+    {
+      (*it)["Keypoint"] >> tempPoint ;
+      keyPoints.push_back(tempPoint);
+    }
+    
+    // Read the pattern's bounding box.
+    cv::FileNode boundingBoxNode = fs2["BoundingBox"];
+    
+    // Initialize it's iterator.
+    cv::FileNodeIterator bbIt = boundingBoxNode.begin();
+    cv::FileNodeIterator bbItEnd = boundingBoxNode.end();
+    
+    
+    for ( ; bbIt != bbItEnd ; ++bbIt ) 
+    {
+      (*bbIt)["Corner"] >> tempPoint ;
+      boundingBox.push_back(tempPoint);
+    }
+    
+    // Add the pattern to the pattern vector.
+    Pattern p;
+    p.name = input[i] ;
+    p.boundingBox = boundingBox ;
+    p.keyPoints = keyPoints;
+    p.descriptors = descriptors ;
+    
+    patterns_.push_back(p);
+    
+    // Clear the data vectors.
+    keyPoints.clear();
+    boundingBox.clear(); 
+    
+    // Close the xml file .
+    fs2.release() ;
+    
+  }    
+  
+}
+
+// Detect the pattern in the frame.
+
+bool HazmatDetector::detect( const cv::Mat &frame , float *x , 
+  float *y ) 
+{
+  // Check if the frame is not an empty matrix.
+  if ( !frame.data )
+  {
+    std::cerr << "The provided frame is empty!" << std::endl;
+    return false;
   }
   
-}// namespace pandora_vision
+  
+  // Set the pattern center to NULL .
+  *x = NULL ;
+  *y = NULL ;
+  
+  
+  cv::Mat frameDescriptors ;
+  std::vector<cv::KeyPoint> frameKeyPoints;
+  
+  // Calculate the keypoints and extract the descriptors from the 
+  // frame.
+  getFeatures( frame , &frameDescriptors , &frameKeyPoints ) ; 
+
+  double minDist ; 
+  double maxDist ;
+  
+  // For every pattern in the list : 
+  for (int i = 0 ; i < patterns_.size() ; i++ )
+  {
+    
+  }
+  
+  
+  // Find the pattern that matches best the current frame.
+  int bestMatchIndex = getBestMatches( frame , frameDescriptors , 
+    &minDist , &maxDist );
+    
+  //~ std::cout << patterns_[bestMatchIndex].name << std::endl;
+    
+  
+  // Vector the contains the matches for whom the distance between
+  // the frame descriptors and the pattern descriptors is smaller that
+  // 3 * minDist ;
+  std::vector< cv::DMatch > goodMatches;
+  
+  
+  // Fill the above vector.
+  //~ std::cout << minDist << std::endl;
+  //~ std::cout << bestMatches_.size() << std::endl;
+  
+  if (bestMatches_.size() > 0 )
+  {
+    for( int i = 0; i < frameDescriptors.rows; i++ )
+    { 
+      if( bestMatches_[i].distance < 3*minDist )
+      { 
+         goodMatches.push_back( bestMatches_[i]); 
+      }
+    }
+  }
+
+  
+  std::vector<cv::Point2f> patternKeyPoints;
+  std::vector<cv::Point2f> sceneKeyPoints;
+  
+  // Get the keypoints from the good matches
+
+  for( int i = 0; i < goodMatches.size(); i++ )
+  {
+    
+    // Pattern key points .
+    patternKeyPoints.push_back( 
+      patterns_[bestMatchIndex].keyPoints[ goodMatches[i].queryIdx ] );
+      
+    // Scene key points .
+    sceneKeyPoints.push_back( 
+      frameKeyPoints[ goodMatches[i].trainIdx ].pt );
+  }
+  
+  
+  // Homography Matrix.
+  cv::Mat H ;
+  
+  // Scene bounding box.
+  std::vector<cv::Point2f> sceneBB ;
+  //~ std::cout << patternKeyPoints.size() << std::endl;
+  
+  // If there are sufficient keypoint matches calculate the homography
+  // between the pattern and the detected object.
+  if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
+  {
+    // Calculate the homography matrix.
+    H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
+      CV_RANSAC );
+    // Transfer the bounding box to the frame coordinates.
+    cv::perspectiveTransform( patterns_[bestMatchIndex].boundingBox , 
+      sceneBB , H );
+    
+    // Testing Frame
+    //~ line( trackingFrame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[3] , scene_corners[0] , Scalar( 0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[2] , scene_corners[3] , Scalar( 0, 255, 0), 4 );
+    //~ circle( trackingFrame , scene_corners[4]  , 4.0 , Scalar(0,0,255) , -1 , 8 );
+    
+    // Copy the 4 corners of the bounding box.
+    std::vector<cv::Point2f> bbCorners ;
+    // Iterate over all elements of the bounding box except the last 
+    // one which is its center.
+    for (int i = 0 ; i < sceneBB.size() - 1 ; i++ )
+      bbCorners.push_back( sceneBB[i] );
+    if ( !cv::isContourConvex(bbCorners) )
+      return false;
+      
+    int width = frame.cols;
+    int height = frame.rows;
+      
+    // Check if every point of the bounding box is inside the image.
+    for (int i = 0 ; i < sceneBB.size() ; i++ )
+    {
+      if ( ( sceneBB[i].x < 0 ) 
+        || ( sceneBB[i].x > width )
+        || ( sceneBB[i].y < 0) 
+        || ( sceneBB[i].y > height ) )
+          return false ;
+    }
+    
+    // If all these conditions are met return the coordinates of the 
+    // center of the detected pattern . 
+    *x = sceneBB[ sceneBB.size() - 1 ].x ;
+    *y = sceneBB[ sceneBB.size() - 1 ].y ;
+
+    return true ;
+    
+    //~ trackingFrame.release();
+  }
+  else
+    return false;
+  
+    
+    //~ imshow("Tracker",trackingFrame);
+
+    //~ char key =  waitKey(30);
+    
+}
+
+/**
+  * @brief Find the homography between the scene and the pattern keypoints
+  * , check if it is valid and return the bounding box of the detected
+  * pattern .
+  * @param patternKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+  * keypoints from detected descriptor matches on the pattern.
+  * @param sceneKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+  * keypoints from detected descriptor matches in the scene.
+  * @param patternBB [std::vector<cv::Point2f *] : Vector of 2D float
+  * Points that containes the bounding box and the center of the 
+  * pattern.
+
+ **/
+  
+bool virtual findBoundingBox(std::vector<cv::KeyPoint> &patternKeyPoints , 
+      std::vector<cv::KeyPoint> &sceneKeyPoints , 
+      std::vector<cv::Point2f> *patternBB) 
+{
+  // Check if we have enough points to find the homography between
+  // the pattern and the scene.
+  if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
+  {
+    // Calculate the homography matrix.
+    H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
+      CV_RANSAC );
+    // Transfer the bounding box to the frame coordinates.
+    cv::perspectiveTransform( patterns_[bestMatchIndex].boundingBox , 
+      sceneBB , H );
+    
+    // Testing Frame
+    //~ line( trackingFrame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[3] , scene_corners[0] , Scalar( 0, 255, 0), 4 );
+    //~ line( trackingFrame, scene_corners[2] , scene_corners[3] , Scalar( 0, 255, 0), 4 );
+    //~ circle( trackingFrame , scene_corners[4]  , 4.0 , Scalar(0,0,255) , -1 , 8 );
+    
+    // Copy the 4 corners of the bounding box.
+    std::vector<cv::Point2f> bbCorners ;
+    // Iterate over all elements of the bounding box except the last 
+    // one which is its center.
+    for (int i = 0 ; i < sceneBB.size() - 1 ; i++ )
+      bbCorners.push_back( sceneBB[i] );
+    if ( !cv::isContourConvex(bbCorners) )
+      return false;
+      
+    int width = frame.cols;
+    int height = frame.rows;
+      
+    // Check if every point of the bounding box is inside the image.
+    for (int i = 0 ; i < sceneBB.size() ; i++ )
+    {
+      if ( ( sceneBB[i].x < 0 ) 
+        || ( sceneBB[i].x > width )
+        || ( sceneBB[i].y < 0) 
+        || ( sceneBB[i].y > height ) )
+          return false ;
+    }
+    
+    // If all these conditions are met return the coordinates of the 
+    // center of the detected pattern . 
+    *x = sceneBB[ sceneBB.size() - 1 ].x ;
+    *y = sceneBB[ sceneBB.size() - 1 ].y ;
+
+    return true ;
+    
+    //~ trackingFrame.release();
+  }
+  else
+    return false;
+  
+}
+
+// Get the best matches between the scene and pattern descriptors.
+int HazmatDetector::getBestMatches( const cv::Mat &frame ,
+     const cv::Mat &features , double *minDist , double *maxDist )
+{
+  // Initialize total min and max distances.
+  *minDist = std::numeric_limits<double>::max();
+  //~ *maxDist = std::numeric_limits<double>::max();
+  
+  int bestMatch ;
+  
+  // Max and Min dist for every pattern.
+  double tempMaxDist;
+  double tempMinDist;
+  
+  
+  
+  cv::Mat *descriptorsObj;
+  
+  for (int i = 0 ; i < patterns_.size() ; i++ )
+  {
+    descriptorsObj = &patterns_[i].descriptors;
+    // Find the matches.
+    this->matcher_.match( *descriptorsObj , 
+      features , matches );
+    
+    
+    // Calculate the min and max distance between the descriptors
+    // of the frame and the candidate pattern.
+    tempMinDist = std::numeric_limits<double>::max();
+    //~ tempMaxDist = std::numeric_limits<double>::min();
+    
+    // Calculation of max and min distances between keypoints for 
+    // the patter #i .
+    for( int j = 0; j < (*descriptorsObj).rows; j++ )
+    { 
+      double dist = matches[j].distance;
+      if( dist < tempMinDist ) tempMinDist = dist;
+      //~ if( dist > tempMaxDist ) tempMaxDist = dist;
+    } 
+
+    if (tempMinDist < *minDist )
+    {
+      //~ *maxDist = tempMaxDist ;
+      *minDist = tempMinDist ;
+      bestMatch = i ;
+      bestMatches_ = matches ;
+    }
+    
+  }
+  
+  return bestMatch;
+  
+}
+
+
+
