@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -38,6 +39,10 @@
 
 #ifndef PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
 #define PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
+=======
+#ifndef HISTOGRAM_MASK_H
+#define HISTOGRAM_MASK_H
+>>>>>>> Added new Hazmat detector classes.
 
 #include "pandora_vision_hazmat/hazmat_detector.h"
 
@@ -47,6 +52,7 @@
  **/
  
 
+<<<<<<< HEAD
 class HistogramMask  
 {
   public : 
@@ -87,3 +93,39 @@ class HistogramMask
 
 
 #endif  // PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H_
+=======
+class HistogramMask : public HazmatDetector
+{
+  public : 
+    
+    // Function that calculates the normalized histogram
+    static void calcNormYUVHist(const cv::Mat &image , cv::Mat *hist);
+    
+    // Function the calculates the backprojection 
+    void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
+      const cv::Mat &data = cv::Mat() );
+    
+    // Normalize an image by dividing it with the channel ch.
+    static void normalizeImage(cv::Mat &image , int ch );
+
+     
+    // Constructor
+    HistogramMask(HazmatDetector *baseDetector);
+    
+    virtual ~HistogramMask() 
+    {
+    } 
+    
+  private :
+    // Pointer the base class that will be decorated.
+    HazmatDetector *detector_ ;
+      
+    // A Matrix containing the resulting normalized image.
+    static cv::Mat normImage ;
+
+  };
+  
+
+
+#endif
+>>>>>>> Added new Hazmat detector classes.

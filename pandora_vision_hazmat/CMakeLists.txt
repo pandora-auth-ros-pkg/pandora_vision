@@ -59,6 +59,7 @@ add_executable(hazmat_node
 target_link_libraries(hazmat_node
     ${PROJECT_NAME}_filters
     ${catkin_LIBRARIES} )
+target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
 add_dependencies(hazmat_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -67,6 +68,7 @@ add_dependencies(hazmat_node
 # Download necessary data to run
 download_extra_data(${PROJECT_NAME}_download_training_data
                     EXTRA_FILES patterns/extra_files.yaml)
+
 
 ########################### hazmatTrainNode ############################
 #if(HAZMAT_ENABLE_TRAIN)

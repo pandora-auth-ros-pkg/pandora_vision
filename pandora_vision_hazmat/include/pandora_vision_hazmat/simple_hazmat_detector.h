@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -38,6 +39,10 @@
 
 #ifndef PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
+=======
+#ifndef SIMPLE_HAZMAT_DETECTOR_H
+#define SIMPLE_HAZMAT_DETECTOR_H
+>>>>>>> Added new Hazmat detector classes.
 
 #include "pandora_vision_hazmat/hazmat_detector.h"
 
@@ -48,18 +53,26 @@
         used.
 **/
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Added new Hazmat detector classes.
 class SimpleHazmatDetector : public HazmatDetector
 {
   public:
   
     // Function used to select the input file for the pattern names.
     
+<<<<<<< HEAD
     static void setFileName( const std::string &file );
+=======
+    static void setFileName( const std::string &file ) ;
+>>>>>>> Added new Hazmat detector classes.
     
     // Function that returns the detected keypoints and features of the 
     // the image .
     
+<<<<<<< HEAD
     void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
      , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
       = 0; 
@@ -72,10 +85,21 @@ class SimpleHazmatDetector : public HazmatDetector
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
       std::vector<cv::Point2f> *matchedSceneKeyPoints ,
       const int &patternID = 0 );
+=======
+    void virtual getFeatures( const cv::Mat &frame , 
+    cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) = 0; 
+    
+    // Find the matches between the pattern and the query frame.
+    bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
+      const cv::Mat pattern & patternDescriptors , 
+      std::vector<cv::KeyPoint> *patternKeyPoints , 
+      std::vector<cv::KeyPoint> *SceneKeyPoints  ) ;
+>>>>>>> Added new Hazmat detector classes.
     
     // Returns the type of the features used. 
     //~ const TrainerType virtual getType( void ) = 0 ;
     
+<<<<<<< HEAD
     /* virtual const cv::FlannBasedMatcher& getMatcher(void)
     {
       return matcher_;
@@ -95,9 +119,27 @@ class SimpleHazmatDetector : public HazmatDetector
      * found in the input frame and those of the training set
     */
     cv::Ptr<cv::DescriptorMatcher> *matchers_;
+=======
+    // Constructor
+    SimpleHazmatDetector(const std::string &featureName);
+    
+    // Destructor 
+    virtual ~SimpleHazmatDetector() {} ;
+  
+  protected:
+  
+    // Flann Matcher .
+    // It is initialised by every feature detector separately so as to
+    // set the correct parameters.
+    cv::FlannBasedMatcher matcher_ ;
+>>>>>>> Added new Hazmat detector classes.
     
     
   
 };
 
+<<<<<<< HEAD
 #endif  // PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
+=======
+#endif
+>>>>>>> Added new Hazmat detector classes.

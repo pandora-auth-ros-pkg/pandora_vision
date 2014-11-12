@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -41,6 +42,19 @@
 #include "gtest/gtest.h"
 
  
+=======
+#include "pandora_vision_hazmat/image_signature.h"
+#include "pandora_vision_hazmat/HazmatDetector.h"
+#include "gtest/gtest.h"
+
+//~ class ImageSignatureTest : public ::testing::Test
+//~ {
+  //~ protected:
+    //~ 
+    //~ 
+//~ }
+  
+>>>>>>> Added new Hazmat detector classes.
   TEST( ImageSignatureTest , imageSign )
   {
     // Create a small image with positive elements .
@@ -53,6 +67,7 @@
     
     // Since we pass a multi channel matrix the function must return
     // an empty matrix.
+<<<<<<< HEAD
     ASSERT_TRUE(signs.data == NULL);
     
     // Create a matrix with positive elements.
@@ -60,6 +75,15 @@
     testImage.setTo(100);
     
     ImageSignature::signFunction( testImage , &signs );
+=======
+    ASSERT_FALSE(signs.data);
+    
+    // Create a matrix with positive elements.
+    testImage = cv::Mat(20,20, CV_32FC1 );
+    testImage.setTo(100);
+    
+    ImageSignature::signFunction(testImage , &signs );
+>>>>>>> Added new Hazmat detector classes.
     
     // Check that every value is positive.
 
@@ -67,17 +91,29 @@
     {
       for (int j = 0 ; j < testImage.cols ; j++ )
       {
+<<<<<<< HEAD
         int val = signs.at<float>( i , j );
         ASSERT_GT(  val , 0 );
+=======
+        int val = signs.at<float>(i,j) ;
+        ASSERT_TRUE(  val > 0  ) ;
+>>>>>>> Added new Hazmat detector classes.
       }
     }
     
     
     // Create a matrix with positive elements.
+<<<<<<< HEAD
     testImage = cv::Mat( 20 , 20 , CV_32FC1 );
     testImage.setTo(-100);
     
     ImageSignature::signFunction( testImage , &signs );
+=======
+    testImage = cv::Mat(20,20, CV_32FC1 );
+    testImage.setTo(-100);
+    
+    ImageSignature::signFunction(testImage , &signs );
+>>>>>>> Added new Hazmat detector classes.
     
     // Check that every value is negative.
 
@@ -85,15 +121,26 @@
     {
       for (int j = 0 ; j < testImage.cols ; j++ )
       {
+<<<<<<< HEAD
         int val = signs.at<float>( i , j);
         ASSERT_LT( val , 0 );
+=======
+        int val = signs.at<float>(i,j) ;
+        ASSERT_TRUE(  val <  0  ) ;
+>>>>>>> Added new Hazmat detector classes.
       }
     }
     
     // Create an array with random numbers.
+<<<<<<< HEAD
     //~ cv::randu(testImage , -100 , 100 );
     
     ImageSignature::signFunction( testImage , &signs );
+=======
+    cv::randu(testImage , -100 , 100 );
+    
+    ImageSignature::signFunction(testImage , &signs );
+>>>>>>> Added new Hazmat detector classes.
    
     cv::Mat result( testImage.size() , testImage.type() );
     
@@ -110,10 +157,21 @@
     {
       for (int j = 0 ; j < testImage.cols ; j++ )
       {
+<<<<<<< HEAD
         int val = result.at<float>( i , j);
         ASSERT_GE( val , 0 );
       }
     }
     
+=======
+        int val = result.at<float>(i,j) ;
+        ASSERT_GE(  val  ,   0  ) ;
+      }
+    }
+    
+    
+    
+    
+>>>>>>> Added new Hazmat detector classes.
   }
   

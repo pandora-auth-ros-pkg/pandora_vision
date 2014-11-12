@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -38,6 +39,10 @@
 
 #ifndef PANDORA_VISION_HAZMAT_SIFT_HAZMAT_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_SIFT_HAZMAT_DETECTOR_H
+=======
+#ifndef SIFT_HAZMAT_DETECTOR_H
+#define SIFT_HAZMAT_DETECTOR_H
+>>>>>>> Added new Hazmat detector classes.
 
 #include "pandora_vision_hazmat/simple_hazmat_detector.h"
 
@@ -51,23 +56,53 @@
 class SiftHazmatDetector : public SimpleHazmatDetector 
 {
   public:
+<<<<<<< HEAD
     SiftHazmatDetector();
     // SiftHazmatDetector object destructor.
     ~SiftHazmatDetector() {};
+=======
+    
+    // SIFT hazmat detector constructor
+    SiftHazmatDetector() : 
+      SimpleHazmatDetector("SIFT") 
+    {
+      // Initiliaze  the Flann Based Matcher .
+      matcher_ = cv::FlannBasedMatcher();
+      s_ = cv::SIFT() ; 
+    }
+
+
+    // SiftHazmatDetector object destructor.
+    ~SiftHazmatDetector() {} ;
+>>>>>>> Added new Hazmat detector classes.
     
     // Function that returns the type of the feature detector used.
     //~ const virtual TrainerType getType( void ) ;
     
     // Calculates the keypoints of the image and its descriptors.
+<<<<<<< HEAD
     void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
      , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
      
+=======
+    void virtual getFeatures(const cv::Mat &frame , 
+      cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) ;
+      
+>>>>>>> Added new Hazmat detector classes.
           
   private:
   
     // SIFT detector 
+<<<<<<< HEAD
     cv::SIFT s_;
     
 };
 
 #endif  // PANDORA_VISION_HAZMAT_SIFT_HAZMAT_DETECTOR_H
+=======
+    cv::SIFT s_ ;
+    
+  };
+
+#endif
+>>>>>>> Added new Hazmat detector classes.
