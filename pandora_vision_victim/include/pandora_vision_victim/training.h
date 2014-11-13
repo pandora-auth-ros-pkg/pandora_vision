@@ -73,15 +73,15 @@ class SvmTraining
   
   ///Instance of class ChannelsStatisticsExtractor
   ///to detect color features for the given frame
-  ChannelsStatisticsExtractor _channelsStatisticsDetector;
+  //ChannelsStatisticsExtractor _channelsStatisticsDetector;
   
   ///Instance of class EdgeOrientationExtractor
   ///to detect edge orientation features for the given frame
-  EdgeOrientationExtractor _edgeOrientationDetector;
+  //EdgeOrientationExtractor _edgeOrientationDetector;
   
   ///Instance of class HaralickFeatureExtractor
   ///to detect haralick features for the given frame
-  HaralickFeaturesExtractor _haralickFeatureDetector;
+  //HaralickFeaturesExtractor _haralickFeatureDetector;
  
   //!< Variable used for State Managing
   bool trainingNowON;
@@ -127,7 +127,7 @@ public:
 * predifined features for the rgb image
 * @return void
 */
-  void setRgbFeatureVector();
+  //void setRgbFeatureVector();
   
   /**
 * @brief This function returns current feature vector according
@@ -161,7 +161,7 @@ public:
 * predifined features for the depth image
 * @return void
 */
-  void setDepthFeatureVector();
+  //void setDepthFeatureVector();
   
   /**
 * @brief This function returns current feature vector according

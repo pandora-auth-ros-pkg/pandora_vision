@@ -87,21 +87,36 @@ namespace pandora_vision
 */
   void SvmTraining::extractRgbFeatures(const cv::Mat& inImage)
   {
-    ///Extract color and statistics oriented features
-    ///for rgb image
-    _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
     
+    ///Extract color statistics features for rgb image
+    std::vector<double> channelsStatisticsFeatureVector;
+    ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(inImage, &channelsStatisticsFeatureVector);
+
     ///Extract edge orientation features for rgb image
-    _edgeOrientationDetector.findEdgeFeatures(inImage);
-     
-    ///Extract haralick features for rgb image
-    _haralickFeatureDetector.findHaralickFeatures(inImage);
+    std::vector<double> edgeOrientationFeatureVector;
+    EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
     
+    ///Extract haralick features for rgb image  
+    std::vector<double> haralickFeatureVector;
+    HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
+ 
     
     if(!_rgbFeatureVector.empty())
       _rgbFeatureVector.clear();
     
-    setRgbFeatureVector();
+     ///Append to rgbFeatureVector features according to color histogramms and other statistics
+    for(int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++ )
+          _rgbFeatureVector.push_back(channelsStatisticsFeatureVector[ii]);
+    
+    ///Append to rgbFeatureVector features according to edge orientation
+    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
+          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);   
+    
+    ///Append to rgbFeatureVector features according to haralick features
+    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
+          _rgbFeatureVector.push_back(haralickFeatureVector[ii]);  
+    
+    //setRgbFeatureVector();
     
   }
   
@@ -110,37 +125,37 @@ namespace pandora_vision
 * predifined features for the rgb image
 * @return void
 */
-  void SvmTraining::setRgbFeatureVector()
-  {
-    ///Append to rgbFeatureVector features according to color
-    ///histogramms and other statistics
-    std::vector<double> channelsStatictisFeatureVector =
-        _channelsStatisticsDetector.getRgbFeatures();
-    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          _rgbFeatureVector.push_back(channelsStatictisFeatureVector[i]);
+/*  void SvmTraining::setRgbFeatureVector()*/
+  //{
+    /////Append to rgbFeatureVector features according to color
+    /////histogramms and other statistics
+    //std::vector<double> channelsStatisticsFeatureVector =
+        //_channelsStatisticsDetector.getRgbFeatures();
+    //for(int i = 0; i < channelsStatisticsFeatureVector.size(); i++ )
+          //_rgbFeatureVector.push_back(channelsStatisticsFeatureVector[i]);
     
-    ///Append to rgbFeatureVector features according to edge orientation
-    std::vector<double> edgeOrientationFeatureVector =
-        _edgeOrientationDetector.getFeatures();
-    for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);
+    /////Append to rgbFeatureVector features according to edge orientation
+    //std::vector<double> edgeOrientationFeatureVector =
+        //_edgeOrientationDetector.getFeatures();
+    //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
+          //_rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);
     
-    ///Append to rgbFeatureVector features according to haaralick features
-    std::vector<double> haaralickFeatureVector =
-        _haralickFeatureDetector.getFeatures();
-    for(int i = 0; i < haaralickFeatureVector.size(); i++ )
-          _rgbFeatureVector.push_back(haaralickFeatureVector[i]);
+    /////Append to rgbFeatureVector features according to haaralick features
+    //std::vector<double> haralickFeatureVector =
+        //_haralickFeatureDetector.getFeatures();
+    //for(int i = 0; i < haralickFeatureVector.size(); i++ )
+          //_rgbFeatureVector.push_back(haralickFeatureVector[i]);
           
-    ///Deallocate memory
-    channelsStatictisFeatureVector.clear();
-    _channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
+    /////Deallocate memory
+    //channelsStatisticsFeatureVector.clear();
+    //_channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
     
-    edgeOrientationFeatureVector.clear();
-    _edgeOrientationDetector.emptyCurrentFrameFeatureVector();
+    //edgeOrientationFeatureVector.clear();
+    //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
     
-    haaralickFeatureVector.clear();
-    _haralickFeatureDetector.emptyCurrentFrameFeatureVector();
-  }
+    //haralickFeatureVector.clear();
+    //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
+  /*}*/
   
   std::vector<double> SvmTraining::getRgbFeatureVector()
   {
@@ -155,18 +170,45 @@ namespace pandora_vision
 */
   void SvmTraining::extractDepthFeatures(cv::Mat inImage)
   {
-    ///Extract statistics oriented features for depth image
-    _channelsStatisticsDetector.findDepthChannelsStatisticsFeatures(inImage);
+   ///Extract color and statistics oriented features
+    ///for depth image
+
+    //std::vector<double> channelsStatictisFeatureVector;
+    
+   // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
+    std::vector<double> channelsStatictisFeatureVector;
+    ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
+
     ///Extract edge orientation features for depth image
-    _edgeOrientationDetector.findEdgeFeatures(inImage);
-     
-    ///Extract haralick features for depth image
-    _haralickFeatureDetector.findHaralickFeatures(inImage);
+    //_edgeOrientationDetector.findEdgeFeatures(inImage);
+
+    std::vector<double> edgeOrientationFeatureVector;
+    EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
+    
+    ///Extract haralick features for depth image 
+    //_haralickFeatureDetector.findHaralickFeatures(inImage);
+    
+    std::vector<double> haralickFeatureVector;
+    HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
     
     if(!_depthFeatureVector.empty())
       _depthFeatureVector.clear();
     
-    setDepthFeatureVector();
+    ///Append to depthFeatureVector features according to color
+    ///histogramms and other statistics
+    for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
+    
+    ///Append to depthFeatureVector features according to edge orientation
+    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);   
+    
+    ///Append to depthFeatureVector features according to haralick features
+    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(haralickFeatureVector[ii]);  
+    
+    //setDepthFeatureVector();
+
   }
   
   /**
@@ -174,37 +216,37 @@ namespace pandora_vision
 * predifined features for the depth image
 * @return void
 */
-  void SvmTraining::setDepthFeatureVector()
-  {
-    ///Append to rgbFeatureVector features according to color
-    ///histogramms and other statistics
-    std::vector<double> channelsStatictisFeatureVector =
-        _channelsStatisticsDetector.getDepthFeatures();
-    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(channelsStatictisFeatureVector[i]);
+/*  void SvmTraining::setDepthFeatureVector()*/
+  //{
+    /////Append to rgbFeatureVector features according to color
+    /////histogramms and other statistics
+    //std::vector<double> channelsStatisticsFeatureVector =
+        //_channelsStatisticsDetector.getDepthFeatures();
+    //for(int i = 0; i < channelsStatisticsFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(channelsStatisticsFeatureVector[i]);
     
-    ///Append to depthFeatureVector features according to edge orientation
-    std::vector<double> edgeOrientationFeatureVector =
-        _edgeOrientationDetector.getFeatures();
-    for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);
+    /////Append to depthFeatureVector features according to edge orientation
+    //std::vector<double> edgeOrientationFeatureVector =
+        //_edgeOrientationDetector.getFeatures();
+    //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);
     
-    ///Append to depthFeatureVector features according to haaralick features
-    std::vector<double> haaralickFeatureVector =
-        _haralickFeatureDetector.getFeatures();
-    for(int i = 0; i < haaralickFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(haaralickFeatureVector[i]);
+    /////Append to depthFeatureVector features according to haaralick features
+    //std::vector<double> haralickFeatureVector =
+        //_haralickFeatureDetector.getFeatures();
+    //for(int i = 0; i < haralickFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(haralickFeatureVector[i]);
           
-    ///Deallocate memory
-    channelsStatictisFeatureVector.clear();
-    _channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
+    /////Deallocate memory
+    //channelsStatisticsFeatureVector.clear();
+    //_channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
     
-    edgeOrientationFeatureVector.clear();
-    _edgeOrientationDetector.emptyCurrentFrameFeatureVector();
+    //edgeOrientationFeatureVector.clear();
+    //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
     
-    haaralickFeatureVector.clear();
-    _haralickFeatureDetector.emptyCurrentFrameFeatureVector();
-  }
+    //haralickFeatureVector.clear();
+    //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
+  /*}*/
   
   /**
 * @brief This function returns current feature vector according

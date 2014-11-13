@@ -54,6 +54,8 @@ namespace pandora_vision
     double maxVal = 0;
     double val = 0;
     unsigned int size = cv::Size(_img->size()).height;
+/*    ROS_INFO_STREAM("HIST SIZE" <<_img->size());*/
+    /*ROS_INFO_STREAM("HEIGHT" << size);*/
     for( int i = 0 ; i < size ; i++ )
     {
       double binVal = static_cast<double>(_img->at<float>(i));
@@ -65,7 +67,11 @@ namespace pandora_vision
     }
     
     ret.push_back(val);
-    ret.push_back(maxVal/(VictimParameters::frameHeight * VictimParameters::frameWidth));
+    if(maxVal != 0)
+    	ret.push_back(maxVal/(640 * 480));
+    else
+ 	ret.push_back(0);
+
     return ret;
   }
 }

@@ -45,16 +45,6 @@ include_directories(include
 add_library(victim_parameters_lib src/victim_parameters.cpp)
 target_link_libraries(victim_parameters_lib ${catkin_LIBRARIES})
 
-################################ Utilities library #################################
-add_library(utilities_lib
-            src/utilities/channels_statistics_extractor.cpp
-            src/utilities/edge_orientation_extractor.cpp
-            src/utilities/haralickfeature_extractor.cpp
-	   )
-
-
-target_link_libraries(utilities_lib ${catkin_LIBRARIES})
-
 ################################ Feature Extractors library #################################
 add_library(feature_extractors_lib
 	    src/feature_extractors/mean_std_dev.cpp
@@ -64,6 +54,18 @@ add_library(feature_extractors_lib
 	   )
 
 target_link_libraries(feature_extractors_lib ${catkin_LIBRARIES} victim_parameters_lib)
+
+################################ Utilities library #################################
+add_library(utilities_lib
+            src/utilities/channels_statistics_extractor.cpp
+            src/utilities/edge_orientation_extractor.cpp
+            src/utilities/haralickfeature_extractor.cpp
+	   )
+
+
+target_link_libraries(utilities_lib ${catkin_LIBRARIES} feature_extractors_lib victim_parameters_lib)
+
+
 
 #############################  victim node ##################################################
 

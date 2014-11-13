@@ -77,9 +77,9 @@ namespace pandora_vision
       VictimVJDetector _rgbViolaJonesDetector;
       //~ VictimVJDetector _victimDetector;
       ///Instance of class rgbSystemValidator
-      RgbSystemValidator _rgbSystemValidator;
+      //RgbSystemValidator _rgbSystemValidator;
       ///Instance of class depthSystemValidator
-      DepthSystemValidator _depthSystemValidator;
+      //DepthSystemValidator _depthSystemValidator;
 
       /**
        * @brief This method check in which state we are, according to

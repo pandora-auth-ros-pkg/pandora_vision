@@ -60,9 +60,8 @@ namespace pandora_vision
 };
   class EdgeOrientationExtractor
   {
-    /// Vector containing features according to edge orientation
-    std::vector<double> edgeFeatures;
     
+    public:
     /**
      *@brief This is the function which divides the image 
      *into 16 subblocks and calls the findLocalEdgeFeatures to compute the 
@@ -72,8 +71,8 @@ namespace pandora_vision
      * @param rowsBlockSize [int] the rows size of the subblock.
      * @return [std::vector<double>] the computed  80 edgeFeatures vector.
     */ 
-    std::vector<double> partition(cv::Mat currFrame, int colsBlockSize, 
-                                  int rowsBlockSize );
+    static void partition(const cv::Mat& currFrame, int colsBlockSize, 
+                                  int rowsBlockSize, std::vector<double>* localEdgeFeatures );
 
     /**
      * @brief This is the function which  computes the edge histogram 
@@ -81,7 +80,7 @@ namespace pandora_vision
      * @param currFrame [cv::Mat] the current subblock.
      * @return [std::vector<double>] the computed 1x5 edgeFeatures vector
     */ 
-    std::vector<double> findLocalEdgeFeatures(cv::Mat currFrame);
+  static void findLocalEdgeFeatures(const cv::Mat& currFrame, std::vector<double>* localEdgeFeatures );
     
     /**
      * @brief This function applies the sobel filters on the src image.  
@@ -90,7 +89,7 @@ namespace pandora_vision
      * @param type [ConvolutionType] the type of convolution.
      * @return dest [cv::Mat&] the convoluted image.
     */ 
-    void conv2(const cv::Mat &img, const cv::Mat& kernel, ConvolutionType type, 
+    static void conv2(const cv::Mat &img, const cv::Mat& kernel, ConvolutionType type, 
           cv::Mat* dest);
 
     
@@ -100,30 +99,30 @@ namespace pandora_vision
      * @param hist [cv::Mat] the calculated histogram.
      * @param colorComp [const char*] the name of the window.
     */ 
-    void show_histogramm (int bins, cv::Mat hist, const char* colorComp);
-    public:
+   static void show_histogramm (int bins, cv::Mat hist, const char* colorComp);
     
+   // public:
     //!Constructor
-    EdgeOrientationExtractor();
+   // EdgeOrientationExtractor();
     
     //!Destructor
-    ~EdgeOrientationExtractor();
+    //~EdgeOrientationExtractor();
     
     /**
      * @brief This is the main function which calls all the others and 
      * computes the final edge histogram features.
      * @param src [cv::Mat] the current image.
     */ 
-    void findEdgeFeatures(cv::Mat src);
+   static void findEdgeFeatures(const cv::Mat& inImage, std::vector<double>* edgeFeatures);
     
-    std::vector<double> getFeatures();
+   // std::vector<double> getFeatures();
     
     /**
      * @brief Function that cleans up EdgeFeatureVector, to add
      * new elements for next frame
      * @return void
     */ 
-    void emptyCurrentFrameFeatureVector();
+   // void emptyCurrentFrameFeatureVector();
   };
   
 }// namespace pandora_vision

@@ -42,24 +42,24 @@ namespace pandora_vision
   /**
 @brief Constructor
 **/
-  ChannelsStatisticsExtractor::ChannelsStatisticsExtractor()
-  {
-    h_bins = 180;
-    s_bins = 256;
-    v_bins = 256;
-    ROS_INFO("[victim_node] : Created Color detection instance");
+ /* ChannelsStatisticsExtractor::ChannelsStatisticsExtractor()*/
+  //{
+    //h_bins = 180;
+    //s_bins = 256;
+    //v_bins = 256;
+    //ROS_INFO("[victim_node] : Created Color detection instance");
     
-    //!---------------------EXPERIMENTAL-------------------------//
+    ////!---------------------EXPERIMENTAL-------------------------//
     
-  }
+  //}
   
   /**
 @brief Destructor
 */
-  ChannelsStatisticsExtractor::~ChannelsStatisticsExtractor()
-  {
-    ROS_INFO("[victim_node] : Destroying Color Detection instance");
-  }
+/*  ChannelsStatisticsExtractor::~ChannelsStatisticsExtractor()*/
+  //{
+    //ROS_INFO("[victim_node] : Destroying Color Detection instance");
+  /*}*/
   
   /**
 * @brief This is the main function which calls all others for the computation
@@ -67,20 +67,25 @@ namespace pandora_vision
 * @param src [cv::Mat] current frame to be processed
 * @return void
 */
-  void ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(
-    const cv::Mat& src
-  )
+  void ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(const cv::Mat& src, 
+      				    std::vector<double>* rgbStatisticsVector)
   {
     //~ _colorFeatureVector.clear();
-    
-    inFrame = src.clone();
+    //ROS_INFO("ENTER FIND CHANNELS STATISTICS");
+    cv::Mat inFrame = src.clone();
     cv::Mat hsv;
     //! Transform it to HSV
     cvtColor( inFrame, hsv, CV_BGR2HSV );
     
     //!Preprocess current image, to find histogramms in HSV planes
     //!< Separate the image in 3 places (H,S,V) one for each channel
+
+    std::vector<cv::Mat> hsv_planes;
     split( hsv, hsv_planes );
+    
+    int h_bins = 180;
+    int s_bins = 256;
+    int v_bins = 256;
 
     //!< Set the ranges ( for H,S,V)
     float h_ranges[] = { 0, 180 };
@@ -91,71 +96,62 @@ namespace pandora_vision
     const float* s_histRange = { s_ranges };
     const float* v_histRange = { v_ranges };
 
-    bool uniform = true;
-    bool accumulate = false;
+    cv::Mat h_hist, s_hist, v_hist;
 
     h_hist = computeHist(hsv_planes[0], h_bins, h_histRange);
     s_hist = computeHist(hsv_planes[1], s_bins, s_histRange);
     v_hist = computeHist(hsv_planes[2], v_bins, v_histRange);
     
     //!Find the mean value and std value of every color component
-    {
-      std::vector<double> f1 = MeanStdDevExtractor(&hsv_planes[0]).extract();
-      std::vector<double> f2 = MeanStdDevExtractor(&hsv_planes[1]).extract();
-      std::vector<double> f3 = MeanStdDevExtractor(&hsv_planes[2]).extract();
-      _meanStdHSV = f1;
-      _meanStdHSV.insert(_meanStdHSV.end(), f2.begin(), f2.end());
-      _meanStdHSV.insert(_meanStdHSV.end(), f3.begin(), f3.end());
-      //~ _rgbStatisticsVector.insert(
-        //~ _rgbStatisticsVector.end(),
-        //~ _meanStdHSV.begin(),
-        //~ _meanStdHSV.end()
-      //~ );
-    }
     
+      std::vector<double> meanStdH = MeanStdDevExtractor(&hsv_planes[0]).extract();
+      std::vector<double> meanStdS = MeanStdDevExtractor(&hsv_planes[1]).extract();
+      std::vector<double> meanStdV = MeanStdDevExtractor(&hsv_planes[2]).extract();
+     
+
     //! Find the dominant color component and their density values
-    {
-      std::vector<double> f1 = DominantColorExtractor(&h_hist).extract();
-      std::vector<double> f2 = DominantColorExtractor(&s_hist).extract();
-      std::vector<double> f3 = DominantColorExtractor(&v_hist).extract();
-      _dominantVal = f1;
-      _dominantVal.insert(_dominantVal.end(), f2.begin(), f2.end());
-      _dominantVal.insert(_dominantVal.end(), f3.begin(), f3.end());
-      //~ _rgbStatisticsVectorr.insert(
-        //~ _rgbStatisticsVector.end(),
-        //~ _dominantVal.begin(),
-        //~ _dominantVal.end()
-      //~ );
-      
-     //ROS_INFO("Dominant values and Densities of HSV");
+    
+      std::vector<double> domValH = DominantColorExtractor(&h_hist).extract();
+      std::vector<double> domValS = DominantColorExtractor(&s_hist).extract();
+      std::vector<double> domValV = DominantColorExtractor(&v_hist).extract();
+     
+      //ROS_INFO("Dominant values and Densities of HSV");
      //for (int ii = 0; ii < _dominantVal.size(); ii++)
              //ROS_INFO_STREAM(" " << _dominantVal[ii]);
-    }
+    
      
     //!< Compute the modules of first 6 components of a Fourier transform of the
     //!< image components H(hue) and S(saturation).
-    _huedft = DFTCoeffsExtractor(&hsv_planes[0]).extract();
-    //~ _rgbStatisticsVector.insert(
-      //~ _rgbStatisticsVector.end(),
-      //~ _huedft.begin(),
-      //~ _huedft.end()
-    //~ );
-    _satdft = DFTCoeffsExtractor(&hsv_planes[1]).extract();
-    //~ _rgbStatisticsVector.insert(
-      //~ _rgbStatisticsVector.end(),
-      //~ _satdft.begin(),
-      //~ _satdft.end()
-    //~ );
-
+    std::vector<double> dftH = DFTCoeffsExtractor(&hsv_planes[0]).extract();
+    std::vector<double> dftS = DFTCoeffsExtractor(&hsv_planes[1]).extract();
+  
     //!< Compute the colour angles of rgb color components
-    _colorAnglesAndStd = ColorAnglesExtractor(&inFrame).extract();
-    //~ _rgbStatisticsVector.insert(
-      //~ _rgbStatisticsVector.end(),
-      //~ _colorAnglesAndStd.begin(),
-      //~ _colorAnglesAndStd.end()
-    //~ );
+    std::vector<double> colorAnglesAndStd = ColorAnglesExtractor(&inFrame).extract();
     
-    extractRgbFeatureVector();
+    //!< Append the final rgbStatisticsVector
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        meanStdH.begin(), meanStdH.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        meanStdS.begin(), meanStdS.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        meanStdV.begin(), meanStdV.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        domValH.begin(), domValH.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        domValS.begin(), domValS.end()); 
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        domValV.begin(), domValV.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        dftH.begin(), dftH.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        dftS.begin(), dftS.end());
+    rgbStatisticsVector->insert(rgbStatisticsVector->end(),
+        colorAnglesAndStd.begin(), colorAnglesAndStd.end());
+    
+    if( rgbStatisticsVector->size() != 28){
+      ROS_FATAL("Clean the vector");
+      ROS_INFO_STREAM("vector's size"<< rgbStatisticsVector->size() );
+     }
 
   }
   
@@ -165,15 +161,17 @@ namespace pandora_vision
 * @param src [cv::Mat] depth image to be processed
 * @return void
 */
-  void ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(
-    cv::Mat src)
+  void ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(const
+    cv::Mat& src,  std::vector<double>* depthStatisticsVector)
   {
-    if(src.channels() != 1)
-    cv::cvtColor(src, src, CV_BGR2GRAY);
-
-    inFrame = src.clone();
     
-    computeMeanStd();
+	  cv::Mat inFrame = src.clone();
+	  
+    if(inFrame.channels() != 1)
+    cv::cvtColor(inFrame, inFrame, CV_BGR2GRAY);
+
+    
+   // computeMeanStd();
     
     //!Find the mean value and std value of every color component
     //computeMeanStdHSV();
@@ -187,27 +185,41 @@ namespace pandora_vision
     
     cv::Mat d_hist = computeHist(inFrame, 256, _histRange);
      
-    double dominantValue1 = 0;
-    double dominantValue2 = 0;
+    std::vector<double> meanStd = MeanStdDevExtractor(&inFrame).extract();
+
     //! Find the dominant color component and their density values
-    findDominantColor(d_hist, 256, &dominantValue1, &dominantValue2 );
-    _depthDominantVal.push_back(dominantValue1);
-    _depthDominantVal.push_back(dominantValue2);
-    
+    std::vector<double> domVal = DominantColorExtractor(&d_hist).extract();
+
         //~ ROS_INFO("Dominant values and Densities of depth");
-     //~ for (int ii = 0; ii < _depthDominantVal.size(); ii++)
-       //~ ROS_INFO_STREAM(" " <<_depthDominantVal[ii]);
+     //~ for (int ii = 0; ii < domVal.size(); ii++)
+       //~ ROS_INFO_STREAM(" " <domVal[ii]);
     
     //!< Compute the modules of first 6 components of a Fourier transform of the
-    //!< image components H(hue) and S(saturation).
-    _depthdft = computeDFT(inFrame);
+    //!< image components.
+    std::vector<double> dft = DFTCoeffsExtractor(&inFrame).extract();
+
     
     //~ ROS_INFO("6 first Dft of depth:");
-     //~ for (int ii= 0; ii< _depthdft.size(); ii++)
-      //~ ROS_INFO_STREAM(" " << _depthdft[ii]);
-    
-    extractDepthFeatureVector();
+     //~ for (int ii= 0; ii< dft.size(); ii++)
+      //~ ROS_INFO_STREAM(" " << dft[ii]);
+ 
+      //!< Append the final rgbStatisticsVector
+    depthStatisticsVector->insert(depthStatisticsVector->end(),
+        meanStd.begin(), meanStd.end());
+      depthStatisticsVector->insert(depthStatisticsVector->end(),
+        domVal.begin(), domVal.end());
+    depthStatisticsVector->insert(depthStatisticsVector->end(),
+        dft.begin(), dft.end());
+ 
+    if( depthStatisticsVector->size() != 10 )
+    {
+      ROS_FATAL("Clean the vector");
+      ROS_INFO_STREAM("vector's size"<< depthStatisticsVector->size() );
+     }
+
+
   }
+
     
   /**
 * @brief This function returns the histogram of one color component from
@@ -256,13 +268,13 @@ namespace pandora_vision
 * of a grayscale image.
 * @return void
 */
-    void ChannelsStatisticsExtractor::computeMeanStd()
-    {
-      cv::Scalar avg, st;
-      cv::meanStdDev(inFrame, avg, st);
-      _depthMeanStd.push_back(avg.val[0]);
-      _depthMeanStd.push_back(st.val[0]);
-    }
+ /*   void ChannelsStatisticsExtractor::computeMeanStd()*/
+    //{
+      //cv::Scalar avg, st;
+      //cv::meanStdDev(inFrame, avg, st);
+      //_depthMeanStd.push_back(avg.val[0]);
+      //_depthMeanStd.push_back(st.val[0]);
+    /*}*/
     
   /**
 * @brief This function computes the dominant Color and it's density value in
@@ -273,25 +285,25 @@ namespace pandora_vision
 * @param density [double&] the dominant color density (to be returned).
 * @return void
 */
-  void ChannelsStatisticsExtractor::findDominantColor( cv::Mat hist, int histSize,
-    double* value, double* density )
-  {
-    double maxVal = 0;
-    double val = 0;
-    for( int ii= 0; ii < histSize; ii++ )
-    {
-      double binVal = static_cast<double>(hist.at<float>(ii));
-      if(binVal > maxVal)
-      {
-        maxVal = binVal;
-        val = ii;
-      }
-    }
+/*  void ChannelsStatisticsExtractor::findDominantColor( cv::Mat hist, int histSize,*/
+    //double* value, double* density )
+  //{
+    //double maxVal = 0;
+    //double val = 0;
+    //for( int ii= 0; ii < histSize; ii++ )
+    //{
+      //double binVal = static_cast<double>(hist.at<float>(ii));
+      //if(binVal > maxVal)
+      //{
+        //maxVal = binVal;
+        //val = ii;
+      //}
+    //}
 
-    *value= val;
-    *density= maxVal/(inFrame.rows*inFrame.cols);
+    //*value= val;
+    //*density= maxVal/(inFrame.rows*inFrame.cols);
 
-  }
+  /*}*/
 
   /**
 * @brief This function computes the Dft coefficients .
@@ -299,97 +311,97 @@ namespace pandora_vision
 * @return [std::vector<double>] the feature vector with the 6 first Dft
 * coefficients.
 */
-  std::vector<double> ChannelsStatisticsExtractor::computeDFT(cv::Mat img)
-  {
-    DFTCoeffsExtractor extr(&img);
-    return extr.extract();
-  }
+/*  std::vector<double> ChannelsStatisticsExtractor::computeDFT(cv::Mat img)*/
+  //{
+    //DFTCoeffsExtractor extr(&img);
+    //return extr.extract();
+  /*}*/
 
   /**
    * @brief This function extract a feature vector according to statistcs
    * features for the depth image.
    * @return void
   */
-  void ChannelsStatisticsExtractor::extractRgbFeatureVector()
-  {
-    _rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
-        _meanStdHSV.begin(), _meanStdHSV.end());
-    _rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
-        _dominantVal.begin(), _dominantVal.end());
-    _rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
-        _huedft.begin(), _huedft.end());
-    _rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
-        _satdft.begin(), _satdft.end());
-    _rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
-        _colorAnglesAndStd.begin(), _colorAnglesAndStd.end());
-  }
+/*  void ChannelsStatisticsExtractor::extractRgbFeatureVector()*/
+  //{
+    //_rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
+        //_meanStdHSV.begin(), _meanStdHSV.end());
+    //_rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
+        //_dominantVal.begin(), _dominantVal.end());
+    //_rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
+        //_huedft.begin(), _huedft.end());
+    //_rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
+        //_satdft.begin(), _satdft.end());
+    //_rgbStatisticsVector.insert(_rgbStatisticsVector.end(),
+        //_colorAnglesAndStd.begin(), _colorAnglesAndStd.end());
+  /*}*/
   
   /**
    * @brief This function extract a feature vector according to statistcs
    * features for the depth image.
    * @return void
   */
-  void ChannelsStatisticsExtractor::extractDepthFeatureVector()
-  {
-    _depthStatisticsVector.insert(_depthStatisticsVector.end(),
-        _depthMeanStd.begin(), _depthMeanStd.end());
-    _depthStatisticsVector.insert(_depthStatisticsVector.end(),
-        _depthDominantVal.begin(), _depthDominantVal.end());
-    _depthStatisticsVector.insert(_depthStatisticsVector.end(),
-        _depthdft.begin(), _depthdft.end());
-  }
+/*  void ChannelsStatisticsExtractor::extractDepthFeatureVector()*/
+  //{
+    //_depthStatisticsVector.insert(_depthStatisticsVector.end(),
+        //_depthMeanStd.begin(), _depthMeanStd.end());
+    //_depthStatisticsVector.insert(_depthStatisticsVector.end(),
+        //_depthDominantVal.begin(), _depthDominantVal.end());
+    //_depthStatisticsVector.insert(_depthStatisticsVector.end(),
+        //_depthdft.begin(), _depthdft.end());
+  //}
   
   /**
 * @brief Function returning the color statistics feature vector
 * @return featureVector
 */
-  std::vector<double> ChannelsStatisticsExtractor::getRgbFeatures()
-  {
-    if( _rgbStatisticsVector.size() != 28){
-      ROS_FATAL("Clean the vector");
-      ROS_INFO_STREAM("vector's size"<< _rgbStatisticsVector.size() );
-     }
-    return _rgbStatisticsVector;
-  }
+/*  std::vector<double> ChannelsStatisticsExtractor::getRgbFeatures()*/
+  //{
+    //if( _rgbStatisticsVector.size() != 28){
+      //ROS_FATAL("Clean the vector");
+      //ROS_INFO_STREAM("vector's size"<< _rgbStatisticsVector.size() );
+     //}
+    //return _rgbStatisticsVector;
+  /*}*/
   
   /**
 * @brief Function returning the color statistics feature vector
 * @return featureVector
 */
-  std::vector<double> ChannelsStatisticsExtractor::getDepthFeatures()
-  {
-    if( _depthStatisticsVector.size() != 10){
-      ROS_FATAL("Clean the vector");
-      ROS_INFO_STREAM("vector's size"<< _depthStatisticsVector.size() );
-     }
-    return _depthStatisticsVector;
-  }
+/*  std::vector<double> ChannelsStatisticsExtractor::getDepthFeatures()*/
+  //{
+    //if( _depthStatisticsVector.size() != 10){
+      //ROS_FATAL("Clean the vector");
+      //ROS_INFO_STREAM("vector's size"<< _depthStatisticsVector.size() );
+     //}
+    //return _depthStatisticsVector;
+  /*}*/
   /**
     * @brief Function that cleans up depthFeatureVector, to add
     * new elements for next frame
     * @return void
   */
-  void ChannelsStatisticsExtractor::emptyCurrentFrameFeatureVector()
-  {
-    _meanStdHSV.clear();
-    _dominantVal.clear();
-    _huedft.clear();
-    _satdft.clear();
-    _colorAnglesAndStd.clear();
-    _rgbStatisticsVector.clear();
-  }
+/*  void ChannelsStatisticsExtractor::emptyCurrentFrameFeatureVector()*/
+  //{
+    //_meanStdHSV.clear();
+    //_dominantVal.clear();
+    //_huedft.clear();
+    //_satdft.clear();
+    //_colorAnglesAndStd.clear();
+    //_rgbStatisticsVector.clear();
+  /*}*/
   /**
     * @brief Function that cleans up depthFeatureVector, to add
     * new elements for next frame
     * @return void
   */
-  void ChannelsStatisticsExtractor::emptyCurrentDepthFrameFeatureVector()
-  {
-    _depthMeanStd.clear();
-    _depthDominantVal.clear();
-    _depthdft.clear();
-    _depthStatisticsVector.clear();
-  }
+/*  void ChannelsStatisticsExtractor::emptyCurrentDepthFrameFeatureVector()*/
+  //{
+    //_depthMeanStd.clear();
+    //_depthDominantVal.clear();
+    //_depthdft.clear();
+    //_depthStatisticsVector.clear();
+  /*}*/
   
   //!--------------------------EXPERIMENTAL--------------------------//
   //~ std::vector<float> extract(const cv::Mat& img)

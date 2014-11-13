@@ -46,39 +46,40 @@ namespace pandora_vision
 {
   class ChannelsStatisticsExtractor 
   {
+      public:
       //!< Establish the number of bins
-      int h_bins, s_bins, v_bins;
+      //int h_bins, s_bins, v_bins;
       
-      cv::Mat inFrame;
+      //cv::Mat inFrame;
       
-      std::vector<cv::Mat> hsv_planes;
+      //std::vector<cv::Mat> hsv_planes;
       //!< Creation of 3 Mat objects to save each histogramm
-      cv::Mat h_hist, s_hist, v_hist;
+      //cv::Mat h_hist, s_hist, v_hist;
       
       //!< Vector of mean value and std value of every color component
-      std::vector<double> _meanStdHSV;
+     // std::vector<double> _meanStdHSV;
       //!< Vector of dominant color component and their density values
-      std::vector<double> _dominantVal;
+     // std::vector<double> _dominantVal;
       //!< Vector of first 6 components of a Fourier transform of the 
       //!< image components H(hue) and S(saturation).
-      std::vector<double> _huedft;
-      std::vector<double> _satdft;
+     // std::vector<double> _huedft;
+      //std::vector<double> _satdft;
       //!< Compute the colour angles of rgb color components
-      std::vector<double> _colorAnglesAndStd;
+     // std::vector<double> _colorAnglesAndStd;
       
       //!< Compute a vector of all color features
-      std::vector<double> _rgbStatisticsVector;
+      //std::vector<double> _rgbStatisticsVector;
       
       //!< Vector of mean value and std value of the depth Image
-      std::vector<double> _depthMeanStd;
+      //std::vector<double> _depthMeanStd;
       //!< Vector of dominant color component and their density values
-      std::vector<double> _depthDominantVal;
+      //std::vector<double> _depthDominantVal;
       //!< Vector of first 6 components of a Fourier transform of the 
       //!< image components.
-      std::vector<double> _depthdft;
+      //std::vector<double> _depthdft;
       
       //!< Compute a vector of all depth features
-      std::vector<double> _depthStatisticsVector;
+      //std::vector<double> _depthStatisticsVector;
       
       /**
        * @brief This function returns the histogram of one color component from 
@@ -88,7 +89,7 @@ namespace pandora_vision
        * @param histRange [const float*] the range of the histogram.
        * @return [cv::Mat] the calculated histogram.
       */ 
-      cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
+      static cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
       
       /**
        * @brief This function computes the average and standard deviation value  
@@ -102,7 +103,7 @@ namespace pandora_vision
        * of a grayscale image.
        * @return void
       */ 
-      void computeMeanStd();
+      //void computeMeanStd();
       
       /**
        * @brief This function computes the dominant Color and it's density value 
@@ -113,8 +114,8 @@ namespace pandora_vision
        * @param density [double&] the dominant color density (to be returned).
        * @return void
       */ 
-      void findDominantColor(cv::Mat hist, int histSize, double*
-                  value, double* density);
+/*      void findDominantColor(cv::Mat hist, int histSize, double**/
+                  /*value, double* density);*/
       
       /**
        * @brief This function computes the Dft coefficients . 
@@ -122,16 +123,16 @@ namespace pandora_vision
        * @return [std::vector<double>] the feature vector with the 6 first Dft 
        * coefficients.
       */
-      std::vector<double> computeDFT(cv::Mat img);
+      //std::vector<double> computeDFT(cv::Mat img);
   
     
-    public:
+    //public:
     
       //!Constructor
-      ChannelsStatisticsExtractor();
+      //ChannelsStatisticsExtractor();
       
       //!Destructor
-      virtual ~ChannelsStatisticsExtractor();
+      //virtual ~ChannelsStatisticsExtractor();
       
       /**
        * @brief This is the main function which calls all other for the 
@@ -139,7 +140,7 @@ namespace pandora_vision
        * @param src [cv::Mat] current frame to be processed
        * @return void
       */ 
-      void findChannelsStatisticsFeatures(const cv::Mat& src);
+      static void findChannelsStatisticsFeatures(const cv::Mat& src, std::vector<double>* rgbStatisticsVector);
       
       /**
        * @brief This is the main function which calls all other for the 
@@ -147,7 +148,7 @@ namespace pandora_vision
        * @param src [cv::Mat] depth image to be processed
        * @return void
       */ 
-      void findDepthChannelsStatisticsFeatures(cv::Mat src);
+      static void findDepthChannelsStatisticsFeatures(const cv::Mat& src,  std::vector<double>* depthStatisticsVector);
 
       /**
        * @brief This function extract a feature vector according to statistcs 
@@ -155,39 +156,39 @@ namespace pandora_vision
        * @return void
        */ 
        
-      void extractRgbFeatureVector();      
+      //void extractRgbFeatureVector();      
       /**
        * @brief This function extract a feature vector according to statistcs 
        * features for the depth image.
        * @return void
        */ 
-      void extractDepthFeatureVector();
+      //void extractDepthFeatureVector();
       
       /**
        * @brief Function returning the color statistics feature vector
        * @return featureVector
        */ 
-      std::vector<double> getRgbFeatures();
+      //std::vector<double> getRgbFeatures();
       
       /**
        * @brief Function returning the depth feature vector
        * @return featureVector
       */ 
-      std::vector<double> getDepthFeatures();
+      //std::vector<double> getDepthFeatures();
       
       /**
        * @brief Function that cleans up depthFeatureVector, to add
        * new elements for next frame
        * @return void
       */
-      void emptyCurrentFrameFeatureVector();
+      //void emptyCurrentFrameFeatureVector();
       
       /**
        * @brief Function that cleans up depthFeatureVector, to add
        * new elements for next frame
        * @return void
       */ 
-      void emptyCurrentDepthFrameFeatureVector();
+      //void emptyCurrentDepthFrameFeatureVector();
       
       //!--------------------Experimental-------------------//
       //~ virtual std::vector<float> extract(const cv::Mat& img);

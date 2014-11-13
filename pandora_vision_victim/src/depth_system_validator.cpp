@@ -38,15 +38,19 @@
 #include "pandora_vision_victim/depth_system_validator.h"
 
 namespace pandora_vision
-{
+{  
+  CvSVM DepthSystemValidator::_depthSvm;
+  CvSVMParams DepthSystemValidator::_params;
+  std::string DepthSystemValidator:: _depth_classifier_path;
+  std::vector<double> DepthSystemValidator:: _depthFeatureVector;
   /**
    @brief Constructor
   */ 
-  DepthSystemValidator::DepthSystemValidator()
-  {
-  }
+/*  DepthSystemValidator::DepthSystemValidator()*/
+  //{
+  /*}*/
   
-  void DepthSystemValidator::initialize(std::string depth_classifier_path)
+  void DepthSystemValidator::initialize(const std::string& depth_classifier_path)
   {
     _depth_classifier_path = depth_classifier_path;
     
@@ -64,10 +68,10 @@ namespace pandora_vision
   /**
     @brief Destructor
   */
-  DepthSystemValidator::~DepthSystemValidator()
-  {
-    ROS_DEBUG("[victim_node] : Destroying DepthSystemValidator instance");
-  }
+/*  DepthSystemValidator::~DepthSystemValidator()*/
+  //{
+    //ROS_DEBUG("[victim_node] : Destroying DepthSystemValidator instance");
+  /*}*/
   
   /**
    * @brief This function extract features according to the
@@ -75,20 +79,47 @@ namespace pandora_vision
    * @param inImage [cv::Mat] current depth frame to be processed
    * @return void
   */ 
-  float DepthSystemValidator::calculateSvmDepthProbability(cv::Mat inImage)
+  float DepthSystemValidator::calculateSvmDepthProbability(const cv::Mat& inImage)
   {
-    ///Extract statistics oriented features for depth image
-    _channelsStatisticsDetector.findDepthChannelsStatisticsFeatures(inImage);
+   ///Extract color and statistics oriented features
+    ///for depth image
+
+    //std::vector<double> channelsStatictisFeatureVector;
+    
+   // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
+    std::vector<double> channelsStatictisFeatureVector;
+    ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
+
     ///Extract edge orientation features for depth image
-    _edgeOrientationDetector.findEdgeFeatures(inImage);
-     
+    //_edgeOrientationDetector.findEdgeFeatures(inImage);
+
+    std::vector<double> edgeOrientationFeatureVector;
+    EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
+    
     ///Extract haralick features for depth image 
-    _haralickFeatureDetector.findHaralickFeatures(inImage);
+    //_haralickFeatureDetector.findHaralickFeatures(inImage);
+    
+    std::vector<double> haralickFeatureVector;
+    HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
     
     if(!_depthFeatureVector.empty())
       _depthFeatureVector.clear();
     
-    setDepthFeatureVector();
+    ///Append to depthFeatureVector features according to color
+    ///histogramms and other statistics
+    for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
+    
+    ///Append to depthFeatureVector features according to edge orientation
+    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);   
+    
+    ///Append to depthFeatureVector features according to haralick features
+    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(haralickFeatureVector[ii]);  
+    
+    //setDepthFeatureVector();
+    
     
     return predictionToProbability(predict());
   }
@@ -98,42 +129,42 @@ namespace pandora_vision
     * predifined features for the depth image
     * @return void
   */ 
-  void DepthSystemValidator::setDepthFeatureVector()
-  {
-    ///Append to rgbFeatureVector features according to color
-    ///histogramms and other statistics
-    std::vector<double> channelsStatictisFeatureVector = 
-        _channelsStatisticsDetector.getDepthFeatures();
-    for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(channelsStatictisFeatureVector[i]);
+/*  void DepthSystemValidator::setDepthFeatureVector()*/
+  //{
+    /////Append to rgbFeatureVector features according to color
+    /////histogramms and other statistics
+    //std::vector<double> channelsStatictisFeatureVector = 
+        //_channelsStatisticsDetector.getDepthFeatures();
+    //for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(channelsStatictisFeatureVector[i]);
     
-    ///Append to depthFeatureVector features according to edge orientation
-    std::vector<double> edgeOrientationFeatureVector = 
-        _edgeOrientationDetector.getFeatures();
-    for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
+    /////Append to depthFeatureVector features according to edge orientation
+    //std::vector<double> edgeOrientationFeatureVector = 
+        //_edgeOrientationDetector.getFeatures();
+    //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);   
     
-    ///Append to depthFeatureVector features according to haaralick features
-    std::vector<double> haaralickFeatureVector = 
-        _haralickFeatureDetector.getFeatures();
-    for(int i = 0; i < haaralickFeatureVector.size(); i++ )
-          _depthFeatureVector.push_back(haaralickFeatureVector[i]);  
+    /////Append to depthFeatureVector features according to haaralick features
+    //std::vector<double> haaralickFeatureVector = 
+        //_haralickFeatureDetector.getFeatures();
+    //for(int i = 0; i < haaralickFeatureVector.size(); i++ )
+          //_depthFeatureVector.push_back(haaralickFeatureVector[i]);  
           
-    ///Deallocate memory
-    channelsStatictisFeatureVector.clear();
-    _channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
+    /////Deallocate memory
+    //channelsStatictisFeatureVector.clear();
+    //_channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
     
-    edgeOrientationFeatureVector.clear();
-    _edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 
+    //edgeOrientationFeatureVector.clear();
+    //_edgeOrientationDetector.emptyCurrentFrameFeatureVector(); 
     
-    haaralickFeatureVector.clear();
-    _haralickFeatureDetector.emptyCurrentFrameFeatureVector();   
-  }
+    //haaralickFeatureVector.clear();
+    //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();   
+  /*}*/
   
   /**
    * @brief This function returns current feature vector according
    * to the features found in rgb image
-   * @return [std::vector<double>] _rgbFeatureVector, feature vector 
+   * @return [std::vector<double>] _depthFeatureVector, feature vector 
    * for current rgb image
    */ 
   std::vector<double> DepthSystemValidator::getDepthFeatureVector()
@@ -151,7 +182,8 @@ namespace pandora_vision
     cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
     
     ///Normalize the data from [-1,1]
-    cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);    
+    cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);
+    ROS_INFO_STREAM("DEPTH_SVM class label :" << _depthSvm.predict(samples_mat, false)); 
     float prediction = _depthSvm.predict(samples_mat, true);
     return prediction;
   }

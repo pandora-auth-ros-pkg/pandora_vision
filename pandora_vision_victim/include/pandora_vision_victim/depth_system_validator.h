@@ -46,36 +46,37 @@ namespace pandora_vision
 {
   class DepthSystemValidator
   {
+    public:
+    
     ///Feature vector for depth features
-    std::vector<double> _depthFeatureVector;
+    static std::vector<double> _depthFeatureVector;
     
     ///Instance of class  ChannelsStatisticsExtractor 
     ///to detect color features for the given frame
-    ChannelsStatisticsExtractor _channelsStatisticsDetector;
+    //ChannelsStatisticsExtractor _channelsStatisticsDetector;
     ///Instance of class  EdgeOrientationExtractor 
     ///to detect edge orientation features for the given frame
-    EdgeOrientationExtractor _edgeOrientationDetector;
+    //EdgeOrientationExtractor _edgeOrientationDetector;
     ///Instance of class  HaralickFeatureExtractor 
     ///to detect haralick features for the given frame
-    HaralickFeaturesExtractor _haralickFeatureDetector;
+    //HaralickFeaturesExtractor _haralickFeatureDetector;
     
-    std::string _depth_classifier_path;
+    static std::string _depth_classifier_path;
     
      /// Svm classifier used for rgb subsystem
-    CvSVM _depthSvm;
+    static CvSVM _depthSvm;
     
     /// Set up SVM's parameters
-    CvSVMParams _params;
+    static CvSVMParams _params;
          
-    public:
     
     ///Constructor
-    DepthSystemValidator();
+    //DepthSystemValidator();
 
-    void initialize(std::string depth_classifier_path);
+    static void initialize(const std::string& depth_classifier_path);
     
     ///Destructor
-    ~DepthSystemValidator();
+    //~DepthSystemValidator();
     
     /**
      * @brief This function extract features according to the
@@ -83,14 +84,14 @@ namespace pandora_vision
      * @param inImage [cv::Mat] current depth frame to be processed
      * @return void
      */ 
-    float calculateSvmDepthProbability(cv::Mat inImage);
+    static float calculateSvmDepthProbability(const cv::Mat& inImage);
     
     /**
      * @brief This function creates feature vector according to the
      * predifined features for the depth image
      * @return void
      */ 
-    void setDepthFeatureVector();
+    //static void setDepthFeatureVector();
     
     /**
      * @brief This function returns current feature vector according
@@ -98,14 +99,14 @@ namespace pandora_vision
      * @return [std::vector<double>] _rgbFeatureVector, feature vector 
      * for current rgb image
      */ 
-    std::vector<double> getDepthFeatureVector();
+    static std::vector<double> getDepthFeatureVector();
     
     /**
      * @brief Function that loads the trained classifier and makes a prediction
      * according to the featurevector given for each image
      * @return void
     */ 
-    float predict();
+    static float predict();
     
     /**
      * @brief Function that converts a given vector of doubles
@@ -114,13 +115,13 @@ namespace pandora_vision
      * converted
      * @return [cv::Mat] output Mat of size size_of_vectorx1
     */ 
-    cv::Mat vectorToMat(std::vector<double> data);
+    static cv::Mat vectorToMat(std::vector<double> data);
     
     /**
      * @brief This function prediction according to the rgb classifier
      * @return [float] prediction
      */ 
-    float predictionToProbability(float prediction);
+    static float predictionToProbability(float prediction);
     
   };
 }// namespace pandora_vision 

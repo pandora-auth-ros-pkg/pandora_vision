@@ -45,38 +45,37 @@ namespace pandora_vision
 {
   class RgbSystemValidator
   {
+    public:
+
     ///Feature vector for rgb features
-    std::vector<double> _rgbFeatureVector;
+    static std::vector<double> _rgbFeatureVector;
     
     ///Instance of class  ChannelsStatisticsExtractor 
     ///to detect color features for the given frame
-    ChannelsStatisticsExtractor _channelsStatisticsDetector;
+    //ChannelsStatisticsExtractor _channelsStatisticsDetector;
     ///Instance of class  EdgeOrientationExtractor 
     ///to detect edge orientation features for the given frame
-    EdgeOrientationExtractor _edgeOrientationDetector;
+    //EdgeOrientationExtractor _edgeOrientationDetector;
     ///Instance of class  HaralickFeatureExtractor 
     ///to detect haralick features for the given frame
-    HaralickFeaturesExtractor _haralickFeatureDetector;
+    //HaralickFeaturesExtractor _haralickFeatureDetector;
     
     /// Svm classifier used for rgb subsystem
-    CvSVM _rgbSvm;
+    static CvSVM _rgbSvm;
     
     /// Set up SVM's parameters
-    CvSVMParams _params;
+    static CvSVMParams _params;
     
-    std::string _rgb_classifier_path;
-    
-        
-    public:
-    
+    static std::string _rgb_classifier_path;
+       
     ///Constructor
-    RgbSystemValidator();
+    //RgbSystemValidator();
     
     
-    void initialize( std::string rgb_classifier_path);
+    static void initialize( const std::string& rgb_classifier_path);
     
     ///Destructor
-    ~RgbSystemValidator();
+    //~RgbSystemValidator();
     
     /**
      * @brief This function extract features according to the
@@ -84,14 +83,14 @@ namespace pandora_vision
      * @param inImage [cv::Mat] current rgb frame to be processed
      * @return void
      */ 
-    float calculateSvmRgbProbability(const cv::Mat& inImage);
+   static float calculateSvmRgbProbability(const cv::Mat& inImage);
     
     /**
      * @brief This function creates feature vector according to the
      * predifined features for the rgb image
      * @return void
      */ 
-    void setRgbFeatureVector();
+   //static void setRgbFeatureVector();
     
     /**
      * @brief This function returns current feature vector according
@@ -99,14 +98,14 @@ namespace pandora_vision
      * @return [std::vector<double>] _rgbFeatureVector, feature vector 
      * for current rgb image
      */ 
-    std::vector<double> getRgbFeatureVector();
+    static std::vector<double> getRgbFeatureVector();
     
     /**
      * @brief Function that loads the trained classifier and makes a prediction
      * according to the featurevector given for each image
      * @return void
     */ 
-    float predict();
+    static float predict();
     
     /**
      * @brief Function that converts a given vector of doubles
@@ -115,13 +114,13 @@ namespace pandora_vision
      * converted
      * @return [cv::Mat] output Mat of size size_of_vectorx1
     */ 
-    cv::Mat vectorToMat(std::vector<double> data);
+    static cv::Mat vectorToMat(std::vector<double> data);
     
     /**
      * @brief This function prediction according to the rgb classifier
      * @return [float] prediction
      */ 
-    float predictionToProbability(float prediction);
+    static float predictionToProbability(float prediction);
     
   };
 }// namespace pandora_vision

@@ -75,10 +75,10 @@ namespace pandora_vision
       VictimParameters::cascade_path, 
       VictimParameters::model_path);
       
-    _rgbSystemValidator.initialize(
+    RgbSystemValidator::initialize(
       VictimParameters::rgb_classifier_path);
       
-    _depthSystemValidator.initialize(
+    DepthSystemValidator::initialize(
       VictimParameters::depth_classifier_path);
     
     /// Initialize states - robot starts in STATE_OFF
@@ -885,7 +885,7 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
-        temp.probability = _rgbSystemValidator.calculateSvmRgbProbability(
+        temp.probability = RgbSystemValidator::calculateSvmRgbProbability(
           imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
         temp.source = RGB_SVM;
@@ -897,7 +897,7 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
-        temp.probability = _depthSystemValidator.calculateSvmDepthProbability(
+        temp.probability = DepthSystemValidator::calculateSvmDepthProbability(
           imgs.depthMasks.at(i).img);
         temp.keypoint = imgs.depthMasks[i].keypoint;
         temp.source = DEPTH_RGB_SVM;

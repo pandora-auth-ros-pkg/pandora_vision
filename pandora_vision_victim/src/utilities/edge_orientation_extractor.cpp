@@ -42,20 +42,20 @@ namespace pandora_vision
   /**
     @brief Constructor
   **/
-  EdgeOrientationExtractor::EdgeOrientationExtractor()
-  {
+/*  EdgeOrientationExtractor::EdgeOrientationExtractor()*/
+  //{
    
-   ROS_INFO("[victim_node] : Created Edge Orientation detection instance"); 
+   //ROS_INFO("[victim_node] : Created Edge Orientation detection instance"); 
    
-  }
+  //}
   
   /**
     @brief Destructor
   */
-  EdgeOrientationExtractor::~EdgeOrientationExtractor()
-  {
-    ROS_INFO("[victim_node] : Destroying Edge Orientation detection instance");
-  }
+/*  EdgeOrientationExtractor::~EdgeOrientationExtractor()*/
+  //{
+    //ROS_INFO("[victim_node] : Destroying Edge Orientation detection instance");
+  /*}*/
   
   /**
    * @brief This is the main function which calls all the others and 
@@ -63,8 +63,10 @@ namespace pandora_vision
    * @param src [cv::Mat] the current image.
   */ 
   
-  void EdgeOrientationExtractor::findEdgeFeatures(cv::Mat src)
+  void EdgeOrientationExtractor::findEdgeFeatures(const cv::Mat& inImage, std::vector<double>* edgeFeatures )
   {
+    cv::Mat src = inImage.clone();
+    //ROS_INFO("ENTER find edge features");
     GaussianBlur( src, src, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT );
     if(src.channels() !=1)
       cvtColor( src, src, CV_BGR2GRAY );
@@ -78,9 +80,19 @@ namespace pandora_vision
     );
     if(src.rows % 4 != 0 && src.cols % 4 != 0)
       ROS_ERROR("[victim_node] : Incorrect Division");
-      
-    edgeFeatures = partition(src, colsBlockSize, rowsBlockSize);
     
+    std::vector<double> temp; 
+    partition(src, colsBlockSize, rowsBlockSize, &temp);
+    *edgeFeatures=temp;
+
+      //ROS_INFO_STREAM("vector's size"<< edgeFeatures->size() );
+    if( edgeFeatures->size() != 80){
+      ROS_FATAL("Clean the vector");
+      ROS_INFO_STREAM("vector's size"<< edgeFeatures->size() );
+     }
+
+
+
     //~ ROS_INFO_STREAM("EdgeFeatures= ");
     //~ for (int ii = 0; ii < edgeFeatures.size(); ii++)
        //~ ROS_INFO_STREAM( " " << edgeFeatures[ii]);
@@ -97,28 +109,29 @@ namespace pandora_vision
    * @return [std::vector<double>] the computed  1x80 edgeFeatures vector.
   */ 
   
-  std::vector<double> EdgeOrientationExtractor::partition(cv::Mat currFrame, 
-        int colsBlockSize, int rowsBlockSize )
+  void EdgeOrientationExtractor::partition(const cv::Mat& currFrame, 
+        int colsBlockSize, int rowsBlockSize, std::vector<double>* localEdgeFeatures)
   {   
-    
-    std::vector<double> temp(5);
-    std::vector<double> edgeFeatures;
+    //ROS_INFO("ENTER PARTITION");
+    std::vector<double> temp;
+    //std::vector<double> edgeFeatures;
     
     for(int ii = 0; ii < currFrame.cols; ii += colsBlockSize )
     { 
         for( int jj = 0; jj < currFrame.rows; jj += rowsBlockSize )
-        {
+        {   
+            temp.clear();		
             cv::Mat subblock( currFrame, cv::Rect( ii, jj, colsBlockSize, 
                             rowsBlockSize ) );
             
       
             //!< Do stuff with subblock here
-            temp = findLocalEdgeFeatures(subblock);
+            findLocalEdgeFeatures(subblock, &temp);
             for(int kk = 0; kk < 5; kk++)
-              edgeFeatures.push_back(temp[kk]);
+              localEdgeFeatures->push_back(temp[kk]);
         }
     }
-    return edgeFeatures;   
+     
   }
     
   /**
@@ -128,10 +141,9 @@ namespace pandora_vision
    * @return [std::vector<double>] the computed 1x5 edgeFeatures vector.
   */ 
   
-  std::vector<double> EdgeOrientationExtractor::findLocalEdgeFeatures(cv::Mat 
-                                                                  currFrame)
+  void EdgeOrientationExtractor::findLocalEdgeFeatures(const cv::Mat& currFrame, std::vector<double>* localEdgeFeatures )
 {
-  
+	//ROS_INFO("ENTER FIND LOCAL EDGE");
   cv::Mat img;
   currFrame.convertTo(img, CV_64F);
  
@@ -215,14 +227,21 @@ namespace pandora_vision
   show_histogramm(bins, hist, "Edge Histogramm");
   
   //!< save the final edgeFeatures for the 5 types of oriented gradients
-  std::vector<double> edgeFeatures(5);
+ // std::vector<double> edgeFeatures(5);
   
   for(int ii = 1; ii < 6; ii++)
   {
-     edgeFeatures[ii-1]=hist.at<float>(ii) / (data.rows *data.cols);
+     	
+     localEdgeFeatures->push_back(static_cast<double> (hist.at<float>(ii)) / (data.rows *data.cols));
+	//(*localEdgeFeatures)[ii-1]=hist.at<float>(ii) / (data.rows *data.cols);
   }
-    
-  return edgeFeatures;
+       if( localEdgeFeatures->size() != 5){
+      ROS_FATAL("Clean the vector:localEdge");
+      ROS_INFO_STREAM("vector's size"<< localEdgeFeatures->size() );
+     }
+
+
+  //return edgeFeatures;
 }
 
   
@@ -286,23 +305,23 @@ namespace pandora_vision
                 cv::Scalar( 112, 255, 112 ), -1 ); 
 
     }
-    #ifdef SHOW_DEBUG_IMAGE
-      imshow( colorComp, histImg );
-    #endif    
+    //#ifdef SHOW_DEBUG_IMAGE
+    cv::imshow( colorComp, histImg );
+    //#endif    
   }
   
-  std::vector<double> EdgeOrientationExtractor::getFeatures()
-  {
-    return edgeFeatures;
-  }
+/*  std::vector<double> EdgeOrientationExtractor::getFeatures()*/
+  //{
+    //return edgeFeatures;
+  //}
   
   /**
    * @brief Function that cleans up EdgeFeatureVector, to add
    * new elements for next frame
    * @return void
   */ 
-  void EdgeOrientationExtractor::emptyCurrentFrameFeatureVector()
-  {
-    edgeFeatures.clear();
-  }
+  //void EdgeOrientationExtractor::emptyCurrentFrameFeatureVector()
+  //{
+    //edgeFeatures.clear();
+  /*}*/
 }// namespace pandora_vision
