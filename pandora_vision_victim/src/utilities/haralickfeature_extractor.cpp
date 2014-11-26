@@ -58,7 +58,7 @@ namespace pandora_vision
   void HaralickFeaturesExtractor::updateGLCM(int y1, int x1, int y2, int x2, 
       cv::Mat* out, const cv::Mat& in)
   {
-    if(y2<0 || y2 >= in.rows || x2<0 || x2 >= in.cols) return;
+    if(y2 < 0 || y2 >= in.rows || x2<0 || x2 >= in.cols) return;
     
     out->at<double>(in.at<uchar>(y1, x1), in.at<uchar>(y2, x2))+=1.0;
     

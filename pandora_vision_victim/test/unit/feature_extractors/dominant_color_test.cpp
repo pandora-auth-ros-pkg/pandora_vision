@@ -35,68 +35,88 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/mean_std_dev.h"
+#include "pandora_vision_victim/feature_extractors/dominant_color.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
 {
   /**
-     @class MeanStdDevExtractorTest 
-     @brief Tests the integrity of methods of class MeanStdDevExtractor
+    @class DominantColorExtractorTest 
+    @brief Tests the integrity of methods of class DominantColorExtractor
    **/
-  class MeanStdDevExtractorTest : public ::testing::Test
+  class DominantColorExtractorTest : public ::testing::Test
   {
     protected:
       
 
-      MeanStdDevExtractorTest () {}
+      DominantColorExtractorTest () {}
+
       
        //! Sets up images needed for testing
        virtual void SetUp()
       {
 
-       HEIGHT=10;
-       WIDTH=10;
+       bins = 256;
+       HEIGHT = 480;
+       WIDTH = 640;
 
-        // Construct a black image
-        black = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
-        
-        // Construct a white image
-        white = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
-	cv::Rect rect(0, 0, HEIGHT, WIDTH);
+        // Construct a black histogramm
+        black = cv::Mat::zeros(bins, 1, CV_32FC1);
+        // Construct a white histogramm
+        white = cv::Mat::zeros( bins, 1, CV_32FC1);
+	cv::Rect rect(0, 0, bins, 1);
 	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
-
-	// Construct a half black - half white image
-        blackWhite = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1); 
-        cv::Rect rect1(0, 0, HEIGHT/2, WIDTH);
-	cv::rectangle(blackWhite, rect1, cv::Scalar(255,0,0), -1);
+        
+        // Construct an ascending histogramm 
+       ascending = cv::Mat::zeros( bins, 1, CV_32FC1);
+       for (int rows = 0; rows < ascending.rows; rows++)
+	       ascending.at<float>(rows) = rows;
+       
+       // Construct a descending histogramm 
+       descending = cv::Mat::zeros( bins, 1, CV_32FC1);
+       int i=255;
+       for (int rows = 0;  rows < descending.rows; rows++)
+       {
+	       descending.at<float>(rows) = i;
+       	       i--;
+       }
 
       }
+      //The histogramms bins
+      int bins;
       
-      // The image dimensions
-      int HEIGHT;
-      int WIDTH;
-
+      //Image Dimensions
+      int HEIGHT, WIDTH;
       // Images that will be used for testing
-      cv::Mat black,white,blackWhite;
+      cv::Mat black, white, ascending, descending;
+  
   };
   
-  //! Tests MeanStdDevExtractor::extract
-  TEST_F ( MeanStdDevExtractorTest, extractMeanStd )
+  
+  //! Tests DominantColorExtractor::extract
+  TEST_F ( DominantColorExtractorTest, extractDominantColor )
   {
     // The output vector
     std::vector<double>  out;
-    MeanStdDevExtractor msd1(&black), msd2(&white), msd3(&blackWhite);
-    out = msd1.extract();
+    DominantColorExtractor d1(&black), d2(&white), d3(&ascending), d4(&descending);
+    out = d1.extract();
     EXPECT_EQ ( 0 , out[0] );
     EXPECT_EQ ( 0 , out[1] );
 
-    out = msd2.extract();
-    EXPECT_EQ ( 255 , out[0] );
-    EXPECT_EQ ( 0 , out[1] );
+    out = d2.extract();
+    EXPECT_EQ ( 0 , out[0] );
+    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
 
-    out = msd3.extract();
-    EXPECT_EQ ( 127.5 , out[0] );
-    EXPECT_EQ ( 127.5 , out[1] );
+    out = d3.extract();
+    EXPECT_EQ ( 255 , out[0] );
+    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
+
+    out = d4.extract();
+    EXPECT_EQ ( 0 , out[0] );
+    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
+
   }
+    
+    
+  
 } // namespace pandora_vision

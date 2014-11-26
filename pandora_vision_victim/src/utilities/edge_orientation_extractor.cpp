@@ -305,9 +305,9 @@ namespace pandora_vision
                 cv::Scalar( 112, 255, 112 ), -1 ); 
 
     }
-    //#ifdef SHOW_DEBUG_IMAGE
+    #ifdef SHOW_DEBUG_IMAGE
     cv::imshow( colorComp, histImg );
-    //#endif    
+    #endif    
   }
   
 /*  std::vector<double> EdgeOrientationExtractor::getFeatures()*/

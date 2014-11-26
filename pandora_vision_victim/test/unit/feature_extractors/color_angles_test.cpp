@@ -35,68 +35,68 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/mean_std_dev.h"
+#include "pandora_vision_victim/feature_extractors/color_angles.h"
 #include "gtest/gtest.h"
+#define PI 3.14159265
+
 
 namespace pandora_vision
 {
   /**
-     @class MeanStdDevExtractorTest 
-     @brief Tests the integrity of methods of class MeanStdDevExtractor
+    @class ColorAnglesExtractorTest 
+    @brief Tests the integrity of methods of class ColorAnglesExtractor
    **/
-  class MeanStdDevExtractorTest : public ::testing::Test
+  class ColorAnglesExtractorTest : public ::testing::Test
   {
     protected:
       
 
-      MeanStdDevExtractorTest () {}
+      ColorAnglesExtractorTest () {}
+
       
        //! Sets up images needed for testing
        virtual void SetUp()
       {
 
-       HEIGHT=10;
-       WIDTH=10;
+       
+       HEIGHT = 480;
+       WIDTH = 640;
 
-        // Construct a black image
-        black = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
-        
-        // Construct a white image
-        white = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
-	cv::Rect rect(0, 0, HEIGHT, WIDTH);
-	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
-
-	// Construct a half black - half white image
-        blackWhite = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1); 
-        cv::Rect rect1(0, 0, HEIGHT/2, WIDTH);
-	cv::rectangle(blackWhite, rect1, cv::Scalar(255,0,0), -1);
-
+        // Construct a blue image
+        blue = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255,255,255));
+	// Construct a green image
+       green = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,255,0));
+       // Construct a red image
+       red = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,0,255));
       }
-      
-      // The image dimensions
-      int HEIGHT;
-      int WIDTH;
 
-      // Images that will be used for testing
-      cv::Mat black,white,blackWhite;
+      cv::Mat blue, green, red;
+      int HEIGHT, WIDTH;
+
   };
-  
-  //! Tests MeanStdDevExtractor::extract
-  TEST_F ( MeanStdDevExtractorTest, extractMeanStd )
+
+
+  //! Tests ColorAnglesExtractor::extract
+  TEST_F ( ColorAnglesExtractorTest, extractColorAngles )
   {
     // The output vector
     std::vector<double>  out;
-    MeanStdDevExtractor msd1(&black), msd2(&white), msd3(&blackWhite);
-    out = msd1.extract();
+    ColorAnglesExtractor c1(&blue);//, c2(&green), c3(&red);
+    out = c1.extract();
     EXPECT_EQ ( 0 , out[0] );
     EXPECT_EQ ( 0 , out[1] );
+    EXPECT_EQ ( 0 , out[2] );
+    EXPECT_EQ ( 0 , out[3] );
 
-    out = msd2.extract();
-    EXPECT_EQ ( 255 , out[0] );
-    EXPECT_EQ ( 0 , out[1] );
+    //out = c2.extract();
+    //EXPECT_EQ ( 255 , out[0] );
+    //EXPECT_EQ ( 0 , out[1] );
 
-    out = msd3.extract();
-    EXPECT_EQ ( 127.5 , out[0] );
-    EXPECT_EQ ( 127.5 , out[1] );
+    //out = c3.extract();
+    //EXPECT_EQ ( 127.5 , out[0] );
+    //EXPECT_EQ ( 127.5 , out[1] );
   }
 } // namespace pandora_vision
+             
+
+
