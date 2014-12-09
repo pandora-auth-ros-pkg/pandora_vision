@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
 cv_bridge
-vision_communications
+pandora_vision_msgs
 pandora_common_msgs
 state_manager
 state_manager_communications
@@ -39,7 +39,7 @@ catkin_package(
  roscpp
  cv_bridge
  image_transport
- vision_communications
+ pandora_vision_msgs
  pandora_common_msgs
  state_manager
  state_manager_communications
@@ -137,7 +137,7 @@ target_link_libraries(predator_node cvblobs libopentld ${OpenCV_LIBS} ${catkin_L
 
 add_dependencies(predator_node 
     ${catkin_EXPORTED_TARGETS}
-    vision_communications_gencpp
+    pandora_vision_msgs_gencpp
     pandora_vision_predator_gencfg
 )
 

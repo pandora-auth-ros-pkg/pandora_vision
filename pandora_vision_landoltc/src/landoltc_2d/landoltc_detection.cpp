@@ -102,7 +102,7 @@ void LandoltCDetection::getGeneralParams()
   if (_nh.getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltcPublisher = 
-      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>(param, 10);
+      _nh.advertise<pandora_vision_msgs::LandoltcAlertsVectorMsg>(param, 10);
   }
   else
   {
@@ -278,8 +278,8 @@ void LandoltCDetection::landoltcCallback()
   std::vector<LandoltC> _landoltc = _landoltcDetector.getDetectedLandolt();
   
   //!< Create message of Landoltc Detector
-  vision_communications::LandoltcAlertsVectorMsg landoltcVectorMsg;
-  vision_communications::LandoltcAlertMsg landoltccodeMsg;
+  pandora_vision_msgs::LandoltcAlertsVectorMsg landoltcVectorMsg;
+  pandora_vision_msgs::LandoltcAlertMsg landoltccodeMsg;
 
   landoltcVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
   landoltcVectorMsg.header.stamp = landoltcFrameTimestamp;

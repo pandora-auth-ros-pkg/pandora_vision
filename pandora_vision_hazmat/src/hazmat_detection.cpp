@@ -120,7 +120,7 @@ namespace pandora_vision
     if (_nh.getParam("published_topic_names/hazmat_alert", param))
     {
     hazmatPublisher_ = _nh.advertise
-      <vision_communications::HazmatAlertsVectorMsg>(param, 10);
+      <pandora_vision_msgs::HazmatAlertsVectorMsg>(param, 10);
     }
     else
     {
@@ -306,8 +306,8 @@ namespace pandora_vision
       return;
     }
     // Create Msg for hazmat
-    vision_communications::HazmatAlertsVectorMsg hazmatVectorMsg;
-    vision_communications::HazmatAlertMsg hazmatMsg;
+    pandora_vision_msgs::HazmatAlertsVectorMsg hazmatVectorMsg;
+    pandora_vision_msgs::HazmatAlertMsg hazmatMsg;
      
     std::vector<HazmatEpsilon> a = 
         hazmatDetector_->detectHazmat(hazmatFrame_);

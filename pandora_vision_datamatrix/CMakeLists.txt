@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     state_manager
     state_manager_communications
-    vision_communications
+    pandora_vision_msgs
     cv_bridge
     image_transport
     sensor_msgs
@@ -26,7 +26,7 @@ catkin_package(
       roscpp
       state_manager
       state_manager_communications
-      vision_communications
+      pandora_vision_msgs
       cv_bridge
       image_transport
       sensor_msgs
@@ -49,7 +49,7 @@ add_executable(datamatrix_node
 )
 add_dependencies(datamatrix_node 
     ${catkin_EXPORTED_TARGETS}
-    vision_communications_gencpp
+    pandora_vision_msgs_gencpp
 )
 target_link_libraries(datamatrix_node 
     ${catkin_LIBRARIES} 

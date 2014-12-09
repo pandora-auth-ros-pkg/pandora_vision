@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(catkin REQUIRED COMPONENTS 
     roscpp
-    vision_communications
+    pandora_vision_msgs
     state_manager
     state_manager_communications
     cv_bridge
@@ -25,7 +25,7 @@ catkin_package(
     DEPENDS
     CATKIN_DEPENDS
       roscpp
-      vision_communications
+      pandora_vision_msgs
       state_manager
       state_manager_communications
       cv_bridge
@@ -57,7 +57,7 @@ add_executable(hazmat_node
 target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
 add_dependencies(hazmat_node 
     pandora_vision_hazmat_gencfg
-    vision_communications_gencpp
+    pandora_vision_msgs_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
 

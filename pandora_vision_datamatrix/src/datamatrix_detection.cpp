@@ -102,7 +102,7 @@ namespace pandora_vision
     if (_nh.getParam("published_topic_names/datamatrix_alert", param))
     {
       _datamatrixCodePublisher =
-        _nh.advertise<vision_communications::DataMatrixAlertsVectorMsg>(param, 10, true);
+        _nh.advertise<pandora_vision_msgs::DataMatrixAlertsVectorMsg>(param, 10, true);
     }
     else
     {
@@ -253,8 +253,8 @@ namespace pandora_vision
       return;
     }
     //!< Create message of DatamatrixCode Detector
-    vision_communications::DataMatrixAlertsVectorMsg datamatrixcodeVectorMsg;
-    vision_communications::DataMatrixAlertMsg datamatrixcodeMsg;
+    pandora_vision_msgs::DataMatrixAlertsVectorMsg datamatrixcodeVectorMsg;
+    pandora_vision_msgs::DataMatrixAlertMsg datamatrixcodeMsg;
     datamatrixcodeVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
     datamatrixcodeVectorMsg.header.stamp = datamatrixFrameTimestamp;
 

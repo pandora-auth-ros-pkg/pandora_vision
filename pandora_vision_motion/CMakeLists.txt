@@ -53,7 +53,7 @@ add_executable(motion_node
 target_link_libraries(motion_node ${catkin_LIBRARIES} )
 add_dependencies(motion_node
     pandora_vision_motion_gencfg
-    vision_communications_gencpp
+    pandora_vision_msgs_gencpp
     ${catkin_EXPORTED_TARGETS}
 )
 

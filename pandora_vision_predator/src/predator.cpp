@@ -408,7 +408,7 @@ void Predator::getGeneralParams()
   if (_nh.getParam("published_topic_names/predator_employment_output", param))
   {
     _landoltc3dPredatorPublisher =
-      _nh.advertise<vision_communications::LandoltcPredatorMsg>(param, 1000);
+      _nh.advertise<pandora_vision_msgs::LandoltcPredatorMsg>(param, 1000);
   }
   else
   {
@@ -640,7 +640,7 @@ void Predator::sendMessage(const cv::Rect& rec, const float& posterior,
   
   if( operation_state == true){
     
-    vision_communications::LandoltcPredatorMsg predatorLandoltcMsg;
+    pandora_vision_msgs::LandoltcPredatorMsg predatorLandoltcMsg;
     predatorLandoltcMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
     predatorLandoltcMsg.header.stamp = PredatorFrameTimeStamp;
     predatorLandoltcMsg.x = rec.x;

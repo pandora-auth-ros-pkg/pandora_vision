@@ -7,7 +7,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
-    vision_communications
+    pandora_vision_msgs
     state_manager
     state_manager_communications
     cv_bridge
@@ -27,7 +27,7 @@ catkin_package(
     CATKIN_DEPENDS
       roscpp
       pandora_common_msgs
-      vision_communications
+      pandora_vision_msgs
       state_manager
       state_manager_communications
       cv_bridge
@@ -65,7 +65,7 @@ add_executable(victim_node
 )
 target_link_libraries(victim_node ${catkin_LIBRARIES} )
 add_dependencies(victim_node
-    vision_communications_gencpp
+    pandora_vision_msgs_gencpp
     pandora_vision_victim_gencfg
     ${catkin_EXPORTED_TARGETS}
 )

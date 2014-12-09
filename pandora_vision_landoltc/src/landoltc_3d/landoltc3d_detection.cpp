@@ -115,7 +115,7 @@ void LandoltC3dDetection::getGeneralParams()
   if (_nh.getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltc3dPublisher = 
-      _nh.advertise<vision_communications::LandoltcAlertsVectorMsg>(param, 10);
+      _nh.advertise<pandora_vision_msgs::LandoltcAlertsVectorMsg>(param, 10);
   }
   else
   {
@@ -287,7 +287,7 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 }
 
-void LandoltC3dDetection::predatorCallback(const vision_communications::LandoltcPredatorMsg& msg)
+void LandoltC3dDetection::predatorCallback(const pandora_vision_msgs::LandoltcPredatorMsg& msg)
 {
   cv_bridge::CvImagePtr in_msg;
   in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
@@ -333,8 +333,8 @@ void LandoltC3dDetection::landoltc3dCallback()
   std::vector<LandoltC3D> _landoltc3d = _landoltc3dDetector.getDetectedLandolt();
   
   //!< Create message of Landoltc Detector
-  vision_communications::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
-  vision_communications::LandoltcAlertMsg landoltc3dcodeMsg;
+  pandora_vision_msgs::LandoltcAlertsVectorMsg landoltc3dVectorMsg;
+  pandora_vision_msgs::LandoltcAlertMsg landoltc3dcodeMsg;
 
   landoltc3dVectorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
   landoltc3dVectorMsg.header.stamp = landoltc3dFrameTimestamp;
