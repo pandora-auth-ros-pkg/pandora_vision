@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -40,16 +39,11 @@
 #include "pandora_vision_hazmat/image_signature.h"
 
 
-=======
-#include "pandora_vision_hazmat/image_signature.h"
-
-
 ImageSignature::ImageSignature(HazmatDetector *baseDetector) : 
   detector_(baseDetector)
 {
   
   }
->>>>>>> Added new Hazmat detector classes.
 
 /**
  @brief Calculates the signs of an arbitrary 1-channel matrix.
@@ -69,85 +63,43 @@ void ImageSignature::signFunction(const cv::Mat &array , cv::Mat *signs)
   
   // If the image is an array of unsigned chars then the output
   // should be a signed array with the same size and number of channels.
-<<<<<<< HEAD
   cv::Mat floatArray;
     
   cv::divide( array , abs(array) , *signs );
   
   }
+ }
   
 // Function that calculates the signature of the image.
-=======
-  cv::Mat floatArray ;
-
-  switch (array.type())
-  {
-    // If the input is unsigned then return an array of ones,
-    // since we can only have positive elements.
-    case CV_8UC1:
-    case CV_16UC1:
-      *signs = cv::Mat( array.size() , CV_8SC1 );
-      signs->setTo(1);
-      return ;
-      break;
-    default:
-      array.convertTo(floatArray, CV_32FC1);
-      *signs = cv::Mat( array.size() , CV_32FC1 );
-  }
-    
-  cv::divide( array , abs(array) , *signs );
-  
-  
-  }
-  
->>>>>>> Added new Hazmat detector classes.
 void ImageSignature::calculateSignature(const cv::Mat &image , 
       cv::Mat *imgSign)
 {
   
   
-<<<<<<< HEAD
   cv::Mat imageDCT;
   
   // Compute the discrete cosine transform of the input image.
   cv::dct(image , imageDCT );
-=======
-  cv::Mat imageDCT ;
-  
-  // Compute the discrete cosine transform of the input image.
-  cv::dct(image , imageDCT   );
->>>>>>> Added new Hazmat detector classes.
-  
+ 
   // Calculate the signature of the image.
   ImageSignature::signFunction( imageDCT , imgSign );
   
-<<<<<<< HEAD
   return;
   
   }
 
+
 // Function that uses the signature to create 
 void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame , 
-      cv::Mat *mask )
-=======
-  return ;
-  
-  }
-  
-void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask , 
-     const cv::Mat &data  )
->>>>>>> Added new Hazmat detector classes.
+      cv::Mat *mask );
 {
   if ( !frame.data )
   {
     std::cerr << "Invalid frame " << std::endl;
-<<<<<<< HEAD
     mask->data = NULL;
     return;
-=======
     mask->data = NULL ;
     return ;
->>>>>>> Added new Hazmat detector classes.
   }
   
   static cv::Mat saliency;
@@ -158,13 +110,10 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
     
   // Resize the frame so as to process it correctly.
   // TO DO : read the size from file.
-<<<<<<< HEAD
   cv::resize( saliency , saliency , cv::Size( 64, 48 ));
   
   static cv::Mat signature;
   static cv::Mat invDCT; 
-=======
-  cv::resize( saliency , saliency , cv::Size(64,48) );
   
   static cv::Mat signature;
   static cv::Mat invDCT ; 
@@ -185,7 +134,6 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
     
     return ;
   }
->>>>>>> Added new Hazmat detector classes.
   
   static std::vector<cv::Mat> channels;
 
@@ -206,7 +154,6 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
     ImageSignature::calculateSignature( channels[i] , &signature );
     
     // Perform the inverse DCT on the signature.
-<<<<<<< HEAD
     cv::dct( signature , invDCT , cv::DCT_INVERSE );    
     tempMap = invDCT.mul(invDCT);
     cv::GaussianBlur( tempMap , tempMap , cv::Size( 5 , 5 ) , 0 );
@@ -215,59 +162,40 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
   }
   
   // Calculate the mean of the saliency values of the 3 input channels.
-  sum = (1/3.f) * sum;
-=======
     cv::dct( signature , invDCT , cv::DCT_INVERSE );
     
     tempMap = invDCT.mul(invDCT);
     cv::GaussianBlur( tempMap , tempMap , cv::Size(5,5) , 0 );
+    // Calculate the total map.
     sum  = sum + tempMap ;
   }
+  
   // Calculate the mean of the saliency values of the 3 input channels.
   sum = (1/3.f) * sum ;
   
->>>>>>> Added new Hazmat detector classes.
   
   // Resize the mask so that it can be applied to the frame.
   cv::resize( sum , sum  , frame.size() );
   
-<<<<<<< HEAD
-=======
-  
->>>>>>> Added new Hazmat detector classes.
   // Threshold the mask to decrease noise and keep only the regions
   // of interest.
   cv::threshold( sum  , sum , 0.99 , 1 , cv::THRESH_BINARY); 
   
   // Convert the mask to 1-channel 8 bit format.
   sum.convertTo( sum , CV_8UC1 , 255 );
-<<<<<<< HEAD
   
   cv::medianBlur( sum , sum  , 3 );
   
   *mask = sum;
 
-  return;
-=======
-    cv::imshow("Sum",sum);
 
   
   cv::medianBlur( sum , sum  , 3 );
   
-  
-  
-  // Use the logical or operatio between the calculated mask if we have
-  // received a valid mask.
-  if ( mask->data)
-    cv::bitwise_or(sum , *mask , *mask );
-  else
-    *mask = sum ;
-    
-  // Call the rest of the decorators.
-  detector_->createMask(frame , mask , data );
-  
-  
+  #ifdef DEBUG
+  cv::imshow("Filter",sum);
+  #endif
+   
   
   return ;
->>>>>>> Added new Hazmat detector classes.
   }

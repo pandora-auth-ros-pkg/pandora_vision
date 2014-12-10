@@ -185,21 +185,14 @@ class HazmatDetector : public Detector
     
     void virtual readData( void ) ;
     
-    
-    // Function used to get the best feature matches between a frame
-    // and a number of patterns.
-    
-    int getBestMatches( const cv::Mat &frame ,
-     const cv::Mat &features , double *minDist , double *maxDist  ) ;
+
     
     // Function that returns the detected keypoints and features of the 
     // the image .
     
-    void virtual getFeatures( const cv::Mat &frame , 
-    cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
-    {
-      descriptors->data = NULL ;
-      } 
+    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
+    = 0 ;
     
     void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
       const cv::Mat &data = cv::Mat() );
@@ -211,13 +204,29 @@ class HazmatDetector : public Detector
     // them to the pattern descriptors and returns the corresponding
     // keypoints.
     bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat pattern & patternDescriptors , 
-      std::vector<cv::KeyPoint> *patternKeyPoints , 
-      std::vector<cv::KeyPoint> *sceneKeyPoints  ) = 0 ;
+      const cv::Mat &patternDescriptors , 
+      const std::vector<cv::Point2f> patternKeyPoints ,
+      const std::vector<cv::KeyPoint> sceneKeyPoints ,
+      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
+      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) = 0 ;
       
-    bool virtual findBoundingBox(std::vector<cv::KeyPoint> &patternKeyPoints , 
-      std::vector<cv::KeyPoint> &sceneKeyPoints , 
-      std::vector<cv::Point2f> *patternBB) ;
+    /**
+    * @brief Find the homography between the scene and the pattern keypoints
+    * , check if it is valid and return the bounding box of the detected
+    * pattern .
+    * @param patternKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+    * keypoints from detected descriptor matches on the pattern.
+    * @param sceneKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+    * keypoints from detected descriptor matches in the scene.
+    * @param patternBB [std::vector<cv::Point2f *] : Vector of 2D float
+    * Points that containes the bounding box and the center of the 
+    * pattern.
+    
+    **/
+    bool virtual findBoundingBox(const std::vector<cv::Point2f> &patternKeyPoints , 
+      const std::vector<cv::Point2f> &sceneKeyPoints , 
+      const std::vector<cv::Point2f> &patternBB , 
+      std::vector<cv::Point2f> *sceneBB) ;
 
     // Function that sets the file where the pattern names are stored.
     static void setFileName( const std::string &file ) 
@@ -231,6 +240,12 @@ class HazmatDetector : public Detector
       return this->featuresName_ ;
     }
     
+    static void setDims(const cv::Mat & frame)
+    {
+      width = frame.cols ;
+      height = frame.rows;
+    }
+    
     // Default Hazmat Detector Constructor.
     // Used when the decorators are initiliazed.
     HazmatDetector() {}    
@@ -239,7 +254,6 @@ class HazmatDetector : public Detector
     explicit HazmatDetector(const std::string &featureName) 
       : featuresName_(featureName)
     {
-      // Initialize the Flann matcher.
       readData();
     }
     
@@ -247,7 +261,6 @@ class HazmatDetector : public Detector
     ~HazmatDetector()
     {
       patterns_.clear() ;
-      bestMatches_.clear() ;
 }
   
   
@@ -265,6 +278,16 @@ class HazmatDetector : public Detector
     // Name of the detector .
     const std::string featuresName_;    
     
+    // Width of the input frame.
+    static int width ; 
+    
+    // Height of the input frame.
+    static int height ;
+    
+    // Structs used for finding the execution time. 
+    #ifdef CHRONO
+    struct timeval startwtime, endwtime;
+    #endif
     
 
 };

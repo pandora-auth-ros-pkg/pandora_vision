@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -101,22 +100,4 @@ void SiftHazmatDetector::getFeatures( const cv::Mat &frame ,
   std::cout << "Descriptors Computation time : " << descriptorsTime 
     << std::endl;
   #endif
-=======
-#include "pandora_vision_hazmat/sift_hazmat_detector.h"
-
-/** 
- * Sift detector 
-**/
-
-/**
-  
- **/
-  
-void SiftHazmatDetector::getFeatures( const cv::Mat &frame , 
-  cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints )
-{
-   s_( frame , cv::Mat() , *keyPoints , *descriptors );
->>>>>>> Added new Hazmat detector classes.
-  }
-
 
