@@ -7,7 +7,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     state_manager
-    state_manager_communications
+    state_manager_msgs
     pandora_vision_msgs
     cv_bridge
     image_transport
@@ -25,7 +25,7 @@ catkin_package(
     CATKIN_DEPENDS
       roscpp
       state_manager
-      state_manager_communications
+      state_manager_msgs
       pandora_vision_msgs
       cv_bridge
       image_transport

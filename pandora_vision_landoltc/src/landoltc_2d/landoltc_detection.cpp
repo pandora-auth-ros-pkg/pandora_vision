@@ -68,8 +68,8 @@ LandoltCDetection::LandoltCDetection(const std::string& ns) : _nh(ns), landoltcN
   server.setCallback(boost::bind(&LandoltCDetection::parametersCallback, this, _1, _2));
   
   //!< initialize states - robot starts in STATE_OFF
-  curState = state_manager_communications::robotModeMsg::MODE_OFF;
-  prevState = state_manager_communications::robotModeMsg::MODE_OFF;
+  curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
+  prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
 
   clientInitialize();
   
@@ -327,17 +327,17 @@ void LandoltCDetection::startTransition(int newState)
   //!< check if datamatrix algorithm should be running now
   landoltcNowON =
     (curState ==
-     state_manager_communications::robotModeMsg::MODE_EXPLORATION_RESCUE)
+     state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE)
     || (curState ==
-        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
     || (curState ==
-        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD)
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
     || (curState ==
-        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST);
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
 
   //!< shutdown if the robot is switched off
   if (curState ==
-      state_manager_communications::robotModeMsg::MODE_TERMINATING)
+      state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
   {
     ros::shutdown();
     return;

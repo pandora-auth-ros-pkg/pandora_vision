@@ -83,8 +83,8 @@ namespace pandora_vision
       _frameSubscribers.push_back(frameSubscriber);
     }
     //initialize states - robot starts in STATE_OFF 
-    curState = state_manager_communications::robotModeMsg::MODE_OFF;
-    prevState = state_manager_communications::robotModeMsg::MODE_OFF;
+    curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
+    prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
 
     //initialize state Managing Variables
     hazmatNowOn_ = false;
@@ -354,15 +354,15 @@ namespace pandora_vision
     //check if each algorithm should be running now
     hazmatNowOn_ = 
       ( curState == 
-        state_manager_communications::robotModeMsg::MODE_EXPLORATION_RESCUE ) ||
+        state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE ) ||
       ( curState == 
-        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION ) ||
+        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION ) ||
       ( curState == 
-        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD ) ||
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD ) ||
       ( curState == 
-        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST );
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST );
         
-    if (curState == state_manager_communications::robotModeMsg::\
+    if (curState == state_manager_msgs::RobotModeMsg::\
       MODE_TERMINATING)
     {
       ros::shutdown();

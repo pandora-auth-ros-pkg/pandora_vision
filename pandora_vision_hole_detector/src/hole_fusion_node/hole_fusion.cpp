@@ -687,13 +687,13 @@ namespace pandora_vision
   bool HoleFusion::isHoleDetectorOn(const int& state)
   {
     return (state ==
-        state_manager_communications::robotModeMsg::MODE_EXPLORATION_RESCUE)
+        state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE)
       || (state ==
-        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION)
+        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
       || (state ==
-        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD)
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
       || (state ==
-        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST);
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
   }
 
 

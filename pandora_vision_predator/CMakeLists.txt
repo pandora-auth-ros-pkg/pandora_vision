@@ -9,7 +9,7 @@ cv_bridge
 pandora_vision_msgs
 pandora_common_msgs
 state_manager
-state_manager_communications
+state_manager_msgs
 roscpp
 image_transport
 sensor_msgs
@@ -42,7 +42,7 @@ catkin_package(
  pandora_vision_msgs
  pandora_common_msgs
  state_manager
- state_manager_communications
+ state_manager_msgs
  sensor_msgs
  roslint
  urdf

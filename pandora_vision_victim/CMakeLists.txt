@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_common_msgs
     pandora_vision_msgs
     state_manager
-    state_manager_communications
+    state_manager_msgs
     cv_bridge
     image_transport
     dynamic_reconfigure
@@ -29,7 +29,7 @@ catkin_package(
       pandora_common_msgs
       pandora_vision_msgs
       state_manager
-      state_manager_communications
+      state_manager_msgs
       cv_bridge
       image_transport
       dynamic_reconfigure
