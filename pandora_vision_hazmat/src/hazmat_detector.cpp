@@ -1,5 +1,8 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
 
+int HazmatDetector::width = 640;
+int HazmatDetector::height = 480;
+
 /**
   @brief Creates a mask that defines the region of the frame where
         features will be extracted.
@@ -22,7 +25,7 @@ void HazmatDetector::createMask(const cv::Mat &frame , cv::Mat *mask ,
   }
 
 // Allocating space for the static member variable.
-std::string HazmatDetector::fileName_ = std::string("input") ;
+std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/input") ;
 
 
 // Data input function . 
@@ -67,19 +70,19 @@ void HazmatDetector::readData( void )
   fs.release() ;
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir = "trainingData//" + this->getFeaturesName() ;
+  std::string trainingDataDir = "/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/trainingData/" + this->getFeaturesName() ;
   std::string fileName ;
   
   for (int i = 0 ; i < input.size() ; i++) 
   { 
     // Open the training file associated with image #i .
-    fileName = trainingDataDir + "//" + input[i] + ".xml" ;
+    fileName = trainingDataDir + "/" + input[i] + ".xml" ;
     cv::FileStorage fs2( fileName ,cv::FileStorage::READ);
     
     // Check if the file was properly opened.
     if ( !fs2.isOpened() )
     {
-      std::cerr << "File " << fileName << "could not be opened! " 
+      std::cerr << "File " << fileName << " could not be opened! " 
         << std::endl;
       continue;
     }
@@ -137,7 +140,8 @@ void HazmatDetector::readData( void )
     // Close the xml file .
     fs2.release() ;
     
-  }    
+  }
+  
   
 }
 
@@ -153,139 +157,202 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     return false;
   }
   
+  // Check if that patterns have been read succesfully.
+  // TO DO : Produce Fatal Error on Failure.
+  if ( patterns_.size() < 1 )
+  {
+    std::cerr << "No patterns read . Detection cannot continue " << 
+      std::endl;
+    *x = NULL ;
+    *y = NULL ;
+    return false;
+  }
+  
   
   // Set the pattern center to NULL .
   *x = NULL ;
   *y = NULL ;
   
-  
+  // The matrix that contains the descriptors of the frame.
   cv::Mat frameDescriptors ;
+  // The mask that will be applied to the frame so as to limit the
+  // the search space.
+  cv::Mat mask ;
+  // The detected keypoints of the frame that will be matched to the 
+  // input pattern so as to find the correspondence from the training
+  // set to the query frame.
   std::vector<cv::KeyPoint> frameKeyPoints;
   
+  #ifdef CHRONO
+  gettimeofday(&startwtime,NULL);
+  #endif
+  
+  // Create the mask that will be used to extract regions of interest
+  // on the image based on Image Signature Saliency Map .
+  ImageSignature::createSaliencyMapMask(frame , &mask );
+  
+  #ifdef CHRONO
+  gettimeofday(&endwtime,NULL);
+  double maskTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
+      /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+  std::cout << "Calculation time for creating the mask for frame  is " 
+    << maskTime << std::endl;
+  #endif
+  
+  #ifdef DEBUG
+  cv::Mat maskedFrame;
+  frame.copyTo(maskedFrame,mask);
+  cv::imshow("Segmented Frame",maskedFrame);
+  #endif
+
   // Calculate the keypoints and extract the descriptors from the 
   // frame.
-  getFeatures( frame , &frameDescriptors , &frameKeyPoints ) ; 
-
-  double minDist ; 
-  double maxDist ;
+  
+  #ifdef CHRONO
+  gettimeofday(&startwtime,NULL);
+  #endif
+  getFeatures( frame , mask , &frameDescriptors , &frameKeyPoints ) ; 
+  #ifdef CHRONO
+  gettimeofday(&endwtime,NULL);
+  double featuresTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
+      /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+  std::cout << "Calculation time for the features for frame  is " 
+    << featuresTime << std::endl;
+  #endif
+  
+  bool matchesFound;
+  bool boundingBoxFound;
+  
+  std::vector<cv::Point2f> patternKeyPoints;
+  std::vector<cv::Point2f> sceneKeyPoints;
+  std::vector<cv::Point2f> sceneBB ;
+  
+  
   
   // For every pattern in the list : 
   for (int i = 0 ; i < patterns_.size() ; i++ )
   {
-    
-  }
-  
-  
-  // Find the pattern that matches best the current frame.
-  int bestMatchIndex = getBestMatches( frame , frameDescriptors , 
-    &minDist , &maxDist );
-    
-  //~ std::cout << patterns_[bestMatchIndex].name << std::endl;
-    
-  
-  // Vector the contains the matches for whom the distance between
-  // the frame descriptors and the pattern descriptors is smaller that
-  // 3 * minDist ;
-  std::vector< cv::DMatch > goodMatches;
-  
-  
-  // Fill the above vector.
-  //~ std::cout << minDist << std::endl;
-  //~ std::cout << bestMatches_.size() << std::endl;
-  
-  if (bestMatches_.size() > 0 )
-  {
-    for( int i = 0; i < frameDescriptors.rows; i++ )
-    { 
-      if( bestMatches_[i].distance < 3*minDist )
-      { 
-         goodMatches.push_back( bestMatches_[i]); 
-      }
-    }
-  }
-
-  
-  std::vector<cv::Point2f> patternKeyPoints;
-  std::vector<cv::Point2f> sceneKeyPoints;
-  
-  // Get the keypoints from the good matches
-
-  for( int i = 0; i < goodMatches.size(); i++ )
-  {
-    
-    // Pattern key points .
-    patternKeyPoints.push_back( 
-      patterns_[bestMatchIndex].keyPoints[ goodMatches[i].queryIdx ] );
+    #ifdef CHRONO
+    gettimeofday (&startwtime, NULL); 
+    #endif
+    // Try to find key point matches between the i-th pattern
+    // and the descriptors and the keypoints extracted from the frame.
+    matchesFound = findKeypointMatches(frameDescriptors , 
+      patterns_[i].descriptors , patterns_[i].keyPoints , 
+      frameKeyPoints , 
+      &patternKeyPoints , 
+      &sceneKeyPoints );
       
-    // Scene key points .
-    sceneKeyPoints.push_back( 
-      frameKeyPoints[ goodMatches[i].trainIdx ].pt );
-  }
-  
-  
-  // Homography Matrix.
-  cv::Mat H ;
-  
-  // Scene bounding box.
-  std::vector<cv::Point2f> sceneBB ;
-  //~ std::cout << patternKeyPoints.size() << std::endl;
-  
-  // If there are sufficient keypoint matches calculate the homography
-  // between the pattern and the detected object.
-  if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
-  {
-    // Calculate the homography matrix.
-    H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
-      CV_RANSAC );
-    // Transfer the bounding box to the frame coordinates.
-    cv::perspectiveTransform( patterns_[bestMatchIndex].boundingBox , 
-      sceneBB , H );
-    
-    // Testing Frame
-    //~ line( trackingFrame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[3] , scene_corners[0] , Scalar( 0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[2] , scene_corners[3] , Scalar( 0, 255, 0), 4 );
-    //~ circle( trackingFrame , scene_corners[4]  , 4.0 , Scalar(0,0,255) , -1 , 8 );
-    
-    // Copy the 4 corners of the bounding box.
-    std::vector<cv::Point2f> bbCorners ;
-    // Iterate over all elements of the bounding box except the last 
-    // one which is its center.
-    for (int i = 0 ; i < sceneBB.size() - 1 ; i++ )
-      bbCorners.push_back( sceneBB[i] );
-    if ( !cv::isContourConvex(bbCorners) )
-      return false;
-      
-    int width = frame.cols;
-    int height = frame.rows;
-      
-    // Check if every point of the bounding box is inside the image.
-    for (int i = 0 ; i < sceneBB.size() ; i++ )
+    #ifdef CHRONO
+    gettimeofday(&endwtime,NULL);
+    double keyPointTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
+				/1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+    std::cout << "Calculation time for keypoint matches for pattern "
+      << i << " is " << keyPointTime << std::endl;
+    #endif
+     
+     
+    // If we have succesfully found the matches.
+    if (matchesFound)
     {
-      if ( ( sceneBB[i].x < 0 ) 
-        || ( sceneBB[i].x > width )
-        || ( sceneBB[i].y < 0) 
-        || ( sceneBB[i].y > height ) )
-          return false ;
+      
+      #ifdef CHRONO
+      gettimeofday(&startwtime,NULL);
+      #endif
+      
+      // Find the bounding box for this query pattern .
+      boundingBoxFound = findBoundingBox( patternKeyPoints , 
+        sceneKeyPoints ,  patterns_[i].boundingBox , &sceneBB );
+        
+      #ifdef CHRONO
+      gettimeofday(&endwtime,NULL);
+      double boundingBoxTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
+          /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+      std::cout << "Calculation time for the bounding box for "
+        "the pattern " << i  << " is " << boundingBoxTime << std::endl;
+      #endif      
+      
+      
+      //~ std::cout << "Bounding Box flag : " << boundingBoxFound << std::endl;
+        
+      // If this flag is true then a valid match has been found and
+      // we have detected the pattern.
+      if (boundingBoxFound)
+        
+      {
+        #ifdef DEBUG
+        cv::Mat trackingFrame ;
+        frame.copyTo(trackingFrame,mask);
+        cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , cv::Scalar(0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , cv::Scalar( 0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[3] , sceneBB[0] , cv::Scalar( 0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , cv::Scalar( 0, 255, 0), 4 );
+        cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x,sceneBB[4].y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
+        imshow("Tracking Frame",trackingFrame);
+        #endif
+        
+        
+        //~ std::cout <<"Pattern " <<   i << std::endl;
+        cv::Point2f base = sceneBB[0] - sceneBB[1];
+        cv::Point2f h = sceneBB[1] - sceneBB[2];
+        double sideA = cv::norm(base) ;
+        double sideB = cv::norm(h) ;
+        double surface = sideA * sideB ;
+        
+        
+        
+        //~ std::cout << "Surface " << surface << std::endl;
+        //~ std::cout << "SideA " << sideA << std::endl;
+        //~ std::cout << "SideB " << sideB << std::endl;
+        
+
+        
+        //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
+          //~ continue;
+        if (surface < 10 || surface > frame.rows*frame.cols)
+        { 
+           continue;
+        }
+          //~ return false;
+        
+        
+        //~ break;
+      }
+      
     }
+    patternKeyPoints.clear();
+    sceneBB.clear();
+    sceneKeyPoints.clear();
     
-    // If all these conditions are met return the coordinates of the 
-    // center of the detected pattern . 
-    *x = sceneBB[ sceneBB.size() - 1 ].x ;
-    *y = sceneBB[ sceneBB.size() - 1 ].y ;
-
-    return true ;
-    
-    //~ trackingFrame.release();
   }
-  else
-    return false;
   
-    
-    //~ imshow("Tracker",trackingFrame);
+  if ( !boundingBoxFound )
+  {
+    *x = NULL ;
+    *y = NULL ;
+    patternKeyPoints.clear();
+    sceneBB.clear();
+    sceneKeyPoints.clear();
+    return false;
+  }
+  
+  // If all these conditions are met return the coordinates of the 
+    // center of the detected pattern . 
+  if ( sceneBB.empty() )
+  {
+    *x = NULL ;
+    *y = NULL ;
+    return false;
+  }
+  *x = sceneBB[ sceneBB.size() - 1 ].x ;
+  *y = sceneBB[ sceneBB.size() - 1 ].y ;
+  
+  patternKeyPoints.clear();
+  sceneBB.clear();
+  sceneKeyPoints.clear();
+  
+  return true;
 
-    //~ char key =  waitKey(30);
     
 }
 
@@ -303,55 +370,57 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
 
  **/
   
-bool virtual findBoundingBox(std::vector<cv::KeyPoint> &patternKeyPoints , 
-      std::vector<cv::KeyPoint> &sceneKeyPoints , 
-      std::vector<cv::Point2f> *patternBB) 
+bool HazmatDetector::findBoundingBox( 
+      const std::vector<cv::Point2f> &patternKeyPoints , 
+      const std::vector<cv::Point2f> &sceneKeyPoints , 
+      const std::vector<cv::Point2f> &patternBB , 
+      std::vector<cv::Point2f> *sceneBB) 
 {
   // Check if we have enough points to find the homography between
   // the pattern and the scene.
   if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
   {
-    // Calculate the homography matrix.
-    H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
+    // Calculate the homography matrix using RANSAC algorithm to 
+    // eliminate outliers.
+    cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
       CV_RANSAC );
-    // Transfer the bounding box to the frame coordinates.
-    cv::perspectiveTransform( patterns_[bestMatchIndex].boundingBox , 
-      sceneBB , H );
-    
-    // Testing Frame
-    //~ line( trackingFrame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[3] , scene_corners[0] , Scalar( 0, 255, 0), 4 );
-    //~ line( trackingFrame, scene_corners[2] , scene_corners[3] , Scalar( 0, 255, 0), 4 );
-    //~ circle( trackingFrame , scene_corners[4]  , 4.0 , Scalar(0,0,255) , -1 , 8 );
-    
-    // Copy the 4 corners of the bounding box.
-    std::vector<cv::Point2f> bbCorners ;
-    // Iterate over all elements of the bounding box except the last 
-    // one which is its center.
-    for (int i = 0 ; i < sceneBB.size() - 1 ; i++ )
-      bbCorners.push_back( sceneBB[i] );
-    if ( !cv::isContourConvex(bbCorners) )
-      return false;
       
-    int width = frame.cols;
-    int height = frame.rows;
+    // Transform the bounding box to the frame coordinates.
+    cv::perspectiveTransform( patternBB , 
+      *sceneBB , H );
       
+    
+    
     // Check if every point of the bounding box is inside the image.
-    for (int i = 0 ; i < sceneBB.size() ; i++ )
+    // If not then the correspondences are invalid and these keypoints
+    // are rejected.
+    for (int i = 0 ; i < sceneBB->size() ; i++ )
     {
-      if ( ( sceneBB[i].x < 0 ) 
-        || ( sceneBB[i].x > width )
-        || ( sceneBB[i].y < 0) 
-        || ( sceneBB[i].y > height ) )
-          return false ;
+      if ( ( (*sceneBB)[i].x < 0 ) 
+        || ( (*sceneBB)[i].x > HazmatDetector::width )
+        || ( (*sceneBB)[i].y < 0) 
+        || ( (*sceneBB)[i].y > HazmatDetector::height ) )
+          {
+            //~ std::cerr << "Bounding Box out of bounds " << std::endl;
+            sceneBB->clear();
+            return false ;
+          }
     }
     
-    // If all these conditions are met return the coordinates of the 
-    // center of the detected pattern . 
-    *x = sceneBB[ sceneBB.size() - 1 ].x ;
-    *y = sceneBB[ sceneBB.size() - 1 ].y ;
-
+    // Check if the Bounding box is Convex 
+    // If not the resulting homography is incorrect due to false
+    // matching between the descriptors.
+    std::vector<cv::Point2f> boundingBox = *sceneBB ;
+    boundingBox.pop_back();
+    if ( !cv::isContourConvex(boundingBox) )
+    {
+      boundingBox.clear();
+      //~ std::cerr << "Contour not convex! " << std::endl;
+      return false;
+    }
+    
+    // Clear the bounding box vector .
+    boundingBox.clear();
     return true ;
     
     //~ trackingFrame.release();
@@ -360,60 +429,4 @@ bool virtual findBoundingBox(std::vector<cv::KeyPoint> &patternKeyPoints ,
     return false;
   
 }
-
-// Get the best matches between the scene and pattern descriptors.
-int HazmatDetector::getBestMatches( const cv::Mat &frame ,
-     const cv::Mat &features , double *minDist , double *maxDist )
-{
-  // Initialize total min and max distances.
-  *minDist = std::numeric_limits<double>::max();
-  //~ *maxDist = std::numeric_limits<double>::max();
-  
-  int bestMatch ;
-  
-  // Max and Min dist for every pattern.
-  double tempMaxDist;
-  double tempMinDist;
-  
-  
-  
-  cv::Mat *descriptorsObj;
-  
-  for (int i = 0 ; i < patterns_.size() ; i++ )
-  {
-    descriptorsObj = &patterns_[i].descriptors;
-    // Find the matches.
-    this->matcher_.match( *descriptorsObj , 
-      features , matches );
-    
-    
-    // Calculate the min and max distance between the descriptors
-    // of the frame and the candidate pattern.
-    tempMinDist = std::numeric_limits<double>::max();
-    //~ tempMaxDist = std::numeric_limits<double>::min();
-    
-    // Calculation of max and min distances between keypoints for 
-    // the patter #i .
-    for( int j = 0; j < (*descriptorsObj).rows; j++ )
-    { 
-      double dist = matches[j].distance;
-      if( dist < tempMinDist ) tempMinDist = dist;
-      //~ if( dist > tempMaxDist ) tempMaxDist = dist;
-    } 
-
-    if (tempMinDist < *minDist )
-    {
-      //~ *maxDist = tempMaxDist ;
-      *minDist = tempMinDist ;
-      bestMatch = i ;
-      bestMatches_ = matches ;
-    }
-    
-  }
-  
-  return bestMatch;
-  
-}
-
-
 

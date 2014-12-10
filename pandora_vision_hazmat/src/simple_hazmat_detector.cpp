@@ -20,67 +20,86 @@ SimpleHazmatDetector::SimpleHazmatDetector(
 **/
           
     
-bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat pattern & patternDescriptors ,  
-      std::vector<cv::KeyPoint> *patternKeyPoints , 
-      std::vector<cv::KeyPoint> *sceneKeyPoints  ) 
+bool SimpleHazmatDetector::findKeypointMatches(
+      const cv::Mat &frameDescriptors ,
+      const cv::Mat &patternDescriptors , 
+      const std::vector<cv::Point2f> patternKeyPoints ,
+      const std::vector<cv::KeyPoint> sceneKeyPoints ,
+      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
+      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) 
 {
   // Define the vector that will contain the matches.
   std::vector< cv::DMatch > matches;
   
   // Perfom the matching using the matcher defined by the object.
-  matcher_->match(patternDescriptors,frameDescriptors , matches );
+  matcher_.match(patternDescriptors,frameDescriptors , matches );
   
   // Vector that containes the optimum matches.
   std::vector< cv::DMatch > goodMatches;
   
   // Minimum distance between matches.
-  double minDist ;
+  double minDist =  std::numeric_limits<double>::max() ;
   // Maximum distance between matches.
-  double maxDist ;
-  
+
   // If matches have been found
   if ( matches.size() > 0 )
   {
+
       // Quick calculation of max and min distances between keypoints
-      for( int i = 0; i < descriptorsObject.rows; i++ )
+      for( int i = 0; i < patternDescriptors.rows; i++ )
       { 
         double dist = matches[i].distance;
         if( dist < minDist ) minDist = dist;
-        if( dist > maxDist ) maxDist = dist;
       }
-      
+
+
       // Keep only the matches that are below a certain distance 
       // threshold
       // TO DO : READ THE THRESHOLD FROM FILE.
     
       for( int i = 0; i < patternDescriptors.rows; i++ )
-      { if( matches[i].distance < 3*minDist )
-         { goodMatches.push_back( matches[i]); }
+      { 
+        if( matches[i].distance < 2*minDist )
+          goodMatches.push_back( matches[i]); 
       }
+      
+      
+      
+
   }
   else
   {
     return false;
   }
   
+  
   // Find the keypoints that correspond to the best matches.
-   
+
+  
   for( int i = 0; i < goodMatches.size(); i++ )
   {
     
     // Pattern key points .
-    patternKeyPoints->push_back( 
-      patterns_[bestMatchIndex].keyPoints[ goodMatches[i].queryIdx ] );
+    matchedPatternKeyPoints->push_back( 
+      patternKeyPoints[ goodMatches[i].queryIdx ] );
       
     // Scene key points .
-    sceneKeyPoints->push_back( 
-      frameKeyPoints[ goodMatches[i].trainIdx ].pt );
+    matchedSceneKeyPoints->push_back( 
+      sceneKeyPoints[ goodMatches[i].trainIdx ].pt );
+      
   }
   
+  // If we have less than 4 matches then we cannot find the Homography
+  // and this is an invalid pattern.
+  
+  if ( goodMatches.size() < 4 )
+    return false;
+    
   
   goodMatches.clear();
   matches.clear();
+  
+  
   
   // Matches have been successfully found and keypoints correctly 
   // assigned.

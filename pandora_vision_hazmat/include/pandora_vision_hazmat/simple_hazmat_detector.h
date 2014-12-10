@@ -21,14 +21,17 @@ class SimpleHazmatDetector : public HazmatDetector
     // Function that returns the detected keypoints and features of the 
     // the image .
     
-    void virtual getFeatures( const cv::Mat &frame , 
-    cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) = 0; 
+    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
+      = 0 ; 
     
     // Find the matches between the pattern and the query frame.
     bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat pattern & patternDescriptors , 
-      std::vector<cv::KeyPoint> *patternKeyPoints , 
-      std::vector<cv::KeyPoint> *SceneKeyPoints  ) ;
+      const cv::Mat &patternDescriptors , 
+      const std::vector<cv::Point2f> patternKeyPoints ,
+      const std::vector<cv::KeyPoint> sceneKeyPoints ,
+      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
+      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) ;
     
     // Returns the type of the features used. 
     //~ const TrainerType virtual getType( void ) = 0 ;
@@ -44,6 +47,7 @@ class SimpleHazmatDetector : public HazmatDetector
     // Flann Matcher .
     // It is initialised by every feature detector separately so as to
     // set the correct parameters.
+    
     cv::FlannBasedMatcher matcher_ ;
     
     

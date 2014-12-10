@@ -5,10 +5,12 @@
 HistogramMask::HistogramMask(HazmatDetector *baseDetector) :
   detector_(baseDetector)
 {
-  
+  histogramEnabled_ = true ;
   }
   
 cv::Mat HistogramMask::normImage = cv::Mat();
+
+bool HistogramMask::histogramEnabled_ = false;
 
 /**
  @brief Creates a mask based on the histogram ratio of the pattern 
@@ -24,7 +26,9 @@ void HistogramMask::createMask(const cv::Mat &frame , cv::Mat *mask ,
   if ( !frame.data )
   {
     std::cerr << "Invalid frame data " << std::endl;
-    mask->data = NULL;
+    // If an error has occured create an empty mask and thus the entire
+    // frame will be scanned.
+    *mask = cv::Mat( frame.size() , frame.type() );
     return ;
   }
   
@@ -35,7 +39,9 @@ void HistogramMask::createMask(const cv::Mat &frame , cv::Mat *mask ,
   if ( !frameHist.data )
   {
     std::cerr << "Invalid frame histogram data " << std::endl;
-    mask->data = NULL;
+    // If an error has occured create an empty mask and thus the entire
+    // frame will be scanned.
+    *mask = cv::Mat( frame.size() , frame.type() );
     return ;
   }
   
@@ -105,7 +111,9 @@ void HistogramMask::createMask(const cv::Mat &frame , cv::Mat *mask ,
   
   
 
-  cv::calcBackProject( &normImage , 1 , histChannels ,  ratioHist , 
+  //~ cv::calcBackProject( &normImage , 1 , histChannels ,  ratioHist , 
+    //~ backProj , ranges );
+  cv::calcBackProject( &normImage , 1 , histChannels ,  frameHist , 
     backProj , ranges );
   
   
@@ -118,10 +126,18 @@ void HistogramMask::createMask(const cv::Mat &frame , cv::Mat *mask ,
   //~ cv::split( normImage , channels );
     
   
-  cv::multiply( backProj , Ychannels[0] , backProj );
+  //~ cv::multiply( backProj , Ychannels[0] , backProj );
   
   
-  *mask = backProj;
+  //~ backProj.convertTo(backProj,CV_8UC3,255);
+  cv::imshow("NormImage",normImage);
+  cv::imshow("BackProj",backProj);
+  if ( !mask->data )
+  {
+    *mask = cv::Mat( backProj.size() , backProj.type() );
+    mask->setTo(255);
+  }
+  
   cv::bitwise_or( *mask , backProj , *mask );
   detector_->createMask( frame , mask , data );
   
@@ -173,6 +189,7 @@ void HistogramMask::calcNormYUVHist(const cv::Mat &image ,
   cv::calcHist( &normImage , 1 , histChannels , cv::Mat() , *hist , 
     histDims , histSize , ranges ) ;
   
+  cv::normalize( *hist , *hist , 1 , 0, cv::NORM_L1);
   
   }
 

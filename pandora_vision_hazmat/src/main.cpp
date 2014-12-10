@@ -7,9 +7,9 @@ int main(int argc , char **argv )
 {
   SiftHazmatDetector detectorObj ;
   //~ Detector *detector = new HistogramMask(detectorObj);
-  //~ ImageSignature sign(&detectorObj);
+  ImageSignature detector(&detectorObj);
   //~ HistogramMask detector(&sign);
-  HistogramMask detector(&detectorObj);
+  //~ HistogramMask detector(&detectorObj);
   
   cv::VideoCapture camera(1);
   
@@ -36,18 +36,37 @@ int main(int argc , char **argv )
   HistogramMask::calcNormYUVHist(pattern , &hist);
   float x , y;
   
+  int count = 1 ;
+  
   while(true)
   {
-    const clock_t begin_time = clock();
     
     camera.grab();
     camera.retrieve(frame);
-    //~ bool found = detectorObj->detect(frame , &x, &y);
-    //~ if (found)
-    //~ {
-      //~ cv::circle( frame , cv::Point2f(x,y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
-      //~ 
-    //~ }
+    
+    
+    if (count == 1 )
+    {
+      count++;
+      HazmatDetector::setDims(frame); 
+    }
+    
+    
+    const clock_t begin_time = clock();
+
+    bool found = detector.detect(frame , &x, &y);
+    
+    std::cout <<"Time to execute : " << ( clock () - begin_time ) /  
+      static_cast<double>(CLOCKS_PER_SEC )<< std::endl; 
+    if (found)
+    {
+      //~ cv::line( frame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
+      //~ cv::line( frame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );
+      //~ cv::line( frame, scene_corners[3] , scene_corners[0] , Scalar( 0, 255, 0), 4 );
+      //~ cv::line( frame, scene_corners[2] , scene_corners[3] , Scalar( 0, 255, 0), 4 );
+      cv::circle( frame , cv::Point2f(x,y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
+      
+    }
     if ( !frame.data )
     {
       std::cout << "Invalid Frame. Continuing to next iteration!" 
@@ -60,26 +79,26 @@ int main(int argc , char **argv )
     //~ cv::cvtColor(frame,saliency,CV_BGR2GRAY);
 
     //~ detector.createMask( frame , &mask);
-    detector.createMask( frame , &mask , hist );
+    //~ detector.createMask( frame , &mask , hist );
     
-    if ( ! mask.data )
-    {
-      std::cerr << "Invalid Mask " << std::endl;
-      // Release the camera .
-      camera.release();
-      break;
-    }
+    //~ if ( ! mask.data )
+    //~ {
+      //~ std::cerr << "Invalid Mask " << std::endl;
+      //~ // Release the camera .
+      //~ camera.release();
+      //~ break;
+    //~ }
     
-    std::cout << ( clock () - begin_time ) /  
-      static_cast<double>(CLOCKS_PER_SEC )<< std::endl;
+    //~ std::cout <<"TIme to execute : " << ( clock () - begin_time ) /  
+      //~ static_cast<double>(CLOCKS_PER_SEC )<< std::endl;
     
     
     
     
     cv::imshow("Frame",frame);
-    cv::imshow("Mask" , mask);
-    frame.copyTo(maskedFrame,mask);
-    cv::imshow("Segmented Frame",maskedFrame);
+    //~ cv::imshow("Mask" , mask);
+    //~ frame.copyTo(maskedFrame,mask);
+    //~ cv::imshow("Segmented Frame",maskedFrame);
 
     if (cv::waitKey(30)>=0)
     { 

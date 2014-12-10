@@ -9,23 +9,19 @@
  **/
  
 
-class HistogramMask : public HazmatDetector
+class HistogramMask : 
 {
   public : 
     
-    // Function that calculates the normalized histogram
-    static void calcNormYUVHist(const cv::Mat &image , cv::Mat *hist);
     
-    // Function the calculates the backprojection 
-    void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
-      const cv::Mat &data = cv::Mat() );
-    
-    // Normalize an image by dividing it with the channel ch.
-    static void normalizeImage(cv::Mat &image , int ch );
-
-     
+    // Function the calculates the backprojection of the given histogram
+    // on the image to extract regions of interest.
+    void virtual createBackProjectionMask(const cv::Mat &frame , 
+      cv::Mat *mask , const cv::Mat hist );
+  
+        
     // Constructor
-    HistogramMask(HazmatDetector *baseDetector);
+    HistogramMask();
     
     virtual ~HistogramMask() 
     {
@@ -37,6 +33,14 @@ class HistogramMask : public HazmatDetector
       
     // A Matrix containing the resulting normalized image.
     static cv::Mat normImage ;
+    
+    // The histogram that will be backprojected to the frame
+    // in order to find the regions of interest.
+    static cv::Mat histogram_ ;
+    
+    // A flag that tests whether we will use the filter that implements
+    // histogram backprojection.
+    static bool histogramEnabled_ ;
 
   };
   

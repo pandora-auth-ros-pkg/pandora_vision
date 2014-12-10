@@ -22,8 +22,8 @@ class Detector
     
     // Function used to get the best feature matches between a frame
     // and a number of patterns.
-    int virtual getBestMatches( const cv::Mat &frame ,
-     const cv::Mat &features , double *minDist , double *maxDist  ) = 0;
+    //~ int virtual getBestMatches( const cv::Mat &frame ,
+     //~ const cv::Mat &features , double *minDist , double *maxDist  ) = 0;
      
     void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
       const cv::Mat &data = cv::Mat() ) = 0 ;

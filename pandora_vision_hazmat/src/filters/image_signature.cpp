@@ -1,11 +1,6 @@
 #include "pandora_vision_hazmat/image_signature.h"
 
 
-ImageSignature::ImageSignature(HazmatDetector *baseDetector) : 
-  detector_(baseDetector)
-{
-  
-  }
 
 /**
  @brief Calculates the signs of an arbitrary 1-channel matrix.
@@ -26,27 +21,12 @@ void ImageSignature::signFunction(const cv::Mat &array , cv::Mat *signs)
   // If the image is an array of unsigned chars then the output
   // should be a signed array with the same size and number of channels.
   cv::Mat floatArray ;
-
-  switch (array.type())
-  {
-    // If the input is unsigned then return an array of ones,
-    // since we can only have positive elements.
-    case CV_8UC1:
-    case CV_16UC1:
-      *signs = cv::Mat( array.size() , CV_8SC1 );
-      signs->setTo(1);
-      return ;
-      break;
-    default:
-      array.convertTo(floatArray, CV_32FC1);
-      *signs = cv::Mat( array.size() , CV_32FC1 );
-  }
     
   cv::divide( array , abs(array) , *signs );
   
-  
   }
   
+// Function that calculates the signature of the image.
 void ImageSignature::calculateSignature(const cv::Mat &image , 
       cv::Mat *imgSign)
 {
@@ -63,9 +43,10 @@ void ImageSignature::calculateSignature(const cv::Mat &image ,
   return ;
   
   }
-  
-void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask , 
-     const cv::Mat &data  )
+
+// Function that uses the signature to create 
+void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame , 
+      cv::Mat *mask );
 {
   if ( !frame.data )
   {
@@ -87,23 +68,6 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
   static cv::Mat signature;
   static cv::Mat invDCT ; 
   
-  if ( frame.channels() ==  1 )
-  { 
-    ImageSignature::calculateSignature( saliency , &signature );
-    
-    // Perform the inverse DCT on the signature.
-    cv::dct( signature , invDCT , cv::DCT_INVERSE );
-    
-    *mask = invDCT.mul(invDCT);
-    
-    // Filter the result using a gaussian filter with a 5X5 kernel.
-    
-    cv::GaussianBlur(*mask , *mask , cv::Size(5,5) , 0.05 );
-    //~ cv::medianBlur( *mask , *mask , 5  );
-    
-    return ;
-  }
-  
   static std::vector<cv::Mat> channels;
 
   // Split the input frame into it's separate channels.
@@ -123,19 +87,18 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
     ImageSignature::calculateSignature( channels[i] , &signature );
     
     // Perform the inverse DCT on the signature.
-    cv::dct( signature , invDCT , cv::DCT_INVERSE );
-    
+    cv::dct( signature , invDCT , cv::DCT_INVERSE );    
     tempMap = invDCT.mul(invDCT);
     cv::GaussianBlur( tempMap , tempMap , cv::Size(5,5) , 0 );
+    // Calculate the total map.
     sum  = sum + tempMap ;
   }
+  
   // Calculate the mean of the saliency values of the 3 input channels.
   sum = (1/3.f) * sum ;
   
-  
   // Resize the mask so that it can be applied to the frame.
   cv::resize( sum , sum  , frame.size() );
-  
   
   // Threshold the mask to decrease noise and keep only the regions
   // of interest.
@@ -143,24 +106,13 @@ void  ImageSignature::createMask( const cv::Mat &frame , cv::Mat *mask ,
   
   // Convert the mask to 1-channel 8 bit format.
   sum.convertTo( sum , CV_8UC1 , 255 );
-    cv::imshow("Sum",sum);
-
   
   cv::medianBlur( sum , sum  , 3 );
   
-  
-  
-  // Use the logical or operatio between the calculated mask if we have
-  // received a valid mask.
-  if ( mask->data)
-    cv::bitwise_or(sum , *mask , *mask );
-  else
-    *mask = sum ;
-    
-  // Call the rest of the decorators.
-  detector_->createMask(frame , mask , data );
-  
-  
+  #ifdef DEBUG
+  cv::imshow("Filter",sum);
+  #endif
+   
   
   return ;
   }

@@ -9,9 +9,10 @@
  **/
   
 void SiftHazmatDetector::getFeatures( const cv::Mat &frame , 
-  cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints )
+  const cv::Mat &mask , cv::Mat *descriptors , 
+  std::vector<cv::KeyPoint> *keyPoints ) 
 {
-   s_( frame , cv::Mat() , *keyPoints , *descriptors );
+   s_( frame , mask , *keyPoints , *descriptors );
   }
 
 

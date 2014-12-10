@@ -17,6 +17,16 @@
 #include "opencv2/nonfree/nonfree.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#define CHRONO false
+#define DEBUG false
+
+
+#ifdef CHRONO
+#include "sys/time.h"
+#endif
+
+
+
 
 /** 
  @enum TrainerType

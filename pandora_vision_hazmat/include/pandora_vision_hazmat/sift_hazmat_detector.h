@@ -31,9 +31,9 @@ class SiftHazmatDetector : public SimpleHazmatDetector
     //~ const virtual TrainerType getType( void ) ;
     
     // Calculates the keypoints of the image and its descriptors.
-    void virtual getFeatures(const cv::Mat &frame , 
-      cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) ;
-      
+    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) ;
+     
           
   private:
   
