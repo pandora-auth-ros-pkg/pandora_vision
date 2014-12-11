@@ -25,7 +25,7 @@ void HazmatDetector::createMask(const cv::Mat &frame , cv::Mat *mask ,
   }
 
 // Allocating space for the static member variable.
-std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/input") ;
+std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Desktop/hazmatTraining/input") ;
 
 
 // Data input function . 
@@ -70,7 +70,8 @@ void HazmatDetector::readData( void )
   fs.release() ;
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir = "/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/trainingData/" + this->getFeaturesName() ;
+  std::string trainingDataDir = "/home/vchoutas/Desktop/hazmatTraining/trainingData/" + this->getFeaturesName() ;
+
   std::string fileName ;
   
   for (int i = 0 ; i < input.size() ; i++) 
@@ -90,9 +91,12 @@ void HazmatDetector::readData( void )
     std::vector<cv::Point2f> keyPoints;
     std::vector<cv::Point2f> boundingBox;
     cv::Mat descriptors; 
+    cv::Mat histogram;
     
     // Read the pattern's descriptors.
     fs2["Descriptors"] >> descriptors;
+    
+    fs2["Histogram"] >> histogram;
         
     // Read the pattern' keypoints.
     cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
@@ -130,7 +134,7 @@ void HazmatDetector::readData( void )
     p.boundingBox = boundingBox ;
     p.keyPoints = keyPoints;
     p.descriptors = descriptors ;
-    
+    p.histogram = histogram ;
     patterns_.push_back(p);
     
     // Clear the data vectors.
@@ -189,7 +193,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   
   // Create the mask that will be used to extract regions of interest
   // on the image based on Image Signature Saliency Map .
-  ImageSignature::createSaliencyMapMask(frame , &mask );
+  ImageSignature::createSaliencyMapMask( frame , &mask );
   
   #ifdef CHRONO
   gettimeofday(&endwtime,NULL);
@@ -235,6 +239,12 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     #ifdef CHRONO
     gettimeofday (&startwtime, NULL); 
     #endif
+    
+    // Test it before adding it to the system.
+    //~ HistogramMask::createBackProjectionMask(frame , &mask , 
+      //~ patterns_[i].histogram );
+      
+      
     // Try to find key point matches between the i-th pattern
     // and the descriptors and the keypoints extracted from the frame.
     matchesFound = findKeypointMatches(frameDescriptors , 
@@ -313,10 +323,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         { 
            continue;
         }
-          //~ return false;
         
         
-        //~ break;
       }
       
     }

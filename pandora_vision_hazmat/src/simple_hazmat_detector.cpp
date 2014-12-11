@@ -41,7 +41,7 @@ bool SimpleHazmatDetector::findKeypointMatches(
   double minDist =  std::numeric_limits<double>::max() ;
   // Maximum distance between matches.
 
-  // If matches have been found
+  // If matches have been found.
   if ( matches.size() > 0 )
   {
 

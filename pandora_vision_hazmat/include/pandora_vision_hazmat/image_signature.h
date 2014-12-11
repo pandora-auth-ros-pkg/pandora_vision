@@ -20,7 +20,7 @@ class ImageSignature
     // Function the creates the mask that will be applied to the 
     // incoming frame based on the saliency map produced by the 
     // signature of the image.
-    void static createSaliencyMapMask(const cv::Mat &frame , 
+    static void createSaliencyMapMask(const cv::Mat &frame , 
       cv::Mat *mask );
        
     // Return the array that containts the signs of an arbitrary

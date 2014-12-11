@@ -46,7 +46,7 @@ void ImageSignature::calculateSignature(const cv::Mat &image ,
 
 // Function that uses the signature to create 
 void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame , 
-      cv::Mat *mask );
+      cv::Mat *mask )
 {
   if ( !frame.data )
   {

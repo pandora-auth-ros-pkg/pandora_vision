@@ -9,40 +9,46 @@
  **/
  
 
-class HistogramMask : 
+class HistogramMask  
 {
   public : 
     
     
     // Function the calculates the backprojection of the given histogram
     // on the image to extract regions of interest.
-    void virtual createBackProjectionMask(const cv::Mat &frame , 
+    void static createBackProjectionMask(const cv::Mat &frame , 
       cv::Mat *mask , const cv::Mat hist );
   
         
     // Constructor
     HistogramMask();
     
-    virtual ~HistogramMask() 
-    {
-    } 
+
     
   private :
-    // Pointer the base class that will be decorated.
-    HazmatDetector *detector_ ;
-      
-    // A Matrix containing the resulting normalized image.
-    static cv::Mat normImage ;
+
     
-    // The histogram that will be backprojected to the frame
-    // in order to find the regions of interest.
-    static cv::Mat histogram_ ;
+    // 2D range of the histogram. 
+    static float* ranges_[2] ;
     
-    // A flag that tests whether we will use the filter that implements
-    // histogram backprojection.
-    static bool histogramEnabled_ ;
+    // Channels when creating the histogram.
+    static int channels_[2] ;
+    
+    static float hueRange_[2] ;
+    static float satRange_[2] ;
+    
+    // Resize scale for input image.
+    static int scale_ ;
+    
+    // The threshold for the mask.
+    static int thresh_ ;
+    
+    // Maximum value of the intensity of every pixel of the mask.
+    static int maxValue_ ;
 
   };
+  
+
   
 
 

@@ -1,17 +1,14 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
-#include "pandora_vision_hazmat/histogram_mask.h"
-#include "pandora_vision_hazmat/image_signature.h"
 #include "pandora_vision_hazmat/sift_hazmat_detector.h"
 
 int main(int argc , char **argv )
 {
   SiftHazmatDetector detectorObj ;
   //~ Detector *detector = new HistogramMask(detectorObj);
-  ImageSignature detector(&detectorObj);
   //~ HistogramMask detector(&sign);
   //~ HistogramMask detector(&detectorObj);
   
-  cv::VideoCapture camera(1);
+  cv::VideoCapture camera(0);
   
   if ( !camera.isOpened() )
   {
@@ -33,7 +30,7 @@ int main(int argc , char **argv )
   cv::Mat hist;
   cv::Mat mask;
   cv::Mat maskedFrame;
-  HistogramMask::calcNormYUVHist(pattern , &hist);
+
   float x , y;
   
   int count = 1 ;
@@ -54,7 +51,7 @@ int main(int argc , char **argv )
     
     const clock_t begin_time = clock();
 
-    bool found = detector.detect(frame , &x, &y);
+    bool found = detectorObj.detect(frame , &x, &y);
     
     std::cout <<"Time to execute : " << ( clock () - begin_time ) /  
       static_cast<double>(CLOCKS_PER_SEC )<< std::endl; 
