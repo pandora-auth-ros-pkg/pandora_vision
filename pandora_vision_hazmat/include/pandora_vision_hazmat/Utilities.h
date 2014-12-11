@@ -17,11 +17,20 @@
 #include "opencv2/nonfree/nonfree.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#define CHRONO false
-#define DEBUG false
+// Filter Libraries.
+#include "pandora_vision_hazmat/histogram_mask.h"
+#include "pandora_vision_hazmat/image_signature.h"
 
 
-#ifdef CHRONO
+
+//~ #define CHRONO 0
+#define DEBUG 
+#define HUE_RANGE {0,180}
+#define SAT_RANGE {0,255}
+#define DEFAULT_HIST_CHANNELS {0,1}
+#define HIST_RANGE { HUE_RANGE , SAT_RANGE }
+
+#ifdef CHRONO 
 #include "sys/time.h"
 #endif
 
@@ -52,6 +61,9 @@ struct Pattern
     
     // Matrix of image descriptors .
     cv::Mat descriptors;
+    
+    // Color histogram of the pattern.
+    cv::Mat histogram;
     
   };
   

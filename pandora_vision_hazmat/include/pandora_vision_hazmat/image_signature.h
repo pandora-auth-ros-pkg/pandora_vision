@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -39,10 +38,6 @@
 
 #ifndef PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
 #define PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
-=======
-#ifndef IMAGE_SIGNATURE_H
-#define IMAGE_SIGNATURE_H
->>>>>>> Added new Hazmat detector classes.
 
 #include "pandora_vision_hazmat/hazmat_detector.h"
 
@@ -51,26 +46,10 @@
  @brief Class that implements the image signature saliency map.
 **/
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 class ImageSignature
 {
   public : 
     
-    
-=======
-class ImageSignature : public HazmatDetector
-{
-  public : 
-    
->>>>>>> Added new Hazmat detector classes.
-=======
-class ImageSignature
-{
-  public : 
-    
-    
->>>>>>> Changed Filters to static Functions
     // Function that calculates the image signature.
     static void calculateSignature(const cv::Mat &image , 
       cv::Mat *imgSign);
@@ -78,8 +57,6 @@ class ImageSignature
     // Function the creates the mask that will be applied to the 
     // incoming frame based on the saliency map produced by the 
     // signature of the image.
-<<<<<<< HEAD
-<<<<<<< HEAD
     static void createSaliencyMapMask(const cv::Mat &frame , 
       cv::Mat *mask );
        
@@ -97,30 +74,3 @@ class ImageSignature
 };
 
 #endif  // PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H_
-=======
-    void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
-      const cv::Mat &data = cv::Mat() );
-    
-=======
-    void static createSaliencyMapMask(const cv::Mat &frame , 
-      cv::Mat *mask );
-       
->>>>>>> Changed Filters to static Functions
-    // Return the array that containts the signs of an arbitrary
-    // matrix.
-    static void signFunction(const cv::Mat &array , cv::Mat *signs );
-     
-    // Constructor
-    ImageSignature()
-    { } ;
-    
-    virtual ~ImageSignature() 
-    {
-    } 
-    
-  private :
-
-  };
-
-#endif
->>>>>>> Added new Hazmat detector classes.

@@ -83,8 +83,7 @@ bool SimpleHazmatDetector::findKeypointMatches(
 
   // The vector containing the best matches
   std::vector< cv::DMatch > goodMatches;
-  
-  // If we have found any matches.
+
   if ( matches.size() > 0 )
   {
 
