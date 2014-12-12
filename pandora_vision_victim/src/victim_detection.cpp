@@ -147,16 +147,17 @@ namespace pandora_vision
   */
   void VictimDetection::dummyimageCallback(const sensor_msgs::Image& msg)
   {
-    //ROS_INFO("ENTER DUMMY");
-      if(
+
+    if(
       (curState != 
-        state_manager_communications::robotModeMsg::MODE_IDENTIFICATION) &&
+        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION) &&
       (curState != 
-        state_manager_communications::robotModeMsg::MODE_SENSOR_HOLD) && 
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD) && 
       (curState != 
-        state_manager_communications::robotModeMsg::MODE_SENSOR_TEST)
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST)
     )
     {
+      ROS_ERROR("[victim_node]: Not working state");
       return;
     }
     cv_bridge::CvImagePtr in_msg;
@@ -270,7 +271,7 @@ namespace pandora_vision
     const sensor_msgs::Image& msg
     )
   {
-    
+    //ROS_INFO("ENTER DUMMY DETECT VICTIMS");
     if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
     {
       rgbImage.copyTo(debugImage);
