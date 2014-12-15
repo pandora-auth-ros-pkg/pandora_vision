@@ -148,7 +148,7 @@ namespace pandora_vision
       /// Loop over image and detect changes
       for(int j = 1; j < diff.cols-11; j+=2){ 
         for(int i = 1; i < diff.rows-11; i+=2){
-            if(static_cast<int>(diff.at<uchar>(j, i)) == 255){
+            if(static_cast<int>(diff.at<uchar>(i, j)) == 255){
                 number_of_changes++;
                 if(min_x > i) 
                   min_x = i;
@@ -164,8 +164,7 @@ namespace pandora_vision
       if(number_of_changes){
         cv::Point _tlcorner(min_x, min_y);
         cv::Point _brcorner(max_x, max_y);
-        
-        rectangle(movingObjects_, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
+        rectangle(diff, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
         bounding_box_.x = _tlcorner.x;
         bounding_box_.y = _tlcorner.y;
         bounding_box_.width = max_x - min_x;

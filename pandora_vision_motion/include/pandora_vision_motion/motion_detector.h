@@ -131,6 +131,8 @@ namespace pandora_vision
       int max_deviation_;
       //!< Bounding box of moving objects.    
       cv::Rect_<int> bounding_box_;
+      
+      friend class MotionDetectorTest;
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_MOTION_DETECTOR_H
