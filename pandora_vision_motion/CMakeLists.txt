@@ -41,6 +41,16 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+################# motion node library #################
+add_library(motion_node_lib
+  src/motion_detector.cpp
+  src/motion_parameters.cpp
+)
+target_link_libraries(motion_node_lib
+  ${catkin_LIBRARIES}
+)
+
+################# motion node #################
 add_executable(motion_node
     src/motion_node.cpp
     src/motion_detection.cpp
@@ -70,3 +80,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
+################# Testing #################
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
