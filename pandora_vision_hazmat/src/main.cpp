@@ -105,8 +105,8 @@ int main(int argc , char **argv )
     }
     
     // Reset the contents of the mask and the Segmented Frame.
-    mask.setTo(0);
-    maskedFrame.setTo(0);
+    //~ mask.setTo(0);
+    //~ maskedFrame.setTo(0);
   }
 
   

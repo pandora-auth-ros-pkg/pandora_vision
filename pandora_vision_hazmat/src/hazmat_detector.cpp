@@ -3,26 +3,6 @@
 int HazmatDetector::width = 640;
 int HazmatDetector::height = 480;
 
-/**
-  @brief Creates a mask that defines the region of the frame where
-        features will be extracted.
-  @param frame [const cv::Mat &] : The input frame.
-  @param mask [cv::Mat *] : The output mask.
-  @param data [cv::Mat &] : An array with extra data.  
-  
-**/
-  
-void HazmatDetector::createMask(const cv::Mat &frame , cv::Mat *mask , 
-      const cv::Mat &data  )
-{
-  if ( mask->data)
-    // If another mask has already been created do not change it.
-    return ;
-  else
-    // If not then initialize an empty matrix so that the feature
-    // search is performed on the entire frame. 
-    *mask = cv::Mat( frame.size() , frame.type() );
-  }
 
 // Allocating space for the static member variable.
 std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Desktop/hazmatTraining/input") ;
@@ -192,7 +172,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   #endif
   
   // Create the mask that will be used to extract regions of interest
-  // on the image based on Image Signature Saliency Map .
+  // on the image based on the Image Signature Saliency Map .
   ImageSignature::createSaliencyMapMask( frame , &mask );
   
   #ifdef CHRONO
@@ -205,7 +185,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   
   #ifdef DEBUG
   cv::Mat maskedFrame;
-  frame.copyTo(maskedFrame,mask);
+  frame.copyTo(maskedFrame , mask);
   cv::imshow("Segmented Frame",maskedFrame);
   #endif
 
@@ -215,7 +195,9 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   #ifdef CHRONO
   gettimeofday(&startwtime,NULL);
   #endif
+  
   getFeatures( frame , mask , &frameDescriptors , &frameKeyPoints ) ; 
+  
   #ifdef CHRONO
   gettimeofday(&endwtime,NULL);
   double featuresTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
@@ -231,7 +213,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   std::vector<cv::Point2f> sceneKeyPoints;
   std::vector<cv::Point2f> sceneBB ;
   
-  
+  int found ;
   
   // For every pattern in the list : 
   for (int i = 0 ; i < patterns_.size() ; i++ )
@@ -251,7 +233,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
       patterns_[i].descriptors , patterns_[i].keyPoints , 
       frameKeyPoints , 
       &patternKeyPoints , 
-      &sceneKeyPoints );
+      &sceneKeyPoints , i );
       
     #ifdef CHRONO
     gettimeofday(&endwtime,NULL);
@@ -299,6 +281,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , cv::Scalar( 0, 255, 0), 4 );
         cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x,sceneBB[4].y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
         imshow("Tracking Frame",trackingFrame);
+        std::cout << "Pattern found is " << patterns_[i].name << std::endl;
         #endif
         
         
@@ -323,7 +306,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         { 
            continue;
         }
-        
+        found = i;
         
       }
       

@@ -26,7 +26,8 @@ bool SimpleHazmatDetector::findKeypointMatches(
       const std::vector<cv::Point2f> patternKeyPoints ,
       const std::vector<cv::KeyPoint> sceneKeyPoints ,
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) 
+      std::vector<cv::Point2f> *matchedSceneKeyPoints , 
+      const int &patternID  ) 
 {
   // Define the vector that will contain the matches.
   std::vector< cv::DMatch > matches;

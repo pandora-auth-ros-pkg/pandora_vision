@@ -39,12 +39,24 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+add_library(
+  ${PROJECT_NAME}_filters
+  src/filters/histogram_mask.cpp
+  src/filters/image_signature.cpp)
+  )
+target_link_libraries(
+  ${PROJECT_NAME}_filters
+  ${catkin_LIBRARIES}
+  )
+
 add_executable(hazmat_node
       src/main.cpp
       src/hazmat_detector.cpp
       src/simple_hazmat_detector.cpp
       src/sift_hazmat_detector.cpp)
-target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
+target_link_libraries(hazmat_node
+    ${PROJECT_NAME}_filters
+    ${catkin_LIBRARIES} )
 add_dependencies(hazmat_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

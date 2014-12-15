@@ -25,8 +25,6 @@ class Detector
     //~ int virtual getBestMatches( const cv::Mat &frame ,
      //~ const cv::Mat &features , double *minDist , double *maxDist  ) = 0;
      
-    void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
-      const cv::Mat &data = cv::Mat() ) = 0 ;
     
     Detector() {}
     

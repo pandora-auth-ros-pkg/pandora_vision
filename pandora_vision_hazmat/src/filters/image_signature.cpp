@@ -113,6 +113,7 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   cv::imshow("Filter",sum);
   #endif
    
-  
+  *mask = sum;
+
   return ;
   }

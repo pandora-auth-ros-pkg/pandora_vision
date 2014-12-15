@@ -27,8 +27,7 @@ class HazmatDetector : public Detector
      , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
     = 0 ;
     
-    void virtual createMask(const cv::Mat &frame , cv::Mat *mask , 
-      const cv::Mat &data = cv::Mat() );
+
     
     // Returns the type of the features used. 
     //~ const TrainerType virtual getType( void ) = 0 ;
@@ -41,7 +40,8 @@ class HazmatDetector : public Detector
       const std::vector<cv::Point2f> patternKeyPoints ,
       const std::vector<cv::KeyPoint> sceneKeyPoints ,
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) = 0 ;
+      std::vector<cv::Point2f> *matchedSceneKeyPoints  , 
+      const int &patternID = 0 ) = 0 ;
       
     /**
     * @brief Find the homography between the scene and the pattern keypoints
@@ -56,7 +56,8 @@ class HazmatDetector : public Detector
     * pattern.
     
     **/
-    bool virtual findBoundingBox(const std::vector<cv::Point2f> &patternKeyPoints , 
+    bool virtual findBoundingBox(const std::vector<cv::Point2f> 
+      &patternKeyPoints , 
       const std::vector<cv::Point2f> &sceneKeyPoints , 
       const std::vector<cv::Point2f> &patternBB , 
       std::vector<cv::Point2f> *sceneBB) ;
@@ -94,11 +95,26 @@ class HazmatDetector : public Detector
     ~HazmatDetector()
     {
       patterns_.clear() ;
-}
+    }
+    
+    // Return 
+    const std::vector<Pattern>& getPattersRef()
+    {
+      return patterns_ ;
+    }
+    
+    // Returns the total number of patterns.
+    int getPatternsNumber(void)
+    {
+      return patterns_.size() ;
+    }
+    
+    // Function that returns the parameters of the FLANN matcher
+    // used by the detector.
+    virtual const cv::FlannBasedMatcher& getMatcher(void) = 0;
   
-  
-  protected:
-  
+  //~ protected:
+  private : 
     // Name of the file from which the training data is read.
     static std::string fileName_ ;
     

@@ -31,10 +31,16 @@ class SimpleHazmatDetector : public HazmatDetector
       const std::vector<cv::Point2f> patternKeyPoints ,
       const std::vector<cv::KeyPoint> sceneKeyPoints ,
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) ;
+      std::vector<cv::Point2f> *matchedSceneKeyPoints ,
+      const int &patternID = 0 ) ;
     
     // Returns the type of the features used. 
     //~ const TrainerType virtual getType( void ) = 0 ;
+    
+    virtual const cv::FlannBasedMatcher& getMatcher(void)
+    {
+      return matcher_;
+    }
     
     // Constructor
     SimpleHazmatDetector(const std::string &featureName);
