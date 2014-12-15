@@ -37,6 +37,7 @@
  
 #ifndef PANDORA_VISION_COMMON_EDGE_DETECTION_H
 #define PANDORA_VISION_COMMON_EDGE_DETECTION_H
+
 namespace pandora_vision
 {
   /**

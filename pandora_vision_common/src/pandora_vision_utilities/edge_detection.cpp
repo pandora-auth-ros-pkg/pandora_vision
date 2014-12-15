@@ -39,5 +39,15 @@
 
 namespace pandora_vision
 {
+  /**
+    @brief Applies the Canny edge detector
+    @param[in] inImage [const cv::Mat&] Input image in CV_8U depth
+    @param[out] outImage [cv::Mat*] The processed image in CV_8U depth
+    @return void
+  **/
+  void EdgeDetection::applyCanny(const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    
+  }
   
 } // namespace pandora_vision
