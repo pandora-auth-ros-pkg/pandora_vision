@@ -41,3 +41,78 @@ MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
   
   
   }
+
+
+// Find the keypoint matches between the frame and the training set.
+bool MultipleFlannMatcher::findKeypointMatches(
+      const cv::Mat &frameDescriptors ,
+      const cv::Mat &patternDescriptors , 
+      const std::vector<cv::Point2f> patternKeyPoints ,
+      const std::vector<cv::KeyPoint> sceneKeyPoints ,
+      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
+      std::vector<cv::Point2f> *matchedSceneKeyPoints  , 
+      const int &patternID = 0 )
+{
+  // Define the vector that will contain the matches.
+  std::vector< std::vector<cv::DMatch> > matches;
+  
+  // Perfom the matching using the matcher that corresponds
+  // to the i-th pattern.
+  
+  matchers_[patternID]->knnMatch( frameDescriptors , matches , 2 );
+  
+  std::vector< cv::DMatch > goodMatches ;
+  
+  
+  if (matchers_.size() > 0 )
+  {
+
+    // Keep only the matches that are below a certain distance 
+    // threshold
+    // TO DO : READ THE THRESHOLD FROM FILE.
+    
+    float ration = 0.8 ;
+    
+    for( int i = 0; i <  matches.size() ; i++ )
+    { 
+        if( matches[i][0].distance < ratio*matches[i][1].distance )
+        { 
+           good_matches_.push_back( matches[i][0]); 
+        }
+    }
+    
+  }
+  // No matches found.
+  else
+    return false;
+  
+  // Add the keypoints of the matches found to the corresponding
+  // vectors for the pattern and the scene.
+  for( int i = 0; i < goodMatches.size(); i++ )
+  {
+    
+    // Pattern key points .
+    matchedPatternKeyPoints->push_back( 
+      patternKeyPoints[ goodMatches[i].queryIdx ] );
+      
+    // Scene key points .
+    matchedSceneKeyPoints->push_back( 
+      sceneKeyPoints[ goodMatches[i].trainIdx ].pt );
+  }
+  
+  // If we have less than 4 matches then we cannot find the Homography
+  // and this is an invalid pattern.
+  
+  if ( goodMatches.size() < 4 )
+    return false;
+    
+  
+  goodMatches.clear();
+  matches.clear();
+  
+  // Matches have been successfully found and keypoints correctly 
+  // assigned.
+  return true;  
+  
+  
+  }

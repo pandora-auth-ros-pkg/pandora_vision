@@ -59,7 +59,7 @@
     }
     
     // Create an array with random numbers.
-    cv::randu(testImage , -100 , 100 );
+    //~ cv::randu(testImage , -100 , 100 );
     
     ImageSignature::signFunction(testImage , &signs );
    

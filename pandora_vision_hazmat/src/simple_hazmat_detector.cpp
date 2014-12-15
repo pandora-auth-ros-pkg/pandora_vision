@@ -47,7 +47,7 @@ bool SimpleHazmatDetector::findKeypointMatches(
   {
 
       // Quick calculation of max and min distances between keypoints
-      for( int i = 0; i < patternDescriptors.rows; i++ )
+      for( int i = 0; i < matches.size() ; i++ )
       { 
         double dist = matches[i].distance;
         if( dist < minDist ) minDist = dist;
@@ -58,7 +58,7 @@ bool SimpleHazmatDetector::findKeypointMatches(
       // threshold
       // TO DO : READ THE THRESHOLD FROM FILE.
     
-      for( int i = 0; i < patternDescriptors.rows; i++ )
+      for( int i = 0; i < matches.size() ; i++ )
       { 
         if( matches[i].distance < 2*minDist )
           goodMatches.push_back( matches[i]); 

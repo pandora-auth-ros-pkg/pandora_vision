@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_vision_msgs
     state_manager
     state_manager_msgs
+
     cv_bridge
     image_transport
     sensor_msgs
