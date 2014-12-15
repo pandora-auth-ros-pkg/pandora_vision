@@ -34,12 +34,10 @@
 *
 * Authors: Despoina Paschalidou
 *********************************************************************/
-
 #ifndef PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
 #define PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_motion/motion_cfgConfig.h>
-
 namespace pandora_vision
 {
   struct MotionParameters
@@ -49,14 +47,15 @@ namespace pandora_vision
     static int varThreshold;
     static bool bShadowDetection;
     static int nmixtures;
-    
     //!< Threshold parameters
     static int diff_threshold;
     static double motion_high_thres;
     static double motion_low_thres;
     static bool visualization;
-    
+    static bool show_image;
+    static bool show_background;
+    static bool show_diff_image;
+    static bool show_moving_objects_contours;
   };
-
 } // namespace pandora_vision
-#endif  // PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
+#endif // PANDORA_VISION_MOTION_MOTION_PARAMETERS_H

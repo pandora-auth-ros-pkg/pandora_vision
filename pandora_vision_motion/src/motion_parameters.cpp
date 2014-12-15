@@ -34,12 +34,10 @@
 *
 * Authors: Despoina Paschalidou
 *********************************************************************/
-
 #include "pandora_vision_motion/motion_parameters.h"
 
 namespace pandora_vision
 {
-  
   //!< Background segmentation parameters
   /// Length of the history according to which we calculate background image
   int MotionParameters::history = 10;
@@ -50,17 +48,18 @@ namespace pandora_vision
   bool MotionParameters::bShadowDetection = true;
   /// Maximum allowed number of mixture components
   int MotionParameters::nmixtures = 3;
-  
-  //!< Threshold parameters  
-  /// Threshold between pixel (grayscale) values to be considered "different" 
+  //!< Threshold parameters
+  /// Threshold between pixel (grayscale) values to be considered "different"
   /// between 2 frames
   int MotionParameters::diff_threshold = 45;
   /// Evaluation threshold: higher value means a lot of movement
   double MotionParameters::motion_high_thres = 7500;
-  /// Evaluation threshold: higher value means a little movement - 
+  /// Evaluation threshold: higher value means a little movement -
   /// less means no movement at all
   double MotionParameters::motion_low_thres = 200;
-  
   bool MotionParameters::visualization = false;
-  
+  bool MotionParameters::show_image = false;
+  bool MotionParameters::show_background = false;
+  bool MotionParameters::show_diff_image = false;
+  bool MotionParameters::show_moving_objects_contours = false;
 }// namespace pandora_vision
