@@ -31,3 +31,13 @@ download_extra_data(
 add_dependencies(${PROJECT_NAME}_qr_test_images tests)
 
 add_rostest(functional/qr_test.launch)
+
+################# Unit Tests #################
+catkin_add_gtest(qrCode_detector_test
+  unit/qrCode_detector_test.cpp
+)
+target_link_lbraries(qrCode_detector_test
+  ${catkin_LIBRARIES}
+  qrCode_node_lib
+  gtest_main
+)
