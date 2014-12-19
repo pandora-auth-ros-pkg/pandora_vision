@@ -327,7 +327,7 @@ namespace pandora_vision
     qrcodeVectorMsg.header.frame_id =  _frame_ids_map.find(_frame_id)->second;
     qrcodeVectorMsg.header.stamp = qrcodeFrameTimestamp;
 
-    _qrcodeDetector.detect_qrcode(qrcodeFrame);
+    _qrcodeDetector.detectQrCode(qrcodeFrame);
     std::vector<QrCode> list_qrcodes = _qrcodeDetector.get_detected_qr();
 
     if( _camera_indicator == -1){

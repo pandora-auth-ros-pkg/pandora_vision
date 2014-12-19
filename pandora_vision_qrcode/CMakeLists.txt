@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_qrcode)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_vision_msgs
@@ -34,6 +36,16 @@ catkin_package(
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
+
+################# qrcode node library #################
+add_library(qrcode_node_lib
+  src/qrCode_detector.cpp
+)
+target_link_libraries(qrcode_node_lib
+  ${catkin_LIBRARIES}
+)
+
+################# qrcode node #################
 
 add_executable(qrcode_node
     src/qrCode_detection.cpp

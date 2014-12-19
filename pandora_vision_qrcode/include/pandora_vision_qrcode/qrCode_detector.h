@@ -93,7 +93,7 @@ namespace pandora_vision {
         @param frame [cv::Mat] The image in which the QRs are detected
         @return void
        **/
-      void detect_qrcode(cv::Mat input_frame);
+      void detectQrCode(cv::Mat input_frame);
 
       void set_debug (bool flag)
       {

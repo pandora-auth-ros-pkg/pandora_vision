@@ -44,7 +44,7 @@ namespace pandora_vision
      *     @brief Tests the integrity of methods of class QrCodeDetector
     **/
   
-    class QrCodeDectorTest : public ::testing::Test
+    class QrCodeDetectorTest : public ::testing::Test
     {
       public:
         QrCodeDetectorTest() {}
@@ -52,15 +52,33 @@ namespace pandora_vision
         **/
         virtual void SetUp()
         {
-
+          WIDTH = 640;
+          HEIGHT = 480;
         }
 
         std::vector<QrCode> detectQrCode(cv::Mat frame);
 
+        int WIDTH;
+        int HEIGHT;
+
       private:
         QrCodeDetector qrCodeDetector_;
-  
-
-        
-
+    };
+    
+    std::vector<QrCode> detectQrCode(cv::Mat frame)
+    {
+      QrCodeDetector qrCodeDetector_;
+      qrCodeDetector_.detectQrCode(frame);
+      return qrCodeDetector_.get_detected_qr();
     }
+
+    //! Tests QrCodeDetector::detectQrCode
+    TEST_F (QrCodeDetectorTest, detectQrCodeBlackImage)
+    {
+      cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+      std::vector<QrCode> qrcode_list = detectQrCode(blackFrame);
+      // there shouldn't be any qrcodes
+      EXPECT_EQ(0, qrcode_list.size());
+    }
+      
+} // namespace_pandora_vision

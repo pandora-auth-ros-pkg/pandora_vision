@@ -95,7 +95,7 @@ namespace pandora_vision {
     @param frame [cv::Mat] The image in which the QRs are detected
     @return void
    */
-  void QrCodeDetector::detect_qrcode(cv::Mat frame)
+  void QrCodeDetector::detectQrCode(cv::Mat frame)
   {
     frame.copyTo(input_frame);
     cvtColor(input_frame, gray_frame, CV_BGR2GRAY);

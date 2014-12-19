@@ -36,8 +36,8 @@ add_rostest(functional/qr_test.launch)
 catkin_add_gtest(qrCode_detector_test
   unit/qrCode_detector_test.cpp
 )
-target_link_lbraries(qrCode_detector_test
+target_link_libraries(qrCode_detector_test
   ${catkin_LIBRARIES}
-  qrCode_node_lib
+  qrcode_node_lib
   gtest_main
 )
