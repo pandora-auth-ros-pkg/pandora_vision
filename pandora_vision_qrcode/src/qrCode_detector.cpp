@@ -98,10 +98,13 @@ namespace pandora_vision {
   void QrCodeDetector::detectQrCode(cv::Mat frame)
   {
     frame.copyTo(input_frame);
-    cvtColor(input_frame, gray_frame, CV_BGR2GRAY);
-
+    if (input_frame.channels() == 3)
+      cv::cvtColor(input_frame, gray_frame, CV_BGR2GRAY);
+    else
+      input_frame.copyTo(gray_frame);
     cv::Mat blured;
     normalize(gray_frame, gray_frame, 255, 0, cv::NORM_MINMAX);
+    gaussiansharpenblur = 1;
     cv::GaussianBlur(gray_frame, blured, cv::Size(0, 0), gaussiansharpenblur);
     cv::addWeighted(gray_frame, 1 + gaussiansharpenweight, blured,
         -gaussiansharpenweight, 0, gray_frame);
@@ -135,10 +138,10 @@ namespace pandora_vision {
       qrcode_list.push_back(detected_code);
     }
 
-    if(debug_publish)
-    {
-      debug_show(image);
-    }
+    //if(debug_publish)
+    //{
+    //  debug_show(image);
+    //}
 
     image.set_data(NULL, 0);
   }
