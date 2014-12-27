@@ -3,18 +3,24 @@
 MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
   : detector(detectorPtr)
 {
+  std::cout << "Starting to construct the multiple FLANN matcher"
+    << std::endl;
+    
   // Get the matcher used by the single matcher
   cv::FlannBasedMatcher baseMatcher = detector->getMatcher();
+  
+  
+  
   
   // Request the number of patterns we want to detect.
   int patternNumber = detector->getPatternsNumber() ;
   
   // Get a pointer to the data
-  const std::vector<Pattern> data = detector->getPattersRef();
+  const std::vector<Pattern> *data = detector->getPatternsPtr();
   
   // Create the array of the matchers.
-  matchers = new cv::DescriptorMatcher*[patternNumber] ;
-  
+  matchers_ = new cv::Ptr<cv::FlannBasedMatcher>[patternNumber] ;
+
   // Temporary container for the descriptors of each pattern.
   std::vector<cv::Mat> descriptors;
   
@@ -22,25 +28,33 @@ MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
   for (int i = 0 ; i < patternNumber ; i++ )
   {
     // Create a matcher of the same type as the base matcher.
-    matchers[i] = baseMatcher.clone(true);
-    
+    matchers_[i] = baseMatcher.clone(true);
+   
     // Convert the array of descriptors to a std::vector of cv 
     // matrices for the training function.
-    for (int j = 0 ; j < data[i].descriptors.rows ; i++ )
-      descriptors.push_back( data[i].descriptors.row(j) );
-    
+
+    if ( !matchers_[i]->empty() ) 
+    {
+      std::cout << "Matcher " << i << " is not empty !" << std::endl;
+      matchers_[i]->clear();
+    }
+ 
+    descriptors.push_back( (*data)[i].descriptors ) ;
+   
     // Add the descriptors to the matcher.
-    matchers[i]->add( descriptors );
-    
+    matchers_[i]->add( descriptors );
+
     // Train the matcher for the data of the i-th pattern.
-    matchers[i]->train();
+    matchers_[i]->train();
     
     // Clear the descriptor vector for the next iteration.
     descriptors.clear();
   }
   
+  std::cout << "Finished construncting multiple FLANN matcher!" 
+    << std::endl ;
   
-  }
+  } // End of Multiple FLANN constructor.
 
 
 // Find the keypoint matches between the frame and the training set.
@@ -51,8 +65,11 @@ bool MultipleFlannMatcher::findKeypointMatches(
       const std::vector<cv::KeyPoint> sceneKeyPoints ,
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
       std::vector<cv::Point2f> *matchedSceneKeyPoints  , 
-      const int &patternID = 0 )
+      const int &patternID )
 {
+  std::cout << "hi \n";
+  exit(-1);
+  
   // Define the vector that will contain the matches.
   std::vector< std::vector<cv::DMatch> > matches;
   
@@ -64,20 +81,20 @@ bool MultipleFlannMatcher::findKeypointMatches(
   std::vector< cv::DMatch > goodMatches ;
   
   
-  if (matchers_.size() > 0 )
+  if ( matches.size() > 0 )
   {
 
     // Keep only the matches that are below a certain distance 
     // threshold
     // TO DO : READ THE THRESHOLD FROM FILE.
     
-    float ration = 0.8 ;
+    float ratio = 0.8 ;
     
     for( int i = 0; i <  matches.size() ; i++ )
     { 
         if( matches[i][0].distance < ratio*matches[i][1].distance )
         { 
-           good_matches_.push_back( matches[i][0]); 
+           goodMatches.push_back( matches[i][0]); 
         }
     }
     

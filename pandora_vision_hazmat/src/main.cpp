@@ -1,5 +1,6 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
 #include "pandora_vision_hazmat/sift_hazmat_detector.h"
+#include "pandora_vision_hazmat/multiple_flann_matcher.h"
 
 int main(int argc , char **argv )
 {
@@ -7,6 +8,7 @@ int main(int argc , char **argv )
   //~ Detector *detector = new HistogramMask(detectorObj);
   //~ HistogramMask detector(&sign);
   //~ HistogramMask detector(&detectorObj);
+  MultipleFlannMatcher detector(&detectorObj);
   
   cv::VideoCapture camera(0);
   
@@ -16,7 +18,7 @@ int main(int argc , char **argv )
     return -1;
   }
   
-  cv::Mat pattern = cv::imread("/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/src/test2.png");
+  cv::Mat pattern = cv::imread("/home/vchoutas/Desktop/patterns/enter8.png");
   
   if ( !pattern.data )
   {

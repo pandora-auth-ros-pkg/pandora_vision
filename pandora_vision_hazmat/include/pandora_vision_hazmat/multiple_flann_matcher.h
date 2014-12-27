@@ -28,6 +28,12 @@ class MultipleFlannMatcher : public HazmatDetector
       detector->getFeatures(frame, mask , descriptors , keyPoints);
     }
     
+    virtual const cv::FlannBasedMatcher& getMatcher(void)
+    {
+      return detector->getMatcher();
+    }
+    
+    
     // Decorator Constructor.
     MultipleFlannMatcher(HazmatDetector* detectorPtr);
     
@@ -40,7 +46,7 @@ class MultipleFlannMatcher : public HazmatDetector
   private : 
     HazmatDetector* detector ;
     
-    cv::DescriptorMatcher **matchers;
+    cv::Ptr<cv::FlannBasedMatcher> *matchers_ ;
   };
 
 #endif

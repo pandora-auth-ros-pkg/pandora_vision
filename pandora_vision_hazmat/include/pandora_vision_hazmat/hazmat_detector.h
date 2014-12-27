@@ -98,9 +98,9 @@ class HazmatDetector : public Detector
     }
     
     // Return 
-    const std::vector<Pattern>& getPattersRef()
+    const std::vector<Pattern>* getPatternsPtr()
     {
-      return patterns_ ;
+      return &patterns_ ;
     }
     
     // Returns the total number of patterns.
