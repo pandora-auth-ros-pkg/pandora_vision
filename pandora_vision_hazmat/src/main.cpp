@@ -53,11 +53,12 @@ int main(int argc , char **argv )
     
     const clock_t begin_time = clock();
 
-    bool found = detectorObj.detect(frame , &x, &y);
-    
+    //bool found = detectorObj.detect(frame , &x, &y);
+    bool found = detector.detect(frame , &x, &y);
+
     std::cout <<"Time to execute : " << ( clock () - begin_time ) /  
       static_cast<double>(CLOCKS_PER_SEC )<< std::endl; 
-    if (found)
+    if (found && x > 0 && y > 0  )
     {
       //~ cv::line( frame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
       //~ cv::line( frame, scene_corners[1] , scene_corners[2] , Scalar( 0, 255, 0), 4 );

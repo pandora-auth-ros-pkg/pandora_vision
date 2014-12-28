@@ -86,41 +86,41 @@ class HazmatDetector : public Detector
    
     // Hazmat Detector class constructor.
     explicit HazmatDetector(const std::string &featureName) 
-      : featuresName_(featureName)
+      : featuresName_(featureName) , patterns_(new std::vector<Pattern>) 
     {
+
       readData();
     }
     
     // HazmatDetector Destructor.
-    ~HazmatDetector()
+    virtual ~HazmatDetector()
     {
-      patterns_.clear() ;
     }
     
-    // Return 
-    const std::vector<Pattern>* getPatternsPtr()
+    // Return a pointer to the patterns. 
+    boost::shared_ptr< std::vector<Pattern> > getPatternsPtr()
     {
-      return &patterns_ ;
-    }
+      return patterns_ ;
+    } 
     
     // Returns the total number of patterns.
     int getPatternsNumber(void)
     {
-      return patterns_.size() ;
+      return patterns_->size() ;
     }
     
     // Function that returns the parameters of the FLANN matcher
     // used by the detector.
     virtual const cv::FlannBasedMatcher& getMatcher(void) = 0;
   
-  //~ protected:
+  protected:
+     // Vector of the patterns we wish to detect.
+    boost::shared_ptr< std::vector<Pattern> > patterns_ ;
+    
   private : 
     // Name of the file from which the training data is read.
-    static std::string fileName_ ;
-    
-    // Vector of the patterns we wish to detect.
-    std::vector<Pattern> patterns_ ;
-    
+    static std::string fileName_ ;        
+
     // Type of detector used .
     //~ const TrainerType type_ ;
     
@@ -137,6 +137,7 @@ class HazmatDetector : public Detector
     #ifdef CHRONO
     struct timeval startwtime, endwtime;
     #endif
+    
     
 
 };

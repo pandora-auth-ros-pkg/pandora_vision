@@ -16,6 +16,8 @@
 #include "opencv2/calib3d/calib3d.hpp"
 #include "opencv2/nonfree/nonfree.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include <boost/shared_ptr.hpp>
+
 
 // Filter Libraries.
 #include "pandora_vision_hazmat/histogram_mask.h"
@@ -23,7 +25,7 @@
 
 
 
-//~ #define CHRONO 
+#define CHRONO 
 #define DEBUG 
 #define HUE_RANGE {0,180}
 #define SAT_RANGE {0,255}

@@ -115,7 +115,7 @@ void HazmatDetector::readData( void )
     p.keyPoints = keyPoints;
     p.descriptors = descriptors ;
     p.histogram = histogram ;
-    patterns_.push_back(p);
+    patterns_->push_back(p);
     
     // Clear the data vectors.
     keyPoints.clear();
@@ -126,7 +126,7 @@ void HazmatDetector::readData( void )
     
   }
   
-  
+  std::cout << patterns_->size() << std::endl; 
 }
 
 // Detect the pattern in the frame.
@@ -140,22 +140,26 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     std::cerr << "The provided frame is empty!" << std::endl;
     return false;
   }
-  
+  if ( patterns_ == NULL )
+  {
+    std::cout << "Error NULL pattern Pointer " << std::endl;
+    exit(-1);
+  }
   // Check if that patterns have been read succesfully.
   // TO DO : Produce Fatal Error on Failure.
-  if ( patterns_.size() < 1 )
+  if ( patterns_->size() < 1 )
   {
     std::cerr << "No patterns read . Detection cannot continue " << 
       std::endl;
-    *x = NULL ;
-    *y = NULL ;
+    *x = -1 ;
+    *y = -1 ;
     return false;
   }
   
   
   // Set the pattern center to NULL .
-  *x = NULL ;
-  *y = NULL ;
+  *x = -1 ;
+  *y = -1 ;
   
   // The matrix that contains the descriptors of the frame.
   cv::Mat frameDescriptors ;
@@ -170,7 +174,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   #ifdef CHRONO
   gettimeofday(&startwtime,NULL);
   #endif
-  
+
   // Create the mask that will be used to extract regions of interest
   // on the image based on the Image Signature Saliency Map .
   ImageSignature::createSaliencyMapMask( frame , &mask );
@@ -216,7 +220,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   int found ;
   
   // For every pattern in the list : 
-  for (int i = 0 ; i < patterns_.size() ; i++ )
+  for (int i = 0 ; i < patterns_->size() ; i++ )
   {
     #ifdef CHRONO
     gettimeofday (&startwtime, NULL); 
@@ -225,12 +229,13 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     // Test it before adding it to the system.
     //~ HistogramMask::createBackProjectionMask(frame , &mask , 
       //~ patterns_[i].histogram );
-      
+     
+    
       
     // Try to find key point matches between the i-th pattern
     // and the descriptors and the keypoints extracted from the frame.
     matchesFound = findKeypointMatches(frameDescriptors , 
-      patterns_[i].descriptors , patterns_[i].keyPoints , 
+      (*patterns_)[i].descriptors , (*patterns_)[i].keyPoints , 
       frameKeyPoints , 
       &patternKeyPoints , 
       &sceneKeyPoints , i );
@@ -242,19 +247,18 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     std::cout << "Calculation time for keypoint matches for pattern "
       << i << " is " << keyPointTime << std::endl;
     #endif
-     
-     
+    
     // If we have succesfully found the matches.
     if (matchesFound)
     {
-      
+     
       #ifdef CHRONO
       gettimeofday(&startwtime,NULL);
       #endif
       
       // Find the bounding box for this query pattern .
       boundingBoxFound = findBoundingBox( patternKeyPoints , 
-        sceneKeyPoints ,  patterns_[i].boundingBox , &sceneBB );
+        sceneKeyPoints ,  (*patterns_)[i].boundingBox , &sceneBB );
         
       #ifdef CHRONO
       gettimeofday(&endwtime,NULL);
@@ -281,7 +285,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , cv::Scalar( 0, 255, 0), 4 );
         cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x,sceneBB[4].y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
         imshow("Tracking Frame",trackingFrame);
-        std::cout << "Pattern found is " << patterns_[i].name << std::endl;
+       
         #endif
         
         
@@ -304,7 +308,11 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
           //~ continue;
         if (surface < 10 || surface > frame.rows*frame.cols)
         { 
-           continue;
+          patternKeyPoints.clear();
+          sceneBB.clear();
+          sceneKeyPoints.clear();
+
+          continue;
         }
         found = i;
         
@@ -319,8 +327,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   
   if ( !boundingBoxFound )
   {
-    *x = NULL ;
-    *y = NULL ;
+    *x = -1 ;
+    *y = -1 ;
     patternKeyPoints.clear();
     sceneBB.clear();
     sceneKeyPoints.clear();
@@ -331,8 +339,12 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     // center of the detected pattern . 
   if ( sceneBB.empty() )
   {
-    *x = NULL ;
-    *y = NULL ;
+    *x = -1 ;
+    *y = -1 ;
+    patternKeyPoints.clear();
+    sceneBB.clear();
+    sceneKeyPoints.clear();
+  
     return false;
   }
   *x = sceneBB[ sceneBB.size() - 1 ].x ;
@@ -371,11 +383,29 @@ bool HazmatDetector::findBoundingBox(
   // the pattern and the scene.
   if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
   {
+//    std::cout << patternKeyPoints.size() << std::endl;
+
     // Calculate the homography matrix using RANSAC algorithm to 
     // eliminate outliers.
     cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
-      CV_RANSAC );
-      
+      CV_RANSAC , 4 );
+/*
+    cv::Mat invH = cv::findHomography( sceneKeyPoints , patternKeyPoints ,
+        CV_RANSAC ) ; 
+
+    cv::Mat res = H * invH ;
+    for (int i = 0 ; i < 3 ; i++)
+    {
+      for (int j = 0 ; j < 3 ; j++)
+      {
+        std::cout << res.at<double>(i,j) << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+*/
+    //cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
+    //    CV_LMEDS ); 
     // Transform the bounding box to the frame coordinates.
     cv::perspectiveTransform( patternBB , 
       *sceneBB , H );

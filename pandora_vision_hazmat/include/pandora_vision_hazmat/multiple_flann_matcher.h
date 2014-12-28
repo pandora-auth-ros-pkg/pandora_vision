@@ -42,7 +42,14 @@ class MultipleFlannMatcher : public HazmatDetector
     // so as to be called by an outside module.
     MultipleFlannMatcher()
     {} ;
+   
     
+
+    ~MultipleFlannMatcher()
+    { 
+      delete[] matchers_;
+    }
+
   private : 
     HazmatDetector* detector ;
     

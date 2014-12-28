@@ -1,7 +1,7 @@
 #include "pandora_vision_hazmat/multiple_flann_matcher.h"
 
 MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
-  : detector(detectorPtr)
+  : detector(detectorPtr) 
 {
   std::cout << "Starting to construct the multiple FLANN matcher"
     << std::endl;
@@ -9,14 +9,14 @@ MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
   // Get the matcher used by the single matcher
   cv::FlannBasedMatcher baseMatcher = detector->getMatcher();
   
-  
+  patterns_ = detectorPtr->getPatternsPtr()  ;
   
   
   // Request the number of patterns we want to detect.
   int patternNumber = detector->getPatternsNumber() ;
   
   // Get a pointer to the data
-  const std::vector<Pattern> *data = detector->getPatternsPtr();
+ // const std::vector<Pattern> *data = detector->getPatternsPtr();
   
   // Create the array of the matchers.
   matchers_ = new cv::Ptr<cv::FlannBasedMatcher>[patternNumber] ;
@@ -30,16 +30,16 @@ MultipleFlannMatcher::MultipleFlannMatcher(HazmatDetector* detectorPtr)
     // Create a matcher of the same type as the base matcher.
     matchers_[i] = baseMatcher.clone(true);
    
-    // Convert the array of descriptors to a std::vector of cv 
-    // matrices for the training function.
-
     if ( !matchers_[i]->empty() ) 
     {
       std::cout << "Matcher " << i << " is not empty !" << std::endl;
       matchers_[i]->clear();
     }
  
-    descriptors.push_back( (*data)[i].descriptors ) ;
+    // Convert the array of descriptors to a std::vector of cv 
+    // matrices for the training function.
+  //  std::cout << (*patterns_)[i].descriptors.rows << std::endl;
+    descriptors.push_back( (*patterns_)[i].descriptors ) ;
    
     // Add the descriptors to the matcher.
     matchers_[i]->add( descriptors );
@@ -67,17 +67,21 @@ bool MultipleFlannMatcher::findKeypointMatches(
       std::vector<cv::Point2f> *matchedSceneKeyPoints  , 
       const int &patternID )
 {
-  std::cout << "hi \n";
-  exit(-1);
-  
+ // std::cout << "hi \n";
+ // exit(-1);
+  matchedSceneKeyPoints->clear();
+  matchedPatternKeyPoints->clear();
   // Define the vector that will contain the matches.
   std::vector< std::vector<cv::DMatch> > matches;
-  
+  std::vector< cv::KeyPoint> keyPoints ; 
   // Perfom the matching using the matcher that corresponds
   // to the i-th pattern.
-  
+  if ( matchers_[patternID]->empty() ) 
+  {
+    std::cout << "Matcher : " << patternID << " is empty" << std::endl;
+  }
   matchers_[patternID]->knnMatch( frameDescriptors , matches , 2 );
-  
+ // matchers_[patternID]->knnMatch( frameDescriptors ,(*patterns_)[patternID].descriptors , matches ,  2 ) ;
   std::vector< cv::DMatch > goodMatches ;
   
   
@@ -88,7 +92,7 @@ bool MultipleFlannMatcher::findKeypointMatches(
     // threshold
     // TO DO : READ THE THRESHOLD FROM FILE.
     
-    float ratio = 0.8 ;
+    float ratio = 0.6 ;
     
     for( int i = 0; i <  matches.size() ; i++ )
     { 
@@ -107,14 +111,14 @@ bool MultipleFlannMatcher::findKeypointMatches(
   // vectors for the pattern and the scene.
   for( int i = 0; i < goodMatches.size(); i++ )
   {
-    
+    keyPoints.push_back( sceneKeyPoints[ goodMatches[i].queryIdx ]);
     // Pattern key points .
     matchedPatternKeyPoints->push_back( 
-      patternKeyPoints[ goodMatches[i].queryIdx ] );
+      patternKeyPoints[ goodMatches[i].trainIdx ] );
       
     // Scene key points .
     matchedSceneKeyPoints->push_back( 
-      sceneKeyPoints[ goodMatches[i].trainIdx ].pt );
+      sceneKeyPoints[ goodMatches[i].queryIdx ].pt );
   }
   
   // If we have less than 4 matches then we cannot find the Homography
@@ -123,7 +127,7 @@ bool MultipleFlannMatcher::findKeypointMatches(
   if ( goodMatches.size() < 4 )
     return false;
     
-  
+
   goodMatches.clear();
   matches.clear();
   
