@@ -1,10 +1,12 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
 #include "pandora_vision_hazmat/sift_hazmat_detector.h"
 #include "pandora_vision_hazmat/multiple_flann_matcher.h"
-
+#include "pandora_vision_hazmat/surf_hazmat_detector.h"
+#include "pandora_vision_hazmat/orb_hazmat_detector.h"
 int main(int argc , char **argv )
 {
   SiftHazmatDetector detectorObj ;
+//  SurfHazmatDetector detectorObj ;
   //~ Detector *detector = new HistogramMask(detectorObj);
   //~ HistogramMask detector(&sign);
   //~ HistogramMask detector(&detectorObj);
@@ -32,7 +34,7 @@ int main(int argc , char **argv )
   cv::Mat hist;
   cv::Mat mask;
   cv::Mat maskedFrame;
-
+  std::stringstream ss;
   float x , y;
   
   int count = 1 ;
@@ -55,9 +57,9 @@ int main(int argc , char **argv )
 
     //bool found = detectorObj.detect(frame , &x, &y);
     bool found = detector.detect(frame , &x, &y);
-
-    std::cout <<"Time to execute : " << ( clock () - begin_time ) /  
-      static_cast<double>(CLOCKS_PER_SEC )<< std::endl; 
+    double execTime = ( clock () - begin_time ) /  
+      static_cast<double>(CLOCKS_PER_SEC );
+    std::cout <<"Time to execute : " << execTime << std::endl; 
     if (found && x > 0 && y > 0  )
     {
       //~ cv::line( frame, scene_corners[0] , scene_corners[1] , Scalar(0, 255, 0), 4 );
@@ -91,9 +93,14 @@ int main(int argc , char **argv )
     
     //~ std::cout <<"TIme to execute : " << ( clock () - begin_time ) /  
       //~ static_cast<double>(CLOCKS_PER_SEC )<< std::endl;
-    
-    
-    
+    ss << 1 / execTime ;
+
+    cv::putText( frame , "fps : " + ss.str() , cv::Point( 0 , frame.rows ) ,
+        CV_FONT_HERSHEY_PLAIN , 3 , cv::Scalar( 0 , 0 , 255 ) , 3 ) ;
+
+
+    // Clear the string stream.
+    ss.str( std::string() ) ;
     
     cv::imshow("Frame",frame);
     //~ cv::imshow("Mask" , mask);

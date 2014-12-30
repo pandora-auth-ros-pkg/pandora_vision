@@ -54,7 +54,9 @@ add_executable(hazmat_node
       src/main.cpp
       src/hazmat_detector.cpp
       src/simple_hazmat_detector.cpp
-      src/sift_hazmat_detector.cpp)
+      src/sift_hazmat_detector.cpp
+      src/surf_hazmat_detector.cpp
+      src/orb_hazmat_detector.cpp)
 target_link_libraries(hazmat_node
     ${PROJECT_NAME}_filters
     ${catkin_LIBRARIES} )
