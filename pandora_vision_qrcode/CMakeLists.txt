@@ -46,7 +46,6 @@ target_link_libraries(qrcode_node_lib
 )
 
 ################# qrcode node #################
-
 add_executable(qrcode_node
     src/qrCode_detection.cpp
     src/qrCode_detector.cpp

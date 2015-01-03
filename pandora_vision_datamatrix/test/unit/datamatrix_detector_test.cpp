@@ -34,10 +34,10 @@
  * *
  * * Author: 
  * *********************************************************************/
-#include "pandora_vision_qrcode/qrCode_detector.h"
+#include "pandora_vision_datamatrix/datamatrix_detector.h"
 
 #include "gtest/gtest.h"
-#include "math.h"
+
 namespace pandora_vision
 {
     /**
@@ -73,14 +73,14 @@ namespace pandora_vision
     }
 
     /**
-     *     @class QrCodeDetectorTests
-     *     @brief Tests the integrity of methods of class QrCodeDetector
+     *     @class DatamatrixDetectorTest
+     *     @brief Tests the integrity of methods of class DatamatrixDetector
     **/
   
-    class QrCodeDetectorTest : public ::testing::Test
+    class DatamatrixDetectorTest : public ::testing::Test
     {
       public:
-        QrCodeDetectorTest() {}
+        DatamatrixDetectorTest() {}
 
         virtual void SetUp()
         {
@@ -88,44 +88,44 @@ namespace pandora_vision
           HEIGHT = 480;
         }
 
-        std::vector<QrCode> detectQrCode(cv::Mat frame);
+        std::vector<DataMatrixQode> detectDatamatrix(cv::Mat frame);
 
         int WIDTH;
         int HEIGHT;
 
       private:
-        QrCodeDetector qrCodeDetector_;
+        DatamatrixDetector datamatrixDetector_;
     };
 
-    std::vector<QrCode> QrCodeDetectorTest::detectQrCode(cv::Mat frame)
+    std::vector<DataMatrixQode> DatamatrixDetectorTest::detectDatamatrix(cv::Mat frame)
     {
-      qrCodeDetector_.detectQrCode(frame);
-      return qrCodeDetector_.get_detected_qr();
+      datamatrixDetector_.detect_datamatrix(frame);
+      return datamatrixDetector_.get_detected_datamatrix();
     }
 
-    //! Tests QrCodeDetector::detectQrCode
-    TEST_F (QrCodeDetectorTest, detectQrCodeBlackImage)
+    //! Tests DatamatrixDetector::detect_datamatrix
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixBlackImage)
     {
       cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-      std::vector<QrCode> qrcode_list = detectQrCode(blackFrame);
-      // there shouldn't be any qrcodes
-      EXPECT_EQ(0, qrcode_list.size());
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(blackFrame);
+      // there shouldn't be any datamatrices
+      EXPECT_EQ(0, datamatrix_list.size());
       // neither when 3 channels are used
       blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
-      qrcode_list = detectQrCode(blackFrame);
-      EXPECT_EQ(0, qrcode_list.size());
+      datamatrix_list = detectDatamatrix(blackFrame);
+      EXPECT_EQ(0, datamatrix_list.size());
     }
 
-    TEST_F (QrCodeDetectorTest, detectQrCodeWhiteImage)
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixWhiteImage)
     {
       cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
       whiteFrame.setTo(cv::Scalar(255,255,255));
-      std::vector<QrCode> qrcode_list = detectQrCode(whiteFrame);
-      // there shouldn't be any qrcodes
-      EXPECT_EQ(0, qrcode_list.size());
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(whiteFrame);
+      // there shouldn't be any datamatrices
+      EXPECT_EQ(0, datamatrix_list.size());
     }
 
-    TEST_F (QrCodeDetectorTest, detectQrCodeWhiteBlackMixImage)
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixWhiteBlackMixImage)
     {
       // Vertically concatenated
       cv::Mat blackFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
@@ -134,61 +134,41 @@ namespace pandora_vision
       cv::Mat H, V;
       cv::hconcat(blackFrame, whiteFrame, H);
       cv::vconcat(blackFrame, whiteFrame, V);
-      std::vector<QrCode> qrcode_list = detectQrCode(H);
-      // there shouldn't be any qrcodes
-      EXPECT_EQ(0, qrcode_list.size());
-      qrcode_list = detectQrCode(V);
-      EXPECT_EQ(0, qrcode_list.size());
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(H);
+      // there shouldn't be any datamatrices
+      EXPECT_EQ(0, datamatrix_list.size());
+      datamatrix_list = detectDatamatrix(V);
+      EXPECT_EQ(0, datamatrix_list.size());
     }
 
-    //TEST_F (QrCodeDetectorTest, detectQrCodeRandomChessboardImage)
+    //TEST_F (datamatrixDetectorTest, detectdatamatrixRandomChessboardImage)
     //{
     //  cv::Mat frame;
     //  int blocksNumber = 10;
     //  drawChessboard( blocksNumber, WIDTH, HEIGHT, frame);
-    //  std::vector<QrCode> qrcode_list = detectQrCode(frame);
-    //  // there shouldn't be any qrcodes
-    //  EXPECT_EQ(0, qrcode_list.size());
+    //  std::vector<datamatrix> datamatrix_list = detectdatamatrix(frame);
+    //  // there shouldn't be any datamatrixs
+    //  EXPECT_EQ(0, datamatrix_list.size());
     //  blocksNumber = 100;
     //  drawChessboard( blocksNumber, WIDTH, HEIGHT, frame);
-    //  qrcode_list = detectQrCode(frame);
-    //  // there shouldn't be any qrcodes
-    //  EXPECT_EQ(0, qrcode_list.size());
+    //  datamatrix_list = detectdatamatrix(frame);
+    //  // there shouldn't be any datamatrixs
+    //  EXPECT_EQ(0, datamatrix_list.size());
     //}
 
     
-    //TEST_F (QrCodeDetectorTest, detectBigQrCodeWhiteBackground)
+    //TEST_F (DatamatrixDetectorTest, detectBigDatamatrixWhiteBackground)
     //{
     //  cv::Mat inputFrame;
-    //  inputFrame = cv::imread("");
+    //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/Toshiba-UHDTV-Magic-Drum-Washing-Machine Convention-GICC-TianChad.com-7993.jpg");
     //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-    //  std::vector<QrCode> qrcode_list = detectQrCode(inputFrame);
-    //  // there should be two qrcodes
-    //  EXPECT_EQ(2, qrcode_list.size());
-    //  inputFrame = cv::imread("");
-    //  qrcode_list = detectQrCode(inputFrame);
-    //  // there should be one qrcode
-    //  EXPECT_EQ(1, qrcode_list.size());
-    //}
-
-    //TEST_F (QrCodeDetectorTest, detectOneQrCodeCamera)
-    //{
-    //  cv::VideoCapture camera( 0 );  
-    //  cv::Mat inputFrame;
-    //  int i = 0;
-    //  int qrNumber = 0;
-    //  std::vector<QrCode> qrcode_list;
-    //  while( i<100 )
-    //  {
-    //    // Get the next frame.
-    //    camera.grab();
-    //    camera.retrieve(inputFrame);
-    //    qrcode_list = detectQrCode(inputFrame);
-    //    qrNumber = qrcode_list.size();
-    //    i++;
-    //  }
-    //  // there should be one qrcode
-    //  EXPECT_EQ(1, qrNumber);
+    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be two datamatrixs
+    //  EXPECT_EQ(2, datamatrix_list.size());
+    //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/QR-Code-640x480-b31d9cf3ddd68752.jpg");
+    //  datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be one datamatrix
+    //  EXPECT_EQ(1, datamatrix_list.size());
     //}
       
 } // namespace_pandora_vision

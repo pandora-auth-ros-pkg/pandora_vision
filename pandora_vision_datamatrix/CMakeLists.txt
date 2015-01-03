@@ -36,6 +36,15 @@ include_directories(include
   ${DMTX_INCLUDE_DIRS}
 )
 
+################# datamatrix node library #################
+add_library(datamatrix_node_lib
+  src/datamatrix_detector.cpp
+)
+target_link_libraries(datamatrix_node_lib
+  ${catkin_LIBRARIES}
+)
+
+################# qrcode node #################
 add_executable(datamatrix_node
   src/datamatrix_node.cpp
   src/datamatrix_detection.cpp
@@ -64,5 +73,10 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
+
+################# Testing #################
+if(CATKIN_ENABLE_TESTING)
+    add_subdirectory(test)
+endif()
 
 

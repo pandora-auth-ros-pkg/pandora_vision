@@ -104,6 +104,7 @@ namespace pandora_vision {
       input_frame.copyTo(gray_frame);
     cv::Mat blured;
     normalize(gray_frame, gray_frame, 255, 0, cv::NORM_MINMAX);
+    // TO REMOVE
     gaussiansharpenblur = 5;
     cv::GaussianBlur(gray_frame, blured, cv::Size(0, 0), gaussiansharpenblur);
     cv::addWeighted(gray_frame, 1 + gaussiansharpenweight, blured,

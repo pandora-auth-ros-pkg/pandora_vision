@@ -50,8 +50,8 @@ namespace pandora_vision
     reg = NULL;
     msg = NULL;
     
-    _datamatrixPublisher = 
-        image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
+  //  _datamatrixPublisher = 
+  //       image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
     detected_datamatrix.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
@@ -78,7 +78,11 @@ namespace pandora_vision
    */
   void DatamatrixDetector::detect_datamatrix(cv::Mat image)
   {
+    if (image.channels() < 3)
+      cv::cvtColor(image, image, CV_GRAY2BGR);
+
     datamatrix_list.clear();
+
     
     img = NULL;
     dec = NULL;
@@ -96,11 +100,14 @@ namespace pandora_vision
     dec = dmtxDecodeCreate(img, 1);
     ROS_ASSERT(dec != NULL);
     
+    //!< add msecs to timeout
+    timeout = dmtxTimeAdd(dmtxTimeNow(), 1000);
+    
     //!< searches  every  pixel location in a grid pattern looking 
     //!< for potential barcode regions. A DmtxRegion is returned 
     //!< whenever a potential  barcode region  is found, or if the final 
     //!< pixel location has been scanned.
-    reg = dmtxRegionFindNext(dec, NULL);
+    reg = dmtxRegionFindNext(dec, &timeout);
     if(reg != NULL) 
     {
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
@@ -181,7 +188,7 @@ namespace pandora_vision
     cv_bridge::CvImage datamatrixMSg;
     datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
     datamatrixMSg.image = debug_frame.clone();
-    _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
+  //  _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
     
   }
   
