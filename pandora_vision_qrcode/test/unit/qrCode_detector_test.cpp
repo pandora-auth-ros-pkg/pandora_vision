@@ -40,6 +40,39 @@
 #include "math.h"
 namespace pandora_vision
 {
+
+    /**
+     *     @class QrCodeDetectorTests
+     *     @brief Tests the integrity of methods of class QrCodeDetector
+    **/
+  
+    class QrCodeDetectorTest : public ::testing::Test
+    {
+      public:
+        QrCodeDetectorTest() {}
+
+        virtual void SetUp()
+        {
+          WIDTH = 640;
+          HEIGHT = 480;
+        }
+
+        std::vector<QrCode> detectQrCode(cv::Mat frame);
+
+        void drawChessboard (
+          int blocksNumber,
+          int WIDTH,
+          int HEIGHT,
+          cv::Mat &image
+        );
+
+        int WIDTH;
+        int HEIGHT;
+
+      private:
+        QrCodeDetector qrCodeDetector_;
+    };
+
     /**
       @brief Constructs a chessboard with specific number of blocks.
       @param blocksNumber [int] The number of chessboard blocks
@@ -48,7 +81,7 @@ namespace pandora_vision
       @param image [cv::Mat&] The final chessboard image
       @return void
     **/
-    void drawChessboard (
+    void QrCodeDetectorTest::drawChessboard (
       int blocksNumber,
       int WIDTH,
       int HEIGHT,
@@ -71,31 +104,6 @@ namespace pandora_vision
       }
       chessBoard.copyTo(image);
     }
-
-    /**
-     *     @class QrCodeDetectorTests
-     *     @brief Tests the integrity of methods of class QrCodeDetector
-    **/
-  
-    class QrCodeDetectorTest : public ::testing::Test
-    {
-      public:
-        QrCodeDetectorTest() {}
-
-        virtual void SetUp()
-        {
-          WIDTH = 640;
-          HEIGHT = 480;
-        }
-
-        std::vector<QrCode> detectQrCode(cv::Mat frame);
-
-        int WIDTH;
-        int HEIGHT;
-
-      private:
-        QrCodeDetector qrCodeDetector_;
-    };
 
     std::vector<QrCode> QrCodeDetectorTest::detectQrCode(cv::Mat frame)
     {
