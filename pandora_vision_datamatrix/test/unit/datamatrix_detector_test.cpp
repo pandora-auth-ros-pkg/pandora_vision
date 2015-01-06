@@ -40,37 +40,6 @@
 
 namespace pandora_vision
 {
-    /**
-      @brief Constructs a chessboard with specific number of blocks.
-      @param blocksNumber [int] The number of chessboard blocks
-      @param WIDTH [int] Output image's width
-      @param HEIGHT [int]  Output image's height
-      @param image [cv::Mat&] The final chessboard image
-      @return void
-    **/
-    void drawChessboard (
-      int blocksNumber,
-      int WIDTH,
-      int HEIGHT,
-      cv::Mat &image
-    )
-    {
-      int imageSize = WIDTH * HEIGHT;
-      int blockSize = static_cast<int>(imageSize / blocksNumber);
-      cv::Mat chessBoard(WIDTH, HEIGHT, CV_8UC3, cv::Scalar::all(0));          
-      unsigned char color = 255;
-      for (int i = 0; i < WIDTH - blockSize; i += blockSize)
-      {
-        color = -color;
-        for (int j = 0; j < HEIGHT - blockSize; j += blockSize)
-        {
-          cv::Mat ROI = chessBoard(cv::Rect(i, j, blockSize, blockSize));
-          ROI.setTo(cv::Scalar::all(color));
-          color = abs(color-255);
-        }
-      }
-      chessBoard.copyTo(image);
-    }
 
     /**
      *     @class DatamatrixDetectorTest
@@ -90,6 +59,12 @@ namespace pandora_vision
 
         std::vector<DataMatrixQode> detectDatamatrix(cv::Mat frame);
 
+        void drawChessboard (
+          int blocksNumberH,
+          int blocksNumberV,
+          cv::Mat &image
+        );
+
         int WIDTH;
         int HEIGHT;
 
@@ -103,6 +78,35 @@ namespace pandora_vision
       return datamatrixDetector_.get_detected_datamatrix();
     }
 
+    /**
+      @brief Constructs a chessboard with specific number of blocks.
+      @param blocksNumberH [int] The number of chessboard blocks, horizontal direction
+      @param blocksNumberV [int] The number of chessboard blocks, vertical direction
+      @param image [cv::Mat&] The final chessboard image
+      @return void
+    **/
+    void DatamatrixDetectorTest::drawChessboard (
+      int blocksNumberH,
+      int blocksNumberV,
+      cv::Mat &image
+    )
+    {
+      int imageSize = WIDTH * HEIGHT;
+      int blockWidth = static_cast<int>(WIDTH / blocksNumberH);
+      int blockHeight = static_cast<int>(HEIGHT / blocksNumberV);
+      cv::Mat chessBoard(HEIGHT, WIDTH, CV_8UC3, cv::Scalar::all(0));          
+      unsigned char color = 255;
+      for (int i = 0; i < WIDTH - blockWidth; i += blockWidth)
+      {
+        for (int j = 0; j < HEIGHT - blockHeight; j += blockHeight)
+        {
+          cv::Mat ROI = chessBoard(cv::Rect(i, j, blockWidth, blockHeight));
+          ROI.setTo(cv::Scalar::all(color));
+          color = abs(color-255);
+        }
+      }
+      chessBoard.copyTo(image);
+    }
     //! Tests DatamatrixDetector::detect_datamatrix
     TEST_F (DatamatrixDetectorTest, detect_datamatrixBlackImage)
     {
@@ -141,34 +145,40 @@ namespace pandora_vision
       EXPECT_EQ(0, datamatrix_list.size());
     }
 
-    //TEST_F (datamatrixDetectorTest, detectdatamatrixRandomChessboardImage)
-    //{
-    //  cv::Mat frame;
-    //  int blocksNumber = 10;
-    //  drawChessboard( blocksNumber, WIDTH, HEIGHT, frame);
-    //  std::vector<datamatrix> datamatrix_list = detectdatamatrix(frame);
-    //  // there shouldn't be any datamatrixs
-    //  EXPECT_EQ(0, datamatrix_list.size());
-    //  blocksNumber = 100;
-    //  drawChessboard( blocksNumber, WIDTH, HEIGHT, frame);
-    //  datamatrix_list = detectdatamatrix(frame);
-    //  // there shouldn't be any datamatrixs
-    //  EXPECT_EQ(0, datamatrix_list.size());
-    //}
 
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixRandomChessboardImage)
+    {
+      cv::Mat frame;
+      int blocksNumberH = 10;
+      int blocksNumberV = 10;
+      drawChessboard( blocksNumberH, blocksNumberV, frame);
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(frame);
+      // there shouldn't be any qrcodes
+      EXPECT_EQ(0, datamatrix_list.size());
+      blocksNumberH = 100;
+      blocksNumberV = 100;
+      drawChessboard( blocksNumberH, blocksNumberV, frame);
+      datamatrix_list = detectDatamatrix(frame);
+      // there shouldn't be any qrcodes
+      EXPECT_EQ(0, datamatrix_list.size());
+    }
     
-    //TEST_F (DatamatrixDetectorTest, detectBigDatamatrixWhiteBackground)
-    //{
-    //  cv::Mat inputFrame;
-    //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/Toshiba-UHDTV-Magic-Drum-Washing-Machine Convention-GICC-TianChad.com-7993.jpg");
-    //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
-    //  // there should be two datamatrixs
-    //  EXPECT_EQ(2, datamatrix_list.size());
-    //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/QR-Code-640x480-b31d9cf3ddd68752.jpg");
-    //  datamatrix_list = detectDatamatrix(inputFrame);
-    //  // there should be one datamatrix
-    //  EXPECT_EQ(1, datamatrix_list.size());
-    //}
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
+    {
+      cv::Mat inputFrame;
+      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
+      //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+      // there should be one datamatrix
+      EXPECT_EQ(1, datamatrix_list.size());
+      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/500px-Datamatrix-encodings.jpg");
+      datamatrix_list = detectDatamatrix(inputFrame);
+      // there should be four datamatrices
+      EXPECT_EQ(4, datamatrix_list.size());
+      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/codigo-bidi-datamatrix-qr.jpg");
+      datamatrix_list = detectDatamatrix(inputFrame);
+      // there should be one datamatrix
+      EXPECT_EQ(1, datamatrix_list.size());
+    }
       
 } // namespace_pandora_vision

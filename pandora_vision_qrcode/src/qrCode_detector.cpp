@@ -109,7 +109,6 @@ namespace pandora_vision {
     cv::GaussianBlur(gray_frame, blured, cv::Size(0, 0), gaussiansharpenblur);
     cv::addWeighted(gray_frame, 1 + gaussiansharpenweight, blured,
         -gaussiansharpenweight, 0, gray_frame);
-    cv::waitKey(1);
     int width = gray_frame.cols;
     int height = gray_frame.rows;
     uchar *raw = gray_frame.data;
