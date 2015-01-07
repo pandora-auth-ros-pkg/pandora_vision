@@ -165,23 +165,23 @@ namespace pandora_vision
     }
 
     
-    TEST_F (QrCodeDetectorTest, detectQrCodesFromImage)
-    {
-      cv::Mat inputFrame;
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/Toshiba-UHDTV-Magic-Drum-Washing-Machine Convention-GICC-TianChad.com-7993.jpg");
-      //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-      std::vector<QrCode> qrcode_list = detectQrCode(inputFrame);
-      // there should be two qrcodes
-      EXPECT_EQ(2, qrcode_list.size());
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/QR-Code-640x480-b31d9cf3ddd68752.jpg");
-      qrcode_list = detectQrCode(inputFrame);
-      // there should be one qrcode
-      EXPECT_EQ(1, qrcode_list.size());
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing.jpg");
-      qrcode_list = detectQrCode(inputFrame);
-      // there should be eight qrcodes
-      EXPECT_EQ(8, qrcode_list.size());
-    }
+    //TEST_F (QrCodeDetectorTest, detectQrCodesFromImage)
+    //{
+    //  cv::Mat inputFrame;
+    //  inputFrame = cv::imread("");
+    //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
+    //  std::vector<QrCode> qrcode_list = detectQrCode(inputFrame);
+    //  // there should be two qrcodes
+    //  EXPECT_EQ(2, qrcode_list.size());
+    //  inputFrame = cv::imread("");
+    //  qrcode_list = detectQrCode(inputFrame);
+    //  // there should be one qrcode
+    //  EXPECT_EQ(1, qrcode_list.size());
+    //  inputFrame = cv::imread("");
+    //  qrcode_list = detectQrCode(inputFrame);
+    //  // there should be eight qrcodes
+    //  EXPECT_EQ(8, qrcode_list.size());
+    //}
 
     //TEST_F (QrCodeDetectorTest, detectOneQrCodeCamera)
     //{

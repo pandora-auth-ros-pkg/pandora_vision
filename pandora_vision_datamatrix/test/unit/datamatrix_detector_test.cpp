@@ -163,22 +163,22 @@ namespace pandora_vision
       EXPECT_EQ(0, datamatrix_list.size());
     }
     
-    TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
-    {
-      cv::Mat inputFrame;
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
-      //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
-      // there should be one datamatrix
-      EXPECT_EQ(1, datamatrix_list.size());
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/500px-Datamatrix-encodings.jpg");
-      datamatrix_list = detectDatamatrix(inputFrame);
-      // there should be four datamatrices
-      EXPECT_EQ(4, datamatrix_list.size());
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/codigo-bidi-datamatrix-qr.jpg");
-      datamatrix_list = detectDatamatrix(inputFrame);
-      // there should be one datamatrix
-      EXPECT_EQ(1, datamatrix_list.size());
-    }
+    //TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
+    //{
+    //  cv::Mat inputFrame;
+    //  inputFrame = cv::imread("");
+    //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
+    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be one datamatrix
+    //  EXPECT_EQ(1, datamatrix_list.size());
+    //  inputFrame = cv::imread("");
+    //  datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be four datamatrices
+    //  EXPECT_EQ(4, datamatrix_list.size());
+    //  inputFrame = cv::imread("");
+    //  datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be one datamatrix
+    //  EXPECT_EQ(1, datamatrix_list.size());
+    //}
       
 } // namespace_pandora_vision
