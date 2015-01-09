@@ -13,17 +13,7 @@
 class SiftHazmatDetector : public SimpleHazmatDetector 
 {
   public:
-    
-    // SIFT hazmat detector constructor
-    SiftHazmatDetector() : 
-      SimpleHazmatDetector("SIFT") 
-    {
-      // Initiliaze  the Flann Based Matcher .
-      matcher_ = cv::FlannBasedMatcher();
-      s_ = cv::SIFT() ; 
-    }
-
-
+    SiftHazmatDetector();
     // SiftHazmatDetector object destructor.
     ~SiftHazmatDetector() {} ;
     

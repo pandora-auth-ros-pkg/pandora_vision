@@ -6,16 +6,8 @@
 class SurfHazmatDetector : public SimpleHazmatDetector 
 {
    public:
-     SurfHazmatDetector() : SimpleHazmatDetector("SURF")
-     {
-       // To be read from file.
-       int minHessian = 400;
-       matcher_ = cv::FlannBasedMatcher();
+     SurfHazmatDetector();
 
-       s_ = cv::SURF( minHessian ) ;
-
-     }
-    
      ~SurfHazmatDetector()
      {} ;
 

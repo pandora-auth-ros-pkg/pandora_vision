@@ -27,12 +27,13 @@
 
 //#define CHRONO 
 #define DEBUG 
+#define FEATURES_CHRONO
 #define HUE_RANGE {0,180}
 #define SAT_RANGE {0,255}
 #define DEFAULT_HIST_CHANNELS {0,1}
 #define HIST_RANGE { HUE_RANGE , SAT_RANGE }
 
-#ifdef CHRONO 
+#if defined(CHRONO) || defined(FEATURES_CHRONO) 
 #include "sys/time.h"
 #endif
 

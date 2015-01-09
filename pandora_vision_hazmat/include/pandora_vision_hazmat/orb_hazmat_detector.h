@@ -6,12 +6,10 @@
 class OrbHazmatDetector : public SimpleHazmatDetector 
 {
    public:
-     OrbHazmatDetector() : SimpleHazmatDetector("ORB")
-     {
-     
-       s_ = cv::ORB() ;
-       matcher_ = cv::FlannBasedMatcher(new cv::flann::LshIndexParams(20,10,2));
-     }
+
+     // Default Constructor
+     OrbHazmatDetector();
+   
    
     // OrbHazmatDetector object destructor.
     ~OrbHazmatDetector() {} ;

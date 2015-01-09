@@ -10,6 +10,7 @@
         used.
 **/
 
+
 class SimpleHazmatDetector : public HazmatDetector
 {
   public:
@@ -37,24 +38,25 @@ class SimpleHazmatDetector : public HazmatDetector
     // Returns the type of the features used. 
     //~ const TrainerType virtual getType( void ) = 0 ;
     
-    virtual const cv::FlannBasedMatcher& getMatcher(void)
+    /* virtual const cv::FlannBasedMatcher& getMatcher(void)
     {
       return matcher_;
-    }
+    }*/
     
     // Constructor
-    SimpleHazmatDetector(const std::string &featureName);
+    SimpleHazmatDetector(const std::string &featureName)
+      : HazmatDetector(featureName)
+    {}; 
     
     // Destructor 
     virtual ~SimpleHazmatDetector() {} ;
   
   protected:
   
-    // Flann Matcher .
-    // It is initialised by every feature detector separately so as to
-    // set the correct parameters.
-    
-    cv::FlannBasedMatcher matcher_ ;
+    /* Array of descriptors matchers used to match the keypoints
+     * found in the input frame and those of the training set
+    */
+    cv::Ptr<cv::DescriptorMatcher> *matchers_ ;
     
     
   

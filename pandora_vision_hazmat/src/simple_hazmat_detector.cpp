@@ -1,12 +1,6 @@
 #include "pandora_vision_hazmat/simple_hazmat_detector.h"
 
-
-SimpleHazmatDetector::SimpleHazmatDetector(
-  const std::string &featureName) : HazmatDetector(featureName)
-  {
-    
-    }
-    
+   
 /**
   @brief Function used to detect matches between a pattern and the 
          input frame.
@@ -29,65 +23,57 @@ bool SimpleHazmatDetector::findKeypointMatches(
       std::vector<cv::Point2f> *matchedSceneKeyPoints , 
       const int &patternID  ) 
 {
-  // Define the vector that will contain the matches.
-  std::vector< cv::DMatch > matches;
-  
-  // Perfom the matching using the matcher defined by the object.
-  matcher_.match(patternDescriptors,frameDescriptors , matches );
-  
-  // Vector that containes the optimum matches.
-  std::vector< cv::DMatch > goodMatches;
-  
-  // Minimum distance between matches.
-  double minDist =  std::numeric_limits<double>::max() ;
-  // Maximum distance between matches.
+  // Clear the vectors containing the matched keypoints.
+  matchedSceneKeyPoints->clear();
+  matchedPatternKeyPoints->clear();
 
-  // If matches have been found.
+  // Define the vector of vectors that contains the matches.
+  // Each element is a vector that contains the first,the second
+  // up to the n-th best match.
+  std::vector< std::vector<cv::DMatch> > matches;
+  
+  // Perfom the matching using the matcher of the patternID-th 
+  // pattern and find the top 2 correspondences. 
+  matchers_[patternID]->knnMatch( frameDescriptors , matches , 2 );
+
+  // The vector containing the best matches
+  std::vector< cv::DMatch > goodMatches ;
+  
+  // If we have found any matches.
   if ( matches.size() > 0 )
   {
 
-      // Quick calculation of max and min distances between keypoints
-      for( int i = 0; i < matches.size() ; i++ )
-      { 
-        double dist = matches[i].distance;
-        if( dist < minDist ) minDist = dist;
-      }
-
-
-      // Keep only the matches that are below a certain distance 
-      // threshold
-      // TO DO : READ THE THRESHOLD FROM FILE.
+    // We filter that matches by keeping only those
+    // whose distance ration between the first and the second
+    // best match is below a certain threshold.
+    // TO DO : READ THE THRESHOLD FROM FILE.
     
-      for( int i = 0; i < matches.size() ; i++ )
-      { 
-        if( matches[i].distance < 2*minDist )
-          goodMatches.push_back( matches[i]); 
-      }
-      
-      
-      
-
+    float ratio = 0.6 ;
+    
+    for( int i = 0; i <  matches.size() ; i++ )
+    { 
+        if( matches[i][0].distance < ratio*matches[i][1].distance )
+        { 
+           goodMatches.push_back( matches[i][0]); 
+        }
+    }
+    
   }
+  // No matches found.
   else
-  {
     return false;
-  }
   
-  
-  // Find the keypoints that correspond to the best matches.
-
-  
+  // Add the keypoints of the matches found to the corresponding
+  // vectors for the pattern and the scene.
   for( int i = 0; i < goodMatches.size(); i++ )
-  {
-    
+  { 
     // Pattern key points .
     matchedPatternKeyPoints->push_back( 
-      patternKeyPoints[ goodMatches[i].queryIdx ] );
+      patternKeyPoints[ goodMatches[i].trainIdx ] );
       
     // Scene key points .
     matchedSceneKeyPoints->push_back( 
-      sceneKeyPoints[ goodMatches[i].trainIdx ].pt );
-      
+      sceneKeyPoints[ goodMatches[i].queryIdx ].pt );
   }
   
   // If we have less than 4 matches then we cannot find the Homography
@@ -96,14 +82,12 @@ bool SimpleHazmatDetector::findKeypointMatches(
   if ( goodMatches.size() < 4 )
     return false;
     
-  
+
   goodMatches.clear();
   matches.clear();
   
-  
-  
   // Matches have been successfully found and keypoints correctly 
   // assigned.
-  return true;
+  return true;  
   
   }

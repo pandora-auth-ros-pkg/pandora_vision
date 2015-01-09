@@ -1,33 +1,25 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
 #include "pandora_vision_hazmat/sift_hazmat_detector.h"
-#include "pandora_vision_hazmat/multiple_flann_matcher.h"
+//#include "pandora_vision_hazmat/multiple_flann_matcher.h"
 #include "pandora_vision_hazmat/surf_hazmat_detector.h"
 #include "pandora_vision_hazmat/orb_hazmat_detector.h"
 int main(int argc , char **argv )
 {
-  SiftHazmatDetector detectorObj ;
-//  SurfHazmatDetector detectorObj ;
+  // SiftHazmatDetector detectorObj ;
+  // SurfHazmatDetector detectorObj ;
+  OrbHazmatDetector detectorObj ; 
   //~ Detector *detector = new HistogramMask(detectorObj);
   //~ HistogramMask detector(&sign);
   //~ HistogramMask detector(&detectorObj);
-  MultipleFlannMatcher detector(&detectorObj);
+//  MultipleFlannMatcher detector(&detectorObj);
   
-  cv::VideoCapture camera(0);
+  cv::VideoCapture camera(1);
   
   if ( !camera.isOpened() )
   {
     std::cerr << "Error Opening the camera ! " << std::endl;
     return -1;
   }
-  
-  cv::Mat pattern = cv::imread("/home/vchoutas/Desktop/patterns/enter8.png");
-  
-  if ( !pattern.data )
-  {
-    std::cerr << "Could not open the image !" << std::endl;
-    return -1;
-  }
-  
   
   
   cv::Mat frame;
@@ -55,8 +47,8 @@ int main(int argc , char **argv )
     
     const clock_t begin_time = clock();
 
-    //bool found = detectorObj.detect(frame , &x, &y);
-    bool found = detector.detect(frame , &x, &y);
+    bool found = detectorObj.detect(frame , &x, &y);
+    // bool found = detector.detect(frame , &x, &y);
     double execTime = ( clock () - begin_time ) /  
       static_cast<double>(CLOCKS_PER_SEC );
     std::cout <<"Time to execute : " << execTime << std::endl; 

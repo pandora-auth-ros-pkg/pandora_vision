@@ -109,14 +109,15 @@ class HazmatDetector : public Detector
       return patterns_->size() ;
     }
     
-    // Function that returns the parameters of the FLANN matcher
-    // used by the detector.
-    virtual const cv::FlannBasedMatcher& getMatcher(void) = 0;
-  
+ 
   protected:
      // Vector of the patterns we wish to detect.
     boost::shared_ptr< std::vector<Pattern> > patterns_ ;
     
+    // Structs used for finding the execution time. 
+    #if defined(CHRONO) || defined(FEATURES_CHRONO) 
+    struct timeval startwtime, endwtime;
+    #endif 
   private : 
     // Name of the file from which the training data is read.
     static std::string fileName_ ;        
@@ -133,10 +134,7 @@ class HazmatDetector : public Detector
     // Height of the input frame.
     static int height ;
     
-    // Structs used for finding the execution time. 
-    #ifdef CHRONO
-    struct timeval startwtime, endwtime;
-    #endif
+    
     
     
 
