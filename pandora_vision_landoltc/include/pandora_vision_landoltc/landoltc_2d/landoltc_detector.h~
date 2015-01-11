@@ -88,7 +88,7 @@ private:
   //!<Vector containing LandoltC structs
   std::vector<LandoltC> _landoltc;
 
-  friend class LandoltcDetectorTest;
+  //friend class LandoltcDetectorTest;
 
 public:
 

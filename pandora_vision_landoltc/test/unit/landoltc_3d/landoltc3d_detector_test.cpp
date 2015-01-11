@@ -49,4 +49,11 @@ namespace pandora_vision
     protected:
       Landoltc3dDetectorTest() {}
   };    
+  
+  
+  TEST_F(Landoltc3dDetectorTest,test1)
+  {
+		
+		
+	}
 } // namespace pandora_vision
