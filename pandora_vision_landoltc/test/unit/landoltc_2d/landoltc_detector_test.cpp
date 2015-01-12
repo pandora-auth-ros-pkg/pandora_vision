@@ -50,95 +50,95 @@ namespace pandora_vision
     public:
       LandoltcDetectorTest() {}
       virtual ~LandoltcDetectorTest(){}
-      
+
     protected:
       void fillGrad(cv::Mat& input);
       cv::Point giveCenters(int i);
       int giveVotingData(cv::Point a, cv::Point b, int y, int i);
-    
+
       LandoltCDetector landoltCDetector;
-      
-      
+
+
   }; 
-  
+
   //process input and call findcenters
   void LandoltcDetectorTest::fillGrad(cv::Mat& input)
   {
-		cv::Mat gradX, gradY;
-		
-		cv::Sobel(input, gradX, CV_32F, 1, 0, 3);
+    cv::Mat gradX, gradY;
+
+    cv::Sobel(input, gradX, CV_32F, 1, 0, 3);
     cv::Sobel(input, gradY, CV_32F, 0, 1, 3);
-    
-     float* gradXF = reinterpret_cast<float*>(gradX.data);
-     float* gradYF = reinterpret_cast<float*>(gradY.data);
-    
-		landoltCDetector._voting = cv::Mat::zeros(input.rows, input.cols, CV_16U);
+
+    float* gradXF = reinterpret_cast<float*>(gradX.data);
+    float* gradYF = reinterpret_cast<float*>(gradY.data);
+
+    landoltCDetector._voting = cv::Mat::zeros(input.rows, input.cols, CV_16U);
     landoltCDetector.findCenters(input.rows, input.cols, gradXF, gradYF);
-    
-	}
-	
-	//returns possible center
-	cv::Point LandoltcDetectorTest::giveCenters(int i)
-	{ 
-		return landoltCDetector._centers.at(i);
-	}
-  
-  
+
+  }
+
+  //returns possible center
+  cv::Point LandoltcDetectorTest::giveCenters(int i)
+  { 
+    return landoltCDetector._centers.at(i);
+  }
+
+
   //y and i change order invotingData depending on the points i give to rasterize
-	int LandoltcDetectorTest::giveVotingData(cv::Point a, cv::Point b , int y , int i)
-	{
-		cv::Mat image;
-		
-		image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",-1);
-		
-		landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
-		
-		
-		landoltCDetector.rasterizeLine(a,b);
-		
-		const uint16_t* readVoting = (const uint16_t*)landoltCDetector._voting.data;
-		
-		int columns = image.cols ;
-		
-		return readVoting[columns*y + i];
-	}
-    
-  
-  
+  int LandoltcDetectorTest::giveVotingData(cv::Point a, cv::Point b , int y , int i)
+  {
+    cv::Mat image;
+
+    image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",-1);
+
+    landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
+
+
+    landoltCDetector.rasterizeLine(a,b);
+
+    const uint16_t* readVoting = (const uint16_t*)landoltCDetector._voting.data;
+
+    int columns = image.cols ;
+
+    return readVoting[columns*y + i];
+  }
+
+
+
   /** test cases **/
-  
+
   TEST_F(LandoltcDetectorTest, findCentersTest)
   {
-                cv::Mat image;
-                image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",0);		
+    cv::Mat image;
+    image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",0);		
 
-                fillGrad(image);
-		
-                cv::Point point(400,300);
-		
-                EXPECT_EQ(point,giveCenters(0)) ;
-		
-                //image=cv::imread("/pandora_vision_landoltc/index.png",0);
-		
-                //fillGrad(image);
-		
-                //cv::Point point2(400,300);
-		
-                //EXPECT_EQ(point2,giveCenters()) ;
-		
-        }
-  
-  
+    fillGrad(image);
+
+    cv::Point point(400,300);
+
+    EXPECT_EQ(point,giveCenters(0)) ;
+
+    //image=cv::imread("/pandora_vision_landoltc/index.png",0);
+
+    //fillGrad(image);
+
+    //cv::Point point2(400,300);
+
+    //EXPECT_EQ(point2,giveCenters()) ;
+
+  }
+
+
   TEST_F(LandoltcDetectorTest, rasterizeLineTest)
   {
-	  cv::Point a(1,1);
-		cv::Point b(2,2);
-		
-		EXPECT_EQ(1,giveVotingData(a, b, 2, 2));
+    cv::Point a(1,1);
+    cv::Point b(2,2);
+
+    EXPECT_EQ(1,giveVotingData(a, b, 2, 2));
   }	
-  
-  
-  
-   
+
+
+
+
 } // namespace pandora_vision
 
