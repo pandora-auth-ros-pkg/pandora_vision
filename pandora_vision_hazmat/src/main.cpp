@@ -5,9 +5,9 @@
 #include "pandora_vision_hazmat/orb_hazmat_detector.h"
 int main(int argc , char **argv )
 {
-  // SiftHazmatDetector detectorObj ;
+  SiftHazmatDetector detectorObj ;
   // SurfHazmatDetector detectorObj ;
-  OrbHazmatDetector detectorObj ; 
+  // OrbHazmatDetector detectorObj ; 
   //~ Detector *detector = new HistogramMask(detectorObj);
   //~ HistogramMask detector(&sign);
   //~ HistogramMask detector(&detectorObj);
