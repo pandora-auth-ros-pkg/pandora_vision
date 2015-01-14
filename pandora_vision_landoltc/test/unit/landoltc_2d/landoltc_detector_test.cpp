@@ -89,7 +89,7 @@ namespace pandora_vision
   {
     cv::Mat image;
 
-    image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",-1);
+    image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/bold.jpg",-1);
 
     landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
 
@@ -110,7 +110,7 @@ namespace pandora_vision
   TEST_F(LandoltcDetectorTest, findCentersTest)
   {
     cv::Mat image;
-    image=cv::imread("/home/manos/pandora/src/pandora_vision/pandora_vision_landoltc/bold.jpg",0);		
+    image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/bold.jpg",0);		
 
     fillGrad(image);
 
