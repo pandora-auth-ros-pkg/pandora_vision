@@ -161,6 +161,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   *x = -1 ;
   *y = -1 ;
   
+  bool foundPattern = false;
   // The matrix that contains the descriptors of the frame.
   cv::Mat frameDescriptors ;
   // The mask that will be applied to the frame so as to limit the
@@ -179,21 +180,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   // on the image based on the Image Signature Saliency Map .
   ImageSignature::createSaliencyMapMask( frame , &mask );
   
-  #ifdef CHRONO
-  gettimeofday(&endwtime,NULL);
-  double maskTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
-      /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-  std::cout << "Calculation time for creating the mask for frame  is " 
-    << maskTime << std::endl;
-  #endif
-  
-  #ifdef DEBUG
-  cv::Mat maskedFrame;
-  frame.copyTo(maskedFrame , mask);
-  cv::imshow("Segmented Frame",maskedFrame);
-  #endif
-
-  // Calculate the keypoints and extract the descriptors from the 
+    // Calculate the keypoints and extract the descriptors from the 
   // frame.
   
   #ifdef CHRONO
@@ -296,13 +283,16 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         double sideB = cv::norm(h) ;
         double surface = sideA * sideB ;
         
-        
+        foundPattern |= boundingBoxFound; 
         
         //~ std::cout << "Surface " << surface << std::endl;
         //~ std::cout << "SideA " << sideA << std::endl;
         //~ std::cout << "SideB " << sideB << std::endl;
         
-
+        
+        *x = sceneBB[ sceneBB.size() - 1 ].x ;
+        *y = sceneBB[ sceneBB.size() - 1 ].y ;
+  
         
         //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
           //~ continue;
@@ -325,7 +315,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     
   }
   
-  if ( !boundingBoxFound )
+  /* if ( !boundingBoxFound )
   {
     *x = -1 ;
     *y = -1 ;
@@ -334,10 +324,12 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     sceneKeyPoints.clear();
     return false;
   }
+
+  */
   
   // If all these conditions are met return the coordinates of the 
-    // center of the detected pattern . 
-  if ( sceneBB.empty() )
+  // center of the detected pattern . 
+  /* if ( sceneBB.empty() )
   {
     *x = -1 ;
     *y = -1 ;
@@ -346,15 +338,12 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     sceneKeyPoints.clear();
   
     return false;
-  }
-  *x = sceneBB[ sceneBB.size() - 1 ].x ;
-  *y = sceneBB[ sceneBB.size() - 1 ].y ;
-  
+  } */
   patternKeyPoints.clear();
   sceneBB.clear();
   sceneKeyPoints.clear();
   
-  return true;
+  return foundPattern;
 
     
 }

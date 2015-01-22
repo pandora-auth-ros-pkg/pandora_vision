@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_vision_msgs
     state_manager
     state_manager_msgs
-
     cv_bridge
     image_transport
     sensor_msgs
@@ -16,9 +15,9 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_cmake_tools
 )
 
-generate_dynamic_reconfigure_options(
-  config/hazmat_cfg.cfg
-)
+#generate_dynamic_reconfigure_options(
+#  config/hazmat_cfg.cfg
+#)
 
 catkin_package(
     #DEPENDS
@@ -31,6 +30,7 @@ catkin_package(
       image_transport
       sensor_msgs
       dynamic_reconfigure
+      roslint
       urdf
     #INCLUDE_DIRS
     #LIBRARIES
@@ -51,7 +51,8 @@ target_link_libraries(
   )
 
 add_executable(hazmat_node
-      src/main.cpp
+      src/hazmat_node.cpp
+      src/hazmat_detection.cpp
       src/hazmat_detector.cpp
       src/simple_hazmat_detector.cpp
       src/sift_hazmat_detector.cpp
