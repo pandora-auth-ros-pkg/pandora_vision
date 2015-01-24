@@ -58,6 +58,7 @@ namespace pandora_vision
         }
 
         std::vector<DataMatrixQode> detectDatamatrix(cv::Mat frame);
+        int* locateDatamatrix(cv::Point2f center);
 
         void drawChessboard (
           int blocksNumberH,
@@ -76,6 +77,14 @@ namespace pandora_vision
     {
       datamatrixDetector_.detect_datamatrix(frame);
       return datamatrixDetector_.get_detected_datamatrix();
+    }
+
+    int* DatamatrixDetectorTest::locateDatamatrix(cv::Point2f datamatrix_center)
+    {
+      int* center = new int[2];
+      center[0] = round(datamatrix_center.y);
+      center[1] = round(datamatrix_center.x);
+      return center;
     }
 
     /**
@@ -163,14 +172,19 @@ namespace pandora_vision
       EXPECT_EQ(0, datamatrix_list.size());
     }
     
-    //TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
-    //{
-    //  cv::Mat inputFrame;
-    //  inputFrame = cv::imread("");
-    //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
-    //  // there should be one datamatrix
-    //  EXPECT_EQ(1, datamatrix_list.size());
+    TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
+    {
+      cv::Mat inputFrame;
+      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
+      //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
+      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+      // there should be one datamatrix
+      ASSERT_EQ(1, datamatrix_list.size());
+      int* center = locateDatamatrix(datamatrix_list[0].datamatrix_center);
+      EXPECT_LE(130, center[0]);   
+      EXPECT_GE(160, center[0]);   
+      EXPECT_LE(263, center[1]);   
+      EXPECT_GE(293, center[1]);   
     //  inputFrame = cv::imread("");
     //  datamatrix_list = detectDatamatrix(inputFrame);
     //  // there should be four datamatrices
@@ -179,6 +193,6 @@ namespace pandora_vision
     //  datamatrix_list = detectDatamatrix(inputFrame);
     //  // there should be one datamatrix
     //  EXPECT_EQ(1, datamatrix_list.size());
-    //}
+    }
       
 } // namespace_pandora_vision
