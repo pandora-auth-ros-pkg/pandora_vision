@@ -33,6 +33,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Author:  Despoina Paschalidou
+*          Miltiadis Kofinas, <mkofinas@gmail.com>
 *********************************************************************/
 
 #include "pandora_vision_motion/motion_detector.h"
@@ -47,11 +48,9 @@ namespace pandora_vision
   MotionDetector::MotionDetector()
   { 
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
-    bg_ = cv::BackgroundSubtractorMOG2(
-            MotionParameters::history,
-            MotionParameters::varThreshold, 
-            MotionParameters::bShadowDetection
-        );
+    bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,
+      MotionParameters::varThreshold, MotionParameters::bShadowDetection);
+    
     bounding_box_.x = 0;
     bounding_box_.y = 0;
     bounding_box_.width = 0;
@@ -80,96 +79,98 @@ namespace pandora_vision
   */
   int MotionDetector::detectMotion(cv::Mat &frame)
   {
-    movingObjects_ = frame.clone(); 
-    /// Upadate the background model and create 
-    /// binary mask for foreground objects
-    bg_.operator()(frame, foreground_);
-    bg_.getBackgroundImage(background_);
-        
-    cv::Mat thresholdedDifference;
-    cv::subtract(frame, background_, thresholdedDifference);
-    cv::cvtColor(thresholdedDifference, thresholdedDifference, CV_BGR2GRAY);
-    cv::threshold(
-        thresholdedDifference, 
-        thresholdedDifference, 
-        MotionParameters::diff_threshold, 
-        255, 
-        cv::THRESH_BINARY
-    );
+    /// Check that frame has data and that image has 3 channels
+    if (frame.data && frame.channels() == 3)
+    {
+      movingObjects_ = frame.clone(); 
+      /// Upadate the background model and create 
+      /// binary mask for foreground objects
+      bg_.operator()(frame, foreground_);
+      bg_.getBackgroundImage(background_);
+          
+      cv::Mat thresholdedDifference;
+      cv::subtract(frame, background_, thresholdedDifference);
+      cv::cvtColor(thresholdedDifference, thresholdedDifference, CV_BGR2GRAY);
       
-     
-    int typeOfMovement = motionIdentification(thresholdedDifference);
-    cv::Mat kernel = getStructuringElement(
-      cv::MORPH_CROSS , 
-      cv::Size(3, 3), 
-      cv::Point( -1, -1 )
-    );
-    
-    cv::morphologyEx(
-      thresholdedDifference, 
-      thresholdedDifference, 
-      cv::MORPH_CLOSE, 
-      kernel, 
-      cv::Point(-1, -1), 
-      8
-    );
- 
-    detectMotionPosition(thresholdedDifference);
-    
-    if(MotionParameters::visualization ||
-        MotionParameters::show_image ||
-        MotionParameters::show_background ||
-        MotionParameters::show_diff_image ||
-        MotionParameters::show_moving_objects_contours 
-    )
-    debugShow(thresholdedDifference, frame);
-    
-    return typeOfMovement;
+      cv::threshold(thresholdedDifference, thresholdedDifference, 
+        MotionParameters::diff_threshold, 255, cv::THRESH_BINARY);
+        
+      int typeOfMovement = motionIdentification(thresholdedDifference);
+      
+      cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3), 
+        cv::Point(-1, -1));
+      
+      cv::morphologyEx(thresholdedDifference, thresholdedDifference, 
+        cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), 8);
+   
+      detectMotionPosition(thresholdedDifference);
+      
+      if(MotionParameters::visualization || MotionParameters::show_image ||
+        MotionParameters::show_background || MotionParameters::show_diff_image ||
+        MotionParameters::show_moving_objects_contours)
+      {
+        debugShow(thresholdedDifference, frame);
+      }
+      
+      return typeOfMovement;
+    }
+    else
+    {
+      return 0;
+    }
   }
   
   /**
-    @brief Function that calculates motion's postion
-    @param diff: [cv::Mat] frame that represents
+    @brief Function that calculates motion's position
+    @param diff: [&cv::Mat] frame that represents
       the thresholded difference between current frame and computed 
       background.
     @return void 
   */
-  void MotionDetector::detectMotionPosition(cv::Mat diff)
+  void MotionDetector::detectMotionPosition(cv::Mat &diff)
   {
-    /// Calculate the standard deviation
-    cv::Scalar mean, stddev;
-    meanStdDev(diff, mean, stddev);
-    /// If not to much changes then the motion is real 
-    if(stddev[0] < max_deviation_)
+    /// Check that the thresholded difference image has data
+    if(diff.data)
     {
-      int number_of_changes = 0;
-      int min_x = diff.cols, max_x = 0;
-      int min_y = diff.rows, max_y = 0;
-      /// Loop over image and detect changes
-      for(int j = 1; j < diff.cols-11; j+=2){ 
-        for(int i = 1; i < diff.rows-11; i+=2){
-            if(static_cast<int>(diff.at<uchar>(i, j)) == 255){
+      /// Calculate the standard deviation
+      cv::Scalar mean, stddev;
+      meanStdDev(diff, mean, stddev);
+      /// If not to much changes then the motion is real 
+      if(stddev[0] < max_deviation_)
+      {
+        int number_of_changes = 0;
+        int min_x = diff.cols, max_x = 0;
+        int min_y = diff.rows, max_y = 0;
+        /// Loop over image and detect changes
+        for(int j = 0; j < diff.cols; j++)
+        { 
+          for(int i = 0; i < diff.rows; i++)
+          {
+              if(static_cast<int>(diff.at<uchar>(i, j)) == 255)
+              {
                 number_of_changes++;
-                if(min_x > i) 
-                  min_x = i;
-                if(max_x < i) 
-                  max_x = i;
-                if(min_y > j) 
-                  min_y = j;
-                if(max_y < j) 
-                  max_y = j;
-                }
-            }
+                if(min_y > i) 
+                  min_y = i;
+                if(max_y < i) 
+                  max_y = i;
+                if(min_x > j) 
+                  min_x = j;
+                if(max_x < j) 
+                  max_x = j;
+              }
+          }
         }
-      if(number_of_changes){
-        cv::Point _tlcorner(min_x, min_y);
-        cv::Point _brcorner(max_x, max_y);
-        rectangle(diff, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
-        bounding_box_.x = _tlcorner.x;
-        bounding_box_.y = _tlcorner.y;
-        bounding_box_.width = max_x - min_x;
-        bounding_box_.height = max_y - min_y;
-      }  
+        if(number_of_changes)
+        {
+          cv::Point _tlcorner(min_x, min_y);
+          cv::Point _brcorner(max_x, max_y);
+          rectangle(movingObjects_, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
+          bounding_box_.x = _tlcorner.x;
+          bounding_box_.y = _tlcorner.y;
+          bounding_box_.width = max_x - min_x + 1;
+          bounding_box_.height = max_y - min_y + 1;
+        }  
+      }
     }
   }
   
@@ -181,13 +182,9 @@ namespace pandora_vision
   {
     int *motion_position = new int[4];
     //!< Center_x
-    motion_position[0] = round( 
-      bounding_box_.x + bounding_box_.width * 0.5 
-    );
+    motion_position[0] = floor(bounding_box_.x + bounding_box_.width * 0.5);
     //!< Center_y
-    motion_position[1] = round( 
-      bounding_box_.y + bounding_box_.height * 0.5 
-    );
+    motion_position[1] = floor(bounding_box_.y + bounding_box_.height * 0.5);
     //!< Rectangle width
     motion_position[2] = bounding_box_.width;
     //!< Rectangle height

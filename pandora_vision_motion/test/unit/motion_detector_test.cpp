@@ -33,6 +33,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 * Author: Despoina Paschalidou
+*         Miltiadis Kofinas, <mkofinas@gmail.com>
 *********************************************************************/
 #include "pandora_vision_motion/motion_detector.h"
 
@@ -40,102 +41,294 @@
 namespace pandora_vision
 {
   /**
-  @class MotionDetectorTests
+  @class MotionDetectorTest
   @brief Tests the integrity of methods of class MotionDetector
   **/
   class MotionDetectorTest : public ::testing::Test
   {
     public:
       MotionDetectorTest() {}
-      /**
-        @brief Constructs a rectangle of specific width and height.
-        @param upperLeft [const cv::Point2f] The upper left vertex of
-        the rectangle to be created
-        @param x [const int] The rectangle's width
-        @param height [const int] The rectangle's height
-        @param color [const unsigned char color] The value for all points inside the
-        rectangle
-        @param image [cv::Mat&] The image on which the rectangle will
-        be imprinted on
-        @return void
-      **/
-      void drawRectangle (
-        const cv::Point& upperLeft,
-        const int width,
-        const int height,
-        const unsigned char color,
-        cv::Mat &image 
-      );
-      
+    
+    protected:
       virtual void SetUp()
       {
         WIDTH = 640;
         HEIGHT = 480;
       }
       
-      int* detectMotionPosition(cv::Mat frame);
-    
+      /* accessors to private functions */
+      int* detectMotionPosition(cv::Mat& frame);
+      
+      int detectMotion(cv::Mat& frame);
+      int* getMotionPosition();
+      
+    protected:
       int WIDTH;
       int HEIGHT;
+      
     private:
       MotionDetector motionDetector_;
   };
-  /**
-    @brief Constructs a rectangle of specific width and height.
-    @param upperLeft [const cv::Point2f] The upper left vertex of
-    the rectangle to be created
-    @param x [const int] The rectangle's width
-    @param height [const int] The rectangle's height
-    @param color [const unsigned char] The value for all points inside the
-    rectangle
-    @param image [cv::Mat&] The image on which the rectangle will
-    be imprinted on
-    @return void
-  **/
-  void MotionDetectorTest::drawRectangle (
-    const cv::Point& upperLeft,
-    const int width,
-    const int height,
-    const unsigned char color,
-    cv::Mat &image
-  )
-  {
-    for(int rows = upperLeft.y; rows < upperLeft.y + height; rows++)
-    {
-      for (int cols = upperLeft.x; cols < upperLeft.x + width; cols++)
-      {
-        for (int channels = 0; channels < image.channels(); channels++)
-        {
-          image.at<cv::Vec3b>(rows, cols).val[channels] = color;
-        }
-      }
-    }
-  }
   
-  int* MotionDetectorTest::detectMotionPosition(cv::Mat frame)
+  int* MotionDetectorTest::detectMotionPosition(cv::Mat& frame)
   {
     motionDetector_.detectMotionPosition(frame);
     return motionDetector_.getMotionPosition();
   }
   
+  int* MotionDetectorTest::getMotionPosition()
+  {
+    return motionDetector_.getMotionPosition();
+  }
+  
+  int MotionDetectorTest::detectMotion(cv::Mat& frame)
+  {
+    return motionDetector_.detectMotion(frame);
+  }
+  
+  /* Unit Tests */
   //! Tests MotionDetector::detectMotionPosition
-  TEST_F (MotionDetectorTest, detectMotionPositionBlackImage)
+  TEST_F(MotionDetectorTest, detectMotionPositionImageNoData)
+  {
+    cv::Mat frame;
+    int* bounding_boxes  = detectMotionPosition(frame);
+    for(int i = 0; i < 4; i++)
+      EXPECT_EQ(0, bounding_boxes[i]);
+  }  
+  
+  TEST_F(MotionDetectorTest, detectMotionPositionBlackImage)
   {
     cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     int* bounding_boxes  = detectMotionPosition(blackFrame);
-    for(int i=0; i< 4; i++)
+    for(int i = 0; i < 4; i++)
       EXPECT_EQ(0, bounding_boxes[i]);
   }
   
-  TEST_F (MotionDetectorTest, detectMotionPositionBlackImageWithRectangle)
+  TEST_F(MotionDetectorTest, detectMotionPositionImageWithRectangle)
   {
     cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-    frame(cv::Rect(17, 63, 8, 8))=255;
-    //~ drawRectangle(point, 8, 8, 255, frame);
+    frame(cv::Rect(17, 63, 8, 8)) = 255;
+
     int* bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(21, bounding_boxes[0]);
     EXPECT_EQ(67, bounding_boxes[1]);
     EXPECT_EQ(8, bounding_boxes[2]);
     EXPECT_EQ(8, bounding_boxes[3]);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionPositionImageWithRectangle2)
+  {
+    cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+    frame(cv::Rect(100, 50, 75, 45)) = 255;
+
+    int* bounding_boxes  = detectMotionPosition(frame);
+    EXPECT_EQ(137, bounding_boxes[0]);
+    EXPECT_EQ(72, bounding_boxes[1]);
+    EXPECT_EQ(75, bounding_boxes[2]);
+    EXPECT_EQ(45, bounding_boxes[3]);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionPositionImageWithRotatedRectangle)
+  {
+    cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+
+    std::vector<cv::Point> rectangleVertices(4);
+    rectangleVertices[0] = cv::Point(100, 200);
+    rectangleVertices[1] = cv::Point(100, 300);
+    rectangleVertices[2] = cv::Point(150, 200);
+    rectangleVertices[3] = cv::Point(150, 300);
+  
+    cv::fillConvexPoly(frame, &rectangleVertices[0], rectangleVertices.size(), 255);
+    
+    int* bounding_boxes  = detectMotionPosition(frame);
+    EXPECT_EQ(125, bounding_boxes[0]);
+    EXPECT_EQ(250, bounding_boxes[1]);
+    EXPECT_EQ(51, bounding_boxes[2]);
+    EXPECT_EQ(101, bounding_boxes[3]);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionPositionImageWithHighStdDeviation)
+  {
+    cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+    frame(cv::Rect(50, 50, 400, 400)) = 255;
+
+    int* bounding_boxes  = detectMotionPosition(frame);
+    EXPECT_EQ(0, bounding_boxes[0]);
+    EXPECT_EQ(0, bounding_boxes[1]);
+    EXPECT_EQ(0, bounding_boxes[2]);
+    EXPECT_EQ(0, bounding_boxes[3]);
+  }
+  
+  //! Tests MotionDetector::detectMotion
+  TEST_F(MotionDetectorTest, detectMotionNoMotion)
+  {
+    cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+ 
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionNoData)
+  {
+    cv::Mat frame;
+ 
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionSingleChannelImage)
+  {
+    cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+ 
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionRectangleLinearMovementSlowly)
+  {
+    cv::Mat frameBackground = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+    cv::Mat frame = frameBackground.clone();
+    
+    int objectWidth = 50;
+    int objectHeight = 50;
+    int topLeftXCoordinate = 10;
+    int topLeftYCoordinate = 10;
+    int stepXCoordinate = 20;
+    int stepYCoordinate = 20;
+    
+    cv::Scalar rectColor = cv::Scalar(255, 255, 255);
+    cv::Point startingPoint = cv::Point(topLeftXCoordinate, topLeftYCoordinate);
+    cv::Point endingPoint = cv::Point(topLeftXCoordinate + objectWidth, 
+      topLeftYCoordinate + objectHeight);
+      
+    cv::rectangle(frame, startingPoint, endingPoint, rectColor, -1); 
+    
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+    for (int ii = 0; ii < 10; ii++)
+    {
+      topLeftXCoordinate += stepXCoordinate;
+      topLeftYCoordinate += stepYCoordinate;
+      startingPoint = cv::Point(topLeftXCoordinate, topLeftYCoordinate);
+      endingPoint = cv::Point(topLeftXCoordinate + objectWidth, 
+        topLeftYCoordinate + objectHeight);
+        
+      frame = frameBackground.clone();
+      cv::rectangle(frame, startingPoint, endingPoint, rectColor, -1);       
+      
+      motionEvaluation  = detectMotion(frame);
+      EXPECT_EQ(1, motionEvaluation);
+    }
+  }
+  
+  TEST_F(MotionDetectorTest, detectMotionRectangleLinearMovementFastNoOverlaps)
+  {
+    cv::Mat frameBackground = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+    cv::Mat frame = frameBackground.clone();
+    
+    int objectWidth = 100;
+    int objectHeight = 100;
+    int topLeftXCoordinate = 1;
+    int topLeftYCoordinate = 1;
+    int stepXCoordinate = 100;
+    int stepYCoordinate = 100;
+    
+    cv::Scalar rectColor = cv::Scalar(255, 255, 255);
+    cv::Point startingPoint = cv::Point(topLeftXCoordinate, topLeftYCoordinate);
+    cv::Point endingPoint = cv::Point(topLeftXCoordinate + objectWidth - 1, 
+      topLeftYCoordinate + objectHeight - 1);
+      
+    cv::rectangle(frame, startingPoint, endingPoint, rectColor, -1); 
+    
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+    for (int ii = 0; ii < 3; ii++)
+    {
+      topLeftXCoordinate += stepXCoordinate;
+      topLeftYCoordinate += stepYCoordinate;
+      startingPoint = cv::Point(topLeftXCoordinate, topLeftYCoordinate);
+      endingPoint = cv::Point(topLeftXCoordinate + objectWidth - 1, 
+        topLeftYCoordinate + objectHeight - 1);
+        
+      frame = frameBackground.clone();
+      cv::rectangle(frame, startingPoint, endingPoint, rectColor, -1);       
+      
+      motionEvaluation  = detectMotion(frame);
+      EXPECT_EQ(2, motionEvaluation);
+      
+      int* bounding_boxes  = getMotionPosition();
+      EXPECT_EQ(topLeftXCoordinate + 50, bounding_boxes[0]);
+      EXPECT_EQ(topLeftYCoordinate + 50, bounding_boxes[1]);
+      EXPECT_EQ(objectWidth, bounding_boxes[2]);
+      EXPECT_EQ(objectHeight, bounding_boxes[3]);
+    }
+  }
+
+  TEST_F(MotionDetectorTest, detectMotionRectangleAngularMovement)
+  {
+    cv::Mat frameBackground = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+    cv::Mat frame = frameBackground.clone();
+    
+    int objectWidth = 200;
+    int objectHeight = 200;
+    int centerXCoordinate = 240;
+    int centerYCoordinate = 240;
+    int objectHalfWidth = ceil(static_cast<double>(objectWidth) / 2);
+    int objectHalfHeight = ceil(static_cast<double>(objectHeight) / 2);
+    
+    cv::Point rectangleCenter = cv::Point(centerXCoordinate, centerYCoordinate);
+    
+    std::vector<cv::Point> rectangleVertices;
+    rectangleVertices.push_back(cv::Point(centerXCoordinate - objectHalfWidth,
+      centerYCoordinate - objectHalfHeight));
+    rectangleVertices.push_back(cv::Point(centerXCoordinate - objectHalfWidth,
+      centerYCoordinate + objectHalfHeight - 1));
+    rectangleVertices.push_back(cv::Point(centerXCoordinate + objectHalfWidth - 1,
+      centerYCoordinate + objectHalfHeight - 1));
+    rectangleVertices.push_back(cv::Point(centerXCoordinate + objectHalfWidth - 1,
+      centerYCoordinate - objectHalfHeight));
+  
+    cv::Scalar rectColor = cv::Scalar(255, 255, 255);
+    cv::fillConvexPoly(frame, &rectangleVertices[0], rectangleVertices.size(), rectColor);
+    
+    int motionEvaluation  = detectMotion(frame);
+    EXPECT_EQ(0, motionEvaluation);
+    
+    int* bounding_boxes  = getMotionPosition();
+    EXPECT_EQ(0, bounding_boxes[0]);
+    EXPECT_EQ(0, bounding_boxes[1]);
+    EXPECT_EQ(0, bounding_boxes[2]);
+    EXPECT_EQ(0, bounding_boxes[3]);
+    
+    double angle = 45.0;
+    double scale = 1.0;
+    cv::Mat rotationMatrix = getRotationMatrix2D(rectangleCenter, angle, scale);
+    
+    for (int ii = 0; ii < 4; ii++)
+    {
+      cv::transform(rectangleVertices, rectangleVertices, rotationMatrix);
+      
+      frame = frameBackground.clone();
+      cv::fillConvexPoly(frame, &rectangleVertices[0], rectangleVertices.size(), rectColor);
+      
+      motionEvaluation = detectMotion(frame);
+      EXPECT_EQ(1, motionEvaluation);
+      
+      bounding_boxes  = getMotionPosition();
+      EXPECT_NEAR(centerXCoordinate, bounding_boxes[0], 1);
+      EXPECT_NEAR(centerYCoordinate, bounding_boxes[1], 1);
+      
+      if (ii % 2)
+      {
+        EXPECT_NEAR(objectWidth, bounding_boxes[2], 1);
+        EXPECT_NEAR(objectHeight, bounding_boxes[3], 1);
+
+      }
+      else
+      {
+        EXPECT_NEAR(sqrt(2) * objectWidth, bounding_boxes[2], 1);
+        EXPECT_NEAR(sqrt(2) * objectHeight, bounding_boxes[3], 1);
+      }
+    }
   }
 } // namespace pandora_vision

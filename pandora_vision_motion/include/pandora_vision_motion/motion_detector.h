@@ -82,7 +82,7 @@ namespace pandora_vision
         according to the number of pixels, that differ from current
         frame and background. In case insignificant motion 0 is detected
         0 is returned. If there is slight motion 1 is returned and last
-        bust not least in case extensive motion is detected 2 is returned
+        but not least in case extensive motion is detected 2 is returned
         @param thresholdedDifference: [&cv::Mat] frame that represents
           the thresholded difference between current frame and computed 
           background
@@ -100,19 +100,17 @@ namespace pandora_vision
         @param frame: [&cv::Mat] current frame, captured from camera
         @return void
       */ 
-      void debugShow(
-        const cv::Mat &thresholdedDifference, 
-        const cv::Mat &frame
-      );
+      void debugShow(const cv::Mat &thresholdedDifference, 
+        const cv::Mat &frame);
       
       /**
-        @brief Function that calculates motion's postion
-        @param thresholdedDifference: [&cv::Mat] frame that represents
+        @brief Function that calculates motion's position
+        @param diff: [&cv::Mat] frame that represents
         the thresholded difference between current frame and computed 
         background.
         @return void 
       */
-      void detectMotionPosition(cv::Mat diff); 
+      void detectMotionPosition(cv::Mat &diff); 
         
     private:
       //!< Current frame to be processed
