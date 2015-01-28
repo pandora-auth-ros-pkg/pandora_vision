@@ -26,6 +26,10 @@
   <exec_depend>pandora_vision_qrcode</exec_depend>
   <exec_depend>pandora_vision_victim</exec_depend>
 
+
+  <!--Optional dependency, commented on purpose-->
+  <!--<exec_depend>pandora_robots_description</exec_depend>-->
+
   <export>
   </export>
 
