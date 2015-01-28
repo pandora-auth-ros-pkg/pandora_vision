@@ -225,12 +225,12 @@ namespace pandora_vision
 
   /**
     @brief The function called when a parameter is changed
-    @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
+    @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void Depth::parametersCallback(
-    const pandora_vision_hole_detector::depth_cfgConfig& config,
+    const pandora_vision_hole::depth_cfgConfig& config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Depth node] Parameters callback called");

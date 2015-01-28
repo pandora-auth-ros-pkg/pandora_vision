@@ -230,50 +230,50 @@ namespace pandora_vision
 
 
       // The dynamic reconfigure server for debugging parameters
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         debug_cfgConfig> serverDebug;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         debug_cfgConfig>::CallbackType f_debug;
 
 
       // The dynamic reconfigure server for parameters pertaining to the
       // prioriority of filters' execution
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         filters_priority_cfgConfig> serverFiltersPriority;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         filters_priority_cfgConfig>::CallbackType f_filters_priority;
 
 
       // The dynamic reconfigure server for parameters pertaining to
       // thresholds of filters
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         filters_thresholds_cfgConfig> serverFiltersThresholds;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         filters_thresholds_cfgConfig>::CallbackType f_filters_thresholds;
 
 
       // The dynamic reconfigure server for general parameters
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         general_cfgConfig> serverGeneral;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         general_cfgConfig>::CallbackType f_general;
 
 
       // The dynamic reconfigure server for parameters pertaining to
       // the validity of holes
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         validity_cfgConfig> serverValidity;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::
+      dynamic_reconfigure::Server<pandora_vision_hole::
         validity_cfgConfig>::CallbackType f_validity;
 
 
@@ -380,59 +380,59 @@ namespace pandora_vision
       /**
         @brief The function called when a debugging parameter is changed
         @param[in] config
-        [const pandora_vision_hole_detector::debug_cfgConfig&]
+        [const pandora_vision_hole::debug_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallbackDebug(
-        const pandora_vision_hole_detector::debug_cfgConfig& config,
+        const pandora_vision_hole::debug_cfgConfig& config,
         const uint32_t& level);
 
       /**
         @brief The function called when a parameter regarding the order
         of filters is changed
         @param[in] config
-        [const pandora_vision_hole_detector::filters_priority_cfgConfig&]
+        [const pandora_vision_hole::filters_priority_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallbackFiltersPriority(
-        const pandora_vision_hole_detector::filters_priority_cfgConfig& config,
+        const pandora_vision_hole::filters_priority_cfgConfig& config,
         const uint32_t& level);
 
       /**
         @brief The function called when a parameter regarding thresholds
         of filters is changed
         @param[in] config
-        [const pandora_vision_hole_detector::debug_cfgConfig&]
+        [const pandora_vision_hole::debug_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallbackFiltersThresholds(
-        const pandora_vision_hole_detector::filters_thresholds_cfgConfig& config,
+        const pandora_vision_hole::filters_thresholds_cfgConfig& config,
         const uint32_t& level);
 
       /**
         @brief The function called when a general parameter is changed
         @param[in] config
-        [const pandora_vision_hole_detector::general_cfgConfig&]
+        [const pandora_vision_hole::general_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallbackGeneral(
-        const pandora_vision_hole_detector::general_cfgConfig& config,
+        const pandora_vision_hole::general_cfgConfig& config,
         const uint32_t& level);
 
       /**
         @brief The function called when a parameter regarding the validity of
         holes is changed
         @param[in] config
-        [const pandora_vision_hole_detector::debug_cfgConfig&]
+        [const pandora_vision_hole::debug_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallbackValidity(
-        const pandora_vision_hole_detector::validity_cfgConfig& config,
+        const pandora_vision_hole::validity_cfgConfig& config,
         const uint32_t& level);
 
       /**

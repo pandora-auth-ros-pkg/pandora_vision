@@ -36,7 +36,7 @@ __author__ = "Tsirigotis Christos"
 __maintainer__ = "Tsirigotis Christos"
 __email__ = "tsirif@gmail.com"
 
-PKG = 'pandora_vision_hole_detector'
+PKG = 'pandora_vision_hole'
 NAME = 'hole_detector_test'
 
 import sys

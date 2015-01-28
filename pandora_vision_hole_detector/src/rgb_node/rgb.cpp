@@ -208,12 +208,12 @@ namespace pandora_vision
 
   /**
     @brief The function called when a parameter is changed
-    @param[in] config [const pandora_vision_hole_detector::rgb_cfgConfig&]
+    @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void Rgb::parametersCallback(
-    const pandora_vision_hole_detector::rgb_cfgConfig& config,
+    const pandora_vision_hole::rgb_cfgConfig& config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[RGB node] Parameters callback called");

@@ -131,7 +131,7 @@ namespace pandora_vision
 
   /**
     @brief Computes a cv::MatND histogram from images loaded in directory
-    ${pandora_vision_hole_detector}/src/walls
+    ${pandora_vision_hole}/src/walls
     @param [out] histogram [std::vector<cv::MatND>*] The calculated
     vector of histograms
     @param [in] secondaryChannel [const int&] Which channel to use, aside the
@@ -148,7 +148,7 @@ namespace pandora_vision
 
     // The path to the package where the wall pictures directory lies in
     std::string packagePath =
-      ros::package::getPath("pandora_vision_hole_detector");
+      ros::package::getPath("pandora_vision_hole");
 
     // The actual wall pictures directory
     std::string wallsDirectory = packagePath + "/walls/";

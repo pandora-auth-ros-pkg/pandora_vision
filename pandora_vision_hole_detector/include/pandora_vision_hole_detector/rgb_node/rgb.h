@@ -81,11 +81,11 @@ namespace pandora_vision
       std::vector<cv::MatND> wallsHistogram_;
 
       // The dynamic reconfigure (RGB) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>
+      dynamic_reconfigure::Server<pandora_vision_hole::rgb_cfgConfig>
         server;
 
       // The dynamic reconfigure (RGB) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::rgb_cfgConfig>::
+      dynamic_reconfigure::Server<pandora_vision_hole::rgb_cfgConfig>::
         CallbackType f;
 
       /**
@@ -110,12 +110,12 @@ namespace pandora_vision
 
       /**
         @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole_detector::rgb_cfgConfig&]
+        @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallback(
-        const pandora_vision_hole_detector::rgb_cfgConfig& config,
+        const pandora_vision_hole::rgb_cfgConfig& config,
         const uint32_t& level);
 
 

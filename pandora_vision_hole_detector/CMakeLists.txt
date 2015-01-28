@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(pandora_vision_hole_detector)
+project(pandora_vision_hole)
 
 # Uncomment for generating coverage statistics.
 # CMAKE_BUILD_TYPE should not be set.

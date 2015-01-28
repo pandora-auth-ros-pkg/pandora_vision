@@ -19,7 +19,7 @@
   <exec_depend>state_manager</exec_depend>
   <exec_depend>pandora_vision_datamatrix</exec_depend>
   <exec_depend>pandora_vision_hazmat</exec_depend>
-  <exec_depend>pandora_vision_hole_detector</exec_depend>
+  <exec_depend>pandora_vision_hole</exec_depend>
   <exec_depend>pandora_vision_landoltc</exec_depend>
   <exec_depend>pandora_vision_motion</exec_depend>
   <exec_depend>pandora_vision_predator</exec_depend>

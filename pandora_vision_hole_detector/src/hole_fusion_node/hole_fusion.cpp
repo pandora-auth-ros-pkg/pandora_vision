@@ -701,12 +701,12 @@ namespace pandora_vision
   /**
     @brief The function called when a debugging parameter is changed
     @param[in] config
-    [const pandora_vision_hole_detector::debug_cfgConfig&]
+    [const pandora_vision_hole::debug_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void HoleFusion::parametersCallbackDebug(
-    const pandora_vision_hole_detector::debug_cfgConfig &config,
+    const pandora_vision_hole::debug_cfgConfig &config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
@@ -770,12 +770,12 @@ namespace pandora_vision
     @brief The function called when a parameter regarding the order
     of filters is changed
     @param[in] config
-    [const pandora_vision_hole_detector::filters_priority_cfgConfig&]
+    [const pandora_vision_hole::filters_priority_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void HoleFusion::parametersCallbackFiltersPriority(
-    const pandora_vision_hole_detector::filters_priority_cfgConfig &config,
+    const pandora_vision_hole::filters_priority_cfgConfig &config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
@@ -834,12 +834,12 @@ namespace pandora_vision
     @brief The function called when a parameter regarding thresholds
     of filters is changed
     @param[in] config
-    [const pandora_vision_hole_detector::debug_cfgConfig&]
+    [const pandora_vision_hole::debug_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void HoleFusion::parametersCallbackFiltersThresholds(
-    const pandora_vision_hole_detector::filters_thresholds_cfgConfig &config,
+    const pandora_vision_hole::filters_thresholds_cfgConfig &config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
@@ -898,12 +898,12 @@ namespace pandora_vision
   /**
     @brief The function called when a general parameter is changed
     @param[in] config
-    [const pandora_vision_hole_detector::general_cfgConfig&]
+    [const pandora_vision_hole::general_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void HoleFusion::parametersCallbackGeneral(
-    const pandora_vision_hole_detector::general_cfgConfig &config,
+    const pandora_vision_hole::general_cfgConfig &config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
@@ -1044,12 +1044,12 @@ namespace pandora_vision
     @brief The function called when a parameter regarding the validity of
     holes is changed
     @param[in] config
-    [const pandora_vision_hole_detector::debug_cfgConfig&]
+    [const pandora_vision_hole::debug_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
   void HoleFusion::parametersCallbackValidity(
-    const pandora_vision_hole_detector::validity_cfgConfig &config,
+    const pandora_vision_hole::validity_cfgConfig &config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");

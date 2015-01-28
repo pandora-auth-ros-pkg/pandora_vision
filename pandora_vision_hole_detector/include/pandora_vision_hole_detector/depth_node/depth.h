@@ -76,11 +76,11 @@ namespace pandora_vision
       std::string candidateHolesTopic_;
 
       // The dynamic reconfigure (depth) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
+      dynamic_reconfigure::Server<pandora_vision_hole::depth_cfgConfig>
         server;
 
       // The dynamic reconfigure (depth) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_detector::depth_cfgConfig>
+      dynamic_reconfigure::Server<pandora_vision_hole::depth_cfgConfig>
         ::CallbackType f;
 
       /**
@@ -105,12 +105,12 @@ namespace pandora_vision
 
       /**
         @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole_detector::depth_cfgConfig&]
+        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/
       void parametersCallback(
-        const pandora_vision_hole_detector::depth_cfgConfig& config,
+        const pandora_vision_hole::depth_cfgConfig& config,
         const uint32_t& level);
 
 
