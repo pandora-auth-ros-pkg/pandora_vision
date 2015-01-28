@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>pandora_vision_hole_detector</name>
   <version>0.1.0</version>
   <description>Containts hole detection node using kinect sensor.</description>
@@ -11,46 +11,30 @@
   <url type="bugtracker">https://github.com/pandora-auth-ros-pkg/pandora_vision/issues</url>
   <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
-  <author>Alexandros Philotheou, Manos Tsardoulias</author>
+  <author>Alexandros Philotheou</author>
+  <author>Manos Tsardoulias</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>image_transport</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>pandora_vision_msgs</build_depend>
-  <build_depend>state_manager</build_depend>
-  <build_depend>state_manager_msgs</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>pcl_ros</build_depend>
-  <build_depend>message_filters</build_depend>
   <build_depend>roslint</build_depend>
-  <build_depend>openni2_launch</build_depend>
-  <build_depend>urdf</build_depend>
+  <depend>roscpp</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>sensor_msgs</depend>
+  <depend>pandora_vision_msgs</depend>
+  <depend>state_manager</depend>
+  <depend>state_manager_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>pcl_ros</depend>
+  <depend>message_filters</depend>
+  <depend>urdf</depend>
 
-  <run_depend>roscpp</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>pandora_vision_msgs</run_depend>
-  <run_depend>state_manager</run_depend>
-  <run_depend>state_manager_msgs</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>openni_launch</run_depend>
-  <run_depend>message_filters</run_depend>
-  <run_depend>roslint</run_depend>
-  <run_depend>openni2_launch</run_depend>
-  <run_depend>urdf</run_depend>
+  <exec_depend>openni2_launch</exec_depend>
 
   <!-- Test Depends -->
-
-  <run_depend>pandora_testing_tools</run_depend>
-
-  <!-- Test Depends -->
-
-  <run_depend>pandora_testing_tools</run_depend>
+  <test_depend>pandora_testing_tools</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
 
   <export>
   </export>

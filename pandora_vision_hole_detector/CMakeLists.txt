@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_hole_detector)
 
-set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_BUILD_TYPE Debug)
-
 # Uncomment for generating coverage statistics.
 # CMAKE_BUILD_TYPE should not be set.
 # CXX should be set to g++, NOT clang.
@@ -48,28 +45,30 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
   CATKIN_DEPENDS
-  roscpp
-  pandora_vision_msgs
-  state_manager
-  state_manager_msgs
-  cv_bridge
-  image_transport
-  sensor_msgs
-  dynamic_reconfigure
-  pcl_ros
-  message_filters
-  roslint
-  urdf
+    roscpp
+    pandora_vision_msgs
+    state_manager
+    state_manager_msgs
+    cv_bridge
+    image_transport
+    sensor_msgs
+    dynamic_reconfigure
+    pcl_ros
+    message_filters
+    urdf
   INCLUDE_DIRS
-  include
+    include
+  LIBRARIES
+    ${PROJECT_NAME}_utils
   )
 
-include_directories(include
+include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   )
 
 ################################ Utils library #################################
-add_library(utils_lib
+add_library(${PROJECT_NAME}_utils
   src/utils/blob_detection.cpp
   src/utils/bounding_box_detection.cpp
   src/utils/edge_detection.cpp
@@ -86,7 +85,7 @@ add_library(utils_lib
   src/utils/wavelets.cpp
   )
 
-target_link_libraries(utils_lib
+target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
 
@@ -103,7 +102,7 @@ add_subdirectory(src/synchronizer_node)
 set(ROSLINT_CPP_OPTS
   "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string, -runtime/printf, -readability/streams")
 
-FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
+file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
   ## depth_node ##

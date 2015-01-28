@@ -4,12 +4,11 @@ add_executable(synchronizer_node
   )
 
 target_link_libraries(synchronizer_node
-  utils_lib
+  ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
 
 add_dependencies(synchronizer_node
-  ${PROJECT_NAME}_gencfg
-  pandora_vision_msgs_gencpp
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   )
