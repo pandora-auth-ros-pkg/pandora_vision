@@ -24,11 +24,6 @@ include_directories(include
   ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS})
 
-#include_directories(
-#src/libopentld/mftracker
-#src/libopentld/tld
-#src/3rdparty/cvblobs)
-
 generate_dynamic_reconfigure_options(
   config/predator_cfg.cfg
 )
@@ -50,85 +45,6 @@ catkin_package(
     dynamic_reconfigure
     open_tld
 )
-
-
-
-#add_library(cvblobs STATIC
-  #src/3rdparty/cvblobs/blob.cpp
-  #src/3rdparty/cvblobs/BlobContour.cpp
-  #src/3rdparty/cvblobs/BlobOperators.cpp
-  #src/3rdparty/cvblobs/BlobProperties.cpp
-  #src/3rdparty/cvblobs/BlobResult.cpp
-  #src/3rdparty/cvblobs/ComponentLabeling.cpp
-  #src/3rdparty/cvblobs/blob.h
-  #src/3rdparty/cvblobs/BlobContour.h
-  #src/3rdparty/cvblobs/BlobLibraryConfiguration.h
-  #src/3rdparty/cvblobs/BlobOperators.h
-  #src/3rdparty/cvblobs/BlobProperties.h
-  #src/3rdparty/cvblobs/BlobResult.h
-  #src/3rdparty/cvblobs/ComponentLabeling.h)
-
-
-#include_directories(
-    #src/libopentld/mftracker
-    #src/libopentld/tld
-    #src/3rdparty/cvblobs
-    #${OpenCV_INCLUDE_DIRS})
-#link_directories(${OpenCV_LIB_DIR})
-
-
-#add_library(libopentld STATIC
-  #src/libopentld/mftracker/BB.cpp
-  #src/libopentld/mftracker/BBPredict.cpp
-  #src/libopentld/mftracker/FBTrack.cpp
-  #src/libopentld/mftracker/Lk.cpp
-  #src/libopentld/mftracker/Median.cpp
-  #src/libopentld/tld/Clustering.cpp
-  #src/libopentld/tld/DetectionResult.cpp
-  #src/libopentld/tld/DetectorCascade.cpp
-  #src/libopentld/tld/EnsembleClassifier.cpp
-  #src/libopentld/tld/ForegroundDetector.cpp
-  #src/libopentld/tld/MedianFlowTracker.cpp
-  #src/libopentld/tld/NNClassifier.cpp
-  #src/libopentld/tld/TLD.cpp
-  #src/libopentld/tld/TLDUtil.cpp
-  #src/libopentld/tld/VarianceFilter.cpp
-  #src/libopentld/mftracker/BB.h
-  #src/libopentld/mftracker/BBPredict.h
-  #src/libopentld/mftracker/FBTrack.h
-  #src/libopentld/mftracker/Lk.h
-  #src/libopentld/mftracker/Median.h
-  #src/libopentld/tld/Clustering.h
-  #src/libopentld/tld/DetectionResult.h
-  #src/libopentld/tld/DetectorCascade.h
-  #src/libopentld/tld/EnsembleClassifier.h
-  #src/libopentld/tld/ForegroundDetector.h
-  #src/libopentld/tld/IntegralImage.h
-  #src/libopentld/tld/MedianFlowTracker.h
-  #src/libopentld/tld/NNClassifier.h
-  #src/libopentld/tld/NormalizedPatch.h
-  #src/libopentld/tld/TLD.h
-  #src/libopentld/tld/TLDUtil.h
-  #src/libopentld/tld/VarianceFilter.h)
-
-
-
-#target_link_libraries(libopentld ${OpenCV_LIBS})
-
-#set_target_properties(libopentld PROPERTIES OUTPUT_NAME opentld)
-
-
-#link_directories(${OpenCV_LIB_DIR})
-
-#include_directories(
-        #src/libopentld/mftracker
-        #src/libopentld/tld
-        #src/3rdparty/cvblobs
-    #${OpenCV_INCLUDE_DIRS})
-
-
-
-#target_link_libraries(libopentld cvblobs ${OpenCV_LIBS})
 
 add_executable(predator_node
       src/predator_node.cpp
