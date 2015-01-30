@@ -31,18 +31,20 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
- INCLUDE_DIRS include
- CATKIN_DEPENDS
-   roscpp
-   cv_bridge
-   image_transport
-   pandora_vision_msgs
-   pandora_common_msgs
-   state_manager
-   state_manager_msgs
-   sensor_msgs
-   urdf
-   dynamic_reconfigure
+ #INCLUDE_DIRS include
+  DEPENDS
+    OpenCV
+  CATKIN_DEPENDS
+    roscpp
+    cv_bridge
+    image_transport
+    pandora_vision_msgs
+    pandora_common_msgs
+    state_manager
+    state_manager_msgs
+    sensor_msgs
+    urdf
+    dynamic_reconfigure
 )
 
 
