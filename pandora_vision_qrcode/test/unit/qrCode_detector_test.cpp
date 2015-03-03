@@ -56,6 +56,8 @@ namespace pandora_vision
             {
                 WIDTH = 640;
                 HEIGHT = 480;
+               // pw = getpwuid(getuid());
+                homedir = getenv("HOME");
             }
 
             std::vector<QrCode> detectQrCode(cv::Mat frame);
@@ -69,9 +71,11 @@ namespace pandora_vision
 
             int WIDTH;
             int HEIGHT;
+            char* homedir;
 
         private:
             QrCodeDetector qrCodeDetector_;
+            //struct passwd *pw;
     };
 
 
@@ -175,16 +179,19 @@ namespace pandora_vision
 
     TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
     {
-        std::stringstream imgName;
+        std::stringstream fileName;
         std::vector<QrCode> qrcode_list;
         cv::Mat inputFrame;
         int* center;
         int  cArray[9];
         FILE *fpr;
-        fpr = fopen("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/test_qr_centers.txt", "r");
+        fileName.str("");
+        fileName << homedir << "/Downloads/Qr_Datamatrix_Testing/test_qr_centers.txt"; 
+        fpr = fopen(fileName.str().c_str(), "r");
+        fileName.str("");
         for( int i=1; i<13; i++ ){
-            imgName << "/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/test_qr_" << i << ".jpg";
-            inputFrame = cv::imread(imgName.str());
+            fileName << homedir << "/Downloads/Qr_Datamatrix_Testing/test_qr_" << i << ".jpg";
+            inputFrame = cv::imread(fileName.str());
             fscanf(fpr, " %d", &cArray[0]);
             for( int j = 1; j < (1 + cArray[0] * 4); j ++)
             {
@@ -193,7 +200,7 @@ namespace pandora_vision
             if(!inputFrame.data)
             {
                 ROS_ERROR("Cannot open image.");
-                imgName.str("");
+                fileName.str("");
                 continue;
             }
             qrcode_list = detectQrCode(inputFrame);
@@ -209,7 +216,7 @@ namespace pandora_vision
                     EXPECT_GE(cArray[1 + 3 + j * 4], center[1]);   
                 }
             }
-            imgName.str("");
+            fileName.str("");
         }
         fclose(fpr);
     }
