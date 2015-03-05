@@ -44,7 +44,6 @@ add_library(
   ${PROJECT_NAME}_filters
   src/filters/histogram_mask.cpp
   src/filters/image_signature.cpp)
-  )
 target_link_libraries(
   ${PROJECT_NAME}_filters
   ${catkin_LIBRARIES}

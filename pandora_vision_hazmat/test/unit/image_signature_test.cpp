@@ -1,5 +1,5 @@
 #include "pandora_vision_hazmat/image_signature.h"
-#include "pandora_vision_hazmat/HazmatDetector.h"
+#include "pandora_vision_hazmat/hazmat_detector.h"
 #include "gtest/gtest.h"
 
 //~ class ImageSignatureTest : public ::testing::Test

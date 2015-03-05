@@ -1,5 +1,4 @@
-#include "pandora_vision_hazmat/filters.h"
-#include "pandora_vision_hazmat/HazmatDetector.h"
+#include "pandora_vision_hazmat/hazmat_detector.h"
 #include "gtest/gtest.h"
 
 

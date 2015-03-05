@@ -17,13 +17,13 @@ add_rostest(benchmark/hazmat_benchmark_test.launch)
 catkin_add_gtest(histogram_mask_test unit/histogram_mask_test.cpp)
 target_link_libraries(histogram_mask_test
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_filters
   gtest_main
-  filters_lib
   )
 
 catkin_add_gtest(image_signature_test unit/image_signature_test.cpp)
 target_link_libraries(image_signature_test
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_filters
   gtest_main
-  filters_lib
   )
