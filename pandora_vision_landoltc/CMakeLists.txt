@@ -4,7 +4,7 @@ project(pandora_vision_landoltc)
 #set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_vision_msgs
     state_manager
@@ -47,7 +47,7 @@ add_library(${PROJECT_NAME}_2d_lib
         src/landoltc_2d/landoltc_detector.cpp
         src/landoltc_2d/landoltc_parameters.cpp)
 
-target_link_libraries(${PROJECT_NAME}_2d_lib ${catkin_LIBRARIES})	
+target_link_libraries(${PROJECT_NAME}_2d_lib ${catkin_LIBRARIES})
 
 ########################### landoltcNode ############################
 add_executable(landoltc_node
@@ -67,7 +67,7 @@ add_library(${PROJECT_NAME}_3d_lib
   src/landoltc_3d/landoltc3d_detector.cpp
   src/landoltc_3d/landoltc3d_parameters.cpp)
 
-target_link_libraries(${PROJECT_NAME}_3d_lib ${catkin_LIBRARIES})	
+target_link_libraries(${PROJECT_NAME}_3d_lib ${catkin_LIBRARIES})
 
 ########################### landoltc3dNode ############################
 add_executable(landoltc3d_node
