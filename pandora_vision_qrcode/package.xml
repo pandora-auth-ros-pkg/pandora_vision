@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <package format="2">
   <name>pandora_vision_qrcode</name>
   <version>0.1.0</version>
@@ -14,9 +13,10 @@
   <author>Despoina Paschalidou</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  
+
+  <build_depend>roslint</build_depend>
   <build_depend>pandora_cmake_tools</build_depend>
-  
+
   <depend>roscpp</depend>
   <depend>zbar</depend>
   <depend>cv_bridge</depend>
@@ -25,7 +25,6 @@
   <depend>state_manager</depend>
   <depend>state_manager_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>roslint</depend>
   <depend>urdf</depend>
 
   <test_depend>pandora_testing_tools</test_depend>

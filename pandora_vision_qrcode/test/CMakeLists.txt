@@ -19,3 +19,15 @@ ${catkin_INCLUDE_DIRS})
 #add_dependencies(${PROJECT_NAME}_qr_test_images tests)
 
 add_rostest(benchmark/qr_benchmark_test.launch)
+
+################################################################################
+#                               Functional Tests                               #
+################################################################################
+
+download_extra_data(
+  ${PROJECT_NAME}_qr_test_images
+  EXTRA_FILES test/functional/images/extra_files.yaml
+  )
+add_dependencies(${PROJECT_NAME}_qr_test_images tests)
+
+add_rostest(functional/qr_test.launch)

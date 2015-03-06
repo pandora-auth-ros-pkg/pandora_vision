@@ -68,9 +68,9 @@ namespace pandora_vision
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
     prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
-    
-    _lastTimeProcessed = ros::Time::now(); 
-    
+
+    _lastTimeProcessed = ros::Time::now();
+
     clientInitialize();
 
     ROS_INFO("[QrCode_node] : Created QrCode Detection instance");
@@ -94,12 +94,12 @@ namespace pandora_vision
   void QrCodeDetection::getGeneralParams()
   {
     //! Publishers
-    
+
     //! Declare publisher and advertise topic
     //! where algorithm results are posted
     if (_nh.getParam("published_topic_names/qr_alert", param))
     {
-      _qrcodePublisher = 
+      _qrcodePublisher =
         _nh.advertise<pandora_vision_msgs::QRAlertsVectorMsg>(param, 10, true);
     }
     else
@@ -107,7 +107,7 @@ namespace pandora_vision
       ROS_FATAL("[QrCode_node]: Qr alert topic name param not found");
       ROS_BREAK();
     }
-  
+
     //!< Get the debugQrCode parameter if available;
     if (_nh.getParam("debugQrCode", debugQrCode))
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrCode);
@@ -116,9 +116,9 @@ namespace pandora_vision
       debugQrCode = false;
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrCode);
     }
-    
+
     if(debugQrCode)
-    {    
+    {
       //! Advertise topics for debugging if we are in debug mode
       if (_nh.getParam("published_topic_names/debug_qrcode", param))
       {
@@ -128,62 +128,62 @@ namespace pandora_vision
       else
         ROS_WARN("Cannot find qrcode debug show topic");
     }
-    
+
     XmlRpc::XmlRpcValue cameras_list;
     _nh.getParam("camera_sensors", cameras_list);
-    ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray); 
+    ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
     std::string key;
     for (int ii = 0; ii < cameras_list.size(); ii++)
     {
       ROS_ASSERT(
         cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeStruct);
-      
+
       key = "name";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeString);
       cameraName = static_cast<std::string>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[QrCode_node]: camera_name : " << cameraName);
-      
+
       //!< Get the listener's topic for camera
       if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
         ROS_INFO_STREAM("[QrCode_node]: imageTopic for camera : " << imageTopic);
       else
       {
        ROS_FATAL("[QrCode_node]: Image topic name not found");
-       ROS_BREAK(); 
+       ROS_BREAK();
       }
       _imageTopics.push_back("/"+imageTopic);
-      
+
       key = "image_height";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameHeight = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[QrCode_node]: image_height : " << frameHeight);
-        
+
       _frameHeight.push_back(frameHeight);
-        
+
       key = "image_width";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameWidth = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[QrCode_node]: image_width : " << frameWidth);
-        
-      _frameWidth.push_back(frameWidth);  
-      
+
+      _frameWidth.push_back(frameWidth);
+
       key = "hfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       hfov = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[QrCode_node]: hfov : " << hfov);
-        
-      _hfov.push_back(hfov);  
-      
+
+      _hfov.push_back(hfov);
+
       key = "vfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeDouble);
       vfov = static_cast<double>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[QrCode_node]: vfov : " << vfov);
-        
-      _vfov.push_back(vfov);  
-    
+
+      _vfov.push_back(vfov);
+
     }
-    
+
     //!< Get the debugQrCode parameter if available;
     if (_nh.getParam("timerThreshold", _timerThreshold))
       ROS_DEBUG_STREAM("timerThreshold : " << _timerThreshold);
@@ -226,7 +226,7 @@ namespace pandora_vision
       _qrcodeDetector.gaussiansharpenweight = 0.8;
     }
   }
-  
+
   /**
   @brief Function that retrieves the parent to the frame_id.
   @param void
@@ -245,7 +245,7 @@ namespace pandora_vision
       ROS_ERROR("[QrCode_node]:Robot description couldn't be retrieved from the parameter server.");
       return false;
     }
-  
+
     boost::shared_ptr<urdf::ModelInterface> model(
       urdf::parseURDF(robot_description));
 
@@ -259,10 +259,10 @@ namespace pandora_vision
     }
     else
       _parent_frame_id = _frame_id;
-      
+
     return false;
   }
-  
+
   /**
    * @brief Function called when new ROS message appears, for front camera
    * @param msg [const sensor_msgs::Imager&] The message
@@ -272,13 +272,14 @@ namespace pandora_vision
   {
     if( ros::Time::now() - _lastTimeProcessed < ros::Duration (_timerThreshold))
       return;
-    
+
+    ROS_INFO("Yolo, frame has arrived!");
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     qrcodeFrame = in_msg->image.clone();
     qrcodeFrameTimestamp = msg.header.stamp;
     _frame_id = msg.header.frame_id;
-    
+
     if(_frame_id.c_str()[0] == '/'){
       _frame_id = _frame_id.substr(1);
       _camera_indicator = 1;
@@ -289,23 +290,23 @@ namespace pandora_vision
       ros::shutdown();
       return;
     }
-    
+
     if(!qrcodeNowON)
       return;
-    
+
     std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
-      
+
     if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
       bool _indicator = getParentFrameId();
-      
+
       _frame_ids_map.insert( it , std::pair<std::string, std::string>(
          _frame_id, _parent_frame_id));
-      
+
        for (it = _frame_ids_map.begin(); it != _frame_ids_map.end(); ++it)
           ROS_DEBUG_STREAM("" << it->first << " => " << it->second );
-    } 
-  
-    _lastTimeProcessed = ros::Time::now(); 
+    }
+
+    _lastTimeProcessed = ros::Time::now();
     qrDetect();
   }
 
@@ -320,15 +321,15 @@ namespace pandora_vision
     //!< Create message of QrCode Detector
     pandora_vision_msgs::QRAlertsVectorMsg qrcodeVectorMsg;
     pandora_vision_msgs::QRAlertMsg qrcodeMsg;
- 
-    //!< Qrcode message 
+
+    //!< Qrcode message
     //!< do detection and examine result cases
     qrcodeVectorMsg.header.frame_id =  _frame_ids_map.find(_frame_id)->second;
     qrcodeVectorMsg.header.stamp = qrcodeFrameTimestamp;
 
     _qrcodeDetector.detect_qrcode(qrcodeFrame);
     std::vector<QrCode> list_qrcodes = _qrcodeDetector.get_detected_qr();
-     
+
     if( _camera_indicator == -1){
       frameWidth = _frameWidth.at(1);
       frameHeight = _frameHeight.at(1);
@@ -341,7 +342,7 @@ namespace pandora_vision
       hfov = _hfov.at(0);
       vfov = _vfov.at(0);
     }
-      
+
     for(int i = 0; i < static_cast<int>(list_qrcodes.size()); i++)
     {
       qrcodeMsg.QRcontent = list_qrcodes[i].qrcode_desc;
