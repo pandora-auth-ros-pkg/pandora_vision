@@ -1,3 +1,41 @@
+/*********************************************************************
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Authors: Choutas Vassilis 
+ *********************************************************************/
+
+
 #include "pandora_vision_hazmat/image_signature.h"
 
 
@@ -20,7 +58,7 @@ void ImageSignature::signFunction(const cv::Mat &array , cv::Mat *signs)
   
   // If the image is an array of unsigned chars then the output
   // should be a signed array with the same size and number of channels.
-  cv::Mat floatArray ;
+  cv::Mat floatArray;
     
   cv::divide( array , abs(array) , *signs );
   
@@ -32,15 +70,15 @@ void ImageSignature::calculateSignature(const cv::Mat &image ,
 {
   
   
-  cv::Mat imageDCT ;
+  cv::Mat imageDCT;
   
   // Compute the discrete cosine transform of the input image.
-  cv::dct(image , imageDCT   );
+  cv::dct(image , imageDCT );
   
   // Calculate the signature of the image.
   ImageSignature::signFunction( imageDCT , imgSign );
   
-  return ;
+  return;
   
   }
 
@@ -51,8 +89,8 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   if ( !frame.data )
   {
     std::cerr << "Invalid frame " << std::endl;
-    mask->data = NULL ;
-    return ;
+    mask->data = NULL;
+    return;
   }
   
   static cv::Mat saliency;
@@ -63,10 +101,10 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
     
   // Resize the frame so as to process it correctly.
   // TO DO : read the size from file.
-  cv::resize( saliency , saliency , cv::Size(64,48) );
+  cv::resize( saliency , saliency , cv::Size( 64, 48 ));
   
   static cv::Mat signature;
-  static cv::Mat invDCT ; 
+  static cv::Mat invDCT; 
   
   static std::vector<cv::Mat> channels;
 
@@ -89,13 +127,13 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
     // Perform the inverse DCT on the signature.
     cv::dct( signature , invDCT , cv::DCT_INVERSE );    
     tempMap = invDCT.mul(invDCT);
-    cv::GaussianBlur( tempMap , tempMap , cv::Size(5,5) , 0 );
+    cv::GaussianBlur( tempMap , tempMap , cv::Size( 5 , 5 ) , 0 );
     // Calculate the total map.
-    sum  = sum + tempMap ;
+    sum  = sum + tempMap;
   }
   
   // Calculate the mean of the saliency values of the 3 input channels.
-  sum = (1/3.f) * sum ;
+  sum = (1/3.f) * sum;
   
   // Resize the mask so that it can be applied to the frame.
   cv::resize( sum , sum  , frame.size() );
@@ -111,5 +149,5 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   
   *mask = sum;
 
-  return ;
+  return;
   }

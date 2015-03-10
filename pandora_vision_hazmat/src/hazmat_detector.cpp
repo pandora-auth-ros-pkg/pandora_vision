@@ -1,3 +1,41 @@
+/*********************************************************************
+ *
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Authors: Choutas Vassilis 
+ *********************************************************************/
+
+
 #include "pandora_vision_hazmat/hazmat_detector.h"
 
 int HazmatDetector::width = 640;
@@ -5,7 +43,8 @@ int HazmatDetector::height = 480;
 
 
 // Allocating space for the static member variable.
-std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Desktop/hazmatTraining/input") ;
+std::string HazmatDetector::fileName_ = 
+  std::string("/home/vchoutas/Desktop/hazmatTraining/input");
 
 
 // Data input function . 
@@ -13,13 +52,13 @@ std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Desktop/hazm
 void HazmatDetector::readData( void )
 {
   // Open the file for reading .
-  cv::FileStorage fs( fileName_ + ".xml" ,cv::FileStorage::READ);
+  cv::FileStorage fs( fileName_ + ".xml" , cv::FileStorage::READ);
   std::cout << fileName_ + ".xml" << std::endl;
   // Check if the file was opened succesfully .
   if ( !fs.isOpened() )
   {
     std::cerr << "XML file could not be opened!" << std::endl;
-    return ;
+    return;
   }
   
   // Go to the xml node that contains the pattern names.
@@ -30,35 +69,36 @@ void HazmatDetector::readData( void )
     {
         std::cerr << "Input data  is not a string sequence! FAIL" 
           << std::endl;
-        return ;
+        return;
     }
   
   // Initialize File iterator.
-  cv::FileNodeIterator it = inputNames.begin() ;
-  cv::FileNodeIterator itEnd = inputNames.end() ;
-  std::string inputName ;
+  cv::FileNodeIterator it = inputNames.begin();
+  cv::FileNodeIterator itEnd = inputNames.end();
+  std::string inputName;
   std::vector<std::string> input;
   
   // Iterate over the node and get the names.
   for ( ; it != itEnd ; ++it ) 
   {
-   inputName = (std::string)(*it)["name"]  ;
-   input.push_back(inputName) ;
+    inputName = (std::string)(*it)["name"];
+    input.push_back(inputName);
   }
   
   // Close the file with the pattern names.
-  fs.release() ;
+  fs.release();
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir = "/home/vchoutas/Desktop/hazmatTraining/trainingData/" + this->getFeaturesName() ;
+  std::string trainingDataDir =  "/home/vchoutas/Desktop/hazmatTraining" + 
+    "/trainingData/" + this->getFeaturesName();
 
-  std::string fileName ;
+  std::string fileName;
   
   for (int i = 0 ; i < input.size() ; i++) 
   { 
     // Open the training file associated with image #i .
-    fileName = trainingDataDir + "/" + input[i] + ".xml" ;
-    cv::FileStorage fs2( fileName ,cv::FileStorage::READ);
+    fileName = trainingDataDir + "/" + input[i] + ".xml";
+    cv::FileStorage fs2( fileName , cv::FileStorage::READ);
     
     // Check if the file was properly opened.
     if ( !fs2.isOpened() )
@@ -85,12 +125,12 @@ void HazmatDetector::readData( void )
     cv::FileNodeIterator it = keyPointsNode.begin();
     cv::FileNodeIterator itEnd = keyPointsNode.end();
     
-    cv::Point2f tempPoint ;
+    cv::Point2f tempPoint;
     
     // Iterate over the node to get the keypoints.
     for ( ; it != itEnd ; ++it ) 
     {
-      (*it)["Keypoint"] >> tempPoint ;
+      (*it)["Keypoint"] >> tempPoint;
       keyPoints.push_back(tempPoint);
     }
     
@@ -104,17 +144,17 @@ void HazmatDetector::readData( void )
     
     for ( ; bbIt != bbItEnd ; ++bbIt ) 
     {
-      (*bbIt)["Corner"] >> tempPoint ;
+      (*bbIt)["Corner"] >> tempPoint;
       boundingBox.push_back(tempPoint);
     }
     
     // Add the pattern to the pattern vector.
     Pattern p;
-    p.name = input[i] ;
-    p.boundingBox = boundingBox ;
+    p.name = input[i];
+    p.boundingBox = boundingBox;
     p.keyPoints = keyPoints;
-    p.descriptors = descriptors ;
-    p.histogram = histogram ;
+    p.descriptors = descriptors;
+    p.histogram = histogram;
     patterns_->push_back(p);
     
     // Clear the data vectors.
@@ -122,7 +162,7 @@ void HazmatDetector::readData( void )
     boundingBox.clear(); 
     
     // Close the xml file .
-    fs2.release() ;
+    fs2.release();
     
   }
   
@@ -151,29 +191,29 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   {
     std::cerr << "No patterns read . Detection cannot continue " << 
       std::endl;
-    *x = -1 ;
-    *y = -1 ;
+    *x = -1;
+    *y = -1;
     return false;
   }
   
   
   // Set the pattern center to NULL .
-  *x = -1 ;
-  *y = -1 ;
+  *x = -1;
+  *y = -1;
   
   bool foundPattern = false;
   // The matrix that contains the descriptors of the frame.
-  cv::Mat frameDescriptors ;
+  cv::Mat frameDescriptors;
   // The mask that will be applied to the frame so as to limit the
   // the search space.
-  cv::Mat mask ;
+  cv::Mat mask;
   // The detected keypoints of the frame that will be matched to the 
   // input pattern so as to find the correspondence from the training
   // set to the query frame.
   std::vector<cv::KeyPoint> frameKeyPoints;
   
   #ifdef CHRONO
-  gettimeofday(&startwtime,NULL);
+  gettimeofday(&startwtime , NULL);
   #endif
 
   // Create the mask that will be used to extract regions of interest
@@ -184,15 +224,15 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   // frame.
   
   #ifdef CHRONO
-  gettimeofday(&startwtime,NULL);
+  gettimeofday(&startwtime , NULL);
   #endif
   
-  getFeatures( frame , mask , &frameDescriptors , &frameKeyPoints ) ; 
+  getFeatures( frame , mask , &frameDescriptors , &frameKeyPoints ); 
   
   #ifdef CHRONO
-  gettimeofday(&endwtime,NULL);
-  double featuresTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
-      /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+  gettimeofday(&endwtime , NULL);
+  double featuresTime = static_cast<double>((endwtime.tv_usec - 
+        startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
   std::cout << "Calculation time for the features for frame  is " 
     << featuresTime << std::endl;
   #endif
@@ -202,9 +242,9 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   
   std::vector<cv::Point2f> patternKeyPoints;
   std::vector<cv::Point2f> sceneKeyPoints;
-  std::vector<cv::Point2f> sceneBB ;
+  std::vector<cv::Point2f> sceneBB;
   
-  int found ;
+  int found;
   
   // For every pattern in the list : 
   for (int i = 0 ; i < patterns_->size() ; i++ )
@@ -228,9 +268,9 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
       &sceneKeyPoints , i );
       
     #ifdef CHRONO
-    gettimeofday(&endwtime,NULL);
-    double keyPointTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
-				/1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+    gettimeofday(&endwtime , NULL);
+    double keyPointTime = static_cast<double>((endwtime.tv_usec - 
+          startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
     std::cout << "Calculation time for keypoint matches for pattern "
       << i << " is " << keyPointTime << std::endl;
     #endif
@@ -240,7 +280,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     {
      
       #ifdef CHRONO
-      gettimeofday(&startwtime,NULL);
+      gettimeofday(&startwtime , NULL);
       #endif
       
       // Find the bounding box for this query pattern .
@@ -248,9 +288,9 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         sceneKeyPoints ,  (*patterns_)[i].boundingBox , &sceneBB );
         
       #ifdef CHRONO
-      gettimeofday(&endwtime,NULL);
-      double boundingBoxTime = (double)((endwtime.tv_usec - startwtime.tv_usec)
-          /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
+      gettimeofday(&endwtime , NULL);
+      double boundingBoxTime = static_cast<double>((endwtime.tv_usec - 
+            startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
       std::cout << "Calculation time for the bounding box for "
         "the pattern " << i  << " is " << boundingBoxTime << std::endl;
       #endif      
@@ -264,14 +304,19 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         
       {
         #ifdef DEBUG
-        cv::Mat trackingFrame ;
-        frame.copyTo(trackingFrame,mask);
-        cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , cv::Scalar(0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , cv::Scalar( 0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[3] , sceneBB[0] , cv::Scalar( 0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , cv::Scalar( 0, 255, 0), 4 );
-        cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x,sceneBB[4].y)  , 4.0 , cv::Scalar(0,0,255) , -1 , 8 );
-        imshow("Tracking Frame",trackingFrame);
+        cv::Mat trackingFrame;
+        frame.copyTo(trackingFrame , mask);
+        cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , 
+            cv::Scalar(0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , 
+            cv::Scalar( 0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[3] , sceneBB[0] , 
+            cv::Scalar( 0, 255, 0), 4 );
+        cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , 
+            cv::Scalar( 0, 255, 0), 4 );
+        cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x , sceneBB[4].y)  , 
+            4.0 , cv::Scalar(0 , 0 , 255) , -1 , 8 );
+        imshow("Tracking Frame" , trackingFrame);
        
         #endif
         
@@ -279,9 +324,9 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         //~ std::cout <<"Pattern " <<   i << std::endl;
         cv::Point2f base = sceneBB[0] - sceneBB[1];
         cv::Point2f h = sceneBB[1] - sceneBB[2];
-        double sideA = cv::norm(base) ;
-        double sideB = cv::norm(h) ;
-        double surface = sideA * sideB ;
+        double sideA = cv::norm(base);
+        double sideB = cv::norm(h);
+        double surface = sideA * sideB;
         
         foundPattern |= boundingBoxFound; 
         
@@ -290,8 +335,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         //~ std::cout << "SideB " << sideB << std::endl;
         
         
-        *x = sceneBB[ sceneBB.size() - 1 ].x ;
-        *y = sceneBB[ sceneBB.size() - 1 ].y ;
+        *x = sceneBB[ sceneBB.size() - 1 ].x;
+        *y = sceneBB[ sceneBB.size() - 1 ].y;
   
         
         //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
@@ -413,14 +458,14 @@ bool HazmatDetector::findBoundingBox(
           {
             //~ std::cerr << "Bounding Box out of bounds " << std::endl;
             sceneBB->clear();
-            return false ;
+            return false;
           }
     }
     
     // Check if the Bounding box is Convex 
     // If not the resulting homography is incorrect due to false
     // matching between the descriptors.
-    std::vector<cv::Point2f> boundingBox = *sceneBB ;
+    std::vector<cv::Point2f> boundingBox = *sceneBB;
     boundingBox.pop_back();
     if ( !cv::isContourConvex(boundingBox) )
     {
@@ -431,7 +476,7 @@ bool HazmatDetector::findBoundingBox(
     
     // Clear the bounding box vector .
     boundingBox.clear();
-    return true ;
+    return true;
     
     //~ trackingFrame.release();
   }

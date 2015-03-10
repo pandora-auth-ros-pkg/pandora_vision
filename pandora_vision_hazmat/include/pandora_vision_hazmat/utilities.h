@@ -36,54 +36,78 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
-#define PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
+#ifndef PANDORA_VISION_HAZMAT_UTILITIES_H
+#define PANDORA_VISION_HAZMAT_UTILITIES_H
 
-#include "pandora_vision_hazmat/hazmat_detector.h"
+/**
+  Header file used for initializing useful data structures and 
+  including the necessary libraries.
+**/
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <limits>
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
+#include "opencv2/nonfree/nonfree.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <boost/shared_ptr.hpp>
+#include "ros/ros.h"
+#include "sensor_msgs/image_encodings.h"
+#include "std_msgs/Bool.h"
+#include "cv_bridge/cv_bridge.h"
+
+// Filter Libraries.
+#include "pandora_vision_hazmat/histogram_mask.h"
+#include "pandora_vision_hazmat/image_signature.h"
+
+
+
+//#define CHRONO 
+#define DEBUG 
+#define FEATURES_CHRONO
+#define HUE_RANGE {0 , 180}
+#define SAT_RANGE {0 , 255}
+#define DEFAULT_HIST_CHANNELS {0 , 1}
+#define HIST_RANGE { HUE_RANGE , SAT_RANGE }
+
+#if defined(CHRONO) || defined(FEATURES_CHRONO) 
+#include "sys/time.h"
+#endif
+
+
+
 
 /** 
- @class HistogramMask
- @brief Class the implements the histogram back projection algorithm 
+ @enum TrainerType
+ @brief Type of keypoint detector used .
  **/
- 
 
-class HistogramMask  
+enum TrainerType { SIFT , SURF };
+
+
+struct Pattern
 {
-  public : 
+ public: 
 
+    // Name of the pattern.
+    std::string name; 
 
-    // Function the calculates the backprojection of the given histogram
-    // on the image to extract regions of interest.
-    static void createBackProjectionMask(const cv::Mat &frame ,
-        cv::Mat *mask , const cv::Mat hist );
+    // A vector of 2D points that contains the bounding box
+    // and the center of the pattern.
+    std::vector<cv::Point2f> boundingBox;
 
-    // Constructor
-    HistogramMask();
+    // Vector of detected keypoints in the pattern.
+    std::vector<cv::Point2f> keyPoints;
 
-  private :
+    // Matrix of image descriptors .
+    cv::Mat descriptors;
 
-    // 2D range of the histogram. 
-    static float* ranges_[2];
-
-    // Channels when creating the histogram.
-    static int channels_[2];
-
-    static float hueRange_[2];
-    static float satRange_[2];
-
-    // Resize scale for input image.
-    static int scale_;
-
-    // The threshold for the mask.
-    static int thresh_;
-
-    // Maximum value of the intensity of every pixel of the mask.
-    static int maxValue_;
-
+    // Color histogram of the pattern.
+    cv::Mat histogram;
 };
-
-
-
-
-
-#endif  // PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H_
+  
+#endif  // PANDORA_VISION_HAZMAT_UTILITIES_H
