@@ -43,7 +43,7 @@ include_directories(include
 
 ########################## Victim_Parameters library ###############################
 
-add_library(${PROJECT_NAME}_victim_parameters src/victim_parameters.cpp) 
+add_library(${PROJECT_NAME}_victim_parameters src/victim_parameters.cpp)
 target_link_libraries(${PROJECT_NAME}_victim_parameters ${catkin_LIBRARIES})
 
 ################################ Feature Extractors library #################################
@@ -80,7 +80,7 @@ add_executable(victim_node
 )
 
 
-target_link_libraries(victim_node ${catkin_LIBRARIES} 
+target_link_libraries(victim_node ${catkin_LIBRARIES}
                       ${PROJECT_NAME}_utilities
                       ${PROJECT_NAME}_feature_extractors
                       ${PROJECT_NAME}_victim_parameters)
@@ -92,18 +92,18 @@ add_dependencies(victim_node
 
 ########################### victimTrainer ############################
 if(VICTIM_ENABLE_TRAIN)
-   
-  
+
+
 
   add_executable(victim_train_node
                   src/training.cpp
                   #src/rgb_system_validator.cpp
-                  #src/depth_system_validator.cpp                
+                  #src/depth_system_validator.cpp
                   src/training_parameters.cpp
   		)
 
 
-  target_link_libraries(victim_train_node ${catkin_LIBRARIES} 
+  target_link_libraries(victim_train_node ${catkin_LIBRARIES}
                       ${PROJECT_NAME}_utilities
                       ${PROJECT_NAME}_feature_extractors
                       ${PROJECT_NAME}_victim_parameters)
@@ -133,7 +133,7 @@ set(ROSLINT_CPP_OPTS
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-  
+
   ## victim_node ##
 
   include/victim_detection.h
@@ -142,7 +142,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/depth_system_validator.h
   include/training.h
   include/training_parameters.h
-  include/victim_parameters.h 
+  include/victim_parameters.h
 
   src/victim_detection.cpp
   src/victim_vj_detector.cpp
@@ -159,12 +159,12 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utilities/haralickfeature_extractor.h
 
 
-  
+
   src/utilities/channels_statistics_extractor.cpp
   src/utilities/edge_orientation_extractor.cpp
   src/utilities/haralickfeature_extractor.cpp
 
-  
+
   ## feature_extractors ##
 
   include/feature_extractors/mean_std_dev.cpp
@@ -181,6 +181,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
 ##################################### Testing ##################################
+
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
