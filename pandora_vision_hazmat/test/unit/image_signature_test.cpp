@@ -2,13 +2,7 @@
 #include "pandora_vision_hazmat/hazmat_detector.h"
 #include "gtest/gtest.h"
 
-//~ class ImageSignatureTest : public ::testing::Test
-//~ {
-  //~ protected:
-    //~ 
-    //~ 
-//~ }
-  
+ 
   TEST( ImageSignatureTest , imageSign )
   {
     // Create a small image with positive elements .
@@ -21,7 +15,7 @@
     
     // Since we pass a multi channel matrix the function must return
     // an empty matrix.
-    ASSERT_FALSE(signs.data);
+    ASSERT_TRUE(signs.data == NULL);
     
     // Create a matrix with positive elements.
     testImage = cv::Mat(20,20, CV_32FC1 );
@@ -82,9 +76,6 @@
         ASSERT_GE(  val  ,   0  ) ;
       }
     }
-    
-    
-    
     
   }
   
