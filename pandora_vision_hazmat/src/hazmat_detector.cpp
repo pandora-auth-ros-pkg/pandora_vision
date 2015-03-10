@@ -89,8 +89,9 @@ void HazmatDetector::readData( void )
   fs.release();
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir =  "/home/vchoutas/Desktop/hazmatTraining" + 
-    "/trainingData/" + this->getFeaturesName();
+  std::string trainingDataDir =  std::string("/home/vchoutas/Desktop") + 
+    std::string("/hazmatTraining") + std::string( "/trainingData/") +
+    this->getFeaturesName();
 
   std::string fileName;
   
