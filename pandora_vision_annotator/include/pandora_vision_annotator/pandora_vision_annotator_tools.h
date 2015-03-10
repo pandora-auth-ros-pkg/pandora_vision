@@ -1,0 +1,72 @@
+/******************************************************************************
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+   
+   Authors : 
+   * Manos Tsardoulias, etsardou@gmail.com
+******************************************************************************/
+
+#ifndef PANDORA_VISION_ANNOTATOR_TOOLS
+#define PANDORA_VISION_ANNOTATOR_TOOLS
+
+#include <ros/package.h>
+#include "ros/ros.h"
+#include <tf/transform_listener.h>
+
+#include <QtUiTools/QUiLoader>
+
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QThread>
+#include <QtCore/QTimer>
+#include <QtCore/QTime>
+
+#include <QtGui/QMenu>
+#include <QtGui/QApplication>
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QImage>
+#include <QtGui/QFileDialog>
+#include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
+#include <QtGui/QListWidget>
+#include <QtGui/QPainter>
+#include <QtGui/QPixmap>
+#include <QtGui/QProgressBar>
+#include <QtGui/QPushButton>
+#include <QtGui/QRadioButton>
+#include <QtGui/QScrollBar>
+#include <QtGui/QStatusBar>
+#include <QtGui/QTextEdit>
+#include <QtGui/QTreeWidget>
+#include <QtGui/QVBoxLayout>
+#include <QtGui/QWidget>
+#include <QtGui/QWindowsStyle>
+#include <QtGui/QInputDialog>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QMessageBox>
+#include <QtGui/QTimeEdit>
+#include <QtGui/QInputDialog>
+#include <QtGui/QFont>
+
+/**
+@namespace pandora_vision
+@brief The namespace for pandora vision
+**/ 
+namespace pandora_vision
+{
+}
+
+#endif
