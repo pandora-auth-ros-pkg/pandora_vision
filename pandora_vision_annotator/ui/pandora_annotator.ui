@@ -37,7 +37,7 @@
            <item>
             <widget class="QLineEdit" name="rosTopicLineEdit">
              <property name="text">
-              <string>ROS topic</string>
+              <string>/camera/image</string>
              </property>
             </widget>
            </item>

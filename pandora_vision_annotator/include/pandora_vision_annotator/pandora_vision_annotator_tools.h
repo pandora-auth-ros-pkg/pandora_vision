@@ -18,9 +18,14 @@
 #ifndef PANDORA_VISION_ANNOTATOR_TOOLS
 #define PANDORA_VISION_ANNOTATOR_TOOLS
 
+#include <iostream>
+#include <cstdlib>
+
 #include <ros/package.h>
 #include "ros/ros.h"
 #include <tf/transform_listener.h>
+
+#include <boost/thread.hpp>
 
 #include <QtUiTools/QUiLoader>
 
@@ -60,6 +65,12 @@
 #include <QtGui/QTimeEdit>
 #include <QtGui/QInputDialog>
 #include <QtGui/QFont>
+
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 /**
 @namespace pandora_vision

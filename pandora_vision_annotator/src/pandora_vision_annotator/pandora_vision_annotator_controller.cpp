@@ -36,7 +36,7 @@ namespace pandora_vision
   @return void
   **/
   CController::CController(int argc,char **argv):
-    gui_connector_(argc,argv),
+    connector_(argc,argv),
     argc_(argc),
     argv_(argv)
   {
@@ -57,16 +57,39 @@ namespace pandora_vision
   **/
   void CController::initializeCommunications(void)
   {
-    //map_subscriber_ = n_.subscribe(
-      //"map", 
-      //1, 
-      //&CGuiController::receiveMap,
-      //this);
-   
-    //QObject::connect(
-      //this, SIGNAL(setSoundSensorVisibility(QString,QString,char)),
-      //&info_connector_, SLOT(setSoundSensorVisibility(QString,QString,char)));
+    QObject::connect(
+      &connector_,SIGNAL(rosTopicGiven()),
+      this, SLOT(rosTopicGiven()));
+      
+    QObject::connect(
+      this,SIGNAL(updateImage()),
+      &connector_, SLOT(updateImage()));
   }
+  
+  void CController::rosTopicGiven(void)
+  {
+    QString ros_topic = connector_.getRosTopic();
+    img_subscriber_ = n_.subscribe(
+      ros_topic.toStdString(), 
+      1, 
+      &CController::receiveImage,
+      this);
+  }
+  
+  void CController::receiveImage(const sensor_msgs::Image& msg)
+  {
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv::Mat temp, src = in_msg->image;
+    
+    cvtColor(src, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    dest.bits(); // enforce deep copy, see documentation 
+    
+    connector_.setImage(dest);
+    Q_EMIT updateImage();
+  }
+    
  
   /**
   @brief Initializes the ROS spin and Qt threads
@@ -78,7 +101,7 @@ namespace pandora_vision
     {
       return false;
     }
-    gui_connector_.show();
+    connector_.show();
 
     initializeCommunications();
     boost::thread spinThread(&spinThreadFunction);

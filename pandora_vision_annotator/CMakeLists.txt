@@ -4,7 +4,7 @@ project(pandora_vision_annotator)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
-  tf
+  cv_bridge
 )
 
 include_directories( include
@@ -35,7 +35,7 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     roslib
-    tf
+    cv_bridge
   INCLUDE_DIRS include
   LIBRARIES 
 )

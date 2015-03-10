@@ -18,9 +18,6 @@
 #ifndef PANDORA_VISION_ANNOTATOR_CONTROLLER
 #define PANDORA_VISION_ANNOTATOR_CONTROLLER
 
-#include <iostream>
-#include <cstdlib>
-#include <boost/thread.hpp>
 #include "pandora_vision_annotator/pandora_vision_annotator_connector.h"
 /**
 @namespace pandora_vision
@@ -46,15 +43,16 @@ namespace pandora_vision
       //!< Input arguments
       char** argv_;
      
-      //!< ROS subscriber for occupancy grid map
-      //ros::Subscriber map_subscriber_;
-     //!< The ROS node handle
-      ros::NodeHandle n_;
-     //!< QImage created one time, containing the OGM
-      QImage initial_map_;
+      //!< ROS subscriber for the image topic
+      ros::Subscriber img_subscriber_;
       
-      //!< Object of CGuiConnector
-      CConnector gui_connector_;
+      //!< The ROS node handle
+      ros::NodeHandle n_;
+      //!< QImage created one time, containing the frame from the input topic
+      QImage topic_img_;
+      
+      //!< Object of CConnector
+      CConnector connector_;
    
     //------------------------------------------------------------------------//  
     public:
@@ -85,11 +83,16 @@ namespace pandora_vision
       **/
       bool init();
       
+      void receiveImage(const sensor_msgs::Image& msg);
+      
     //------------------------------------------------------------------------//
     public Q_SLOTS:
       
+      void rosTopicGiven(void);
+      
     //------------------------------------------------------------------------//
     Q_SIGNALS:
+      void updateImage(void);
     };
 }
 

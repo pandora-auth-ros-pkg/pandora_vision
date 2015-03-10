@@ -32,25 +32,37 @@ namespace pandora_vision
     argc_(argc),
     argv_(argv)
   {
-    
-    //QObject::connect(
-      //loader_.actionProperties,SIGNAL(triggered(bool)),
-      //this,SLOT(actionPropertiesTriggered()));
-     }
+    QObject::connect(
+      loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(rosTopicPushButtonTriggered()));
+  }
   
   /**
-  @brief Qt slot that is called when the Properties tool button is pressed
+  @brief Qt slot that is called when the rosTopicPushButton is pressed
   @return void
   **/
-  //void CGuiConnector::actionPropertiesTriggered(void)
-  //{
-    //QMessageBox msg(static_cast<QMainWindow *>(&this->loader_));
-    //msg.setWindowTitle(QString("Not finished yet :/"));
-    //msg.exec();
-  //}
+  void CConnector::rosTopicPushButtonTriggered(void)
+  {
+    Q_EMIT rosTopicGiven();
+  }
   
   void CConnector::show(void)
   {
     loader_.show();
+  }
+  
+  QString CConnector::getRosTopic(void)
+  {
+    return loader_.rosTopicLineEdit->text();
+  }
+  
+  void CConnector::setImage(QImage &img)
+  {
+    localImage_ = img.copy();
+  }
+  
+  void CConnector::updateImage(void)
+  {
+    loader_.imageLabel->setPixmap(QPixmap().fromImage((localImage_)));
   }
 }

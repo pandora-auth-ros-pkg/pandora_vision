@@ -31,8 +31,7 @@ namespace pandora_vision
   @class CConnector
   @brief Serves the Qt events of the main GUI window. Inherits from QObject
   **/ 
-  class CConnector:
-    public QObject
+  class CConnector: public QObject
   {
     Q_OBJECT
     
@@ -45,7 +44,9 @@ namespace pandora_vision
       char**  argv_;   
       
       //!< The loader of main GUI QWidget 
-      CLoader loader_;    
+      CLoader loader_; 
+      
+      QImage localImage_;   
     
     //------------------------------------------------------------------------//
     public:
@@ -59,16 +60,18 @@ namespace pandora_vision
       CConnector(int argc, char **argv);
 
       void show(void);
+      
+      QString getRosTopic(void);
+      
+      void setImage(QImage &img);
          
 
     //------------------------------------------------------------------------//
     public Q_SLOTS:
-    
-      /**
-      @brief Qt slot that is called when the Properties tool button is pressed
-      @return void
-      **/
-      //void actionPropertiesTriggered(void);
+
+      void rosTopicPushButtonTriggered(void);
+      
+      void updateImage(void);
           
     //------------------------------------------------------------------------//
     Q_SIGNALS:
@@ -78,7 +81,7 @@ namespace pandora_vision
       @param state [bool] Toggle flag
       @return void
       **/
-      //void setZoomInCursor(bool state);
+      void rosTopicGiven(void);
   };
 }
 
