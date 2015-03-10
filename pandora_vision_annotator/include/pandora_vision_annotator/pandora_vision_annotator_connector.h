@@ -47,6 +47,15 @@
 namespace pandora_vision
 {
   
+  enum ImageStates
+  {
+    IDLE,
+    VICTIM_CLICK,
+    QR_CLICK,
+    HAZMAT_CLICK,
+    LANDOLTC_CLICK
+  };
+  
   /**
   @class CConnector
   @brief Serves the Qt events of the main GUI window. Inherits from QObject
@@ -67,6 +76,10 @@ namespace pandora_vision
       CLoader loader_; 
       
       QImage localImage_;   
+      
+      ImageStates img_state_;
+      
+      bool eventFilter( QObject* watched, QEvent* event ); 
     
     //------------------------------------------------------------------------//
     public:
@@ -92,15 +105,15 @@ namespace pandora_vision
       void rosTopicPushButtonTriggered(void);
       
       void updateImage(void);
+      
+      void victimPushButtonTriggered(void);
+      void qrPushButtonTriggered(void);
+      void landoltcPushButtonTriggered(void);
+      void hazmatPushButtonTriggered(void);
           
     //------------------------------------------------------------------------//
     Q_SIGNALS:
     
-      /**
-      @brief Qt signal that is emmited in GuiConnector::actionZoomInTriggered and connects to MapLoader::setCursorZoomIn
-      @param state [bool] Toggle flag
-      @return void
-      **/
       void rosTopicGiven(void);
   };
 }

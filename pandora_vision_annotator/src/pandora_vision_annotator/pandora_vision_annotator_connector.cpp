@@ -40,6 +40,8 @@
 namespace pandora_vision
 {
   
+
+  
   /**
   @brief Default contructor
   @param argc [int] Number of input arguments
@@ -52,9 +54,27 @@ namespace pandora_vision
     argc_(argc),
     argv_(argv)
   {
+    // Event filter for the image area
+    loader_.imageLabel->installEventFilter(this);
+    
+    img_state_ = IDLE;
+    
     QObject::connect(
       loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
       this,SLOT(rosTopicPushButtonTriggered()));
+      
+    QObject::connect(
+      loader_.victimPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(victimPushButtonTriggered()));
+    QObject::connect(
+      loader_.hazmatPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(hazmatPushButtonTriggered()));
+    QObject::connect(
+      loader_.landoltcPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(landoltcPushButtonTriggered()));
+    QObject::connect(
+      loader_.qrPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(qrPushButtonTriggered()));
   }
   
   /**
@@ -84,5 +104,86 @@ namespace pandora_vision
   void CConnector::updateImage(void)
   {
     loader_.imageLabel->setPixmap(QPixmap().fromImage((localImage_)));
+  }
+  
+  /**
+  @brief General event filter. Captures all events
+  @param watched [QObject*] The object in which the event was triggered
+  @param event [QEvent*] The type of event
+  @return bool : True is event served
+  **/
+  bool CConnector::eventFilter( QObject* watched, QEvent* event ) 
+  {
+    if(watched == loader_.imageLabel)
+    {
+      if(event->type() == QEvent::MouseButtonPress)
+      {
+        
+        loader_.imageLabel->setFocus(Qt::MouseFocusReason);
+        
+        const QMouseEvent* const me = 
+          static_cast<const QMouseEvent*>( event );
+        QPoint p = me->pos();
+        
+        int container_width = loader_.imageLabel->width();
+        int container_height = loader_.imageLabel->height();
+        int img_height = localImage_.height();
+        int diff = (container_height - img_height) / 2;
+
+        if(me->button() == Qt::LeftButton)
+        {
+          if(img_state_ == IDLE)
+          {
+            return true;
+          }
+          else if(img_state_ == VICTIM_CLICK)
+          {
+            loader_.victimCoordsLabel->setText(
+              loader_.victimCoordsLabel->text() + QString("[") +
+              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.y() - diff) + QString("]"));
+          }
+          else if(img_state_ == QR_CLICK)
+          {
+            loader_.qrCoordsLabel->setText(
+              loader_.qrCoordsLabel->text() + QString("[") +
+              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.y() - diff) + QString("]"));
+          }
+          else if(img_state_ == HAZMAT_CLICK)
+          {
+            loader_.hazmatCoordsLabel->setText(
+              loader_.hazmatCoordsLabel->text() + QString("[") +
+              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.y() - diff) + QString("]"));
+          }
+          else if(img_state_ == LANDOLTC_CLICK)
+          {
+            loader_.landoltcCoordsLabel->setText(
+              loader_.landoltcCoordsLabel->text() + QString("[") +
+              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.y() - diff) + QString("]"));
+          }
+        }
+      }
+    }
+    return false;
+  }
+  
+  void CConnector::victimPushButtonTriggered(void)
+  {
+    img_state_ = VICTIM_CLICK;
+  }
+  void CConnector::qrPushButtonTriggered(void)
+  {
+    img_state_ = QR_CLICK;
+  }
+  void CConnector::hazmatPushButtonTriggered(void)
+  {
+    img_state_ = HAZMAT_CLICK;
+  }
+  void CConnector::landoltcPushButtonTriggered(void)
+  {
+    img_state_ = LANDOLTC_CLICK;
   }
 }

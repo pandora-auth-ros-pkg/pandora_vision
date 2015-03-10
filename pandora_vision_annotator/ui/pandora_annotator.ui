@@ -64,7 +64,7 @@
               <enum>QFrame::Box</enum>
              </property>
              <property name="text">
-              <string>Hole Coords info</string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -87,7 +87,7 @@
               <enum>QFrame::Box</enum>
              </property>
              <property name="text">
-              <string>LandoltC Coords info</string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -131,7 +131,7 @@
               <enum>QFrame::Box</enum>
              </property>
              <property name="text">
-              <string>Qr Coords info</string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -147,7 +147,7 @@
               <enum>QFrame::Box</enum>
              </property>
              <property name="text">
-              <string>Hazmat Coords info</string>
+              <string/>
              </property>
             </widget>
            </item>
