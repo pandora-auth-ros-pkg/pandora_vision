@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PANDORA Vision Annotator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -53,7 +53,7 @@
          <item row="2" column="0">
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="3" column="0">
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="victimCoordsLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -69,14 +69,14 @@
             </widget>
            </item>
            <item row="16" column="0">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="submitPushButton">
              <property name="text">
               <string>Submit</string>
              </property>
             </widget>
            </item>
            <item row="15" column="0">
-            <widget class="QLabel" name="label_5">
+            <widget class="QLabel" name="landoltcCoordsLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -92,26 +92,26 @@
             </widget>
            </item>
            <item row="10" column="0">
-            <widget class="QLineEdit" name="lineEdit_3">
+            <widget class="QLineEdit" name="hazmatInfoLineEdit">
              <property name="text">
               <string>Hazmat types separated with ,</string>
              </property>
             </widget>
            </item>
            <item row="14" column="0">
-            <widget class="QLineEdit" name="lineEdit_4"/>
+            <widget class="QLineEdit" name="landoltcInfoLineEdit"/>
            </item>
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QCheckBox" name="holeExistsCheckBox">
+              <widget class="QCheckBox" name="victimCheckBox">
                <property name="text">
                 <string>Hole / Victim</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="holeExistsPushButton">
+              <widget class="QPushButton" name="victimPushButton">
                <property name="text">
                 <string>Set Coords</string>
                </property>
@@ -120,7 +120,7 @@
             </layout>
            </item>
            <item row="7" column="0">
-            <widget class="QLabel" name="label_3">
+            <widget class="QLabel" name="qrCoordsLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -136,7 +136,7 @@
             </widget>
            </item>
            <item row="11" column="0">
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="hazmatCoordsLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -152,7 +152,7 @@
             </widget>
            </item>
            <item row="6" column="0">
-            <widget class="QLineEdit" name="lineEdit_2">
+            <widget class="QLineEdit" name="qrInfoLineEdit">
              <property name="text">
               <string>QR Message here</string>
              </property>
@@ -161,14 +161,14 @@
            <item row="5" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QCheckBox" name="checkBox_2">
+              <widget class="QCheckBox" name="qrCheckBox">
                <property name="text">
                 <string>Qr label</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="qrPushButton">
                <property name="text">
                 <string>Set Coords</string>
                </property>
@@ -177,19 +177,19 @@
             </layout>
            </item>
            <item row="2" column="0">
-            <widget class="QLineEdit" name="lineEdit"/>
+            <widget class="QLineEdit" name="victimInfoLineEdit"/>
            </item>
            <item row="13" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QCheckBox" name="checkBox_4">
+              <widget class="QCheckBox" name="landoltcCheckBox">
                <property name="text">
                 <string>LandoltC label</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="landoltcPushButton">
                <property name="text">
                 <string>Set Coords</string>
                </property>
@@ -200,14 +200,14 @@
            <item row="9" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QCheckBox" name="checkBox_3">
+              <widget class="QCheckBox" name="hazmatCheckBox">
                <property name="text">
                 <string>Hazmat label</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_4">
+              <widget class="QPushButton" name="hazmatPushButton">
                <property name="text">
                 <string>Set Coords</string>
                </property>
@@ -249,7 +249,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="imageLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
