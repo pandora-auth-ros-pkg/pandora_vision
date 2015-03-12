@@ -65,7 +65,7 @@ namespace pandora_vision
   {
     private:
     
- //   ros::NodeHandle _nh;
+    //ros::NodeHandle _nh;
     
     DmtxMessage *msg;
     DmtxImage *img;
