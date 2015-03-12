@@ -185,14 +185,14 @@ namespace pandora_vision
       EXPECT_GE(160, center[0]);   
       EXPECT_LE(263, center[1]);   
       EXPECT_GE(293, center[1]);   
-    //  inputFrame = cv::imread("");
-    //  datamatrix_list = detectDatamatrix(inputFrame);
-    //  // there should be four datamatrices
-    //  EXPECT_EQ(4, datamatrix_list.size());
-    //  inputFrame = cv::imread("");
-    //  datamatrix_list = detectDatamatrix(inputFrame);
-    //  // there should be one datamatrix
-    //  EXPECT_EQ(1, datamatrix_list.size());
+      // inputFrame = cv::imread("");
+      // datamatrix_list = detectDatamatrix(inputFrame);
+      // // there should be four datamatrices
+      // EXPECT_EQ(4, datamatrix_list.size());
+      // inputFrame = cv::imread("");
+      // datamatrix_list = detectDatamatrix(inputFrame);
+      // // there should be one datamatrix
+      // EXPECT_EQ(1, datamatrix_list.size());
     }
       
 } // namespace_pandora_vision
