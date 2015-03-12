@@ -43,8 +43,8 @@ int HazmatDetector::height = 480;
 
 
 // Allocating space for the static member variable.
-std::string HazmatDetector::fileName_ = 
-  std::string("/home/vchoutas/Desktop/hazmatTraining/input");
+std::string HazmatDetector::fileName_ =
+  std::string("/home/kostas/pandora/input") ;
 
 
 // Data input function . 
@@ -89,9 +89,13 @@ void HazmatDetector::readData( void )
   fs.release();
   
   // For every pattern name read the necessary training data.
+<<<<<<< HEAD
   std::string trainingDataDir =  std::string("/home/vchoutas/Desktop") + 
     std::string("/hazmatTraining") + std::string( "/trainingData/") +
     this->getFeaturesName();
+=======
+  std::string trainingDataDir = "/home/kostas/pandora/trainingData/" + this->getFeaturesName() ;
+>>>>>>> 3ec674e... Refactored hazmat functional test and fixed hazmat_detector
 
   std::string fileName;
   
@@ -219,7 +223,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
 
   // Create the mask that will be used to extract regions of interest
   // on the image based on the Image Signature Saliency Map .
-  ImageSignature::createSaliencyMapMask( frame , &mask );
+  //ImageSignature::createSaliencyMapMask( frame , &mask );
+  mask.setTo(1);
   
     // Calculate the keypoints and extract the descriptors from the 
   // frame.

@@ -21,7 +21,7 @@ add_rostest(benchmark/landoltc_benchmark_test.launch)
 download_extra_data(
   ${PROJECT_NAME}_landoltc_test_images
   EXTRA_FILES test/functional/images/extra_files.yaml
-  )
+)
 add_dependencies(${PROJECT_NAME}_landoltc_test_images tests)
 
 add_rostest(functional/landoltc_test.launch)
