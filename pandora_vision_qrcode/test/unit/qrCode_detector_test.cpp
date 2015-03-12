@@ -56,7 +56,6 @@ namespace pandora_vision
             {
                 WIDTH = 640;
                 HEIGHT = 480;
-               // pw = getpwuid(getuid());
                 homedir = getenv("HOME");
             }
 
@@ -75,7 +74,6 @@ namespace pandora_vision
 
         private:
             QrCodeDetector qrCodeDetector_;
-            //struct passwd *pw;
     };
 
 
