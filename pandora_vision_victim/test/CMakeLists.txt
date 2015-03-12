@@ -39,3 +39,5 @@ target_link_libraries(haralickfeature_extractor_test
 #    DESTINATION functional
 #    )
 #add_rostest(functional/hole_detector_test.launch)
+
+add_rostest(functional/victim_test.launch)
