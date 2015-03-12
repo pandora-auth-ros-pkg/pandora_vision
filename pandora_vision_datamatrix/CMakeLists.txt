@@ -36,18 +36,16 @@ include_directories(include
   ${DMTX_INCLUDE_DIRS}
 )
 
-################# dmtx node #################
-add_executable(datamatrix_node 
-                  src/datamatrix_node.cpp
-                  src/datamatrix_detection.cpp
-                  src/datamatrix_detector.cpp
+add_executable(datamatrix_node
+  src/datamatrix_node.cpp
+  src/datamatrix_detection.cpp
+  src/datamatrix_detector.cpp
 )
 
 add_dependencies(datamatrix_node 
     ${catkin_EXPORTED_TARGETS}
 )
 
-################# datamatrix node library #################
 add_library(datamatrix_node_lib
   src/datamatrix_detector.cpp
 )
