@@ -28,7 +28,7 @@ catkin_package(
       sensor_msgs
       urdf
     #INCLUDE_DIRS
-    #LIBRARIES
+    #LIBRARIES 
 )
 
 include_directories(include
@@ -36,25 +36,28 @@ include_directories(include
   ${DMTX_INCLUDE_DIRS}
 )
 
+################# dmtx node #################
+add_executable(datamatrix_node 
+                  src/datamatrix_node.cpp
+                  src/datamatrix_detection.cpp
+                  src/datamatrix_detector.cpp
+)
+
+add_dependencies(datamatrix_node 
+    ${catkin_EXPORTED_TARGETS}
+)
+
 ################# datamatrix node library #################
 add_library(datamatrix_node_lib
   src/datamatrix_detector.cpp
 )
+
 target_link_libraries(datamatrix_node_lib
   ${catkin_LIBRARIES}
 )
 
-################# qrcode node #################
-add_executable(datamatrix_node
-  src/datamatrix_node.cpp
-  src/datamatrix_detection.cpp
-  src/datamatrix_detector.cpp
-)
-add_dependencies(datamatrix_node
-    ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(datamatrix_node
-    ${catkin_LIBRARIES}
+target_link_libraries(datamatrix_node 
+    ${catkin_LIBRARIES} 
     ${DMTX_LIBRARIES}
 )
 
