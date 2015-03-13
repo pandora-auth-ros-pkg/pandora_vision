@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_vision_msgs
     state_manager
     state_manager_msgs
+    pandora_cmake_tools
     cv_bridge
     image_transport
     dynamic_reconfigure
@@ -42,29 +43,29 @@ include_directories(include
 
 ########################## Victim_Parameters library ###############################
 
-add_library(victim_parameters_lib src/victim_parameters.cpp)
-target_link_libraries(victim_parameters_lib ${catkin_LIBRARIES})
+add_library(${PROJECT_NAME}_victim_parameters src/victim_parameters.cpp) 
+target_link_libraries(${PROJECT_NAME}_victim_parameters ${catkin_LIBRARIES})
 
 ################################ Feature Extractors library #################################
-add_library(feature_extractors_lib
+add_library(${PROJECT_NAME}_feature_extractors
 	    src/feature_extractors/mean_std_dev.cpp
             src/feature_extractors/dominant_color.cpp
             src/feature_extractors/dft_coeffs.cpp
             src/feature_extractors/color_angles.cpp
 	   )
 
-target_link_libraries(feature_extractors_lib ${catkin_LIBRARIES} victim_parameters_lib)
+target_link_libraries(${PROJECT_NAME}_feature_extractors ${catkin_LIBRARIES} ${PROJECT_NAME}_victim_parameters)
 
 ################################ Utilities library #################################
-add_library(utilities_lib
+add_library(${PROJECT_NAME}_utilities
             src/utilities/channels_statistics_extractor.cpp
             src/utilities/edge_orientation_extractor.cpp
             src/utilities/haralickfeature_extractor.cpp
 	   )
 
 
-target_link_libraries(utilities_lib ${catkin_LIBRARIES} feature_extractors_lib victim_parameters_lib)
-
+target_link_libraries(${PROJECT_NAME}_utilities ${catkin_LIBRARIES} ${PROJECT_NAME}_feature_extractors
+${PROJECT_NAME}_victim_parameters)
 
 
 #############################  victim node ##################################################
@@ -79,7 +80,10 @@ add_executable(victim_node
 )
 
 
-target_link_libraries(victim_node ${catkin_LIBRARIES} utilities_lib feature_extractors_lib victim_parameters_lib)
+target_link_libraries(victim_node ${catkin_LIBRARIES} 
+                      ${PROJECT_NAME}_utilities
+                      ${PROJECT_NAME}_feature_extractors
+                      ${PROJECT_NAME}_victim_parameters)
 
 add_dependencies(victim_node
     ${catkin_EXPORTED_TARGETS}
@@ -98,13 +102,16 @@ if(VICTIM_ENABLE_TRAIN)
                   src/training_parameters.cpp
   		)
 
-target_link_libraries(victim_train_node ${catkin_LIBRARIES} utilities_lib feature_extractors_lib victim_parameters_lib)
 
-add_dependencies(victim_train_node
-    vision_communications_gencpp
-    pandora_vision_victim_gencfg
+  target_link_libraries(victim_train_node ${catkin_LIBRARIES} 
+                      ${PROJECT_NAME}_utilities
+                      ${PROJECT_NAME}_feature_extractors
+                      ${PROJECT_NAME}_victim_parameters)
+
+  add_dependencies(victim_train_node
     ${catkin_EXPORTED_TARGETS}
-)
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  )
 endif()
 
 ########################### modelTRainer ############################
@@ -115,11 +122,16 @@ if(MODEL_ENABLE_TRAIN)
   target_link_libraries(model_train ${catkin_LIBRARIES} )
 endif()
 
+download_extra_data(
+  ${PROJECT_NAME}_download_training_files
+  EXTRA_FILES data/extra_files.yaml
+  )
+
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
     "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string")
 
-FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
+file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
   
   ## victim_node ##

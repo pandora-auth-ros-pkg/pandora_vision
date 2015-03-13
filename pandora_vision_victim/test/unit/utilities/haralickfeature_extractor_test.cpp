@@ -41,17 +41,17 @@
 namespace pandora_vision
 {
   /**
-    @class HaralickFeaturesExtractorTest 
+    @class HaralickFeaturesExtractorTest
     @brief Tests the integrity of methods of class HaralickFeaturesExtractor
    **/
   class HaralickFeaturesExtractorTest : public ::testing::Test
   {
     protected:
-      
+
 
       HaralickFeaturesExtractorTest () {}
 
-      
+
        //! Sets up images needed for testing
        virtual void SetUp()
       {
@@ -61,7 +61,7 @@ namespace pandora_vision
 
         // Construct a black image
         black = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
-         
+
         //set the blackGLCM matrix
         blackGLCM = cv::Mat::zeros(256, 256, CV_64FC1);
         int occurence = black.rows * (black.cols - 1);
@@ -77,7 +77,7 @@ namespace pandora_vision
         white = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
         cv::Rect rect(0, 0, WIDTH, HEIGHT);
 	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
-        
+
         //std::cout << "white= " << std::endl << " " << white << std::endl << std::endl;
 
         //set the whiteGLCM matrix
@@ -91,26 +91,26 @@ namespace pandora_vision
 
 
 	// Construct a horizontal edge image
-        horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U); 
+        horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect1(0, 0, WIDTH, HEIGHT/2);
 	cv::rectangle(horizontal, rect1, cv::Scalar(255,0,0), -1);
-        
+
 	// Construct a vertical edge image
-        vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U); 
+        vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect2(0, 0, WIDTH/2, HEIGHT);
 	cv::rectangle(vertical, rect2, cv::Scalar(255,0,0), -1);
-	
+
        }
-            
+
       //Image Dimensions
-      int HEIGHT, WIDTH;  
+      int HEIGHT, WIDTH;
 
       // Images that will be used for testing
       cv::Mat black,blackGLCM, white, whiteGLCM, horizontal, vertical, diagonal45, diagonal135, circle, noisy;
-  
+
   };
-  
-  
+
+
   //! Tests HaralickFeaturesExtractor::calculateGLCM()
 
   TEST_F ( HaralickFeaturesExtractorTest, calculateGLCMwhite)
@@ -118,8 +118,8 @@ namespace pandora_vision
     // The output image
     cv::Mat out;
     out = HaralickFeaturesExtractor::calculateGLCM(white);
-    ASSERT_EQ ( 256, out.rows ); 
-    ASSERT_EQ ( 256, out.cols ); 
+    ASSERT_EQ ( 256, out.rows );
+    ASSERT_EQ ( 256, out.cols );
 
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
@@ -132,14 +132,14 @@ namespace pandora_vision
 
     EXPECT_EQ ( true , equal );
   }
- 
+
   TEST_F ( HaralickFeaturesExtractorTest, calculateGLCMblack)
   {
     // The output image
     cv::Mat out;
     out = HaralickFeaturesExtractor::calculateGLCM(black);
-    ASSERT_EQ ( 256, out.rows ); 
-    ASSERT_EQ ( 256, out.cols ); 
+    ASSERT_EQ ( 256, out.rows );
+    ASSERT_EQ ( 256, out.cols );
 
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
@@ -148,10 +148,10 @@ namespace pandora_vision
 	    if(out.at<double>(ii, jj) != blackGLCM.at<double>(ii,jj))
 		    equal= false;
 
-    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl; 
+    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
 
     EXPECT_EQ ( true , equal );
-    
+
   }
   TEST_F ( HaralickFeaturesExtractorTest, AngularSecondMoment)
   {
@@ -160,15 +160,15 @@ namespace pandora_vision
     out = HaralickFeaturesExtractor::getAngularSecondMoment(blackGLCM);
 
 
-    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl; 
+    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
     //compute angular second moment
     double ang = 0;
     for (int ii = 0; ii < blackGLCM.rows; ii++)
       for (int jj = 0; jj < blackGLCM.cols; jj++)
-        ang+ = pow(blackGLCM.at<double>(ii, jj), 2.0);
+        ang += pow(blackGLCM.at<double>(ii, jj), 2.0);
 
     EXPECT_EQ ( ang  , out );
-    
+
   }
 
   TEST_F ( HaralickFeaturesExtractorTest, Contrast)
@@ -178,7 +178,7 @@ namespace pandora_vision
     out = HaralickFeaturesExtractor::getContrast(blackGLCM);
 
 
-    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl; 
+    //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
     //compute angular second moment
     double sum = 0;
     for (int ii = 0; ii<blackGLCM.rows; ii++)
@@ -186,7 +186,7 @@ namespace pandora_vision
         sum+=pow((ii-jj), 2.0) * blackGLCM.at<double>(ii,jj);
 
     EXPECT_EQ ( sum  , out );
-    
+
   }
 
 } // namespace pandora_vision
