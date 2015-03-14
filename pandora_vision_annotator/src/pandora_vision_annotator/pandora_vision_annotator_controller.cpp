@@ -48,7 +48,7 @@ namespace pandora_vision
   {
     ros::spin();
   }
-  
+
   /**
   @brief Default contructor
   @param argc [int] Number of input arguments
@@ -68,9 +68,9 @@ namespace pandora_vision
   **/
   CController::~CController(void)
   {
-    
+
   }
-  
+
   /**
   @brief Initializes the Qt event connections and ROS subscribers and publishers
   @return void
@@ -80,44 +80,74 @@ namespace pandora_vision
     QObject::connect(
       &connector_,SIGNAL(rosTopicGiven()),
       this, SLOT(rosTopicGiven()));
-      
+
     QObject::connect(
       this,SIGNAL(updateImage()),
       &connector_, SLOT(updateImage()));
   }
-  
+
   void CController::rosTopicGiven(void)
   {
     QString ros_topic = connector_.getRosTopic();
     img_subscriber_ = n_.subscribe(
-      ros_topic.toStdString(), 
-      1, 
+      ros_topic.toStdString(),
+      1,
       &CController::receiveImage,
       this);
   }
-  
-  void CController::receiveImage(const sensor_msgs::Image& msg)
+
+  void CController::receiveImage(const sensor_msgs::Image::ConstPtr& msg)
   {
-    cv_bridge::CvImagePtr in_msg;
-    in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    cv::Mat temp, src = in_msg->image;
-    
-    cvtColor(src, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+
+    cv_bridge::CvImageConstPtr in_msg;
+    cv::Mat temp;
+    try
+      {
+        in_msg = cv_bridge::toCvCopy(msg);
+        if(msg->encoding == "8UC1")
+   	    {
+   		  cv::cvtColor(in_msg->image, temp, CV_GRAY2RGB);
+        }
+
+        else if (msg->encoding == "16UC1" || msg->encoding == "32FC1")
+
+   	    {
+          double min, max;
+          cv::minMaxLoc(in_msg->image, &min, &max);
+   	      cv::Mat img_scaled_8u;
+          cv::Mat(in_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
+          cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
+        }
+        else if(msg->encoding == "rgb8")
+        {
+          in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+          temp = in_msg->image;
+          cv::cvtColor(in_msg->image, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+        }
+
+        }
+
+      catch(cv_bridge::Exception& e)
+      {
+        qWarning("CController::receiveImage() while trying to convert image from '%s' to 'rgb8' an exception was thrown ((%s)", msg->encoding.c_str(), e.what());
+        //connector_.setImage((const uchar *)QImage());
+        return;
+      }
+
     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    dest.bits(); // enforce deep copy, see documentation 
-    
+    dest.bits(); // enforce deep copy, see documentation
+
     connector_.setImage(dest);
     Q_EMIT updateImage();
-  }
-    
- 
+
+}
   /**
   @brief Initializes the ROS spin and Qt threads
   @return bool
   **/
   bool CController::init(void)
   {
-    if ( ! ros::master::check() ) 
+    if ( ! ros::master::check() )
     {
       return false;
     }

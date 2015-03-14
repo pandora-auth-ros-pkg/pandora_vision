@@ -38,5 +38,68 @@
 #include "pandora_vision_annotator/pandora_vision_annotator_tools.h"
 
 namespace pandora_vision
-{
+{ int ImgAnnotations::annPerImage = 0;
+  bool ImgAnnotations::secondpoint = false;
+  std::vector<annotation> ImgAnnotations::annotations;
+  std::ofstream ImgAnnotations::outFile;
+  annotation ImgAnnotations::temp;
+    void ImgAnnotations::writeToFile(const std::string& filename)
+    {
+        outFile.open("/home/marios/annotations.txt", std::ofstream::out | std::ofstream::app);
+        if (!outFile)
+            {
+                qFatal("cannot load file");
+                return;
+            }
+        else
+        {  if(outFile.is_open())
+           {
+            qDebug("Writing to file" );
+            for (unsigned int i = 0; i < annotations.size(); i++)
+            {
+                outFile << ImgAnnotations::annotations[i].imgName << ","
+                       << ImgAnnotations::annotations[i].category << ","
+                       << ImgAnnotations::annotations[i].x1 << ","
+                       << ImgAnnotations::annotations[i].y1 << ","
+                       << ImgAnnotations::annotations[i].x2 << ","
+                       << ImgAnnotations::annotations[i].y2 << std::endl;
+               qDebug("%s %s %d %d %d %d\n",ImgAnnotations::annotations[i].imgName.c_str(),
+                      ImgAnnotations::annotations[i].category.c_str(),
+                      ImgAnnotations::annotations[i].x1,
+                      ImgAnnotations::annotations[i].y1,
+                      ImgAnnotations::annotations[i].x2,
+                      ImgAnnotations::annotations[i].y2);
+            }
+            }
+        }
+        outFile.close();
+    }
+
+    bool ImgAnnotations::is_file_exist(const char *fileName)
+   {
+     std::ifstream infile(fileName);
+     return infile.good();
+   }
+
+
+    void ImgAnnotations::setAnnotations(const std::string &category, int x, int y)
+    {
+      if(secondpoint)
+      {
+        ImgAnnotations::temp.x2 = x;
+        ImgAnnotations::temp.y2 = y;
+        ImgAnnotations::annotations.push_back(temp);
+        qDebug("%ld",ImgAnnotations::annotations.size());
+        ImgAnnotations::annPerImage++;
+        ImgAnnotations::secondpoint = false;
+      }
+      else
+      {
+      ImgAnnotations::temp.imgName ="xx";
+      ImgAnnotations::temp.category = category;
+      ImgAnnotations::temp.x1 = x;
+      ImgAnnotations::temp.y1 = y;
+      ImgAnnotations::secondpoint = true;
+      }
+    }
 }

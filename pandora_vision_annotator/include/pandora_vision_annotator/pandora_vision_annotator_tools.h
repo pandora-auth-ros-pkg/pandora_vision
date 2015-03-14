@@ -39,6 +39,7 @@
 #define PANDORA_VISION_ANNOTATOR_TOOLS
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 
 #include <ros/package.h>
@@ -95,9 +96,34 @@
 /**
 @namespace pandora_vision
 @brief The namespace for pandora vision
-**/ 
+**/
 namespace pandora_vision
 {
+  struct annotation
+  {
+      std::string imgName;
+      std::string category;
+      int x1;
+      int y1;
+      int x2;
+      int y2;
+  };
+
+  class ImgAnnotations
+  {
+    public:
+    static std::vector<annotation> annotations;
+    static annotation temp;
+    static std::ifstream inFile;
+    static std::ofstream outFile;
+    static int annPerImage;
+    static bool secondpoint;
+    static void writeToFile(const std::string& filename);
+    static void readFromFile();
+    static void setAnnotations(const std::string &category, int x, int y);
+    static bool is_file_exist(const char *fileName);
+
+  };
 }
 
 #endif

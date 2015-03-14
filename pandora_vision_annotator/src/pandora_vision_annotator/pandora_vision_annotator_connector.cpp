@@ -39,9 +39,9 @@
 
 namespace pandora_vision
 {
-  
 
-  
+
+
   /**
   @brief Default contructor
   @param argc [int] Number of input arguments
@@ -56,13 +56,13 @@ namespace pandora_vision
   {
     // Event filter for the image area
     loader_.imageLabel->installEventFilter(this);
-    
+
     img_state_ = IDLE;
-    
+
     QObject::connect(
       loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
       this,SLOT(rosTopicPushButtonTriggered()));
-      
+
     QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
@@ -75,8 +75,12 @@ namespace pandora_vision
     QObject::connect(
       loader_.qrPushButton,SIGNAL(clicked(bool)),
       this,SLOT(qrPushButtonTriggered()));
+    QObject::connect(
+      loader_.submitPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(submitPushButtonTriggered()));
+
   }
-  
+
   /**
   @brief Qt slot that is called when the rosTopicPushButton is pressed
   @return void
@@ -85,46 +89,46 @@ namespace pandora_vision
   {
     Q_EMIT rosTopicGiven();
   }
-  
+
   void CConnector::show(void)
   {
     loader_.show();
   }
-  
+
   QString CConnector::getRosTopic(void)
   {
     return loader_.rosTopicLineEdit->text();
   }
-  
+
   void CConnector::setImage(QImage &img)
   {
     localImage_ = img.copy();
   }
-  
+
   void CConnector::updateImage(void)
   {
     loader_.imageLabel->setPixmap(QPixmap().fromImage((localImage_)));
   }
-  
+
   /**
   @brief General event filter. Captures all events
   @param watched [QObject*] The object in which the event was triggered
   @param event [QEvent*] The type of event
   @return bool : True is event served
   **/
-  bool CConnector::eventFilter( QObject* watched, QEvent* event ) 
+  bool CConnector::eventFilter( QObject* watched, QEvent* event )
   {
     if(watched == loader_.imageLabel)
     {
       if(event->type() == QEvent::MouseButtonPress)
       {
-        
+
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
-        
-        const QMouseEvent* const me = 
+
+        const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );
         QPoint p = me->pos();
-        
+
         int container_width = loader_.imageLabel->width();
         int container_height = loader_.imageLabel->height();
         int img_height = localImage_.height();
@@ -140,36 +144,42 @@ namespace pandora_vision
           {
             loader_.victimCoordsLabel->setText(
               loader_.victimCoordsLabel->text() + QString("[") +
-              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.x()) + QString(",") +
               QString().setNum(p.y() - diff) + QString("]"));
-          }
+              ImgAnnotations::setAnnotations("victim", p.x(), p.y()-diff);
+
+        }
           else if(img_state_ == QR_CLICK)
           {
             loader_.qrCoordsLabel->setText(
               loader_.qrCoordsLabel->text() + QString("[") +
-              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.x()) + QString(",") +
               QString().setNum(p.y() - diff) + QString("]"));
+              ImgAnnotations::setAnnotations("qr", p.x(), p.y()-diff);
+
           }
           else if(img_state_ == HAZMAT_CLICK)
           {
             loader_.hazmatCoordsLabel->setText(
               loader_.hazmatCoordsLabel->text() + QString("[") +
-              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.x()) + QString(",") +
               QString().setNum(p.y() - diff) + QString("]"));
+              ImgAnnotations::setAnnotations("hazmat", p.x(), p.y()-diff);
           }
           else if(img_state_ == LANDOLTC_CLICK)
           {
             loader_.landoltcCoordsLabel->setText(
               loader_.landoltcCoordsLabel->text() + QString("[") +
-              QString().setNum(p.x()) + QString(",") + 
+              QString().setNum(p.x()) + QString(",") +
               QString().setNum(p.y() - diff) + QString("]"));
+              ImgAnnotations::setAnnotations("landoltc", p.x(), p.y()-diff);
           }
         }
       }
     }
     return false;
   }
-  
+
   void CConnector::victimPushButtonTriggered(void)
   {
     img_state_ = VICTIM_CLICK;
@@ -186,4 +196,11 @@ namespace pandora_vision
   {
     img_state_ = LANDOLTC_CLICK;
   }
+  void CConnector::submitPushButtonTriggered(void)
+  { if(ImgAnnotations::is_file_exist("/home/marios/annotations.txt"))
+      remove("/home/marios/annotations.txt");
+    ImgAnnotations::writeToFile("/home/marios/annotations.txt");
+
+  }
+
 }

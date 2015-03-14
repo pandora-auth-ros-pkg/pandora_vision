@@ -43,10 +43,10 @@
 /**
 @namespace pandora_vision
 @brief The main namespace for pandora_vision
-**/ 
+**/
 namespace pandora_vision
 {
-  
+
   enum ImageStates
   {
     IDLE,
@@ -55,35 +55,35 @@ namespace pandora_vision
     HAZMAT_CLICK,
     LANDOLTC_CLICK
   };
-  
+
   /**
   @class CConnector
   @brief Serves the Qt events of the main GUI window. Inherits from QObject
-  **/ 
+  **/
   class CConnector: public QObject
   {
     Q_OBJECT
-    
+
     //------------------------------------------------------------------------//
     private:
-    
+
       //!< Number of input arguments
-      int   argc_;  
-      //!< Input arguments     
-      char**  argv_;   
-      
-      //!< The loader of main GUI QWidget 
-      CLoader loader_; 
-      
-      QImage localImage_;   
-      
+      int   argc_;
+      //!< Input arguments
+      char**  argv_;
+
+      //!< The loader of main GUI QWidget
+      CLoader loader_;
+
+      QImage localImage_;
+
       ImageStates img_state_;
-      
-      bool eventFilter( QObject* watched, QEvent* event ); 
-    
+
+      bool eventFilter( QObject* watched, QEvent* event );
+
     //------------------------------------------------------------------------//
     public:
-      
+
       /**
       @brief Default contructor
       @param argc [int] Number of input arguments
@@ -93,27 +93,28 @@ namespace pandora_vision
       CConnector(int argc, char **argv);
 
       void show(void);
-      
+
       QString getRosTopic(void);
-      
+
       void setImage(QImage &img);
-         
+
 
     //------------------------------------------------------------------------//
     public Q_SLOTS:
 
       void rosTopicPushButtonTriggered(void);
-      
+
       void updateImage(void);
-      
+
       void victimPushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
       void hazmatPushButtonTriggered(void);
-          
+      void submitPushButtonTriggered(void);
+
     //------------------------------------------------------------------------//
     Q_SIGNALS:
-    
+
       void rosTopicGiven(void);
   };
 }
