@@ -44,17 +44,31 @@ int HazmatDetector::height = 480;
 
 std::string HazmatDetector::fileName_ = std::string();
 
-void HazmatDetector::readData( void )
+HazmatDetector::HazmatDetector(const std::string &featureName) 
+      : featuresName_(featureName) , patterns_(new std::vector<Pattern>) 
+{
+  // Read the necessary data.
+  bool readFlag = this->readData();
+  if (!readFlag)
+  {
+    ROS_FATAL("Could not read the necessary training data!\n"); 
+    ROS_FATAL("The node will now shutdown!\n");
+    ROS_BREAK();
+  }
+  ROS_INFO("Succesfully read training Data!\n");
+}
+
+
+bool HazmatDetector::readData( void )
 {
   // Open the file for reading .
   std::string patternNameInputFile = fileName_ + "/data/input.xml";
   cv::FileStorage fs( patternNameInputFile , cv::FileStorage::READ);
-  ROS_INFO("%s\n" , patternNameInputFile.c_str());
   // Check if the file was opened succesfully .
   if ( !fs.isOpened() )
   {
-    std::cerr << "XML file could not be opened!" << std::endl;
-    return;
+    ROS_ERROR("XML file could not be opened! \n");
+    return false;
   }
   
   // Go to the xml node that contains the pattern names.
@@ -62,11 +76,10 @@ void HazmatDetector::readData( void )
   
   // Check if the node has a sequence.
   if ( inputNames.type() != cv::FileNode::SEQ)
-    {
-        std::cerr << "Input data  is not a string sequence! FAIL" 
-          << std::endl;
-        return;
-    }
+  {
+    ROS_ERROR("Input data  is not a string sequence!\n");
+    return false;
+  }
   
   // Initialize File iterator.
   cv::FileNodeIterator it = inputNames.begin();
@@ -116,8 +129,7 @@ void HazmatDetector::readData( void )
     // Check if the file was properly opened.
     if ( !fs2.isOpened() )
     {
-      std::cerr << "File " << fileName << " could not be opened! " 
-        << std::endl;
+      ROS_ERROR("File %s could not be opened!\n ", fileName.c_str());
       continue;
     }
     
@@ -131,7 +143,7 @@ void HazmatDetector::readData( void )
     
     fs2["Histogram"] >> histogram;
         
-    // Read the pattern' keypoints.
+    // Read the pattern's keypoints.
     cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
     
     // Initialize node iterators.
@@ -179,7 +191,17 @@ void HazmatDetector::readData( void )
     
   }
   
-  
+  if (patterns_->size() > 0 )
+  {
+    if (patterns_->size() != input.size())
+      ROS_ERROR("Could not read the training files for all the patterns!\n");
+    return true;
+  }
+  else
+  {
+    ROS_FATAL("No pattern was read! The node cannot function!\n");
+    ROS_BREAK();
+  }
 }
 
  
@@ -193,13 +215,13 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   // Check if the frame is not an empty matrix.
   if ( !frame.data )
   {
-    std::cerr << "The provided frame is empty!" << std::endl;
+    ROS_ERROR("The provided frame is empty!\n");
     return false;
   }
   if ( patterns_ == NULL )
   {
-    std::cout << "Error NULL pattern Pointer " << std::endl;
-    exit(-1);
+    ROS_FATAL("Error Pointer to pattern array is NULL!\n");
+    ROS_BREAK();
   }
   // Check if that patterns have been read succesfully.
   // TO DO : Produce Fatal Error on Failure.
@@ -249,8 +271,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
   gettimeofday(&endwtime , NULL);
   double featuresTime = static_cast<double>((endwtime.tv_usec - 
         startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-  std::cout << "Calculation time for the features for frame  is " 
-    << featuresTime << std::endl;
+  ROS_INFO("Calculation time for the features in the frame is %f \n", 
+            featuresTime);
   #endif
   
   bool matchesFound;
@@ -287,14 +309,13 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     gettimeofday(&endwtime , NULL);
     double keyPointTime = static_cast<double>((endwtime.tv_usec - 
           startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-    std::cout << "Calculation time for keypoint matches for pattern "
-      << i << " is " << keyPointTime << std::endl;
+    ROS_INFO("Calculation time for the keypoints in the frame is %f \n", 
+            featuresTime);
     #endif
     
     // If we have succesfully found the matches.
     if (matchesFound)
     {
-     
       #ifdef CHRONO
       gettimeofday(&startwtime , NULL);
       #endif
@@ -307,8 +328,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
       gettimeofday(&endwtime , NULL);
       double boundingBoxTime = static_cast<double>((endwtime.tv_usec - 
             startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-      std::cout << "Calculation time for the bounding box for "
-        "the pattern " << i  << " is " << boundingBoxTime << std::endl;
+      ROS_INFO("Calculation time for the bounding box for "
+        "the pattern %d  is : %f .\n", i, boundingBoxTime);
       #endif      
       
       
@@ -316,8 +337,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         
       // If this flag is true then a valid match has been found and
       // we have detected the pattern.
-      if (boundingBoxFound)
-        
+      if (boundingBoxFound)  
       {
         #ifdef DEBUG
         cv::Mat trackingFrame;
@@ -437,8 +457,7 @@ bool HazmatDetector::findBoundingBox(
     // Calculate the homography matrix using RANSAC algorithm to 
     // eliminate outliers.
     cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
-      CV_RANSAC );
-      
+      CV_RANSAC , 4 );
     // Transform the bounding box to the frame coordinates.
     cv::perspectiveTransform( patternBB , 
       *sceneBB , H );
@@ -469,7 +488,6 @@ bool HazmatDetector::findBoundingBox(
     if ( !cv::isContourConvex(boundingBox) )
     {
       boundingBox.clear();
-      //~ std::cerr << "Contour not convex! " << std::endl;
       return false;
     }
     
@@ -477,7 +495,6 @@ bool HazmatDetector::findBoundingBox(
     boundingBox.clear();
     return true ;
     
-    //~ trackingFrame.release();
   }
   else
     return false;

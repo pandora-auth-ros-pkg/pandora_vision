@@ -88,7 +88,7 @@ void SurfHazmatDetector::getFeatures( const cv::Mat &frame ,
   gettimeofday( &endwtime, NULL );
   double keyPointTime = static_cast<double>((endwtime.tv_usec - startwtime.tv_usec)
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-  std::cout << "Keypoint Extraction time : " << keyPointTime << std::endl;
+  ROS_INFO( "Keypoint Extraction time : %f .\n", keyPointTime);
   #endif
   // Extract descriptors for the the detected keypoints.
   #ifdef FEATURES_CHRONO
@@ -97,10 +97,9 @@ void SurfHazmatDetector::getFeatures( const cv::Mat &frame ,
   s_.compute( frame, *keyPoints , *descriptors);
   #ifdef FEATURES_CHRONO
   gettimeofday( &endwtime, NULL );
-  double descriptorsTime =  static_cast<double>((endwtime.tv_usec - startwtime.tv_usec)
+  double descriptorsTime = static_cast<double>((endwtime.tv_usec - startwtime.tv_usec)
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-  std::cout << "Descriptors Computation time : " << descriptorsTime 
-    << std::endl;
+  ROS_INFO( "Descriptors Computation time : %f .\n", descriptorsTime);
   #endif
   }
 

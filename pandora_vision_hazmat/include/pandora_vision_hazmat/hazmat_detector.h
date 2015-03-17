@@ -60,7 +60,7 @@ class HazmatDetector : public Detector
     
     // Function used for reading the training data from an xml file.
     
-    void virtual readData( void );
+    bool virtual readData( void );
   
     // Function that returns the detected keypoints and features of the 
     // the image .
@@ -68,10 +68,6 @@ class HazmatDetector : public Detector
     void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
      , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
     = 0;
-    
-
-    // Returns the type of the features used. 
-    //~ const TrainerType virtual getType( void ) = 0 ;
     
     // Function that takes as input the scene descriptors, matches
     // them to the pattern descriptors and returns the corresponding
@@ -126,12 +122,7 @@ class HazmatDetector : public Detector
     HazmatDetector() {}    
    
     // Hazmat Detector class constructor.
-    explicit HazmatDetector(const std::string &featureName) 
-      : featuresName_(featureName) , patterns_(new std::vector<Pattern>) 
-    {
-
-      readData();
-    }
+    explicit HazmatDetector(const std::string &featureName); 
     
     // HazmatDetector Destructor.
     virtual ~HazmatDetector()

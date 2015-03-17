@@ -40,17 +40,23 @@
 
 HazmatDetectionNode::HazmatDetectionNode()
 {
+  ROS_INFO("Starting Hazmat Detection Node!\n");
+
   // TO DO : use nodehandle get params.
   imageTopic_ = std::string("/camera/image_raw");
   imageSubscriber_ = nodeHandle_.subscribe( imageTopic_ , 1 ,
       &HazmatDetectionNode::imageCallback, this);
-
+  
+  // Get the path of the current package.
   std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
   HazmatDetector::setFileName(packagePath);
-  detector_ = new SiftHazmatDetector(); 
-  //
+
+  // Initiliaze the object detector
+  detector_ = new OrbHazmatDetector();
+  ROS_INFO("Created the detector object!\n");
+  
+  // Initialize the alert Publisher.
   hazmatTopic_ = std::string("/alert/hazmat");
-  ROS_INFO("The path to the package is : %s \n" , packagePath.c_str());
   hazmatPublisher_ = nodeHandle_.advertise<std_msgs::Bool>(hazmatTopic_, 10);
 
 }
@@ -68,8 +74,6 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
   // bool found = detector.detect(frame , &x, &y);
   double execTime = ( clock () - begin_time ) /  
     static_cast<double>(CLOCKS_PER_SEC );
-  std::cout <<"Time to execute : " << execTime << std::endl; 
-
   if (found )
   {
     ROS_INFO("Found Hazmat! \n");
@@ -77,9 +81,11 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
     msg.data = found;
     hazmatPublisher_.publish(msg);
   }  
-  ss << 1 / execTime;
+  ROS_INFO("Execution Time for the node is : %f!\n", execTime);
+  ss << execTime * 1000;
 
-  cv::putText( imgPtr->image , "fps : " + ss.str() , cv::Point( 0 , imgPtr->image.rows ) ,
+  cv::putText( imgPtr->image , "Exec Time : " + ss.str() + "ms", 
+      cv::Point( 0 , imgPtr->image.rows ) ,
       CV_FONT_HERSHEY_PLAIN , 3 , cv::Scalar( 0 , 0 , 255 ) , 3 );
 
 

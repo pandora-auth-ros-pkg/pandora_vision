@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*********************************************************************
  *
  * Software License Agreement (BSD License)
@@ -58,7 +57,6 @@ class Detector
     void virtual readData( void ) = 0;
     
     
-        
     
     // Function used to get the best feature matches between a frame
     // and a number of patterns.
