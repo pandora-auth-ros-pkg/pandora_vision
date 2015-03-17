@@ -46,7 +46,8 @@ std::string HazmatDetector::fileName_ = std::string();
 
 void HazmatDetector::readData( void )
 {
-  std::string patternNameInputFile = fileName_ + "/training_data/input.xml";
+  // Open the file for reading .
+  std::string patternNameInputFile = fileName_ + "/data/input.xml";
   cv::FileStorage fs( patternNameInputFile , cv::FileStorage::READ);
   ROS_INFO("%s\n" , patternNameInputFile.c_str());
   // Check if the file was opened succesfully .
@@ -101,7 +102,7 @@ void HazmatDetector::readData( void )
   fs.release() ;
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir = fileName_ + std::string( "/training_data/") +
+  std::string trainingDataDir = fileName_ + std::string( "/data/training/") +
     this->getFeaturesName();
 
   std::string fileName ;

@@ -35,8 +35,6 @@ catkin_package(
     #LIBRARIES
 )
 
-#download_extra_data(${PROJECT_NAME}_download_training_data
-#                    EXTRA_FILES training_data/extra_files.yaml)
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
@@ -70,8 +68,7 @@ add_dependencies(hazmat_node
 
 # Download necessary data to run
 download_extra_data(${PROJECT_NAME}_download_training_data
-                    EXTRA_FILES patterns/extra_files.yaml)
-
+                    EXTRA_FILES data/extra_files.yaml)
 
 ########################### hazmatTrainNode ############################
 #if(HAZMAT_ENABLE_TRAIN)

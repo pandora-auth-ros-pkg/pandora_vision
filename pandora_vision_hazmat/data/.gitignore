@@ -1,11 +1,3 @@
 *.xml
 *.png
 *.jp*g
-*.txt
-
-/training/*.png
-/training/*.xml
-/training/*.jp*g
-/trainingInput/*.txt
-/trainingInput/*.png
-/trainingInput/*.jp*g
