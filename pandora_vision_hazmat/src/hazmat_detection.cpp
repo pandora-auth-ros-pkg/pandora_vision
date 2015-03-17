@@ -50,7 +50,7 @@ HazmatDetectionNode::HazmatDetectionNode()
   detector_ = new SiftHazmatDetector(); 
   //
   hazmatTopic_ = std::string("/alert/hazmat");
-  ROS_INFO("The path to the package is : %s \n",packagePath.c_str());
+  ROS_INFO("The path to the package is : %s \n" , packagePath.c_str());
   hazmatPublisher_ = nodeHandle_.advertise<std_msgs::Bool>(hazmatTopic_, 10);
 
 }
