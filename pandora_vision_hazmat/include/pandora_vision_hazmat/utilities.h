@@ -56,6 +56,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <boost/shared_ptr.hpp>
 #include "ros/ros.h"
+#include <ros/package.h>
 #include "sensor_msgs/image_encodings.h"
 #include "std_msgs/Bool.h"
 #include "cv_bridge/cv_bridge.h"

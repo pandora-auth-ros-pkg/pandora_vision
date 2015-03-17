@@ -44,11 +44,15 @@ HazmatDetectionNode::HazmatDetectionNode()
   imageTopic_ = std::string("/camera/image_raw");
   imageSubscriber_ = nodeHandle_.subscribe( imageTopic_ , 1 ,
       &HazmatDetectionNode::imageCallback, this);
-  //detector_ = SiftHazmatDetector(); 
+
+  std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
+  HazmatDetector::setFileName(packagePath);
+  detector_ = new SiftHazmatDetector(); 
   //
   hazmatTopic_ = std::string("/alert/hazmat");
-  
+  ROS_INFO("The path to the package is : %s \n",packagePath.c_str());
   hazmatPublisher_ = nodeHandle_.advertise<std_msgs::Bool>(hazmatTopic_, 10);
+
 }
 
 void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
@@ -60,7 +64,7 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
   float x , y; 
   const clock_t begin_time = clock();
 
-  bool found = detector_.detect(imgPtr->image , &x, &y);
+  bool found = detector_->detect(imgPtr->image , &x, &y);
   // bool found = detector.detect(frame , &x, &y);
   double execTime = ( clock () - begin_time ) /  
     static_cast<double>(CLOCKS_PER_SEC );

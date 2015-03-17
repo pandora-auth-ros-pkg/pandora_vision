@@ -91,7 +91,7 @@ void HistogramMask::createBackProjectionMask(const cv::Mat &frame ,
   #ifdef DEBUG
   cv::Mat segmentedFrame;
   frame.copyTo(segmentedFrame , backprojection);
-  imshow("Segmented Frame" , segmentedFrame);
+  cv::imshow("Segmented Frame" , segmentedFrame);
   #endif
 
   // If the mask is not empty :

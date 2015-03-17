@@ -68,7 +68,7 @@ class HazmatDetectionNode
     std::string imageTopic_;
 
     std::string hazmatTopic_;
-    SiftHazmatDetector detector_;
+    HazmatDetector *detector_;
     // OrbHazmatDetector detector_;
 };
 

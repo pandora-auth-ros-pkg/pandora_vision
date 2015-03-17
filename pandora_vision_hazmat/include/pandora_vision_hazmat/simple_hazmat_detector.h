@@ -52,10 +52,10 @@ class SimpleHazmatDetector : public HazmatDetector
 {
   public:
   
-    // Function used to select the input file for the pattern names.
     
     static void setFileName( const std::string &file );
 
+    
     // Function that returns the detected keypoints and features of the 
     // the image .
     

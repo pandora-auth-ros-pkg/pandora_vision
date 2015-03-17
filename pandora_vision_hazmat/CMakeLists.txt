@@ -35,6 +35,9 @@ catkin_package(
     #LIBRARIES
 )
 
+#download_extra_data(${PROJECT_NAME}_download_training_data
+#                    EXTRA_FILES training_data/extra_files.yaml)
+
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )

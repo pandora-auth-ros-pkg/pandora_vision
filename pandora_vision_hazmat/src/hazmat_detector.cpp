@@ -42,31 +42,13 @@ int HazmatDetector::width = 640;
 int HazmatDetector::height = 480;
 
 
-// Allocating space for the static member variable.
-std::string HazmatDetector::fileName_ =
-  std::string("/home/kostas/pandora/input");
-#include "pandora_vision_hazmat/hazmat_detector.h"
-
-int HazmatDetector::width = 640;
-int HazmatDetector::height = 480;
-
-/**
-  @brief Creates a mask that defines the region of the frame where
-        features will be extracted.
-  @param frame [const cv::Mat &] : The input frame.
-  @param mask [cv::Mat *] : The output mask.
-  @param data [cv::Mat &] : An array with extra data.  
-  
-**/
-std::string HazmatDetector::fileName_ = std::string("/home/vchoutas/Programming/pandora_ws/src/pandora_vision/pandora_vision_hazmat/input") ;
-
-// Data input function . 
+std::string HazmatDetector::fileName_ = std::string();
 
 void HazmatDetector::readData( void )
 {
-  // Open the file for reading .
-  cv::FileStorage fs( fileName_ + ".xml" ,cv::FileStorage::READ);
-  std::cout << fileName_ + ".xml" << std::endl;
+  std::string patternNameInputFile = fileName_ + "/training_data/input.xml";
+  cv::FileStorage fs( patternNameInputFile , cv::FileStorage::READ);
+  ROS_INFO("%s\n" , patternNameInputFile.c_str());
   // Check if the file was opened succesfully .
   if ( !fs.isOpened() )
   {
@@ -119,7 +101,8 @@ void HazmatDetector::readData( void )
   fs.release() ;
   
   // For every pattern name read the necessary training data.
-  std::string trainingDataDir = "/home/vchoutas/Desktop/hazmatTraining/trainingData/" + this->getFeaturesName() ;
+  std::string trainingDataDir = fileName_ + std::string( "/training_data/") +
+    this->getFeaturesName();
 
   std::string fileName ;
   
@@ -250,9 +233,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
 
   // Create the mask that will be used to extract regions of interest
   // on the image based on the Image Signature Saliency Map .
-  //ImageSignature::createSaliencyMapMask( frame , &mask );
-  mask.setTo(1);
-  
+  ImageSignature::createSaliencyMapMask( frame , &mask );
+  //mask.setTo(1); 
     // Calculate the keypoints and extract the descriptors from the 
   // frame.
   
@@ -287,8 +269,8 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
     #endif
     
     // Test it before adding it to the system.
-    //~ HistogramMask::createBackProjectionMask(frame , &mask , 
-      //~ patterns_[i].histogram );
+    //HistogramMask::createBackProjectionMask(frame , &mask , 
+       //(*patterns_)[i].histogram );
      
     
       
@@ -350,7 +332,6 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
         cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x , sceneBB[4].y)  , 
             4.0 , cv::Scalar(0 , 0 , 255) , -1 , 8 );
         imshow("Tracking Frame" , trackingFrame);
-       
         #endif
         
         
