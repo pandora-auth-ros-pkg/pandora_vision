@@ -56,7 +56,7 @@ void ImageSignature::signFunction(const cv::Mat &array , cv::Mat *signs)
 {
   if ( array.channels() > 1 )
   {
-    std::cerr << "Invalid channel number " << std::endl;
+    ROS_ERROR( "Invalid channel number!\n");
     signs->data = NULL;
     return;
   }
@@ -95,7 +95,7 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
 {
   if ( !frame.data )
   {
-    std::cerr << "Invalid frame " << std::endl;
+    ROS_ERROR("Invalid frame!\n ");
     mask->data = NULL;
     return;
     mask->data = NULL ;

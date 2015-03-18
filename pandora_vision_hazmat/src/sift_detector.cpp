@@ -35,18 +35,16 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/surf_hazmat_detector.h"
+#include "pandora_vision_hazmat/sift_detector.h"
 
-
-/** 
- * SURF-feature based detector 
+/**  
+ * Sift detector 
 **/
 
-SurfHazmatDetector::SurfHazmatDetector() :
-  SimpleHazmatDetector("SURF")
+// SIFT hazmat detector constructor
+SiftDetector::SiftDetector() : 
+  FeatureMatchingDetector("SIFT") 
 {
-  // To be read from file.
-  int minHessian = 1000;
   int patternNum = this->getPatternsNumber();
 
   // Initialize the matchers that will be used for the 
@@ -72,10 +70,10 @@ SurfHazmatDetector::SurfHazmatDetector() :
 
   // Initialize the keypoint detector and the feature extractor
   // that will be used.
-  s_ = cv::SURF(minHessian);
+  s_ = cv::SIFT(); 
 }
 
-void SurfHazmatDetector::getFeatures( const cv::Mat &frame , 
+void SiftDetector::getFeatures( const cv::Mat &frame , 
   const cv::Mat &mask , cv::Mat *descriptors , 
   std::vector<cv::KeyPoint> *keyPoints ) 
 {
@@ -101,6 +99,4 @@ void SurfHazmatDetector::getFeatures( const cv::Mat &frame ,
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
   ROS_INFO( "Descriptors Computation time : %f .\n", descriptorsTime);
   #endif
-  }
-
 

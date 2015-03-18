@@ -39,7 +39,10 @@
 #ifndef PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
 #define PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
 
-#include "pandora_vision_hazmat/hazmat_detector.h"
+#include "ros/ros.h"
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 /** 
  @class HistogramMask

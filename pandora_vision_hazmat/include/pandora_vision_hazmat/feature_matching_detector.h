@@ -36,25 +36,24 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
 
-#include "pandora_vision_hazmat/hazmat_detector.h"
+#include "pandora_vision_hazmat/planar_object_detector.h"
 
 /**
- @class SimpleHazmatDetector
- @brief A Simple detector interface that is used to produce the 
-        different kind of objects that represent the types of features
-        used.
+ @class FeatureMatchingDetector
+ @brief An interface for all the detectors that extract features
+        from an image and compare them with those from the training set
+        to find a possible match in the current frame.
 **/
 
-class SimpleHazmatDetector : public HazmatDetector
+ 
+class FeatureMatchingDetector : public PlanarObjectDetector
 {
   public:
   
-    
-    static void setFileName( const std::string &file );
-
+    bool virtual readData(void);    
     
     // Function that returns the detected keypoints and features of the 
     // the image .
@@ -80,6 +79,20 @@ class SimpleHazmatDetector : public HazmatDetector
       const std::vector<cv::KeyPoint> sceneKeyPoints ,
       std::vector<cv::Point2f> *matchedPatternKeyPoints , 
       std::vector<cv::Point2f> *matchedSceneKeyPoints  ) ;
+    
+    // Returns the type of the features used. 
+    //~ const TrainerType virtual getType( void ) = 0 ;
+    
+    /* virtual const cv::FlannBasedMatcher& getMatcher(void)
+    {
+      return matcher_;
+    }*/
+    
+    // Constructor
+    explicit FeatureMatchingDetector(const std::string &featureName);
+    
+    // Destructor 
+    virtual ~FeatureMatchingDetector() {};
   
   protected:
   
@@ -87,14 +100,10 @@ class SimpleHazmatDetector : public HazmatDetector
      * found in the input frame and those of the training set
     */
     cv::Ptr<cv::DescriptorMatcher> *matchers_;
-    // Constructor
-    SimpleHazmatDetector(const std::string &featureName);
     
-    // Destructor 
-    virtual ~SimpleHazmatDetector() {} ;
    
     
   
 };
 
-#endif  // PANDORA_VISION_HAZMAT_SIMPLE_HAZMAT_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H

@@ -36,180 +36,22 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/hazmat_detector.h"
+#include "pandora_vision_hazmat/planar_object_detector.h"
 
-int HazmatDetector::width = 640;
-int HazmatDetector::height = 480;
+int PlanarObjectDetector::width = 640;
+int PlanarObjectDetector::height = 480;
 
+std::string PlanarObjectDetector::fileName_ = std::string();
+// Data input function . 
 
-std::string HazmatDetector::fileName_ = std::string();
-
-HazmatDetector::HazmatDetector(const std::string &featureName) 
+PlanarObjectDetector::PlanarObjectDetector(const std::string &featureName) 
       : featuresName_(featureName) , patterns_(new std::vector<Pattern>) 
 {
-  // Read the necessary data.
-  bool readFlag = this->readData();
-  if (!readFlag)
-  {
-    ROS_FATAL("Could not read the necessary training data!\n"); 
-    ROS_FATAL("The node will now shutdown!\n");
-    ROS_BREAK();
   }
-  ROS_INFO("Succesfully read training Data!\n");
-}
-
-
-bool HazmatDetector::readData( void )
-{
-  // Open the file for reading .
-  std::string patternNameInputFile = fileName_ + "/data/input.xml";
-  cv::FileStorage fs( patternNameInputFile , cv::FileStorage::READ);
-  // Check if the file was opened succesfully .
-  if ( !fs.isOpened() )
-  {
-    ROS_ERROR("XML file could not be opened! \n");
-    return false;
-  }
-  
-  // Go to the xml node that contains the pattern names.
-  cv::FileNode inputNames = fs["PatternName"];
-  
-  // Check if the node has a sequence.
-  if ( inputNames.type() != cv::FileNode::SEQ)
-  {
-    ROS_ERROR("Input data  is not a string sequence!\n");
-    return false;
-  }
-  
-  // Initialize File iterator.
-  cv::FileNodeIterator it = inputNames.begin();
-  cv::FileNodeIterator itEnd = inputNames.end();
-  std::string inputName;
-  std::vector<std::string> input;
-  
-  // Iterate over the node and get the names.
-  for ( ; it != itEnd ; ++it ) 
-  {
-    inputName = (std::string)(*it)["name"];
-    input.push_back(inputName);
-    {
-        std::cerr << "Input data  is not a string sequence! FAIL" 
-          << std::endl;
-        return ;
-    }
-  
-  // Initialize File iterator.
-  cv::FileNodeIterator it = inputNames.begin() ;
-  cv::FileNodeIterator itEnd = inputNames.end() ;
-  std::string inputName ;
-  std::vector<std::string> input;
-  
-  // Iterate over the node and get the names.
-  for ( ; it != itEnd ; ++it ) 
-  {
-   inputName = (std::string)(*it)["name"]  ;
-   input.push_back(inputName) ;
-  }
-  
-  // Close the file with the pattern names.
-  fs.release() ;
-  
-  // For every pattern name read the necessary training data.
-  std::string trainingDataDir = fileName_ + std::string( "/data/training/") +
-    this->getFeaturesName();
-
-  std::string fileName ;
-  
-  for (int i = 0 ; i < input.size() ; i++) 
-  { 
-    // Open the training file associated with image #i .
-    fileName = trainingDataDir + "/" + input[i] + ".xml" ;
-    cv::FileStorage fs2( fileName ,cv::FileStorage::READ);
-    
-    // Check if the file was properly opened.
-    if ( !fs2.isOpened() )
-    {
-      ROS_ERROR("File %s could not be opened!\n ", fileName.c_str());
-      continue;
-    }
-    
-    std::vector<cv::Point2f> keyPoints;
-    std::vector<cv::Point2f> boundingBox;
-    cv::Mat descriptors; 
-    cv::Mat histogram;
-    
-    // Read the pattern's descriptors.
-    fs2["Descriptors"] >> descriptors;
-    
-    fs2["Histogram"] >> histogram;
-        
-    // Read the pattern's keypoints.
-    cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
-    
-    // Initialize node iterators.
-    cv::FileNodeIterator it = keyPointsNode.begin();
-    cv::FileNodeIterator itEnd = keyPointsNode.end();
-    
-    cv::Point2f tempPoint ;
-    
-    // Iterate over the node to get the keypoints.
-    for ( ; it != itEnd ; ++it ) 
-    {
-      (*it)["Keypoint"] >> tempPoint ;
-      keyPoints.push_back(tempPoint);
-    }
-    
-    // Read the pattern's bounding box.
-    cv::FileNode boundingBoxNode = fs2["BoundingBox"];
-    
-    // Initialize it's iterator.
-    cv::FileNodeIterator bbIt = boundingBoxNode.begin();
-    cv::FileNodeIterator bbItEnd = boundingBoxNode.end();
-    
-    
-    for ( ; bbIt != bbItEnd ; ++bbIt ) 
-    {
-      (*bbIt)["Corner"] >> tempPoint ;
-      boundingBox.push_back(tempPoint);
-    }
-    
-    // Add the pattern to the pattern vector.
-    Pattern p;
-    p.name = input[i] ;
-    p.boundingBox = boundingBox ;
-    p.keyPoints = keyPoints;
-    p.descriptors = descriptors ;
-    p.histogram = histogram ;
-    patterns_.push_back(p);
-    
-    // Clear the data vectors.
-    keyPoints.clear();
-    boundingBox.clear(); 
-    
-    // Close the xml file .
-    fs2.release() ;
-    
-  }
-  
-  if (patterns_->size() > 0 )
-  {
-    if (patterns_->size() != input.size())
-      ROS_ERROR("Could not read the training files for all the patterns!\n");
-    return true;
-  }
-  else
-  {
-    ROS_FATAL("No pattern was read! The node cannot function!\n");
-    ROS_BREAK();
-  }
-}
-
  
-  
-    
 // Detect the pattern in the frame.
 
-bool HazmatDetector::detect( const cv::Mat &frame , float *x , 
+bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x , 
   float *y ) 
 {
   // Check if the frame is not an empty matrix.
@@ -444,7 +286,7 @@ bool HazmatDetector::detect( const cv::Mat &frame , float *x ,
 
  **/
   
-bool HazmatDetector::findBoundingBox( 
+bool PlanarObjectDetector::findBoundingBox( 
       const std::vector<cv::Point2f> &patternKeyPoints , 
       const std::vector<cv::Point2f> &sceneKeyPoints , 
       const std::vector<cv::Point2f> &patternBB , 
@@ -470,9 +312,9 @@ bool HazmatDetector::findBoundingBox(
     for (int i = 0 ; i < sceneBB->size() ; i++ )
     {
       if ( ( (*sceneBB)[i].x < 0 ) 
-        || ( (*sceneBB)[i].x > HazmatDetector::width )
+        || ( (*sceneBB)[i].x > PlanarObjectDetector::width )
         || ( (*sceneBB)[i].y < 0) 
-        || ( (*sceneBB)[i].y > HazmatDetector::height ) )
+        || ( (*sceneBB)[i].y > PlanarObjectDetector::height ) )
           {
             //~ std::cerr << "Bounding Box out of bounds " << std::endl;
             sceneBB->clear();

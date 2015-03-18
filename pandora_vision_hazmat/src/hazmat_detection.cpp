@@ -49,10 +49,10 @@ HazmatDetectionNode::HazmatDetectionNode()
   
   // Get the path of the current package.
   std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
-  HazmatDetector::setFileName(packagePath);
+  PlanarObjectDetector::setFileName(packagePath);
 
   // Initiliaze the object detector
-  detector_ = new OrbHazmatDetector();
+  detector_ = new OrbDetector();
   ROS_INFO("Created the detector object!\n");
   
   // Initialize the alert Publisher.

@@ -35,7 +35,6 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-
 #include "pandora_vision_hazmat/histogram_mask.h"
 
 int HistogramMask::scale_ = 10;
@@ -63,7 +62,7 @@ void HistogramMask::createBackProjectionMask(const cv::Mat &frame ,
   
   if ( !frame.data )
   {
-    std::cout << "Invalid Frame received! " << std::endl;
+    ROS_INFO( "Invalid Frame received! \n");
     return;
   }
   

@@ -39,10 +39,10 @@
 
 
 
-#include "pandora_vision_hazmat/hazmat_detector.h"
-#include "pandora_vision_hazmat/sift_hazmat_detector.h"
-#include "pandora_vision_hazmat/surf_hazmat_detector.h"
-#include "pandora_vision_hazmat/orb_hazmat_detector.h"
+#include "pandora_vision_hazmat/planar_object_detector.h"
+#include "pandora_vision_hazmat/sift_detector.h"
+#include "pandora_vision_hazmat/surf_detector.h"
+#include "pandora_vision_hazmat/orb_detector.h"
 
 class HazmatDetectionNode
 {
@@ -68,8 +68,7 @@ class HazmatDetectionNode
     std::string imageTopic_;
 
     std::string hazmatTopic_;
-    HazmatDetector *detector_;
-    // OrbHazmatDetector detector_;
+    PlanarObjectDetector *detector_;
 };
 
 #endif  // PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H

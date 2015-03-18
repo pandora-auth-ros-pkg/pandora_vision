@@ -35,16 +35,18 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
+#include "pandora_vision_hazmat/surf_detector.h"
 
-#include "pandora_vision_hazmat/orb_hazmat_detector.h"
 
 /** 
- *  ORB detector 
+ * SURF-feature based detector 
 **/
 
-OrbHazmatDetector::OrbHazmatDetector() :
-  SimpleHazmatDetector("ORB")
+SurfDetector::SurfDetector() :
+  FeatureMatchingDetector("SURF")
 {
+  // To be read from file.
+  int minHessian = 1000;
   int patternNum = this->getPatternsNumber();
 
   // Initialize the matchers that will be used for the 
@@ -56,7 +58,7 @@ OrbHazmatDetector::OrbHazmatDetector() :
 
   for (int i = 0 ; i < patternNum ; i++ )
   {
-    matchers_[i] = cv::DescriptorMatcher::create("BruteForce-Hamming");
+    matchers_[i] = cv::DescriptorMatcher::create("FlannBased");
     // Add the descriptors of the i-th pattern to the 
     // container.
     descriptors.push_back( (*patterns_ )[i].descriptors );
@@ -70,10 +72,10 @@ OrbHazmatDetector::OrbHazmatDetector() :
 
   // Initialize the keypoint detector and the feature extractor
   // that will be used.
-  s_ = cv::ORB();
+  s_ = cv::SURF(minHessian);
 }
 
-void OrbHazmatDetector::getFeatures( const cv::Mat &frame , 
+void SurfDetector::getFeatures( const cv::Mat &frame , 
   const cv::Mat &mask , cv::Mat *descriptors , 
   std::vector<cv::KeyPoint> *keyPoints ) 
 {
@@ -84,7 +86,7 @@ void OrbHazmatDetector::getFeatures( const cv::Mat &frame ,
   s_.detect( frame ,  *keyPoints ,  mask );
   #ifdef FEATURES_CHRONO
   gettimeofday( &endwtime, NULL );
-  double keyPointTime = static_cast<double> ((endwtime.tv_usec - startwtime.tv_usec)
+  double keyPointTime = static_cast<double>((endwtime.tv_usec - startwtime.tv_usec)
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
   ROS_INFO( "Keypoint Extraction time : %f .\n", keyPointTime);
   #endif
@@ -99,5 +101,6 @@ void OrbHazmatDetector::getFeatures( const cv::Mat &frame ,
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
   ROS_INFO( "Descriptors Computation time : %f .\n", descriptorsTime);
   #endif
-}
+  }
+
 

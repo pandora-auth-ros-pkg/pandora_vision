@@ -36,47 +36,34 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
-#define PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
+#ifndef PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+ 
+#include "pandora_vision_hazmat/feature_matching_detector.h"
 
-#include "ros/ros.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/calib3d/calib3d.hpp"
-#include "opencv2/nonfree/nonfree.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
-/**
- @class ImageSignature 
- @brief Class that implements the image signature saliency map.
-**/
-
-class ImageSignature
+class OrbDetector : public FeatureMatchingDetector 
 {
-  public : 
-    
-    // Function that calculates the image signature.
-    static void calculateSignature(const cv::Mat &image , 
-      cv::Mat *imgSign);
-    
-    // Function the creates the mask that will be applied to the 
-    // incoming frame based on the saliency map produced by the 
-    // signature of the image.
-    static void createSaliencyMapMask(const cv::Mat &frame , 
-      cv::Mat *mask );
-       
-    // Return the array that containts the signs of an arbitrary
-    // matrix.
-    static void signFunction(const cv::Mat &array , cv::Mat *signs );
-     
-    // Constructor
-    ImageSignature() {};
-    
-    virtual ~ImageSignature() {}; 
-    
-  private :
+ public:
+
+    // Default Constructor
+    OrbDetector();
+
+
+    // OrbDetector object destructor.
+    ~OrbDetector() {};
+
+    // Function that returns the type of the feature detector used.
+    //~ const virtual TrainerType getType( void ) ;
+
+    // Calculates the keypoints of the image and its descriptors.
+    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+        , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
+
+ private:
+
+    // ORB detector 
+    cv::ORB s_;
 
 };
 
-#endif  // PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H_
+#endif  // PANDORA_VISION_HAZMAT_ORB_DETECTOR_H

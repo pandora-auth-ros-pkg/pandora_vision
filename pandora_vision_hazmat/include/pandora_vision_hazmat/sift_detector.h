@@ -36,34 +36,38 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_ORB_HAZMAT_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_ORB_HAZMAT_DETECTOR_H
- 
-#include "pandora_vision_hazmat/simple_hazmat_detector.h"
+#ifndef PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
 
-class OrbHazmatDetector : public SimpleHazmatDetector 
+#include "pandora_vision_hazmat/feature_matching_detector.h"
+
+/**
+  @class SiftDetector
+  @brief Implements a detector that uses SIFT ( Scale Invariant 
+         Features Transformation) features to detect the different 
+         signs.
+**/
+
+class SiftDetector : public FeatureMatchingDetector 
 {
- public:
-
-    // Default Constructor
-    OrbHazmatDetector();
-
-
-    // OrbHazmatDetector object destructor.
-    ~OrbHazmatDetector() {};
-
+  public:
+        
+    SiftDetector();
+    // SiftDetector object destructor.
+    ~SiftDetector() {};
+    
     // Function that returns the type of the feature detector used.
     //~ const virtual TrainerType getType( void ) ;
-
+    
     // Calculates the keypoints of the image and its descriptors.
     void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-        , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
-
- private:
-
-    // ORB detector 
-    cv::ORB s_;
-
+     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
+     
+  private:
+  
+    // SIFT detector 
+    cv::SIFT s_;
+    
 };
 
-#endif  // PANDORA_VISION_HAZMAT_ORB_HAZMAT_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H

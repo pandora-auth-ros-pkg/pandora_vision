@@ -36,7 +36,157 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/simple_hazmat_detector.h"
+#include "pandora_vision_hazmat/feature_matching_detector.h"
+
+
+FeatureMatchingDetector::FeatureMatchingDetector(const std::string &featureName)
+  :PlanarObjectDetector(featureName)
+{
+  // Read the necessary data.
+  bool readFlag = this->readData();
+  if (!readFlag)
+  {
+    ROS_FATAL("Could not read the necessary training data!\n"); 
+    ROS_FATAL("The node will now shutdown!\n");
+    ROS_BREAK();
+  }
+  ROS_INFO("Succesfully read training Data!\n");
+}
+
+/**
+  @brief Function used to read the necessary training data for
+         the detector to function.
+  @return [bool] : A flag that tells us whether we succeeded in 
+                   reading the data.
+**/
+ 
+bool FeatureMatchingDetector::readData( void )
+{
+  // Open the file for reading .
+  std::string patternNameInputFile = fileName_ + "/data/input.xml";
+  cv::FileStorage fs( patternNameInputFile , cv::FileStorage::READ);
+  // Check if the file was opened succesfully .
+  if ( !fs.isOpened() )
+  {
+    ROS_ERROR("XML file could not be opened! \n");
+    return false;
+  }
+  
+  // Go to the xml node that contains the pattern names.
+  cv::FileNode inputNames = fs["PatternName"];
+  
+  // Check if the node has a sequence.
+  if ( inputNames.type() != cv::FileNode::SEQ)
+  {
+    ROS_ERROR("Input data  is not a string sequence!\n");
+    return false;
+  }
+  
+  // Initialize File iterator.
+  cv::FileNodeIterator it = inputNames.begin();
+  cv::FileNodeIterator itEnd = inputNames.end();
+  std::string inputName;
+  std::vector<std::string> input;
+  
+  // Iterate over the node and get the names.
+  for ( ; it != itEnd ; ++it ) 
+  {
+    inputName = (std::string)(*it)["name"];
+    input.push_back(inputName);
+  }
+  
+  // Close the file with the pattern names.
+  fs.release();
+  
+  // For every pattern name read the necessary training data.
+  std::string trainingDataDir = fileName_ + std::string( "/data/training/") +
+    this->getFeaturesName();
+
+  std::string fileName;
+  
+  for (int i = 0 ; i < input.size() ; i++) 
+  { 
+    // Open the training file associated with image #i .
+    fileName = trainingDataDir + "/" + input[i] + ".xml";
+    cv::FileStorage fs2( fileName , cv::FileStorage::READ);
+    
+    // Check if the file was properly opened.
+    if ( !fs2.isOpened() )
+    {
+      ROS_ERROR("File %s could not be opened!\n ", fileName.c_str());
+      continue;
+    }
+    
+    std::vector<cv::Point2f> keyPoints;
+    std::vector<cv::Point2f> boundingBox;
+    cv::Mat descriptors; 
+    cv::Mat histogram;
+    
+    // Read the pattern's descriptors.
+    fs2["Descriptors"] >> descriptors;
+    
+    fs2["Histogram"] >> histogram;
+        
+    // Read the pattern's keypoints.
+    cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
+    
+    // Initialize node iterators.
+    cv::FileNodeIterator it = keyPointsNode.begin();
+    cv::FileNodeIterator itEnd = keyPointsNode.end();
+    
+    cv::Point2f tempPoint;
+    
+    // Iterate over the node to get the keypoints.
+    for ( ; it != itEnd ; ++it ) 
+    {
+      (*it)["Keypoint"] >> tempPoint;
+      keyPoints.push_back(tempPoint);
+    }
+    
+    // Read the pattern's bounding box.
+    cv::FileNode boundingBoxNode = fs2["BoundingBox"];
+    
+    // Initialize it's iterator.
+    cv::FileNodeIterator bbIt = boundingBoxNode.begin();
+    cv::FileNodeIterator bbItEnd = boundingBoxNode.end();
+    
+    
+    for ( ; bbIt != bbItEnd ; ++bbIt ) 
+    {
+      (*bbIt)["Corner"] >> tempPoint;
+      boundingBox.push_back(tempPoint);
+    }
+    
+    // Add the pattern to the pattern vector.
+    Pattern p;
+    p.name = input[i];
+    p.boundingBox = boundingBox;
+    p.keyPoints = keyPoints;
+    p.descriptors = descriptors;
+    p.histogram = histogram;
+    patterns_->push_back(p);
+    
+    // Clear the data vectors.
+    keyPoints.clear();
+    boundingBox.clear(); 
+    
+    // Close the xml file .
+    fs2.release();
+  }
+  
+  if (patterns_->size() > 0 )
+  {
+    if (patterns_->size() != input.size())
+      ROS_ERROR("Could not read the training files for all the patterns!\n");
+    return true;
+  }
+  else
+  {
+    ROS_FATAL("No pattern was read! The node cannot function!\n");
+    ROS_BREAK();
+  }
+}
+
 
    
 
@@ -59,7 +209,7 @@ SimpleHazmatDetector::SimpleHazmatDetector(
 **/
           
     
-bool SimpleHazmatDetector::findKeypointMatches(
+bool FeatureMatchingDetector::findKeypointMatches(
       const cv::Mat &frameDescriptors ,
       const cv::Mat &patternDescriptors , 
       const std::vector<cv::Point2f> patternKeyPoints ,
