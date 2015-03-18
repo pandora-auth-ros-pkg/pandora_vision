@@ -62,7 +62,7 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
   }
   if ( patterns_ == NULL )
   {
-    ROS_FATAL("Error Pointer to pattern array is NULL!\n");
+    ROS_FATAL("ERROR :  Pointer to pattern array is NULL!\n");
     ROS_BREAK();
   }
   // Check if that patterns have been read succesfully.
@@ -287,11 +287,18 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
  **/
   
 bool PlanarObjectDetector::findBoundingBox( 
-      const std::vector<cv::Point2f> &patternKeyPoints , 
-      const std::vector<cv::Point2f> &sceneKeyPoints , 
-      const std::vector<cv::Point2f> &patternBB , 
-      std::vector<cv::Point2f> *sceneBB) 
+      const std::vector<cv::Point2f>& patternKeyPoints , 
+      const std::vector<cv::Point2f>& sceneKeyPoints , 
+      const std::vector<cv::Point2f>& patternBB , 
+      std::vector<cv::Point2f>* sceneBB) 
 {
+
+  if (patternBB.size() <= 0)
+  {
+    ROS_ERROR("No bounding box has been read for the current pattern!\n");
+    return false;
+  }
+
   // Check if we have enough points to find the homography between
   // the pattern and the scene.
   if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
@@ -303,7 +310,6 @@ bool PlanarObjectDetector::findBoundingBox(
     // Transform the bounding box to the frame coordinates.
     cv::perspectiveTransform( patternBB , 
       *sceneBB , H );
-      
     
     
     // Check if every point of the bounding box is inside the image.

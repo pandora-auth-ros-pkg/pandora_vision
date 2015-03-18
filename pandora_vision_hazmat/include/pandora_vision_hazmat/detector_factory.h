@@ -35,67 +35,22 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
+#ifndef PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
+#define PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
 
-#include "pandora_vision_hazmat/image_signature.h"
-#include "gtest/gtest.h"
-
-
-
-TEST( ImageSignatureTest , imageSign )
+#include "pandora_vision_hazmat/planar_object_detector.h"
+#include "pandora_vision_hazmat/sift_detector.h"
+#include "pandora_vision_hazmat/surf_detector.h"
+#include "pandora_vision_hazmat/orb_detector.h"
+#include <locale>
+class DetectorFactory
 {
-  // Create a small image with positive elements .
-  cv::Mat testImage( 20 , 20 , CV_32SC3 );
-  testImage.setTo(100);
+  public:
+    
+    DetectorFactory(){};
 
-  cv::Mat signs;
+    PlanarObjectDetector* createDetectorObject(const std::string& featureType);    
+  private:
+};
 
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Since we pass a multi channel matrix the function must return
-  // an empty matrix.
-  ASSERT_TRUE(signs.data == NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat( 20 , 20, CV_32FC1 );
-  testImage.setTo(100);
-
-  ImageSignature::signFunction( testImage , &signs );
-  ASSERT_TRUE(signs.data == NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
-  testImage.setTo(100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is positive.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
-  {
-    for (int j = 0 ; j < testImage.cols ; j++ )
-    {
-      int val = signs.at<float>( i , j );
-      ASSERT_GT(  val , 0 );
-    }
-  }
-
-
-  // Create a matrix with negative elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
-  testImage.setTo(-100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is negative.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
-  {
-    for (int j = 0 ; j < testImage.cols ; j++ )
-    {
-      int val = signs.at<float>( i , j);
-      ASSERT_LT( val , 0 );
-    }
-  }
-
-}
-  
+#endif  // PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H

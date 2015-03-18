@@ -34,15 +34,11 @@
  *
  * Authors: Choutas Vassilis 
  *********************************************************************/
+
 #ifndef PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
 #define PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
 
-
-
-#include "pandora_vision_hazmat/planar_object_detector.h"
-#include "pandora_vision_hazmat/sift_detector.h"
-#include "pandora_vision_hazmat/surf_detector.h"
-#include "pandora_vision_hazmat/orb_detector.h"
+#include "pandora_vision_hazmat/detector_factory.h"
 
 class HazmatDetectionNode
 {
@@ -53,7 +49,7 @@ class HazmatDetectionNode
     { };
   
     void imageCallback(const sensor_msgs::Image& inputImage);
-
+    
     void setImageTopic(const std::string& imageTopic)
     {
       imageTopic_ = imageTopic;
@@ -68,6 +64,7 @@ class HazmatDetectionNode
     std::string imageTopic_;
 
     std::string hazmatTopic_;
+
     PlanarObjectDetector *detector_;
 };
 

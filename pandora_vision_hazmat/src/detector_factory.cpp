@@ -36,66 +36,34 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/image_signature.h"
-#include "gtest/gtest.h"
+#include "pandora_vision_hazmat/detector_factory.h"
 
-
-
-TEST( ImageSignatureTest , imageSign )
+PlanarObjectDetector* DetectorFactory::createDetectorObject(const std::string& featureType)
 {
-  // Create a small image with positive elements .
-  cv::Mat testImage( 20 , 20 , CV_32SC3 );
-  testImage.setTo(100);
+  std::locale loc;
+  std::string feature;
+  for (std::string::size_type i = 0; i < featureType.length() ; ++i)
+    feature += std::toupper(featureType[i], loc);
 
-  cv::Mat signs;
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Since we pass a multi channel matrix the function must return
-  // an empty matrix.
-  ASSERT_TRUE(signs.data == NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat( 20 , 20, CV_32FC1 );
-  testImage.setTo(100);
-
-  ImageSignature::signFunction( testImage , &signs );
-  ASSERT_TRUE(signs.data == NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
-  testImage.setTo(100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is positive.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
+  if( !feature.compare("SIFT"))
   {
-    for (int j = 0 ; j < testImage.cols ; j++ )
-    {
-      int val = signs.at<float>( i , j );
-      ASSERT_GT(  val , 0 );
-    }
-  }
-
-
-  // Create a matrix with negative elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
-  testImage.setTo(-100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is negative.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
+    ROS_INFO("Creating new SIFT Detector!\n");
+    return new SiftDetector();
+  } 
+  else if ( !feature.compare("SURF"))
   {
-    for (int j = 0 ; j < testImage.cols ; j++ )
-    {
-      int val = signs.at<float>( i , j);
-      ASSERT_LT( val , 0 );
-    }
+      ROS_INFO("Creating new SURF Detector!\n");
+      return new SurfDetector();
+  } 
+  else if ( !featureType.compare("ORB"))
+  {
+      ROS_INFO("Creating new ORB Detector!\n");
+      return new OrbDetector();
   }
-
+  else
+  {
+      ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
+      return NULL;
+  }
+  return NULL;
 }
-  

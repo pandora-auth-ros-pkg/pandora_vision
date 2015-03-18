@@ -49,16 +49,42 @@ target_link_libraries(
   ${catkin_LIBRARIES}
   )
 
+add_library(
+  ${PROJECT_NAME}_detectors
+  src/planar_object_detector.cpp
+  src/feature_matching_detector.cpp
+  src/sift_detector.cpp
+  src/surf_detector.cpp
+  src/orb_detector.cpp
+  )
+
+target_link_libraries(
+  ${PROJECT_NAME}_detectors
+  ${PROJECT_NAME}_filters
+  ${catkin_LIBRARIES}
+  )
+
+add_library(
+  ${PROJECT_NAME}_detector_factory
+  src/detector_factory.cpp)
+target_link_libraries(
+  ${PROJECT_NAME}_detector_factory
+  ${PROJECT_NAME}_detectors
+  ${catkin_LIBRARIES}
+  )
+
+add_library(${PROJECT_NAME}_interface
+      src/hazmat_detection.cpp
+      )
+target_link_libraries(${PROJECT_NAME}_interface
+    ${PROJECT_NAME}_detector_factory
+    ${catkin_LIBRARIES}
+    )
 add_executable(hazmat_node
       src/hazmat_node.cpp
-      src/hazmat_detection.cpp
-      src/planar_object_detector.cpp
-      src/feature_matching_detector.cpp
-      src/sift_detector.cpp
-      src/surf_detector.cpp
-      src/orb_detector.cpp)
+      )
 target_link_libraries(hazmat_node
-    ${PROJECT_NAME}_filters
+    ${PROJECT_NAME}_interface
     ${catkin_LIBRARIES} )
 target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
 add_dependencies(hazmat_node

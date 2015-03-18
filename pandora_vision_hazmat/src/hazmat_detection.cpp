@@ -41,7 +41,7 @@
 HazmatDetectionNode::HazmatDetectionNode()
 {
   ROS_INFO("Starting Hazmat Detection Node!\n");
-
+  std::string ns = nodeHandle_.getNamespace();
   // TO DO : use nodehandle get params.
   imageTopic_ = std::string("/camera/image_raw");
   imageSubscriber_ = nodeHandle_.subscribe( imageTopic_ , 1 ,
@@ -50,9 +50,25 @@ HazmatDetectionNode::HazmatDetectionNode()
   // Get the path of the current package.
   std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
   PlanarObjectDetector::setFileName(packagePath);
+  DetectorFactory factory;
 
   // Initiliaze the object detector
-  detector_ = new OrbDetector();
+  std::string featureType;
+  ROS_INFO("Node name space is : %s \n", ns.c_str());
+  if ( !nodeHandle_.getParam(ns + "/feature_type", featureType) )
+  {
+    ROS_ERROR("Could not get the feature type parameter!\n");
+    ROS_INFO("Initializing default detector!\n");
+    featureType = "SIFT"; 
+  }
+  detector_ = factory.createDetectorObject(featureType);
+  // Check if the detector was initialized.
+  if (detector_ == NULL )
+  {
+    ROS_FATAL("Could not create a detector object!\n");
+    ROS_FATAL("The node will now exit!\n");
+    ROS_BREAK();
+  }
   ROS_INFO("Created the detector object!\n");
   
   // Initialize the alert Publisher.
@@ -60,6 +76,7 @@ HazmatDetectionNode::HazmatDetectionNode()
   hazmatPublisher_ = nodeHandle_.advertise<std_msgs::Bool>(hazmatTopic_, 10);
 
 }
+
 
 void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
 {

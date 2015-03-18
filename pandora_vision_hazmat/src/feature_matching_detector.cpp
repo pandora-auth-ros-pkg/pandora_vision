@@ -74,7 +74,11 @@ bool FeatureMatchingDetector::readData( void )
   
   // Go to the xml node that contains the pattern names.
   cv::FileNode inputNames = fs["PatternName"];
-  
+  if (inputNames.empty())
+  {
+    ROS_ERROR("The xml file does not contain a node named : PatternName!\n");
+    return false;
+  }
   // Check if the node has a sequence.
   if ( inputNames.type() != cv::FileNode::SEQ)
   {
@@ -91,10 +95,22 @@ bool FeatureMatchingDetector::readData( void )
   // Iterate over the node and get the names.
   for ( ; it != itEnd ; ++it ) 
   {
+    if ( (*it)["name"].empty() )
+    {
+      ROS_ERROR("No name tag exists for the current value of the iteration"
+          ". The procedure will continue with the next node!\n");
+      continue;
+    }
     inputName = (std::string)(*it)["name"];
     input.push_back(inputName);
   }
-  
+
+  // Check if the names of the patters where read successfully.
+  if (input.size() <= 0)
+  {
+    ROS_FATAL("No patterns names were read from the provided file!\n");
+    return false;
+  }
   // Close the file with the pattern names.
   fs.release();
   
@@ -108,7 +124,7 @@ bool FeatureMatchingDetector::readData( void )
   { 
     // Open the training file associated with image #i .
     fileName = trainingDataDir + "/" + input[i] + ".xml";
-    cv::FileStorage fs2( fileName , cv::FileStorage::READ);
+    cv::FileStorage fs2( fileName.c_str() , cv::FileStorage::READ);
     
     // Check if the file was properly opened.
     if ( !fs2.isOpened() )
@@ -123,11 +139,28 @@ bool FeatureMatchingDetector::readData( void )
     cv::Mat histogram;
     
     // Read the pattern's descriptors.
+    if ( fs2["Descriptors"].empty() )
+    {
+      ROS_ERROR("No descriptors entry was specified for the pattern : %s !\n",
+          fileName.c_str());
+      continue;
+    }
     fs2["Descriptors"] >> descriptors;
-    
+    if ( fs2["Histogram"].empty() )
+    {
+      ROS_ERROR("No Histogram entry was specified for the pattern : %s ! \n", 
+          fileName.c_str());
+      continue;
+    }
     fs2["Histogram"] >> histogram;
         
     // Read the pattern's keypoints.
+    if ( fs2["PatternKeypoints"].empty() )
+    {
+      ROS_ERROR("No Keypoints entry was specified for the pattern : %s ! \n", 
+          fileName.c_str());
+      continue;
+    }
     cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
     
     // Initialize node iterators.
@@ -135,17 +168,34 @@ bool FeatureMatchingDetector::readData( void )
     cv::FileNodeIterator itEnd = keyPointsNode.end();
     
     cv::Point2f tempPoint;
-    
+    int counter = 0;
     // Iterate over the node to get the keypoints.
     for ( ; it != itEnd ; ++it ) 
     {
+      if ( (*it)["Keypoint"].empty() )
+      {
+        ROS_ERROR("Error in reading keypoint %d for pattern %s ! \n", 
+            counter + 1 , fileName.c_str());
+        continue;
+      }
       (*it)["Keypoint"] >> tempPoint;
       keyPoints.push_back(tempPoint);
+      counter++;
     }
-    
-    // Read the pattern's bounding box.
+    if (keyPoints.size() <= 0)
+    {
+      ROS_ERROR("No keypoints were read from the specified file for "
+          "the pattern %s!", fileName.c_str());
+      continue;
+    }
+    // Read the pattern's bounding box. 
     cv::FileNode boundingBoxNode = fs2["BoundingBox"];
-    
+    if (boundingBoxNode.empty() )
+    {
+      ROS_ERROR("No bounding box entry exists for the pattern %s !\n", 
+          fileName.c_str());
+      continue;
+    }
     // Initialize it's iterator.
     cv::FileNodeIterator bbIt = boundingBoxNode.begin();
     cv::FileNodeIterator bbItEnd = boundingBoxNode.end();
@@ -156,7 +206,18 @@ bool FeatureMatchingDetector::readData( void )
       (*bbIt)["Corner"] >> tempPoint;
       boundingBox.push_back(tempPoint);
     }
-    
+    if (boundingBoxNode.size() <= 0 )
+    {
+      ROS_ERROR("The bounding box for the pattern %s could not be read!\n",
+          fileName.c_str());
+      continue;
+    }
+    if (boundingBoxNode.size() < 5 )
+    {
+      ROS_ERROR("Not all the points of the bounding box for the pattern %s " 
+          "were read!\n", fileName.c_str());
+      continue;
+    }
     // Add the pattern to the pattern vector.
     Pattern p;
     p.name = input[i];
@@ -165,10 +226,6 @@ bool FeatureMatchingDetector::readData( void )
     p.descriptors = descriptors;
     p.histogram = histogram;
     patterns_->push_back(p);
-    
-    // Clear the data vectors.
-    keyPoints.clear();
-    boundingBox.clear(); 
     
     // Close the xml file .
     fs2.release();
@@ -185,6 +242,7 @@ bool FeatureMatchingDetector::readData( void )
     ROS_FATAL("No pattern was read! The node cannot function!\n");
     ROS_BREAK();
   }
+  return true;
 }
 
 
@@ -210,12 +268,12 @@ SimpleHazmatDetector::SimpleHazmatDetector(
           
     
 bool FeatureMatchingDetector::findKeypointMatches(
-      const cv::Mat &frameDescriptors ,
-      const cv::Mat &patternDescriptors , 
-      const std::vector<cv::Point2f> patternKeyPoints ,
-      const std::vector<cv::KeyPoint> sceneKeyPoints ,
-      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints , 
+      const cv::Mat& frameDescriptors ,
+      const cv::Mat& patternDescriptors , 
+      const std::vector<cv::Point2f>& patternKeyPoints ,
+      const std::vector<cv::KeyPoint>& sceneKeyPoints ,
+      std::vector<cv::Point2f>* matchedPatternKeyPoints , 
+      std::vector<cv::Point2f>* matchedSceneKeyPoints , 
       const int &patternID  ) 
 {
   // Clear the vectors containing the matched keypoints.
@@ -226,6 +284,34 @@ bool FeatureMatchingDetector::findKeypointMatches(
   // Each element is a vector that contains the first,the second
   // up to the n-th best match.
   std::vector< std::vector<cv::DMatch> > matches;
+  
+  // Check if the keypoints for pattern #patternID have been loaded.
+  if (patternKeyPoints.size() <= 0)
+  {
+    ROS_ERROR("No keypoints stored for pattern %d!\n", patternID);
+    return false;
+  }
+
+  // Check if we have stored the descriptors for pattern #patternID.
+  if (patternDescriptors.data == NULL)
+  {
+    ROS_ERROR("No descriptors stored for pattern %d!\n", patternID);
+    return false;
+  }
+  // No keypoints detected in the scene so the matching cannot continue.
+  if (sceneKeyPoints.size() <=0 )
+  {
+    ROS_INFO("No keypoints were detected in the current scene! \n");
+    return false;
+  }
+  // No descriptors calculated for the current frame.
+  if (frameDescriptors.data == NULL)
+  {
+    ROS_INFO("No descriptors were calculated for the the keypoints of the "
+        "frame!\n");
+    return false;
+  }
+  
   
   // Perfom the matching using the matcher of the patternID-th 
   // pattern and find the top 2 correspondences. 

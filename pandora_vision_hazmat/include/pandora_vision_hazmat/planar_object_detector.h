@@ -64,12 +64,12 @@ class PlanarObjectDetector : public Detector
     // Function that takes as input the scene descriptors, matches
     // them to the pattern descriptors and returns the corresponding
     // keypoints.
-    bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat &patternDescriptors , 
-      const std::vector<cv::Point2f> patternKeyPoints ,
-      const std::vector<cv::KeyPoint> sceneKeyPoints ,
-      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints  , 
+    bool virtual findKeypointMatches(const cv::Mat& frameDescriptors ,
+      const cv::Mat& patternDescriptors , 
+      const std::vector<cv::Point2f>& patternKeyPoints ,
+      const std::vector<cv::KeyPoint>& sceneKeyPoints ,
+      std::vector<cv::Point2f>* matchedPatternKeyPoints , 
+      std::vector<cv::Point2f>* matchedSceneKeyPoints  , 
       const int &patternID = 0 ) = 0;
       
     /**
@@ -87,14 +87,14 @@ class PlanarObjectDetector : public Detector
     **/
     bool virtual findBoundingBox(const std::vector<cv::Point2f> 
       &patternKeyPoints , 
-      const std::vector<cv::Point2f> &sceneKeyPoints , 
-      const std::vector<cv::Point2f> &patternBB , 
-      std::vector<cv::Point2f> *sceneBB);
+      const std::vector<cv::Point2f>& sceneKeyPoints , 
+      const std::vector<cv::Point2f>& patternBB , 
+      std::vector<cv::Point2f>* sceneBB);
 
     // Function that sets the file where the pattern names are stored.
-    static void setFileName( const std::string &file ) 
+    static void setFileName( const std::string &fileName ) 
     {
-      fileName_ = file;       
+      fileName_ = fileName;       
     }
     
     // Return the name of the features used.
