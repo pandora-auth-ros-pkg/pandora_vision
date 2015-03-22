@@ -35,8 +35,8 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_MOCK_FEATURE_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_MOCK_FEATURE_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_MOCK_MOCK_FEATURE_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_MOCK_MOCK_FEATURE_DETECTOR_H
 
 #include "pandora_vision_hazmat/feature_matching_detector.h"
 
@@ -52,4 +52,4 @@ class MockFeatureDetector : public FeatureMatchingDetector
   private:
 };
 
-#endif  // PANDORA_VISION_HAZMAT_MOCK_FEATURE_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_MOCK_MOCK_FEATURE_DETECTOR_H

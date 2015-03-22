@@ -95,15 +95,109 @@ TEST_F(FeatureMatchingDetectorTest, test_input)
       testVecP2f, emptyVec, &returnVec, &returnVec);
   ASSERT_FALSE(testFlag);
   
-  returnVec.push_back(cv::Point2f(1, 0));
-  testFlag = MockDetector.findBoundingBox(emptyVecP2f, returnVec, returnVec, 
-      &returnVec );
+  // The function must return false since there are not enough points for 
+  // the RANSAC algorithm to estimate the homography matrix.
+  testFlag = MockDetector.findBoundingBox(emptyVecP2f, testVecP2f, testVecP2f, 
+      &returnVec);
   ASSERT_FALSE(testFlag);
-  testFlag = MockDetector.findBoundingBox(returnVec, emptyVecP2f, returnVec,
-      &returnVec );
+  testFlag = MockDetector.findBoundingBox(testVecP2f, emptyVecP2f, testVecP2f,
+      &returnVec);
   ASSERT_FALSE(testFlag);
-  testFlag = MockDetector.findBoundingBox(returnVec, returnVec, emptyVecP2f,
-      &returnVec );
+  // The function must return false since an empty vector is provided
+  // as a bounding box.
+  testFlag = MockDetector.findBoundingBox(testVecP2f, testVecP2f, emptyVecP2f,
+      &returnVec);
   ASSERT_FALSE(testFlag);
 
+}
+
+TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
+{
+  bool testFlag;
+  std::vector<cv::Point2f> patternKeyPoints;
+  std::vector<cv::Point2f> sceneKeyPoints;
+  std::vector<cv::Point2f> patternBB;
+  std::vector<cv::Point2f> sceneBB;
+  std::vector<cv::Point2f> correctBB;
+
+  patternBB.push_back(cv::Point2f(0.0f, 0.0f)); 
+  patternBB.push_back(cv::Point2f(100.0f, 0.0f));
+  patternBB.push_back(cv::Point2f(100.0f, 100.0f));
+  patternBB.push_back(cv::Point2f(0.0f, 100.0f));
+  
+  patternKeyPoints.push_back(cv::Point2f(25.0f, 0.0f));
+  patternKeyPoints.push_back(cv::Point2f(75.0f, 0.0f ));
+  patternKeyPoints.push_back(cv::Point2f(75.0f, 75.0f));
+  patternKeyPoints.push_back(cv::Point2f(0.0f, 75.0f));
+  patternKeyPoints.push_back(cv::Point2f(50.0f, 50.0f));
+  
+  correctBB.push_back(cv::Point2f(0.0f, 0.0f)); 
+  correctBB.push_back(cv::Point2f(100.0f, 0.0f));
+  correctBB.push_back(cv::Point2f(100.0f, 100.0f));
+  correctBB.push_back(cv::Point2f(0.0f, 100.0f));
+  cv::Mat rot = cv::getRotationMatrix2D(cv::Point2f(50.0f, 50.0f), -90, 1);
+
+  cv::transform(patternBB, correctBB, rot);
+  cv::transform(patternKeyPoints, sceneKeyPoints, rot);
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+      patternBB, &sceneBB);
+  
+  for (int i = 0 ; i < correctBB.size() ; i++)
+  {
+    ASSERT_NEAR(correctBB[i].x, sceneBB[i].x, 0.01);
+    ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
+  }
+
+  // Second rotation test.
+  rot = cv::getRotationMatrix2D(cv::Point2f(50.0f, 50.0f), -45, 1);
+
+  cv::transform(patternBB, correctBB, rot);
+  cv::transform(patternKeyPoints, sceneKeyPoints, rot);
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+      patternBB, &sceneBB);
+  
+  for (int i = 0 ; i < correctBB.size() ; i++)
+  {
+    ASSERT_NEAR(correctBB[i].x, sceneBB[i].x, 0.01);
+    ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
+  }
+  // Scale test
+  rot = cv::getRotationMatrix2D(cv::Point2f(50.0f, 50.0f), 0, 0.5);
+
+  cv::transform(patternBB, correctBB, rot);
+  cv::transform(patternKeyPoints, sceneKeyPoints, rot);
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+      patternBB, &sceneBB);
+  
+  for (int i = 0 ; i < correctBB.size() ; i++)
+  {
+    ASSERT_NEAR(correctBB[i].x, sceneBB[i].x, 0.01);
+    ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
+  }
+  // Scale and clockwise Rotation test.
+  rot = cv::getRotationMatrix2D(cv::Point2f(50.0f, 50.0f), -60, 0.5);
+
+  cv::transform(patternBB, correctBB, rot);
+  cv::transform(patternKeyPoints, sceneKeyPoints, rot);
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+      patternBB, &sceneBB);
+  
+  for (int i = 0 ; i < correctBB.size() ; i++)
+  {
+    ASSERT_NEAR(correctBB[i].x, sceneBB[i].x, 0.01);
+    ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
+  }
+  // Scale and counter - clockwise Rotation test.
+  rot = cv::getRotationMatrix2D(cv::Point2f(50.0f, 50.0f), 120, 0.5);
+
+  cv::transform(patternBB, correctBB, rot);
+  cv::transform(patternKeyPoints, sceneKeyPoints, rot);
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+      patternBB, &sceneBB);
+  
+  for (int i = 0 ; i < correctBB.size() ; i++)
+  {
+    ASSERT_NEAR(correctBB[i].x, sceneBB[i].x, 0.01);
+    ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
+  }
 }

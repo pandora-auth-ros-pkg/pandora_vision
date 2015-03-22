@@ -311,7 +311,6 @@ bool PlanarObjectDetector::findBoundingBox(
     cv::perspectiveTransform( patternBB , 
       *sceneBB , H );
     
-    
     // Check if every point of the bounding box is inside the image.
     // If not then the correspondences are invalid and these keypoints
     // are rejected.
@@ -322,7 +321,6 @@ bool PlanarObjectDetector::findBoundingBox(
         || ( (*sceneBB)[i].y < 0) 
         || ( (*sceneBB)[i].y > PlanarObjectDetector::height ) )
           {
-            //~ std::cerr << "Bounding Box out of bounds " << std::endl;
             sceneBB->clear();
             return false ;
           }
