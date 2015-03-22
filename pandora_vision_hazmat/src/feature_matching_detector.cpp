@@ -284,7 +284,6 @@ bool FeatureMatchingDetector::findKeypointMatches(
   // Each element is a vector that contains the first,the second
   // up to the n-th best match.
   std::vector< std::vector<cv::DMatch> > matches;
-  
   // Check if the keypoints for pattern #patternID have been loaded.
   if (patternKeyPoints.size() <= 0)
   {
@@ -301,13 +300,13 @@ bool FeatureMatchingDetector::findKeypointMatches(
   // No keypoints detected in the scene so the matching cannot continue.
   if (sceneKeyPoints.size() <=0 )
   {
-    ROS_INFO("No keypoints were detected in the current scene! \n");
+    ROS_ERROR("No keypoints were detected in the current scene! \n");
     return false;
   }
   // No descriptors calculated for the current frame.
   if (frameDescriptors.data == NULL)
   {
-    ROS_INFO("No descriptors were calculated for the the keypoints of the "
+    ROS_ERROR("No descriptors were calculated for the the keypoints of the "
         "frame!\n");
     return false;
   }
