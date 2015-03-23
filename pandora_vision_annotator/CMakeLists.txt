@@ -3,8 +3,12 @@ project(pandora_vision_annotator)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy 
+  rosbag
+  camera_calibration_parsers
   roslib
   cv_bridge
+  sensor_msgs
 )
 
 include_directories( include
@@ -18,6 +22,7 @@ find_package(Qt4 REQUIRED COMPONENTS
   QtGui 
   QtUiTools
 )
+catkin_python_setup()
 
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 
@@ -34,7 +39,10 @@ catkin_package(
     QtUiTools
   CATKIN_DEPENDS
     roscpp
+    rospy
+    rosbag
     roslib
+    sensor_msgs
     cv_bridge
   INCLUDE_DIRS include
   LIBRARIES 
@@ -69,4 +77,7 @@ target_link_libraries(pandora_vision_annotator_node
   ${catkin_LIBRARIES} 
   ${QT_LIBRARIES}
 )
+install(PROGRAMS scripts/images_to_bag
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 
