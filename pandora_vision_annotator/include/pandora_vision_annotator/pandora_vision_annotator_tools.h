@@ -42,11 +42,17 @@
 #include <fstream>
 #include <cstdlib>
 
+
+#include <rosbag/bag.h>
+#include <rosbag/view.h>
 #include <ros/package.h>
 #include "ros/ros.h"
 #include <tf/transform_listener.h>
 
 #include <boost/thread.hpp>
+#include <boost/foreach.hpp>
+
+
 
 #include <QtUiTools/QUiLoader>
 
@@ -120,7 +126,7 @@ namespace pandora_vision
     static bool secondpoint;
     static void writeToFile(const std::string& filename);
     static void readFromFile();
-    static void setAnnotations(const std::string &category, int x, int y);
+    static void setAnnotations(const::std::string& imgName, const std::string &category, int x, int y);
     static bool is_file_exist(const char *fileName);
 
   };

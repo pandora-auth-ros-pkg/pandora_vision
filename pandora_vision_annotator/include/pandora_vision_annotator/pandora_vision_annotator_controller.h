@@ -74,6 +74,14 @@ namespace pandora_vision
       //!< Object of CConnector
       CConnector connector_;
 
+      //!< Vector of frames
+      std::vector<cv::Mat> frames;
+
+      //sensors_msgs::Image::ConstPtr imgs;
+      int count,prevcount;
+
+      int currentFrame;
+
     //------------------------------------------------------------------------//
     public:
 
@@ -104,15 +112,18 @@ namespace pandora_vision
       bool init();
 
       void receiveImage(const sensor_msgs::Image::ConstPtr& msg);
+      void connectFrame();
+      void loadBag(const std::string& filename, const std::string& topic);
 
-    //------------------------------------------------------------------------//
+
+         //------------------------------------------------------------------------//
     public Q_SLOTS:
 
       void rosTopicGiven(void);
 
     //------------------------------------------------------------------------//
     Q_SIGNALS:
-      void updateImage(void);
+      void updateImage();
     };
 }
 

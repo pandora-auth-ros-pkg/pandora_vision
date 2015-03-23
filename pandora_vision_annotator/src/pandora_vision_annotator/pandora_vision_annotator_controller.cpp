@@ -87,13 +87,33 @@ namespace pandora_vision
   }
 
   void CController::rosTopicGiven(void)
-  {
-    QString ros_topic = connector_.getRosTopic();
-    img_subscriber_ = n_.subscribe(
+  { QString ros_topic = connector_.getRosTopic();
+    /*img_subscriber_ = n_.subscribe(
       ros_topic.toStdString(),
       1,
       &CController::receiveImage,
-      this);
+      this);*/
+    loadBag("/home/marios/pandora_ws/benchmark_dataset.bag",ros_topic.toStdString());
+    count = 0;
+    currentFrame = 0;
+  }
+
+  void CController::loadBag(const std::string& filename, const std::string& topic)
+  {
+        rosbag::Bag bag;
+        bag.open(filename, rosbag::bagmode::Read);
+        rosbag::View view(bag, rosbag::TopicQuery(topic));
+        // Load all messages into our stereo dataset
+        BOOST_FOREACH(rosbag::MessageInstance const m, view)
+        {
+            sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
+            if(img != NULL)
+            receiveImage(img);
+        }
+              connector_.setFrames(frames);
+              connector_.setcurrentFrame();
+              qDebug("sfsfsdf");
+
   }
 
   void CController::receiveImage(const sensor_msgs::Image::ConstPtr& msg)
@@ -118,7 +138,7 @@ namespace pandora_vision
           cv::Mat(in_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
           cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
         }
-        else if(msg->encoding == "rgb8")
+        else if(msg->encoding == "rgb8" || msg->encoding == "bgr8" )
         {
           in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
           temp = in_msg->image;
@@ -134,11 +154,30 @@ namespace pandora_vision
         return;
       }
 
-    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    dest.bits(); // enforce deep copy, see documentation
+    /*ros::Rate loop_rate(100);*/
+    /*loop_rate.sleep();*/
+    count++;
+    qDebug("CALLBACK %d", count);
+    frames.push_back(temp);
+    //connectFrame();
+    //QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    //dest.bits(); // enforce deep copy, see documentation
 
-    connector_.setImage(dest);
-    Q_EMIT updateImage();
+    //connector_.setImage(dest);
+    //Q_EMIT updateImage();
+
+}
+void CController::connectFrame()
+{
+    qDebug("%ld",frames.size());
+    for(int i = 0; i < frames.size(); i++)
+    {
+      QImage dest((const uchar *) frames[currentFrame].data, frames[currentFrame].cols, frames[currentFrame].rows, frames[currentFrame].step, QImage::Format_RGB888);
+      dest.bits(); // enforce deep copy, see documentation
+      connector_.setImage(dest);
+      Q_EMIT updateImage();
+      //currentFrame++;
+    }
 
 }
   /**

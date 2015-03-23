@@ -82,20 +82,20 @@ namespace pandora_vision
    }
 
 
-    void ImgAnnotations::setAnnotations(const std::string &category, int x, int y)
+    void ImgAnnotations::setAnnotations(const std::string &imgName, const std::string &category, int x, int y)
     {
       if(secondpoint)
       {
         ImgAnnotations::temp.x2 = x;
         ImgAnnotations::temp.y2 = y;
         ImgAnnotations::annotations.push_back(temp);
-        qDebug("%ld",ImgAnnotations::annotations.size());
-        ImgAnnotations::annPerImage++;
+        qDebug(" Annotations in current frame %ld",ImgAnnotations::annotations.size());
+        //ImgAnnotations::annPerImage++;
         ImgAnnotations::secondpoint = false;
       }
       else
       {
-      ImgAnnotations::temp.imgName ="xx";
+      ImgAnnotations::temp.imgName =imgName;
       ImgAnnotations::temp.category = category;
       ImgAnnotations::temp.x1 = x;
       ImgAnnotations::temp.y1 = y;

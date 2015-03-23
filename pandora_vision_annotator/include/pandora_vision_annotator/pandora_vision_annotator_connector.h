@@ -72,10 +72,18 @@ namespace pandora_vision
       //!< Input arguments
       char**  argv_;
 
+      std::vector<int> bbox_ready;
+
+      std::vector<cv::Mat> frames;
+
+      int currFrame;
+
       //!< The loader of main GUI QWidget
       CLoader loader_;
 
       QImage localImage_;
+
+      QImage backupImage_;
 
       ImageStates img_state_;
 
@@ -98,19 +106,28 @@ namespace pandora_vision
 
       void setImage(QImage &img);
 
+      void setFrames(const std::vector<cv::Mat>& x);
+
+      void setcurrentFrame();
+
+      void drawBox();
+
 
     //------------------------------------------------------------------------//
     public Q_SLOTS:
 
       void rosTopicPushButtonTriggered(void);
 
-      void updateImage(void);
+      void updateImage();
 
       void victimPushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
       void hazmatPushButtonTriggered(void);
       void submitPushButtonTriggered(void);
+      void clearPushButtonTriggered(void);
+      void nextFramePushButtonTriggered(void);
+      void previousFramePushButtonTriggered(void);
 
     //------------------------------------------------------------------------//
     Q_SIGNALS:
