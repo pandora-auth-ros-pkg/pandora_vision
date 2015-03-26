@@ -36,7 +36,7 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/feature_matching_detector.h"
+#include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
 
 FeatureMatchingDetector::FeatureMatchingDetector(const std::string &featureName)

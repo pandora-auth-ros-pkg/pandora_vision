@@ -36,49 +36,34 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_SURF_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_SURF_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
  
-#include "pandora_vision_hazmat/feature_matching_detector.h"
+#include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
-class SurfDetector : public FeatureMatchingDetector 
+class OrbDetector : public FeatureMatchingDetector 
 {
-  public:
-    SurfDetector();
+ public:
 
-    ~SurfDetector()
-    {};
+    // Default Constructor
+    OrbDetector();
 
-    // Functions used to change the SURF algorithm parameters.
 
-    // Function for changing the threshold used for the hessian
-    // keypoint detector.
-    void setHessianThreshold(const double &t);
+    // OrbDetector object destructor.
+    ~OrbDetector() {};
 
-    // Function that changes the number of pyramid octaves the keypoint
-    // detector uses.
-    void setOctavesNumber(const double &ocNum);
-
-    // Setter for the the number of octave layers in each octave.
-    void setOctaveLayersNumber(const double &ocLay);
-
-    // Setter for the flag that decides whether to use or not an
-    // extended descriptor vector( 128 element ) .
-    void setExtendedDescrFlag(const double &extFlag);
-
-    // Set the flag that will decide if the orientation of the features
-    // will be computed. 
-    void setOrientationFlag(const double &orFlag);
+    // Function that returns the type of the feature detector used.
+    //~ const virtual TrainerType getType( void ) ;
 
     // Calculates the keypoints of the image and its descriptors.
     void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
         , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
 
-  private:
+ private:
 
-    // SURF detector 
-    cv::SURF s_;
+    // ORB detector 
+    cv::ORB s_;
 
 };
 
-#endif  // PANDORA_VISION_HAZMAT_SURF_DETECTOR_H_
+#endif  // PANDORA_VISION_HAZMAT_ORB_DETECTOR_H

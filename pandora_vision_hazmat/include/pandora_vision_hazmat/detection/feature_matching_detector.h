@@ -39,7 +39,7 @@
 #ifndef PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
 
-#include "pandora_vision_hazmat/planar_object_detector.h"
+#include "pandora_vision_hazmat/detection/planar_object_detector.h"
 
 /**
  @class FeatureMatchingDetector

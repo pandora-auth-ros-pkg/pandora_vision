@@ -51,11 +51,11 @@ target_link_libraries(
 
 add_library(
   ${PROJECT_NAME}_detectors
-  src/planar_object_detector.cpp
-  src/feature_matching_detector.cpp
-  src/sift_detector.cpp
-  src/surf_detector.cpp
-  src/orb_detector.cpp
+  src/detection/planar_object_detector.cpp
+  src/detection/feature_matching_detector.cpp
+  src/detection/sift_detector.cpp
+  src/detection/surf_detector.cpp
+  src/detection/orb_detector.cpp
   )
 
 target_link_libraries(
@@ -66,7 +66,7 @@ target_link_libraries(
 
 add_library(
   ${PROJECT_NAME}_detector_factory
-  src/detector_factory.cpp)
+  src/detection/detector_factory.cpp)
 target_link_libraries(
   ${PROJECT_NAME}_detector_factory
   ${PROJECT_NAME}_detectors
@@ -74,36 +74,39 @@ target_link_libraries(
   )
 
 add_library(${PROJECT_NAME}_interface
-      src/hazmat_detection.cpp
+      src/detection/hazmat_detection.cpp
       )
 target_link_libraries(${PROJECT_NAME}_interface
     ${PROJECT_NAME}_detector_factory
     ${catkin_LIBRARIES}
     )
-add_executable(hazmat_node
-      src/hazmat_node.cpp
+add_executable(${PROJECT_NAME}_node
+      src/detection/hazmat_node.cpp
       )
-target_link_libraries(hazmat_node
+target_link_libraries(${PROJECT_NAME}_node
     ${PROJECT_NAME}_interface
     ${catkin_LIBRARIES} )
-target_link_libraries(hazmat_node ${catkin_LIBRARIES} )
-add_dependencies(hazmat_node
+add_dependencies(${PROJECT_NAME}_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 
 # Download necessary data to run
-download_extra_data(${PROJECT_NAME}_download_training_data
+download_extra_data(${PROJECT_NAME}_download_training_results
                     EXTRA_FILES data/extra_files.yaml)
 
 ########################### hazmatTrainNode ############################
-#if(HAZMAT_ENABLE_TRAIN)
-#  add_executable(hazmat_train src/hazmat_trainer.cpp
-#          src/utils.cpp
-#          src/sift.cpp
-#          src/imgfeatures.cpp)
-#  target_link_libraries(hazmat_train ${catkin_LIBRARIES} )
-#endif()
+if(HAZMAT_ENABLE_TRAINING)
+  add_executable(${PROJECT_NAME}_trainer_node 
+          src/training/hazmat_trainer_node.cpp
+          src/training/planar_pattern_trainer.cpp 
+          src/training/factory.cpp
+          src/training/sift_trainer.cpp
+          src/training/surf_trainer.cpp
+          src/training/orb_trainer.cpp)
+        target_link_libraries(${PROJECT_NAME}_trainer_node
+          ${catkin_LIBRARIES} )
+endif()
 
 
 #~ To check lint : catkin_make roslint_pandora_vision_hazmat

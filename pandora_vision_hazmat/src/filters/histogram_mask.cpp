@@ -35,7 +35,7 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/histogram_mask.h"
+#include "pandora_vision_hazmat/filters/histogram_mask.h"
 
 int HistogramMask::scale_ = 10;
 int HistogramMask::channels_[2] = { 0 , 1 };

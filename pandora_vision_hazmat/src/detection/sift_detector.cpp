@@ -35,7 +35,7 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/sift_detector.h"
+#include "pandora_vision_hazmat/detection/sift_detector.h"
 
 /**  
  * Sift detector 

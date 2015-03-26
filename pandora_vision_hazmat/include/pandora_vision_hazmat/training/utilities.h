@@ -34,40 +34,19 @@
  *
  * Authors: Choutas Vassilis 
  *********************************************************************/
+#ifndef UTILITIES_H
+#define UTILITIES_H
 
 
-#ifndef PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#include <iostream>
+#include <string>
+#include <vector>
+#include <locale>
+#include "ros/ros.h"
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/nonfree/nonfree.hpp"
 
-#include "pandora_vision_hazmat/feature_matching_detector.h"
-
-/**
-  @class SiftDetector
-  @brief Implements a detector that uses SIFT ( Scale Invariant 
-         Features Transformation) features to detect the different 
-         signs.
-**/
-
-class SiftDetector : public FeatureMatchingDetector 
-{
-  public:
-        
-    SiftDetector();
-    // SiftDetector object destructor.
-    ~SiftDetector() {};
-    
-    // Function that returns the type of the feature detector used.
-    //~ const virtual TrainerType getType( void ) ;
-    
-    // Calculates the keypoints of the image and its descriptors.
-    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
-     
-  private:
-  
-    // SIFT detector 
-    cv::SIFT s_;
-    
-};
-
-#endif  // PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#endif

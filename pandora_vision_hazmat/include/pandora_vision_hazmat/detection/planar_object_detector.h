@@ -39,7 +39,7 @@
 #ifndef PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_HAZMAT_DETECTOR_H
 
-#include "pandora_vision_hazmat/detector_interface.h"
+#include "pandora_vision_hazmat/detection/detector_interface.h"
 
 
 class PlanarObjectDetector : public Detector
@@ -48,7 +48,8 @@ class PlanarObjectDetector : public Detector
   
     // Function that detects the PlanarObject patterns.
     
-    bool virtual detect(const cv::Mat &frame , float *x , float *y );
+    bool virtual detect(const cv::Mat &frame , std::vector<Object>* 
+        detectedObjects);
     
     // Function used for reading the training data from an xml file.
     
@@ -119,13 +120,7 @@ class PlanarObjectDetector : public Detector
     // PlanarObjectDetector Destructor.
     virtual ~PlanarObjectDetector()
     {}
-    
-    // Return a pointer to the patterns. 
-    boost::shared_ptr< std::vector<Pattern> > getPatternsPtr()
-    {
-      return patterns_;
-    } 
-    
+   
     // Returns the total number of patterns.
     int getPatternsNumber(void)
     {

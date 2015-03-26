@@ -35,35 +35,22 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
+#ifndef PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
+#define PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
 
-#include "pandora_vision_hazmat/detector_factory.h"
-
-PlanarObjectDetector* DetectorFactory::createDetectorObject(const std::string& featureType)
+#include "pandora_vision_hazmat/detection/planar_object_detector.h"
+#include "pandora_vision_hazmat/detection/sift_detector.h"
+#include "pandora_vision_hazmat/detection/surf_detector.h"
+#include "pandora_vision_hazmat/detection/orb_detector.h"
+#include <locale>
+class DetectorFactory
 {
-  std::locale loc;
-  std::string feature;
-  for (std::string::size_type i = 0; i < featureType.length() ; ++i)
-    feature += std::toupper(featureType[i], loc);
+  public:
+    
+    DetectorFactory(){};
 
-  if( !feature.compare("SIFT"))
-  {
-    ROS_INFO("Creating new SIFT Detector!\n");
-    return new SiftDetector();
-  } 
-  else if ( !feature.compare("SURF"))
-  {
-      ROS_INFO("Creating new SURF Detector!\n");
-      return new SurfDetector();
-  } 
-  else if ( !featureType.compare("ORB"))
-  {
-      ROS_INFO("Creating new ORB Detector!\n");
-      return new OrbDetector();
-  }
-  else
-  {
-      ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
-      return NULL;
-  }
-  return NULL;
-}
+    PlanarObjectDetector* createDetectorObject(const std::string& featureType);    
+  private:
+};
+
+#endif  // PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H

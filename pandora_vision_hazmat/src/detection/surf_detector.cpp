@@ -35,7 +35,7 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/surf_detector.h"
+#include "pandora_vision_hazmat/detection/surf_detector.h"
 
 
 /** 

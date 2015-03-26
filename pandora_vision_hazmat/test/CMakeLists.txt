@@ -14,6 +14,7 @@ include_directories(
   #~ ${PROJECT_NAME}_filters
   #~ gtest_main
   #~ )
+#add_rostest(functional/hazmat_benchmark_test.launch)
 
 catkin_add_gtest(feature_detector_test unit/feature_matching_test.cpp)
 target_link_libraries(feature_detector_test

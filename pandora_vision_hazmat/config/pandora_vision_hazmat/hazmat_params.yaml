@@ -1,1 +1,6 @@
-feature_type: ORB
+feature_type: SIFT 
+
+subscriber_topic_names:
+  camera_topic: /kinect/rgb/image_raw
+publisher_topic_names:
+  alert_topic: /vision/hazmat_alert

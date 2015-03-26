@@ -35,35 +35,43 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
+#include "pandora_vision_hazmat/training/factory.h"
 
-#ifndef PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
- 
-#include "pandora_vision_hazmat/feature_matching_detector.h"
+  
+/**
+ @brief Function used to produce the correct Hazmat Trainer object. 
+ @param featureType[const std::string&] : The type of the feature which the
+ trainer model will use to describe the training objects. 
+**/  
 
-class OrbDetector : public FeatureMatchingDetector 
+PlanarPatternTrainer* PlanarPatternTrainerFactory::createObject(
+    const std::string &featureType)
 {
- public:
+  std::locale loc;
+  std::string feature;
+  for (std::string::size_type i = 0; i < featureType.length() ; ++i)
+    feature += std::toupper(featureType[i], loc);
 
-    // Default Constructor
-    OrbDetector();
-
-
-    // OrbDetector object destructor.
-    ~OrbDetector() {};
-
-    // Function that returns the type of the feature detector used.
-    //~ const virtual TrainerType getType( void ) ;
-
-    // Calculates the keypoints of the image and its descriptors.
-    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-        , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
-
- private:
-
-    // ORB detector 
-    cv::ORB s_;
-
-};
-
-#endif  // PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+  if( !feature.compare("SIFT"))
+  {
+    ROS_INFO("Creating new SIFT Trainer!\n");
+    return new SiftTrainer();
+  } 
+  else if ( !feature.compare("SURF"))
+  {
+      ROS_INFO("Creating new SURF Trainer!\n");
+      return new SurfTrainer();
+  } 
+  else if ( !featureType.compare("ORB"))
+  {
+      ROS_INFO("Creating new ORB Trainer!\n");
+      return new OrbTrainer();
+  }
+  else
+  {
+      ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
+      return NULL;
+  }
+  return NULL;
+}
+  

@@ -35,38 +35,39 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
-#define PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
 
-#include "pandora_vision_hazmat/detector_factory.h"
+#ifndef PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
 
-class HazmatDetectionNode
+#include "pandora_vision_hazmat/detection/feature_matching_detector.h"
+
+/**
+  @class SiftDetector
+  @brief Implements a detector that uses SIFT ( Scale Invariant 
+         Features Transformation) features to detect the different 
+         signs.
+**/
+
+class SiftDetector : public FeatureMatchingDetector 
 {
   public:
-    HazmatDetectionNode();
-
-    ~HazmatDetectionNode()
-    { };
-  
-    void imageCallback(const sensor_msgs::Image& inputImage);
+        
+    SiftDetector();
+    // SiftDetector object destructor.
+    ~SiftDetector() {};
     
-    void setImageTopic(const std::string& imageTopic)
-    {
-      imageTopic_ = imageTopic;
-    }
+    // Function that returns the type of the feature detector used.
+    //~ const virtual TrainerType getType( void ) ;
+    
+    // Calculates the keypoints of the image and its descriptors.
+    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
+     
   private:
-    ros::NodeHandle nodeHandle_;
-
-    ros::Subscriber imageSubscriber_;
+  
+    // SIFT detector 
+    cv::SIFT s_;
     
-    ros::Publisher hazmatPublisher_; 
-
-    std::string imageTopic_;
-
-    std::string hazmatTopic_;
-
-    PlanarObjectDetector *detector_;
 };
 
-#endif  // PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
-
+#endif  // PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H

@@ -36,7 +36,7 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/planar_object_detector.h"
+#include "pandora_vision_hazmat/detection/planar_object_detector.h"
 
 int PlanarObjectDetector::width = 640;
 int PlanarObjectDetector::height = 480;
@@ -51,8 +51,8 @@ PlanarObjectDetector::PlanarObjectDetector(const std::string &featureName)
  
 // Detect the pattern in the frame.
 
-bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x , 
-  float *y ) 
+bool PlanarObjectDetector::detect(const cv::Mat &frame,
+    std::vector<Object>* detectedObjects) 
 {
   // Check if the frame is not an empty matrix.
   if ( !frame.data )
@@ -71,15 +71,8 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
   {
     std::cerr << "No patterns read . Detection cannot continue " << 
       std::endl;
-    *x = -1;
-    *y = -1;
     return false;
   }
-  
-  
-  // Set the pattern center to NULL .
-  *x = -1;
-  *y = -1;
   
   bool foundPattern = false;
   // The matrix that contains the descriptors of the frame.
@@ -124,7 +117,8 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
   std::vector<cv::Point2f> sceneKeyPoints;
   std::vector<cv::Point2f> sceneBB;
   
-  int found;
+  // Temporary variables used to store the detected center of a pattern.
+  float x , y;
   
   // For every pattern in the list : 
   for (int i = 0 ; i < patterns_->size() ; i++ )
@@ -132,11 +126,6 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
     #ifdef CHRONO
     gettimeofday (&startwtime, NULL); 
     #endif
-    
-    // Test it before adding it to the system.
-    //HistogramMask::createBackProjectionMask(frame , &mask , 
-       //(*patterns_)[i].histogram );
-     
     
       
     // Try to find key point matches between the i-th pattern
@@ -183,7 +172,7 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
       {
         #ifdef DEBUG
         cv::Mat trackingFrame;
-        frame.copyTo(trackingFrame , mask);
+        frame.copyTo(trackingFrame , cv::Mat());
         cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , 
             cv::Scalar(0, 255, 0), 4 );
         cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , 
@@ -212,22 +201,23 @@ bool PlanarObjectDetector::detect( const cv::Mat &frame , float *x ,
         //~ std::cout << "SideB " << sideB << std::endl;
         
         
-        *x = sceneBB[ sceneBB.size() - 1 ].x;
-        *y = sceneBB[ sceneBB.size() - 1 ].y;
+        x = sceneBB[ sceneBB.size() - 1 ].x;
+        y = sceneBB[ sceneBB.size() - 1 ].y;
   
         
         //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
           //~ continue;
-        if (surface < 10 || surface > frame.rows*frame.cols)
-        { 
-          patternKeyPoints.clear();
-          sceneBB.clear();
-          sceneKeyPoints.clear();
+        //if (surface < 10 || surface > frame.rows*frame.cols)
+        //{ 
+          //patternKeyPoints.clear();
+          //sceneBB.clear();
+          //sceneKeyPoints.clear();
 
-          continue;
-        }
-        found = i;
+          //continue;
+        //}
         
+        detectedObjects->push_back(Object((*patterns_)[i].name,
+              cv::Point2f(x, y )));
       }
       
     }

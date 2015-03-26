@@ -3,7 +3,7 @@
    <include file="$(find pandora_vision_launchers)/launch/usb_cam.launch" >
     <arg name="camID" value="/dev/video0"/>
     <arg name="name" value="right_camera"/>
-    <arg name="topic_name" value="/camera/image_raw"/>
+    <arg name="topic_name" value="/kinect/rgb/image_raw"/>
     <arg name="frame_id" value="right_camera_link"/>
   </include>
   

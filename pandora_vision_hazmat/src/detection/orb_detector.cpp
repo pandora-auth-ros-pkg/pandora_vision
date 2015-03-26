@@ -36,7 +36,7 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/orb_detector.h"
+#include "pandora_vision_hazmat/detection/orb_detector.h"
 
 /** 
  *  ORB detector 
