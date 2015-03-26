@@ -36,6 +36,7 @@
 *          Miltiadis Kofinas, <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
 #include "pandora_vision_motion/motion_detector.h"
 
 namespace pandora_vision 
@@ -77,7 +78,7 @@ namespace pandora_vision
     @param frame [&cv::Mat] current frame to be processed 
     @return [int] Index of evaluation of Motion in current frame.
   */
-  int MotionDetector::detectMotion(cv::Mat &frame)
+  int MotionDetector::detectMotion(const cv::Mat& frame)
   {
     /// Check that frame has data and that image has 3 channels
     if (frame.data && frame.channels() == 3)
@@ -127,7 +128,7 @@ namespace pandora_vision
       background.
     @return void 
   */
-  void MotionDetector::detectMotionPosition(const cv::Mat &diff)
+  void MotionDetector::detectMotionPosition(const cv::Mat& diff)
   {
     /// Check that the thresholded difference image has data
     if(diff.data)
@@ -142,22 +143,22 @@ namespace pandora_vision
         int min_x = diff.cols, max_x = 0;
         int min_y = diff.rows, max_y = 0;
         /// Loop over image and detect changes
-        for(int j = 0; j < diff.cols; j++)
+        for(int i = 0; i < diff.rows; i++)
         { 
-          for(int i = 0; i < diff.rows; i++)
+          for(int j = 0; j < diff.cols; j++)
           {
-              if(static_cast<int>(diff.at<uchar>(i, j)) == 255)
-              {
-                number_of_changes++;
-                if(min_y > i) 
-                  min_y = i;
-                if(max_y < i) 
-                  max_y = i;
-                if(min_x > j) 
-                  min_x = j;
-                if(max_x < j) 
-                  max_x = j;
-              }
+            if(static_cast<int>(diff.at<uchar>(i, j)) == 255)
+            {
+              number_of_changes++;
+              if(min_y > i) 
+                min_y = i;
+              if(max_y < i) 
+                max_y = i;
+              if(min_x > j) 
+                min_x = j;
+              if(max_x < j) 
+                max_x = j;
+            }
           }
         }
         if(number_of_changes)
@@ -205,9 +206,7 @@ namespace pandora_vision
     @return typeOfMovement [int], where 2 corresponds to moving objects
     with greater probability whereas 0 corresponds to stationary objects
   */ 
-  int MotionDetector::motionIdentification(
-    const cv::Mat &thresholdedDifference
-  )
+  int MotionDetector::motionIdentification(const cv::Mat& thresholdedDifference)
   {
     //!< Counts value of non zero pixels in binary image in order 
     //!< to find the exact number of pixels, that differ from current 
@@ -232,8 +231,8 @@ namespace pandora_vision
     @return void
   */ 
   void MotionDetector::debugShow(
-    const cv::Mat &thresholdedDifference, 
-    const cv::Mat &frame
+    const cv::Mat& thresholdedDifference, 
+    const cv::Mat& frame
   )
   {
     std::vector<std::vector<cv::Point> > contours;
@@ -258,5 +257,4 @@ namespace pandora_vision
     
     contours.clear();
   }
-     
 }// namespace pandora_vision

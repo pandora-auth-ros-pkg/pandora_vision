@@ -38,25 +38,25 @@
 #ifndef PANDORA_VISION_MOTION_MOTION_DETECTION_H
 #define PANDORA_VISION_MOTION_MOTION_DETECTION_H
 
-#include "ros/ros.h"
-
-#include "pandora_vision_motion/motion_detector.h"
-
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/image_encodings.h>
-#include <image_transport/image_transport.h>
+#include <cstdlib>
+#include <string>
+#include <iostream>
+#include <map>
 
 #include <opencv/cvwimage.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+#include <ros/ros.h>
+
+#include <urdf_parser/urdf_parser.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
 #include "pandora_common_msgs/GeneralAlertMsg.h"
 #include "state_manager/state_client.h"
+#include "pandora_vision_motion/motion_detector.h"
 
-#include <iostream>
-#include <stdlib.h>
-#include <urdf_parser/urdf_parser.h>
-#include <map>
 
 namespace pandora_vision
 {

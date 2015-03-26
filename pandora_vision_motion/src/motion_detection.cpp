@@ -35,7 +35,12 @@
 * Author:  Despoina Paschalidou
 *********************************************************************/
 
+#include <utility>
+#include <map>
+#include <string>
+
 #include "pandora_vision_motion/motion_detection.h"
+
 namespace pandora_vision
 {
   /**

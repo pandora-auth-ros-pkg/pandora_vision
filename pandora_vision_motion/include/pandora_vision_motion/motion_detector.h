@@ -38,10 +38,12 @@
 #ifndef PANDORA_VISION_MOTION_MOTION_DETECTOR_H
 #define PANDORA_VISION_MOTION_MOTION_DETECTOR_H
 
-#include "ros/ros.h"
-#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
+
+#include <opencv2/opencv.hpp>
+#include <ros/ros.h>
+
 #include "pandora_vision_motion/motion_parameters.h"
 
 namespace pandora_vision 
@@ -68,7 +70,7 @@ namespace pandora_vision
         @param frame [&cv::Mat] current frame to be processed 
         @return [int] Index of evaluation of Motion in current frame.
       */
-      int detectMotion(cv::Mat &frame);
+      int detectMotion(const cv::Mat& frame);
 
       /**
         @brief Creates the continuous table of motion in current frame
@@ -89,7 +91,7 @@ namespace pandora_vision
         @return typeOfMovement [int], where 2 corresponds to moving objects
         with greater probability whereas 0 corresponds to stationary objects
       */ 
-      int motionIdentification(const cv::Mat &thresholdedDifference);
+      int motionIdentification(const cv::Mat& thresholdedDifference);
 
       /**
         @brief Function used for debug reasons, that shows background
@@ -100,7 +102,7 @@ namespace pandora_vision
         @param frame: [&cv::Mat] current frame, captured from camera
         @return void
       */ 
-      void debugShow(const cv::Mat &thresholdedDifference, 
+      void debugShow(const cv::Mat& thresholdedDifference, 
         const cv::Mat &frame);
 
       /**
@@ -110,7 +112,7 @@ namespace pandora_vision
         background.
         @return void 
       */
-      void detectMotionPosition(const cv::Mat &diff); 
+      void detectMotionPosition(const cv::Mat& diff); 
 
     private:
       //!< Current frame to be processed
