@@ -127,7 +127,7 @@ namespace pandora_vision
       background.
     @return void 
   */
-  void MotionDetector::detectMotionPosition(cv::Mat &diff)
+  void MotionDetector::detectMotionPosition(const cv::Mat &diff)
   {
     /// Check that the thresholded difference image has data
     if(diff.data)
@@ -178,7 +178,7 @@ namespace pandora_vision
     @brief Creates the continuous table of motion in current frame
     @return [int[]] table of motion position and size
   */
-   int* MotionDetector::getMotionPosition()
+  int* MotionDetector::getMotionPosition()
   {
     int *motion_position = new int[4];
     //!< Center_x

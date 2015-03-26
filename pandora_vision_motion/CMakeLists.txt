@@ -70,7 +70,6 @@ set(ROSLINT_CPP_OPTS
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-
   include/motion_detection.h
   include/motion_detector.h
   include/motion_parameters.h

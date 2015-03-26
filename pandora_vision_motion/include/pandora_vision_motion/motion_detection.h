@@ -34,9 +34,9 @@
 *
 * Author:  Despoina Paschalidou
 *********************************************************************/
- 
-#ifndef PANDORA_VISION_MOTION_MOTION_DETECTION_H 
-#define PANDORA_VISION_MOTION_MOTION_DETECTION_H 
+
+#ifndef PANDORA_VISION_MOTION_MOTION_DETECTION_H
+#define PANDORA_VISION_MOTION_MOTION_DETECTION_H
 
 #include "ros/ros.h"
 
@@ -60,50 +60,50 @@
 
 namespace pandora_vision
 {
-  class MotionDetection : public StateClient 
+  class MotionDetection : public StateClient
   {
     private:
       /// nodeHandle
       ros::NodeHandle _nh;
       /// Instance of class MotionDetector
       MotionDetector _motionDetector;
-            
+
       /// Horizontal Field Of View (rad)
       double hfov;
       /// Vertical Field Of View (rad)
       double vfov;
-      
+
       /// Frame width
-      int frameWidth; 
+      int frameWidth;
       /// Frame height
-      int frameHeight; 
+      int frameHeight;
       ///Current frame to be processed
-      cv::Mat motionFrame; 
+      cv::Mat motionFrame;
       /// MotionDetector frame timestamp
-      ros::Time motionFrameTimestamp; 
+      ros::Time motionFrameTimestamp;
 
       std::string imageTopic;
       std::string cameraName;
-      
-      std::string _parent_frame_id; 
+
+      std::string _parent_frame_id;
       std::string _frame_id;
-      
+
       /// Publishers for MotionDetector result messages
       ros::Publisher _motionPublisher;
-      
+
       /// Subscriber that listens to the frame topic advertised by the central node
       ros::Subscriber _frameSubscriber;
-                
+
       /// Variable used for State Managing
       bool motionNowON;
-      
+
       //!< The dynamic reconfigure (motion's) parameters' server
       dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>
         server;
       //!< The dynamic reconfigure (depth) parameters' callback
       dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>
         ::CallbackType f;  
-      
+
        /**
         @brief This method uses a MotionDetector instance to detect motion
         in current frame.
@@ -144,30 +144,29 @@ namespace pandora_vision
       std::map<std::string, std::string> _frame_ids_map;
            
     public:
-          
       /**
         @brief Constructor
       **/
       explicit MotionDetection(const std::string& ns);
-            
+
       /**
         @brief Destructor
       */
       ~MotionDetection();
-      
+
       /**
         @brief Node's state manager
         @param newState [int] The robot's new state
         @return void
       */
       void startTransition(int newState);
-      
+
       /**
          @brief After completion of state transition
          @return void
       */
       void completeTransition(void);
-      
+
       //!< Current state of robot
       int curState;
       //!< Previous state of robot

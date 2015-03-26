@@ -43,7 +43,6 @@ namespace pandora_vision
   **/
   MotionDetection::MotionDetection(const std::string& ns) : _nh(ns)
   {
-    
     //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
     _frame_id = "";
@@ -337,7 +336,6 @@ namespace pandora_vision
     MotionParameters::motion_high_thres= config.motion_high_thres;
     MotionParameters::motion_low_thres= config.motion_low_thres;
     MotionParameters::visualization= config.visualization;
-    
   }
 }// namespace pandora_vision
 

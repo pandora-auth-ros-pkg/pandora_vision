@@ -58,4 +58,4 @@ namespace pandora_vision
     static bool show_moving_objects_contours;
   };
 } // namespace pandora_vision
-#endif // PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
+#endif  // PANDORA_VISION_MOTION_MOTION_PARAMETERS_H

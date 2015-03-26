@@ -69,13 +69,13 @@ namespace pandora_vision
         @return [int] Index of evaluation of Motion in current frame.
       */
       int detectMotion(cv::Mat &frame);
-      
+
       /**
         @brief Creates the continuous table of motion in current frame
         @return [std::array<int,4>] table of motion position and size
       */
       int* getMotionPosition();
-    
+
      protected:
       /**
         @brief Function that defines the type of movement 
@@ -90,7 +90,7 @@ namespace pandora_vision
         with greater probability whereas 0 corresponds to stationary objects
       */ 
       int motionIdentification(const cv::Mat &thresholdedDifference);
-      
+
       /**
         @brief Function used for debug reasons, that shows background
         foreground and contours of motion trajectories in current frame
@@ -102,7 +102,7 @@ namespace pandora_vision
       */ 
       void debugShow(const cv::Mat &thresholdedDifference, 
         const cv::Mat &frame);
-      
+
       /**
         @brief Function that calculates motion's position
         @param diff: [&cv::Mat] frame that represents
@@ -110,8 +110,8 @@ namespace pandora_vision
         background.
         @return void 
       */
-      void detectMotionPosition(cv::Mat &diff); 
-        
+      void detectMotionPosition(const cv::Mat &diff); 
+
     private:
       //!< Current frame to be processed
       cv::Mat frame_;
@@ -129,7 +129,7 @@ namespace pandora_vision
       int max_deviation_;
       //!< Bounding box of moving objects.    
       cv::Rect_<int> bounding_box_;
-      
+
       friend class MotionDetectorTest;
   };
 }// namespace pandora_vision
