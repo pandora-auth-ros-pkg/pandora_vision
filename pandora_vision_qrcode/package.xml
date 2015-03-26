@@ -14,7 +14,9 @@
   <author>Despoina Paschalidou</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
+  
+  <build_depend>pandora_cmake_tools</build_depend>
+  
   <depend>roscpp</depend>
   <depend>zbar</depend>
   <depend>cv_bridge</depend>
@@ -26,6 +28,9 @@
   <depend>roslint</depend>
   <depend>urdf</depend>
 
+  <test_depend>pandora_testing_tools</test_depend>
+  <test_depend>rostest</test_depend>
+  
   <export>
   </export>
 

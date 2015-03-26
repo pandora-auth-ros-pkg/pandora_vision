@@ -12,4 +12,10 @@ ${catkin_INCLUDE_DIRS})
 #                               Benchmark Tests                                #
 ################################################################################
 
-add_rostest(benchmark/landoltc_benchmark_test.launch)
+#download_extra_data(
+  #${PROJECT_NAME}_qr_test_images
+  #EXTRA_FILES test/functional/images/extra_files.yaml
+  #)
+#add_dependencies(${PROJECT_NAME}_qr_test_images tests)
+
+add_rostest(benchmark/qr_benchmark_test.launch)

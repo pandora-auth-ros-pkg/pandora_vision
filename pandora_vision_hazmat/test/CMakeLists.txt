@@ -12,4 +12,4 @@ ${catkin_INCLUDE_DIRS})
 #                               Benchmark Tests                                #
 ################################################################################
 
-add_rostest(benchmark/landoltc_benchmark_test.launch)
+add_rostest(benchmark/hazmat_benchmark_test.launch)

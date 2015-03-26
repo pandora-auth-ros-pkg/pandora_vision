@@ -116,6 +116,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_TEST
 roslint_cpp(${${PROJECT_NAME}_LINT_TEST})
 
 ##################################### Testing ##################################
+
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()

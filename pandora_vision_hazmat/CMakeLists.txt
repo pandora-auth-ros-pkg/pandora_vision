@@ -85,3 +85,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/hazmat_trainer.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
+
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
