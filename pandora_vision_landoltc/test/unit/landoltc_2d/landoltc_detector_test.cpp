@@ -103,7 +103,7 @@ namespace pandora_vision
     landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
     landoltCDetector.rasterizeLine(a, b);
 
-    const uint16_t* readVoting = static_cast<const uint16_t*>(
+    const uint16_t* readVoting = reinterpret_cast<const uint16_t*>(
         landoltCDetector._voting.data);
     int columns = image.cols;
 
