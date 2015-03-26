@@ -32,7 +32,7 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Marios Protopapas
 *********************************************************************/
 
 #ifndef PANDORA_VISION_VICTIM_TRAINING_H
@@ -60,34 +60,34 @@ namespace pandora_vision
 class SvmTraining
 {
   private:
-    
+
   //!< The NodeHandle
   ros::NodeHandle _nh;
-  
+
   VictimParameters vparams;
   ///Feature vector for rgb features
   std::vector<double> _rgbFeatureVector;
-  
+
   ///Feature vector for depth features
   std::vector<double> _depthFeatureVector;
-  
+
   ///Instance of class ChannelsStatisticsExtractor
   ///to detect color features for the given frame
   //ChannelsStatisticsExtractor _channelsStatisticsDetector;
-  
+
   ///Instance of class EdgeOrientationExtractor
   ///to detect edge orientation features for the given frame
   //EdgeOrientationExtractor _edgeOrientationDetector;
-  
+
   ///Instance of class HaralickFeatureExtractor
   ///to detect haralick features for the given frame
   //HaralickFeaturesExtractor _haralickFeatureDetector;
- 
+
   //!< Variable used for State Managing
   bool trainingNowON;
 
   std::string package_path;
-    
+
   int num_files;
   int test_num_files;
   int num_feat;
@@ -99,21 +99,21 @@ class SvmTraining
   cv::Mat labels_mat;
   cv::Mat test_mat;
   cv::Mat test_labels_mat;
-  
+
   /// Set up SVM's parameters
   CvSVMParams params;
   CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
-  
+
   /// Train the SVM
   CvSVM SVM;
 public:
 
   //!< The Constructor
   explicit SvmTraining(const std::string& ns, int _num_files, int _test_num_files, int _num_feat);
-  
+
   //!< The Destructor
   virtual ~SvmTraining();
-  
+
   /**
 * @brief This function extract features according to the
 * predifined features for the rgb image
@@ -121,14 +121,14 @@ public:
 * @return void
 */
   void extractRgbFeatures(const cv::Mat& inImage);
-    
+
   /**
 * @brief This function creates feature vector according to the
 * predifined features for the rgb image
 * @return void
 */
   //void setRgbFeatureVector();
-  
+
   /**
 * @brief This function returns current feature vector according
 * to the features found in rgb image
@@ -136,7 +136,7 @@ public:
 * for current rgb image
 */
   std::vector<double> getRgbFeatureVector();
-  
+
   /**
 * @brief This method constructs the training matrix
 * to be used for the training
@@ -146,8 +146,8 @@ public:
 * @return void
 */
   void constructTrainingMatrix(std::string file_name, int type);
-  
-      
+
+
   /**
 * @brief This function extract features according to the
 * predifined features for the depth image
@@ -155,14 +155,14 @@ public:
 * @return void
 */
   void extractDepthFeatures(cv::Mat inImage);
-  
+
   /**
 * @brief This function creates feature vector according to the
 * predifined features for the depth image
 * @return void
 */
   //void setDepthFeatureVector();
-  
+
   /**
 * @brief This function returns current feature vector according
 * to the features found in rgb image
@@ -170,7 +170,7 @@ public:
 * for current rgb image
 */
   std::vector<double> getDepthFeatureVector();
-  
+
   /**
 * @brief This method constructs the rgb test matrix
 * to be used for validation of the training
@@ -180,7 +180,7 @@ public:
 * @return void
 */
   void constructTestMatrix(std::string file_name, int type);
-  
+
   /**
 *@brief Function that implements the training for the subsystems
 * according to the given training sets. It applies svm and extracts
@@ -190,14 +190,14 @@ public:
 * @return void
 */
   void trainSubSystem(int type);
-  
+
   /**
 *@brief Function that checks if a file exists
 *@param name Name of file to check if exists
 *@return true if the file was found, and false if not
 */
   bool exist(const char *name);
-  
+
   /**
 *@brief Function that saves a variable to a file
 * @param [std::string] file_name, name of the file to be created
@@ -206,7 +206,7 @@ public:
 * @return void
 */
   void saveToFile(std::string file_name, std::string var_name, cv::Mat var);
-  
+
    /**
 *@brief Function that loads the necessary files for the training
 * @param [std::string] training_mat_file, name of the file that contains the training data
@@ -216,7 +216,7 @@ public:
 */
   void loadFiles(std::string training_mat_file_stream, std::string labels_mat_file_stream,
                   std::string test_mat_file, std::string test_labels_mat_file);
-                  
+
   /**
 *@brief Function that evaluates the training
 *@param [cv::Mat&] predicted the predicted results
@@ -224,14 +224,14 @@ public:
 *@return void
 */
   void evaluate(const cv::Mat& predicted, const cv::Mat& actual);
-  
+
   /**
 *@brief Function that computes the min distance between the features
 * of the 2 classes
 *@return void
 */
   void calcMinDistance();
-  
+
   /**
 *@brief Function that computes the vectors A,B necessary for the computation
 * of the probablistic output of the svm bases on platt's binary svm
@@ -245,9 +245,9 @@ public:
 */
   void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A, double* B);
 
-  
+
   std::string path_to_samples;
-  
+
 };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_TRAINING_H

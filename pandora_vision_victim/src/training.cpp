@@ -32,7 +32,7 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Marios Protopapas
 *********************************************************************/
 
 #include "pandora_vision_victim/training.h"
@@ -42,9 +42,9 @@ namespace pandora_vision
   /**
 @brief Constructor
 **/
-  SvmTraining::SvmTraining(const std::string& ns,int _num_files, int _test_num_files, int _num_feat) :
-	  _nh(ns),
-	  vparams(ns)
+  SvmTraining::SvmTraining(const std::string& ns, int _num_files, int _test_num_files, int _num_feat) :
+                           _nh(ns),
+                           vparams(ns)
   {
     num_files = _num_files;
     num_feat = _num_feat;
@@ -65,12 +65,12 @@ namespace pandora_vision
     params.term_crit.type = CV_TERMCRIT_ITER+CV_TERMCRIT_EPS;
     params.term_crit.max_iter = 10000;
     params.term_crit.epsilon = 1e-6;
-    
+
     package_path = ros::package::getPath("pandora_vision_victim");
     ROS_INFO("[victim_node] : Created Svm training instance");
-    
+
   }
-  
+
   /**
 @brief Destructor
 */
@@ -78,7 +78,7 @@ namespace pandora_vision
   {
     ROS_DEBUG("[victim_node] : Destroying Svm training instance");
   }
-  
+
   /**
 * @brief This function extract features according to the
 * predifined features for the rgb image
@@ -87,7 +87,7 @@ namespace pandora_vision
 */
   void SvmTraining::extractRgbFeatures(const cv::Mat& inImage)
   {
-    
+
     ///Extract color statistics features for rgb image
     std::vector<double> channelsStatisticsFeatureVector;
     ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(inImage, &channelsStatisticsFeatureVector);
@@ -95,31 +95,31 @@ namespace pandora_vision
     ///Extract edge orientation features for rgb image
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
-    
-    ///Extract haralick features for rgb image  
+
+    ///Extract haralick features for rgb image
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
- 
-    
+
+
     if(!_rgbFeatureVector.empty())
       _rgbFeatureVector.clear();
-    
+
      ///Append to rgbFeatureVector features according to color histogramms and other statistics
     for(int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++ )
           _rgbFeatureVector.push_back(channelsStatisticsFeatureVector[ii]);
-    
+
     ///Append to rgbFeatureVector features according to edge orientation
     for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);   
-    
+          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
+
     ///Append to rgbFeatureVector features according to haralick features
     for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(haralickFeatureVector[ii]);  
-    
+          _rgbFeatureVector.push_back(haralickFeatureVector[ii]);
+
     //setRgbFeatureVector();
-    
+
   }
-  
+
   /**
 * @brief This function creates feature vector according to the
 * predifined features for the rgb image
@@ -133,35 +133,35 @@ namespace pandora_vision
         //_channelsStatisticsDetector.getRgbFeatures();
     //for(int i = 0; i < channelsStatisticsFeatureVector.size(); i++ )
           //_rgbFeatureVector.push_back(channelsStatisticsFeatureVector[i]);
-    
+
     /////Append to rgbFeatureVector features according to edge orientation
     //std::vector<double> edgeOrientationFeatureVector =
         //_edgeOrientationDetector.getFeatures();
     //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
           //_rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);
-    
+
     /////Append to rgbFeatureVector features according to haaralick features
     //std::vector<double> haralickFeatureVector =
         //_haralickFeatureDetector.getFeatures();
     //for(int i = 0; i < haralickFeatureVector.size(); i++ )
           //_rgbFeatureVector.push_back(haralickFeatureVector[i]);
-          
+
     /////Deallocate memory
     //channelsStatisticsFeatureVector.clear();
     //_channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
-    
+
     //edgeOrientationFeatureVector.clear();
     //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
-    
+
     //haralickFeatureVector.clear();
     //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
   /*}*/
-  
+
   std::vector<double> SvmTraining::getRgbFeatureVector()
   {
     return _rgbFeatureVector;
   }
-  
+
   /**
 * @brief This function extract features according to the
 * predifined features for the depth image
@@ -170,12 +170,12 @@ namespace pandora_vision
 */
   void SvmTraining::extractDepthFeatures(cv::Mat inImage)
   {
-   ///Extract color and statistics oriented features
+    ///Extract color and statistics oriented features
     ///for depth image
 
     //std::vector<double> channelsStatictisFeatureVector;
-    
-   // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
+
+    // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
     std::vector<double> channelsStatictisFeatureVector;
     ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
 
@@ -184,33 +184,33 @@ namespace pandora_vision
 
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
-    
-    ///Extract haralick features for depth image 
+
+    ///Extract haralick features for depth image
     //_haralickFeatureDetector.findHaralickFeatures(inImage);
-    
+
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
-    
+
     if(!_depthFeatureVector.empty())
       _depthFeatureVector.clear();
-    
+
     ///Append to depthFeatureVector features according to color
     ///histogramms and other statistics
     for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
           _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
-    
+
     ///Append to depthFeatureVector features according to edge orientation
     for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
-          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);   
-    
+          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
+
     ///Append to depthFeatureVector features according to haralick features
     for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
-          _depthFeatureVector.push_back(haralickFeatureVector[ii]);  
-    
+          _depthFeatureVector.push_back(haralickFeatureVector[ii]);
+
     //setDepthFeatureVector();
 
   }
-  
+
   /**
 * @brief This function creates feature vector according to the
 * predifined features for the depth image
@@ -224,30 +224,30 @@ namespace pandora_vision
         //_channelsStatisticsDetector.getDepthFeatures();
     //for(int i = 0; i < channelsStatisticsFeatureVector.size(); i++ )
           //_depthFeatureVector.push_back(channelsStatisticsFeatureVector[i]);
-    
+
     /////Append to depthFeatureVector features according to edge orientation
     //std::vector<double> edgeOrientationFeatureVector =
         //_edgeOrientationDetector.getFeatures();
     //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
           //_depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);
-    
+
     /////Append to depthFeatureVector features according to haaralick features
     //std::vector<double> haralickFeatureVector =
         //_haralickFeatureDetector.getFeatures();
     //for(int i = 0; i < haralickFeatureVector.size(); i++ )
           //_depthFeatureVector.push_back(haralickFeatureVector[i]);
-          
+
     /////Deallocate memory
     //channelsStatisticsFeatureVector.clear();
     //_channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
-    
+
     //edgeOrientationFeatureVector.clear();
     //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
-    
+
     //haralickFeatureVector.clear();
     //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
   /*}*/
-  
+
   /**
 * @brief This function returns current feature vector according
 * to the features found in rgb image
@@ -258,7 +258,7 @@ namespace pandora_vision
   {
     return _depthFeatureVector;
   }
-  
+
   /**
 * @brief This method constructs the rgb training matrix
 * to be used for the training
@@ -288,7 +288,7 @@ namespace pandora_vision
         << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
       }
       else
-      
+
       {
       if(ii < TrainingParameters::numOfPositiveSamples)
         img_name << path_to_samples << "/data/"
@@ -298,34 +298,34 @@ namespace pandora_vision
         << "Depth_Negative_Images/negative"
         << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
       }
-        
+
       std::cout << img_name.str() << std::endl;
-        
+
       img = cv::imread(img_name.str());
       if (!img.data)
       {
        std::cout << "Error reading file " << img_name.str() << std::endl;
        return;
       }
-      
+
       cv::Size size(640, 480);
       cv::resize(img, img, size);
-      
+
       if(type == 1)
       {
         extractRgbFeatures(img);
         _featureVector = getRgbFeatureVector();
       }
-      
+
       else
       {
         extractDepthFeatures(img);
         _featureVector = getDepthFeatureVector();
       }
-      
+
       std::cout << "Feature vector of image " << img_name.str() << " "
                << _featureVector.size() << std::endl;
-          
+
        /// display feature vector
 
         for(int kk = 0; kk < _featureVector.size(); kk++)
@@ -333,22 +333,22 @@ namespace pandora_vision
           std::cout << _featureVector[kk] << " ";
 
        }
-              
+
       for (int jj = 0; jj < _featureVector.size(); jj++)
         training_mat.at<double>(ii, jj) = _featureVector[jj];
 
       if(ii < TrainingParameters::numOfPositiveSamples)
         labels_mat.at<double>(ii, 0) = 1.0;
-      
+
       else
         labels_mat.at<double>(ii, 0) = -1.0;
 
-        
+
       ///Empty stringstream for next image
       img_name.str("");
-      
+
     }
-    
+
     /// Perform pca to reduce the dimensions of the features
 
     int nEigens = 23;
@@ -360,28 +360,28 @@ namespace pandora_vision
     std::cout << "EigenValues" << eigenvalues << std::endl;
     std::cout << "EigenVectors " << eigenvectors.size() << std::endl;
     //pca.project(training_mat, training_mat);
-    
+
     /// Normalize the training matrix
-    
+
     for (int kk = 0; kk < training_mat.rows; kk++)
     cv::normalize(training_mat.row(kk), training_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
-        
+
     std::stringstream training_mat_file_stream;
     training_mat_file_stream << package_path << "/data/" << file_name;
     saveToFile(training_mat_file_stream.str(), "training_mat", training_mat);
-    
+
     std::cout << training_mat_file_stream.str() << std::endl <<
         " " << training_mat.size() << std::endl;
-        
+
     std::stringstream labels_mat_file_stream;
     labels_mat_file_stream << package_path << "/data/" << "labels_"+file_name;
     saveToFile(labels_mat_file_stream.str(), "labels_mat", labels_mat);
-    
+
     std::cout << labels_mat_file_stream.str() << std::endl <<
         " " << labels_mat.size() << std::endl;
-       
+
   }
-  
+
    /**
 * @brief This method constructs the rgb test matrix
 * to be used for validation of the training
@@ -417,12 +417,12 @@ namespace pandora_vision
             << "Test_Depth_Positive_Images/positive" << ii + 1 << ".jpg";
       else
         img_name << path_to_samples << "/data/"
-            << "Test_Depth_Negative_Images/negative" << ii + 1 - 
+            << "Test_Depth_Negative_Images/negative" << ii + 1 -
               TrainingParameters::numOfTestPositiveSamples  << ".jpg";
       }
-        
+
       std::cout << img_name.str() << std::endl;
-        
+
       img = cv::imread(img_name.str());
 
       if (!img.data)
@@ -430,25 +430,25 @@ namespace pandora_vision
        std::cout << "Error reading file " << img_name.str() << std::endl;
        return;
       }
-      
+
       cv::Size size(640, 480);
       cv::resize(img, img, size);
-      
+
       if(type == 1)
       {
         extractRgbFeatures(img);
         _featureVector = getRgbFeatureVector();
       }
-      
+
       else
       {
         extractDepthFeatures(img);
         _featureVector = getDepthFeatureVector();
       }
-      
+
       std::cout << "Feature vector of image " << img_name.str() << " "
           << _featureVector.size() << std::endl;
-          
+
       /// display feature vector
 
         for(int kk = 0; kk < _featureVector.size(); kk++)
@@ -459,20 +459,20 @@ namespace pandora_vision
 
       for (int jj = 0; jj < _featureVector.size(); jj++)
         test_mat.at<double>(ii, jj)=_featureVector[jj];
-                
+
       if(ii < TrainingParameters::numOfTestPositiveSamples)
         test_labels_mat.at<double>(ii, 0) = 1.0;
-      
+
       else
         test_labels_mat.at<double>(ii, 0) = -1.0;
 
       /// Empty stringstream for next image
       img_name.str("");
-      
+
     }
-    
+
     /// Perform pca to reduce the dimensions of the features
-    
+
     int nEigens = 23;
     cv::PCA pca(test_mat, cv::Mat(), CV_PCA_DATA_AS_ROW);
     cv::Mat mean = pca.mean.clone();
@@ -481,27 +481,27 @@ namespace pandora_vision
     std::cout << "EigenValues" << eigenvalues << std::endl;
     std::cout << "EigenVectors " << eigenvectors.size() << std::endl;
     //pca.project(test_mat, test_mat);
-    
+
     /// Normalize the test matrix
     for (int kk = 0; kk < test_mat.rows; kk++)
     cv::normalize(test_mat.row(kk), test_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
-    
+
     std::stringstream test_mat_file_stream;
     test_mat_file_stream << package_path << "/data/" << file_name;
     saveToFile(test_mat_file_stream.str(), "test_mat", test_mat);
-    
+
     std::cout << test_mat_file_stream.str() << std::endl <<
         " " << test_mat.size() << std::endl;
-        
+
     std::stringstream test_labels_mat_file_stream;
     test_labels_mat_file_stream << package_path << "/data/" << "labels_"+file_name;
     saveToFile(test_labels_mat_file_stream.str(), "test_labels_mat", test_labels_mat);
 
     std::cout << test_labels_mat_file_stream.str() << std::endl <<
         " " << test_labels_mat.size() << std::endl;
-       
+
   }
-  
+
   /**
 *@brief Function that implements the training for the subsystems
 * according to the given training sets. It applies svm and extracts
@@ -545,19 +545,19 @@ namespace pandora_vision
           std::cout << "Create necessary training matrix" << std::endl;
           constructTrainingMatrix(training_matrix_file_path, type);
         }
-         
+
         if(exist(in_test_file_stream.str().c_str()) == false){
           std::cout << "Create necessary test matrix" << std::endl;
           constructTestMatrix(test_matrix_file_path, type);
         }
-      
+
         loadFiles(in_file_stream.str(),
                   labels_mat_file_stream.str(),
                   in_test_file_stream.str(),
                   test_labels_mat_file_stream.str());
-        
+
         //calcMinDistance();
-              
+
         std::cout << "Starting training process for the rgb images" << std::endl;
         if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
         {
@@ -570,7 +570,7 @@ namespace pandora_vision
                          CvSVM::get_default_grid(CvSVM::COEF),
                          CvSVM::get_default_grid(CvSVM::DEGREE),
                          true);
-                         
+
           params = SVM.get_params();
           std::cout << "Using optimal Parameters" << std::endl;
           std::cout << "degree=" << params.degree << std::endl;
@@ -580,12 +580,12 @@ namespace pandora_vision
           std::cout << "nu=" << params.nu << std::endl;
           std::cout << "p=" << params.p << std::endl;
         }
-        
+
         else
           SVM.train(training_mat, labels_mat, cv::Mat(), cv::Mat(), params);
         SVM.save(svm_file_stream.str().c_str());
         std::cout << "Finished training process" << std::endl;
-        
+
         ///uncomment to produce the platt probability
         //~ for (int ii = 0; ii < test_mat.rows; ii++)
         //~ {
@@ -595,7 +595,7 @@ namespace pandora_vision
         //~ sigmoid_train(results, test_labels_mat, &A, &B);
         //~ std::cout << "A=" << A << std::endl;
         //~ std::cout << "B=" << B << std::endl;
-        
+
         ///uncomment for ONE_CLASS SVM
         //~ for (int ii = 0; ii < results.rows; ii++)
          //~ for (int jj = 0; jj < results.cols; jj++)
@@ -605,9 +605,9 @@ namespace pandora_vision
         //std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
         saveToFile(results_file_stream.str(), "results", results);
         evaluate(results, test_labels_mat);
-      
+
         break;
-        
+
       case 2:
         /// Train only depth subsystem
         training_matrix_file_path = "depth_training_matrix.xml";
@@ -625,19 +625,19 @@ namespace pandora_vision
           std::cout << "Create necessary training matrix" << std::endl;
           constructTrainingMatrix(training_matrix_file_path, type);
         }
-        
+
         if(exist(in_test_file_stream.str().c_str()) == false){
           std::cout << "Create necessary test matrix" << std::endl;
           constructTestMatrix(test_matrix_file_path, type);
         }
-        
+
         loadFiles(in_file_stream.str(),
                   labels_mat_file_stream.str(),
                   in_test_file_stream.str(),
                   test_labels_mat_file_stream.str());
-        
+
         //calcMinDistance();
-              
+
         std::cout << "Starting training process for the depth images" << std::endl;
         if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
         {
@@ -650,7 +650,7 @@ namespace pandora_vision
                            CvSVM::get_default_grid(CvSVM::COEF),
                            CvSVM::get_default_grid(CvSVM::DEGREE),
                            true);
-                           
+
             params = SVM.get_params();
             std::cout << "Using optimal Parameters" << std::endl;
             std::cout << "degree=" << params.degree << std::endl;
@@ -659,7 +659,7 @@ namespace pandora_vision
             std::cout << "C=" << params.C << std::endl;
             std::cout << "nu=" << params.nu << std::endl;
             std::cout << "p" << params.p << std::endl;
-            
+
         }
         else
         SVM.train(training_mat, labels_mat, cv::Mat(), cv::Mat(), params);
@@ -687,7 +687,7 @@ namespace pandora_vision
         break;
     }
   }
-  
+
   /**
 *@brief Function that saves a variable to a file
 * @param [std::string] file_name, name of the file to be created
@@ -701,7 +701,7 @@ namespace pandora_vision
 
     if (!fs.isOpened())
       fs.open(file_name, cv::FileStorage::WRITE);
-    
+
     fs << var_name << var;
     fs.release();
   }
@@ -740,7 +740,7 @@ namespace pandora_vision
        std::cout << test_mat_file << temp3.size() << std::endl;;
        std::cout << test_labels_mat_file << temp4.size() << std::endl;
       }
-    
+
     training_mat = temp1.clone();
     labels_mat = temp2.clone();
     test_mat = temp3.clone();
@@ -764,7 +764,7 @@ namespace pandora_vision
     else //if the file was found, then file is non-0
         return true; //the file was found
   }
-  
+
   /**
 *@brief Function that evaluates the training
 *@param [cv::Mat&] predicted the predicted results
@@ -802,7 +802,7 @@ namespace pandora_vision
     precision = (tp * 1.0) / (tp + fp);
     recall = (tp * 1.0) / (tp + fn);
     fmeasure= (tp *2.0) / (2.0 * tp + fn + fp);
-    
+
     std::cout << "True Positives= " << tp << std::endl;
     std::cout << "True Negatives= " << tn << std::endl;
     std::cout << "False Positives= " << fp << std::endl;
@@ -812,7 +812,7 @@ namespace pandora_vision
     std::cout << "svm precision= " << precision << std::endl;
     std::cout << "svm recall= " << recall << std::endl;
     std::cout << "svm fmeasure= " << fmeasure << std::endl;
-    
+
   }
 
   /**
@@ -829,7 +829,7 @@ namespace pandora_vision
     {
       sum = 0;
       for(int jj = 0; jj < training_mat.cols; jj++)
-          sum = sum + pow( training_mat.at<double>(ii, jj) - 
+          sum = sum + pow( training_mat.at<double>(ii, jj) -
             training_mat.at<double>(ii + TrainingParameters::numOfPositiveSamples), 2);
       distance = sqrt(sum);
       std::cout << "distance=" << distance <<" "<< ii << std::endl;
@@ -839,7 +839,7 @@ namespace pandora_vision
     }
     std::cout << "min distance=" << min << std::endl;
   }
-  
+
     // Platt's binary SVM Probablistic Output: an improvement from Lin et al.
   /**
 *@brief Function that computes the vectors A,B necessary for the computation
@@ -862,7 +862,7 @@ namespace pandora_vision
         prior1 += 1;
       else
         prior0+= 1;
-    
+
     int max_iter = 100;// Maximal number of iterations
     double min_step = 1e-10;// Minimal step taken in line search
     double sigma = 1e-12;// For numerically strict PD of Hessian
@@ -873,7 +873,7 @@ namespace pandora_vision
     double fApB, p, q, h11, h22, h21, g1, g2, det, dA, dB, gd, stepsize;
     double newA, newB, newf, d1, d2, Avector, Bvector;
     int iter;
-    
+
     // Initial Point and Initial Fun Value
     Avector = 0.0;
     Bvector = log((prior0 + 1.0) / (prior1 + 1.0));
@@ -973,13 +973,13 @@ namespace pandora_vision
     *A = Avector;
     *B = Bvector;
   }
-  
+
 }// namespace pandora_vision
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_train_node");
-  
+
   /// num_files = 9500 and rgb_num_feat = 121 depth_num_feat=103
   int num_files, test_num_files, num_feat, type;
   std::cout << "Choose type of training: 1 rgb ,2 depth"<< std::endl;
@@ -988,16 +988,16 @@ int main(int argc, char** argv)
   std::cin >> num_files;
   std::cout << "Add total number of images to be tested :" << std::endl;
   std::cin >> test_num_files;
-  
+
   if(type == 1 || type == 2){
     std::cout << "Add total number of features required for your subsystem :" << std::endl;
     std::cin >> num_feat;
-    pandora_vision::SvmTraining victim_trainer("victim",num_files, test_num_files, num_feat);
+    pandora_vision::SvmTraining victim_trainer("victim", num_files, test_num_files, num_feat);
     std::cout << "Add absolute path, where your samples are stored "<< std::endl;
     std::cin >> victim_trainer.path_to_samples;
     victim_trainer.trainSubSystem(type);
   }
- 
+
 
   ros::spin();
   return 0;

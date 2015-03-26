@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Marios Protopapas
 *********************************************************************/
 
 #include "pandora_vision_victim/feature_extractors/color_angles.h"
@@ -43,13 +43,13 @@ namespace pandora_vision
   ColorAnglesExtractor::ColorAnglesExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
-    
+
   }
-  
+
   std::vector<double> ColorAnglesExtractor::extract(void)
   {
     std::vector<double> colorAnglesAndStd;
-    
+
     //!< Separate the image in 3 places (R,G,B) one for each channel
     std::vector<cv::Mat> rgb_planes;
     split( *_img, rgb_planes );
@@ -57,13 +57,13 @@ namespace pandora_vision
     cv::Scalar bmean = mean(rgb_planes[0]);
     cv::Scalar gmean = mean(rgb_planes[1]);
     cv::Scalar rmean = mean(rgb_planes[2]);
-    
+
     //!< Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
     //!< Corresponding average pixel value of each original colour vector
     cv::Mat r0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
     cv::Mat b0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
     cv::Mat g0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
-    
+
     for (int ii = 0; ii < _img->rows; ii++)
       for (int jj = 0; jj < _img->cols; jj++)
         b0.at<double>(ii, jj) = rgb_planes[0].at<uchar>(ii, jj) - bmean.val[0];
@@ -73,22 +73,22 @@ namespace pandora_vision
     for (int ii = 0; ii < _img->rows; ii++)
       for (int jj = 0; jj < _img->cols; jj++)
         r0.at<double>(ii, jj) = rgb_planes[2].at<uchar>(ii, jj) - rmean.val[0];
-    
+
 /*   for (int ii=0; ii< _img->rows; ii++)*/
-	   //for(int jj=0; jj<_img->cols; jj++)
-	   /*ROS_INFO_STREAM(b0.at<double>(ii,jj));*/
+     //for(int jj=0; jj<_img->cols; jj++)
+      /*ROS_INFO_STREAM(b0.at<double>(ii,jj));*/
 
     //!< Compute the dot product of rgb color components
     double rgdot = r0.dot(g0);
     double gbdot = g0.dot(b0);
     double rbdot = r0.dot(b0);
     double rsum = 0, bsum = 0, gsum = 0;
-    
+
 /*    ROS_INFO_STREAM("rgdot= " << rgdot);*/
     //ROS_INFO_STREAM("gbdot= " << gbdot);
     //ROS_INFO_STREAM("rbdot= " << rbdot);
 
-    //!< Compute the lengh of the color angle vector  
+    //!< Compute the lengh of the color angle vector
     for (int ii = 0; ii < r0.rows; ii++)
       for(int jj = 0; jj < r0.cols; jj++)
         {
@@ -99,11 +99,11 @@ namespace pandora_vision
 /*    ROS_INFO_STREAM("rsum= " << rsum);*/
     //ROS_INFO_STREAM("gsum= " << gsum);
     /*ROS_INFO_STREAM("bsum= " << bsum);*/
-      
+
     double rlength = sqrt(rsum);
     double glength = sqrt(gsum);
     double blength = sqrt(bsum);
-    
+
 /*    ROS_INFO_STREAM("rlength= " << rlength);*/
     //ROS_INFO_STREAM("glength= " << glength);
     /*ROS_INFO_STREAM("blength= " << blength);*/
@@ -111,7 +111,7 @@ namespace pandora_vision
     gbdot/= (glength*blength);
     rbdot/= (rlength*blength);
 
-   
+
 /*    ROS_INFO_STREAM("rgdot= " << rgdot);*/
     //ROS_INFO_STREAM("gbdot= " << gbdot);
     /*ROS_INFO_STREAM("rbdot= " << rbdot);*/
@@ -129,31 +129,31 @@ namespace pandora_vision
     //!< Normalised intensity standard deviation
     //!< Transform the src image to grayscale
     cvtColor( *_img, gray, CV_BGR2GRAY );
-    
+
     //!< Compute the mean intensity value
     cv::Scalar meanI = mean(gray);
-    
-   
+
+
     //!< Find the maximum intensity value
     double maxVal, std, sum = 0;
     cv::minMaxLoc( gray, NULL, &maxVal );
-        
+
     for(int ii = 0; ii < gray.rows; ii++)
       for(int jj = 0; jj < gray.cols; jj++)
       {
         sum+= pow((gray.at<uchar>(ii, jj) - meanI.val[0]), 2);
       }
-      
+
     std = 2.0 / (maxVal * gray.cols * gray.rows) * sqrt(sum);
-   
+
     //!< Construct the final feature vector
     colorAnglesAndStd.push_back(rgAngle);
     colorAnglesAndStd.push_back(gbAngle);
     colorAnglesAndStd.push_back(rbAngle);
     colorAnglesAndStd.push_back(std);
-    
+
     return colorAnglesAndStd;
   }
-}
+}// namespace pandora_vision
 
 

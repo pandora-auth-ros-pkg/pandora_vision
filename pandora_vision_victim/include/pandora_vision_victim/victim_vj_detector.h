@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_FACE_DETECTOR_H
-#define PANDORA_VISION_VICTIM_FACE_DETECTOR_H 
+#ifndef PANDORA_VISION_VICTIM_VICTIM_VJ_DETECTOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_VJ_DETECTOR_H
 
 #include "pandora_vision_victim/victim_parameters.h"
 
@@ -46,7 +46,7 @@ namespace pandora_vision
   class VictimVJDetector
   {
     private:
-   
+
     std::vector<std::vector<cv::Rect_<int> > > faces;
 
     std::vector<cv::Rect_<int> > faces_total;
@@ -97,4 +97,4 @@ namespace pandora_vision
 
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_FACE_DETECTOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_VJ_DETECTOR_H

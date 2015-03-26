@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Marios Protopapas
 *********************************************************************/
 
 #include "pandora_vision_victim/feature_extractors/dominant_color.h"
@@ -44,13 +44,13 @@ namespace pandora_vision
   DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
-    
+
   }
-  
+
   std::vector<double> DominantColorExtractor::extract(void)
   {
     std::vector<double> ret;
-    
+
     double maxVal = 0;
     double val = 0;
     unsigned int size = cv::Size(_img->size()).height;
@@ -65,15 +65,15 @@ namespace pandora_vision
         val = i;
       }
     }
-    
+
     ret.push_back(val);
     if(maxVal != 0)
-    	ret.push_back(maxVal/(640 * 480));
+      ret.push_back(maxVal/(640 * 480));
     else
- 	ret.push_back(0);
+      ret.push_back(0);
 
     return ret;
   }
-}
+}// namespace pandora_vision
 
 
