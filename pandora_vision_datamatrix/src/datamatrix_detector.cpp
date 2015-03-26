@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Despoina Paschalidou, Vasilis Bosdelekidis
 *********************************************************************/
 
 #include "pandora_vision_datamatrix/datamatrix_detector.h"

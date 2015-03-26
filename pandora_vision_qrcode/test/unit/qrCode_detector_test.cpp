@@ -32,7 +32,7 @@
  * * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * * POSSIBILITY OF SUCH DAMAGE.
  * *
- * * Author: 
+ * * Author: Vasilis Bosdelekidis
  * *********************************************************************/
 #include "pandora_vision_qrcode/qrCode_detector.h"
 #include "gtest/gtest.h"

@@ -4,7 +4,7 @@
   <version>0.1.0</version>
   <description>Containts datamatrix detection node.</description>
 
-  <maintainer email="paschalidoud@gmail.com">Despoina Paschalidou</maintainer>
+  <maintainer email="vasilis1bos@gmail.com">Vasilis Bosdelekidis</maintainer>
 
   <license>BSD</license>
 
@@ -12,6 +12,7 @@
   <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
   <author>Despoina Paschalidou</author>
+  <author>Vasilis Bosdelekidis</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
