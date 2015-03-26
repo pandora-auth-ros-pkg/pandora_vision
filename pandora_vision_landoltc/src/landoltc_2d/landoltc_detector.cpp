@@ -571,13 +571,13 @@ void LandoltCDetector::begin(cv::Mat* input)
 
   for(std::size_t i = 0; i < _centers.size(); i++)
   {
-    cv::circle(*input, _centers.at(i), 2, (0, 0, 255), -1);
+    cv::circle(*input, _centers[i], 2, cv::Scalar(0, 0, 255), -1);
   }
 
   blur(gray, gray, cv::Size(3, 3));
 
-  cv::adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 7, 
-  LandoltcParameters::adaptiveThresholdSubtractSize);
+  cv::adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+      cv::THRESH_BINARY_INV, 7, LandoltcParameters::adaptiveThresholdSubtractSize);
 
   cv::erode(binary, binary, erodeKernel);
 

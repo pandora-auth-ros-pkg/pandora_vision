@@ -37,10 +37,7 @@
 #ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 
-#include <opencv2/opencv.hpp>
 
-#include <iostream>
-#include <stdlib.h>
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_parameters.h"
 
 namespace pandora_vision
@@ -104,6 +101,10 @@ public:
   **/
   void initializeReferenceImage(std::string path);
 
+  //int  getNumCenter(void)
+  //{
+    //return _centers.size();
+  //}
   /**
   @brief Rasterize line between two points
   @param A [cv::Point] The start point of a line

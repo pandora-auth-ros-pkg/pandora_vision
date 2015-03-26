@@ -54,7 +54,7 @@ namespace pandora_vision
       }
       virtual ~LandoltcDetectorTest(){}
       void fillGrad(cv::Mat& input);
-      cv::Point giveCenters(int i);
+      void getCenter(cv::Point *point, const int& index);
       int giveVotingData(cv::Point a, cv::Point b, int y, int i);
 
     protected:
@@ -82,24 +82,19 @@ namespace pandora_vision
   }
 
   //returns possible center
-  cv::Point LandoltcDetectorTest::giveCenters(int i)
+  void LandoltcDetectorTest::getCenter(cv::Point *point, const int& index)
   {
-    std::vector<cv::Point> newCenters;
-    //size_t vectorSize = landoltCDetector._centers.size();
-    size_t mitsos = 3;
-    ASSERT_GT(1, 0);
-    std::cout << "LandoltC Vector Size  " <<  vectorSize << std::endl;
-    for(int j =0 ;j < vectorSize ; j++)
-    {
-      newCenters[j] = landoltCDetector._centers[j];
-      std::cout << landoltCDetector._centers[j] << std::endl;
-    }
-    return newCenters[i];
+    int vectorSize = landoltCDetector._centers.size();  
+    ASSERT_NE(0, (int)vectorSize); 
+    ASSERT_GT(vectorSize, index);
+    *point = landoltCDetector._centers[index];
+    return;
   }
 
 
   //y=column,i=row
-  int LandoltcDetectorTest::giveVotingData(cv::Point a, cv::Point b , int y , int i)
+  int LandoltcDetectorTest::giveVotingData(cv::Point a, cv::Point b , int y ,
+      int i)
   {
     cv::Mat image;
 
@@ -113,7 +108,6 @@ namespace pandora_vision
 
     return readVoting[columns*y + i];
   }
-
 
 
   /** test cases **/
@@ -132,16 +126,19 @@ namespace pandora_vision
     fillGrad(image);
 
     cv::Point point(400,300);
-    cv::Point giveCentersResult = giveCenters(0);
-    EXPECT_NEAR(point.x, giveCentersResult.x, 0.1);
-    EXPECT_NEAR(point.y, giveCentersResult.y, 0.1);
-    //image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/index.png",0);
+    cv::Point detectedCenters;
+    getCenter(&detectedCenters, 0);
+    EXPECT_NEAR(point.x, detectedCenters.x, 0.1);
+    EXPECT_NEAR(point.y, detectedCenters.y, 0.1);
 
-    //fillGrad(image);
+    image = cv::imread(packagePath + "/index.png", 0);
 
-    //cv::Point point2(400,300);
+    fillGrad(image);
 
-    //EXPECT_EQ(point2,giveCenters()) ;
+    cv::Point point2(400,300);
+    getCenter(&detectedCenters, 0);
+    EXPECT_NEAR(point2.x, detectedCenters.x, 0.1);
+    EXPECT_NEAR(point2.y, detectedCenters.y, 0.1);
 
   }
 
