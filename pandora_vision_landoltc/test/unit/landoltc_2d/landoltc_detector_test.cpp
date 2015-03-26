@@ -48,17 +48,19 @@ namespace pandora_vision
   class LandoltcDetectorTest : public ::testing::Test
   {
     public:
-      LandoltcDetectorTest() {}
+      LandoltcDetectorTest() 
+      {
+        packagePath = ros::package::getPath("pandora_vision_landoltc");
+      }
       virtual ~LandoltcDetectorTest(){}
-
-    protected:
       void fillGrad(cv::Mat& input);
       cv::Point giveCenters(int i);
       int giveVotingData(cv::Point a, cv::Point b, int y, int i);
 
+    protected:
+      
       LandoltCDetector landoltCDetector;
-
-
+      std::string packagePath; 
   }; 
 
   //process input and call findcenters
@@ -66,7 +68,7 @@ namespace pandora_vision
   {
     cv::Mat gradX, gradY;
     cv::Mat gray;
-    
+   
     cv::cvtColor(input, gray, CV_BGR2GRAY );
 
     cv::Sobel(gray, gradX, CV_32F, 1, 0, 3);
@@ -77,19 +79,22 @@ namespace pandora_vision
 
     landoltCDetector._voting = cv::Mat::zeros(input.rows, input.cols, CV_16U);
     landoltCDetector.findCenters(input.rows, input.cols, gradXF, gradYF);
-    
   }
 
   //returns possible center
   cv::Point LandoltcDetectorTest::giveCenters(int i)
   {
-    std::vector <cv::Point> newCenters(100);
-    int vectorSize=landoltCDetector._centers.size();
-    for(int j=0;j<vectorSize;j++)
+    std::vector<cv::Point> newCenters;
+    //size_t vectorSize = landoltCDetector._centers.size();
+    size_t mitsos = 3;
+    ASSERT_GT(1, 0);
+    std::cout << "LandoltC Vector Size  " <<  vectorSize << std::endl;
+    for(int j =0 ;j < vectorSize ; j++)
     {
-    newCenters.at(j)=landoltCDetector._centers.at(j);
+      newCenters[j] = landoltCDetector._centers[j];
+      std::cout << landoltCDetector._centers[j] << std::endl;
     }
-    return newCenters.at(i);
+    return newCenters[i];
   }
 
 
@@ -98,7 +103,7 @@ namespace pandora_vision
   {
     cv::Mat image;
 
-    image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/bold.jpg");
+    image = cv::imread(this->packagePath + "/bold.jpg");
 
     landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
     landoltCDetector.rasterizeLine(a,b);
@@ -116,14 +121,20 @@ namespace pandora_vision
   TEST_F(LandoltcDetectorTest, findCentersTest)
   {
     cv::Mat image;
-    image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/bold.jpg");		
-    
+       
+    image = cv::imread(packagePath + "/bold.jpg");		
+    if ( !image.data)
+    {
+      ROS_FATAL("Could not read test image!");
+      ASSERT_EQ(1, 0);
+    }
+
     fillGrad(image);
 
     cv::Point point(400,300);
-
-    EXPECT_EQ(point,giveCenters(0)) ;
-    
+    cv::Point giveCentersResult = giveCenters(0);
+    EXPECT_NEAR(point.x, giveCentersResult.x, 0.1);
+    EXPECT_NEAR(point.y, giveCentersResult.y, 0.1);
     //image=cv::imread("/home/aggelos/pandora_ws/src/pandora_vision/pandora_vision_landoltc/index.png",0);
 
     //fillGrad(image);

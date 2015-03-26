@@ -40,6 +40,9 @@
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_landoltc/landoltc_cfgConfig.h>
 
+#include "ros/ros.h"
+#include "ros/package.h"
+
 namespace pandora_vision
 {
   struct LandoltcParameters

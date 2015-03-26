@@ -313,9 +313,17 @@ void LandoltCDetector::rasterizeLine(cv::Point A, cv::Point B)
 void LandoltCDetector::findCenters(int rows, int cols, float* grX, float* grY)
 {
   cv::Point center;
-
+  if (grX == NULL)
+  {
+    ROS_ERROR("Invalid gradient X pointer! \n");
+    return;
+  }
+  if (grY == NULL)
+  {
+    ROS_ERROR("Invalid gradient X pointer! \n");
+    return;
+  }
   //!< Rasterization of lines between thresholded points
-
   for (int x = 0; x < cols; x++)
   {
     for (int y = 0; y < rows; y++)

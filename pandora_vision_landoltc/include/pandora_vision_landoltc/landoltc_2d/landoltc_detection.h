@@ -37,9 +37,6 @@
 #ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTION_H
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTION_H
 
-#include "ros/ros.h"
-#include <ros/package.h>
-
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>

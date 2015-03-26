@@ -37,7 +37,6 @@
 #ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 
-#include "ros/ros.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -66,7 +65,7 @@ private:
   //!<Value for thresholding values in voting array
   int _threshold;
   //!<Vector containing centers of possible landolts
-  std::vector <cv::Point> _centers;
+  std::vector<cv::Point> _centers;
   //!<Vector containing colors of landolts,used for seperating them later
   std::vector<cv::Scalar> _fillColors;
   //!<Vector containing bounding rectangles of each landolt
