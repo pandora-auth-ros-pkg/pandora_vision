@@ -40,28 +40,30 @@ find_package(PkgConfig)
 pkg_check_modules(ZBAR zbar)
 target_link_libraries(qrCode_detector_test
   ${catkin_LIBRARIES}
-  qrcode_node_lib
+  ${PROJECT_NAME}_qrcode_node
   gtest_main
   zbar
 )
 
-################# Download necessary images in /home/v/Downloads folder #################
+##set(MY_URL "https://copy.com/weAYQs6IXAUoQdKa")
+##set(MY_SRC_PATH "$ENV{HOME}/Downloads")
+##set(MY_DOWNLOAD_PATH "${MY_SRC_PATH}/Qr_Datamatrix_Testing.tar.gz")
+##set(MY_EXTRACTION_PATH "${MY_SRC_PATH}/Qr_Datamatrix_Testing")
+##
+##if (NOT EXISTS "${MY_DOWNLOAD_PATH}")
+##  file(DOWNLOAD "${MY_URL}" "${MY_DOWNLOAD_PATH}")
+##endif()
+##
+##file(MAKE_DIRECTORY ${MY_EXTRACTION_PATH})
+##
+##execute_process(
+##  COMMAND ${CMAKE_COMMAND} -E tar xzf ${MY_SRC_PATH}/Qr_Datamatrix_Testing.tar.gz
+##  WORKING_DIRECTORY ${MY_EXTRACTION_PATH}
+##)
 
-set(MY_URL "https://copy.com/weAYQs6IXAUoQdKa")
-set(MY_SRC_PATH "$ENV{HOME}/Downloads")
-set(MY_DOWNLOAD_PATH "${MY_SRC_PATH}/Qr_Datamatrix_Testing.tar.gz")
-set(MY_EXTRACTION_PATH "${MY_SRC_PATH}/Qr_Datamatrix_Testing")
-
-if (NOT EXISTS "${MY_DOWNLOAD_PATH}")
-  file(DOWNLOAD "${MY_URL}" "${MY_DOWNLOAD_PATH}")
-endif()
-
-file(MAKE_DIRECTORY ${MY_EXTRACTION_PATH})
-
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -E tar xzf ${MY_SRC_PATH}/Qr_Datamatrix_Testing.tar.gz
-  WORKING_DIRECTORY ${MY_EXTRACTION_PATH}
-)
-
+download_extra_data(
+    ${PROJECT_NAME}_download_qr_images_unit_testing
+    EXTRA_FILES test/unit/data/extra_files.yaml
+    )
 
 

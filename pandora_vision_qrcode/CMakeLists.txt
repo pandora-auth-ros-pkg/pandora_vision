@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     sensor_msgs
     roslint
     urdf
+    pandora_cmake_tools
 )
 
 find_package(PkgConfig)
@@ -38,10 +39,10 @@ include_directories(include
 )
 
 ################# qrcode node library #################
-add_library(qrcode_node_lib
+add_library(${PROJECT_NAME}_qrcode_node
   src/qrCode_detector.cpp
 )
-target_link_libraries(qrcode_node_lib
+target_link_libraries(${PROJECT_NAME}_qrcode_node
   ${catkin_LIBRARIES}
 )
 
@@ -68,6 +69,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/qrCode_detector.h
   src/qrCode_detector.cpp
   src/qrCode_detection.cpp
+  test/unit/qrCode_detector_test.cpp
 
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})

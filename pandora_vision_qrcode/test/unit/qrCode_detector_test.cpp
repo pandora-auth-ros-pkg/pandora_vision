@@ -37,7 +37,7 @@
 #include "pandora_vision_qrcode/qrCode_detector.h"
 #include "gtest/gtest.h"
 #include "ros/ros.h"
-#include "math.h"
+#include "ros/package.h"
 
 namespace pandora_vision
 {
@@ -56,7 +56,6 @@ namespace pandora_vision
             {
                 WIDTH = 640;
                 HEIGHT = 480;
-                homedir = getenv("HOME");
             }
 
             std::vector<QrCode> detectQrCode(cv::Mat frame);
@@ -70,7 +69,6 @@ namespace pandora_vision
 
             int WIDTH;
             int HEIGHT;
-            char* homedir;
 
         private:
             QrCodeDetector qrCodeDetector_;
@@ -136,7 +134,7 @@ namespace pandora_vision
     TEST_F (QrCodeDetectorTest, detectQrCodeWhiteImage)
     {
         cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-        whiteFrame.setTo(cv::Scalar(255,255,255));
+        whiteFrame.setTo(cv::Scalar(255, 255, 255));
         std::vector<QrCode> qrcode_list = detectQrCode(whiteFrame);
         // there shouldn't be any qrcodes
         EXPECT_EQ(0, qrcode_list.size());
@@ -147,7 +145,7 @@ namespace pandora_vision
         // Vertically concatenated
         cv::Mat blackFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
         cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
-        whiteFrame.setTo(cv::Scalar(255,255,255));
+        whiteFrame.setTo(cv::Scalar(255, 255, 255));
         cv::Mat H, V;
         cv::hconcat(blackFrame, whiteFrame, H);
         cv::vconcat(blackFrame, whiteFrame, V);
@@ -184,11 +182,13 @@ namespace pandora_vision
         int  cArray[9];
         FILE *fpr;
         fileName.str("");
-        fileName << homedir << "/Downloads/Qr_Datamatrix_Testing/test_qr_centers.txt"; 
+        fileName << ros::package::getPath("pandora_vision_qrcode");
+        fileName << "/test/unit/data/" << "test_qr_centers.txt"; 
         fpr = fopen(fileName.str().c_str(), "r");
         fileName.str("");
-        for( int i=1; i<13; i++ ){
-            fileName << homedir << "/Downloads/Qr_Datamatrix_Testing/test_qr_" << i << ".jpg";
+        for(int i = 1; i < 13; i ++){
+            fileName << ros::package::getPath("pandora_vision_qrcode");
+            fileName << "/test/unit/data/" << "test_qr_" << i << ".jpg"; 
             inputFrame = cv::imread(fileName.str());
             fscanf(fpr, " %d", &cArray[0]);
             for( int j = 1; j < (1 + cArray[0] * 4); j ++)
@@ -219,4 +219,4 @@ namespace pandora_vision
         fclose(fpr);
     }
 
-} // namespace_pandora_vision
+}// namespace pandora_vision
