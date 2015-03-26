@@ -51,9 +51,6 @@ namespace pandora_vision
   };    
   
   
-  TEST_F(Landoltc3dDetectorTest,test1)
-  {
-		
-		
-	}
+  TEST_F(Landoltc3dDetectorTest, test1)
+  {}
 } // namespace pandora_vision

@@ -53,7 +53,7 @@ namespace pandora_vision
         packagePath = ros::package::getPath("pandora_vision_landoltc");
       }
       virtual ~LandoltcDetectorTest(){}
-      void fillGrad(cv::Mat& input);
+      void fillGrad(const cv::Mat& input);
       void getCenter(cv::Point *point, const int& index);
       int giveVotingData(cv::Point a, cv::Point b, int y, int i);
 
@@ -64,7 +64,7 @@ namespace pandora_vision
   }; 
 
   //process input and call findcenters
-  void LandoltcDetectorTest::fillGrad(cv::Mat& input)
+  void LandoltcDetectorTest::fillGrad(const cv::Mat& input)
   {
     cv::Mat gradX, gradY;
     cv::Mat gray;
@@ -85,7 +85,7 @@ namespace pandora_vision
   void LandoltcDetectorTest::getCenter(cv::Point *point, const int& index)
   {
     int vectorSize = landoltCDetector._centers.size();  
-    ASSERT_NE(0, (int)vectorSize); 
+    ASSERT_NE(0, static_cast<int>(vectorSize)); 
     ASSERT_GT(vectorSize, index);
     *point = landoltCDetector._centers[index];
     return;
@@ -101,12 +101,13 @@ namespace pandora_vision
     image = cv::imread(this->packagePath + "/bold.jpg");
 
     landoltCDetector._voting = cv::Mat::zeros(image.rows, image.cols, CV_16U);
-    landoltCDetector.rasterizeLine(a,b);
+    landoltCDetector.rasterizeLine(a, b);
 
-    const uint16_t* readVoting = (const uint16_t*)landoltCDetector._voting.data;
-    int columns = image.cols ;
+    const uint16_t* readVoting = static_cast<const uint16_t*>(
+        landoltCDetector._voting.data);
+    int columns = image.cols;
 
-    return readVoting[columns*y + i];
+    return readVoting[columns * y + i];
   }
 
 
@@ -115,8 +116,7 @@ namespace pandora_vision
   TEST_F(LandoltcDetectorTest, findCentersTest)
   {
     cv::Mat image;
-       
-    image = cv::imread(packagePath + "/bold.jpg");		
+    image = cv::imread(packagePath+"/bold.jpg");
     if ( !image.data)
     {
       ROS_FATAL("Could not read test image!");
@@ -125,7 +125,7 @@ namespace pandora_vision
 
     fillGrad(image);
 
-    cv::Point point(400,300);
+    cv::Point point(400, 300);
     cv::Point detectedCenters;
     getCenter(&detectedCenters, 0);
     EXPECT_NEAR(point.x, detectedCenters.x, 0.1);
@@ -135,7 +135,7 @@ namespace pandora_vision
 
     fillGrad(image);
 
-    cv::Point point2(400,300);
+    cv::Point point2(400, 300);
     getCenter(&detectedCenters, 0);
     EXPECT_NEAR(point2.x, detectedCenters.x, 0.1);
     EXPECT_NEAR(point2.y, detectedCenters.y, 0.1);
@@ -159,7 +159,7 @@ namespace pandora_vision
     //EXPECT_EQ(1,giveVotingData(d, c, 4, 5));
     //EXPECT_EQ(1,giveVotingData(b, e, 2, 2));
     //EXPECT_EQ(1,giveVotingData(b, e, 3, 2));
-  //}	
+  //}
 
 
 

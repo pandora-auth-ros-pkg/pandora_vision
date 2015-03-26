@@ -105,10 +105,15 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/landoltc_2d/landoltc_node.cpp
   src/landoltc_2d/landoltc_parameters.cpp
   src/landoltc_3d/landoltc3d_parameters.cpp
-
-
 )
+
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
+
+file(GLOB_RECURSE ${PROJECT_NAME}_LINT_TEST
+  RELATIVE ${PROJECT_SOURCE_DIR}
+    test/unit/*
+    )
+roslint_cpp(${${PROJECT_NAME}_LINT_TEST})
 
 ##################################### Testing ##################################
 if(CATKIN_ENABLE_TESTING)
