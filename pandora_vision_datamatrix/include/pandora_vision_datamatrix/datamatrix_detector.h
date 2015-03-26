@@ -51,7 +51,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#define DEBUG_MODE true
+#define DEBUG_MODE false
 
 namespace pandora_vision 
 {
@@ -64,8 +64,9 @@ namespace pandora_vision
   class DatamatrixDetector
   {
     private:
-    
-    //ros::NodeHandle _nh;
+    #if DEBUG_MODE
+      ros::NodeHandle _nh;
+    #endif
     
     DmtxMessage *msg;
     DmtxImage *img;

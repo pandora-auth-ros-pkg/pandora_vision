@@ -49,9 +49,9 @@ namespace pandora_vision
     dec = NULL;
     reg = NULL;
     msg = NULL;
-    
-  //  _datamatrixPublisher = 
-  //       image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
+    #if DEBUG_MODE
+      _datamatrixPublisher = image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
+    #endif
     detected_datamatrix.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
@@ -188,7 +188,9 @@ namespace pandora_vision
     cv_bridge::CvImage datamatrixMSg;
     datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
     datamatrixMSg.image = debug_frame.clone();
-  //  _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
+    #if DEBUG_MODE
+      _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
+    #endif
     
   }
   

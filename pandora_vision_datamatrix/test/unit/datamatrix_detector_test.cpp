@@ -132,7 +132,7 @@ namespace pandora_vision
     TEST_F (DatamatrixDetectorTest, detect_datamatrixWhiteImage)
     {
       cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-      whiteFrame.setTo(cv::Scalar(255,255,255));
+      whiteFrame.setTo(cv::Scalar(255, 255, 255));
       std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(whiteFrame);
       // there shouldn't be any datamatrices
       EXPECT_EQ(0, datamatrix_list.size());
@@ -143,7 +143,7 @@ namespace pandora_vision
       // Vertically concatenated
       cv::Mat blackFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
       cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
-      whiteFrame.setTo(cv::Scalar(255,255,255));
+      whiteFrame.setTo(cv::Scalar(255, 255, 255));
       cv::Mat H, V;
       cv::hconcat(blackFrame, whiteFrame, H);
       cv::vconcat(blackFrame, whiteFrame, V);
@@ -172,27 +172,27 @@ namespace pandora_vision
       EXPECT_EQ(0, datamatrix_list.size());
     }
     
-    TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
-    {
-      cv::Mat inputFrame;
-      inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
-      //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
-      // there should be one datamatrix
-      ASSERT_EQ(1, datamatrix_list.size());
-      int* center = locateDatamatrix(datamatrix_list[0].datamatrix_center);
-      EXPECT_LE(130, center[0]);   
-      EXPECT_GE(160, center[0]);   
-      EXPECT_LE(263, center[1]);   
-      EXPECT_GE(293, center[1]);   
-      // inputFrame = cv::imread("");
-      // datamatrix_list = detectDatamatrix(inputFrame);
-      // // there should be four datamatrices
-      // EXPECT_EQ(4, datamatrix_list.size());
-      // inputFrame = cv::imread("");
-      // datamatrix_list = detectDatamatrix(inputFrame);
-      // // there should be one datamatrix
-      // EXPECT_EQ(1, datamatrix_list.size());
-    }
+    //TEST_F (DatamatrixDetectorTest, detect_datamatrixFromImage)
+    //{
+    //  cv::Mat inputFrame;
+    //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
+    //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
+    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+    //  // there should be one datamatrix
+    //  ASSERT_EQ(1, datamatrix_list.size());
+    //  int* center = locateDatamatrix(datamatrix_list[0].datamatrix_center);
+    //  EXPECT_LE(130, center[0]);   
+    //  EXPECT_GE(160, center[0]);   
+    //  EXPECT_LE(263, center[1]);   
+    //  EXPECT_GE(293, center[1]);   
+    //  // inputFrame = cv::imread("");
+    //  // datamatrix_list = detectDatamatrix(inputFrame);
+    //  // // there should be four datamatrices
+    //  // EXPECT_EQ(4, datamatrix_list.size());
+    //  // inputFrame = cv::imread("");
+    //  // datamatrix_list = detectDatamatrix(inputFrame);
+    //  // // there should be one datamatrix
+    //  // EXPECT_EQ(1, datamatrix_list.size());
+    //}
       
-} // namespace_pandora_vision
+}// namespace pandora_vision

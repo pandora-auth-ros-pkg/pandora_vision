@@ -42,16 +42,16 @@ add_executable(datamatrix_node
   src/datamatrix_detector.cpp
 )
 
-add_dependencies(datamatrix_node 
-    ${catkin_EXPORTED_TARGETS}
-)
-
-add_library(datamatrix_node_lib
+add_library(${PROJECT_NAME}_datamatrix_node
   src/datamatrix_detector.cpp
 )
 
-target_link_libraries(datamatrix_node_lib
+target_link_libraries(${PROJECT_NAME}_datamatrix_node
   ${catkin_LIBRARIES}
+)
+
+add_dependencies(datamatrix_node 
+    ${catkin_EXPORTED_TARGETS}
 )
 
 target_link_libraries(datamatrix_node 
@@ -70,6 +70,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/datamatrix_detector.h
   src/datamatrix_detector.cpp
   src/datamatrix_detection.cpp
+  test/unit/datamatrix_detector_test.cpp
 
 
 )

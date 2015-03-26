@@ -16,7 +16,7 @@ find_package(DMTX REQUIRED)
 
 target_link_libraries(datamatrix_detector_test
   ${catkin_LIBRARIES}
-  datamatrix_node_lib
+  ${PROJECT_NAME}_datamatrix_node
   gtest_main
   ${DMTX_LIBRARIES}
 )
