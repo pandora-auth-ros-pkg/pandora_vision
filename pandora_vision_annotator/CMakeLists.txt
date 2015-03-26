@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   cv_bridge
   sensor_msgs
+  pcl_ros
 )
 
 include_directories( include
@@ -44,6 +45,7 @@ catkin_package(
     roslib
     sensor_msgs
     cv_bridge
+    pcl_ros
   INCLUDE_DIRS include
   LIBRARIES 
 )

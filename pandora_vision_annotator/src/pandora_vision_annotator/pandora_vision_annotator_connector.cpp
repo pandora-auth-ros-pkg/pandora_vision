@@ -161,7 +161,7 @@ namespace pandora_vision
       if(event->type() == QEvent::MouseButtonPress)
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
-        std::string img_name = "/home/marios/frame000" + boost::to_string(currFrame) + ".png";
+        std::string img_name = "frame000" + boost::to_string(currFrame) + ".png";
         //qDebug() << "load Image" << img_name;
         const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );

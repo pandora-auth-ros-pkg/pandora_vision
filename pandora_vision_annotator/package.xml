@@ -19,6 +19,7 @@
   <depend>rospy</depend>
   <depend>roslib</depend>
   <depend>rosbag</depend>
+  <depend>pcl_ros</depend>
   <depend>camera_calibration_parsers</depend>
   <depend>sensor_msgs</depend>
   <depend>cv_bridge</depend>

@@ -99,7 +99,7 @@ namespace pandora_vision
   }
 
   void CController::loadBag(const std::string& filename, const std::string& topic)
-  {
+  {     qDebug("enter loadbag");
         rosbag::Bag bag;
         bag.open(filename, rosbag::bagmode::Read);
         rosbag::View view(bag, rosbag::TopicQuery(topic));
@@ -107,16 +107,54 @@ namespace pandora_vision
         BOOST_FOREACH(rosbag::MessageInstance const m, view)
         {
             sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
+            sensor_msgs::PointCloud2::ConstPtr pc =m.instantiate<sensor_msgs::PointCloud2>();
             if(img != NULL)
             receiveImage(img);
+            if (pc != NULL)
+            {
+              //sensor_msgs::Image image_;
+              //pcl::toROSMsg (*pc, image_);
+              //receiveImage(image_);
+              receivePointCloud(pc);
+            }
         }
+
               connector_.setFrames(frames);
               connector_.setcurrentFrame();
-              qDebug("sfsfsdf");
+              //qDebug("sfsfsdf");
 
   }
+  void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
+  {pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::fromROSMsg (*msg, *cloud);
+qDebug("ddfd");
 
-  void CController::receiveImage(const sensor_msgs::Image::ConstPtr& msg)
+      cv::Mat imageFrame;
+if (cloud->isOrganized())
+{       imageFrame = cv::Mat(cloud->height, cloud->width, CV_8UC3);
+    {
+
+        for (int h=0; h<imageFrame.rows; h++)
+        {
+            for (int w=0; w<imageFrame.cols; w++)
+            {
+                pcl::PointXYZRGB point = cloud->at(w, h);
+
+                Eigen::Vector3i rgb = point.getRGBVector3i();
+
+                imageFrame.at<cv::Vec3b>(h,w)[2] = rgb[2];
+                imageFrame.at<cv::Vec3b>(h,w)[1] = rgb[1];
+                imageFrame.at<cv::Vec3b>(h,w)[0] = rgb[0];
+            }
+        }
+    }
+} frames.push_back(imageFrame);
+connector_.setFrames(frames);
+              connector_.setcurrentFrame();
+
+
+  }
+  void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
   {
 
     cv_bridge::CvImageConstPtr in_msg;

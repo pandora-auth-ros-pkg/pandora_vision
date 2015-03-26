@@ -95,7 +95,11 @@
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/conversions.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
