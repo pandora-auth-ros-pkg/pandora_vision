@@ -48,6 +48,8 @@
 #include <iterator>
 #include <fstream>
 #include "boost/filesystem.hpp"
+#include "boost/algorithm/string.hpp"
+#include "boost/lexical_cast.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/highgui/highgui.hpp"

@@ -102,12 +102,17 @@ class PlanarPatternTrainer{
      */
 
     void singleViewTraining(const boost::filesystem::path& dirPath);
+
     /*
      * @brief This method iterates over a directory, reads every
      * instance/synthetic view,calculates features and keypoints for every single
      * one of them and stores them in a corresponding xml file.
      * @param dirPath[const boost::filesystem::path&]: The path of the directory.
      */
+    bool getHomographyMatrices(
+        const boost::filesystem::path& homographyFilePath,
+        std::map<std::string, cv::Mat>* homographyMatrices);
+
     void multiViewTraining(const boost::filesystem::path& dirPath);
     /**
       @brief Saves the training data to a proper XML file.
@@ -116,7 +121,7 @@ class PlanarPatternTrainer{
       @param keyPoints [const std::vector<cv::Keypoint>] : The key points
       detected on the pattern.
      **/
-    void saveDataToFile(const std::string &patternName ,
+    void saveDataToFile(const boost::filesystem::path &patternName,
         const cv::Mat &descriptors ,
         const std::vector<cv::KeyPoint> &keyPoints,
         const std::vector<cv::Point2f> &boundingBox);

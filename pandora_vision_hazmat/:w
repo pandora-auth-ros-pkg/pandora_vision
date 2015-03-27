@@ -128,54 +128,14 @@ void PlanarPatternTrainer::train()
           // Get the path to the image that represents the frontal view of
           // the pattern.
           std::vector<boost::filesystem::path>::iterator frontalViewPathIter;
-          
-          // Get the path to the frontal view.
-          boost::filesystem::path frontalViewPath(
-              dirIterator->string() + "/" +
-              dirIterator->filename().string() + std::string(".png"));
-          // Find the path in the container for the current subdirectory. 
-          frontalViewPathIter = std::find(pathVector.begin(),
-              pathVector.end(), frontalViewPath); 
 
-          // Vector that contains the training set images.
-          std::vector<cv::Mat> imageCollection;
-          std::vector<std::string> imageNames;
-          
-          // Check if the path was found.
-          if (frontalViewPathIter == pathVector.end() || 
-              !boost::filesystem::exists(*frontalViewPathIter))
-          {
-            ROS_ERROR("Could not find the frontal view as specified by" 
-                " %s !", frontalViewPath.c_str());
-            continue;
-          }
-          // Check if it is a file.
-          if (boost::filesystem::is_regular_file(*frontalViewPathIter))
-          {
-            cv::Mat img = cv::imread(frontalViewPathIter->c_str());
 
-            if (!img.data)
-            {
-              ROS_ERROR("Could not read image,proceeding to next pattern!");
-              continue;
-            }
-            // Add the frontal view to the collection.
-            imageCollection.push_back(img);
-            imageNames.push_back(frontalViewPathIter->filename().
-                stem().string());
-          }
-          else
-          {
-            ROS_ERROR("The path : %s is not a valid path. Continuing with the"
-                " next path!", frontalViewPathIter->c_str());
-            continue;
-          }
-          
-          // Remove the frontal view from the entries.
-          int frontalViewPos = std::distance(pathVector.begin(),
-              frontalViewPathIter);
-          pathVector.erase(pathVector.begin() + frontalViewPos);
-          
+
+          //if (boost::filesystem::is_regular_file(*frontalViewPathIter))
+          //{
+
+          //}
+
           // Get the path to the file containing the homographies that
           // created all the synthetic views.
           std::vector<boost::filesystem::path>::iterator
@@ -218,22 +178,9 @@ void PlanarPatternTrainer::train()
               (pathVector.begin()); 
               it != pathVector.end(); ++it)
           {
-            cv::Mat img = cv::imread(it->c_str());
-            if (!img.data)
-            {
-              ROS_ERROR("Could not read image,proceeding to next pattern!");
-              continue;
-            }
-            // Add the frontal view to the collection.
-            imageCollection.push_back(img);
-            imageNames.push_back(frontalViewPathIter->filename().
-                stem().string());
+            ROS_INFO("Path %s ", it->c_str());
           }
-
-          // Finished parsing the images.
-          // We will now calculate the descriptors of the pattern
-          // from all the generating views!
-           
+          
         }
         else
         {
