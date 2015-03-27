@@ -61,15 +61,12 @@ void SurfTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors,
  *          corresponding descriptors for an image. 
  * @param images[const std::vector<cv::Mat&>] : The image we want 
  * to process.
- * @param imageNames[const std::vector<std::string>&] : The vector
- * containing the image names.
  * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
  * used to store the descriptors for each image.
  * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
  * containing the Keypoints detected in every image.
  **/
 void SurfTrainer::getFeatures(const std::vector<cv::Mat>& images,
-    const std::vector<std::string>& imageNames,
     std::vector<cv::Mat>* descriptors,
     std::vector<std::vector<cv::KeyPoint> >* keyPoints)
 {
