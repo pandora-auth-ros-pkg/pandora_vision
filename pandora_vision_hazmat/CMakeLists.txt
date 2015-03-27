@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_hazmat)
 
+find_package(Boost REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_vision_msgs
@@ -32,7 +34,8 @@ catkin_package(
       dynamic_reconfigure
       urdf
     #INCLUDE_DIRS
-    #LIBRARIES
+    LIBRARIES
+      Boost
 )
 
 

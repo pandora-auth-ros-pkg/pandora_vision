@@ -35,8 +35,8 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
-#define PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
+#define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
 
 #include "pandora_vision_hazmat/detection/detector_factory.h"
 #include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
@@ -71,5 +71,4 @@ class HazmatDetectionNode
     PlanarObjectDetector *detector_;
 };
 
-#endif  // PANDORA_VISION_HAZMAT_HAZMAT_DETECTION_H
-
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H

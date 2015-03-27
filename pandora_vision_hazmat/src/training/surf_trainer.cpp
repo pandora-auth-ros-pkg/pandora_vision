@@ -51,10 +51,10 @@ void SurfTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
     std::vector<cv::KeyPoint>* keyPoints)
 {
   // Calculate image keypoints.
-  featureExtractor_.detect( frame , *keyPoints ) ;  
+  featureExtractor_.detect(frame, *keyPoints);  
   
   // Extract Descriptors from image
-  featureExtractor_.compute( frame , *keyPoints , *descriptors ) ;
+  featureExtractor_.compute(frame, *keyPoints, *descriptors);
 }
 
 /*

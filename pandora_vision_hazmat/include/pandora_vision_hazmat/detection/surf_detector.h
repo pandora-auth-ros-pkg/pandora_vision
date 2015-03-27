@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_SURF_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_SURF_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_SURF_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_DETECTION_SURF_DETECTOR_H
  
 #include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
@@ -81,4 +81,4 @@ class SurfDetector : public FeatureMatchingDetector
 
 };
 
-#endif  // PANDORA_VISION_HAZMAT_SURF_DETECTOR_H_
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_SURF_DETECTOR_H_

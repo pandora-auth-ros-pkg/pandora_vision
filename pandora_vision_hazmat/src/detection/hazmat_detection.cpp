@@ -101,7 +101,7 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
     static_cast<double>(CLOCKS_PER_SEC );
   if (found )
   {
-    int width = 640 ;
+    int width = 640;
     int height = 480;
     float hfov = 58 * PI/180.0f;
     float vfov = 45.0 * PI / 180.0f;
@@ -113,7 +113,7 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
     for (int i = 0 ; i < detectedObjects.size() ; i++)
     {
       x = detectedObjects[i].position.x - static_cast<float>(width) / 2;
-      y = static_cast<float>(height) / 2 - detectedObjects[i].position.y ;
+      y = static_cast<float>(height) / 2 - detectedObjects[i].position.y;
       hazmatMsg.yaw = atan(2 * x / width * tan(hfov / 2));
       hazmatMsg.pitch = atan(2 * y / height * tan(vfov / 2));
       hazmatMsg.patternType = 0;

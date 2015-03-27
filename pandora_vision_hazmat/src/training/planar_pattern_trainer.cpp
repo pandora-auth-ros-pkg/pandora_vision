@@ -34,6 +34,7 @@
  *
  * Authors: Choutas Vassilis 
  *********************************************************************/
+
 #include "pandora_vision_hazmat/training/planar_pattern_trainer.h"
 
 /**
@@ -44,106 +45,190 @@
 void PlanarPatternTrainer::train()
 {
 
-  std::cout << "Starting Training! " << std::endl;
-  const clock_t startingTime = clock() ;  
+  ROS_INFO("Starting Training!");
+  const clock_t startingTime = clock();  
+  
   // The number of images.
-  int imgNum ;
+  int imgNum;
 
   // The temporary container for the images.
   cv::Mat img;
 
   // The vector of the training image set.
   std::vector<cv::Mat> images;
-  std::string imgName ;
+  std::string imgName;
   std::string inputFile;
 
-  cv::Mat descriptors ;
-
-  std::vector<cv::KeyPoint> keyPoints;
-  std::vector<cv::Point2f> boundingBox ; 
-
-
-  // Read the name of the file with the pattern titles.
-  std::cout << "Please enter the name of the file with the pattern " <<
-    "file names." << std::endl;
-  std::getline(std::cin,inputFile);
+  std::vector<std::string> inputDataNames;
 
   // Open the file with the different pattern names .
-  cv::FileStorage fs( inputFile+".xml" ,cv::FileStorage::READ);
-
-
-  // Check if the file was opened .
-  if ( !fs.isOpened() )
-  {
-    std::cout << "File: " << inputFile << " could not be opened!" <<
-      std::endl; 
-    return ;
-  }
-
-  std::vector<std::string> input ;
-
-  // Temporary string file.
-  std::string inputName ;
-
-  cv::FileNode inputNames = fs["PatternName"];
-
-  // Check if the xml node is a string sequence .
-  if ( inputNames.type() != cv::FileNode::SEQ)
-  {
-    std::cerr << "strings is not a sequence! FAIL" << std::endl;
-    return ;
-  }
-
-  // Initialize the file Iterators .   
-  cv::FileNodeIterator it = inputNames.begin() ;
-  cv::FileNodeIterator itEnd = inputNames.end() ;
-
-  std::cout << "Reading Pattern Names." << std::endl;
-
-  // Read the name of the pattern files.
-  for ( ; it != itEnd ; ++it ) 
-  {
-
-    inputName = (std::string)(*it)["name"]  ;
-    input.push_back(inputName) ;
-  }
-
+  std::string fileName;
+  std::string line;
   
+  //ROS_INFO("Reading the names of the patterns.");
 
-  std::cout << "Calculating Pattern Features " << std::endl;
+  //while(std::getline(file, line))
+  //{
+    //if (line.empty())
+      //continue;
+    //inputDataNames.push_back(line);
+  //}
 
-  cv::Mat hist;
+  // Initialize the path to the data that will be used to train the system. 
+  boost::filesystem::path trainingInputPath(packagePath_ +
+        "/data/trainingInput/");
+  
+  // Create the container for all the files in the directory containing
+  // the input of the training module.
+  std::vector<boost::filesystem::path> trainingInputContents;
 
-  for (int i = 0 ; i < input.size() ; i++ )
+  // Iterate over the provided directory and store all
+  // the files/paths it contains.
+  copy(boost::filesystem::directory_iterator(trainingInputPath),
+      boost::filesystem::directory_iterator(),
+      std::back_inserter(trainingInputContents));
+
+  // Sort the resulting data.
+  sort(trainingInputContents.begin(), trainingInputContents.end());
+  // Iterate over all the files/paths in the subdirectory.
+  for (std::vector<boost::filesystem::path>::iterator 
+      dirIterator(trainingInputContents.begin());
+      dirIterator != trainingInputContents.end(); dirIterator++)
   {
-    // Name of the image to be read. 
-    imgName = "patterns/" + input[i] + ".png" ; 
-    img = cv::imread(imgName);
-    if ( !img.data ) 
+    ROS_INFO("%s", dirIterator->c_str());
+    try
     {
-      std::cout << "Error reading image : " << imgName << std::endl;
-      std::cout << "Proceeding with the next image ! " << std::endl;
-      continue;
-    }
-    
+      // Check if the provided path exists.
+      if (boost::filesystem::exists(*dirIterator))
+      {
+        // Check if it is a file.
+        if (boost::filesystem::is_regular_file(*dirIterator))
+        {
+          singleViewTraining(*dirIterator);
+        }
+        // Check if it is a directory.
+        else if(boost::filesystem::is_directory(*dirIterator))
+        {
+          ROS_INFO("%s is a directory !", dirIterator->c_str());
+          ROS_INFO("Iterating over all the files in the directory!");
+          // 
+          std::vector<boost::filesystem::path> pathVector;
 
-    // Calculate the Hue - Saturation histogram of the image.
-    this->calculateHistogram(&hist);
-    // Calculate the image features.
-    this->getFeatures(img, &descriptors , &keyPoints , &boundingBox );
-    // Save the training data for the i-th image.
-    this->saveData( input[i] , descriptors , keyPoints , boundingBox 
-        , hist);
+          // Iterate over the provided directory and store all
+          // the paths it contains.
+          copy(boost::filesystem::directory_iterator(*dirIterator),
+              boost::filesystem::directory_iterator(),
+              std::back_inserter(pathVector));
 
-    keyPoints.clear();
-    boundingBox.clear();
+          // Sort the contained paths.
+          sort(pathVector.begin(), pathVector.end());
+
+          // Get the path to the image that represents the frontal view of
+          // the pattern.
+          std::vector<boost::filesystem::path>::iterator frontalViewPathIter;
+          
+          
+          
+          //if (boost::filesystem::is_regular_file(*frontalViewPathIter))
+          //{
+            
+          //}
+
+          // Get the path to the file containing the homographies that
+          // created all the synthetic views.
+          std::vector<boost::filesystem::path>::iterator
+            homographyDataStoragePathIter;
+
+          boost::filesystem::path homographyPath(dirIterator->string() +
+              std::string("homography.txt"));
+
+          homographyDataStoragePathIter = std::find(pathVector.begin(),
+              pathVector.end(), homographyPath);
+          if (homographyDataStoragePathIter == pathVector.end())
+          {
+            ROS_ERROR("Could not find the file containing the homography "
+                "transformations that generated the new views!");
+            continue;
+          }
+          int homographyDataStoragePathPos = std::distance(pathVector.begin(),
+              homographyDataStoragePathIter);
+          
+
+          for (std::vector<boost::filesystem::path>::const_iterator it 
+              (pathVector.begin()); 
+              it != pathVector.end(); ++it)
+          {
+            ROS_INFO("Path %s ", it->c_str());
+          }
+
+        }
+        else
+        {
+          ROS_INFO("Path %s exists but is neither a file nor a directory!",
+              dirIterator->c_str());
+        }
+        
+      }
+      else
+      {
+        ROS_ERROR("Invalid path!");
+        continue;
+      }
+      
+  }
+  catch(const boost::filesystem3::filesystem_error& ex)
+  {
+    ROS_ERROR("%s", ex.what());
   }
 
+
+  }
   const clock_t endingTime = clock();
-  std::cout << "Features calculated and saved." << std::endl;
-  std::cout << "Training is over ! " << std::endl;
-  std::cout << "Training time was : " << ( endingTime - startingTime ) /
-    static_cast<double>(CLOCKS_PER_SEC) << " seconds " << std::endl;
+  ROS_INFO("Features calculated and saved.");
+  ROS_INFO("Training is over !");
+  ROS_INFO("Training time was : %f seconds", ( endingTime - startingTime ) /
+      static_cast<double>(CLOCKS_PER_SEC));
+}
+
+/*
+ * @brief This method iterates over a directory, reads every
+ * instance/synthetic view,calculates features and keypoints for every single
+ * one of them and stores them in a corresponding xml file.
+ * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+*/
+void PlanarPatternTrainer::multiViewTraining(const boost::filesystem::path& 
+    dirPath)
+{
+  ROS_INFO("Processing directory : %s ", dirPath.c_str());
+}
+
+/*
+ * @brief This method iterates over a directory, reads every
+ * instance/synthetic view,calculates features and keypoints for every single
+ * one of them and stores them in a corresponding xml file.
+ * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+*/
+void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
+    dirPath)
+{
+  ROS_INFO("Reading image : %s ", dirPath.filename().c_str());
+  cv::Mat descriptors;
+  std::vector<cv::KeyPoint> keyPoints;
+  std::vector<cv::Point2f> boundingBox; 
+
+  cv::Mat img = cv::imread(dirPath.c_str());
+  if (!img.data)
+  {
+    ROS_ERROR("Could not read image,proceeding to next pattern!");
+    return;
+  }
+  //Calculate the image features.
+  this->getFeatures(img, &descriptors, &keyPoints, &boundingBox );
+  //Save the training data for the i-th image.
+  
+  this->saveDataToFile(dirPath.filename().string(), descriptors, keyPoints,
+      boundingBox);
+  return;
 }
 
 /**
@@ -154,11 +239,10 @@ void PlanarPatternTrainer::train()
         detected on the pattern.
 **/                  
   
-void PlanarPatternTrainer::saveData(const std::string &patternName,
+void PlanarPatternTrainer::saveDataToFile(const std::string &patternName,
   const cv::Mat &descriptors ,
   const std::vector<cv::KeyPoint> &keyPoints,
-  const std::vector<cv::Point2f> &boundingBox , 
-  const cv::Mat &histogram)
+  const std::vector<cv::Point2f> &boundingBox) 
 {
 
   // Create the file name where the results will be stored.
@@ -166,76 +250,46 @@ void PlanarPatternTrainer::saveData(const std::string &patternName,
 
 
   // Properly choose the name of the data file.
-  std::string path("trainingData") ;
+  std::string path("trainingData");
 
   path = path + "/" + this->getFeatureType() + "/";
 
-  fileName = path + fileName ;
-  std::cout << fileName << std::endl;
+  fileName = path + fileName;
+  ROS_INFO("DEBUG MESSAGE : Saving fileName %s", fileName.c_str());
   // Opening the xml file for writing .
-  cv::FileStorage fs( fileName + ".xml" ,cv::FileStorage::WRITE);
+  cv::FileStorage fs( fileName + ".xml", cv::FileStorage::WRITE);
   
-  if ( ! fs.isOpened() )
+  if (!fs.isOpened())
   {
-    std::cout << "Error opening file : " << fileName << std::endl;
-    std::cout << "Proceeding to next pattern !" << std::endl;
+    ROS_ERROR("Could not open the file name: %s", fileName.c_str());
     return;
   }
 
   // Enter the name of the pattern.
-  fs << "PatternName" << patternName ;
+  fs << "PatternName" << patternName;
 
   // Save the descriptors.
-  fs << "Descriptors" << descriptors ;
-
-  // Save the histogram
-  fs << "Histogram" << histogram ;
+  fs << "Descriptors" << descriptors;
 
   // Calculate the number of keypoints found.
-  int keyPointsNum = keyPoints.size() ;
+  int keyPointsNum = keyPoints.size();
 
   // Store the detected keypoints.
-  fs << "PatternKeypoints" << "[" ;
+  fs << "PatternKeypoints" << "[";
   for (int i = 0 ; i < keyPointsNum ; i++ )
-    fs << "{" << "Keypoint" <<  keyPoints[i].pt << "}" ;
-
-  fs << "]" ;
+    fs << "{" << "Keypoint" <<  keyPoints[i].pt << "}";
+  fs << "]";
 
   // Store the bounding box for the pattern.
-  fs << "BoundingBox" << "[" ;
+  fs << "BoundingBox" << "[";
   for (int i = 0 ; i < boundingBox.size() ; i++ )
-    fs << "{" << "Corner" <<  boundingBox[i] << "}" ;
+    fs << "{" << "Corner" <<  boundingBox[i] << "}";
 
-  fs << "]" ;
+  fs << "]";
 
   // Close the xml file .
   fs.release();
 
-
 }
 
-
-// The function that will calculate the histogram of the pattern.
-void PlanarPatternTrainer::calculateHistogram(cv::Mat *hist)
-{
-  // The parameters will be read by an yml/xml file .
-  int hbins = 15, sbins = 16;  
-  int histSize[] = {hbins, sbins};
-  float hranges[] = { 0, 180 };
-  float sranges[] = { 0, 256 };
-  const float* ranges[] = { hranges, sranges };
-  int channels[] = {0, 1};
-
-
-  cv::Mat hsv;
-
-  cv::cvtColor( currentImage_ , hsv , CV_BGR2HSV );
-
-  calcHist( &hsv , 1 , channels, cv::Mat() , // do not use mask
-      *hist , 2 , histSize , ranges ,
-      true , // the histogram is uniform
-      false );
-
-  cv::normalize( *hist , *hist , 255 , 0 , cv::NORM_L1 );   
-}
 

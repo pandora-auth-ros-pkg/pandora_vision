@@ -34,9 +34,8 @@
  *
  * Authors: Choutas Vassilis 
  *********************************************************************/
-#ifndef FACTORY_H
-#define FACTORY_H
-
+#ifndef PANDORA_VISION_HAZMAT_TRAINING_FACTORY_H
+#define PANDORA_VISION_HAZMAT_TRAINING_FACTORY_H
   
 #include "pandora_vision_hazmat/training/sift_trainer.h"  
 #include "pandora_vision_hazmat/training/surf_trainer.h"
@@ -49,22 +48,23 @@
 **/        
 class PlanarPatternTrainerFactory
 {
+
   public:
-  
+
     /**
       @brief Function used to detect Descriptors for the image.
-     
-    **/  
+
+     **/  
     PlanarPatternTrainer *createObject(const std::string &featureType);
-    
+
     /**
       @brief Hazmat Trainer Factory constructor
-    **/
+     **/
     PlanarPatternTrainerFactory()
     {};
-    
-  private:
-  
-  };
 
-#endif
+  private:
+
+};
+
+#endif  // PANDORA_VISION_HAZMAT_TRAINING_FACTORY_H

@@ -34,19 +34,26 @@
  *
  * Authors: Choutas Vassilis 
  *********************************************************************/
-#ifndef UTILITIES_H
-#define UTILITIES_H
+
+#ifndef PANDORA_VISION_HAZMAT_TRAINING_UTILITIES_H
+#define PANDORA_VISION_HAZMAT_TRAINING_UTILITIES_H
 
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <locale>
-#include "ros/ros.h"
+#include <algorithm>
+#include <map>
+#include <iterator>
+#include <fstream>
+#include "boost/filesystem.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/nonfree/nonfree.hpp"
+#include "ros/ros.h"
+#include "ros/package.h"
 
-#endif
+#endif  // PANDORA_VISION_HAZMAT_TRAINING_UTILITIES_H

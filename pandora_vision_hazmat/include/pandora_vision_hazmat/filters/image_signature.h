@@ -35,9 +35,8 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-
-#ifndef PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
-#define PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H
+#ifndef PANDORA_VISION_HAZMAT_FILTERS_IMAGE_SIGNATURE_H 
+#define PANDORA_VISION_HAZMAT_FILTERS_IMAGE_SIGNATURE_H
 
 #include "ros/ros.h"
 #include "opencv2/core/core.hpp"
@@ -79,4 +78,4 @@ class ImageSignature
 
 };
 
-#endif  // PANDORA_VISION_HAZMAT_IMAGE_SIGNATURE_H_
+#endif  // PANDORA_VISION_HAZMAT_FILTERS_IMAGE_SIGNATURE_H

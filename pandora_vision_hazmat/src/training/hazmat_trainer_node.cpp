@@ -35,7 +35,7 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/training/factory.h"
+#include "pandora_vision_hazmat/training/factorytory.h"
 
 int main(int argc , char* argv[])
 {
@@ -49,8 +49,8 @@ int main(int argc , char* argv[])
       << std::endl;
     return -1;
   }
-  PlanarPatternTrainerFactory fac ; 
-  PlanarPatternTrainer *trainer = fac.createObject(argv[1]);
+  PlanarPatternTrainerFactory factory; 
+  PlanarPatternTrainer *trainer = factory.createObject(argv[1]);
   if ( trainer == NULL )
   {
     ROS_FATAL("No trainer was created ! Training will not proceed! ");

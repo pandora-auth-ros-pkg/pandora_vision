@@ -54,7 +54,7 @@ class OrbTrainer : public PlanarPatternTrainer
     OrbTrainer() : featureType_("ORB")
   {
     // Feature Extractor Initialization.
-    featureExtractor_ = cv::ORB() ;
+    featureExtractor_ = cv::ORB();
   }
     /*
      * @brief: Function used to produce the necessary keypoints and their
@@ -96,9 +96,9 @@ class OrbTrainer : public PlanarPatternTrainer
     }
   private:
 
-    cv::ORB featureExtractor_ ; //!< ORB algorithm main class.
+    cv::ORB featureExtractor_; //!< ORB algorithm main class.
 
-    const std::string featureType_ ; //!< ID of the algorithm used.
+    const std::string featureType_; //!< ID of the algorithm used.
 
 };
 

@@ -45,14 +45,14 @@
  * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
  * containing the Keypoints detected in the current image.
  **/ 
-void SiftTrainer::getFeatures(const cv::Mat& frame,cv::Mat* descriptors,
+void SiftTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
     std::vector<cv::KeyPoint>* keyPoints)
 {
   // Calculate image keypoints.
-  featureExtractor_.detect( frame , *keyPoints ) ;  
+  featureExtractor_.detect(frame, *keyPoints);  
   
   // Extract Descriptors from image
-  featureExtractor_.compute( frame , *keyPoints , *descriptors ) ;
+  featureExtractor_.compute(frame, *keyPoints, *descriptors);
 }
 
 /*
@@ -74,20 +74,20 @@ void SiftTrainer::getFeatures(const cv::Mat& frame, cv::Mat *descriptors,
 {
   
   // Calculate image keypoints.
-  featureExtractor_.detect( frame , *keyPoints ) ;  
+  featureExtractor_.detect( frame , *keyPoints );  
   
   // Extract Descriptors from image
-  featureExtractor_.compute( frame , *keyPoints , *descriptors ) ;
+  featureExtractor_.compute( frame , *keyPoints , *descriptors );
   // Calculate the bounding box for the current pattern 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
   (*boundingBox).push_back(  cv::Point2f( frame.cols , 0));
   (*boundingBox).push_back ( cv::Point2f( frame.cols  , 
-    frame.rows  )); 
+    frame.rows)); 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 
-    frame.rows ) );
+    frame.rows));
   
-  (*boundingBox).push_back( cv::Point2f( frame.cols / 2.0f ,
-    frame.rows / 2.0f ));
+  (*boundingBox).push_back( cv::Point2f( frame.cols / 2.0f,
+    frame.rows / 2.0f));
 
   }
 

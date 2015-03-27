@@ -54,7 +54,7 @@ class SurfTrainer : public PlanarPatternTrainer
     SurfTrainer() : featureType_("SURF")
   {
     // Feature Extractor Initialization.
-    featureExtractor_ = cv::SURF() ;
+    featureExtractor_ = cv::SURF();
   }
     /*
      * @brief: Function used to produce the necessary keypoints and their
@@ -94,9 +94,9 @@ class SurfTrainer : public PlanarPatternTrainer
     }
   private:
 
-    cv::SURF featureExtractor_ ; //!< SURF algorithm main class.
+    cv::SURF featureExtractor_; //!< SURF algorithm main class.
 
-    const std::string featureType_ ; //!< ID of the algorithm used.
+    const std::string featureType_; //!< ID of the algorithm used.
 
 };
 

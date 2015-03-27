@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_UTILITIES_H
-#define PANDORA_VISION_HAZMAT_UTILITIES_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_UTILITIES_H
+#define PANDORA_VISION_HAZMAT_DETECTION_UTILITIES_H
 
 /**
   Header file used for initializing useful data structures and 
@@ -82,15 +82,15 @@
 
 struct Object
 {
-  public:
-    std::string name;
+ public:
+     std::string name;
 
-    cv::Point2f position;
-    Object(const std::string& objectName, const cv::Point2f& objectPosition)
-    {
-      name = objectName;
-      position = objectPosition;
-    }
+     cv::Point2f position;
+     Object(const std::string& objectName, const cv::Point2f& objectPosition)
+     {
+       name = objectName;
+       position = objectPosition;
+     }
 };
 
 struct Pattern
@@ -114,4 +114,4 @@ struct Pattern
     cv::Mat histogram;
 };
   
-#endif  // PANDORA_VISION_HAZMAT_UTILITIES_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_UTILITIES_H

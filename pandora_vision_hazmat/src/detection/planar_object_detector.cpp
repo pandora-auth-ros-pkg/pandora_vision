@@ -45,12 +45,12 @@ std::string PlanarObjectDetector::fileName_ = std::string();
 // Data input function . 
 
 PlanarObjectDetector::PlanarObjectDetector(const std::string &featureName) 
-      : featuresName_(featureName) , patterns_(new std::vector<Pattern>) 
+      : featuresName_(featureName) , patterns_(new std::vector<Pattern>)
 {
   }
  
-// Detect the pattern in the frame.
 
+// Detect the pattern in the frame.
 bool PlanarObjectDetector::detect(const cv::Mat &frame,
     std::vector<Object>* detectedObjects) 
 {

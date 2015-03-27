@@ -36,7 +36,7 @@
  *********************************************************************/
 
 
-#include "pandora_vision_hazmat/image_signature.h"
+#include "pandora_vision_hazmat/filters/image_signature.h"
 #include "gtest/gtest.h"
 
 

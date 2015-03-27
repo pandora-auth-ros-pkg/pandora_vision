@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_ORB_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_DETECTION_ORB_DETECTOR_H
  
 #include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
@@ -66,4 +66,4 @@ class OrbDetector : public FeatureMatchingDetector
 
 };
 
-#endif  // PANDORA_VISION_HAZMAT_ORB_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_ORB_DETECTOR_H

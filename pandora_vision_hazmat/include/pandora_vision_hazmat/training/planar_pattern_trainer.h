@@ -35,21 +35,21 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER
-#define PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER
+#ifndef PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER_H
+#define PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER_H
 
 #include "pandora_vision_hazmat/training/utilities.h"
 
 
 /** 
- @class PlanarPatternTrainer
- @brief Abstract class used for training the Hazmat detector
+  @class PlanarPatternTrainer
+  @brief Abstract class used for training the Hazmat detector
  **/
- 
+
 class PlanarPatternTrainer{
 
   public:
-/*
+    /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
@@ -61,9 +61,9 @@ class PlanarPatternTrainer{
      **/
     virtual void getFeatures(const cv::Mat& frame,
         cv::Mat *descriptors, 
-      std::vector<cv::KeyPoint>* keyPoints,
-      std::vector<cv::Point2f>* boundingBox) = 0;
- /*
+        std::vector<cv::KeyPoint>* keyPoints,
+        std::vector<cv::Point2f>* boundingBox) = 0;
+    /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
@@ -74,44 +74,64 @@ class PlanarPatternTrainer{
     virtual void getFeatures(const cv::Mat& frame,
         cv::Mat *descriptors,
         std::vector<cv::KeyPoint>* keyPoints) = 0;
-    // The function that will calculate the histogram of the pattern.
-    virtual void calculateHistogram(cv::Mat *hist);
-    
-    virtual const std::string getFeatureType() = 0 ;
-    
+
+    virtual const std::string getFeatureType() = 0;
+
     /**
-    @brief Sets the current image that will be used to train the detector.
-    @param img [const cv::Mat] : The image of the pattern that we want 
-                                to detect .
-    **/            
+      @brief Sets the current image that will be used to train the detector.
+      @param img [const cv::Mat] : The image of the pattern that we want 
+      to detect .
+     **/            
     virtual void setCurrentImage(const cv::Mat &img)
     {
-      currentImage_ = img ;
+      currentImage_ = img;
     }
 
-        
+
     /**
-     @brief Main training function that reads input images and stores 
-            the results in a corresponding xml file.
-    **/ 
+      @brief Main training function that reads input images and stores 
+      the results in a corresponding xml file.
+     **/ 
     void train();
-    
-  /**
-   @brief Saves the training data to a proper XML file.
-   @param patternName [const std::string &] : The name of the pattern.
-   @param descriptors [const cv::Mat &] : The descriptors of the pattern.
-   @param keyPoints [const std::vector<cv::Keypoint>] : The key points
-          detected on the pattern.
-  **/                  
-   void saveData(const std::string &patternName ,
-      const cv::Mat &descriptors ,
-      const std::vector<cv::KeyPoint> &keyPoints , 
-      const std::vector<cv::Point2f> &boundingBox ,
-      const cv::Mat &histogram );
 
+    /*
+     * @brief This method iterates over a directory, reads every
+     * instance/synthetic view,calculates features and keypoints for every single
+     * one of them and stores them in a corresponding xml file.
+     * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+     */
+
+    void singleViewTraining(const boost::filesystem::path& dirPath);
+    /*
+     * @brief This method iterates over a directory, reads every
+     * instance/synthetic view,calculates features and keypoints for every single
+     * one of them and stores them in a corresponding xml file.
+     * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+     */
+    void multiViewTraining(const boost::filesystem::path& dirPath);
+    /**
+      @brief Saves the training data to a proper XML file.
+      @param patternName [const std::string &] : The name of the pattern.
+      @param descriptors [const cv::Mat &] : The descriptors of the pattern.
+      @param keyPoints [const std::vector<cv::Keypoint>] : The key points
+      detected on the pattern.
+     **/
+    void saveDataToFile(const std::string &patternName ,
+        const cv::Mat &descriptors ,
+        const std::vector<cv::KeyPoint> &keyPoints,
+        const std::vector<cv::Point2f> &boundingBox);
+    /**
+      @brief Default Object Constructor. 
+     **/ 
+    PlanarPatternTrainer()
+    {
+      // Get the path of the package.
+      packagePath_ = ros::package::getPath("pandora_vision_hazmat");
+    }
   protected:
-    cv::Mat currentImage_ ; //!< Current image used for traing.
-  };
+    cv::Mat currentImage_; //!< Current image used for traing.
+    std::string packagePath_;
+};
 
 
-#endif  // PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER
+#endif  // PANDORA_VISION_HAZMAT_TRAINING_PLANAR_PATTERN_TRAINER_H

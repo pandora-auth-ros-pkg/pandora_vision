@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
-#define PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H
+#ifndef PANDORA_VISION_HAZMAT_FILTERS_HISTOGRAM_MASK_H
+#define PANDORA_VISION_HAZMAT_FILTERS_HISTOGRAM_MASK_H
 
 #include "ros/ros.h"
 #include "opencv2/core/core.hpp"
@@ -85,5 +85,4 @@ class HistogramMask
 
 };
 
-
-#endif  // PANDORA_VISION_HAZMAT_HISTOGRAM_MASK_H_
+#endif  // PANDORA_VISION_HAZMAT_FILTERS_HISTOGRAM_MASK_H_

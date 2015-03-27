@@ -35,22 +35,23 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
-#define PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H
+#define PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H
 
 #include "pandora_vision_hazmat/detection/planar_object_detector.h"
 #include "pandora_vision_hazmat/detection/sift_detector.h"
 #include "pandora_vision_hazmat/detection/surf_detector.h"
 #include "pandora_vision_hazmat/detection/orb_detector.h"
 #include <locale>
+
 class DetectorFactory
 {
   public:
-    
+
     DetectorFactory(){};
 
     PlanarObjectDetector* createDetectorObject(const std::string& featureType);    
   private:
 };
 
-#endif  // PANDORA_VISION_HAZMAT_DETECTOR_FACTORY_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H

@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_FEATURE_MATCHING_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_DETECTION_FEATURE_MATCHING_DETECTOR_H
 
 #include "pandora_vision_hazmat/detection/planar_object_detector.h"
 
@@ -107,4 +107,4 @@ class FeatureMatchingDetector : public PlanarObjectDetector
  
 };
 
-#endif  // PANDORA_VISION_HAZMAT_FEATURE_MATCHING_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_FEATURE_MATCHING_DETECTOR_H

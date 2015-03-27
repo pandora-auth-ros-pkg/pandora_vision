@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
-#define PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_SIFT_DETECTOR_H
+#define PANDORA_VISION_HAZMAT_DETECTION_SIFT_DETECTOR_H
 
 #include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
@@ -70,4 +70,4 @@ class SiftDetector : public FeatureMatchingDetector
     
 };
 
-#endif  // PANDORA_VISION_HAZMAT_SIFT_DETECTOR_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_SIFT_DETECTOR_H

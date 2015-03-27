@@ -38,7 +38,7 @@
 #ifndef PANDORA_VISION_HAZMAT_MOCK_MOCK_FEATURE_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_MOCK_MOCK_FEATURE_DETECTOR_H
 
-#include "pandora_vision_hazmat/feature_matching_detector.h"
+#include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
 class MockFeatureDetector : public FeatureMatchingDetector
 {

@@ -50,10 +50,10 @@ void OrbTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
     std::vector<cv::KeyPoint>* keyPoints)
 {
   // Calculate image keypoints.
-  featureExtractor_.detect( frame , *keyPoints ) ;  
+  featureExtractor_.detect(frame, *keyPoints);
   
   // Extract Descriptors from image
-  featureExtractor_.compute( frame , *keyPoints , *descriptors ) ;
+  featureExtractor_.compute(frame, *keyPoints, *descriptors);
 }
 
 /*
@@ -79,12 +79,12 @@ void OrbTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
   (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
   (*boundingBox).push_back(  cv::Point2f( frame.cols , 0));
   (*boundingBox).push_back ( cv::Point2f( frame.cols  , 
-    frame.rows  )); 
+    frame.rows)); 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 
-    frame.rows ));
+    frame.rows));
   
   (*boundingBox).push_back( cv::Point2f( frame.cols / 2.0f ,
-    frame.rows / 2.0f ));
+    frame.rows / 2.0f));
 }
 
 

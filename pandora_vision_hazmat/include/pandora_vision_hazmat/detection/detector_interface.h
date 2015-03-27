@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HAZMAT_DETECTOR_INTERFACE_H
-#define PANDORA_VISION_HAZMAT_DETECTOR_INTERFACE_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_INTERFACE_H
+#define PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_INTERFACE_H
 
 #include "pandora_vision_hazmat/detection/utilities.h"
 
@@ -68,5 +68,4 @@ class Detector
   
 };
 
-#endif  // PANDORA_VISION_HAZMAT_DETECTOR_INTERFACE_H
-
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_INTERFACE_H

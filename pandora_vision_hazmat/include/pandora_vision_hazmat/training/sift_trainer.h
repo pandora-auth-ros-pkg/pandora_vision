@@ -54,7 +54,7 @@ class SiftTrainer : public PlanarPatternTrainer
     SiftTrainer() : featureType_("SIFT")
   {
     // Feature Extractor Initialization.
-    featureExtractor_ = cv::SIFT() ;
+    featureExtractor_ = cv::SIFT();
   }
     /*
  * @brief: Function used to produce the necessary keypoints and their
@@ -96,9 +96,9 @@ class SiftTrainer : public PlanarPatternTrainer
     }
   private:
 
-    cv::SIFT featureExtractor_ ; //!< SIFT algorithm main class.
+    cv::SIFT featureExtractor_; //!< SIFT algorithm main class.
 
-    const std::string featureType_ ; //!< ID of the algorithm used.
+    const std::string featureType_; //!< ID of the algorithm used.
 
 };
 
