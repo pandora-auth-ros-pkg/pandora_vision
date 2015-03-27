@@ -32,15 +32,71 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou, Marios Protopapas
+* Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/training_parameters.h"
+#include "pandora_vision_victim/feature_extractors/mean_std_dev.h"
+#include "gtest/gtest.h"
 
 namespace pandora_vision
 {
-  int TrainingParameters::numOfPositiveSamples = 10;
-  int TrainingParameters::numOfNegativeSamples = 10;
-  int TrainingParameters::numOfTestPositiveSamples = 5;
-  int TrainingParameters::numOfTestNegativeSamples = 5;
-}
+  /**
+     @class MeanStdDevExtractorTest 
+     @brief Tests the integrity of methods of class MeanStdDevExtractor
+   **/
+  class MeanStdDevExtractorTest : public ::testing::Test
+  {
+    protected:
+      
+
+      MeanStdDevExtractorTest () {}
+      
+       //! Sets up images needed for testing
+       virtual void SetUp()
+      {
+
+       HEIGHT=10;
+       WIDTH=10;
+
+        // Construct a black image
+        black = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
+        
+        // Construct a white image
+        white = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1);
+	cv::Rect rect(0, 0, HEIGHT, WIDTH);
+	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+
+	// Construct a half black - half white image
+        blackWhite = cv::Mat::zeros( HEIGHT, WIDTH, CV_64FC1); 
+        cv::Rect rect1(0, 0, HEIGHT/2, WIDTH);
+	cv::rectangle(blackWhite, rect1, cv::Scalar(255,0,0), -1);
+
+      }
+      
+      // The image dimensions
+      int HEIGHT;
+      int WIDTH;
+
+      // Images that will be used for testing
+      cv::Mat black,white,blackWhite;
+  };
+  
+  //! Tests MeanStdDevExtractor::extract
+  TEST_F ( MeanStdDevExtractorTest, extractMeanStd )
+  {
+    // The output vector
+    std::vector<double>  out;
+    MeanStdDevExtractor msd1(&black), msd2(&white), msd3(&blackWhite);
+    out = msd1.extract();
+    EXPECT_EQ ( 0 , out[0] );
+    EXPECT_EQ ( 0 , out[1] );
+
+    out = msd2.extract();
+    EXPECT_EQ ( 255 , out[0] );
+    EXPECT_EQ ( 0 , out[1] );
+
+    out = msd3.extract();
+    EXPECT_EQ ( 127.5 , out[0] );
+    EXPECT_EQ ( 127.5 , out[1] );
+  }
+} // namespace pandora_vision

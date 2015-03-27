@@ -3,7 +3,7 @@
     
     <arg name="output" default="log" />
     
-    <node name="victim_node" type="victim_node" pkg="pandora_vision_victim"  
+    <node name="victim_train_node" type="victim_train_node" pkg="pandora_vision_victim"  
       output="$(arg output)"/>
     
     <rosparam file="$(find pandora_vision_victim)/config/victim_topics.yaml" 

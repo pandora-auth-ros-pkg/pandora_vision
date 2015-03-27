@@ -32,15 +32,71 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou, Marios Protopapas
+* Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/training_parameters.h"
+#include "pandora_vision_victim/feature_extractors/color_angles.h"
+#include "gtest/gtest.h"
+#define PI 3.14159265
+
 
 namespace pandora_vision
 {
-  int TrainingParameters::numOfPositiveSamples = 10;
-  int TrainingParameters::numOfNegativeSamples = 10;
-  int TrainingParameters::numOfTestPositiveSamples = 5;
-  int TrainingParameters::numOfTestNegativeSamples = 5;
-}
+  /**
+    @class ColorAnglesExtractorTest 
+    @brief Tests the integrity of methods of class ColorAnglesExtractor
+   **/
+  class ColorAnglesExtractorTest : public ::testing::Test
+  {
+    protected:
+      
+
+      ColorAnglesExtractorTest () {}
+
+      
+       //! Sets up images needed for testing
+       virtual void SetUp()
+      {
+
+       
+       HEIGHT = 480;
+       WIDTH = 640;
+
+        // Construct a blue image
+        blue = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255,255,255));
+	// Construct a green image
+       green = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,255,0));
+       // Construct a red image
+       red = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,0,255));
+      }
+
+      cv::Mat blue, green, red;
+      int HEIGHT, WIDTH;
+
+  };
+
+
+  //! Tests ColorAnglesExtractor::extract
+  TEST_F ( ColorAnglesExtractorTest, extractColorAngles )
+  {
+    // The output vector
+    std::vector<double>  out;
+    ColorAnglesExtractor c1(&blue);//, c2(&green), c3(&red);
+    out = c1.extract();
+    EXPECT_EQ ( 0 , out[0] );
+    EXPECT_EQ ( 0 , out[1] );
+    EXPECT_EQ ( 0 , out[2] );
+    EXPECT_EQ ( 0 , out[3] );
+
+    //out = c2.extract();
+    //EXPECT_EQ ( 255 , out[0] );
+    //EXPECT_EQ ( 0 , out[1] );
+
+    //out = c3.extract();
+    //EXPECT_EQ ( 127.5 , out[0] );
+    //EXPECT_EQ ( 127.5 , out[1] );
+  }
+} // namespace pandora_vision
+             
+
+
