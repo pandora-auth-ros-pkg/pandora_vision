@@ -79,17 +79,17 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 print "Error reading image", fileName
                 print "The process will read the next image!"
                 continue
-            
+
             # If the tested algorithm is not Victim, there is no need to use
             # depth and thermal images.
             if (("depth" in fileName or "thermal" in fileName) and
                 (self.algorithm != "Victim" and self.algorithm != "Hole")):
-                
+
                 continue
             # Store the image.
             self.images.append(bridge.cv2_to_imgmsg(currentImg, "bgr8"))
             self.names.append(fileName)
-        
+
     def readBenchmarkFile(self, filePath):
         filePath, pathTail = os.path.split(filePath)
         benchmarkFileName = filePath + "/vision_benchmarking.txt"
@@ -101,13 +101,13 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         for line in benchmarkFile:
             if line.startswith("#"):
                 continue
-            frameName, objectType, distance, hAngle, vAngle = line.split(", ")
+            (frameName, objectType, distance, hAngle, vAngle, specs) = line.split(", ")
             if self.algorithm != "Victim" and "depth" in frameName:
                 continue
-            self.benchmarkDict[objectType, float(distance), float(hAngle), 
-                               float(vAngle)].append(frameName)
+            self.benchmarkDict[objectType, float(distance), float(hAngle),
+                               float(vAngle), specs].append(frameName)
         benchmarkFile.close()
-        
+
     def readAnnotatorFile(self, filePath):
         filePath, pathTail = os.path.split(filePath)
         annotatorFileName = filePath + "/vision_annotations.txt"
@@ -119,17 +119,17 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         for line in annotatorFile:
             if line.startswith("#"):
                 continue
-            (frameName, objectType, xTopLeftPoint, yTopLeftPoint, 
+            (frameName, objectType, xTopLeftPoint, yTopLeftPoint,
                 xBottomRightPoint, yBottomRightPoint) = line.split(", ")
             if self.algorithm != "Victim" and "depth" in frameName:
                 continue
-            self.annotatorDict[frameName].append((objectType, 
-                                            int(xTopLeftPoint), 
-                                            int(yTopLeftPoint), 
-                                            int(xBottomRightPoint), 
+            self.annotatorDict[frameName].append((objectType,
+                                            int(xTopLeftPoint),
+                                            int(yTopLeftPoint),
+                                            int(xBottomRightPoint),
                                             int(yBottomRightPoint)))
         annotatorFile.close()
-        
+
     def calculateAlertDistanceError(self, imageName, imageX, imageY):
         minSqrError = float("Inf")
         for annotatorKey, annotatorValues in self.annotatorDict.iteritems():
@@ -137,11 +137,11 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 minSqrError = float("Inf")
                 for ii in xrange(len(annotatorValues)):
                     if self.algorithm == annotatorValues[ii][0]:
-                        alertCenterX = ((annotatorValues[ii][1] + 
+                        alertCenterX = ((annotatorValues[ii][1] +
                                         annotatorValues[ii][3]) / 2.0)
-                        alertCenterY = ((annotatorValues[ii][2] + 
+                        alertCenterY = ((annotatorValues[ii][2] +
                                         annotatorValues[ii][4]) / 2.0)
-                        alertSqrDist = ((imageX - alertCenterX) ** 2 + 
+                        alertSqrDist = ((imageX - alertCenterX) ** 2 +
                                         (imageY - alertCenterY) ** 2)
                         if minSqrError > alertSqrDist:
                             minSqrError = alertSqrDist
@@ -155,30 +155,38 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 for ii in xrange(len(annotatorValues)):
                     if self.algorithm == annotatorValues[ii][0]:
                         annotations += 1
-        return annotations	
-    
+        return annotations
+
     def updateActualPositiveDictionary(self):
         for dictKey, dictValues in self.benchmarkDict.iteritems():
-            if dictKey[0] == self.algorithm: 
+            if dictKey[0] == self.algorithm:
                 distance = dictKey[1]
                 hAngle = dictKey[2]
                 vAngle = dictKey[3]
-                self.actualPositivesBenchmarkDict[
-                    self.algorithm, float(distance), float(hAngle), 
-                    float(vAngle)] += len(dictValues)	
-    
+                specs = dictKey[4]
+                num = 0
+                for ii in xrange(len(dictValues)):
+                    if dictValues[ii] in self.names:
+                        num += 1
+                if num > 0:
+                    self.actualPositivesBenchmarkDict[
+                        self.algorithm, float(distance), float(hAngle),
+                        float(vAngle), specs] += num
+
     def updateTruePositiveDictionary(self, imageName):
         for dictKey, dictValues in self.benchmarkDict.iteritems():
             if (imageName in dictValues and dictKey[0] == self.algorithm):
                 distance = dictKey[1]
                 hAngle = dictKey[2]
                 vAngle = dictKey[3]
-                self.truePositivesBenchmarkDict[self.algorithm, 
-                                                float(distance), 
-                                                float(hAngle), 
-                                                float(vAngle)] += 1
-        
-    def calculateBenchmarkResults(self):    
+                specs = dictKey[4]
+                self.truePositivesBenchmarkDict[self.algorithm,
+                                                float(distance),
+                                                float(hAngle),
+                                                float(vAngle),
+                                                specs] += 1
+
+    def calculateBenchmarkResults(self):
         rospy.loginfo("Benchmarking Test Results for %s node.", self.algorithm)
         rospy.loginfo("Number of images used in algorithms: %d", 
                       len(self.images))
@@ -186,13 +194,13 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         rospy.loginfo("Number of False Positives: %d", self.falsePositives)
         rospy.loginfo("Number of True Negatives: %d", self.trueNegatives)
         rospy.loginfo("Number of False Negatives: %d", self.falseNegatives)
-        
+
         if len(self.elapsedTimeList) > 0:
             minElapsedTime = min(self.elapsedTimeList)
             maxElapsedTime = max(self.elapsedTimeList)
             meanElapsedTime = numpy.mean(self.elapsedTimeList)
             stdElapsedTime = numpy.std(self.elapsedTimeList)
-            
+
             rospy.loginfo("Minimum Elapsed Time: %f seconds", minElapsedTime)
             rospy.loginfo("Maximum Elapsed Time: %f seconds", maxElapsedTime)
             rospy.loginfo("Mean Elapsed Time : %f seconds", meanElapsedTime)
@@ -224,7 +232,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         rospy.loginfo("Recall (TPR): %f", recall)
         rospy.loginfo("F-measure: %f", fMeasure)
         rospy.loginfo("Mean Squared Error from POI: %f", self.meanSquaredError)
-    
+
     def calculateRecallResults(self):
         for dictKeyTP, dictValuesTP in self.actualPositivesBenchmarkDict.iteritems():
             if dictKeyTP in self.truePositivesBenchmarkDict:
@@ -232,7 +240,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             else:
                 truePos = 0
             rospy.loginfo("%s: %d/%d", dictKeyTP, truePos, dictValuesTP)
-  
+
     def benchmarkTest(self, imagePath, inputTopic, outputTopic):
         # Read a Set of Images
         rospy.loginfo("Reading Images")
