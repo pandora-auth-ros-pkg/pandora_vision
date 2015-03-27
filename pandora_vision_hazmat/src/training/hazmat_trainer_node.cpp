@@ -35,7 +35,7 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#include "pandora_vision_hazmat/training/factorytory.h"
+#include "pandora_vision_hazmat/training/factory.h"
 
 int main(int argc , char* argv[])
 {
