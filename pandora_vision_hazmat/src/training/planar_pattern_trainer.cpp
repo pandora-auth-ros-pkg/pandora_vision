@@ -213,7 +213,7 @@ void PlanarPatternTrainer::train()
           // Delete the entry of the homography matrix from the list of
           // paths.
           pathVector.erase(pathVector.begin() + homographyDataStoragePathPos);
-
+          
           for (std::vector<boost::filesystem::path>::const_iterator it 
               (pathVector.begin()); 
               it != pathVector.end(); ++it)
@@ -281,18 +281,53 @@ void PlanarPatternTrainer::train()
 void PlanarPatternTrainer::directoryProcessor(const boost::filesystem::path& 
     dirPath)
 {
-}
-
-/*
- * @brief This method iterates over a directory, reads every
- * instance/synthetic view,calculates features and keypoints for every single
- * one of them and stores them in a corresponding xml file.
- * @param dirPath[const boost::filesystem::path&]: The path of the directory.
-*/
-void PlanarPatternTrainer::multiViewTraining(const boost::filesystem::path& 
-    dirPath)
-{
   ROS_INFO("Processing directory : %s ", dirPath.c_str());
+
+}
+
+/*
+ * @brief This method calculates and saves the features for a list of
+ * images.
+ * @param images[const std::vector<cv::Mat>]&: The list of images.
+ * @param imageNames[const std::vector<std::string>&]: The list of image 
+ * names.
+ * @param homographies[const std::map<std::string, cv::Mat>&] : The container
+ * that contains for each view the corresponding homography.
+ * @param descriptors[cv::Mat*]: The final array of the descriptors for 
+ * the pattern.
+ * @param keypoints[std::vector<cv::KeyPoint>*]: The vector containing
+ * the keypoints of the training set images.
+ * @param boundingBox[std::vector<cv::Point2f>*]: The bounding box for
+ * the pattern.
+ */
+void PlanarPatternTrainer::multiViewTraining(
+    const std::vector<cv::Mat>& images,
+    const std::vector<std::string>& imageNames,
+    const std::map<std::string, cv::Mat>& homographies,
+    cv::Mat* descriptors,
+    std::vector<cv::KeyPoint>* keypoints,
+    std::vector<cv::Point2f>* boundingBox)
+{
+
+  cv::Mat frontViewDescriptors;
+  std::vector<cv::KeyPoint> frontViewKeyPoints;
+  //Calculate the features for the frontal view of the pattern.
+  this->getFeatures(images[0], &frontViewDescriptors,
+      &frontViewKeyPoints, boundingBox );
+
+  std::vector<cv::Mat> synthViewDescriptors;
+  std::vector<std::vector<cv::KeyPoint> > synthViewKeyPoints;
+
+  // Find the features for all the images except the front view.
+  this->getFeatures(std::vector<cv::Mat>(images.begin() + 1, images.end()),
+      &synthViewDescriptors, &synthViewKeyPoints);
+
+  // Perform the inverse transformations on the keypoints and store the
+  // result.
+
+  std::vector<cv::KeyPoint> resultingKeypoints;
+  // Concatenate the descriptors matrices(each line corresponds to a
+  // horizontal descriptor, vercat).
 }
 
 
@@ -302,7 +337,7 @@ void PlanarPatternTrainer::multiViewTraining(const boost::filesystem::path&
  * instance/synthetic view,calculates features and keypoints for every single
  * one of them and stores them in a corresponding xml file.
  * @param dirPath[const boost::filesystem::path&]: The path of the directory.
-*/
+ */
 void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
     dirPath)
 {
@@ -320,26 +355,26 @@ void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
   //Calculate the image features.
   this->getFeatures(img, &descriptors, &keyPoints, &boundingBox );
   //Save the training data for the i-th image.
-  
+
   this->saveDataToFile(dirPath, descriptors, keyPoints,
       boundingBox);
   return;
 }
 
 /**
- @brief Saves the training data to a proper XML file.
- @param patternName [const std::string &] : The name of the pattern.
- @param descriptors [const cv::Mat &] : The descriptors of the pattern.
- @param keyPoints [const std::vector<cv::Keypoint>] : The key points
-        detected on the pattern.
-**/                  
+  @brief Saves the training data to a proper XML file.
+  @param patternName [const std::string &] : The name of the pattern.
+  @param descriptors [const cv::Mat &] : The descriptors of the pattern.
+  @param keyPoints [const std::vector<cv::Keypoint>] : The key points
+  detected on the pattern.
+ **/                  
 
 
 void PlanarPatternTrainer::saveDataToFile(
     const boost::filesystem::path &patternPath,
-  const cv::Mat &descriptors ,
-  const std::vector<cv::KeyPoint> &keyPoints,
-  const std::vector<cv::Point2f> &boundingBox) 
+    const cv::Mat &descriptors ,
+    const std::vector<cv::KeyPoint> &keyPoints,
+    const std::vector<cv::Point2f> &boundingBox) 
 {
 
   // Create the file name where the results will be stored.
@@ -360,7 +395,7 @@ void PlanarPatternTrainer::saveDataToFile(
 
   // Opening the xml file for writing .
   cv::FileStorage fs( resultPath.string() + ".xml", cv::FileStorage::WRITE);
-  
+
   if (!fs.isOpened())
   {
     ROS_ERROR("Could not open the file name: %s", resultPath.c_str());
@@ -375,7 +410,6 @@ void PlanarPatternTrainer::saveDataToFile(
 
   // Calculate the number of keypoints found.
   int keyPointsNum = keyPoints.size();
-
   // Store the detected keypoints.
   fs << "PatternKeypoints" << "[";
   for (int i = 0 ; i < keyPointsNum ; i++ )
@@ -402,7 +436,7 @@ void PlanarPatternTrainer::saveDataToFile(
  * row wise form as csv values.
  * @param getHomographyMatrices[std::map<cv::Mat>*]: A mapping from the image
  * names to the corresponding homography matrices.
-*/
+ */
 
 bool PlanarPatternTrainer::getHomographyMatrices(
     const boost::filesystem::path& homographyFilePath,
@@ -421,7 +455,7 @@ bool PlanarPatternTrainer::getHomographyMatrices(
   std::vector<float> matrix;
   // The OpenCV matrix that will be stored.
   cv::Mat homography(3, 3, CV_32FC1);
-    
+
   std::string imageName;
 
   if (!file)
@@ -472,9 +506,9 @@ bool PlanarPatternTrainer::getHomographyMatrices(
       ROS_ERROR("Invalid number of entries for the homography file!");
       return false;
     }
-    
+
     homography = cv::Mat(matrix, true);
-    
+
     // Insert the current value in the map and check if it is present.
     if ( !homographyMatrices->insert(std::pair<std::string, cv::Mat>
           (imageName, homography)).second)
@@ -482,7 +516,7 @@ bool PlanarPatternTrainer::getHomographyMatrices(
       ROS_INFO("Value for key : %s is already present and will not be "
           "changed!\n Check your dataset!", imageName.c_str()); 
     }
-  
+
     matrix.clear();
     coeffs.clear();
     tokens.clear();

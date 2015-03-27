@@ -85,15 +85,12 @@ class PlanarPatternTrainer{
      *          corresponding descriptors for an image. 
      * @param images[const std::vector<cv::Mat&>] : The image we want 
      * to process.
-     * @param imageNames[const std::vector<std::string>&] : The vector
-     * containing the image names.
      * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
      * used to store the descriptors for each image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
      * containing the Keypoints detected in every image.
-    **/
+     **/
     virtual void getFeatures(const std::vector<cv::Mat>& images,
-        const std::vector<std::string>& imageNames,
         std::vector<cv::Mat>* descriptors,
         std::vector<std::vector<cv::KeyPoint> >* keyPoints) = 0;
 
@@ -140,7 +137,27 @@ class PlanarPatternTrainer{
      */
     void directoryProcessor(const boost::filesystem::path& 
         dirPath);
-    void multiViewTraining(const boost::filesystem::path& dirPath);
+    /*
+     * @brief This method calculates and saves the features for a list of
+     * images.
+     * @param images[const std::vector<cv::Mat>]&: The list of images.
+     * @param imageNames[const std::vector<std::string>&]: The list of image 
+     * names.
+     * @param homographies[const std::map<std::string, cv::Mat>&] : The container
+     * that contains for each view the corresponding homography.
+     * @param descriptors[cv::Mat*]: The final array of the descriptors for 
+     * the pattern.
+     * @param keypoints[std::vector<cv::KeyPoint>*]: The vector containing
+     * the keypoints of the training set images.
+     * @param boundingBox[std::vector<cv::Point2f>*]: The bounding box for
+     * the pattern.
+     */
+    void multiViewTraining(const std::vector<cv::Mat>& images,
+        const std::vector<std::string>& imageNames,
+        const std::map<std::string, cv::Mat>& homographies,
+        cv::Mat* descriptors,
+        std::vector<cv::KeyPoint>* keypoints,
+        std::vector<cv::Point2f>* boundingBox);
     /**
       @brief Saves the training data to a proper XML file.
       @param patternName [const std::string &] : The name of the pattern.
