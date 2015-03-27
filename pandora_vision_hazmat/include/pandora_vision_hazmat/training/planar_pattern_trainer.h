@@ -52,7 +52,7 @@ class PlanarPatternTrainer{
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
-     * @param images[const cv::Mat&] : The image we want to process.
+     * @param image[const cv::Mat&] : The image we want to process.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
      * store the descriptors of the current image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
@@ -60,7 +60,7 @@ class PlanarPatternTrainer{
      * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
      * containing the bounding box for the pattern in the current image.
      **/
-    virtual void getFeatures(const cv::Mat& images,
+    virtual void getFeatures(const cv::Mat& image,
         cv::Mat *descriptors, 
         std::vector<cv::KeyPoint>* keyPoints,
         std::vector<cv::Point2f>* boundingBox) = 0;
@@ -68,13 +68,13 @@ class PlanarPatternTrainer{
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
-     * @param images[const cv::Mat&] : The image we want to process.
+     * @param image[const cv::Mat&] : The image we want to process.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
      * store the descriptors of the current image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
      * containing the Keypoints detected in the current image.
      **/
-    virtual void getFeatures(const cv::Mat& images,
+    virtual void getFeatures(const cv::Mat& image,
         cv::Mat *descriptors,
         std::vector<cv::KeyPoint>* keyPoints) = 0;
 
@@ -85,15 +85,17 @@ class PlanarPatternTrainer{
      *          corresponding descriptors for an image. 
      * @param images[const std::vector<cv::Mat&>] : The image we want 
      * to process.
-     * @param descriptors[cv::Mat*]: A pointer to the array that will be 
-     * used to store the descriptors of the current image.
+     * @param imageNames[const std::vector<std::string>&] : The vector
+     * containing the image names.
+     * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+     * used to store the descriptors for each image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
-     * containing the Keypoints detected in the current image.
+     * containing the Keypoints detected in every image.
     **/
     virtual void getFeatures(const std::vector<cv::Mat>& images,
-        const std::vector<std::string> imageNames,
-        std::vector<cv::Mat> descriptors,
-        std::vector<std::vector<cv::KeyPoint> > keyPoints) = 0;
+        const std::vector<std::string>& imageNames,
+        std::vector<cv::Mat>* descriptors,
+        std::vector<std::vector<cv::KeyPoint> >* keyPoints) = 0;
 
     /**
       @brief Sets the current image that will be used to train the detector.
@@ -130,7 +132,14 @@ class PlanarPatternTrainer{
     bool getHomographyMatrices(
         const boost::filesystem::path& homographyFilePath,
         std::map<std::string, cv::Mat>* homographyMatrices);
-
+    /*
+     * @brief This method iterates over a directory, reads every
+     * instance/synthetic view,calculates features and keypoints for every single
+     * one of them and stores them in a corresponding xml file.
+     * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+     */
+    void directoryProcessor(const boost::filesystem::path& 
+        dirPath);
     void multiViewTraining(const boost::filesystem::path& dirPath);
     /**
       @brief Saves the training data to a proper XML file.

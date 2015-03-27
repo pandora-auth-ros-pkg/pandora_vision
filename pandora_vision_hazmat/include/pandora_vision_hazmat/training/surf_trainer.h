@@ -53,9 +53,28 @@ class SurfTrainer : public PlanarPatternTrainer
      **/
     SurfTrainer() : featureType_("SURF")
   {
+    featureDetector_ = cv::FeatureDetector::create(featureType_);
     // Feature Extractor Initialization.
-    featureExtractor_ = cv::SURF();
+    featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
+
   }
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const std::vector<cv::Mat&>] : The image we want 
+     * to process.
+     * @param imageNames[const std::vector<std::string>&] : The vector
+     * containing the image names.
+     * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+     * used to store the descriptors for each image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in every image.
+     **/
+    virtual void getFeatures(const std::vector<cv::Mat>& images,
+        const std::vector<std::string>& imageNames,
+        std::vector<cv::Mat>* descriptors,
+        std::vector<std::vector<cv::KeyPoint> >* keyPoints);
+
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
@@ -94,8 +113,8 @@ class SurfTrainer : public PlanarPatternTrainer
     }
   private:
 
-    cv::SURF featureExtractor_; //!< SURF algorithm main class.
-
+    cv::Ptr<cv::FeatureDetector> featureDetector_;
+    cv::Ptr<cv::DescriptorExtractor> featureExtractor_;
     const std::string featureType_; //!< ID of the algorithm used.
 
 };

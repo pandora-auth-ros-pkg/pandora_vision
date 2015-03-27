@@ -270,6 +270,129 @@ void PlanarPatternTrainer::train()
       static_cast<double>(CLOCKS_PER_SEC));
 }
 
+
+
+/*
+ * @brief This method iterates over a directory, reads every
+ * instance/synthetic view,calculates features and keypoints for every single
+ * one of them and stores them in a corresponding xml file.
+ * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+*/
+void PlanarPatternTrainer::directoryProcessor(const boost::filesystem::path& 
+    dirPath)
+{
+}
+
+/*
+ * @brief This method iterates over a directory, reads every
+ * instance/synthetic view,calculates features and keypoints for every single
+ * one of them and stores them in a corresponding xml file.
+ * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+*/
+void PlanarPatternTrainer::multiViewTraining(const boost::filesystem::path& 
+    dirPath)
+{
+  ROS_INFO("Processing directory : %s ", dirPath.c_str());
+}
+
+
+
+/*
+ * @brief This method iterates over a directory, reads every
+ * instance/synthetic view,calculates features and keypoints for every single
+ * one of them and stores them in a corresponding xml file.
+ * @param dirPath[const boost::filesystem::path&]: The path of the directory.
+*/
+void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
+    dirPath)
+{
+  ROS_INFO("Reading image : %s ", dirPath.filename().c_str());
+  cv::Mat descriptors;
+  std::vector<cv::KeyPoint> keyPoints;
+  std::vector<cv::Point2f> boundingBox; 
+
+  cv::Mat img = cv::imread(dirPath.c_str());
+  if (!img.data)
+  {
+    ROS_ERROR("Could not read image,proceeding to next pattern!");
+    return;
+  }
+  //Calculate the image features.
+  this->getFeatures(img, &descriptors, &keyPoints, &boundingBox );
+  //Save the training data for the i-th image.
+  
+  this->saveDataToFile(dirPath, descriptors, keyPoints,
+      boundingBox);
+  return;
+}
+
+/**
+ @brief Saves the training data to a proper XML file.
+ @param patternName [const std::string &] : The name of the pattern.
+ @param descriptors [const cv::Mat &] : The descriptors of the pattern.
+ @param keyPoints [const std::vector<cv::Keypoint>] : The key points
+        detected on the pattern.
+**/                  
+
+
+void PlanarPatternTrainer::saveDataToFile(
+    const boost::filesystem::path &patternPath,
+  const cv::Mat &descriptors ,
+  const std::vector<cv::KeyPoint> &keyPoints,
+  const std::vector<cv::Point2f> &boundingBox) 
+{
+
+  // Create the file name where the results will be stored.
+  std::string fileName(patternPath.filename().string());
+
+  // Remove the file extension.
+  fileName = fileName.substr(0, fileName.find("."));
+
+
+  // Properly choose the name of the data file.
+  // TO DO : Change hard coded strings to yaml params.
+  boost::filesystem::path resultPath(packagePath_ + "/data" + "/training" +
+      "/" + this->getFeatureType() + "/" + fileName);
+
+  // fileName = path + fileName;
+  // ROS_INFO("DEBUG MESSAGE : Saving fileName %s", fileName.c_str());
+  ROS_INFO("DEBUG MESSAGE : Saving fileName %s", resultPath.c_str());
+
+  // Opening the xml file for writing .
+  cv::FileStorage fs( resultPath.string() + ".xml", cv::FileStorage::WRITE);
+  
+  if (!fs.isOpened())
+  {
+    ROS_ERROR("Could not open the file name: %s", resultPath.c_str());
+    return;
+  }
+
+  // Enter the name of the pattern.
+  fs << "PatternName" << fileName;
+
+  // Save the descriptors.
+  fs << "Descriptors" << descriptors;
+
+  // Calculate the number of keypoints found.
+  int keyPointsNum = keyPoints.size();
+
+  // Store the detected keypoints.
+  fs << "PatternKeypoints" << "[";
+  for (int i = 0 ; i < keyPointsNum ; i++ )
+    fs << "{" << "Keypoint" <<  keyPoints[i].pt << "}";
+  fs << "]";
+
+  // Store the bounding box for the pattern.
+  fs << "BoundingBox" << "[";
+  for (int i = 0 ; i < boundingBox.size() ; i++ )
+    fs << "{" << "Corner" <<  boundingBox[i] << "}";
+
+  fs << "]";
+
+  // Close the xml file .
+  fs.release();
+}
+
 /*
  * @brief Iterate over the file containing the homographies and store them
  * in a vector.
@@ -368,113 +491,3 @@ bool PlanarPatternTrainer::getHomographyMatrices(
   file.close();
   return true;
 }
-
-/*
- * @brief This method iterates over a directory, reads every
- * instance/synthetic view,calculates features and keypoints for every single
- * one of them and stores them in a corresponding xml file.
- * @param dirPath[const boost::filesystem::path&]: The path of the directory.
-*/
-void PlanarPatternTrainer::multiViewTraining(const boost::filesystem::path& 
-    dirPath)
-{
-  ROS_INFO("Processing directory : %s ", dirPath.c_str());
-}
-
-/*
- * @brief This method iterates over a directory, reads every
- * instance/synthetic view,calculates features and keypoints for every single
- * one of them and stores them in a corresponding xml file.
- * @param dirPath[const boost::filesystem::path&]: The path of the directory.
-*/
-void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
-    dirPath)
-{
-  ROS_INFO("Reading image : %s ", dirPath.filename().c_str());
-  cv::Mat descriptors;
-  std::vector<cv::KeyPoint> keyPoints;
-  std::vector<cv::Point2f> boundingBox; 
-
-  cv::Mat img = cv::imread(dirPath.c_str());
-  if (!img.data)
-  {
-    ROS_ERROR("Could not read image,proceeding to next pattern!");
-    return;
-  }
-  //Calculate the image features.
-  this->getFeatures(img, &descriptors, &keyPoints, &boundingBox );
-  //Save the training data for the i-th image.
-  
-  this->saveDataToFile(dirPath, descriptors, keyPoints,
-      boundingBox);
-  return;
-}
-
-/**
- @brief Saves the training data to a proper XML file.
- @param patternName [const std::string &] : The name of the pattern.
- @param descriptors [const cv::Mat &] : The descriptors of the pattern.
- @param keyPoints [const std::vector<cv::Keypoint>] : The key points
-        detected on the pattern.
-**/                  
-
-
-void PlanarPatternTrainer::saveDataToFile(
-    const boost::filesystem::path &patternPath,
-  const cv::Mat &descriptors ,
-  const std::vector<cv::KeyPoint> &keyPoints,
-  const std::vector<cv::Point2f> &boundingBox) 
-{
-
-  // Create the file name where the results will be stored.
-  std::string fileName(patternPath.filename().string());
-
-  // Remove the file extension.
-  fileName = fileName.substr(0, fileName.find("."));
-
-
-  // Properly choose the name of the data file.
-  // TO DO : Change hard coded strings to yaml params.
-  boost::filesystem::path resultPath(packagePath_ + "/data" + "/training" +
-      "/" + this->getFeatureType() + "/" + fileName);
-
-  // fileName = path + fileName;
-  // ROS_INFO("DEBUG MESSAGE : Saving fileName %s", fileName.c_str());
-  ROS_INFO("DEBUG MESSAGE : Saving fileName %s", resultPath.c_str());
-
-  // Opening the xml file for writing .
-  cv::FileStorage fs( resultPath.string() + ".xml", cv::FileStorage::WRITE);
-  
-  if (!fs.isOpened())
-  {
-    ROS_ERROR("Could not open the file name: %s", resultPath.c_str());
-    return;
-  }
-
-  // Enter the name of the pattern.
-  fs << "PatternName" << fileName;
-
-  // Save the descriptors.
-  fs << "Descriptors" << descriptors;
-
-  // Calculate the number of keypoints found.
-  int keyPointsNum = keyPoints.size();
-
-  // Store the detected keypoints.
-  fs << "PatternKeypoints" << "[";
-  for (int i = 0 ; i < keyPointsNum ; i++ )
-    fs << "{" << "Keypoint" <<  keyPoints[i].pt << "}";
-  fs << "]";
-
-  // Store the bounding box for the pattern.
-  fs << "BoundingBox" << "[";
-  for (int i = 0 ; i < boundingBox.size() ; i++ )
-    fs << "{" << "Corner" <<  boundingBox[i] << "}";
-
-  fs << "]";
-
-  // Close the xml file .
-  fs.release();
-}
-
-

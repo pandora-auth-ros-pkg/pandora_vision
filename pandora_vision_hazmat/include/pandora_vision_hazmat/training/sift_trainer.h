@@ -40,8 +40,8 @@
 #include "pandora_vision_hazmat/training/planar_pattern_trainer.h"
 
 /** 
- @class SiftTrainer
- @brief Class that uses the SIFT algorithm for HAZMAT pattern training.
+  @class SiftTrainer
+  @brief Class that uses the SIFT algorithm for HAZMAT pattern training.
  **/
 
 class SiftTrainer : public PlanarPatternTrainer
@@ -53,50 +53,66 @@ class SiftTrainer : public PlanarPatternTrainer
      **/
     SiftTrainer() : featureType_("SIFT")
   {
+    featureDetector_ = cv::FeatureDetector::create(featureType_);
     // Feature Extractor Initialization.
-    featureExtractor_ = cv::SIFT();
+    featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
   }
     /*
- * @brief: Function used to produce the necessary keypoints and their
- *          corresponding descriptors for an image. 
- * @param images[const cv::Mat&] : The images that will be processed to 
- * extract features and keypoints.
- * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
- * store the descriptors of the current image.
- * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
- * containing the Keypoints detected in the current image.
- **/
-    void getFeatures(const cv::Mat& images, cv::Mat* descriptors,
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param image[const cv::Mat&] : The images that will be processed to 
+     * extract features and keypoints.
+     * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
+     * store the descriptors of the current image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in the current image.
+     **/
+    void getFeatures(const cv::Mat& image, cv::Mat* descriptors,
         std::vector<cv::KeyPoint>* keyPoints);   
-
     /*
- * @brief: Function used to produce the necessary keypoints and their
- *          corresponding descriptors for an image. 
- * @param images[const cv::Mat&] : The images that will be processed to 
- * extract features and keypoints.
- * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
- * store the descriptors of the current image.
- * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
- * containing the Keypoints detected in the current image.
- * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
- * containing the bounding box for the pattern in the current image.
- **/  
-    void getFeatures(const cv::Mat& images, cv::Mat *descriptors , 
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const std::vector<cv::Mat&>] : The image we want 
+     * to process.
+     * @param imageNames[const std::vector<std::string>&] : The vector
+     * containing the image names.
+     * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+     * used to store the descriptors for each image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in every image.
+     **/
+    virtual void getFeatures(const std::vector<cv::Mat>& images,
+        const std::vector<std::string>& imageNames,
+        std::vector<cv::Mat>* descriptors,
+        std::vector<std::vector<cv::KeyPoint> >* keyPoints);
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param image[const cv::Mat&] : The images that will be processed to 
+     * extract features and keypoints.
+     * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
+     * store the descriptors of the current image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in the current image.
+     * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
+     * containing the bounding box for the pattern in the current image.
+     **/  
+    void getFeatures(const cv::Mat& image, cv::Mat *descriptors , 
         std::vector<cv::KeyPoint> *keyPoints , 
         std::vector<cv::Point2f> *boundingBox );
 
 
     /** 
-    *  @brief: Returns the type of features that were used to describe 
-    *          the pattern.   
-    **/
+     *  @brief: Returns the type of features that were used to describe 
+     *          the pattern.   
+     **/
     const std::string getFeatureType()
     {
       return featureType_;
     }
   private:
-
-    cv::SIFT featureExtractor_; //!< SIFT algorithm main class.
+    cv::Ptr<cv::FeatureDetector> featureDetector_;
+    cv::Ptr<cv::DescriptorExtractor> featureExtractor_; //!< SIFT algorithm main class.
 
     const std::string featureType_; //!< ID of the algorithm used.
 

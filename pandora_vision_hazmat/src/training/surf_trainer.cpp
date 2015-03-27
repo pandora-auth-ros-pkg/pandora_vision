@@ -39,7 +39,7 @@
  /*
   * @brief: Function used to produce the necessary keypoints and their
   *          corresponding descriptors for an image. 
-  * @param images[const cv::Mat&] : The images that will be processed to 
+  * @param image[const cv::Mat&] : The images that will be processed to 
   * extract features and keypoints.
   * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
   * store the descriptors of the current image.
@@ -47,20 +47,45 @@
   * containing the Keypoints detected in the current image.
   **/ 
 
-void SurfTrainer::getFeatures(const cv::Mat& images, cv::Mat* descriptors,
+void SurfTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors,
     std::vector<cv::KeyPoint>* keyPoints)
 {
   // Calculate image keypoints.
-  featureExtractor_.detect(images, *keyPoints);  
+  featureDetector_->detect(image, *keyPoints);  
   
   // Extract Descriptors from image
-  featureExtractor_.compute(images, *keyPoints, *descriptors);
+  featureExtractor_->compute( image , *keyPoints , *descriptors );
 }
-
 /*
  * @brief: Function used to produce the necessary keypoints and their
  *          corresponding descriptors for an image. 
- * @param images[const cv::Mat&] : The images that will be processed to 
+ * @param images[const std::vector<cv::Mat&>] : The image we want 
+ * to process.
+ * @param imageNames[const std::vector<std::string>&] : The vector
+ * containing the image names.
+ * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+ * used to store the descriptors for each image.
+ * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+ * containing the Keypoints detected in every image.
+ **/
+void SurfTrainer::getFeatures(const std::vector<cv::Mat>& images,
+    const std::vector<std::string>& imageNames,
+    std::vector<cv::Mat>* descriptors,
+    std::vector<std::vector<cv::KeyPoint> >* keyPoints)
+{
+  // Calculate image keypoints.
+  featureDetector_->detect( images , *keyPoints );  
+  // Extract Descriptors from the images.
+  for (int i = 0 ; i < keyPoints->size(); i++)
+  {
+    featureExtractor_->compute( images[i] , (*keyPoints)[i] ,
+        (*descriptors)[i] );
+  }
+}
+/*
+ * @brief: Function used to produce the necessary keypoints and their
+ *          corresponding descriptors for an image. 
+ * @param image[const cv::Mat&] : The images that will be processed to 
  * extract features and keypoints.
  * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
  * store the descriptors of the current image.
@@ -71,21 +96,21 @@ void SurfTrainer::getFeatures(const cv::Mat& images, cv::Mat* descriptors,
  **/  
 
 
-void SurfTrainer::getFeatures(const cv::Mat& images, cv::Mat *descriptors, 
+void SurfTrainer::getFeatures(const cv::Mat& image, cv::Mat *descriptors, 
   std::vector<cv::KeyPoint> *keyPoints,
   std::vector<cv::Point2f> *boundingBox)
 {
-  this->getFeatures(images, descriptors, keyPoints);
+  this->getFeatures(image, descriptors, keyPoints);
 
   // Calculate the bounding box for the current pattern 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
-  (*boundingBox).push_back(  cv::Point2f( images.cols , 0));
-  (*boundingBox).push_back ( cv::Point2f( images.cols  , 
-    images.rows  )); 
+  (*boundingBox).push_back(  cv::Point2f( image.cols , 0));
+  (*boundingBox).push_back ( cv::Point2f( image.cols  , 
+    image.rows  )); 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 
-    images.rows ) );
+    image.rows ) );
   
-  (*boundingBox).push_back( cv::Point2f( images.cols / 2.0f ,
-    images.rows / 2.0f ));
+  (*boundingBox).push_back( cv::Point2f( image.cols / 2.0f ,
+    image.rows / 2.0f ));
 
   }
