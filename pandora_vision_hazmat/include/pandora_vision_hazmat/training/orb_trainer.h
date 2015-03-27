@@ -59,20 +59,20 @@ class OrbTrainer : public PlanarPatternTrainer
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
-     * @param frame[const cv::Mat&] : The frame that will be processed to 
+     * @param images[const cv::Mat&] : The images that will be processed to 
      * extract features and keypoints.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
      * store the descriptors of the current image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
      * containing the Keypoints detected in the current image.
      **/
-    void getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
+    void getFeatures(const cv::Mat& images, cv::Mat* descriptors,
         std::vector<cv::KeyPoint>* keyPoints);   
 
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
-     * @param frame[const cv::Mat&] : The frame that will be processed to 
+     * @param images[const cv::Mat&] : The images that will be processed to 
      * extract features and keypoints.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used 
      * to store the descriptors of the current image.
@@ -81,7 +81,7 @@ class OrbTrainer : public PlanarPatternTrainer
      * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
      * containing the bounding box for the pattern in the current image.
      **/  
-    void getFeatures(const cv::Mat& frame, cv::Mat *descriptors , 
+    void getFeatures(const cv::Mat& images, cv::Mat *descriptors , 
         std::vector<cv::KeyPoint> *keyPoints , 
         std::vector<cv::Point2f> *boundingBox );
 

@@ -417,7 +417,8 @@ void PlanarPatternTrainer::singleViewTraining(const boost::filesystem::path&
  @param keyPoints [const std::vector<cv::Keypoint>] : The key points
         detected on the pattern.
 **/                  
-  
+
+
 void PlanarPatternTrainer::saveDataToFile(
     const boost::filesystem::path &patternPath,
   const cv::Mat &descriptors ,

@@ -39,7 +39,7 @@
  /*
   * @brief: Function used to produce the necessary keypoints and their
   *          corresponding descriptors for an image. 
-  * @param frame[const cv::Mat&] : The frame that will be processed to 
+  * @param images[const cv::Mat&] : The images that will be processed to 
   * extract features and keypoints.
   * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
   * store the descriptors of the current image.
@@ -47,20 +47,20 @@
   * containing the Keypoints detected in the current image.
   **/ 
 
-void SurfTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
+void SurfTrainer::getFeatures(const cv::Mat& images, cv::Mat* descriptors,
     std::vector<cv::KeyPoint>* keyPoints)
 {
   // Calculate image keypoints.
-  featureExtractor_.detect(frame, *keyPoints);  
+  featureExtractor_.detect(images, *keyPoints);  
   
   // Extract Descriptors from image
-  featureExtractor_.compute(frame, *keyPoints, *descriptors);
+  featureExtractor_.compute(images, *keyPoints, *descriptors);
 }
 
 /*
  * @brief: Function used to produce the necessary keypoints and their
  *          corresponding descriptors for an image. 
- * @param frame[const cv::Mat&] : The frame that will be processed to 
+ * @param images[const cv::Mat&] : The images that will be processed to 
  * extract features and keypoints.
  * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
  * store the descriptors of the current image.
@@ -71,21 +71,21 @@ void SurfTrainer::getFeatures(const cv::Mat& frame, cv::Mat* descriptors,
  **/  
 
 
-void SurfTrainer::getFeatures(const cv::Mat& frame, cv::Mat *descriptors, 
+void SurfTrainer::getFeatures(const cv::Mat& images, cv::Mat *descriptors, 
   std::vector<cv::KeyPoint> *keyPoints,
   std::vector<cv::Point2f> *boundingBox)
 {
-  this->getFeatures(frame, descriptors, keyPoints);
+  this->getFeatures(images, descriptors, keyPoints);
 
   // Calculate the bounding box for the current pattern 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
-  (*boundingBox).push_back(  cv::Point2f( frame.cols , 0));
-  (*boundingBox).push_back ( cv::Point2f( frame.cols  , 
-    frame.rows  )); 
+  (*boundingBox).push_back(  cv::Point2f( images.cols , 0));
+  (*boundingBox).push_back ( cv::Point2f( images.cols  , 
+    images.rows  )); 
   (*boundingBox).push_back( cv::Point2f( 0.0f , 
-    frame.rows ) );
+    images.rows ) );
   
-  (*boundingBox).push_back( cv::Point2f( frame.cols / 2.0f ,
-    frame.rows / 2.0f ));
+  (*boundingBox).push_back( cv::Point2f( images.cols / 2.0f ,
+    images.rows / 2.0f ));
 
   }

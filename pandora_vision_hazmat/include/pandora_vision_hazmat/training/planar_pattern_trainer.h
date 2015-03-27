@@ -52,6 +52,7 @@ class PlanarPatternTrainer{
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
+     * @param images[const cv::Mat&] : The image we want to process.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
      * store the descriptors of the current image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
@@ -59,23 +60,40 @@ class PlanarPatternTrainer{
      * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
      * containing the bounding box for the pattern in the current image.
      **/
-    virtual void getFeatures(const cv::Mat& frame,
+    virtual void getFeatures(const cv::Mat& images,
         cv::Mat *descriptors, 
         std::vector<cv::KeyPoint>* keyPoints,
         std::vector<cv::Point2f>* boundingBox) = 0;
+
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
+     * @param images[const cv::Mat&] : The image we want to process.
      * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
      * store the descriptors of the current image.
      * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
      * containing the Keypoints detected in the current image.
      **/
-    virtual void getFeatures(const cv::Mat& frame,
+    virtual void getFeatures(const cv::Mat& images,
         cv::Mat *descriptors,
         std::vector<cv::KeyPoint>* keyPoints) = 0;
 
     virtual const std::string getFeatureType() = 0;
+
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const std::vector<cv::Mat&>] : The image we want 
+     * to process.
+     * @param descriptors[cv::Mat*]: A pointer to the array that will be 
+     * used to store the descriptors of the current image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in the current image.
+    **/
+    virtual void getFeatures(const std::vector<cv::Mat>& images,
+        const std::vector<std::string> imageNames,
+        std::vector<cv::Mat> descriptors,
+        std::vector<std::vector<cv::KeyPoint> > keyPoints) = 0;
 
     /**
       @brief Sets the current image that will be used to train the detector.
