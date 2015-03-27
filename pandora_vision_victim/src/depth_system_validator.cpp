@@ -43,18 +43,17 @@ namespace pandora_vision
   CvSVMParams DepthSystemValidator::_params;
   std::string DepthSystemValidator:: _depth_classifier_path;
   std::vector<double> DepthSystemValidator:: _depthFeatureVector;
-  /**
-   @brief Constructor
-  */
-/*  DepthSystemValidator::DepthSystemValidator()*/
-  //{
-  /*}*/
 
+  /**
+  @brief This function initializes the depth clasifier path and the svm params
+  @params depth_classifier_path [string]: the path of the depth classifier
+  @return void
+  **/
   void DepthSystemValidator::initialize(const std::string& depth_classifier_path)
   {
     _depth_classifier_path = depth_classifier_path;
 
-    ///Load classifier path for rgb subsystem
+    ///Load classifier path for depth subsystem
     _depthSvm.load(depth_classifier_path.c_str());
 
     _params.svm_type = CvSVM::C_SVC;
@@ -66,38 +65,25 @@ namespace pandora_vision
   }
 
   /**
-    @brief Destructor
-  */
-/*  DepthSystemValidator::~DepthSystemValidator()*/
-  //{
-    //ROS_DEBUG("[victim_node] : Destroying DepthSystemValidator instance");
-  /*}*/
-
-  /**
-   * @brief This function extract features according to the
-   * predifined features for the depth image
-   * @param inImage [cv::Mat] current depth frame to be processed
-   * @return void
-  */
+  @brief This function extract features according to the
+  predifined features for the depth image
+  @param inImage [cv::Mat] current depth frame to be processed
+  @return void
+  **/
   float DepthSystemValidator::calculateSvmDepthProbability(const cv::Mat& inImage)
   {
     ///Extract color and statistics oriented features
     ///for depth image
 
-    //std::vector<double> channelsStatictisFeatureVector;
-
-    // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
     std::vector<double> channelsStatictisFeatureVector;
     ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
 
     ///Extract edge orientation features for depth image
-    //_edgeOrientationDetector.findEdgeFeatures(inImage);
 
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
 
     ///Extract haralick features for depth image
-    //_haralickFeatureDetector.findHaralickFeatures(inImage);
 
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
@@ -118,65 +104,25 @@ namespace pandora_vision
     for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
           _depthFeatureVector.push_back(haralickFeatureVector[ii]);
 
-    //setDepthFeatureVector();
-
-
     return predictionToProbability(predict());
   }
 
   /**
-    * @brief This function creates feature vector according to the
-    * predifined features for the depth image
-    * @return void
-  */
-/*  void DepthSystemValidator::setDepthFeatureVector()*/
-  //{
-    /////Append to rgbFeatureVector features according to color
-    /////histogramms and other statistics
-    //std::vector<double> channelsStatictisFeatureVector =
-        //_channelsStatisticsDetector.getDepthFeatures();
-    //for(int i = 0; i < channelsStatictisFeatureVector.size(); i++ )
-          //_depthFeatureVector.push_back(channelsStatictisFeatureVector[i]);
-
-    /////Append to depthFeatureVector features according to edge orientation
-    //std::vector<double> edgeOrientationFeatureVector =
-        //_edgeOrientationDetector.getFeatures();
-    //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          //_depthFeatureVector.push_back(edgeOrientationFeatureVector[i]);
-
-    /////Append to depthFeatureVector features according to haaralick features
-    //std::vector<double> haaralickFeatureVector =
-        //_haralickFeatureDetector.getFeatures();
-    //for(int i = 0; i < haaralickFeatureVector.size(); i++ )
-          //_depthFeatureVector.push_back(haaralickFeatureVector[i]);
-
-    /////Deallocate memory
-    //channelsStatictisFeatureVector.clear();
-    //_channelsStatisticsDetector.emptyCurrentDepthFrameFeatureVector();
-
-    //edgeOrientationFeatureVector.clear();
-    //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
-
-    //haaralickFeatureVector.clear();
-    //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
-  /*}*/
-
-  /**
-   * @brief This function returns current feature vector according
-   * to the features found in rgb image
-   * @return [std::vector<double>] _depthFeatureVector, feature vector
-   * for current rgb image
-   */
+  @brief This function returns current feature vector according
+  to the features found in rgb image
+  @return [std::vector<double>] _depthFeatureVector, feature vector
+  for current rgb image
+  **/
   std::vector<double> DepthSystemValidator::getDepthFeatureVector()
   {
     return _depthFeatureVector;
   }
 
-    /**
-    * @brief Function that loads the trained classifier and makes a prediction
-    * according to the featurevector given for each image
-    * @return void
-  */
+  /**
+  @brief Function that loads the trained classifier and makes a prediction
+  according to the featurevector given for each image
+  @return void
+  **/
   float DepthSystemValidator::predict()
   {
     cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
@@ -189,12 +135,12 @@ namespace pandora_vision
   }
 
   /**
-   * @brief Function that converts a given vector of doubles
-   * in cv:Mat in order to use it to opencv function predict()
-   * @param [std::vector <double>] data, input vector to be
-   * converted
-   * @return [cv::Mat] output Mat of size size_of_vectorx1
-  */
+  @brief Function that converts a given vector of doubles
+  in cv:Mat in order to use it to opencv function predict()
+  @param [std::vector <double>] data, input vector to be
+  converted
+  @return [cv::Mat] output Mat of size size_of_vectorx1
+  **/
   cv::Mat DepthSystemValidator::vectorToMat(std::vector<double> data)
   {
     int size = data.size();
@@ -207,9 +153,9 @@ namespace pandora_vision
   }
 
   /**
-    * @brief This function prediction according to the rgb classifier
-    * @return [float] prediction
-  */
+  @brief This function prediction according to the rgb classifier
+  @return [float] prediction
+  **/
   float DepthSystemValidator::predictionToProbability(float prediction)
   {
     float probability;
@@ -222,4 +168,5 @@ namespace pandora_vision
       ROS_INFO_STREAM("SVM DEPTH pred/prob :" << prediction << " " <<probability);
     return probability;
   }
+
 }// namespace pandora_vision

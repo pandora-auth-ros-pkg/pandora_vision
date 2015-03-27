@@ -40,12 +40,19 @@
 
 namespace pandora_vision
 {
+  /**
+  @brief Constructor
+  **/
   DFTCoeffsExtractor::DFTCoeffsExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
 
   }
 
+  /**
+  @brief this function extracts the 6 first dft coeffs
+  @return the vector of dft coeffs
+  **/
   std::vector<double> DFTCoeffsExtractor::extract(void)
   {
     std::vector<double>temp(6);

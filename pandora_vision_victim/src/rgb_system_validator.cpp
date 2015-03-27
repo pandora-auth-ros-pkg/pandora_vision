@@ -45,13 +45,10 @@ namespace pandora_vision
   std::vector<double> RgbSystemValidator:: _rgbFeatureVector;
 
   /**
-   @brief Constructor
-  */
-/*  RgbSystemValidator::RgbSystemValidator(void)*/
-  //{
-    //ROS_DEBUG("[victim_node] : RgbSystemValidator instance created");
-  //}
-
+  @brief This function initializes the depth clasifier path and the svm params
+  @params depth_classifier_path [string]: the path of the depth classifier
+  @return void
+  **/
   void RgbSystemValidator::initialize(const std::string& rgb_classifier_path)
   {
     ROS_INFO("ENTER RGBSYSTEM INITIALIZE");
@@ -70,14 +67,6 @@ namespace pandora_vision
   }
 
   /**
-    @brief Destructor
-  */
-/*  RgbSystemValidator::~RgbSystemValidator()*/
-  //{
-    //ROS_DEBUG("[victim_node] : Destroying RgbSystemValidator instance");
-  //}
-
-  /**
    * @brief This function extract features according to the
    * predifined features for the rgb image
    * @param inImage [cv::Mat] current rgb frame to be processed
@@ -85,24 +74,18 @@ namespace pandora_vision
   */
   float RgbSystemValidator::calculateSvmRgbProbability(const cv::Mat& inImage)
   {
-    //ROS_INFO("ENTER RGBSYSTEM CALCULATESVMRGBPROB");
     ///Extract color and statistics oriented features
     ///for rgb image
 
-    //std::vector<double> channelsStatisticsFeatureVector;
-
-    // _channelsStatisticsDetector.findChannelsStatisticsFeatures(inImage);
     std::vector<double> channelsStatisticsFeatureVector;
     ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(inImage, &channelsStatisticsFeatureVector);
 
     ///Extract edge orientation features for rgb image
-    //_edgeOrientationDetector.findEdgeFeatures(inImage);
 
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
 
     ///Extract haralick features for rgb image
-    //_haralickFeatureDetector.findHaralickFeatures(inImage);
 
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
@@ -123,65 +106,25 @@ namespace pandora_vision
     for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
           _rgbFeatureVector.push_back(haralickFeatureVector[ii]);
 
-    //setRgbFeatureVector();
-
-
     return predictionToProbability(predict());
   }
 
   /**
-    * @brief This function creates feature vector according to the
-    * predifined features for the rgb image
-    * @return void
-  */
-/*  void RgbSystemValidator::setRgbFeatureVector()*/
-  //{
-    /////Append to rgbFeatureVector features according to color
-    /////histogramms and other statistics
-    //std::vector<double> channelsStatisticsFeatureVector =
-        //_channelsStatisticsDetector.getRgbFeatures();
-    //for(int i = 0; i < channelsStatisticsFeatureVector.size(); i++ )
-          //_rgbFeatureVector.push_back(channelsStatisticsFeatureVector[i]);
-
-    /////Append to rgbFeatureVector features according to edge orientation
-    //std::vector<double> edgeOrientationFeatureVector =
-        //_edgeOrientationDetector.getFeatures();
-    //for(int i = 0; i < edgeOrientationFeatureVector.size(); i++ )
-          //_rgbFeatureVector.push_back(edgeOrientationFeatureVector[i]);
-
-    /////Append to rgbFeatureVector features according to haaralick features
-    //std::vector<double> haralickFeatureVector =
-        //_haralickFeatureDetector.getFeatures();
-    //for(int i = 0; i < haralickFeatureVector.size(); i++ )
-          //_rgbFeatureVector.push_back(haralickFeatureVector[i]);
-
-    /////Deallocate memory
-    //channelsStatisticsFeatureVector.clear();
-     //_channelsStatisticsDetector.emptyCurrentFrameFeatureVector();
-
-    //edgeOrientationFeatureVector.clear();
-    //_edgeOrientationDetector.emptyCurrentFrameFeatureVector();
-
-    //haralickFeatureVector.clear();
-    //_haralickFeatureDetector.emptyCurrentFrameFeatureVector();
-  //}
-
-  /**
-     * @brief This function returns current feature vector according
-     * to the features found in rgb image
-     * @return [std::vector<double>] _rgbFeatureVector, feature vector
-     * for current rgb image
-  */
+  @brief This function returns current feature vector according
+  to the features found in rgb image
+  @return [std::vector<double>] _rgbFeatureVector, feature vector
+  for current rgb image
+  **/
   std::vector<double> RgbSystemValidator::getRgbFeatureVector()
   {
     return _rgbFeatureVector;
   }
 
   /**
-    * @brief Function that loads the trained classifier and makes a prediction
-    * according to the featurevector given for each image
-    * @return void
-  */
+  @brief Function that loads the trained classifier and makes a prediction
+  according to the featurevector given for each image
+  @return void
+  **/
   float RgbSystemValidator::predict()
   {
     cv::Mat samples_mat = vectorToMat(_rgbFeatureVector);
@@ -193,12 +136,12 @@ namespace pandora_vision
   }
 
   /**
-   * @brief Function that converts a given vector of doubles
-   * in cv:Mat in order to use it to opencv function predict()
-   * @param [std::vector <double>] data, input vector to be
-   * converted
-   * @return [cv::Mat] output Mat of size size_of_vectorx1
-  */
+  @brief Function that converts a given vector of doubles
+  in cv:Mat in order to use it to opencv function predict()
+  @param [std::vector <double>] data, input vector to be
+  converted
+  @return [cv::Mat] output Mat of size size_of_vectorx1
+  **/
   cv::Mat RgbSystemValidator::vectorToMat(std::vector<double> data)
   {
     int size = data.size();
@@ -212,9 +155,9 @@ namespace pandora_vision
   }
 
   /**
-    * @brief This function prediction according to the rgb classifier
-    * @return [float] prediction
-  */
+  @brief This function prediction according to the rgb classifier
+  @return [float] prediction
+  **/
   float RgbSystemValidator::predictionToProbability(float prediction)
   {
     float probability;

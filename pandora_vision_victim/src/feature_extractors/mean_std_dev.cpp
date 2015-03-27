@@ -40,12 +40,20 @@
 
 namespace pandora_vision
 {
+  /**
+  brief Constructor
+  **/
   MeanStdDevExtractor::MeanStdDevExtractor(cv::Mat* img)
     :BaseFeatureExtractor(img)
   {
 
   }
-
+  
+  /**
+  @brief this function extracts the mean and std value of a color
+  component
+  @returns meanStd Vector
+  **/
   std::vector<double> MeanStdDevExtractor::extract(void)
   {
     std::vector<double> ret;

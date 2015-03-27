@@ -40,10 +40,7 @@
 
 namespace pandora_vision
 {
-  //!<Constructor
-/*  HaralickFeaturesExtractor:: HaralickFeaturesExtractor()*/
-  //{
-  /*}*/
+
 
   /**
     @brief Function for updating the values of the GLCM matrix.
@@ -531,32 +528,10 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function returning the haralick feature vector,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @return std::vector [float] The vector containing the haralick features
-  **/
-/*  std::vector<double> HaralickFeaturesExtractor::getFeatures()*/
-  //{
-    ////~ for(int i = 0; i < _haralickFeatures.size(); i++)
-      ////~ ROS_INFO_STREAM(" "<< _haralickFeatures.at(i));
-    //return _haralickFeatures;
-  /*}*/
-
-  /**
-    @brief Function that cleans up haralickFeatureVector, to add
-    new elements for next frame
-    @return void
-  */
-/*  void HaralickFeaturesExtractor::emptyCurrentFrameFeatureVector()*/
-  //{
-    //_haralickFeatures.clear();
-  //}
-
-  /**
     @brief This is the main function called to extract haralick features
     @param image [cv::Mat] The current frame to be processed
     @param void return
-  */
+  **/
   void HaralickFeaturesExtractor::findHaralickFeatures(const cv::Mat& image, std::vector<double>* haralickFeatures)
   { //ROS_INFO("ENTER FIND HARALICK");
     cv::Mat temp = cv::Mat(image.rows, image.cols, CV_8UC1);

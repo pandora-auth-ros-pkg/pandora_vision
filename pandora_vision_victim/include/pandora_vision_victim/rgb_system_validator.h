@@ -50,16 +50,6 @@ namespace pandora_vision
     ///Feature vector for rgb features
     static std::vector<double> _rgbFeatureVector;
 
-    ///Instance of class  ChannelsStatisticsExtractor
-    ///to detect color features for the given frame
-    //ChannelsStatisticsExtractor _channelsStatisticsDetector;
-    ///Instance of class  EdgeOrientationExtractor
-    ///to detect edge orientation features for the given frame
-    //EdgeOrientationExtractor _edgeOrientationDetector;
-    ///Instance of class  HaralickFeatureExtractor
-    ///to detect haralick features for the given frame
-    //HaralickFeaturesExtractor _haralickFeatureDetector;
-
     /// Svm classifier used for rgb subsystem
     static CvSVM _rgbSvm;
 
@@ -68,58 +58,44 @@ namespace pandora_vision
 
     static std::string _rgb_classifier_path;
 
-    ///Constructor
-    //RgbSystemValidator();
-
-
     static void initialize( const std::string& rgb_classifier_path);
 
-    ///Destructor
-    //~RgbSystemValidator();
-
     /**
-     * @brief This function extract features according to the
-     * predifined features for the rgb image
-     * @param inImage [cv::Mat] current rgb frame to be processed
-     * @return void
-     */
+    @brief This function extract features according to the
+    predifined features for the rgb image
+    @param inImage [cv::Mat] : current rgb frame to be processed
+    @return void
+    **/
     static float calculateSvmRgbProbability(const cv::Mat& inImage);
 
     /**
-     * @brief This function creates feature vector according to the
-     * predifined features for the rgb image
-     * @return void
-     */
-    //static void setRgbFeatureVector();
-
-    /**
-     * @brief This function returns current feature vector according
-     * to the features found in rgb image
-     * @return [std::vector<double>] _rgbFeatureVector, feature vector
-     * for current rgb image
-     */
+    @brief This function returns current feature vector according
+    to the features found in rgb image
+    @return [std::vector<double>] _rgbFeatureVector, feature vector
+    for current rgb image
+    **/
     static std::vector<double> getRgbFeatureVector();
 
     /**
-     * @brief Function that loads the trained classifier and makes a prediction
-     * according to the featurevector given for each image
-     * @return void
-    */
+    @brief Function that loads the trained classifier and makes a prediction
+    according to the featurevector given for each image
+    @return void
+    **/
     static float predict();
 
     /**
-     * @brief Function that converts a given vector of doubles
-     * in cv:Mat in order to use it to opencv function predict()
-     * @param [std::vector <double>] data, input vector to be
-     * converted
-     * @return [cv::Mat] output Mat of size size_of_vectorx1
-    */
+    @brief Function that converts a given vector of doubles
+    in cv:Mat in order to use it to opencv function predict()
+    @param [std::vector <double>] data, input vector to be
+    converted
+    @return [cv::Mat] output Mat of size size_of_vectorx1
+    **/
     static cv::Mat vectorToMat(std::vector<double> data);
 
     /**
-     * @brief This function prediction according to the rgb classifier
-     * @return [float] prediction
-     */
+    @brief This function prediction according to the rgb classifier
+    @return [float] prediction
+    **/
     static float predictionToProbability(float prediction);
 
   };

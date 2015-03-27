@@ -40,12 +40,18 @@
 
 namespace pandora_vision
 {
+  /**
+  @brief Constructor
+  **/
   ColorAnglesExtractor::ColorAnglesExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
 
   }
-
+  /**
+  @brief this function extracts the color angles features
+  @return color angles vector
+  **/
   std::vector<double> ColorAnglesExtractor::extract(void)
   {
     std::vector<double> colorAnglesAndStd;

@@ -51,16 +51,6 @@ namespace pandora_vision
     ///Feature vector for depth features
     static std::vector<double> _depthFeatureVector;
     
-    ///Instance of class  ChannelsStatisticsExtractor 
-    ///to detect color features for the given frame
-    //ChannelsStatisticsExtractor _channelsStatisticsDetector;
-    ///Instance of class  EdgeOrientationExtractor 
-    ///to detect edge orientation features for the given frame
-    //EdgeOrientationExtractor _edgeOrientationDetector;
-    ///Instance of class  HaralickFeatureExtractor 
-    ///to detect haralick features for the given frame
-    //HaralickFeaturesExtractor _haralickFeatureDetector;
-    
     static std::string _depth_classifier_path;
     
      /// Svm classifier used for rgb subsystem
@@ -69,58 +59,44 @@ namespace pandora_vision
     /// Set up SVM's parameters
     static CvSVMParams _params;
          
-    
-    ///Constructor
-    //DepthSystemValidator();
-
     static void initialize(const std::string& depth_classifier_path);
     
-    ///Destructor
-    //~DepthSystemValidator();
-    
     /**
-     * @brief This function extract features according to the
-     * predifined features for the depth image
-     * @param inImage [cv::Mat] current depth frame to be processed
-     * @return void
-     */ 
+    @brief This function extract features according to the
+    predifined features for the depth image
+    @param inImage [cv::Mat] current depth frame to be processed
+    @return void
+    **/ 
     static float calculateSvmDepthProbability(const cv::Mat& inImage);
-    
+        
     /**
-     * @brief This function creates feature vector according to the
-     * predifined features for the depth image
-     * @return void
-     */ 
-    //static void setDepthFeatureVector();
-    
-    /**
-     * @brief This function returns current feature vector according
-     * to the features found in rgb image
-     * @return [std::vector<double>] _rgbFeatureVector, feature vector 
-     * for current rgb image
-     */ 
+    @brief This function returns current feature vector according
+    to the features found in rgb image
+    @return [std::vector<double>] _rgbFeatureVector, feature vector 
+    for current rgb image
+    **/ 
     static std::vector<double> getDepthFeatureVector();
     
     /**
-     * @brief Function that loads the trained classifier and makes a prediction
-     * according to the featurevector given for each image
-     * @return void
-    */ 
+    @brief Function that loads the trained classifier and makes a prediction
+    according to the featurevector given for each image
+    @return void
+    **/ 
     static float predict();
     
     /**
-     * @brief Function that converts a given vector of doubles
-     * in cv:Mat in order to use it to opencv function predict()
-     * @param [std::vector <double>] data, input vector to be 
-     * converted
-     * @return [cv::Mat] output Mat of size size_of_vectorx1
-    */ 
+    @brief Function that converts a given vector of doubles
+    in cv:Mat in order to use it to opencv function predict()
+    @param data [std::vector <double>]: input vector to be 
+    converted
+    @return output [cv::Mat] : Mat of size size_of_vectorx1
+    **/ 
     static cv::Mat vectorToMat(std::vector<double> data);
     
     /**
-     * @brief This function prediction according to the rgb classifier
-     * @return [float] prediction
-     */ 
+    @brief This function prediction according to the rgb classifier
+    @return [float] prediction
+    **/ 
     static float predictionToProbability(float prediction);
     
   };

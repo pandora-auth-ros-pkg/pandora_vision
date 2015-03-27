@@ -40,13 +40,21 @@
 
 
 namespace pandora_vision
-{
+{ 
+  /**
+  @brief Constructor
+  **/
   DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
 
   }
 
+  /**
+  @brief this function extracts the dominant color from ever
+  color coordinate and also their density
+  @return the dominant color vector
+  **/
   std::vector<double> DominantColorExtractor::extract(void)
   {
     std::vector<double> ret;

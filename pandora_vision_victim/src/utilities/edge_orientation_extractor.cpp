@@ -39,30 +39,12 @@
 
 namespace pandora_vision
 {
+
   /**
-    @brief Constructor
+  @brief This is the main function which calls all the others and
+  computes the final edge histogram features.
+  @param src [cv::Mat] : the current image.
   **/
-/*  EdgeOrientationExtractor::EdgeOrientationExtractor()*/
-  //{
-
-      //ROS_INFO("[victim_node] : Created Edge Orientation detection instance");
-
-  //}
-
-  /**
-    @brief Destructor
-  */
-/*  EdgeOrientationExtractor::~EdgeOrientationExtractor()*/
-  //{
-    //ROS_INFO("[victim_node] : Destroying Edge Orientation detection instance");
-  /*}*/
-
-  /**
-   * @brief This is the main function which calls all the others and
-   * computes the final edge histogram features.
-   * @param src [cv::Mat] the current image.
-  */
-
   void EdgeOrientationExtractor::findEdgeFeatures(const cv::Mat& inImage, std::vector<double>* edgeFeatures )
   {
     cv::Mat src = inImage.clone();
@@ -91,8 +73,6 @@ namespace pandora_vision
       ROS_INFO_STREAM("vector's size"<< edgeFeatures->size() );
      }
 
-
-
     //~ ROS_INFO_STREAM("EdgeFeatures= ");
     //~ for (int ii = 0; ii < edgeFeatures.size(); ii++)
        //~ ROS_INFO_STREAM( " " << edgeFeatures[ii]);
@@ -100,14 +80,14 @@ namespace pandora_vision
   }
 
   /**
-   *@brief This is the function which divides the image
-   *into 16 subblocks and calls the findLocalEdgeFeatures to compute the
-   *features of the current subblock
-   * @param currFrame [cv::Mat] the current subblock.
-   * @param colsBlockSize [int] the cols size of the subblock.
-   * @param rowsBlockSize [int] the rows size of the subblock.
-   * @return [std::vector<double>] the computed  1x80 edgeFeatures vector.
-  */
+  @brief This is the function which divides the image
+  into 16 subblocks and calls the findLocalEdgeFeatures to compute the
+  features of the current subblock
+  @param currFrame [cv::Mat]: the current subblock.
+  @param colsBlockSize [int]: the cols size of the subblock.
+  @param rowsBlockSize [int]: the rows size of the subblock.
+  @return [std::vector<double>] the computed  1x80 edgeFeatures vector.
+  **/
 
   void EdgeOrientationExtractor::partition(const cv::Mat& currFrame,
         int colsBlockSize, int rowsBlockSize, std::vector<double>* localEdgeFeatures)
@@ -133,121 +113,117 @@ namespace pandora_vision
   }
 
   /**
-   * @brief This is the function which  computes the edge histogram
-   *  feature of the current subblock.
-   * @param currFrame [cv::Mat] the current subblock.
-   * @return [std::vector<double>] the computed 1x5 edgeFeatures vector.
-  */
-
+  @brief This is the function which  computes the edge histogram
+  feature of the current subblock.
+  @param currFrame [cv::Mat] the current subblock.
+  @return [std::vector<double>] the computed 1x5 edgeFeatures vector.
+  **/
   void EdgeOrientationExtractor::findLocalEdgeFeatures(const cv::Mat& currFrame,
                                                        std::vector<double>* localEdgeFeatures )
-{
-  //ROS_INFO("ENTER FIND LOCAL EDGE");
-  cv::Mat img;
-  currFrame.convertTo(img, CV_64F);
+  {
+    //ROS_INFO("ENTER FIND LOCAL EDGE");
+    cv::Mat img;
+    currFrame.convertTo(img, CV_64F);
 
-  //!< Build a vector of the same size of the image and 5 dimensions
-  //!<to save the gradients
-  std::vector<cv::Mat> convImg(5);
+    //!< Build a vector of the same size of the image and 5 dimensions
+    //!<to save the gradients
+    std::vector<cv::Mat> convImg(5);
 
-  //!< Define the Scharr filters for the 5 types of edges
-  std::vector<cv::Mat> kernel(5);
-  /*double vals[5][9] = {1, 2, 1, 0, 0, 0, -1, -2, -1, -1, 0, 1, -2, 0, 2, -1,
+    //!< Define the Scharr filters for the 5 types of edges
+    std::vector<cv::Mat> kernel(5);
+    /*double vals[5][9] = {1, 2, 1, 0, 0, 0, -1, -2, -1, -1, 0, 1, -2, 0, 2, -1,
                   0, 1, 2, 2, -1, 2, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1, 2,
                   -1, -1, -1, -1, 0, 1, 0, 0, 0, 1, 0, -1}; */
-  double vals[5][9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3, -3, 0, 3, -10, 0, 10, -3,
+    double vals[5][9] = {-3, -10, -3, 0, 0, 0, 3, 10, 3, -3, 0, 3, -10, 0, 10, -3,
                   0, 3, 0, 3, 10, -3, 0, 3, -10, -3, 0, -10, -3, 0, -3,
                   0, 3, 0, 3, 10, -3, 0, 3, 0, 0, 0, 3, 0, -3};
 
-  for (int ii = 0; ii < kernel.size(); ii++)
-    kernel[ii] = cv::Mat(3, 3, CV_64F, vals[ii]);
+    for (int ii = 0; ii < kernel.size(); ii++)
+      kernel[ii] = cv::Mat(3, 3, CV_64F, vals[ii]);
 
-  //!<iterate over the posible directions and apply the filters
+    //!<iterate over the posible directions and apply the filters
 
-  for (int ii = 0; ii < kernel.size(); ii++)
-  {
-    conv2(img, kernel[ii], CONVOLUTION_SAME, &convImg[ii]);
-    convImg[ii]=abs(convImg[ii]);
-  }
-
-  //!< Calculate the max sobel gradient and save the type of the orientation
-  double maxVal;
-  cv::Mat maxGrad = cv::Mat::zeros(convImg[0].rows, convImg[0].cols, CV_64F);
-  for(int jj = 0; jj < convImg[0].rows; jj++)
-    for(int kk = 0; kk < convImg[0].cols; kk++)
+    for (int ii = 0; ii < kernel.size(); ii++)
     {
-      double maxVal= - std::numeric_limits<double>::infinity();
-      for(int ii = 0; ii < convImg.size(); ii++)
-      {
-        if(maxVal < convImg[ii].at<double>(jj, kk))
-        { maxVal = convImg[ii].at<double>(jj, kk);
-          maxGrad.at<double>(jj, kk) = ii+1;
-        }
-      }
+      conv2(img, kernel[ii], CONVOLUTION_SAME, &convImg[ii]);
+      convImg[ii]=abs(convImg[ii]);
     }
 
-  //!<Detect the edges
-  cv::Mat edges;
-  Canny(currFrame, edges, 0, 30, 3);
-  edges.convertTo(edges, CV_64F);
-  for (int ii = 0; ii < edges.rows; ii++)
-    for(int jj = 0; jj < edges.cols; jj++)
-        if(edges.at<double>(ii, jj) == 255)
-          edges.at<double>(ii, jj)=1;
+    //!< Calculate the max sobel gradient and save the type of the orientation
+    double maxVal;
+    cv::Mat maxGrad = cv::Mat::zeros(convImg[0].rows, convImg[0].cols, CV_64F);
+    for(int jj = 0; jj < convImg[0].rows; jj++)
+      for(int kk = 0; kk < convImg[0].cols; kk++)
+      {
+        double maxVal= - std::numeric_limits<double>::infinity();
+        for(int ii = 0; ii < convImg.size(); ii++)
+        {
+          if(maxVal < convImg[ii].at<double>(jj, kk))
+          { 
+            maxVal = convImg[ii].at<double>(jj, kk);
+            maxGrad.at<double>(jj, kk) = ii+1;
+          }
+        }
+      }
 
+    //!<Detect the edges
+    cv::Mat edges;
+    Canny(currFrame, edges, 0, 30, 3);
+    edges.convertTo(edges, CV_64F);
+    for (int ii = 0; ii < edges.rows; ii++)
+     for(int jj = 0; jj < edges.cols; jj++)
+       if(edges.at<double>(ii, jj) == 255)
+         edges.at<double>(ii, jj)=1;
 
-
-  //!<multiply against the types of orientations detected by the Sobel masks
-  cv::Mat data = cv::Mat::zeros(convImg[0].rows, convImg[0].cols, CV_64F);
-
+    //!<multiply against the types of orientations detected by the Sobel masks
+    cv::Mat data = cv::Mat::zeros(convImg[0].rows, convImg[0].cols, CV_64F);
     for(int jj = 0; jj < data.rows; jj++)
       for(int kk = 0; kk < data.cols; kk++)
         data.at<double>(jj, kk) = maxGrad.at<double>(jj, kk) *
                                   edges.at<double>(jj, kk);
 
-  data.convertTo(data, CV_32F);
+    data.convertTo(data, CV_32F);
 
-  //!< Establish the number of bins
-  int bins = 6;
+    //!< Establish the number of bins
+    int bins = 6;
 
-  //!< Set the range
-  float range[] = { 0, 6 };
+    //!< Set the range
+    float range[] = { 0, 6 };
 
-  const float* histRange = { range };
+    const float* histRange = { range };
 
-  bool uniform = true;
-  bool accumulate = false;
+    bool uniform = true;
+    bool accumulate = false;
 
-  cv::Mat hist;
-  cv::calcHist( &data, 1, 0, cv::Mat(), hist, 1, &bins, &histRange, uniform,
+    cv::Mat hist;
+    cv::calcHist( &data, 1, 0, cv::Mat(), hist, 1, &bins, &histRange, uniform,
                 accumulate );
 
-  show_histogramm(bins, hist, "Edge Histogramm");
+    show_histogramm(bins, hist, "Edge Histogramm");
 
-  //!< save the final edgeFeatures for the 5 types of oriented gradients
-  // std::vector<double> edgeFeatures(5);
+    //!< save the final edgeFeatures for the 5 types of oriented gradients
+    // std::vector<double> edgeFeatures(5);
 
-  for(int ii = 1; ii < 6; ii++)
-  {
-    localEdgeFeatures->push_back(static_cast<double> (hist.at<float>(ii)) / (data.rows *data.cols));
-    //(*localEdgeFeatures)[ii-1]=hist.at<float>(ii) / (data.rows *data.cols);
+    for(int ii = 1; ii < 6; ii++)
+    {
+      localEdgeFeatures->push_back(static_cast<double> (hist.at<float>(ii)) / (data.rows *data.cols));
+      //(*localEdgeFeatures)[ii-1]=hist.at<float>(ii) / (data.rows *data.cols);
+    }
+
+    if( localEdgeFeatures->size() != 5)
+    {
+      ROS_FATAL("Clean the vector:localEdge");
+      ROS_INFO_STREAM("vector's size"<< localEdgeFeatures->size() );
+     }
   }
 
-  if( localEdgeFeatures->size() != 5)
-  {
-    ROS_FATAL("Clean the vector:localEdge");
-    ROS_INFO_STREAM("vector's size"<< localEdgeFeatures->size() );
-  }
-  //return edgeFeatures;
-}
-
-    /**
-     * @brief This function applies the sobel filters on the src image.
-     * @param img [const cv::Mat&] the src img.
-     * @param kernel [const cv::Mat&] the sobel kernel filter.
-     * @param type [ConvolutionType] the type of convolution.
-     * @return dest [cv::Mat&] the convoluted image.
-    */
+  /**
+  @brief This function applies the sobel filters on the src image.
+  @param img [const cv::Mat&]: the src img.
+  @param kernel [const cv::Mat&]: the sobel kernel filter.
+  @param type [ConvolutionType]: the type of convolution.
+  @return dest [cv::Mat&]: the convoluted image.
+  **/
   void EdgeOrientationExtractor::conv2(const cv::Mat &img,
             const cv::Mat& kernel, ConvolutionType type, cv::Mat* dest)
   {
@@ -277,11 +253,11 @@ namespace pandora_vision
 
 
   /**
-     * @brief This function displays the calculated histogram to the screen.
-     * @param bins [int] the number of bins.
-     * @param hist [cv::Mat] the calculated histogram.
-     * @param colorComp [const char*] the name of the window.
-  */
+  @brief This function displays the calculated histogram to the screen.
+  @param bins [int] the number of bins.
+  @param hist [cv::Mat] the calculated histogram.
+  @param colorComp [const char*] the name of the window.
+  **/
   void EdgeOrientationExtractor::show_histogramm(int bins, cv::Mat hist,
                                                const char* colorComp)
   {
@@ -306,18 +282,4 @@ namespace pandora_vision
     #endif
   }
 
-/*  std::vector<double> EdgeOrientationExtractor::getFeatures()*/
-  //{
-    //return edgeFeatures;
-  //}
-
-  /**
-   * @brief Function that cleans up EdgeFeatureVector, to add
-   * new elements for next frame
-   * @return void
-  */
-  //void EdgeOrientationExtractor::emptyCurrentFrameFeatureVector()
-  //{
-    //edgeFeatures.clear();
-  /*}*/
 }// namespace pandora_vision

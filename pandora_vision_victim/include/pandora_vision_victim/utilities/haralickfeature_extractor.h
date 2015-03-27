@@ -44,16 +44,8 @@ namespace pandora_vision
   class HaralickFeaturesExtractor
   {
     
-    //private:
-    
-    //!<Vector containing 13 Haralick Features
-    //std::vector<double> _haralickFeatures;
-    
     public:
-    
-    //!<Constructor
-    //HaralickFeaturesExtractor();
-    
+
     /**
     @brief Function for calculating the normalized GLCM matrix, considering an
     horizontal relationship between pixels with offset equal to 1. The returned 
@@ -193,12 +185,6 @@ namespace pandora_vision
     */ 
     static void findHaralickFeatures(const cv::Mat& image, std::vector<double>* haralickFeatures);
     
-    /**
-    @brief Function that cleans up haralickFeatureVector, to add
-    new elements for next frame
-    @return void
-    */ 
-   // void emptyCurrentFrameFeatureVector();
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
