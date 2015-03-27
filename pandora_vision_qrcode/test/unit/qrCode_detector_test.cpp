@@ -173,50 +173,50 @@ namespace pandora_vision
         EXPECT_EQ(0, qrcode_list.size());
     }
 
-    TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
-    {
-        std::stringstream fileName;
-        std::vector<QrCode> qrcode_list;
-        cv::Mat inputFrame;
-        int* center;
-        int  cArray[9];
-        FILE *fpr;
-        fileName.str("");
-        fileName << ros::package::getPath("pandora_vision_qrcode");
-        fileName << "/test/unit/data/" << "test_qr_centers.txt"; 
-        fpr = fopen(fileName.str().c_str(), "r");
-        fileName.str("");
-        for(int i = 1; i < 13; i ++){
-            fileName << ros::package::getPath("pandora_vision_qrcode");
-            fileName << "/test/unit/data/" << "test_qr_" << i << ".jpg"; 
-            inputFrame = cv::imread(fileName.str());
-            fscanf(fpr, " %d", &cArray[0]);
-            for( int j = 1; j < (1 + cArray[0] * 4); j ++)
-            {
-                fscanf(fpr, " %d", &cArray[j]);
-            }
-            if(!inputFrame.data)
-            {
-                ROS_ERROR("Cannot open image.");
-                fileName.str("");
-                continue;
-            }
-            qrcode_list = detectQrCode(inputFrame);
-            EXPECT_EQ(cArray[0], qrcode_list.size());
-            if(cArray[0] == qrcode_list.size())
-            {
-                for( int j = 0; j < qrcode_list.size(); j ++)
-                {
-                    center = locateQrCode(qrcode_list[j].qrcode_center);
-                    EXPECT_LE(cArray[1 + 0 + j * 4], center[0]);   
-                    EXPECT_GE(cArray[1 + 1 + j * 4], center[0]);   
-                    EXPECT_LE(cArray[1 + 2 + j * 4], center[1]);   
-                    EXPECT_GE(cArray[1 + 3 + j * 4], center[1]);   
-                }
-            }
-            fileName.str("");
-        }
-        fclose(fpr);
-    }
+    //TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
+    //{
+    //    std::stringstream fileName;
+    //    std::vector<QrCode> qrcode_list;
+    //    cv::Mat inputFrame;
+    //    int* center;
+    //    int  cArray[9];
+    //    FILE *fpr;
+    //    fileName.str("");
+    //    fileName << ros::package::getPath("pandora_vision_qrcode");
+    //    fileName << "/test/unit/data/" << "test_qr_centers.txt"; 
+    //    fpr = fopen(fileName.str().c_str(), "r");
+    //    fileName.str("");
+    //    for(int i = 1; i < 13; i ++){
+    //        fileName << ros::package::getPath("pandora_vision_qrcode");
+    //        fileName << "/test/unit/data/" << "test_qr_" << i << ".jpg"; 
+    //        inputFrame = cv::imread(fileName.str());
+    //        fscanf(fpr, " %d", &cArray[0]);
+    //        for( int j = 1; j < (1 + cArray[0] * 4); j ++)
+    //        {
+    //            fscanf(fpr, " %d", &cArray[j]);
+    //        }
+    //        if(!inputFrame.data)
+    //        {
+    //            ROS_ERROR("Cannot open image.");
+    //            fileName.str("");
+    //            continue;
+    //        }
+    //        qrcode_list = detectQrCode(inputFrame);
+    //        EXPECT_EQ(cArray[0], qrcode_list.size());
+    //        if(cArray[0] == qrcode_list.size())
+    //        {
+    //            for( int j = 0; j < qrcode_list.size(); j ++)
+    //            {
+    //                center = locateQrCode(qrcode_list[j].qrcode_center);
+    //                EXPECT_LE(cArray[1 + 0 + j * 4], center[0]);   
+    //                EXPECT_GE(cArray[1 + 1 + j * 4], center[0]);   
+    //                EXPECT_LE(cArray[1 + 2 + j * 4], center[1]);   
+    //                EXPECT_GE(cArray[1 + 3 + j * 4], center[1]);   
+    //            }
+    //        }
+    //        fileName.str("");
+    //    }
+    //    fclose(fpr);
+    //}
 
 }// namespace pandora_vision

@@ -16,6 +16,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>roslint</build_depend>
+  <build_depend>pandora_cmake_tools</build_depend>
+
   <depend>roscpp</depend>
   <depend>state_manager</depend>
   <depend>state_manager_msgs</depend>
@@ -24,7 +27,8 @@
   <depend>image_transport</depend>
   <depend>sensor_msgs</depend>
   <depend>libdmtx-dev</depend>
-  <depend>roslint</depend>
   <depend>urdf</depend>
 
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
 </package>
