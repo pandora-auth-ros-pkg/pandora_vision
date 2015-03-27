@@ -56,13 +56,15 @@ namespace sensor_processor
 
   bool
   VisionPreProcessor::
-  preProcess(const ImageConstPtr& input, const CVMatPtr& output)
+  preProcess(const ImageConstPtr& input, const CVMatStampedPtr& output)
   {
     cv_bridge::CvImagePtr inMsg;
     inMsg = cv_bridge::toCvCopy(*input, sensor_msgs::image_encodings::BGR8);
-    *output = inMsg->image.clone();
+    output->image = inMsg->image.clone();
 
-    if (output->empty())
+    output->header = input->header;
+
+    if (output->image.empty())
     {
       ROS_ERROR("[Node] No more Frames or something went wrong with bag file");
       // ros::shutdown();
