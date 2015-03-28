@@ -30,7 +30,6 @@ catkin_package(
       image_transport
       sensor_msgs
       dynamic_reconfigure
-      roslint
       urdf
     #INCLUDE_DIRS
     #LIBRARIES
