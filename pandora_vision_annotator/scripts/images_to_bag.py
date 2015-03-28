@@ -1,89 +1,67 @@
 #!/usr/bin/python
-"""
-Copyright (c) 2012,
-Systems, Robotics and Vision Group
-University of the Balearican Islands
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Systems, Robotics and Vision Group, University of 
-      the Balearican Islands nor the names of its contributors may be used to 
-      endorse or promote products derived from this software without specific 
-      prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
-
 
 PKG = 'pandora_vision_annotator' # this package name
 
-import roslib; roslib.load_manifest(PKG)
+import time, sys, os
+from ros import rosbag
+import roslib; roslib.load_manifest('sensor_msgs')
 import rospy
-import sensor_msgs.msg
-import cv_bridge
-import camera_info_parser
-import glob
-import cv
+from sensor_msgs.msg import Image
 
-def collect_image_files(image_dir,file_pattern):
-  images = glob.glob(image_dir + '/'+ file_pattern)
-  images.sort()
-  return images
+import ImageFile
 
-def playback_images(image_dir,file_pattern,camera_info_file,publish_rate):
-  if camera_info_file != "":
-    cam_info = camera_info_parser.parse_yaml(camera_info_file)
-    publish_cam_info = True
-  else:
-    publish_cam_info = False
-  image_files = collect_image_files(image_dir,file_pattern)
-  rospy.loginfo("%s ,%s ", image_dir, file_pattern)
-  rospy.loginfo('Found %i images.',len(image_files))
-  bridge = cv_bridge.CvBridge()
-  rate = rospy.Rate(publish_rate)
-  image_publisher = rospy.Publisher('camera/image', sensor_msgs.msg.Image)
-  if publish_cam_info:
-      cam_info_publisher = rospy.Publisher('camera/camera_info', sensor_msgs.msg.CameraInfo)
-  rospy.loginfo('Starting playback.')
-  for image_file in image_files:
-    if rospy.is_shutdown():
-      break
-    now = rospy.Time.now()
-    image = cv.LoadImage(image_file)
-    image_msg = bridge.cv_to_imgmsg(image, encoding='bgr8')
-    image_msg.header.stamp = now
-    image_msg.header.frame_id = "/camera"
-    image_publisher.publish(image_msg)
-    if publish_cam_info:
-      cam_info.header.stamp = now
-      cam_info.header.frame_id = "/camera"
-      cam_info_publisher.publish(cam_info)
-    rate.sleep()
-  rospy.loginfo('No more images left. Stopping.')
+def GetFilesFromDir(dir):
+    '''Generates a list of files from the directory'''
+    print( "Searching directory %s" % dir )
+    all = []
+    if os.path.exists(dir):
+        for path, names, files in os.walk(dir):
+            for f in files:
+                if os.path.splitext(f)[1] in ['.bmp', '.png', '.jpg', '.ppm']:
+                    all.append( os.path.join( path, f ) )
+    return all
+
+
+def CreateBag(imgs,bagname):
+    '''Creates a bag file with camera images'''
+    bag =rosbag.Bag(bagname, 'w')
+
+    try:
+        for i in range(len(imgs)):
+            print("Adding %s" % imgs[i])
+            fp = open( imgs[i], "r" )
+            p = ImageFile.Parser()
+
+            while 1:
+                s = fp.read(1024)
+                if not s:
+                    break 
+                p.feed(s)
+
+            im = p.close()
+            if im.mode != "RGB":
+                im=im.convert("RGB")
+            Stamp = rospy.rostime.Time.from_sec(time.time())
+            Img = Image()
+            Img.header.stamp = Stamp
+            Img.width = im.size[0]
+            Img.height = im.size[1]
+            Img.encoding = "rgb8"
+            Img.step = Img.width *3;
+            Img.header.frame_id = "camera"
+            Img_data = [pix for pixdata in im.getdata() for pix in pixdata]
+            Img.data = Img_data
+
+            bag.write('/camera/image', Img, Stamp)
+    finally:
+        bag.close()       
 
 if __name__ == "__main__":
-  rospy.init_node('image_sequence_publisher')
-  try:
-    image_dir = rospy.get_param("~image_dir","/home/marios/pandora_supplementary_material/vision/dataset/dataset_part1")
-    file_pattern = rospy.get_param("~file_pattern","frame*.png")
-    camera_info_file = rospy.get_param("~camera_info_file", "")
-    frequency = rospy.get_param("~frequency", 10)
-    playback_images(image_dir, file_pattern, camera_info_file, frequency)
-  except KeyError as e:
-    print 'Required parameter missing:', e
-  except Exception, e:
-    import traceback
-    traceback.print_exc()
+    if len( sys.argv ) == 3:
+        all_imgs = GetFilesFromDir(sys.argv[1])
+        if len(all_imgs) <= 0:
+            print("No images found in %s" % sys.argv[1])
+            exit()
+        CreateBag(all_imgs, sys.argv[2])
+    else:
+        print( "Usage: img2bag imagedir bagfilename")
