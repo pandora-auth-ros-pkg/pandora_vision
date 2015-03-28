@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Christos Tsirigotis <tsirif@gmail.com>
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
 #ifndef PANDORA_VISION_COMMON_POIS_STAMPED_H
@@ -52,7 +52,7 @@ namespace pandora_vision
 
     public:
       std_msgs::Header header;
-      std::vector<POIPtr> points;
+      std::vector<POIPtr> pois;
 
       int frameWidth;
       int frameHeight;

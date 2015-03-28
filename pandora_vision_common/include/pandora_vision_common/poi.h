@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Christos Tsirigotis <tsirif@gmail.com>
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
 #ifndef PANDORA_VISION_COMMON_POI_H
@@ -51,10 +51,14 @@ namespace pandora_vision
 
   public:
     cv::Point point;
+    float probability;
 
   public:
     void setPoint(const cv::Point&);
     cv::Point getPoint() const;
+
+    void setProbability(float);
+    float getProbability() const;
   };
 
   void POI::setPoint(const cv::Point& pointArg)
@@ -65,6 +69,16 @@ namespace pandora_vision
   cv::Point POI::getPoint() const
   {
     return point;
+  }
+
+  void POI::setProbability(float probArg)
+  {
+    probability = probArg;
+  }
+
+  float POI::getProbability() const
+  {
+    return probability;
   }
 
   typedef POI::Ptr POIPtr;
