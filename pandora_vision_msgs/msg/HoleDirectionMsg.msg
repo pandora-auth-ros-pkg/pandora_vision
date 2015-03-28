@@ -1,4 +1,2 @@
-float32 yaw
-float32 pitch
-float32 probability
+pandora_common_msgs/GeneralAlertInfo info
 uint64 holeId
