@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Christos Tsirigotis <tsirif@gmail.com>
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
 #ifndef PANDORA_VISION_COMMON_VISION_POSTPROCESSOR_H
@@ -46,11 +46,13 @@
 #include <boost/shared_ptr.hpp>
 #include <urdf_parser/urdf_parser.h>
 
-#include "vision_common/postprocessor.h"
-#include "vision_common/abstract_handler.h"
+#include "sensor_processor/postprocessor.h"
+#include "sensor_processor/abstract_handler.h"
+#include "pandora_common_msgs/GeneralAlertInfoVector.h"
 #include "pandora_common_msgs/GeneralAlertInfo.h"
 
 #include "pandora_vision_common/pois_stamped.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_exceptions.h"
 
 namespace pandora_vision
 {
@@ -62,13 +64,15 @@ namespace pandora_vision
 
   public:
     VisionPostProcessor(const std::string& ns, AbstractHandler* handler);
+    virtual
+      ~VisionPostProcessor() {}
 
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const std_msgs::Int32Ptr& output);
 
   protected:
-    std::vector<GeneralAlertInfo>
-      getGeneralAlertInfo(const POIsStampedConstPtr& input);
+    pandora_common_msgs::GeneralAlertInfoVector
+      getGeneralAlertInfo(const POIsStampedConstPtr& result);
 
   private:
     template <class T>
@@ -81,8 +85,8 @@ namespace pandora_vision
 
   protected:
     std::map<std::string, std::string> parentFrameDict_;
-    std::map<std::string, double> hfovDict_;
-    std::map<std::string, double> vfovDict_;
+    std::map<std::string, float> hfovDict_;
+    std::map<std::string, float> vfovDict_;
   };
 
   template <class VisionAlertMsg>
@@ -90,21 +94,48 @@ namespace pandora_vision
     VisionPostProcessor(const std::string& ns, AbstractHandler* handler) :
       PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
     {
-      //TODO
     }
 
   template <class VisionAlertMsg>
+    pandora_common_msgs::GeneralAlertInfoVector
     VisionPostProcessor<VisionAlertMsg>::
-    std::vector<GeneralAlertInfo>
-    getGeneralAlertInfo(const POIsStampedConstPtr& input)
+    getGeneralAlertInfo(const POIsStampedConstPtr& result)
     {
-      //TODO
+      pandora_common_msgs::GeneralAlertInfoVector generalAlertInfos;
+
+      float x = 0, y = 0;
+      // fov are in radians
+      float hfov = findParam<float>(&hfovDict_, result->header.frame_id);
+      float vfov = findParam<float>(&vfovDict_, result->header.frame_id);
+      std::string parentFrameId = findParentFrameId(&parentFrameDict_,
+          result->header.frame_id, "/robot_description");
+
+      generalAlertInfos.header = result->header;
+      generalAlertInfos.header.frame_id = parentFrameId;
+
+      for (int i = 0; i < result->pois.size(); ++i)
+      {
+        const POI poi = result->pois[i];
+        pandora_common_msgs::GeneralAlertInfo info;
+        x = poi->getPoint().x
+          - static_cast<float>(result->frameWidth) / 2;
+        y = static_cast<float>(result->frameHeight) / 2
+          - poi->getPoint().y;
+
+        info.yaw = atan(2 * x / result->frameWidth * tan(hfov / 2));
+        info.pitch = atan(2 * y / result->frameHeight * tan(vfov / 2));
+        info.probability = poi.getProbability();
+
+        generalAlertInfos.generalAlerts.push_back(info);
+      }
+
+      return generalAlertInfos;
     }
 
   template <class T>
     template <class VisionAlertMsg>
-      VisionPostProcessor<VisionAlertMsg>::
       T
+      VisionPostProcessor<VisionAlertMsg>::
       findParam(std::map<std::string, T>* dict, const std::string& key)
       {
         std::map<std::string, T>::iterator iter;
@@ -120,8 +151,7 @@ namespace pandora_vision
           {
             ROS_ERROR_NAMED(this->getName(),
                 "Params couldn't be retrieved for %s", key);
-            // throw an exception
-            return T();
+            throw vision_config_error(key + " : not found");
           }
 
           dict->insert(std::make_pair(key, param));
@@ -130,8 +160,8 @@ namespace pandora_vision
       }
 
   template <class VisionAlertMsg>
-    VisionPostProcessor<VisionAlertMsg>::
     std::string
+    VisionPostProcessor<VisionAlertMsg>::
     findParentFrameId(std::map<std::string, std::string>* dict,
         const std::string& key,
         const std::string& model_param_name)
@@ -149,8 +179,7 @@ namespace pandora_vision
         {
           ROS_ERROR_NAMED(this->getName(),
               "Robot description couldn't be retrieved from the parameter server.");
-          // throw an exception
-          return "";
+          throw vision_config_error(model_param_name + " : not found");
         }
 
         std::string parent_frame_id;
