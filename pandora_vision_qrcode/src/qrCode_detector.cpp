@@ -41,7 +41,7 @@
 
 namespace pandora_vision {
 
-  QrCodeDetector::QrCodeDetector(const std::string& ns, AbstractHandler* handler) : 
+  QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) : 
     Processor<CVMatStamped, POIsStamped>(ns, handler), debug_publish(false)
   {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
@@ -71,7 +71,7 @@ namespace pandora_vision {
       }
 
       cv::circle(debug_frame,
-          qrcode_list[counter].qrcode_center,
+          qrcode_list[counter]->getPoint(),
           6,
           cv::Scalar(0, 0, 255),
           CV_FILLED);
@@ -93,7 +93,7 @@ namespace pandora_vision {
    * @brief Get parameters referring to Qrcode detection algorithm
    * @return void
    */
-  void QrCodeDetection::getQrCodeParams()
+  void QrCodeDetector::getQrCodeParams()
   {
     //!< Get the buffer size parameter if available;
     if (this->accessPublicNh()->hasParam("qrcodeSharpenBlur"))
@@ -123,7 +123,7 @@ namespace pandora_vision {
     @param frame [cv::Mat] The image in which the QRs are detected
     @return void
    */
-  void QrCodeDetector::detectQrCode(cv::Mat frame)
+  std::vector<POIPtr> QrCodeDetector::detectQrCode(cv::Mat frame)
   {
     frame.copyTo(input_frame);
     if (input_frame.channels() == 3)
@@ -149,8 +149,8 @@ namespace pandora_vision {
     for (zbar::Image::SymbolIterator symbol = image.symbol_begin();
         symbol != image.symbol_end(); ++symbol)
     {
-      QrCode detected_code;
-      detected_code.qrcode_desc = symbol->get_data();
+      QrCodePOIPtr qrCodePOIPtr(new QrCodePOI);
+      qrCodePOIPtr->setContent(symbol->get_data());
 
       cv::Point detected_center;
       for(int i = 0; i < symbol->get_location_size(); i++)
@@ -162,22 +162,24 @@ namespace pandora_vision {
       detected_center.x /= symbol->get_location_size();
       detected_center.y /= symbol->get_location_size();
 
-      detected_code.qrcode_center = detected_center;
-      qrcode_list.push_back(detected_code);
+      qrCodePOIPtr->setPoint(detected_center);
+      qrcode_list.push_back(qrCodePOIPtr);
     }
 
     if(debug_publish)
     {
       debug_show(image);
     }
-
     image.set_data(NULL, 0);
+    
+    return qrcode_list;
   }
   
-  bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  bool QrCodeDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)  // returns true every time
   {
     output->header = input->header;
     getQrCodeParams();
-    output->pois = detectQrCode(input->image);  // ..............
+    output->pois = detectQrCode(input->image);
+    return true;
   }
 }  // namespace pandora_vision

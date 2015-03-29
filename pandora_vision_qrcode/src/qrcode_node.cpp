@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,19 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Miltiadis-Alexios Papadopoulos
+ * Authors:
+ *   Tsirigotis Christos <tsirif@gmail.com>
+ *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_qrcode/qrCode_detection.h"
+#include "pandora_vision_qrcode/qrcode_handler.h"
 
-/**
-  @brief Main function of the kinect node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
+using pandora_vision::QrCodeHandler;
+
 int main(int argc, char** argv)
 {
-  ros::init(argc,argv,"QrCode_node");
-  pandora_vision::QrCodeDetection QrCodeDetection("qrcode");
+  ros::init(argc, argv, "QrCodeNode");
+  QrCodeHandler qrCodeHandler("QrCode");
   ros::spin();
   return 0;
 }

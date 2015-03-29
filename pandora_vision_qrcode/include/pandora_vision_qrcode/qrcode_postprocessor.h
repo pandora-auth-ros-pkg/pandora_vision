@@ -41,8 +41,9 @@
 #define PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
 
 #include "pandora_common_msgs/GeneralAlertInfoVector.h"
+#include "pandora_vision_msgs/QRAlertMsg.h"
 #include "pandora_vision_msgs/QRAlertsVectorMsg.h"
-#include "pandora_vision_common/vision_postprocessor.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
 #include "pandora_vision_qrcode/qrcode_poi.h"
 
 namespace pandora_vision
@@ -52,14 +53,14 @@ namespace pandora_vision
     public:
       typedef boost::shared_ptr<pandora_vision_msgs::QRAlertsVectorMsg> QRAlertsVectorMsgPtr;
       
-      QrCodePostProcessor(const std::string& ns, AbstractHandler* handler);
+      QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
       ~QrCodePostProcessor() {}
       
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output);
   };
   
-  QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, AbstractHandler* handler) :
+  QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
     VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>(ns, handler)
   {
   }
@@ -71,13 +72,17 @@ namespace pandora_vision
     
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      output->qrAlerts[ii].yaw = alertVector.generalAlerts[ii].yaw;
-      output->qrAlerts[ii].pitch = alertVector.generalAlerts[ii].pitch;
+      pandora_vision_msgs::QRAlertMsg qrAlert;
+      
+      qrAlert.yaw = alertVector.generalAlerts[ii].yaw;
+      qrAlert.pitch = alertVector.generalAlerts[ii].pitch;
       
       boost::shared_ptr<QrCodePOI> qrCodePOI(boost::dynamic_pointer_cast<QrCodePOI>(input->pois[ii]));
+      qrAlert.QRcontent = qrCodePOI->getContent();
       
-      output->qrAlerts[ii].QRcontent = qrCodePOI->getContent();
+      output->qrAlerts.push_back(qrAlert);
     }
+    return true;
   }
 }  // namespace pandora_vision
 

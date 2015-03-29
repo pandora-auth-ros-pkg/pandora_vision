@@ -42,12 +42,12 @@
 
 #include "sensor_processor/handler.h"
 #include "pandora_vision_qrcode/qrcode_preprocessor.h"
-#include "pandora_vision_qrcode/qrcode_processor.h"
 #include "pandora_vision_qrcode/qrcode_postprocessor.h"
+#include "pandora_vision_qrcode/qrCode_detector.h"
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
+  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
     pandora_vision_msgs::QRAlertsVectorMsg>
   {
     public:

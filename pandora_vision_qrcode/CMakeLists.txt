@@ -5,7 +5,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    pandora_vision_common
     pandora_vision_msgs
+    pandora_common_msgs
+    sensor_processor
     state_manager
     state_manager_msgs
     cv_bridge
@@ -23,7 +26,10 @@ catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      pandora_vision_common
       pandora_vision_msgs
+      pandora_common_msgs
+      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge
@@ -39,38 +45,36 @@ include_directories(include
 )
 
 ################# qrcode node library #################
-add_library(${PROJECT_NAME}_qrcode_node
+add_library(${PROJECT_NAME}_detector
   src/qrCode_detector.cpp
 )
-target_link_libraries(${PROJECT_NAME}_qrcode_node
+target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
 )
 
 ################# qrcode node #################
-add_executable(qrcode_node
-    src/qrCode_detection.cpp
-    src/qrCode_detector.cpp
-    src/qrCode_node.cpp
+add_executable(${PROJECT_NAME}_node
+  src/qrcode_handler.cpp
+  src/qrcode_node.cpp
 )
-add_dependencies(qrcode_node
-    ${catkin_EXPORTED_TARGETS}
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+add_dependencies(${PROJECT_NAME}_node
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_detector
 )
-target_link_libraries(qrcode_node ${catkin_LIBRARIES} zbar)
+target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} zbar)
+
+
+################# roslint #################
 
 #~ To check lint : catkin_make roslint_pandora_vision_qrcode
-set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string, -runtime/printf, -readability/streams")
+set(ROSLINT_CPP_OPTS)
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-
-  include/qrCode_detection.h
-  include/qrCode_detector.h
-  src/qrCode_detector.cpp
-  src/qrCode_detection.cpp
+  include/*
+  src/*
   test/unit/qrCode_detector_test.cpp
-
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

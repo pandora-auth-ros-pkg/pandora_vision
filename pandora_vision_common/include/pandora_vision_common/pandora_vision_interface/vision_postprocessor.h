@@ -57,13 +57,13 @@
 namespace pandora_vision
 {
   template <class VisionAlertMsg>
-  class VisionPostProcessor : public PostProcessor<POIsStamped, VisionAlertMsg>
+  class VisionPostProcessor : public sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>
   {
   private:
     typedef boost::shared_ptr<VisionAlertMsg> VisionAlertMsgPtr;
 
   public:
-    VisionPostProcessor(const std::string& ns, AbstractHandler* handler);
+    VisionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
     virtual
       ~VisionPostProcessor() {}
 
@@ -91,8 +91,8 @@ namespace pandora_vision
 
   template <class VisionAlertMsg>
     VisionPostProcessor<VisionAlertMsg>::
-    VisionPostProcessor(const std::string& ns, AbstractHandler* handler) :
-      PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
+    VisionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+      sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
     {
     }
 
@@ -115,16 +115,16 @@ namespace pandora_vision
 
       for (int i = 0; i < result->pois.size(); ++i)
       {
-        const POI poi = result->pois[i];
+        const POIPtr poiPtr = result->pois[i];
         pandora_common_msgs::GeneralAlertInfo info;
-        x = poi->getPoint().x
+        x = poiPtr->getPoint().x
           - static_cast<float>(result->frameWidth) / 2;
         y = static_cast<float>(result->frameHeight) / 2
-          - poi->getPoint().y;
+          - poiPtr->getPoint().y;
 
         info.yaw = atan(2 * x / result->frameWidth * tan(hfov / 2));
         info.pitch = atan(2 * y / result->frameHeight * tan(vfov / 2));
-        info.probability = poi.getProbability();
+        info.probability = poiPtr->getProbability();
 
         generalAlertInfos.generalAlerts.push_back(info);
       }
@@ -132,8 +132,8 @@ namespace pandora_vision
       return generalAlertInfos;
     }
 
-  template <class T>
-    template <class VisionAlertMsg>
+  template <class VisionAlertMsg>
+    template <class T>
       T
       VisionPostProcessor<VisionAlertMsg>::
       findParam(std::map<std::string, T>* dict, const std::string& key)
@@ -141,7 +141,7 @@ namespace pandora_vision
         std::map<std::string, T>::iterator iter;
         if ((iter = dict->find(key)) != dict->end())
         {
-          return *iter;
+          return iter->second;
         }
         else
         {
@@ -169,7 +169,7 @@ namespace pandora_vision
       std::map<std::string, std::string>::iterator iter;
       if ((iter = dict->find(key)) != dict->end())
       {
-        return *iter;
+        return iter->second;
       }
       else
       {

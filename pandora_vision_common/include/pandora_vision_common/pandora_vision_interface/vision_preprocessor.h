@@ -53,14 +53,14 @@
 
 namespace pandora_vision
 {
-  class VisionPreProcessor: public PreProcessor<sensor_msgs::Image, CVMatStamped>
+  class VisionPreProcessor: public sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>
   {
     protected:
       typedef boost::shared_ptr<sensor_msgs::Image> ImagePtr;
       typedef boost::shared_ptr<sensor_msgs::Image const> ImageConstPtr;
 
     public:
-      VisionPreProcessor(const std::string& ns, AbstractHandler* handler);
+      VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
       virtual
         ~VisionPreProcessor() {}
 
@@ -69,7 +69,7 @@ namespace pandora_vision
   };
 
   VisionPreProcessor::
-  VisionPreProcessor(const std::string& ns, AbstractHandler* handler) :
+  VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
     PreProcessor<sensor_msgs::Image, cv::Mat>(ns, handler)
   {
   }

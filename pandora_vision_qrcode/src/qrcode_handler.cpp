@@ -41,26 +41,41 @@
 
 namespace pandora_vision
 {
-  QrCodeHandler::QrCodeHandler(const std::string& ns) : Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_vision_msgs::QRAlertsVectorMsg>(ns)
+  QrCodeHandler::QrCodeHandler(const std::string& ns) : sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, 
+    POIsStamped, pandora_vision_msgs::QRAlertsVectorMsg>(ns)
   {
   }
   
   void QrCodeHandler::startTransition(int newState)
   {
     currentState_ = newState;
-
-    switch (currentState_)  // ................
+    
+    bool previouslyOff = (previousState_ == state_manager_msgs::RobotModeMsg::MODE_OFF);
+    bool currentlyOn = (currentState_ != state_manager_msgs::RobotModeMsg::MODE_OFF);
+    
+    if (previouslyOff && currentlyOn)
     {
-      case 2:
-        preProcPtr_.reset( new QrCodePreProcessor("~/preprocessor", this) );
-        processorPtr_.reset( new QrCodeProcessor("~/processor", this) );
-        postProcPtr_.reset( new QrCodePostProcessor("~/postprocessor", this) );
-        break;
-      case state_manager_msgs::RobotModeMsg::MODE_TERMINATING:
-        ros::shutdown();
-        return;
+      preProcPtr_.reset(new QrCodePreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new QrCodeDetector("~/processor", this));
+      postProcPtr_.reset(new QrCodePostProcessor("~/postprocessor", this));
     }
+    else if (!previouslyOff && !currentlyOn)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+    }
+    
+    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+      
+      ros::shutdown();
+      return;
+    }
+
     previousState_ = currentState_;
     transitionComplete(currentState_);
   }

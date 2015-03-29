@@ -44,16 +44,18 @@
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
+#include "pandora_vision_qrcode/qrcode_poi.h"
 
 namespace pandora_vision 
 {
-  class QrCodeDetector : public Processor<CVMatStamped, POIsStamped>
+  class QrCodeDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
   {
     public:
       typedef boost::shared_ptr<CVMatStamped const> CVMatStampedConstPtr;
       typedef boost::shared_ptr<POIsStamped> POIsStampedPtr;
+      typedef boost::shared_ptr<QrCodePOI> QrCodePOIPtr;
      
-      QrCodeDetector(const std::string& ns, AbstractHandler* handler);
+      QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
       ~QrCodeDetector() {}
       
       virtual bool
@@ -67,11 +69,6 @@ namespace pandora_vision
       cv::Mat get_debug_frame()
       {
         return debug_frame;
-      };
-
-      std::vector<QrCode> get_detected_qr()
-      {
-        return qrcode_list;
       };
       
     private:
@@ -95,7 +92,7 @@ namespace pandora_vision
       zbar::ImageScanner scanner;
 
       //!< List of detected qrcodes
-      std::vector<QrCode> qrcode_list;
+      std::vector<POIPtr> qrcode_list;
       
       /**
        * @brief Get parameters referring to Qrcode detection algorithm
@@ -108,7 +105,7 @@ namespace pandora_vision
         @param frame [cv::Mat] The image in which the QRs are detected
         @return void
        **/
-      void detectQrCode(cv::Mat input_frame);
+      std::vector<POIPtr> detectQrCode(cv::Mat input_frame);
 
       /**
         @brief Creates view for debugging purposes.
