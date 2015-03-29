@@ -47,9 +47,9 @@ namespace pandora_vision
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
    **/
-  Depth::Depth(void)
+  Thermal::Thermal(void)
   {
-    // Acquire the names of topics which the depth node will be having
+    // Acquire the names of topics which the thermal node will be having
     // transactionary affairs with
     getTopicNames();
 
@@ -82,7 +82,7 @@ namespace pandora_vision
 
 
   /**
-    @brief Callback for the depth image received by the synchronizer node.
+    @brief Callback for the thermal image received by the synchronizer node.
 
     The depth image message received by the synchronizer node is unpacked
     in a cv::Mat image and stripped of its noise.
@@ -91,7 +91,7 @@ namespace pandora_vision
     @param msg [const sensor_msgs::Image&] The depth image message
     @return void
    **/
-  void Depth::inputThermalImageCallback(const sensor_msgs::Image& msg)
+  void Thermal::inputThermalImageCallback(const sensor_msgs::Image& msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputThermalImageCallback", "", true);
