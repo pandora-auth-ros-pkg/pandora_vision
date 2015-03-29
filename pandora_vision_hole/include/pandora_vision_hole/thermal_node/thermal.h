@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias,Angelos Triantafyllidis
  *********************************************************************/
 
-#ifndef THERMAL_NODE_H
-#define THERMAL_NODE_H
+#ifndef THERMAL_NODE_DEPTH_H
+#define THERMAL_NODE_DEPTH_H
 
 #include "thermal_node/hole_detector.h"
 #include "utils/parameters.h"
@@ -130,4 +130,4 @@ namespace pandora_vision
 
 } // namespace pandora_vision
 
-#endif  // THERMAL_NODE_H
+#endif  // THERMAL_NODE_DEPTH_H
