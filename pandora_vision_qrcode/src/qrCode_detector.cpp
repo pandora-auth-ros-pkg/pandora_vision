@@ -41,7 +41,8 @@
 
 namespace pandora_vision {
 
-  QrCodeDetector::QrCodeDetector() : debug_publish(false)
+  QrCodeDetector::QrCodeDetector(const std::string& ns, AbstractHandler* handler) : 
+    Processor<CVMatStamped, POIsStamped>(ns, handler), debug_publish(false)
   {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
     scanner.set_config(zbar::ZBAR_QRCODE, zbar::ZBAR_CFG_ENABLE, 1);
@@ -88,7 +89,34 @@ namespace pandora_vision {
     #endif
   }
 
+  /**
+   * @brief Get parameters referring to Qrcode detection algorithm
+   * @return void
+   */
+  void QrCodeDetection::getQrCodeParams()
+  {
+    //!< Get the buffer size parameter if available;
+    if (this->accessPublicNh()->hasParam("qrcodeSharpenBlur"))
+    {
+      this->accessPublicNh()->getParam("qrcodeSharpenBlur", gaussiansharpenblur);
+      ROS_DEBUG_STREAM("qrcodeSharpenBlur : " << gaussiansharpenblur);
+    }
+    else
+    {
+      gaussiansharpenblur = 5;
+    }
 
+    //!< Get the difference threshold parameter if available;
+    if (this->accessPublicNh()->hasParam("qrcodeSharpenWeight"))
+    {
+      this->accessPublicNh()->getParam("qrcodeSharpenWeight", gaussiansharpenweight);
+      ROS_DEBUG_STREAM("qrcodeSharpenWeight : " << gaussiansharpenweight);
+    }
+    else
+    {
+      gaussiansharpenweight = 0.8;
+    }
+  }
 
   /**
     @brief Detects qrcodes and stores them in a vector.
@@ -145,4 +173,11 @@ namespace pandora_vision {
 
     image.set_data(NULL, 0);
   }
-}// namespace pandora_vision
+  
+  bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->header;
+    getQrCodeParams();
+    output->pois = detectQrCode(input->image);  // ..............
+  }
+}  // namespace pandora_vision
