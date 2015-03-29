@@ -54,7 +54,10 @@ class SiftDetector : public FeatureMatchingDetector
         
     SiftDetector();
     // SiftDetector object destructor.
-    ~SiftDetector() {};
+    ~SiftDetector() 
+    {
+      delete[] matchers_;
+    };
     
     // Function that returns the type of the feature detector used.
     //~ const virtual TrainerType getType( void ) ;

@@ -79,7 +79,18 @@ class PlanarPatternTrainer{
         std::vector<cv::KeyPoint>* keyPoints) = 0;
 
     virtual const std::string getFeatureType() = 0;
+    /**
+      @brief Saves the training data to a proper XML file.
+      @param patternName [const std::string &] : The name of the pattern.
+      @param descriptors [const cv::Mat &] : The descriptors of the pattern.
+      @param keyPoints [const std::vector<cv::Point2f>] : The key points
+      detected on the pattern.
+     **/                  
 
+    void saveDataToFile(const boost::filesystem::path &patternPath,
+        const cv::Mat &descriptors ,
+        const std::vector<cv::Point2f> &keyPoints,
+        const std::vector<cv::Point2f> &boundingBox);
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 
@@ -93,16 +104,6 @@ class PlanarPatternTrainer{
     virtual void getFeatures(const std::vector<cv::Mat>& images,
         std::vector<cv::Mat>* descriptors,
         std::vector<std::vector<cv::KeyPoint> >* keyPoints) = 0;
-
-    /**
-      @brief Sets the current image that will be used to train the detector.
-      @param img [const cv::Mat] : The image of the pattern that we want 
-      to detect .
-     **/            
-    virtual void setCurrentImage(const cv::Mat &img)
-    {
-      currentImage_ = img;
-    }
 
 
     /**
@@ -152,12 +153,10 @@ class PlanarPatternTrainer{
      * @param boundingBox[std::vector<cv::Point2f>*]: The bounding box for
      * the pattern.
      */
-    void multiViewTraining(const std::vector<cv::Mat>& images,
+    void multiViewTraining(const boost::filesystem::path& dirPath,
+        const std::vector<cv::Mat>& images,
         const std::vector<std::string>& imageNames,
-        const std::map<std::string, cv::Mat>& homographies,
-        cv::Mat* descriptors,
-        std::vector<cv::KeyPoint>* keypoints,
-        std::vector<cv::Point2f>* boundingBox);
+        const std::map<std::string, cv::Mat>& homographies);
     /**
       @brief Saves the training data to a proper XML file.
       @param patternName [const std::string &] : The name of the pattern.
@@ -178,7 +177,6 @@ class PlanarPatternTrainer{
       packagePath_ = ros::package::getPath("pandora_vision_hazmat");
     }
   protected:
-    cv::Mat currentImage_; //!< Current image used for traing.
     std::string packagePath_;
 };
 

@@ -164,7 +164,6 @@ bool PlanarObjectDetector::detect(const cv::Mat &frame,
       #endif      
       
       
-      //~ std::cout << "Bounding Box flag : " << boundingBoxFound << std::endl;
         
       // If this flag is true then a valid match has been found and
       // we have detected the pattern.
@@ -296,7 +295,7 @@ bool PlanarObjectDetector::findBoundingBox(
     // Calculate the homography matrix using RANSAC algorithm to 
     // eliminate outliers.
     cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
-      CV_RANSAC , 4 );
+      CV_RANSAC , 5 );
     // Transform the bounding box to the frame coordinates.
     cv::perspectiveTransform( patternBB , 
       *sceneBB , H );

@@ -50,7 +50,10 @@ class OrbDetector : public FeatureMatchingDetector
 
 
     // OrbDetector object destructor.
-    ~OrbDetector() {};
+    ~OrbDetector()
+    {
+      delete[] matchers_;
+    };
 
     // Function that returns the type of the feature detector used.
     //~ const virtual TrainerType getType( void ) ;

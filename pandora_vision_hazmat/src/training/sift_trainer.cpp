@@ -71,12 +71,14 @@ void SiftTrainer::getFeatures(const std::vector<cv::Mat>& images,
 {
   // Calculate image keypoints.
   featureDetector_->detect( images , *keyPoints );  
-  
+
+  cv::Mat tempDescriptorMat;
   // Extract Descriptors from the images.
   for (int i = 0 ; i < keyPoints->size(); i++)
   {
     featureExtractor_->compute( images[i] , (*keyPoints)[i] ,
-        (*descriptors)[i] );
+        tempDescriptorMat);
+    descriptors->push_back(tempDescriptorMat);
   }
 }
 /*

@@ -43,13 +43,17 @@
 #include <cmath>
 
 #define PI 3.14159265
+
 class HazmatDetectionNode
 {
   public:
     HazmatDetectionNode();
 
     ~HazmatDetectionNode()
-    { };
+    {
+      ROS_INFO("Destroying the detector object!");
+      delete detector_;
+    }
   
     void imageCallback(const sensor_msgs::Image& inputImage);
     

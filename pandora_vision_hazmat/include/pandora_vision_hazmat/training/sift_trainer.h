@@ -57,6 +57,8 @@ class SiftTrainer : public PlanarPatternTrainer
     // Feature Extractor Initialization.
     featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
   }
+  virtual ~SiftTrainer()
+  {}
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 

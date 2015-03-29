@@ -95,7 +95,8 @@ class FeatureMatchingDetector : public PlanarObjectDetector
     // Empty constructor used for testing purposes only.
     FeatureMatchingDetector() {};
     // Destructor 
-    virtual ~FeatureMatchingDetector() {};
+    virtual ~FeatureMatchingDetector() 
+    {};
   
   protected:
   

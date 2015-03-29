@@ -47,7 +47,9 @@ class SurfDetector : public FeatureMatchingDetector
     SurfDetector();
 
     ~SurfDetector()
-    {};
+    {
+      delete[] matchers_;
+    };
 
     // Functions used to change the SURF algorithm parameters.
 

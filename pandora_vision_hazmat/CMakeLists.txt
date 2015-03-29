@@ -95,10 +95,10 @@ add_dependencies(${PROJECT_NAME}_node
 )
 
 # Download necessary data to run
-# download_extra_data(${PROJECT_NAME}_download_training_results
-                    # EXTRA_FILES data/extra_files.yaml)
+download_extra_data(${PROJECT_NAME}_download_training_results
+                    EXTRA_FILES data/extra_files.yaml)
 
-option(${PROJECT_NAME}_TRAINING "Build flag for the training module")
+option(${PROJECT_NAME}_training "Build flag for the training module")
 ########################### hazmatTrainNode ############################
 if(${PROJECT_NAME}_training)
   add_executable(${PROJECT_NAME}_trainer_node 

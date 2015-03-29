@@ -52,12 +52,13 @@ class OrbTrainer : public PlanarPatternTrainer
       @brief Constructor for a Hazmat trainer module that uses ORB .
      **/
     OrbTrainer() : featureType_("ORB")
-  {
-    featureDetector_ = cv::FeatureDetector::create(featureType_);
-    // Feature Extractor Initialization.
-    featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
-
-  }
+    {
+      featureDetector_ = cv::FeatureDetector::create(featureType_);
+      // Feature Extractor Initialization.
+      featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
+    }
+    virtual ~OrbTrainer()
+    {}
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 

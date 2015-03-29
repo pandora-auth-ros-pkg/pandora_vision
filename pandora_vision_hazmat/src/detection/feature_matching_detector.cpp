@@ -136,7 +136,6 @@ bool FeatureMatchingDetector::readData( void )
     std::vector<cv::Point2f> keyPoints;
     std::vector<cv::Point2f> boundingBox;
     cv::Mat descriptors; 
-    cv::Mat histogram;
     
     // Read the pattern's descriptors.
     if ( fs2["Descriptors"].empty() )
@@ -146,13 +145,14 @@ bool FeatureMatchingDetector::readData( void )
       continue;
     }
     fs2["Descriptors"] >> descriptors;
-    if ( fs2["Histogram"].empty() )
-    {
-      ROS_ERROR("No Histogram entry was specified for the pattern : %s ! \n", 
-          fileName.c_str());
-      continue;
-    }
-    fs2["Histogram"] >> histogram;
+    std::cout << descriptors.size() << std::endl;
+    // if ( fs2["Histogram"].empty() )
+    // {
+      // ROS_ERROR("No Histogram entry was specified for the pattern : %s ! \n", 
+          // fileName.c_str());
+      // continue;
+    // }
+    // fs2["Histogram"] >> histogram;
         
     // Read the pattern's keypoints.
     if ( fs2["PatternKeypoints"].empty() )
@@ -224,7 +224,7 @@ bool FeatureMatchingDetector::readData( void )
     p.boundingBox = boundingBox;
     p.keyPoints = keyPoints;
     p.descriptors = descriptors;
-    p.histogram = histogram;
+    // p.histogram = histogram;
     patterns_->push_back(p);
     
     // Close the xml file .
@@ -319,6 +319,7 @@ bool FeatureMatchingDetector::findKeypointMatches(
   // The vector containing the best matches
   std::vector< cv::DMatch > goodMatches;
 
+  // If we have found any matches.
   if ( matches.size() > 0 )
   {
 
@@ -342,6 +343,7 @@ bool FeatureMatchingDetector::findKeypointMatches(
   else
     return false;
   
+  std::cout << goodMatches.size() << std::endl;
   // Add the keypoints of the matches found to the corresponding
   // vectors for the pattern and the scene.
   for( int i = 0; i < goodMatches.size(); i++ )
