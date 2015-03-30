@@ -53,6 +53,7 @@ namespace pandora_vision
   };
 
   class vision_processor_error : public sensor_processor::processor_error
+  {
     public:
       explicit vision_processor_error(const std::string& errorDescription) :
         sensor_processor::processor_error(errorDescription) {}

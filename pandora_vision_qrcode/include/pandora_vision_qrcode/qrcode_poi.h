@@ -48,6 +48,9 @@ namespace pandora_vision
   class QrCodePOI : public POI
   {
     public:
+      virtual ~QrCodePOI() {}
+    
+    public:
       std::string qrContent;
       
     public:

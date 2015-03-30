@@ -70,7 +70,7 @@ namespace pandora_vision
 
   VisionPreProcessor::
   VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    PreProcessor<sensor_msgs::Image, cv::Mat>(ns, handler)
+    sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>(ns, handler)
   {
   }
 

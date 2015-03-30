@@ -74,8 +74,8 @@ namespace pandora_vision
     {
       pandora_vision_msgs::QRAlertMsg qrAlert;
       
-      qrAlert.yaw = alertVector.generalAlerts[ii].yaw;
-      qrAlert.pitch = alertVector.generalAlerts[ii].pitch;
+      qrAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
+      qrAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
       
       boost::shared_ptr<QrCodePOI> qrCodePOI(boost::dynamic_pointer_cast<QrCodePOI>(input->pois[ii]));
       qrAlert.QRcontent = qrCodePOI->getContent();

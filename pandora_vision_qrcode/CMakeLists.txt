@@ -44,25 +44,36 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-################# qrcode node library #################
+################# qrcode detector #################
 add_library(${PROJECT_NAME}_detector
   src/qrCode_detector.cpp
 )
 target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
+  zbar
+)
+
+################# qrcode handler #################
+add_library(${PROJECT_NAME}_handler
+  src/qrcode_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_detector
 )
 
 ################# qrcode node #################
 add_executable(${PROJECT_NAME}_node
-  src/qrcode_handler.cpp
   src/qrcode_node.cpp
 )
-add_dependencies(${PROJECT_NAME}_node
+add_dependencies(${PROJECT_NAME}_detector
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_detector
 )
-target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} zbar)
+target_link_libraries(${PROJECT_NAME}_node 
+  ${catkin_LIBRARIES} 
+  ${PROJECT_NAME}_handler
+)
 
 
 ################# roslint #################

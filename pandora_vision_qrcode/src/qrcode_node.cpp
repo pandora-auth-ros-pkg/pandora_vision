@@ -37,6 +37,7 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include <ros/console.h>
 #include "pandora_vision_qrcode/qrcode_handler.h"
 
 using pandora_vision::QrCodeHandler;

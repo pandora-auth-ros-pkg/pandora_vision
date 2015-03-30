@@ -48,6 +48,8 @@ namespace pandora_vision
   public:
     typedef boost::shared_ptr<POI> Ptr;
     typedef boost::shared_ptr<POI const> ConstPtr;
+    
+    virtual ~POI() {}
 
   public:
     cv::Point point;

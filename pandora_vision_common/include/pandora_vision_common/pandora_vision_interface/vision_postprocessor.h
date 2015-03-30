@@ -85,8 +85,8 @@ namespace pandora_vision
 
   protected:
     std::map<std::string, std::string> parentFrameDict_;
-    std::map<std::string, float> hfovDict_;
-    std::map<std::string, float> vfovDict_;
+    std::map<std::string, double> hfovDict_;
+    std::map<std::string, double> vfovDict_;
   };
 
   template <class VisionAlertMsg>
@@ -105,8 +105,8 @@ namespace pandora_vision
 
       float x = 0, y = 0;
       // fov are in radians
-      float hfov = findParam<float>(&hfovDict_, result->header.frame_id);
-      float vfov = findParam<float>(&vfovDict_, result->header.frame_id);
+      float hfov = findParam<double>(&hfovDict_, result->header.frame_id);
+      float vfov = findParam<double>(&vfovDict_, result->header.frame_id);
       std::string parentFrameId = findParentFrameId(&parentFrameDict_,
           result->header.frame_id, "/robot_description");
 
@@ -138,19 +138,19 @@ namespace pandora_vision
       VisionPostProcessor<VisionAlertMsg>::
       findParam(std::map<std::string, T>* dict, const std::string& key)
       {
-        std::map<std::string, T>::iterator iter;
+        typename std::map<std::string, T>::iterator iter;
         if ((iter = dict->find(key)) != dict->end())
         {
           return iter->second;
         }
         else
         {
-          std::string param;
+          T param;
 
           if (!this->accessPublicNh()->getParam(key, param))
           {
             ROS_ERROR_NAMED(this->getName(),
-                "Params couldn't be retrieved for %s", key);
+                "Params couldn't be retrieved for %s", key.c_str());
             throw vision_config_error(key + " : not found");
           }
 
@@ -166,7 +166,7 @@ namespace pandora_vision
         const std::string& key,
         const std::string& model_param_name)
     {
-      std::map<std::string, std::string>::iterator iter;
+      typename std::map<std::string, std::string>::iterator iter;
       if ((iter = dict->find(key)) != dict->end())
       {
         return iter->second;
