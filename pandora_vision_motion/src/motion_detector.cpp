@@ -41,7 +41,6 @@
 
 namespace pandora_vision 
 {
-  
   /**
     @brief Class Constructor
     Initializes all varialbes for thresholding
@@ -110,7 +109,7 @@ namespace pandora_vision
         floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
       bounding_box_->setPoint(boxCenter);
       
-      if(MotionParameters::visualization || MotionParameters::show_image ||
+      if (MotionParameters::visualization || MotionParameters::show_image ||
         MotionParameters::show_background || MotionParameters::show_diff_image ||
         MotionParameters::show_moving_objects_contours)
       {
@@ -156,37 +155,37 @@ namespace pandora_vision
   void MotionDetector::detectMotionPosition(const cv::Mat& diff)
   {
     /// Check that the thresholded difference image has data
-    if(diff.data)
+    if (diff.data)
     {
       /// Calculate the standard deviation
       cv::Scalar mean, stddev;
       meanStdDev(diff, mean, stddev);
       /// If not to much changes then the motion is real 
-      if(stddev[0] < max_deviation_)
+      if (stddev[0] < max_deviation_)
       {
         int number_of_changes = 0;
         int min_x = diff.cols, max_x = 0;
         int min_y = diff.rows, max_y = 0;
         /// Loop over image and detect changes
-        for(int i = 0; i < diff.rows; i++)
+        for (int i = 0; i < diff.rows; i++)
         { 
-          for(int j = 0; j < diff.cols; j++)
+          for (int j = 0; j < diff.cols; j++)
           {
-            if(static_cast<int>(diff.at<uchar>(i, j)) == 255)
+            if (static_cast<int>(diff.at<uchar>(i, j)) == 255)
             {
               number_of_changes++;
-              if(min_y > i) 
+              if (min_y > i) 
                 min_y = i;
-              if(max_y < i) 
+              if (max_y < i) 
                 max_y = i;
-              if(min_x > j) 
+              if (min_x > j) 
                 min_x = j;
-              if(max_x < j) 
+              if (max_x < j) 
                 max_x = j;
             }
           }
         }
-        if(number_of_changes)
+        if (number_of_changes)
         {
           cv::Point _tlcorner(min_x, min_y);
           cv::Point _brcorner(max_x, max_y);
@@ -243,20 +242,16 @@ namespace pandora_vision
     std::vector<std::vector<cv::Point> > contours;
     cv::erode(foreground_, foreground_, cv::Mat());
     cv::dilate(foreground_, foreground_, cv::Mat());
-    cv::findContours(
-      foreground_, 
-      contours, 
-      CV_RETR_EXTERNAL, 
-      CV_CHAIN_APPROX_NONE
-    );
+    cv::findContours(foreground_, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
     cv::drawContours(frame, contours, -1, cv::Scalar(0, 0, 255), 2);
-    if(MotionParameters::visualization || MotionParameters::show_image)
+    
+    if (MotionParameters::visualization || MotionParameters::show_image)
       cv::imshow("Frame", frame);
-    if(MotionParameters::visualization || MotionParameters::show_background)
+    if (MotionParameters::visualization || MotionParameters::show_background)
       cv::imshow("Background", background_);
-    if(MotionParameters::visualization || MotionParameters::show_diff_image)
+    if (MotionParameters::visualization || MotionParameters::show_diff_image)
       cv::imshow("Thresholded difference between background and current frame", thresholdedDifference);
-    if(MotionParameters::visualization || MotionParameters::show_moving_objects_contours)
+    if (MotionParameters::visualization || MotionParameters::show_moving_objects_contours)
       cv::imshow("Moving objects in current frame", movingObjects_);
     cv::waitKey(10);
     
@@ -270,6 +265,11 @@ namespace pandora_vision
   {
     output->header = input->header;
     findMotionParameters(input->image);
-    output->pois[0] = bounding_box_->getPoint();
+    if (bounding_box_->getProbability() > 0.1)
+    {
+      output->pois[0] = bounding_box_;
+      return true;
+    }
+    return false;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

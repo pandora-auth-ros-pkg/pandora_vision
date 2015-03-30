@@ -49,7 +49,7 @@
 namespace pandora_vision
 {
   class MotionHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_common_msgs::GeneralAlertInfo>
+    pandora_common_msgs::GeneralAlertInfoVector>
   {
     public:
       explicit MotionHandler(const std::string& ns);

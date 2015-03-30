@@ -68,7 +68,7 @@ target_link_libraries(${PROJECT_NAME}_preprocessor
 
 ################# motion postprocessor #################
 add_library(${PROJECT_NAME}_postprocessor
-  src/motion_detector.cpp
+  src/motion_postprocessor.cpp
 )
 target_link_libraries(${PROJECT_NAME}_postprocessor
   ${catkin_LIBRARIES}
@@ -101,16 +101,12 @@ add_dependencies(${PROJECT_NAME}_node
 
 #~ To check lint : catkin_make roslint_pandora_vision_motion
 set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -whitespace/braces, -whitespace/newline")
+    "--filter=-whitespace/end_of_line,-build/include_what_you_use,-runtime/references")
 
 FILE(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-  include/motion_detection.h
-  include/motion_detector.h
-  include/motion_parameters.h
-  src/motion_detector.cpp
-  src/motion_detection.cpp
-  src/motion_parameters.cpp
+  include/*
+  src/*
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

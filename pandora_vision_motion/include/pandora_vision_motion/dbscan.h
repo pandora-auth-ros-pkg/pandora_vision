@@ -44,8 +44,8 @@
 #include <iostream>
 #include <algorithm>
 
-namespace pandora_vision{
-  
+namespace pandora_vision
+{  
   typedef std::vector<int32_t> Neighbors;
   typedef std::vector<bool> NoisePoints;
   typedef std::vector<bool> VisitedPoints;
@@ -53,7 +53,7 @@ namespace pandora_vision{
   
   class DBSCAN
   {
-      private:
+    private:
       //!< Eps radius, two points are neighbors if their distance
       //!< is smaller than this threshold value
       double _eps;
@@ -62,9 +62,9 @@ namespace pandora_vision{
       
       int _cluster_id;
       
-      //! Vector of visited points 
+      //!< Vector of visited points 
       VisitedPoints _visitedPoints;
-      //! Vector of clustered data 
+      //!< Vector of clustered data 
       ClusteredPoints _clusteredPoints;
       NoisePoints _noise;
       std::map<int, int> _labels;
@@ -79,7 +79,7 @@ namespace pandora_vision{
        @return void
       */  
       void init(unsigned int num_of_points);
-      
+    
       /**
        @brief Function that check if a point has already been visited, if yes
        true is returned, if no false is returned.
@@ -103,7 +103,7 @@ namespace pandora_vision{
        @return vector of all point in the neighborhoud 
       */ 
       std::vector<int> regionQuery(int p);
-      
+    
        /**
        @brief If a point is found to be a dense part of a cluster, its 
        ε-neighborhood is also part of that cluster. Hence, all points that 
@@ -119,8 +119,8 @@ namespace pandora_vision{
       double calculateDistanceMatrix(int ai, int bi); 
       
       double *DP;
-      public:
       
+    public:
       //!< Class constructor
       explicit DBSCAN(std::vector<cv::Rect>& _data, double eps, int minPts);
       
@@ -135,7 +135,6 @@ namespace pandora_vision{
        @return vector of clusters 
       */ 
       std::vector<std::vector<cv::Rect> > getGroups();
-          
   };
-}// namespace pandora_vision
-#endif  // PANDORA_VISION_MOTION_DBSCAN
+}  // namespace pandora_vision
+#endif  // PANDORA_VISION_MOTION_DBSCAN_H

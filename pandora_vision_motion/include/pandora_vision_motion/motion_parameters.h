@@ -34,10 +34,13 @@
 *
 * Authors: Despoina Paschalidou
 *********************************************************************/
+
 #ifndef PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
 #define PANDORA_VISION_MOTION_MOTION_PARAMETERS_H
+
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_motion/motion_cfgConfig.h>
+
 namespace pandora_vision
 {
   struct MotionParameters
@@ -57,5 +60,6 @@ namespace pandora_vision
     static bool show_diff_image;
     static bool show_moving_objects_contours;
   };
-} // namespace pandora_vision
+}  // namespace pandora_vision
+
 #endif  // PANDORA_VISION_MOTION_MOTION_PARAMETERS_H

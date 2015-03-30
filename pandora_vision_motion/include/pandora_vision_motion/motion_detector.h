@@ -131,7 +131,7 @@ namespace pandora_vision
       //!< Class instance for Gaussian Mixture-based backgound 
       //!< and foreground segmentation 
       cv::BackgroundSubtractorMOG2 bg_;
-      ///!< Erode kernel
+      //!< Erode kernel
       cv::Mat kernel_erode_;
       //!< Maximum deviation for calculation position of moving objects;
       int max_deviation_;
@@ -140,5 +140,5 @@ namespace pandora_vision
 
       friend class MotionDetectorTest;
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_MOTION_DETECTOR_H
