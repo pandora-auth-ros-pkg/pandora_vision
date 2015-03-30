@@ -65,4 +65,4 @@ namespace pandora_vision
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_QRCODE_POI_H
+#endif  // PANDORA_VISION_QRCODE_QRCODE_POI_H

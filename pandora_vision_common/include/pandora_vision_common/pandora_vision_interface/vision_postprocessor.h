@@ -68,7 +68,7 @@ namespace pandora_vision
       ~VisionPostProcessor() {}
 
     virtual bool
-      postProcess(const POIsStampedConstPtr& input, const VisionAlertMsgPtr& output);
+      postProcess(const POIsStampedConstPtr& input, const VisionAlertMsgPtr& output) = 0;
 
   protected:
     pandora_common_msgs::GeneralAlertInfoVector

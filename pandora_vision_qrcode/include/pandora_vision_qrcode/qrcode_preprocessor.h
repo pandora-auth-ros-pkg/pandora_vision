@@ -37,9 +37,10 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_COMMON_QRCODE_PREPROCESSOR_H
-#define PANDORA_VISION_COMMON_QRCODE_PREPROCESSOR_H
+#ifndef PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
+#define PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
 
+#include <string>
 #include "sensor_processor/abstract_handler.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_preprocessor.h"
 
@@ -48,10 +49,9 @@ namespace pandora_vision
   class QrCodePreProcessor : public VisionPreProcessor
   {
     public:
-      QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-        VisionPreProcessor(ns, handler) {}
-      ~QrCodePreProcessor() {}
+      QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      ~QrCodePreProcessor();
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_COMMON_QRCODE_PREPROCESSOR_H
+#endif  // PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H

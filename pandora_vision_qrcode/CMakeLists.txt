@@ -53,6 +53,22 @@ target_link_libraries(${PROJECT_NAME}_detector
   zbar
 )
 
+################# qrcode preprocessor #################
+add_library(${PROJECT_NAME}_preprocessor
+  src/qrcode_preprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_preprocessor
+  ${catkin_LIBRARIES}
+)
+
+################# qrcode postprocessor #################
+add_library(${PROJECT_NAME}_postprocessor
+  src/qrcode_postprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_postprocessor
+  ${catkin_LIBRARIES}
+)
+
 ################# qrcode handler #################
 add_library(${PROJECT_NAME}_handler
   src/qrcode_handler.cpp
@@ -60,13 +76,15 @@ add_library(${PROJECT_NAME}_handler
 target_link_libraries(${PROJECT_NAME}_handler
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_detector
+  ${PROJECT_NAME}_preprocessor
+  ${PROJECT_NAME}_postprocessor
 )
 
 ################# qrcode node #################
 add_executable(${PROJECT_NAME}_node
   src/qrcode_node.cpp
 )
-add_dependencies(${PROJECT_NAME}_detector
+add_dependencies(${PROJECT_NAME}_node
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
@@ -79,7 +97,8 @@ target_link_libraries(${PROJECT_NAME}_node
 ################# roslint #################
 
 #~ To check lint : catkin_make roslint_pandora_vision_qrcode
-set(ROSLINT_CPP_OPTS)
+set(ROSLINT_CPP_OPTS
+    "--filter=-whitespace/end_of_line,-build/include_what_you_use")
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
@@ -93,6 +112,6 @@ roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 #                                   Testing                                    #
 ################################################################################
 
-if(CATKIN_ENABLE_TESTING)
-  add_subdirectory(test)
-endif()
+#~ if(CATKIN_ENABLE_TESTING)
+  #~ add_subdirectory(test)
+#~ endif()

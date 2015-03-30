@@ -37,28 +37,37 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
-#define PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
-
-#include <string>
-#include "sensor_processor/handler.h"
-#include "pandora_vision_qrcode/qrcode_preprocessor.h"
 #include "pandora_vision_qrcode/qrcode_postprocessor.h"
-#include "pandora_vision_qrcode/qrCode_detector.h"
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_vision_msgs::QRAlertsVectorMsg>
+  
+  QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+    VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>(ns, handler)
   {
-    public:
-      explicit QrCodeHandler(const std::string& ns);
-      ~QrCodeHandler() {}
+  }
+  
+  QrCodePostProcessor::~QrCodePostProcessor()
+  {
+  }
+  
+  bool QrCodePostProcessor::postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output)
+  {
+    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    output->header = alertVector.header;
+    
+    for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
+    {
+      pandora_vision_msgs::QRAlertMsg qrAlert;
       
-    private:
-      virtual void startTransition(int newState);
-      virtual void completeTransition();
-  };
+      qrAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
+      qrAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
+      
+      boost::shared_ptr<QrCodePOI> qrCodePOI(boost::dynamic_pointer_cast<QrCodePOI>(input->pois[ii]));
+      qrAlert.QRcontent = qrCodePOI->getContent();
+      
+      output->qrAlerts.push_back(qrAlert);
+    }
+    return true;
+  }
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_QRCODE_QRCODE_HANDLER_H

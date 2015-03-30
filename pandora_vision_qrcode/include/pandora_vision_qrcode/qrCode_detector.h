@@ -39,6 +39,8 @@
 #define PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H 
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include <zbar.h>
 #include <opencv2/opencv.hpp>
 #include "sensor_processor/processor.h"
@@ -61,7 +63,7 @@ namespace pandora_vision
       virtual bool
         process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
-      void set_debug (bool flag)
+      void set_debug(bool flag)
       {
         debug_publish = flag;
       };

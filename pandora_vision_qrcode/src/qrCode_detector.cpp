@@ -39,8 +39,8 @@
 
 #define DEBUG_MODE false
 
-namespace pandora_vision {
-
+namespace pandora_vision 
+{
   QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) : 
     Processor<CVMatStamped, POIsStamped>(ns, handler), debug_publish(false)
   {
@@ -61,7 +61,7 @@ namespace pandora_vision {
     for (zbar::Image::SymbolIterator symbol = image.symbol_begin();
         symbol != image.symbol_end(); ++symbol)
     {
-      for(int i = 0; i < symbol->get_location_size(); i++)
+      for (int i = 0; i < symbol->get_location_size(); i++)
       {
         line(debug_frame,
             cv::Point(symbol->get_location_x(i), symbol->get_location_y(i)),
@@ -80,7 +80,7 @@ namespace pandora_vision {
     }
 
     #if DEBUG_MODE
-    if(!debug_frame.empty())
+    if (!debug_frame.empty())
     {
       cv::imshow("[QrCodeNode] processed frame", debug_frame);
       cv::imshow("[QrCodeNode] input frame", input_frame);
@@ -153,7 +153,7 @@ namespace pandora_vision {
       qrCodePOIPtr->setContent(symbol->get_data());
 
       cv::Point detected_center;
-      for(int i = 0; i < symbol->get_location_size(); i++)
+      for (int i = 0; i < symbol->get_location_size(); i++)
       {
         detected_center.x += symbol->get_location_x(i);
         detected_center.y += symbol->get_location_y(i);
@@ -166,7 +166,7 @@ namespace pandora_vision {
       qrcode_list.push_back(qrCodePOIPtr);
     }
 
-    if(debug_publish)
+    if (debug_publish)
     {
       debug_show(image);
     }
@@ -175,11 +175,11 @@ namespace pandora_vision {
     return qrcode_list;
   }
   
-  bool QrCodeDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)  // returns true every time
+  bool QrCodeDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->header;
     getQrCodeParams();
     output->pois = detectQrCode(input->image);
-    return true;
+    return true;  // returns true every time
   }
 }  // namespace pandora_vision

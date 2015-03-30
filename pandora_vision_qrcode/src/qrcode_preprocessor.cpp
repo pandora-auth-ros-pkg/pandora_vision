@@ -37,28 +37,16 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
-#define PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
-
-#include <string>
-#include "sensor_processor/handler.h"
 #include "pandora_vision_qrcode/qrcode_preprocessor.h"
-#include "pandora_vision_qrcode/qrcode_postprocessor.h"
-#include "pandora_vision_qrcode/qrCode_detector.h"
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_vision_msgs::QRAlertsVectorMsg>
+  QrCodePreProcessor::QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+    VisionPreProcessor(ns, handler)
   {
-    public:
-      explicit QrCodeHandler(const std::string& ns);
-      ~QrCodeHandler() {}
-      
-    private:
-      virtual void startTransition(int newState);
-      virtual void completeTransition();
-  };
+  }
+  
+  QrCodePreProcessor::~QrCodePreProcessor()
+  {
+  }
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
