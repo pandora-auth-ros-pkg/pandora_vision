@@ -40,28 +40,30 @@
 
 #include <iostream>
 #include <vector>
-
 #include <opencv2/opencv.hpp>
-#include <ros/ros.h>
-
+#include "sensor_processor/processor.h"
+#include "pandora_vision_common/cv_mat_stamped.h"
+#include "pandora_vision_common/pois_stamped.h"
+#include "pandora_vision_motion/motion_poi.h"
 #include "pandora_vision_motion/motion_parameters.h"
 
 namespace pandora_vision 
 {
-  class MotionDetector
+  class MotionDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
   {
     public:
       /**
         @brief Class Constructor
         Initializes all varialbes for thresholding
       */
-      MotionDetector();
+      MotionDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
       
       /**
         @brief Class Destructor
       */
-      ~MotionDetector();
+      virtual ~MotionDetector();
       
+    protected:
       /**
         @brief Function that detects motion, according to substraction
         between background image and current frame. According to predifined 
@@ -71,14 +73,12 @@ namespace pandora_vision
         @return [int] Index of evaluation of Motion in current frame.
       */
       int detectMotion(const cv::Mat& frame);
-
+      
       /**
-        @brief Creates the continuous table of motion in current frame
-        @return [std::array<int,4>] table of motion position and size
-      */
-      int* getMotionPosition();
-
-     protected:
+       * @brief
+       **/
+      void findMotionParameters(const cv::Mat& frame); 
+      
       /**
         @brief Function that defines the type of movement 
         according to the number of pixels, that differ from current
@@ -113,6 +113,12 @@ namespace pandora_vision
         @return void 
       */
       void detectMotionPosition(const cv::Mat& diff); 
+      
+      /**
+       * @brief 
+       **/ 
+      virtual bool
+        process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
     private:
       //!< Current frame to be processed
@@ -130,7 +136,7 @@ namespace pandora_vision
       //!< Maximum deviation for calculation position of moving objects;
       int max_deviation_;
       //!< Bounding box of moving objects.    
-      cv::Rect_<int> bounding_box_;
+      MotionPOIPtr bounding_box_;
 
       friend class MotionDetectorTest;
   };

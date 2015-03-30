@@ -5,6 +5,8 @@ project(pandora_vision_motion)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
+    pandora_vision_common
+    sensor_processor
     state_manager
     state_manager_msgs
     cv_bridge
@@ -25,6 +27,8 @@ catkin_package(
     CATKIN_DEPENDS
       roscpp
       pandora_common_msgs
+      pandora_vision_common
+      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge
@@ -41,25 +45,56 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-################# motion node library #################
-add_library(motion_node_lib
+################# motion detector #################
+add_library(${PROJECT_NAME}_detector
   src/motion_detector.cpp
   src/motion_parameters.cpp
 )
-target_link_libraries(motion_node_lib
+add_dependencies(${PROJECT_NAME}_detector
+    ${catkin_EXPORTED_TARGETS}
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
 )
 
+################# motion preprocessor #################
+add_library(${PROJECT_NAME}_preprocessor
+  src/motion_preprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_preprocessor
+  ${catkin_LIBRARIES}
+)
+
+################# motion postprocessor #################
+add_library(${PROJECT_NAME}_postprocessor
+  src/motion_detector.cpp
+)
+target_link_libraries(${PROJECT_NAME}_postprocessor
+  ${catkin_LIBRARIES}
+)
+
+################# motion handler #################
+add_library(${PROJECT_NAME}_handler
+  src/motion_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_detector
+  ${PROJECT_NAME}_preprocessor
+  ${PROJECT_NAME}_postprocessor
+)
+
 ################# motion node #################
-add_executable(motion_node
+add_executable(${PROJECT_NAME}_node
     src/motion_node.cpp
-    src/motion_detection.cpp
-    src/motion_detector.cpp
-    src/motion_parameters.cpp
     src/dbscan.cpp
 )
-target_link_libraries(motion_node ${catkin_LIBRARIES} )
-add_dependencies(motion_node
+target_link_libraries(${PROJECT_NAME}_node 
+  ${catkin_LIBRARIES} 
+  ${PROJECT_NAME}_handler
+)
+add_dependencies(${PROJECT_NAME}_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )

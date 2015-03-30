@@ -46,16 +46,16 @@ namespace pandora_vision
     @brief Class Constructor
     Initializes all varialbes for thresholding
   */
-  MotionDetector::MotionDetector()
+  MotionDetector::MotionDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+    sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler)
   { 
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
     bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,
       MotionParameters::varThreshold, MotionParameters::bShadowDetection);
     
-    bounding_box_.x = 0;
-    bounding_box_.y = 0;
-    bounding_box_.width = 0;
-    bounding_box_.height = 0;
+    bounding_box_->setPoint(cv::Point(0, 0));
+    bounding_box_->setWidth(0);
+    bounding_box_->setHeight(0);
     
     max_deviation_ = 50;
     ROS_INFO("Created MotionDetector instance");
@@ -106,18 +106,43 @@ namespace pandora_vision
    
       detectMotionPosition(thresholdedDifference);
       
+      cv::Point boxCenter(floor(bounding_box_->getPoint().x + bounding_box_->getWidth() * 0.5), 
+        floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
+      bounding_box_->setPoint(boxCenter);
+      
       if(MotionParameters::visualization || MotionParameters::show_image ||
         MotionParameters::show_background || MotionParameters::show_diff_image ||
         MotionParameters::show_moving_objects_contours)
       {
         debugShow(thresholdedDifference, frame);
       }
-      
       return typeOfMovement;
     }
     else
     {
       return 0;
+    }
+  }
+  
+  /**
+   * @brief
+   **/
+  void MotionDetector::findMotionParameters(const cv::Mat& frame)
+  {
+    switch (detectMotion(frame))
+    {
+      case 0:
+        bounding_box_->setProbability(0);
+        break;
+      case 1:
+        bounding_box_->setProbability(0.51);
+        break;
+      case 2:
+        bounding_box_->setProbability(1);
+        break;
+      default:
+        bounding_box_->setProbability(-1);
+        break;
     }
   }
   
@@ -166,34 +191,14 @@ namespace pandora_vision
           cv::Point _tlcorner(min_x, min_y);
           cv::Point _brcorner(max_x, max_y);
           rectangle(movingObjects_, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
-          bounding_box_.x = _tlcorner.x;
-          bounding_box_.y = _tlcorner.y;
-          bounding_box_.width = max_x - min_x + 1;
-          bounding_box_.height = max_y - min_y + 1;
+          bounding_box_->setPoint(_tlcorner);
+          bounding_box_->setWidth(max_x - min_x + 1);
+          bounding_box_->setHeight(max_y - min_y + 1);
         }  
       }
     }
   }
   
-  /**
-    @brief Creates the continuous table of motion in current frame
-    @return [int[]] table of motion position and size
-  */
-  int* MotionDetector::getMotionPosition()
-  {
-    int *motion_position = new int[4];
-    //!< Center_x
-    motion_position[0] = floor(bounding_box_.x + bounding_box_.width * 0.5);
-    //!< Center_y
-    motion_position[1] = floor(bounding_box_.y + bounding_box_.height * 0.5);
-    //!< Rectangle width
-    motion_position[2] = bounding_box_.width;
-    //!< Rectangle height
-    motion_position[3] = bounding_box_.height;
-    
-    return motion_position;
-  }
-    
   /**
     @brief Function that defines the type of movement 
     according to the number of pixels, that differ from current
@@ -256,5 +261,15 @@ namespace pandora_vision
     cv::waitKey(10);
     
     contours.clear();
+  }
+  
+  /**
+   * @brief
+   **/
+  bool MotionDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->header;
+    findMotionParameters(input->image);
+    output->pois[0] = bounding_box_->getPoint();
   }
 }// namespace pandora_vision
