@@ -50,7 +50,7 @@ namespace pandora_vision
   {
     public:
       QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      ~QrCodePreProcessor();
+      virtual ~QrCodePreProcessor();
   };
 }  // namespace pandora_vision
 

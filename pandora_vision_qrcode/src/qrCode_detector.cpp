@@ -180,6 +180,11 @@ namespace pandora_vision
     output->header = input->header;
     getQrCodeParams();
     output->pois = detectQrCode(input->image);
-    return true;  // returns true every time
+    
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
   }
 }  // namespace pandora_vision

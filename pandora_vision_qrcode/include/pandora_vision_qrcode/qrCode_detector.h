@@ -53,12 +53,10 @@ namespace pandora_vision
   class QrCodeDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
   {
     public:
-      typedef boost::shared_ptr<CVMatStamped const> CVMatStampedConstPtr;
-      typedef boost::shared_ptr<POIsStamped> POIsStampedPtr;
       typedef boost::shared_ptr<QrCodePOI> QrCodePOIPtr;
      
       QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      ~QrCodeDetector() {}
+      virtual ~QrCodeDetector() {}
       
       virtual bool
         process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);

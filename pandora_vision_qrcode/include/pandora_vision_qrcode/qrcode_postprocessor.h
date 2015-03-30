@@ -55,7 +55,7 @@ namespace pandora_vision
       typedef boost::shared_ptr<pandora_vision_msgs::QRAlertsVectorMsg> QRAlertsVectorMsgPtr;
       
       QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      ~QrCodePostProcessor();
+      virtual ~QrCodePostProcessor();
       
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output);

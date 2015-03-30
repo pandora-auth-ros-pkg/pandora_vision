@@ -53,7 +53,7 @@ namespace pandora_vision
   {
     public:
       explicit QrCodeHandler(const std::string& ns);
-      ~QrCodeHandler() {}
+      virtual ~QrCodeHandler() {}
       
     private:
       virtual void startTransition(int newState);
