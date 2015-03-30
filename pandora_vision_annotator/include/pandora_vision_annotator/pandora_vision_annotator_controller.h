@@ -82,6 +82,8 @@ namespace pandora_vision
 
       int currentFrame;
 
+      bool onlinemode;
+
     //------------------------------------------------------------------------//
     public:
 

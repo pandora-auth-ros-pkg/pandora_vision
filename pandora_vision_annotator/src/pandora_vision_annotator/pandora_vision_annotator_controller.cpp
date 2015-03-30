@@ -87,15 +87,28 @@ namespace pandora_vision
   }
 
   void CController::rosTopicGiven(void)
-  { QString ros_topic = connector_.getRosTopic();
-    /*img_subscriber_ = n_.subscribe(
+  { 
+    QString ros_topic = connector_.getRosTopic();
+    onlinemode =false;
+    if(onlinemode)
+    {
+      img_subscriber_ = n_.subscribe(
       ros_topic.toStdString(),
       1,
       &CController::receiveImage,
-      this);*/
-    loadBag("/home/marios/pandora_ws/benchmark_dataset.bag",ros_topic.toStdString());
-    count = 0;
-    currentFrame = 0;
+      this);
+    }
+
+    else
+    { QString bag_name = connector_.getBagName();
+      std::string  package_path = ros::package::getPath("pandora_vision_annotator");
+      std::stringstream bag_path;
+      bag_path << package_path << "/data/" <<bag_name.toStdString();
+      loadBag(bag_path.str(),ros_topic.toStdString());
+      count = 0;
+      currentFrame = 0;
+
+    }
   }
 
   void CController::loadBag(const std::string& filename, const std::string& topic)
@@ -127,7 +140,6 @@ namespace pandora_vision
   void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
   {pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg (*msg, *cloud);
-qDebug("ddfd");
 
       cv::Mat imageFrame;
 if (cloud->isOrganized())
@@ -191,20 +203,20 @@ connector_.setFrames(frames);
         //connector_.setImage((const uchar *)QImage());
         return;
       }
-
-    /*ros::Rate loop_rate(100);*/
-    /*loop_rate.sleep();*/
-    count++;
-    qDebug("CALLBACK %d", count);
-    frames.push_back(temp);
-    //connectFrame();
-    //QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    //dest.bits(); // enforce deep copy, see documentation
-
-    //connector_.setImage(dest);
-    //Q_EMIT updateImage();
-
-}
+   if(!onlinemode)
+   {
+      count++;
+      qDebug("CALLBACK %d", count);
+      frames.push_back(temp);
+  }
+   else
+    {
+    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    dest.bits(); // enforce deep copy, see documentation
+    connector_.setImage(dest);
+    Q_EMIT updateImage();
+    }
+  }   
 void CController::connectFrame()
 {
     qDebug("%ld",frames.size());

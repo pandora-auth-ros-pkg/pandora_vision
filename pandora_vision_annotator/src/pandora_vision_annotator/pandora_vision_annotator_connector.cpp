@@ -59,15 +59,28 @@ namespace pandora_vision
     for (int i = 0; i<4; i++)
     {
         bbox_ready.push_back(0);
-        qDebug("%d" , bbox_ready[i]);
     }
 
     img_state_ = IDLE;
 
+    package_path = ros::package::getPath("pandora_vision_annotator");
+    
+    QObject::connect(
+      loader_.offlineRadioButton, SIGNAL(toggled(bool)),
+      this,SLOT(offlineRadioButtonChecked()));
+    QObject::connect(
+      loader_.onlineRadioButton, SIGNAL(toggled(bool)),
+      this,SLOT(onlineRadioButtonChecked()));
+    QObject::connect(
+      loader_.realTimeRadioButton, SIGNAL(toggled(bool)),
+      this,SLOT(realTimeRadioButtonChecked()));
+    
+}
+void CConnector::offlineRadioButtonChecked(void)
+{
     QObject::connect(
       loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
       this,SLOT(rosTopicPushButtonTriggered()));
-
     QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
@@ -93,8 +106,17 @@ namespace pandora_vision
       loader_.previousFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(previousFramePushButtonTriggered()));
 
+}
 
-  }
+void CConnector::onlineRadioButtonChecked(void)
+{
+  
+}
+
+void CConnector::realtimeRadioButtonChecked(void)
+{
+  
+}
 
   /**
   @brief Qt slot that is called when the rosTopicPushButton is pressed
@@ -113,6 +135,12 @@ namespace pandora_vision
   {
     return loader_.rosTopicLineEdit->text();
   }
+  
+  QString CConnector::getBagName(void)
+  {
+    return loader_.bagLineEdit->text();
+  }
+
   void CConnector::setFrames(const std::vector<cv::Mat>& x)
   {
       frames = x;
@@ -152,9 +180,11 @@ namespace pandora_vision
           QKeyEvent*  me = static_cast<QKeyEvent*> (event);
           if(me->key() == Qt::Key_S)
           {
-            qDebug("Save current Frame as: frame%04d.png",currFrame);
-            std::string img_name = "/home/marios/frame000" + boost::to_string(currFrame) + ".png";
-            cv::imwrite(img_name, frames[currFrame]);
+            qDebug("Save current Frame as: frame%d.png",currFrame);
+            std::stringstream img_name;
+            img_name << package_path  << "/data/frame" << currFrame << ".png";
+            cv::imwrite(img_name.str(), frames[currFrame]);
+
           }
       }
 
@@ -276,12 +306,15 @@ namespace pandora_vision
   }
 
   void CConnector::submitPushButtonTriggered(void)
-  { if(ImgAnnotations::is_file_exist("/home/marios/annotations.txt"))
+  { 
+    std::stringstream file;
+    file << package_path << "/data/annotations.txt";
+    if(ImgAnnotations::is_file_exist(file.str().c_str()))
     {
-      remove("/home/marios/annotations.txt");
+      remove(file.str().c_str());
 
     }
-    ImgAnnotations::writeToFile("/home/marios/annotations.txt");
+    ImgAnnotations::writeToFile(file.str() );
 
   }
 

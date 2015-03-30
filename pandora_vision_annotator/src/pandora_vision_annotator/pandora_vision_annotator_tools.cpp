@@ -45,7 +45,7 @@ namespace pandora_vision
   annotation ImgAnnotations::temp;
     void ImgAnnotations::writeToFile(const std::string& filename)
     {
-        outFile.open("/home/marios/annotations.txt", std::ofstream::out | std::ofstream::app);
+        outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
         if (!outFile)
             {
                 qFatal("cannot load file");

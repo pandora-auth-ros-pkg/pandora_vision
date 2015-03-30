@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>808</width>
-    <height>610</height>
+    <width>917</width>
+    <height>778</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>300</width>
-      <height>490</height>
+      <height>652</height>
      </rect>
     </property>
     <property name="minimumSize">
@@ -36,32 +36,7 @@
      </size>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLineEdit" name="rosTopicLineEdit">
-         <property name="text">
-          <string>/camera/rgb/image_raw</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="rosTopicPushButton">
-         <property name="text">
-          <string>Connect</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="1" column="0">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
+     <item row="4" column="0">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="9" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -126,6 +101,13 @@
          </property>
         </widget>
        </item>
+       <item row="16" column="0">
+        <widget class="QPushButton" name="submitPushButton">
+         <property name="text">
+          <string>Submit</string>
+         </property>
+        </widget>
+       </item>
        <item row="4" column="0">
         <widget class="Line" name="line_2">
          <property name="orientation">
@@ -176,10 +158,10 @@
          </item>
         </layout>
        </item>
-       <item row="16" column="0">
-        <widget class="QPushButton" name="submitPushButton">
+       <item row="19" column="0">
+        <widget class="QPushButton" name="previousFramePushButton">
          <property name="text">
-          <string>Submit</string>
+          <string>Previous Frame</string>
          </property>
         </widget>
        </item>
@@ -190,10 +172,10 @@
          </property>
         </widget>
        </item>
-       <item row="19" column="0">
-        <widget class="QPushButton" name="previousFramePushButton">
+       <item row="17" column="0">
+        <widget class="QPushButton" name="clearPushButton">
          <property name="text">
-          <string>Previous Frame</string>
+          <string>Clear Annotations</string>
          </property>
         </widget>
        </item>
@@ -231,17 +213,17 @@
          </item>
         </layout>
        </item>
-       <item row="17" column="0">
-        <widget class="QPushButton" name="clearPushButton">
-         <property name="text">
-          <string>Clear Annotations</string>
-         </property>
-        </widget>
-       </item>
        <item row="6" column="0">
         <widget class="QLineEdit" name="qrInfoLineEdit">
          <property name="text">
           <string>QR Message here</string>
+         </property>
+        </widget>
+       </item>
+       <item row="18" column="0">
+        <widget class="QPushButton" name="nextFramePushButton">
+         <property name="text">
+          <string>Next Frame</string>
          </property>
         </widget>
        </item>
@@ -261,10 +243,60 @@
          </property>
         </widget>
        </item>
-       <item row="18" column="0">
-        <widget class="QPushButton" name="nextFramePushButton">
+      </layout>
+     </item>
+     <item row="3" column="0">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QRadioButton" name="offlineRadioButton">
          <property name="text">
-          <string>Next Frame</string>
+          <string>Offline</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="onlineRadioButton">
+         <property name="text">
+          <string>Online</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="realTimeRadioButton">
+         <property name="text">
+          <string>Realtime</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLineEdit" name="bagLineEdit">
+         <property name="text">
+          <string>test.bag</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="rosTopicLineEdit">
+         <property name="text">
+          <string>/camera/rgb/image_raw</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="rosTopicPushButton">
+         <property name="text">
+          <string>Connect</string>
          </property>
         </widget>
        </item>
@@ -278,7 +310,7 @@
       <x>306</x>
       <y>10</y>
       <width>640</width>
-      <height>480</height>
+      <height>641</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -291,13 +323,39 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="statusLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>660</y>
+      <width>901</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <zorder>widget</zorder>
+   <zorder>imageLabel</zorder>
+   <zorder>statusLabel</zorder>
+   <zorder>rosTopicPushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>808</width>
+     <width>917</width>
      <height>25</height>
     </rect>
    </property>

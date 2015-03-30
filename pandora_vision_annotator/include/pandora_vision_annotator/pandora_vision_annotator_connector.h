@@ -78,6 +78,8 @@ namespace pandora_vision
 
       int currFrame;
 
+      std::string package_path;
+
       //!< The loader of main GUI QWidget
       CLoader loader_;
 
@@ -104,6 +106,8 @@ namespace pandora_vision
 
       QString getRosTopic(void);
 
+      QString getBagName(void);
+
       void setImage(QImage &img);
 
       void setFrames(const std::vector<cv::Mat>& x);
@@ -120,6 +124,9 @@ namespace pandora_vision
 
       void updateImage();
 
+      void onlineRadioButtonChecked(void);
+      void offlineRadioButtonChecked(void);
+      void realtimeRadioButtonChecked(void);
       void victimPushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
