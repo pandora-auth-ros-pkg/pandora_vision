@@ -3,6 +3,8 @@
   <!-- =========================== The namespace =========================== -->
   <arg name="namespace" default="pandora_vision/hole_detector" />
 
+  <arg name="output" default="screen" />
+
 
   <node
     name="thermal_node"

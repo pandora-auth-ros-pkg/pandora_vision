@@ -76,7 +76,7 @@ namespace pandora_vision
 
     // Detect edges in the thermal image
     cv::Mat thermalImageEdges;
-    EdgeDetection::computeThermalEdges(thermalImage,
+    EdgeDetection::computeDepthEdges(thermalImage,
       &thermalImageEdges);
 
     #ifdef DEBUG_SHOW

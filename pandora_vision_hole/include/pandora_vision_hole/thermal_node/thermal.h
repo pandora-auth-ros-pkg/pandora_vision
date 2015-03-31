@@ -80,8 +80,8 @@ namespace pandora_vision
         server;
 
        //The dynamic reconfigure (thermal) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
-        ::CallbackType f;
+      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>   
+       ::CallbackType f;
 
       /**
         @brief Callback for the thermal image received by the thermal camera
@@ -103,7 +103,7 @@ namespace pandora_vision
 
       /**
         @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
+        @param[in] config [const pandora_vision_hole::thermal_cfgConfig&]
         @param[in] level [const uint32_t]
         @return void
        **/

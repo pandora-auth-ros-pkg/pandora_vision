@@ -41,6 +41,7 @@
 #include "utils/defines.h"
 #include "utils/parameters.h"
 #include <dynamic_reconfigure/server.h>
+#include <pandora_vision_hole/thermal_cfgConfig.h>
 #include <pandora_vision_hole/depth_cfgConfig.h>
 #include <pandora_vision_hole/rgb_cfgConfig.h>
 #include <pandora_vision_hole/hole_fusion_cfgConfig.h>
@@ -90,6 +91,9 @@ namespace pandora_vision
 
       // Show the depth image that arrives in the depth node
       static bool show_depth_image;
+
+      //Show the thermal image that arrives in the thermal node
+      static bool show_thermal_image;
 
       // Show the rgb image that arrives in the rgb node
       static bool show_rgb_image;

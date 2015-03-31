@@ -113,7 +113,7 @@ namespace pandora_vision
     }
     #endif
 
-    // Locate potential holes in the interpolated depth image
+    // Locate potential holes in the thermal image
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
     // Create the candidate holes message
