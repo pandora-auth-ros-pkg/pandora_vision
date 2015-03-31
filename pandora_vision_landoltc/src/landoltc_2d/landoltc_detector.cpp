@@ -109,32 +109,32 @@ namespace pandora_vision
     cv::Moments moment;
 
     moment = cv::moments(in, true);
-    double y = 2*moment.mu11;
+    double y = 2 * moment.mu11;
     double x = moment.mu20-moment.mu02;
-    double angle = 0.5*atan2(y, x);
+    double angle = 0.5 * atan2(y, x);
     
     if (angle < 0)
     {
-      angle+=3.14159265359;
+      angle += CV_PI;
     }
     
     int len = std::max(in.cols, in.rows);
-    double theta = 180*(angle-3.14159265359/2)/3.14159265359;
-    cv::Point2f pt(len/2., len/2.);
+    double theta = 180 * (angle - CV_PI / 2) / CV_PI;
+    cv::Point2f pt(len / 2., len / 2.);
     cv::Mat r = cv::getRotationMatrix2D(pt, theta, 1.0);
     cv::warpAffine(in, paddedptr, r, cv::Size(len, len));
     cv::Mat left = cv::Mat::zeros(paddedptr.rows, paddedptr.cols, CV_8UC1);
   
-    for (int x = 0; x < paddedptr.cols/2; x++)
+    for (int x = 0; x < paddedptr.cols / 2; x++)
     {
       for (int y = 0; y < paddedptr.rows; y++)
       {
-        left.at<uchar>(y, x)=paddedptr.at<uchar>(y, x);
+        left.at<uchar>(y, x) = paddedptr.at<uchar>(y, x);
       }
     }
     cv::findContours(left, left_contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     
-    if (left_contours.size() == 2) angle += 3.14159265359;
+    if (left_contours.size() == 2) angle += CV_PI;
     
     // std::cout << "Angle of " << i <<" is: " << (angle*(180/3.14159265359)) << std::endl;
     // ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
@@ -162,9 +162,9 @@ namespace pandora_vision
     {
       for (unsigned int cols = 1; cols < paddedptr.cols - 1; cols++)
       {
-        if (paddedptr.data[rows * paddedptr.cols + cols] !=0)
+        if (paddedptr.data[rows * paddedptr.cols + cols] != 0)
         {
-          pts[limit]= rows * paddedptr.cols + cols;
+          pts[limit] = rows * paddedptr.cols + cols;
           limit++;          
         }
       }
@@ -175,21 +175,21 @@ namespace pandora_vision
     }
     for (int k = 0; k < _edgePoints.size(); k++)  
     {
-      cv::circle(paddedptr, _edgePoints.at(k), 2, 255, -1, 8, 0);
+      cv::circle(paddedptr, _edgePoints[k], 2, 255, -1, 8, 0);
     }
     
     if (_edgePoints.size() == 2)
     {
-      int yc=(_edgePoints.at(0).y+_edgePoints.at(1).y)/2;
-      int xc=(_edgePoints.at(0).x+_edgePoints.at(1).x)/2;
+      int yc = (_edgePoints[0].y + _edgePoints[1].y) / 2;
+      int xc = (_edgePoints[0].x + _edgePoints[1].x) / 2;
       
       cv::Point gapCenter(xc, yc);
       cv::circle(paddedptr, gapCenter, 1, 255, -1, 8, 0);
-      cv::Point center(paddedptr.cols/2, paddedptr.rows/2);
+      cv::Point center(paddedptr.cols / 2, paddedptr.rows / 2);
       cv::circle(paddedptr, center, 1, 255, -1, 8, 0);
     
-      double angle = atan2(gapCenter.y-center.y, gapCenter.x-center.x);
-      if (angle < 0) angle += 2 * 3.14159265359;
+      double angle = atan2(gapCenter.y - center.y, gapCenter.x - center.x);
+      if (angle < 0) angle += 2 * CV_PI;
       
       // std::cout << "Angle of " << i <<" is : " << angle*(180/3.14159265359) << std::endl;
       // ROS_INFO("Angle of %d is %lf \n", i, angle*(180/3.14159265359));
@@ -220,16 +220,16 @@ namespace pandora_vision
     unsigned int y = index/in.cols;
     unsigned int x = index%in.cols;
 
-    unsigned char p1 = in.at<unsigned char>(y-1, x);
-    unsigned char p2 = in.at<unsigned char>(y-1, x+1);
-    unsigned char p3 = in.at<unsigned char>(y, x+1);
-    unsigned char p4 = in.at<unsigned char>(y+1, x+1);
-    unsigned char p5 = in.at<unsigned char>(y+1, x);
-    unsigned char p6 = in.at<unsigned char>(y+1, x-1);
-    unsigned char p7 = in.at<unsigned char>(y, x-1);
-    unsigned char p8 = in.at<unsigned char>(y-1, x-1);
+    unsigned char p1 = in.at<unsigned char>(y - 1, x);
+    unsigned char p2 = in.at<unsigned char>(y - 1, x + 1);
+    unsigned char p3 = in.at<unsigned char>(y, x + 1);
+    unsigned char p4 = in.at<unsigned char>(y + 1, x + 1);
+    unsigned char p5 = in.at<unsigned char>(y + 1, x);
+    unsigned char p6 = in.at<unsigned char>(y + 1, x - 1);
+    unsigned char p7 = in.at<unsigned char>(y, x - 1);
+    unsigned char p8 = in.at<unsigned char>(y - 1, x - 1);
   
-    if (p1+p2+p3+p4+p5+p6+p7+p8 == 255) 
+    if (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 == 255) 
     {
       _edges++;
       _edgePoints.push_back(cv::Point(x, y));    
@@ -318,7 +318,7 @@ namespace pandora_vision
         float dy = grY[i];
         float mag = dx * dx + dy * dy;
         if (mag > (LandoltcParameters::gradientThreshold 
-        * LandoltcParameters::gradientThreshold))  // old _minDiff* _minDiff
+          * LandoltcParameters::gradientThreshold))  // old _minDiff* _minDiff
         {
           mag = sqrt(mag);
           float s = 20 / mag;
