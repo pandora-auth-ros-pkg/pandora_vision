@@ -1,2 +1,3 @@
-subsrcibed_topics:
-  thermal_image_topic: raspbery
+subscribed_topics:
+  #thermal_image_topic: raspbery
+  thermal_image_topic: /camera/rgb/image_raw

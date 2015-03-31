@@ -144,6 +144,7 @@ namespace pandora_vision
         @return void
        **/
       static void computeDepthEdges(const cv::Mat& inImage, cv::Mat* edges);
+      static void computeThermalEdges(const cv::Mat& inImage, cv::Mat* edges);
 
       /**
         @brief Takes as input a RGB image of type CV_8UC3,

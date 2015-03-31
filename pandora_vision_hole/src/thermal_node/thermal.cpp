@@ -103,8 +103,12 @@ namespace pandora_vision
     // sensor_msgs::Image, it has to be transformed into a cv format in order
     // to be processed. Its cv format will be CV_32FC1.
     cv::Mat thermalImage;
-    MessageConversions::extractImageFromMessage(msg, &thermalImage,
-      sensor_msgs::image_encodings::TYPE_32FC1);
+    //MessageConversions::extractImageFromMessage(msg, &thermalImage,
+      //sensor_msgs::image_encodings::TYPE_32FC1);
+
+    //-------------------//
+    thermalImage = cv::imread("/home/manos/Desktop/thermal0269.pgm", CV_LOAD_IMAGE_GRAYSCALE);
+    cv::resize(thermalImage, thermalImage, cv::Size(640, 480));
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
@@ -117,7 +121,7 @@ namespace pandora_vision
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
     // Create the candidate holes message
-    pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
+    //pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.
@@ -155,11 +159,11 @@ namespace pandora_vision
     // Read the name of the topic from where the thermal node acquires the
     // unadulterated thermal image and store it in a private member variable
     if (nodeHandle_.getParam(
-        ns + "/thermal_node/subscribed_topics/thermal_image_topic",
+        ns + "/thermal_camera_node/subscribed_topics/thermal_image_topic",
         thermalImageTopic_ ))
     {
-      // Make the topic's name absolute
-      thermalImageTopic_ = ns + "/" + thermalImageTopic_;
+      // Make the topic's name absolute - uncomment this!
+      //thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Subscribed to the input thermal image");

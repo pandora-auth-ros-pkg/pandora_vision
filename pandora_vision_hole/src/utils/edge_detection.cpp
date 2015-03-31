@@ -429,7 +429,48 @@ namespace pandora_vision
     #endif
   }
 
+  void EdgeDetection::computeThermalEdges(const cv::Mat& inImage, cv::Mat* edges)
+  {
+    if (inImage.type() != CV_8UC1)
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "EdgeDetection::computeEdges : Inappropriate thermal image type.");
 
+      return;
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::start("computeEdges", "findHoles");
+    #endif
+
+    // The input depth image, in CV_8UC1 format
+    cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
+      inImage, Parameters::Image::scale_method);
+
+    // The image of edges of the denoised depth image, in CV_32FC1 format
+    cv::Mat denoisedDepthImageEdges;
+
+    // Detect edges in the visualizableDepthImage
+    detectEdges(visualizableDepthImage, &denoisedDepthImageEdges,
+      Parameters::Edge::edge_detection_method);
+
+    // Apply a threshold to the image of edges
+    // to get rid of low value - insignificant - edges
+    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
+      Parameters::Edge::denoised_edges_threshold, 255, 3);
+
+    // Make all non zero pixels have a value of 255
+    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges, 0, 255,
+      cv::THRESH_BINARY);
+
+    // Denoise the edges found
+    denoisedDepthImageEdges.copyTo(*edges);
+    denoiseEdges(edges);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("computeEdges");
+    #endif
+  }
 
   /**
     @brief Takes as input a RGB image of type CV_8UC3,

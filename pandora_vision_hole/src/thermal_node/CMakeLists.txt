@@ -9,8 +9,8 @@ add_dependencies(${PROJECT_NAME}_thermal
   ${catkin_EXPORTED_TARGETS})
 
 
-add_executable(thermal_node thermal_node.cpp)
-target_link_libraries(thermal_node
+add_executable(thermal_camera_node thermal_node.cpp)
+target_link_libraries(thermal_camera_node
   ${PROJECT_NAME}_thermal
   ${catkin_LIBRARIES})
 

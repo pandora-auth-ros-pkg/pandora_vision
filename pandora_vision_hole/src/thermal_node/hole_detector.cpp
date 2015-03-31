@@ -60,6 +60,8 @@ namespace pandora_vision
     Timer::start("findHoles", "inputThermalImageCallback");
     #endif
 
+    ROS_ERROR("Type: %d", thermalImage.type());
+
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
@@ -76,7 +78,7 @@ namespace pandora_vision
 
     // Detect edges in the thermal image
     cv::Mat thermalImageEdges;
-    EdgeDetection::computeDepthEdges(thermalImage,
+    EdgeDetection::computeThermalEdges(thermalImage,
       &thermalImageEdges);
 
     #ifdef DEBUG_SHOW
