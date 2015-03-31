@@ -37,27 +37,56 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-#define PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-
-#include <string>
-#include "pandora_common_msgs/GeneralAlertInfo.h"
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+#include "pandora_vision_landoltc/landoltc_2d/landoltc_handler.h"
 
 namespace pandora_vision
 {
-  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>
+  LandoltCHandler::LandoltCHandler(const std::string& ns) : sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, 
+    POIsStamped, pandora_vision_msgs::LandoltcAlertsVectorMsg>(ns)
   {
-    public:
-      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
+  }
+  
+  void LandoltCHandler::startTransition(int newState)
+  {
+    currentState_ = newState;
+    
+    bool previouslyOff = (previousState_ != state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
       
-      MotionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~MotionPostProcessor();
+    bool currentlyOn = (currentState_ == state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    
+    if (previouslyOff && currentlyOn)
+    {
+      preProcPtr_.reset(new LandoltCPreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new LandoltCDetector("~/processor", this));
+      postProcPtr_.reset(new LandoltCPostProcessor("~/postprocessor", this));
+    }
+    else if (!previouslyOff && !currentlyOn)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+    }
+    
+    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
       
-      virtual bool
-        postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output);
-  };
+      ros::shutdown();
+      return;
+    }
+    previousState_ = currentState_;
+    transitionComplete(currentState_);
+  }
+  
+  void LandoltCHandler::completeTransition()
+  {
+  }
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H

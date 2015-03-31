@@ -37,27 +37,38 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-#define PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-
-#include <string>
-#include "pandora_common_msgs/GeneralAlertInfo.h"
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+#include "pandora_vision_landoltc/landoltc_2d/landoltc_postprocessor.h"
 
 namespace pandora_vision
 {
-  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>
+  
+  LandoltCPostProcessor::LandoltCPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+    VisionPostProcessor<pandora_vision_msgs::LandoltcAlertsVectorMsg>(ns, handler)
   {
-    public:
-      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
+  }
+  
+  LandoltCPostProcessor::~LandoltCPostProcessor()
+  {
+  }
+  
+  bool LandoltCPostProcessor::postProcess(const POIsStampedConstPtr& input, const LandoltcAlertsVectorMsgPtr& output)
+  {
+    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    output->header = alertVector.header;
+    
+    for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
+    {
+      pandora_vision_msgs::LandoltcAlertMsg landoltcAlert;
       
-      MotionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~MotionPostProcessor();
+      landoltcAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
+      landoltcAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
       
-      virtual bool
-        postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output);
-  };
+      boost::shared_ptr<LandoltCPOI> landoltCPOI(boost::dynamic_pointer_cast<LandoltCPOI>(input->pois[ii]));
+      landoltcAlert.angles = landoltCPOI->getAngles();
+      landoltcAlert.posterior = landoltCPOI->getProbability();
+      
+      output->landoltcAlerts.push_back(landoltcAlert);
+    }
+    return true;
+  }
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H

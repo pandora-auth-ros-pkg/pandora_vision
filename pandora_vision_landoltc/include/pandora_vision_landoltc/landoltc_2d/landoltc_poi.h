@@ -37,27 +37,75 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-#define PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfo.h"
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+#include "pandora_vision_common/poi.h"
 
 namespace pandora_vision
 {
-  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>
+  class LandoltCPOI : public POI
   {
     public:
-      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
+      typedef boost::shared_ptr<LandoltCPOI> Ptr;
       
-      MotionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~MotionPostProcessor();
+      virtual ~LandoltCPOI() {}
+    
+    public:
+      std::vector<float> angles; 
+      std::vector<cv::Scalar> color;
+      std::vector<cv::Rect> bbox;
+      int count;
       
-      virtual bool
-        postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output);
+    public:
+      void setAngles(const std::vector<float>& angles)
+      {
+        this->angles = angles;
+      }
+      void setColor(const std::vector<cv::Scalar>& color)
+      {
+        this->color = color;
+      }
+      void setBox(const std::vector<cv::Rect>& box)
+      {
+        bbox = box;
+      }
+      void setCount(const int& count)
+      {
+        this->count = count;
+      }
+      
+      std::vector<float> getAngles() const
+      {
+        return angles;
+      }
+      
+      std::vector<cv::Scalar> getColorVector() const
+      {
+        return color;
+      }
+      cv::Scalar getColor(int pos) const
+      {
+        return color[pos];
+      }
+      
+      std::vector<cv::Rect> getBoxVector() const
+      {
+        return bbox;
+      }
+      cv::Rect getBox(int pos) const
+      {
+        return bbox[pos];
+      }
+      
+      int getCount() const
+      {
+        return count;
+      }
   };
+  
+  typedef LandoltCPOI::Ptr LandoltCPOIPtr;
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H

@@ -37,27 +37,28 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
-#define PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_HANDLER_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC_HANDLER_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfo.h"
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+#include "sensor_processor/handler.h"
+#include "pandora_vision_landoltc/landoltc_2d/landoltc_preprocessor.h"
+#include "pandora_vision_landoltc/landoltc_2d/landoltc_postprocessor.h"
+#include "pandora_vision_landoltc/landoltc_2d/landoltc_detector.h"
 
 namespace pandora_vision
 {
-  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>
+  class LandoltCHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
+    pandora_vision_msgs::LandoltcAlertsVectorMsg>
   {
     public:
-      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
+      explicit LandoltCHandler(const std::string& ns);
+      virtual ~LandoltCHandler() {}
       
-      MotionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~MotionPostProcessor();
-      
-      virtual bool
-        postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output);
+    private:
+      virtual void startTransition(int newState);
+      virtual void completeTransition();
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_HANDLER_H
