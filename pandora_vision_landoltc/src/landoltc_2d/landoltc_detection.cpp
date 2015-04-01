@@ -293,8 +293,8 @@ void LandoltCDetection::landoltcCallback()
       - _landoltc.at(i).center.y;
 
     // Landoltc center's yaw and pitch
-    landoltccodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-    landoltccodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+    landoltccodeMsg.info.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+    landoltccodeMsg.info.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
 
     landoltccodeMsg.posterior = _landoltc.at(i).probability;
     

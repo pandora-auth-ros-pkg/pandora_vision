@@ -30,7 +30,7 @@
   <param name="algorithm" value="Hazmat"/>
 
   <param name="dataset_camera" value="kinect"/>
-  <param name="dataset_path" value="/home/miltos/Desktop/images_480p"/>
+  <param name="dataset_path" value="/test/benchmark/images/images_480p"/>
   
   <test test-name="HazmatBenchmarkTest" pkg="pandora_vision_hazmat"
     type="hazmat_benchmark_test.py" time-limit="1000.0"/>

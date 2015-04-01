@@ -32,6 +32,7 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
         imagePath = rospy.get_param("dataset_path")
         self.benchmarkTest(PKG_PATH + imagePath,
                            publisherTopic, subscriberTopic)
+
 if __name__ == "__main__":
     publisherTopic = rospy.get_param("kinect/topic_name")
     publisherMessagePackage = rospy.get_param("publisherMessagePackage")

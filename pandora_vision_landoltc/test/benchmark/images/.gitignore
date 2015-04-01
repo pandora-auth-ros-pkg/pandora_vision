@@ -2,6 +2,10 @@
 *.png
 *.jp*g
 *.bmp
+*.pgm
+
+# Ignore ROS bags.
+*.bag
 
 # Ignore annotations and benchmark parameters.
 *.txt

@@ -30,7 +30,7 @@
   <param name="algorithm" value="Hazmat"/>
 
   <param name="dataset_camera" value="web_camera"/>
-  <param name="dataset_path" value="/home/miltos/Documents/pandora_supplementary_material/vision/benchmark_dataset/images_720p"/>
+  <param name="dataset_path" value="/test/benchmark/images/images_720p"/>
   
   <test test-name="HazmatBenchmarkTest" pkg="pandora_vision_hazmat"
     type="hazmat_benchmark_test.py" time-limit="1000.0"/>

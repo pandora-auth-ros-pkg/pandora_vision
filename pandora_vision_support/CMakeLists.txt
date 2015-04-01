@@ -26,4 +26,3 @@ add_executable(image_saver_by_topic_node
 target_link_libraries(image_saver_by_topic_node
   ${catkin_LIBRARIES}
 )
-

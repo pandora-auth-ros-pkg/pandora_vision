@@ -18,7 +18,7 @@
   
   <param name="algorithm" value="LandoltC"/>
   <param name="dataset_camera" value="kinect"/>
-  <param name="dataset_path" value="/home/miltos/test_datasets/images_480p"/>
+  <param name="dataset_path" value="/test/benchmark/images/images_480p"/>
   
   <test test-name="LandoltcBenchmarkTest" pkg="pandora_vision_landoltc"
     type="landoltc_benchmark_test.py" time-limit="2000.0"/>

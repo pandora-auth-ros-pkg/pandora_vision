@@ -11,6 +11,8 @@ import math
 
 from pandora_vision_support.pandora_vision_testing_interface import vision_benchmark_test_base
 
+PKG_PATH = rospkg.RosPack().get_path(PKG)
+
 
 class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
     def test_benchmark(self):
@@ -28,7 +30,7 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
 
         self.algorithm = rospy.get_param("algorithm")
         imagePath = rospy.get_param("dataset_path")
-        self.benchmarkTest(imagePath,
+        self.benchmarkTest(PKG_PATH + imagePath,
                            publisherTopic, subscriberTopic)
 if __name__ == "__main__":
     publisherTopic = rospy.get_param("publisherTopic")

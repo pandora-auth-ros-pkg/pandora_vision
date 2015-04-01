@@ -76,7 +76,7 @@
   <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
 
   <param name="dataset_camera" value="kinect"/>
-  <param name="dataset_path" value="/home/miltos/Documents/pandora_supplementary_material/vision/benchmark_dataset/bags_pcl"/>
+  <param name="dataset_path" value="/test/benchmark/images/bags_pcl"/>
   
   <test test-name="HoleBenchmarkTest" pkg="pandora_vision_hole"
     type="hole_benchmark_test.py" time-limit="1000.0"/>

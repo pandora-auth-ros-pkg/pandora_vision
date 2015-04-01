@@ -354,8 +354,8 @@ namespace pandora_vision
         - list_qrcodes[i].qrcode_center.y;
 
       // Qr center's yaw and pitch
-      qrcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-      qrcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+      qrcodeMsg.info.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      qrcodeMsg.info.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
 
       qrcodeVectorMsg.qrAlerts.push_back(qrcodeMsg);
 

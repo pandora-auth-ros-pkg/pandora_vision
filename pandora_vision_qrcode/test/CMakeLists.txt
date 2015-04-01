@@ -45,14 +45,14 @@ download_extra_data(
 download_extra_data(
   ${PROJECT_NAME}_benchmark_images_480p
   EXTRA_FILES test/benchmark/images/images_480p/extra_files.yaml
-  EXCLUDE_FROM_ALL
+  #EXCLUDE_FROM_ALL
   )
 add_dependencies(${PROJECT_NAME}_benchmark_images_480p tests)
 
 download_extra_data(
   ${PROJECT_NAME}_benchmark_images_720p
   EXTRA_FILES test/benchmark/images/images_720p/extra_files.yaml
-  EXCLUDE_FROM_ALL
+  #EXCLUDE_FROM_ALL
   )
 add_dependencies(${PROJECT_NAME}_benchmark_images_720p tests)
 

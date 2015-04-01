@@ -178,4 +178,19 @@ find_package(rostest REQUIRED)
 #    MD5 1844a18c09ee3f7b5725bb788fa43ac1
 #    )
 #add_rostest(functional/hole_detector_test.launch)
+
+
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+
+download_extra_data(
+  ${PROJECT_NAME}_benchmark_images_bags_pcl
+  EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
+  #EXCLUDE_FROM_ALL
+  )
+add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
+
 add_rostest(benchmark/hole_benchmark_test.launch)
+# add_rostest(benchmark/hole_benchmark_test.launch DEPENDENCIES
+            # ${PROJECT_NAME}_benchmark_images_bags_pcl)

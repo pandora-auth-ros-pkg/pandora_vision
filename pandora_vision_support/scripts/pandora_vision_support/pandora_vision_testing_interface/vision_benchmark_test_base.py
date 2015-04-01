@@ -266,7 +266,8 @@ class VisionBenchmarkTestBase(test_base.TestBase):
 
     def calculateBenchmarkResults(self):
         rospy.loginfo("Benchmarking Test Results for %s node.", self.algorithm)
-        rospy.loginfo("Number of images used in algorithms: %d",                              len(self.images))
+        rospy.loginfo("Number of images used in algorithms: %d",
+                      len(self.images))
         rospy.loginfo("Number of True Positives: %d",
                       self.truePositives)
         rospy.loginfo("Number of False Positives: %d",
@@ -288,7 +289,8 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                           maxElapsedTime)
             rospy.loginfo("Mean Elapsed Time : %f seconds",
                           meanElapsedTime)
-            rospy.loginfo("Standard Deviation of Elapsed Time: %f seconds", stdElapsedTime)
+            rospy.loginfo("Standard Deviation of Elapsed Time: %f seconds",
+                          stdElapsedTime)
         else:
             rospy.loginfo("No alerts found. Cannot display elapsed time.")
 
@@ -412,8 +414,8 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 print len(alerts)
                 queueIndex += 1
                 for iiAlert in xrange(len(alerts)):
-                    imageYaw = float(alerts[iiAlert].yaw)
-                    imagePitch = float(alerts[iiAlert].pitch)
+                    imageYaw = float(alerts[iiAlert].info.yaw)
+                    imagePitch = float(alerts[iiAlert].info.pitch)
                     rospy.logdebug("Yaw: %f Degrees",
                                    imageYaw * 180 / math.pi)
                     rospy.logdebug("Pitch: %f Degrees",
@@ -456,20 +458,3 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         self.calculateRecallResults()
         self.calculateMeanNumberOfAngles()
 
-    def accuracyTest(self, imagePath, inputTopic, outputTopic):
-        rospy.loginfo("Reading Images")
-        truePos = 1
-        count = 0
-        for ii in xrange(1):
-            rospy.loginfo("Sending Image")
-            rospy.sleep(20)
-            print self.repliedList[0]
-            print self.repliedList[1]
-            print self.repliedList[2]
-            print self.repliedList[3]
-            if ((self.repliedList[outputTopic]) and
-                (len(self.messageList[outputTopic]) >= 1)):
-
-                count += 1
-                rospy.loginfo("Yo %d", count)
-                rospy.loginfo("Accuracy %f \n", count/float(truePos))
