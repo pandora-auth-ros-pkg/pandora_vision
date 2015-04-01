@@ -1,2 +1,2 @@
-published_topic_names:  
-  motion_alert: /vision/motion_alert
+published_topic: /vision/motion_alert
+subscribed_topic: /kinect/rgb/image_raw
