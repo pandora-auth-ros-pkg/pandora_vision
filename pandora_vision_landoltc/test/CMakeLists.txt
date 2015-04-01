@@ -9,13 +9,6 @@ ${roslib_INCLUDE_DIRS}
 ${catkin_INCLUDE_DIRS})
 
 ################################################################################
-#                               Benchmark Tests                                #
-################################################################################
-
-add_rostest(benchmark/landoltc_benchmark_test.launch)
-
-
-################################################################################
 #                               Functional Tests                               #
 ################################################################################
 
@@ -26,3 +19,9 @@ add_rostest(benchmark/landoltc_benchmark_test.launch)
 #~ add_dependencies(${PROJECT_NAME}_landoltc_test_images tests)
 #~ 
 #~ add_rostest(functional/landoltc_test.launch)
+
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+add_rostest(benchmark/landoltc_kinect_benchmark_test.launch)
+add_rostest(benchmark/landoltc_web_camera_benchmark_test.launch)

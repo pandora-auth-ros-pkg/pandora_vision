@@ -1,4 +1,13 @@
+find_package(roslib REQUIRED)
 find_package(rostest REQUIRED)
+find_package(pandora_testing_tools REQUIRED)
+find_package(pandora_cmake_tools REQUIRED)
+
+include_directories(
+${pandora_testing_tools_INCLUDE_DIRS}
+${roslib_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS})
+
 
 catkin_add_gtest(mean_std_dev_test unit/feature_extractors/mean_std_dev_test.cpp)
 target_link_libraries(mean_std_dev_test
@@ -41,3 +50,9 @@ target_link_libraries(haralickfeature_extractor_test
 #add_rostest(functional/hole_detector_test.launch)
 
 add_rostest(functional/victim_test.launch)
+
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+
+add_rostest(benchmark/victim_benchmark_test.launch)

@@ -178,3 +178,4 @@ find_package(rostest REQUIRED)
 #    MD5 1844a18c09ee3f7b5725bb788fa43ac1
 #    )
 #add_rostest(functional/hole_detector_test.launch)
+add_rostest(benchmark/hole_benchmark_test.launch)
