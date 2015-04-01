@@ -118,7 +118,7 @@
        <item row="10" column="0">
         <widget class="QLineEdit" name="hazmatInfoLineEdit">
          <property name="text">
-          <string>Hazmat types separated with ,</string>
+          <string>Hazmat types [1-13]</string>
          </property>
         </widget>
        </item>
@@ -282,14 +282,14 @@
        <item>
         <widget class="QLineEdit" name="bagLineEdit">
          <property name="text">
-          <string>test.bag</string>
+          <string>benchmark_dataset.bag</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="rosTopicLineEdit">
          <property name="text">
-          <string>/camera/rgb/image_raw</string>
+          <string>/camera/image</string>
          </property>
         </widget>
        </item>
@@ -345,10 +345,6 @@
      <string/>
     </property>
    </widget>
-   <zorder>widget</zorder>
-   <zorder>imageLabel</zorder>
-   <zorder>statusLabel</zorder>
-   <zorder>rosTopicPushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

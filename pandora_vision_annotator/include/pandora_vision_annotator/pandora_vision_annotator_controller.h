@@ -123,7 +123,9 @@ namespace pandora_vision
     public Q_SLOTS:
 
       void rosTopicGiven(void);
-
+      void onlineModeGiven(void);
+      void offlineModeGiven(void);
+    
     //------------------------------------------------------------------------//
     Q_SIGNALS:
       void updateImage();

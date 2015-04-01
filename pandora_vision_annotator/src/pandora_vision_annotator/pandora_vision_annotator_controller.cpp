@@ -77,19 +77,45 @@ namespace pandora_vision
   **/
   void CController::initializeCommunications(void)
   {
-    QObject::connect(
-      &connector_,SIGNAL(rosTopicGiven()),
-      this, SLOT(rosTopicGiven()));
 
+ /* QObject::connect(*/
+    //&connector_,SIGNAL(rosTopicGiven()),
+    /*this, SLOT(rosTopicGiven()));*/
+
+        QObject::connect(
+      &connector_,SIGNAL(offlineModeGiven()),
+      this, SLOT(offlineModeGiven()));
+  
+ 
+        QObject::connect(
+      &connector_,SIGNAL(onlineModeGiven()),
+      this, SLOT(onlineModeGiven()));
+  
     QObject::connect(
       this,SIGNAL(updateImage()),
       &connector_, SLOT(updateImage()));
   }
+  void CController::offlineModeGiven(void)
+  {
+    onlinemode = false;
+    QObject::connect(
+      &connector_,SIGNAL(rosTopicGiven()),
+      this, SLOT(rosTopicGiven()));
+  }
+
+  void CController::onlineModeGiven(void)
+  {
+    onlinemode = true;
+    QObject::connect(
+      &connector_,SIGNAL(rosTopicGiven()),
+      this, SLOT(rosTopicGiven()));
+  }
+
+  
 
   void CController::rosTopicGiven(void)
-  { 
+  {
     QString ros_topic = connector_.getRosTopic();
-    onlinemode =false;
     if(onlinemode)
     {
       img_subscriber_ = n_.subscribe(
@@ -103,10 +129,11 @@ namespace pandora_vision
     { QString bag_name = connector_.getBagName();
       std::string  package_path = ros::package::getPath("pandora_vision_annotator");
       std::stringstream bag_path;
-      bag_path << package_path << "/data/" <<bag_name.toStdString();
-      loadBag(bag_path.str(),ros_topic.toStdString());
       count = 0;
       currentFrame = 0;
+      bag_path << package_path << "/data/" <<bag_name.toStdString();
+      loadBag(bag_path.str(),ros_topic.toStdString());
+   
 
     }
   }
@@ -134,7 +161,6 @@ namespace pandora_vision
 
               connector_.setFrames(frames);
               connector_.setcurrentFrame();
-              //qDebug("sfsfsdf");
 
   }
   void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
@@ -146,9 +172,9 @@ if (cloud->isOrganized())
 {       imageFrame = cv::Mat(cloud->height, cloud->width, CV_8UC3);
     {
 
-        for (int h=0; h<imageFrame.rows; h++)
+        for (int h = 0; h < imageFrame.rows; h++)
         {
-            for (int w=0; w<imageFrame.cols; w++)
+            for (int w = 0; w < imageFrame.cols; w++)
             {
                 pcl::PointXYZRGB point = cloud->at(w, h);
 

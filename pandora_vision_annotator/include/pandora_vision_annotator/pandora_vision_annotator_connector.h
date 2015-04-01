@@ -56,6 +56,13 @@ namespace pandora_vision
     LANDOLTC_CLICK
   };
 
+  enum States
+  {
+    OFFLINE,
+    ONLINE,
+    REALTIME
+  };
+
   /**
   @class CConnector
   @brief Serves the Qt events of the main GUI window. Inherits from QObject
@@ -89,7 +96,11 @@ namespace pandora_vision
 
       ImageStates img_state_;
 
+      States state_;
+
       bool eventFilter( QObject* watched, QEvent* event );
+
+       cv::Mat QImage2Mat(QImage const& src);
 
     //------------------------------------------------------------------------//
     public:
@@ -126,7 +137,7 @@ namespace pandora_vision
 
       void onlineRadioButtonChecked(void);
       void offlineRadioButtonChecked(void);
-      void realtimeRadioButtonChecked(void);
+      void realTimeRadioButtonChecked(void);
       void victimPushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
@@ -140,6 +151,8 @@ namespace pandora_vision
     Q_SIGNALS:
 
       void rosTopicGiven(void);
+      void onlineModeGiven(void);
+      void offlineModeGiven(void);
   };
 }
 

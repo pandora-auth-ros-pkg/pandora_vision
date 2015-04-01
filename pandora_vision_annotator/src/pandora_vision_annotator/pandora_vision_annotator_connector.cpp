@@ -77,11 +77,11 @@ namespace pandora_vision
     
 }
 void CConnector::offlineRadioButtonChecked(void)
-{
+{   qDebug("offline checked");
     QObject::connect(
-      loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(rosTopicPushButtonTriggered()));
-    QObject::connect(
+    loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
+    this,SLOT(rosTopicPushButtonTriggered()));
+  QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
     QObject::connect(
@@ -105,15 +105,39 @@ void CConnector::offlineRadioButtonChecked(void)
     QObject::connect(
       loader_.previousFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(previousFramePushButtonTriggered()));
-
+ Q_EMIT offlineModeGiven();
+ state_= OFFLINE;
 }
 
 void CConnector::onlineRadioButtonChecked(void)
 {
+  QObject::connect(
+    loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
+    this,SLOT(rosTopicPushButtonTriggered()));
+  QObject::connect(
+      loader_.victimPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(victimPushButtonTriggered()));
+    QObject::connect(
+      loader_.hazmatPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(hazmatPushButtonTriggered()));
+    QObject::connect(
+      loader_.landoltcPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(landoltcPushButtonTriggered()));
+    QObject::connect(
+      loader_.qrPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(qrPushButtonTriggered()));
+    QObject::connect(
+      loader_.submitPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(submitPushButtonTriggered()));
+    QObject::connect(
+      loader_.clearPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(clearPushButtonTriggered()));
+    Q_EMIT onlineModeGiven();
+    state_ = ONLINE;
   
 }
 
-void CConnector::realtimeRadioButtonChecked(void)
+void CConnector::realTimeRadioButtonChecked(void)
 {
   
 }
@@ -124,6 +148,7 @@ void CConnector::realtimeRadioButtonChecked(void)
   **/
   void CConnector::rosTopicPushButtonTriggered(void)
   {    Q_EMIT rosTopicGiven();
+       
   }
 
   void CConnector::show(void)
@@ -165,6 +190,14 @@ void CConnector::realtimeRadioButtonChecked(void)
     loader_.imageLabel->setPixmap(QPixmap().fromImage(localImage_));
   }
 
+  cv::Mat CConnector::QImage2Mat(QImage const& src)
+  {
+     cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
+     cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
+     cvtColor(tmp, result,CV_BGR2RGB);
+     return result;
+  }
+
   /**
   @brief General event filter. Captures all events
   @param watched [QObject*] The object in which the event was triggered
@@ -183,11 +216,19 @@ void CConnector::realtimeRadioButtonChecked(void)
             qDebug("Save current Frame as: frame%d.png",currFrame);
             std::stringstream img_name;
             img_name << package_path  << "/data/frame" << currFrame << ".png";
-            cv::imwrite(img_name.str(), frames[currFrame]);
-
+            if(state_== ONLINE)
+            {
+              cv::Mat temp = QImage2Mat(localImage_);
+              cv::imwrite(img_name.str(),temp);
+            }
+            if(state_ == OFFLINE)
+            {
+              cv::imwrite(img_name.str(), frames[currFrame]);
+              loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() ));
+      
+            }
           }
       }
-
       if(event->type() == QEvent::MouseButtonPress)
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
@@ -219,7 +260,7 @@ void CConnector::realtimeRadioButtonChecked(void)
                     loader_.victimCoordsLabel->setText(
                      loader_.victimCoordsLabel->text() + QString("[") +
                      QString().setNum(p.x()) + QString(",") +
-                     QString().setNum(p.y() /*- diff*/) + QString("]"));
+                     QString().setNum(p.y() - diff) + QString("]"));
                      ImgAnnotations::setAnnotations(img_name,"Victim", p.x(), p.y()-diff);
                     bbox_ready[0]++;
                     if(bbox_ready[0] == 2)
@@ -252,7 +293,8 @@ void CConnector::realtimeRadioButtonChecked(void)
                      loader_.hazmatCoordsLabel->text() + QString("[") +
                      QString().setNum(p.x()) + QString(",") +
                      QString().setNum(p.y() - diff) + QString("]"));
-                    ImgAnnotations::setAnnotations(img_name,"Hazmat", p.x(), p.y()-diff);
+                    QString type =loader_.hazmatInfoLineEdit->text();
+                    ImgAnnotations::setAnnotations(img_name,"Hazmat", p.x(), p.y()-diff,type);
                     bbox_ready[2]++;
                     if(bbox_ready[2] == 2)
                     {
@@ -326,6 +368,7 @@ void CConnector::realtimeRadioButtonChecked(void)
       loader_.qrCoordsLabel->clear();
       loader_.hazmatCoordsLabel->clear();
       loader_.victimCoordsLabel->clear();
+      loader_.statusLabel->clear();
       ImgAnnotations::annPerImage = 0;
       ImgAnnotations::annotations.clear();
       setcurrentFrame();
@@ -360,14 +403,12 @@ void CConnector::realtimeRadioButtonChecked(void)
     pen.setBrush(Qt::green);
     painter.setPen(pen);
     for (int i = 0; i < bbox_ready.size(); i++)
-        qDebug("%d", bbox_ready[i]);
-    qDebug("drawing %d annotation", ImgAnnotations::annPerImage);
-               qDebug("%d %d %d %d\n",
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2);
-    QPoint p1(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
+    loader_.statusLabel->setText("drawing "+ QString().setNum(ImgAnnotations::annPerImage)+" annotation\n"
+                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2)+","
+                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2));
+       QPoint p1(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
               ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1);
     QPoint p2(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2,
               ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2);

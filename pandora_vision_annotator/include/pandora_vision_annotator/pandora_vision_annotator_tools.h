@@ -56,6 +56,8 @@
 
 #include <QtUiTools/QUiLoader>
 
+#include <QDebug>
+
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QObject>
@@ -117,6 +119,7 @@ namespace pandora_vision
       int y1;
       int x2;
       int y2;
+      QString type;
   };
 
   class ImgAnnotations
@@ -131,6 +134,7 @@ namespace pandora_vision
     static void writeToFile(const std::string& filename);
     static void readFromFile();
     static void setAnnotations(const::std::string& imgName, const std::string &category, int x, int y);
+    static void setAnnotations(const std::string& imgName, const std::string &category, int x, int y, QString type);
     static bool is_file_exist(const char *fileName);
 
   };
