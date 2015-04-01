@@ -14,7 +14,6 @@
   <author>Vasilis Bosdelekidis</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>roslint</build_depend>
   <build_depend>pandora_cmake_tools</build_depend>
 

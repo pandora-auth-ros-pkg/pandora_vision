@@ -29,6 +29,9 @@
   <depend>dynamic_reconfigure</depend>
   <depend>roslint</depend>
   <depend>urdf</depend>
+  
+  <test_depend>pandora_testing_tools</test_depend>
+  <test_depend>rostest</test_depend>
 
   <test_depend>pandora_testing_tools</test_depend>
   <test_depend>rostest</test_depend>

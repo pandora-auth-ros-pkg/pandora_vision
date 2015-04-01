@@ -13,7 +13,7 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
     def test_benchmark(self):
         self.algorithm = rospy.get_param("algorithm")
         
-        imagePath = "/home/miltos/Documents/pandora_supplementary_material/vision/benchmark_dataset/images_720p"
+        imagePath = "/home/miltos/Documents/pandora_supplementary_material/vision/benchmark_dataset/images_480p"
         self.benchmarkTest(imagePath,
                            publisherTopic, subscriberTopic)
 if __name__ == "__main__":
