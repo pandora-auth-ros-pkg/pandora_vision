@@ -38,7 +38,6 @@
 
 #ifndef PANDORA_VISION_HAZMAT_DETECTION_PLANAR_OBJECT_DETECTOR_H
 #define PANDORA_VISION_HAZMAT_DETECTION_PLANAR_OBJECT_DETECTOR_H
->>>>>>> Add training code,split source into subdirs,training not working fully yet
 
 #include "pandora_vision_hazmat/detection/detector_interface.h"
 

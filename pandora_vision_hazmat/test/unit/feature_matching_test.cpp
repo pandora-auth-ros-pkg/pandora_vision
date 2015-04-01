@@ -139,7 +139,7 @@ TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
 
   cv::transform(patternBB, correctBB, rot);
   cv::transform(patternKeyPoints, sceneKeyPoints, rot);
-  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints, sceneKeyPoints,
       patternBB, &sceneBB);
   
   for (int i = 0 ; i < correctBB.size() ; i++)
@@ -153,7 +153,7 @@ TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
 
   cv::transform(patternBB, correctBB, rot);
   cv::transform(patternKeyPoints, sceneKeyPoints, rot);
-  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints, sceneKeyPoints,
       patternBB, &sceneBB);
   
   for (int i = 0 ; i < correctBB.size() ; i++)
@@ -166,7 +166,7 @@ TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
 
   cv::transform(patternBB, correctBB, rot);
   cv::transform(patternKeyPoints, sceneKeyPoints, rot);
-  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints, sceneKeyPoints,
       patternBB, &sceneBB);
   
   for (int i = 0 ; i < correctBB.size() ; i++)
@@ -179,7 +179,7 @@ TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
 
   cv::transform(patternBB, correctBB, rot);
   cv::transform(patternKeyPoints, sceneKeyPoints, rot);
-  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints, sceneKeyPoints,
       patternBB, &sceneBB);
   
   for (int i = 0 ; i < correctBB.size() ; i++)
@@ -192,7 +192,7 @@ TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
 
   cv::transform(patternBB, correctBB, rot);
   cv::transform(patternKeyPoints, sceneKeyPoints, rot);
-  testFlag = MockDetector.findBoundingBox(patternKeyPoints,sceneKeyPoints,
+  testFlag = MockDetector.findBoundingBox(patternKeyPoints, sceneKeyPoints,
       patternBB, &sceneBB);
   
   for (int i = 0 ; i < correctBB.size() ; i++)

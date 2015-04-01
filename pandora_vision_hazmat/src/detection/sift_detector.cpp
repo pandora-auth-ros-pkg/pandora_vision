@@ -99,4 +99,4 @@ void SiftDetector::getFeatures( const cv::Mat &frame ,
       /1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
   ROS_INFO( "Descriptors Computation time : %f .\n", descriptorsTime);
   #endif
-
+}

@@ -84,12 +84,14 @@ struct Object
 {
  public:
      std::string name;
-
+     int id;
      cv::Point2f position;
-     Object(const std::string& objectName, const cv::Point2f& objectPosition)
+     Object(const std::string& objectName, const cv::Point2f& objectPosition,
+         const int& objectID)
      {
        name = objectName;
        position = objectPosition;
+       id = objectID;
      }
 };
 

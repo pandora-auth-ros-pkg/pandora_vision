@@ -104,7 +104,7 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
     int width = 640;
     int height = 480;
     float hfov = 58 * PI/180.0f;
-    float vfov = 45.0 * PI / 180.0f;
+    float vfov = 45.00 * PI / 180.0f;
     float x, y;
     ROS_INFO("Found Hazmat! \n");
     pandora_vision_msgs::HazmatAlertMsg hazmatMsg;
@@ -116,7 +116,8 @@ void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
       y = static_cast<float>(height) / 2 - detectedObjects[i].position.y;
       hazmatMsg.yaw = atan(2 * x / width * tan(hfov / 2));
       hazmatMsg.pitch = atan(2 * y / height * tan(vfov / 2));
-      hazmatMsg.patternType = 0;
+      hazmatMsg.patternType = detectedObjects[i].id;
+      ROS_INFO("%d ", hazmatMsg.patternType);
       hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
     }
     ROS_INFO("Number of Hazmats Found = %d .", static_cast<int>(

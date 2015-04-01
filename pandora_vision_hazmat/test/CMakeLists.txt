@@ -3,6 +3,12 @@ find_package(rostest REQUIRED)
 find_package(pandora_testing_tools REQUIRED)
 find_package(pandora_cmake_tools REQUIRED)
 
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+
+# add_rostest(benchmark/hazmat_benchmark_test.launch)
+
 include_directories(
   ${pandora_testing_tools_INCLUDE_DIRS}
   ${roslib_INCLUDE_DIRS}
@@ -43,7 +49,13 @@ target_link_libraries(image_signature_test
 #)
 #add_dependencies(${PROJECT_NAME}_hazmat_test_images tests)
 
-add_rostest(functional/hazmat_test.launch)
+# download_extra_data(
+  # ${PROJECT_NAME}_hazmat_test_images
+  # EXTRA_FILES test/functional/images/extra_files.yaml
+# )
+# add_dependencies(${PROJECT_NAME}_hazmat_test_images tests)
+
+# add_rostest(functional/hazmat_test.launch)
 
 ################################################################################
 #                               Benchmark Tests                                #

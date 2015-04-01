@@ -60,10 +60,10 @@ TEST( ImageSignatureTest , imageSign )
   testImage.setTo(100);
 
   ImageSignature::signFunction( testImage , &signs );
-  ASSERT_TRUE(signs.data == NULL);
+  ASSERT_TRUE(signs.data != NULL);
 
   // Create a matrix with positive elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
+  testImage = cv::Mat(20, 20, CV_32FC1);
   testImage.setTo(100);
 
   ImageSignature::signFunction(testImage , &signs );
@@ -81,7 +81,7 @@ TEST( ImageSignatureTest , imageSign )
 
 
   // Create a matrix with negative elements.
-  testImage = cv::Mat(20,20, CV_32FC1 );
+  testImage = cv::Mat(20, 20, CV_32FC1);
   testImage.setTo(-100);
 
   ImageSignature::signFunction(testImage , &signs );

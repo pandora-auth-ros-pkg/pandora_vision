@@ -310,9 +310,10 @@ void PlanarPatternTrainer::multiViewTraining(
   std::vector<cv::KeyPoint> frontViewKeyPoints;
   std::vector<cv::Point2f> boundingBox;
   //Calculate the features for the frontal view of the pattern.
-  this->getFeatures(images[0], &multiViewDescriptors,
+  this->getFeatures(images[0], &frontViewDescriptors,
       &frontViewKeyPoints, &boundingBox );
 
+  multiViewDescriptors = frontViewDescriptors;
   std::vector<cv::Mat> synthViewDescriptors;
   std::vector<std::vector<cv::KeyPoint> > synthViewKeyPoints;
   
@@ -371,12 +372,31 @@ void PlanarPatternTrainer::multiViewTraining(
   cv::Mat labels;
   cv::Mat centroids;
   std::cout << multiViewDescriptors.rows<< std::endl;
-  cv::kmeans(multiViewDescriptors, 40,labels, cv::TermCriteria(
-        cv::TermCriteria::EPS + cv::TermCriteria::COUNT , 10, 0.1), 3, cv::KMEANS_PP_CENTERS,centroids);
+  cv::kmeans(multiViewDescriptors, frontViewKeyPoints.size(), labels, cv::TermCriteria(
+      cv::TermCriteria::EPS + cv::TermCriteria::COUNT , 10, 0.1), 3,
+      cv::KMEANS_PP_CENTERS, centroids);
+
   ROS_INFO("Finished kmeans clustering!"); 
+  cv::BFMatcher matcher(cv::NORM_L2);
+
+  std::vector<std::vector<cv::DMatch> > matches;
+
+  matcher.knnMatch(frontViewDescriptors, centroids, matches, 2);
+
+  std::vector<cv::Point2f> bestKeypoints;
+  
+  for( int i = 0; i <  matches.size() ; i++ )
+  { 
+    // if( matches[i][0].distance < ratio*matches[i][1].distance )
+    bestKeypoints.push_back( frontViewKeyPoints[ matches[i][0].queryIdx ].pt );
+    std::cout << matches[i][0].distance << std::endl;
+  }
+
   // saveDataToFile(dirPath, multiViewDescriptors, multiViewKeypoints,
       // boundingBox);
-  saveDataToFile(dirPath, centroids, multiViewKeypoints,
+  // saveDataToFile(dirPath, centroids, multiViewKeypoints,
+      // boundingBox);
+  saveDataToFile(dirPath, centroids, bestKeypoints,
       boundingBox);
 }
 

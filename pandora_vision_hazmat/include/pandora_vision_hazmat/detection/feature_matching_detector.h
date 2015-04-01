@@ -48,7 +48,6 @@
         to find a possible match in the current frame.
 **/
 
- 
 class FeatureMatchingDetector : public PlanarObjectDetector
 {
   public:
@@ -70,24 +69,6 @@ class FeatureMatchingDetector : public PlanarObjectDetector
       std::vector<cv::Point2f>* matchedPatternKeyPoints , 
       std::vector<cv::Point2f>* matchedSceneKeyPoints ,
       const int &patternID = 0 );
-
-           
-    // Find the matches between the pattern and the query frame.
-    bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat &patternDescriptors , 
-      const std::vector<cv::Point2f> patternKeyPoints ,
-      const std::vector<cv::KeyPoint> sceneKeyPoints ,
-      std::vector<cv::Point2f> *matchedPatternKeyPoints , 
-      std::vector<cv::Point2f> *matchedSceneKeyPoints  ) ;
-    
-    // Returns the type of the features used. 
-    //~ const TrainerType virtual getType( void ) = 0 ;
-    
-    /* virtual const cv::FlannBasedMatcher& getMatcher(void)
-    {
-      return matcher_;
-    }*/
-    
    
     // Constructor
     explicit FeatureMatchingDetector(const std::string &featureName);
@@ -105,7 +86,6 @@ class FeatureMatchingDetector : public PlanarObjectDetector
     */
     cv::Ptr<cv::DescriptorMatcher> *matchers_;
     
- 
 };
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_FEATURE_MATCHING_DETECTOR_H

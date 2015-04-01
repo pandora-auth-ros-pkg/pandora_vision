@@ -216,7 +216,7 @@ bool PlanarObjectDetector::detect(const cv::Mat &frame,
         //}
         
         detectedObjects->push_back(Object((*patterns_)[i].name,
-              cv::Point2f(x, y )));
+              cv::Point2f(x, y ), i + 1));
       }
       
     }
@@ -311,14 +311,14 @@ bool PlanarObjectDetector::findBoundingBox(
         || ( (*sceneBB)[i].y > PlanarObjectDetector::height ) )
           {
             sceneBB->clear();
-            return false ;
+            return false;
           }
     }
     
     // Check if the Bounding box is Convex 
     // If not the resulting homography is incorrect due to false
     // matching between the descriptors.
-    std::vector<cv::Point2f> boundingBox = *sceneBB ;
+    std::vector<cv::Point2f> boundingBox = *sceneBB;
     boundingBox.pop_back();
     if ( !cv::isContourConvex(boundingBox) )
     {
@@ -328,7 +328,7 @@ bool PlanarObjectDetector::findBoundingBox(
     
     // Clear the bounding box vector .
     boundingBox.clear();
-    return true ;
+    return true;
     
   }
   else

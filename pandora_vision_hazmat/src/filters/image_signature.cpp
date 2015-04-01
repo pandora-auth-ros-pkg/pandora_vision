@@ -39,11 +39,6 @@
 #include "pandora_vision_hazmat/filters/image_signature.h"
 
 
-ImageSignature::ImageSignature(HazmatDetector *baseDetector) : 
-  detector_(baseDetector)
-{
-  
-  }
 
 /**
  @brief Calculates the signs of an arbitrary 1-channel matrix.
@@ -68,7 +63,6 @@ void ImageSignature::signFunction(const cv::Mat &array , cv::Mat *signs)
   cv::divide( array , abs(array) , *signs );
   
   }
- }
   
 // Function that calculates the signature of the image.
 void ImageSignature::calculateSignature(const cv::Mat &image , 
@@ -80,14 +74,13 @@ void ImageSignature::calculateSignature(const cv::Mat &image ,
   
   // Compute the discrete cosine transform of the input image.
   cv::dct(image , imageDCT );
- 
+  
   // Calculate the signature of the image.
   ImageSignature::signFunction( imageDCT , imgSign );
   
   return;
   
   }
-
 
 // Function that uses the signature to create 
 void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame , 
@@ -98,8 +91,6 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
     ROS_ERROR("Invalid frame!\n ");
     mask->data = NULL;
     return;
-    mask->data = NULL ;
-    return ;
   }
   
   static cv::Mat saliency;
@@ -114,26 +105,6 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   
   static cv::Mat signature;
   static cv::Mat invDCT; 
-  
-  static cv::Mat signature;
-  static cv::Mat invDCT ; 
-  
-  if ( frame.channels() ==  1 )
-  { 
-    ImageSignature::calculateSignature( saliency , &signature );
-    
-    // Perform the inverse DCT on the signature.
-    cv::dct( signature , invDCT , cv::DCT_INVERSE );
-    
-    *mask = invDCT.mul(invDCT);
-    
-    // Filter the result using a gaussian filter with a 5X5 kernel.
-    
-    cv::GaussianBlur(*mask , *mask , cv::Size(5,5) , 0.05 );
-    //~ cv::medianBlur( *mask , *mask , 5  );
-    
-    return ;
-  }
   
   static std::vector<cv::Mat> channels;
 
@@ -162,17 +133,7 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   }
   
   // Calculate the mean of the saliency values of the 3 input channels.
-    cv::dct( signature , invDCT , cv::DCT_INVERSE );
-    
-    tempMap = invDCT.mul(invDCT);
-    cv::GaussianBlur( tempMap , tempMap , cv::Size(5,5) , 0 );
-    // Calculate the total map.
-    sum  = sum + tempMap ;
-  }
-  
-  // Calculate the mean of the saliency values of the 3 input channels.
-  sum = (1/3.f) * sum ;
-  
+  sum = (1/3.f) * sum;
   
   // Resize the mask so that it can be applied to the frame.
   cv::resize( sum , sum  , frame.size() );
@@ -188,14 +149,5 @@ void  ImageSignature::createSaliencyMapMask(const cv::Mat &frame ,
   
   *mask = sum;
 
-
-  
-  cv::medianBlur( sum , sum  , 3 );
-  
-  #ifdef DEBUG
-  cv::imshow("Filter",sum);
-  #endif
-   
-  
-  return ;
+  return;
   }

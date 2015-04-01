@@ -145,7 +145,6 @@ bool FeatureMatchingDetector::readData( void )
       continue;
     }
     fs2["Descriptors"] >> descriptors;
-    std::cout << descriptors.size() << std::endl;
     // if ( fs2["Histogram"].empty() )
     // {
       // ROS_ERROR("No Histogram entry was specified for the pattern : %s ! \n", 
@@ -245,15 +244,7 @@ bool FeatureMatchingDetector::readData( void )
   return true;
 }
 
-
    
-
-SimpleHazmatDetector::SimpleHazmatDetector(
-  const std::string &featureName) : HazmatDetector(featureName)
-  {
-    
-    }
-    
 /**
   @brief Function used to detect matches between a pattern and the 
          input frame.
@@ -342,8 +333,6 @@ bool FeatureMatchingDetector::findKeypointMatches(
   // No matches found.
   else
     return false;
-  
-  std::cout << goodMatches.size() << std::endl;
   // Add the keypoints of the matches found to the corresponding
   // vectors for the pattern and the scene.
   for( int i = 0; i < goodMatches.size(); i++ )
