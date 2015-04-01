@@ -9,7 +9,8 @@
 *  modification, are permitted provided that the following conditions
 *  are met:
 *
-*   * Redistributions of source code must retain the above copyright
+tamp(const sensor_msgs::header& msg);
+
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
 *     copyright notice, this list of conditions and the following
@@ -189,6 +190,12 @@ void CConnector::realTimeRadioButtonChecked(void)
   {
     loader_.imageLabel->setPixmap(QPixmap().fromImage(localImage_));
   }
+  
+  void CConnector::msgTimeStamp(const std_msgs::Header& msg)
+  {
+    msgHeader = msg;
+    //std::cout << msgHeader << std::endl;
+  }
 
   cv::Mat CConnector::QImage2Mat(QImage const& src)
   {
@@ -213,19 +220,29 @@ void CConnector::realTimeRadioButtonChecked(void)
           QKeyEvent*  me = static_cast<QKeyEvent*> (event);
           if(me->key() == Qt::Key_S)
           {
-            qDebug("Save current Frame as: frame%d.png",currFrame);
-            std::stringstream img_name;
-            img_name << package_path  << "/data/frame" << currFrame << ".png";
+            //qDebug("Save current Frame as: frame%d.png",currFrame);
             if(state_== ONLINE)
             {
-              cv::Mat temp = QImage2Mat(localImage_);
-              cv::imwrite(img_name.str(),temp);
+              //do
+              //{
+              std::stringstream img_name, file;
+              img_name << package_path << "/data/frame" << msgHeader.seq <<".png";
+              //cv::Mat temp = QImage2Mat(localImage_);
+              //cv::imwrite(img_name.str(),temp);
+              //loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
+              file << package_path << "/data/onlineAnnotations.txt";
+              
+              ImgAnnotations::writeToFile(file.str(),msgHeader);
+              loader_.statusLabel->setText("Writing to file"+QString(file.str().c_str()));
+              //}while(me->key() != Qt::Key_D);
+
             }
             if(state_ == OFFLINE)
             {
+              std::stringstream img_name;
+              img_name << package_path  << "/data/frame" << currFrame << ".png";
               cv::imwrite(img_name.str(), frames[currFrame]);
-              loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() ));
-      
+              loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
             }
           }
       }

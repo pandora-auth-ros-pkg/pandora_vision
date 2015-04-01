@@ -136,8 +136,9 @@ namespace pandora_vision
     static void setAnnotations(const::std::string& imgName, const std::string &category, int x, int y);
     static void setAnnotations(const std::string& imgName, const std::string &category, int x, int y, QString type);
     static bool is_file_exist(const char *fileName);
-
+    static void writeToFile(const std::string& filename,const std_msgs::Header& msg );
   };
-}
+
+  }
 
 #endif

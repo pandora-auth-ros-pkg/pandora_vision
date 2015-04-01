@@ -1,5 +1,5 @@
 <launch>
 
-	<node name="$(anon pandora_vision_annotator_node)" pkg="pandora_vision_annotator" type="pandora_vision_annotator_node"/>
-	
+     <node name="$(anon pandora_vision_annotator_node)" pkg="pandora_vision_annotator" type="pandora_vision_annotator_node" output="screen"/>
+
 </launch>

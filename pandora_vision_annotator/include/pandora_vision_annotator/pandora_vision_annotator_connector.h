@@ -87,6 +87,7 @@ namespace pandora_vision
 
       std::string package_path;
 
+      std_msgs::Header msgHeader;
       //!< The loader of main GUI QWidget
       CLoader loader_;
 
@@ -118,6 +119,8 @@ namespace pandora_vision
       QString getRosTopic(void);
 
       QString getBagName(void);
+
+      void msgTimeStamp(const std_msgs::Header& msg);
 
       void setImage(QImage &img);
 

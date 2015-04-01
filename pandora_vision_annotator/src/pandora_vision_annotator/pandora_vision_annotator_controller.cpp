@@ -194,7 +194,6 @@ connector_.setFrames(frames);
   }
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
   {
-
     cv_bridge::CvImageConstPtr in_msg;
     cv::Mat temp;
     try
@@ -240,6 +239,7 @@ connector_.setFrames(frames);
     QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
     dest.bits(); // enforce deep copy, see documentation
     connector_.setImage(dest);
+    connector_.msgTimeStamp(msg->header);
     Q_EMIT updateImage();
     }
   }   

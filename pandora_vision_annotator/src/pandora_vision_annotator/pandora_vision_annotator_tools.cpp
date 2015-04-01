@@ -78,6 +78,8 @@ namespace pandora_vision
         outFile.close();
     }
 
+
+
     bool ImgAnnotations::is_file_exist(const char *fileName)
    {
      std::ifstream infile(fileName);
@@ -126,5 +128,23 @@ namespace pandora_vision
       ImgAnnotations::temp.y1 = y;
       ImgAnnotations::secondpoint = true;
       }
+    }
+
+    void ImgAnnotations::writeToFile(const std::string& filename,const std_msgs::Header& msg )
+    {
+      outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
+        if (!outFile)
+            {
+                ROS_ERROR("cannot load file");
+                return;
+            }
+        else
+        {  if(outFile.is_open())
+           {
+             ROS_INFO("Writing to file" );
+             outFile << msg.seq << "," << msg.stamp << "," << msg.frame_id << std::endl;
+           }
+        }
+        outFile.close();
     }
 }
