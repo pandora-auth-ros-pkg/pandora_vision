@@ -48,13 +48,13 @@
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
+  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped,
     pandora_vision_msgs::QRAlertsVectorMsg>
   {
     public:
       explicit QrCodeHandler(const std::string& ns);
       virtual ~QrCodeHandler() {}
-      
+
     private:
       virtual void startTransition(int newState);
       virtual void completeTransition();

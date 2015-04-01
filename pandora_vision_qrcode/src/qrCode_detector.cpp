@@ -39,9 +39,9 @@
 
 #define DEBUG_MODE false
 
-namespace pandora_vision 
+namespace pandora_vision
 {
-  QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) : 
+  QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) :
     Processor<CVMatStamped, POIsStamped>(ns, handler), debug_publish(false)
   {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
@@ -171,16 +171,16 @@ namespace pandora_vision
       debug_show(image);
     }
     image.set_data(NULL, 0);
-    
+
     return qrcode_list;
   }
-  
+
   bool QrCodeDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->header;
     getQrCodeParams();
     output->pois = detectQrCode(input->image);
-    
+
     if (output->pois.empty())
     {
       return false;

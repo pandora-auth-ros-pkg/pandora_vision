@@ -49,10 +49,10 @@ namespace pandora_vision
   {
     public:
       virtual ~QrCodePOI() {}
-    
+
     public:
       std::string qrContent;
-      
+
     public:
       void setContent(const std::string& content)
       {

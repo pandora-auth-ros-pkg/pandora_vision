@@ -37,29 +37,35 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
-#define PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
+#ifndef PANDORA_VISION_COMMON_VISION_HANDLER_H
+#define PANDORA_VISION_COMMON_VISION_HANDLER_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_msgs/QRAlertMsg.h"
-#include "pandora_vision_msgs/QRAlertsVectorMsg.h"
-#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
-#include "pandora_vision_qrcode/qrcode_poi.h"
+
+#include <sensor_msgs/Image.h>
+
+#include "sensor_processor/handler.h"
+
+#include "pandora_vision_common/cv_mat_stamped.h"
+#include "pandora_vision_common/pois_stamped.h"
 
 namespace pandora_vision
 {
-  class QrCodePostProcessor : public VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>
+  template <class VisionAlertMsg>
+  class VisionHandler : public sensor_processor::Handler<sensor_msgs::Image,
+    CVMatStamped, POIsStamped, VisionAlertMsg>
   {
     public:
-      typedef boost::shared_ptr<pandora_vision_msgs::QRAlertsVectorMsg> QRAlertsVectorMsgPtr;
+      explicit VisionHandler(const std::string& ns) :
+        sensor_processor::Handler<sensor_msgs::Image, CVMatStamped,
+        POIsStamped, VisionAlertMsg>(ns) {}
 
-      QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~QrCodePostProcessor();
+      virtual ~VisionHandler() {}
 
-    virtual bool
-      postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output);
+    protected:
+      virtual void startTransition(int newState);
+      virtual void completeTransition();
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
+#endif  // PANDORA_VISION_COMMON_VISION_HANDLER_H

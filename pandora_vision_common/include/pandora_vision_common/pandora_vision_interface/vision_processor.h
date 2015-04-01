@@ -38,82 +38,25 @@
 #ifndef PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
 #define PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
 
-#include <iostream>
 #include <string>
-#include <vector>
-#include <zbar.h>
-#include <opencv2/opencv.hpp>
+
+#include <std_msgs/Header.h>
+
 #include "sensor_processor/processor.h"
+
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_qrcode/qrcode_poi.h"
 
 namespace pandora_vision
 {
-  class QrCodeDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
+  class VisionProcessor : public sensor_processor::Processor<CVMatStamped, POIsStamped>
   {
     public:
-      typedef boost::shared_ptr<QrCodePOI> QrCodePOIPtr;
-
-      QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~QrCodeDetector() {}
-
-      virtual bool
-        process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
-
-      void set_debug(bool flag)
-      {
-        debug_publish = flag;
-      };
-
-      cv::Mat get_debug_frame()
-      {
-        return debug_frame;
-      };
-
-    private:
-      //!< Filter Parameters
-      int gaussiansharpenblur;
-      double gaussiansharpenweight;
-
-      //!< Debug images publisher flag
-      bool debug_publish;
-
-      //!< Input frame
-      cv::Mat input_frame;
-
-      //!< Grayscale frame, processed for QrCode detection
-      cv::Mat gray_frame;
-
-      //!< Frame for debug purposes
-      cv::Mat debug_frame;
-
-      //!< QrCode scanner
-      zbar::ImageScanner scanner;
-
-      //!< List of detected qrcodes
-      std::vector<POIPtr> qrcode_list;
-
-      /**
-       * @brief Get parameters referring to Qrcode detection algorithm
-       * @return void
-       */
-      void getQrCodeParams();
-
-      /**
-        @brief Detects qrcodes and stores them in a vector.
-        @param frame [cv::Mat] The image in which the QRs are detected
-        @return void
-       **/
-      std::vector<POIPtr> detectQrCode(cv::Mat input_frame);
-
-      /**
-        @brief Creates view for debugging purposes.
-        @param image [zbar::Image&] The image
-        @return void
-       **/
-      void debug_show(const zbar::Image&);
+      VisionProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+        sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler) {}
+      virtual ~VisionProcessor() {}
   };
+
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
