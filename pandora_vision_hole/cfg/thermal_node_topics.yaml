@@ -1,3 +1,2 @@
 subscribed_topics:
-  #thermal_image_topic: raspbery
-  thermal_image_topic: /camera/rgb/image_raw
+  thermal_image_topic: /flir/raspberry/image

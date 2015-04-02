@@ -43,6 +43,7 @@
 #include "utils/message_conversions.h"
 #include "utils/wavelets.h"
 #include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
+#include "std_msgs/UInt8MultiArray.h"
 
 
 /**
@@ -89,10 +90,19 @@ namespace pandora_vision
         The thermal image message received by the thermal camera is unpacked
         in a cv::Mat image.
         Holes are then located inside this image.
-        @param msg [const sensor_msgs::Image&] The thermal image message
+        @param msg [const std_msgs::UInt8MultiArray&] The thermal image message
         @return void
        **/
-      void inputThermalImageCallback(const sensor_msgs::Image& msg);
+      void inputThermalImageCallback(const std_msgs::UInt8MultiArray& msg);
+
+      /**
+       @brief Obtain the Thermal image. Since the image is in a format of
+       std_msgs::Uint8MultiArray, it has to be transformed into a cv format in order
+       to be processed. Its cv format will be CV_8UC1.
+       @param msg[const std_msgs::UInt8MultiArray&] 
+       @return cv::Mat
+      **/
+      cv::Mat convertRawToMat(const std_msgs::UInt8MultiArray& msg); 
 
       /**
         @brief Acquires topics' names needed to be subscribed by the thermal node.

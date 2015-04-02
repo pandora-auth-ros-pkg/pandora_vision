@@ -82,16 +82,16 @@ namespace pandora_vision
 
 
   /**
-    @brief Callback for the thermal image received by the synchronizer node.
+    @brief Callback for the thermal image received by the camera.
 
-    The depth image message received by the synchronizer node is unpacked
-    in a cv::Mat image and stripped of its noise.
+    The thermal image message received by the camera is unpacked
+    in a cv::Mat image.
     Holes are then located inside this image and information about them,
     along with the denoised image, is then sent to the hole fusion node
-    @param msg [const sensor_msgs::Image&] The depth image message
+    @param msg [const std_msgs::UInt16MultiArray&] The thermal image message
     @return void
    **/
-  void Thermal::inputThermalImageCallback(const sensor_msgs::Image& msg)
+  void Thermal::inputThermalImageCallback(const std_msgs::UInt8MultiArray&  msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputThermalImageCallback", "", true);
@@ -99,16 +99,11 @@ namespace pandora_vision
 
     ROS_INFO_NAMED(PKG_NAME, "Thermal node callback");
 
-    // Obtain the Thermal image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be CV_32FC1.
-    cv::Mat thermalImage;
-    //MessageConversions::extractImageFromMessage(msg, &thermalImage,
-      //sensor_msgs::image_encodings::TYPE_32FC1);
+    //Convert thermal raw data to cv::Mat
+    cv::Mat thermalImage = convertRawToMat(msg);
+   
 
-    //-------------------//
-    thermalImage = cv::imread("/home/manos/Desktop/thermal0269.pgm", CV_LOAD_IMAGE_GRAYSCALE);
-    cv::resize(thermalImage, thermalImage, cv::Size(640, 480));
+    //cv::resize(thermalImage, thermalImage, cv::Size(640, 480));
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
@@ -143,6 +138,31 @@ namespace pandora_vision
     return;
   }
 
+  /**
+    @brief Obtain the Thermal image. Since the image is in a format of
+    std_msgs::Uint8MultiArray, it has to be transformed into a cv format in order
+    to be processed. Its cv format will be CV_8UC1.
+    @param msg[const std_msgs::UInt8MultiArray&] 
+    @return cv::Mat
+   **/
+  cv::Mat Thermal::convertRawToMat(const std_msgs::UInt8MultiArray& msg)
+  {
+    int width =msg.layout.dim[0].size;
+    int height = msg.layout.dim[1].size;
+
+
+    cv::Mat thermalImage=cv::Mat::zeros(height, width, CV_8UC1);
+   
+
+    for(int i=0; i<height; i++)
+    {
+      for(int j=0; j<width; j++)
+      {
+        thermalImage.data[i*width + j]= msg.data[i*width + j];
+      }
+    }
+    return thermalImage;
+  }
 
 
   /**
@@ -162,8 +182,8 @@ namespace pandora_vision
         ns + "/thermal_camera_node/subscribed_topics/thermal_image_topic",
         thermalImageTopic_ ))
     {
-      // Make the topic's name absolute - uncomment this!
-      //thermalImageTopic_ = ns + "/" + thermalImageTopic_;
+      
+      thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Subscribed to the input thermal image");
