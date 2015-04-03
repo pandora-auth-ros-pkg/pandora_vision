@@ -41,6 +41,10 @@
 #define PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
 
 #include <string>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include "pandora_common_msgs/GeneralAlertInfoVector.h"
 #include "pandora_vision_msgs/QRAlertMsg.h"
 #include "pandora_vision_msgs/QRAlertsVectorMsg.h"
@@ -53,12 +57,21 @@ namespace pandora_vision
   {
     public:
       typedef boost::shared_ptr<pandora_vision_msgs::QRAlertsVectorMsg> QRAlertsVectorMsgPtr;
+      typedef boost::shared_ptr<cv::Mat> CVMatPtr;
 
       QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
       virtual ~QrCodePostProcessor();
-
+      
+      void setDebugFrame(const cv::Mat& frame);
+      
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output);
+      
+    private:
+      image_transport::Publisher debugPublisher_;
+      
+      bool debugQrCode_;
+      CVMatPtr debugFrame_;
   };
 }  // namespace pandora_vision
 
