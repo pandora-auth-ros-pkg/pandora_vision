@@ -101,9 +101,7 @@ namespace pandora_vision
 
     //Convert thermal raw data to cv::Mat
     cv::Mat thermalImage = convertRawToMat(msg);
-   
-
-    //cv::resize(thermalImage, thermalImage, cv::Size(640, 480));
+    
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
@@ -144,21 +142,19 @@ namespace pandora_vision
     to be processed. Its cv format will be CV_8UC1.
     @param msg[const std_msgs::UInt8MultiArray&] 
     @return cv::Mat
-   **/
+   */
   cv::Mat Thermal::convertRawToMat(const std_msgs::UInt8MultiArray& msg)
   {
-    int width =msg.layout.dim[0].size;
-    int height = msg.layout.dim[1].size;
+    int width = msg.layout.dim[1].size;
+    int height = msg.layout.dim[0].size;
 
+    cv::Mat thermalImage=cv::Mat::zeros(width, height, CV_8UC1);
 
-    cv::Mat thermalImage=cv::Mat::zeros(height, width, CV_8UC1);
-   
-
-    for(int i=0; i<height; i++)
+    for(int i = 0; i<width; i++)
     {
-      for(int j=0; j<width; j++)
+      for(int j = 0; j<height; j++)
       {
-        thermalImage.data[i*width + j]= msg.data[i*width + j];
+        thermalImage.at<unsigned char>(i, j)= msg.data[i * height + j];
       }
     }
     return thermalImage;
@@ -182,8 +178,9 @@ namespace pandora_vision
         ns + "/thermal_camera_node/subscribed_topics/thermal_image_topic",
         thermalImageTopic_ ))
     {
-      
-      thermalImageTopic_ = ns + "/" + thermalImageTopic_;
+    
+    // Make topic's name absolute  
+     // thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Subscribed to the input thermal image");

@@ -1,2 +1,2 @@
 subscribed_topics:
-  thermal_image_topic: /flir/raspberry/image
+  thermal_image_topic: /flir_raspberry/image
