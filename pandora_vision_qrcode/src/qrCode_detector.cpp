@@ -42,10 +42,33 @@
 namespace pandora_vision
 {
   QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    Processor<CVMatStamped, POIsStamped>(ns, handler), debug_publish(false)
+    Processor<CVMatStamped, POIsStamped>(ns, handler)
   {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
     scanner.set_config(zbar::ZBAR_QRCODE, zbar::ZBAR_CFG_ENABLE, 1);
+    
+    std::string debugTopic;
+    
+    if (this->accessPublicNh()->getParam("debugQrCode", debugQrcode_))
+      ROS_DEBUG_STREAM("debugQrCode : " << debugQrcode_);
+    else
+    {
+      debugQrcode_ = false;
+      ROS_DEBUG_STREAM("debugQrCode : " << debugQrcode_);
+    }
+    
+    if(debugQrcode_)
+    {    
+      //! Advertise topics for debugging if we are in debug mode
+      if (this->accessPublicNh()->getParam("debug_qrcode_topic", debugTopic))
+      {
+        debugPublisher_ = image_transport::ImageTransport(*this->accessPublicNh()).advertise(debugTopic, 1);
+      }
+      else
+      {
+        ROS_WARN("Cannot find qrcode debug show topic");
+      }
+    }
   }
 
   /**
@@ -166,7 +189,7 @@ namespace pandora_vision
       qrcode_list.push_back(qrCodePOIPtr);
     }
 
-    if (debug_publish)
+    if (debugQrcode_)
     {
       debug_show(image);
     }
@@ -180,6 +203,14 @@ namespace pandora_vision
     output->header = input->header;
     getQrCodeParams();
     output->pois = detectQrCode(input->image);
+    
+    if (debugQrcode_)
+    {
+      cv_bridge::CvImage qrcodeDebug;
+      qrcodeDebug.encoding = sensor_msgs::image_encodings::MONO8;
+      qrcodeDebug.image = debug_frame.clone();
+      debugPublisher_.publish(qrcodeDebug.toImageMsg());
+    }
 
     if (output->pois.empty())
     {

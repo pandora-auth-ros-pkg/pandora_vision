@@ -43,6 +43,10 @@
 #include <vector>
 #include <zbar.h>
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
@@ -63,7 +67,7 @@ namespace pandora_vision
 
       void set_debug(bool flag)
       {
-        debug_publish = flag;
+        debugQrcode_ = flag;
       };
 
       cv::Mat get_debug_frame()
@@ -77,7 +81,7 @@ namespace pandora_vision
       double gaussiansharpenweight;
 
       //!< Debug images publisher flag
-      bool debug_publish;
+      bool debugQrcode_;
 
       //!< Input frame
       cv::Mat input_frame;
@@ -93,6 +97,9 @@ namespace pandora_vision
 
       //!< List of detected qrcodes
       std::vector<POIPtr> qrcode_list;
+      
+      //!< Debug publisher for QrCodeDetector
+      image_transport::Publisher debugPublisher_;
 
       /**
        * @brief Get parameters referring to Qrcode detection algorithm

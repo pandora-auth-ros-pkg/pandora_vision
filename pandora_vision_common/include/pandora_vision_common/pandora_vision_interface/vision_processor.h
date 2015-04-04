@@ -56,7 +56,6 @@ namespace pandora_vision
         sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler) {}
       virtual ~VisionProcessor() {}
   };
-
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H

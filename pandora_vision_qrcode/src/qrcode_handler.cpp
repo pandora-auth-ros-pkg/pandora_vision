@@ -44,11 +44,6 @@ namespace pandora_vision
   QrCodeHandler::QrCodeHandler(const std::string& ns) : sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, 
     POIsStamped, pandora_vision_msgs::QRAlertsVectorMsg>(ns)
   {
-    boost::shared_ptr<QrCodePostProcessor> postProcPtr(
-        boost::dynamic_pointer_cast<QrCodePostProcessor>(postProcPtr_));
-    boost::shared_ptr<QrCodeDetector> processorPtr(
-        boost::dynamic_pointer_cast<QrCodeDetector>(processorPtr_));
-    postProcPtr->setDebugFrame(processorPtr->get_debug_frame());
   }
   
   void QrCodeHandler::startTransition(int newState)
@@ -80,7 +75,6 @@ namespace pandora_vision
       ros::shutdown();
       return;
     }
-
     previousState_ = currentState_;
     transitionComplete(currentState_);
   }
