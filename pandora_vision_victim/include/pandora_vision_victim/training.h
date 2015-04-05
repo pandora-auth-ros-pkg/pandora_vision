@@ -182,6 +182,16 @@ namespace pandora_vision
     @return void
     **/
     void saveToFile(std::string file_name, std::string var_name, cv::Mat var);
+    
+    /**
+    @brief Function that saves a variable to a file
+    @param file_name [std::string] : name of the file to be created
+    @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
+    @param labels_mat [cv::Mat] : name of the mat of labels to be saved to the file
+    @return void
+    **/
+    void saveToCSV(const std::string& file_name, const cv::Mat& training_mat, const cv::Mat& labels_mat);
+
 
     /**
     @brief Function that loads the necessary files for the training

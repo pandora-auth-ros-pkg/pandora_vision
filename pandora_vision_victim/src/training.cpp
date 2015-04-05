@@ -299,7 +299,13 @@ namespace pandora_vision
 
     std::cout << labels_mat_file_stream.str() << std::endl <<
         " " << labels_mat.size() << std::endl;
-
+   
+    
+    std::string training_matrix_csv_file;
+    training_matrix_csv_file = "rgb_training_matrix.csv";
+    training_mat_file_stream.str("");
+    training_mat_file_stream << package_path << "/data/" << training_matrix_csv_file;
+    saveToCSV(training_mat_file_stream.str(), training_mat, labels_mat);
   }
 
   /**
@@ -419,7 +425,12 @@ namespace pandora_vision
 
     std::cout << test_labels_mat_file_stream.str() << std::endl <<
         " " << test_labels_mat.size() << std::endl;
-
+ 
+    std::string test_matrix_csv_file;
+    test_matrix_csv_file = "rgb_test_matrix.csv";
+    test_mat_file_stream.str(" ");
+    test_mat_file_stream << package_path << "/data/" << test_matrix_csv_file;
+    saveToCSV(test_mat_file_stream.str(), test_mat, test_labels_mat);
   }
 
   /**
@@ -625,6 +636,52 @@ namespace pandora_vision
     fs << var_name << var;
     fs.release();
   }
+  
+  /**
+  @brief Function that saves a variable to a file
+  @param file_name [std::string] : name of the file to be created
+  @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
+  @param labels_mat [cv::Mat] : name of the mat of labels to be saved to the file
+  @return void
+  **/
+  void SvmTraining::saveToCSV(const std::string& file_name, const cv::Mat& training_mat, const cv::Mat& labels_mat)
+  {
+    std::ofstream outFile;
+    outFile.open(file_name.c_str(), std::ofstream::out | std::ofstream::app);
+    if (!outFile)
+    {
+      ROS_ERROR("cannot load file");
+      return;
+    }
+    else
+    {  
+      if(outFile.is_open())
+      {
+        for(int kk = 0; kk < training_mat.cols; kk++)
+        {
+          outFile <<"a" <<kk ;
+          if(kk < training_mat.cols - 1)
+             outFile <<",";
+          else
+            outFile <<std::endl;
+        }
+        for (int ii = 0; ii < training_mat.rows; ii++)
+        {
+          outFile << labels_mat.at<double>(ii) << ",";
+          for(int jj =0; jj < training_mat.cols; jj++)
+          {
+            outFile << training_mat.at<double>(ii,jj);
+            if(jj < training_mat.cols-1)
+              outFile << ",";
+            else
+              outFile << std::endl;
+          }
+        }
+      }
+      outFile.close();
+    }
+  }
+
 
   /**
   @brief Function that loads the necessary files for the training
