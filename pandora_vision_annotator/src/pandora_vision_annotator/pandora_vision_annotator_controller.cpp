@@ -82,12 +82,11 @@ namespace pandora_vision
     //&connector_,SIGNAL(rosTopicGiven()),
     /*this, SLOT(rosTopicGiven()));*/
 
-        QObject::connect(
-      &connector_,SIGNAL(offlineModeGiven()),
-      this, SLOT(offlineModeGiven()));
+     QObject::connect(
+       &connector_,SIGNAL(offlineModeGiven()),
+       this, SLOT(offlineModeGiven()));
   
- 
-        QObject::connect(
+    QObject::connect(
       &connector_,SIGNAL(onlineModeGiven()),
       this, SLOT(onlineModeGiven()));
   
@@ -95,12 +94,13 @@ namespace pandora_vision
       this,SIGNAL(updateImage()),
       &connector_, SLOT(updateImage()));
   }
+
   void CController::offlineModeGiven(void)
   {
-    onlinemode = false;
-    QObject::connect(
-      &connector_,SIGNAL(rosTopicGiven()),
-      this, SLOT(rosTopicGiven()));
+     onlinemode = false;
+     QObject::connect(
+       &connector_,SIGNAL(rosTopicGiven()),
+        this, SLOT(rosTopicGiven()));
   }
 
   void CController::onlineModeGiven(void)
@@ -112,7 +112,6 @@ namespace pandora_vision
   }
 
   
-
   void CController::rosTopicGiven(void)
   {
     QString ros_topic = connector_.getRosTopic();
@@ -126,136 +125,119 @@ namespace pandora_vision
     }
 
     else
-    { QString bag_name = connector_.getBagName();
+    { 
+      QString bag_name = connector_.getBagName();
       std::string  package_path = ros::package::getPath("pandora_vision_annotator");
       std::stringstream bag_path;
       count = 0;
       currentFrame = 0;
       bag_path << package_path << "/data/" <<bag_name.toStdString();
       loadBag(bag_path.str(),ros_topic.toStdString());
-   
-
     }
   }
 
   void CController::loadBag(const std::string& filename, const std::string& topic)
-  {     qDebug("enter loadbag");
-        rosbag::Bag bag;
-        bag.open(filename, rosbag::bagmode::Read);
-        rosbag::View view(bag, rosbag::TopicQuery(topic));
-        // Load all messages into our stereo dataset
-        BOOST_FOREACH(rosbag::MessageInstance const m, view)
-        {
-            sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
-            sensor_msgs::PointCloud2::ConstPtr pc =m.instantiate<sensor_msgs::PointCloud2>();
-            if(img != NULL)
-            receiveImage(img);
-            if (pc != NULL)
-            {
-              //sensor_msgs::Image image_;
-              //pcl::toROSMsg (*pc, image_);
-              //receiveImage(image_);
-              receivePointCloud(pc);
-            }
-        }
-
-              connector_.setFrames(frames);
-              connector_.setcurrentFrame();
-
-  }
-  void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
-  {pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::fromROSMsg (*msg, *cloud);
-
-      cv::Mat imageFrame;
-if (cloud->isOrganized())
-{       imageFrame = cv::Mat(cloud->height, cloud->width, CV_8UC3);
+  {     
+    qDebug("enter loadbag");
+    rosbag::Bag bag;
+    bag.open(filename, rosbag::bagmode::Read);
+    rosbag::View view(bag, rosbag::TopicQuery(topic));
+    // Load all messages into our stereo dataset
+    BOOST_FOREACH(rosbag::MessageInstance const m, view)
     {
-
-        for (int h = 0; h < imageFrame.rows; h++)
-        {
-            for (int w = 0; w < imageFrame.cols; w++)
-            {
-                pcl::PointXYZRGB point = cloud->at(w, h);
-
-                Eigen::Vector3i rgb = point.getRGBVector3i();
-
-                imageFrame.at<cv::Vec3b>(h,w)[2] = rgb[2];
-                imageFrame.at<cv::Vec3b>(h,w)[1] = rgb[1];
-                imageFrame.at<cv::Vec3b>(h,w)[0] = rgb[0];
-            }
-        }
+      sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
+      sensor_msgs::PointCloud2::ConstPtr pc =m.instantiate<sensor_msgs::PointCloud2>();
+      if(img != NULL)
+       receiveImage(img);
+      if (pc != NULL)
+      {
+        //sensor_msgs::Image image_;
+        //pcl::toROSMsg (*pc, image_);
+        //receiveImage(image_);
+        receivePointCloud(pc);
+      }
     }
-} frames.push_back(imageFrame);
-connector_.setFrames(frames);
-              connector_.setcurrentFrame();
 
+    connector_.setFrames(frames);
+    connector_.setcurrentFrame();
 
   }
+
+  void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
+  {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::fromROSMsg (*msg, *cloud);
+    cv::Mat imageFrame;
+    if (cloud->isOrganized())
+    {       
+      imageFrame = cv::Mat(cloud->height, cloud->width, CV_8UC3);
+      for (int h = 0; h < imageFrame.rows; h++)
+      {
+        for (int w = 0; w < imageFrame.cols; w++)
+        {
+          pcl::PointXYZRGB point = cloud->at(w, h);
+          Eigen::Vector3i rgb = point.getRGBVector3i();
+          imageFrame.at<cv::Vec3b>(h,w)[2] = rgb[2];
+          imageFrame.at<cv::Vec3b>(h,w)[1] = rgb[1];
+          imageFrame.at<cv::Vec3b>(h,w)[0] = rgb[0];
+        }
+      }
+    } 
+    frames.push_back(imageFrame);
+    connector_.setFrames(frames);
+    connector_.setcurrentFrame();
+  }
+
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImageConstPtr in_msg;
     cv::Mat temp;
     try
+    {
+      in_msg = cv_bridge::toCvCopy(msg);
+      if(msg->encoding == "8UC1")
       {
-        in_msg = cv_bridge::toCvCopy(msg);
-        if(msg->encoding == "8UC1")
-   	    {
-   		  cv::cvtColor(in_msg->image, temp, CV_GRAY2RGB);
-        }
-
-        else if (msg->encoding == "16UC1" || msg->encoding == "32FC1")
-
-   	    {
-          double min, max;
-          cv::minMaxLoc(in_msg->image, &min, &max);
-   	      cv::Mat img_scaled_8u;
-          cv::Mat(in_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
-          cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
-        }
-        else if(msg->encoding == "rgb8" || msg->encoding == "bgr8" )
-        {
-          in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-          temp = in_msg->image;
-          cv::cvtColor(in_msg->image, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
-        }
-
-        }
-
-      catch(cv_bridge::Exception& e)
-      {
-        qWarning("CController::receiveImage() while trying to convert image from '%s' to 'rgb8' an exception was thrown ((%s)", msg->encoding.c_str(), e.what());
-        //connector_.setImage((const uchar *)QImage());
-        return;
+        cv::cvtColor(in_msg->image, temp, CV_GRAY2RGB);
       }
-   if(!onlinemode)
-   {
+      else if (msg->encoding == "16UC1" || msg->encoding == "32FC1")
+      {
+      
+        double min, max;
+        cv::minMaxLoc(in_msg->image, &min, &max);
+   	cv::Mat img_scaled_8u;
+        cv::Mat(in_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
+        cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
+      }
+      else if(msg->encoding == "rgb8" || msg->encoding == "bgr8" )
+      {
+        in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        temp = in_msg->image;
+        cv::cvtColor(in_msg->image, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
+      }
+
+    }
+    catch(cv_bridge::Exception& e)
+    {
+      qWarning("CController::receiveImage() while trying to convert image from '%s' to 'rgb8' an exception was thrown ((%s)", msg->encoding.c_str(), e.what());
+      //connector_.setImage((const uchar *)QImage());
+      return;
+    }
+    if(!onlinemode)
+    {
       count++;
       qDebug("CALLBACK %d", count);
       frames.push_back(temp);
-  }
-   else
-    {
-    QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    dest.bits(); // enforce deep copy, see documentation
-    connector_.setImage(dest);
-    connector_.msgTimeStamp(msg->header);
-    Q_EMIT updateImage();
     }
-  }   
-void CController::connectFrame()
-{
-    qDebug("%ld",frames.size());
-    for(int i = 0; i < frames.size(); i++)
+    else
     {
-      QImage dest((const uchar *) frames[currentFrame].data, frames[currentFrame].cols, frames[currentFrame].rows, frames[currentFrame].step, QImage::Format_RGB888);
+      QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
       connector_.setImage(dest);
+      connector_.msgTimeStamp(msg->header);
       Q_EMIT updateImage();
-      //currentFrame++;
     }
+  }   
 
-}
   /**
   @brief Initializes the ROS spin and Qt threads
   @return bool

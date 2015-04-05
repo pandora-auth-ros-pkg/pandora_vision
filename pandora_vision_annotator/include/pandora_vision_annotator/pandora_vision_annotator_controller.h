@@ -115,7 +115,6 @@ namespace pandora_vision
 
       void receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg);
       void receiveImage(const sensor_msgs::ImageConstPtr& msg);
-      void connectFrame();
       void loadBag(const std::string& filename, const std::string& topic);
 
 

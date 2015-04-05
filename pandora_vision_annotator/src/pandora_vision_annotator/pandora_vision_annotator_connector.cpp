@@ -115,25 +115,7 @@ void CConnector::onlineRadioButtonChecked(void)
   QObject::connect(
     loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
     this,SLOT(rosTopicPushButtonTriggered()));
-  QObject::connect(
-      loader_.victimPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(victimPushButtonTriggered()));
-    QObject::connect(
-      loader_.hazmatPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(hazmatPushButtonTriggered()));
-    QObject::connect(
-      loader_.landoltcPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(landoltcPushButtonTriggered()));
-    QObject::connect(
-      loader_.qrPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(qrPushButtonTriggered()));
-    QObject::connect(
-      loader_.submitPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(submitPushButtonTriggered()));
-    QObject::connect(
-      loader_.clearPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(clearPushButtonTriggered()));
-    Q_EMIT onlineModeGiven();
+     Q_EMIT onlineModeGiven();
     state_ = ONLINE;
   
 }
@@ -249,7 +231,7 @@ void CConnector::realTimeRadioButtonChecked(void)
       if(event->type() == QEvent::MouseButtonPress)
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
-        std::string img_name = "frame000" + boost::to_string(currFrame) + ".png";
+        std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
         //qDebug() << "load Image" << img_name;
         const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );
@@ -307,10 +289,10 @@ void CConnector::realTimeRadioButtonChecked(void)
                case HAZMAT_CLICK:
                   {
                     loader_.hazmatCoordsLabel->setText(
-                     loader_.hazmatCoordsLabel->text() + QString("[") +
+                    loader_.hazmatCoordsLabel->text() + QString("[") +
                      QString().setNum(p.x()) + QString(",") +
                      QString().setNum(p.y() - diff) + QString("]"));
-                    QString type =loader_.hazmatInfoLineEdit->text();
+                    std::string type =loader_.hazmatInfoLineEdit->text().toStdString();
                     ImgAnnotations::setAnnotations(img_name,"Hazmat", p.x(), p.y()-diff,type);
                     bbox_ready[2]++;
                     if(bbox_ready[2] == 2)
@@ -368,7 +350,7 @@ void CConnector::realTimeRadioButtonChecked(void)
   { 
     std::stringstream file;
     file << package_path << "/data/annotations.txt";
-    if(ImgAnnotations::is_file_exist(file.str().c_str()))
+    if(ImgAnnotations::is_file_exist(file.str().c_str()) && currFrame == 0)
     {
       remove(file.str().c_str());
 
@@ -396,42 +378,60 @@ void CConnector::realTimeRadioButtonChecked(void)
   {
     if(currFrame != frames.size()-1)
     {
-    currFrame++;
-    setcurrentFrame();
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      currFrame++;
+      std::string img_name = "frame" + boost::to_string(currFrame);
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      setcurrentFrame();
+      drawBox();
     }
   }
   void CConnector::previousFramePushButtonTriggered(void)
   {
     if(currFrame != 0)
     {
-     currFrame--;
-     setcurrentFrame();
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      currFrame--;
+      std::string img_name = "frame" + boost::to_string(currFrame);
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      setcurrentFrame();
+      drawBox();
     }
   }
   void CConnector::drawBox()
   {
     //annImage_ = localImage_.copy();
-    if(ImgAnnotations::annPerImage == 0)
-    backupImage_=localImage_.copy();
+    //if(ImgAnnotations::annPerImage == 0)
+    //backupImage_=localImage_.copy();
     QPainter painter(&localImage_);
     painter.setRenderHint(QPainter::Antialiasing);
     QPen pen;
     pen.setWidth( 3 );
     pen.setBrush(Qt::green);
     painter.setPen(pen);
-    for (int i = 0; i < bbox_ready.size(); i++)
-    loader_.statusLabel->setText("drawing "+ QString().setNum(ImgAnnotations::annPerImage)+" annotation\n"
-                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1)+"," 
-                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1)+"," 
-                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2)+","
-                                 +QString().setNum(ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2));
-       QPoint p1(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
-              ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1);
-    QPoint p2(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2,
-              ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2);
-    QRect r(p1,p2);
-    painter.drawRect(r);
-    updateImage();
- }
+    for (int i = 0; i < ImgAnnotations::annotations.size(); i++)
+    {
+      loader_.statusLabel->setText("drawing "+ QString().setNum(i+1)+" annotation\n"
+                                 +QString().setNum(ImgAnnotations::annotations[i].x1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[i].y1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[i].x2)+","
+                                 +QString().setNum(ImgAnnotations::annotations[i].y2));
+      QPoint p1(ImgAnnotations::annotations[i].x1,
+              ImgAnnotations::annotations[i].y1);
+      QPoint p2(ImgAnnotations::annotations[i].x2,
+              ImgAnnotations::annotations[i].y2);
+      QRect r(p1,p2);
+      painter.drawRect(r);
+      updateImage();
+    }
 
+  }
 }

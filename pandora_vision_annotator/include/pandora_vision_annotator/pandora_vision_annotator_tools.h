@@ -40,6 +40,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstdlib>
 
 
@@ -119,7 +120,7 @@ namespace pandora_vision
       int y1;
       int x2;
       int y2;
-      QString type;
+      std::string type;
   };
 
   class ImgAnnotations
@@ -132,11 +133,12 @@ namespace pandora_vision
     static int annPerImage;
     static bool secondpoint;
     static void writeToFile(const std::string& filename);
-    static void readFromFile();
     static void setAnnotations(const::std::string& imgName, const std::string &category, int x, int y);
-    static void setAnnotations(const std::string& imgName, const std::string &category, int x, int y, QString type);
+    static void setAnnotations(const std::string& imgName, const std::string &category, int x, int y, const std::string&  type);
     static bool is_file_exist(const char *fileName);
     static void writeToFile(const std::string& filename,const std_msgs::Header& msg );
+    static void readFromFile(const std::string& filename, const std::string& frame);
+
   };
 
   }

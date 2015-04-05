@@ -38,113 +38,169 @@
 #include "pandora_vision_annotator/pandora_vision_annotator_tools.h"
 
 namespace pandora_vision
-{ int ImgAnnotations::annPerImage = 0;
+{ 
+  int ImgAnnotations::annPerImage = 0;
   bool ImgAnnotations::secondpoint = false;
   std::vector<annotation> ImgAnnotations::annotations;
   std::ofstream ImgAnnotations::outFile;
+  std::ifstream ImgAnnotations::inFile;
   annotation ImgAnnotations::temp;
-    void ImgAnnotations::writeToFile(const std::string& filename)
+  void ImgAnnotations::readFromFile(const std::string& filename, const std::string& frame)
+  {
+    std::string line,x1,y1,x2,y2;
+    inFile.open(filename.c_str());
+  int  i = 0;
+    if (!inFile)
     {
-        outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
-        if (!outFile)
-            {
-                qFatal("cannot load file");
-                return;
-            }
-        else
-        {  if(outFile.is_open())
-           {
-            qDebug("Writing to file" );
-            for (unsigned int i = 0; i < annotations.size(); i++)
-            {
-                outFile << ImgAnnotations::annotations[i].imgName << ","
-                       << ImgAnnotations::annotations[i].category << ","
-                       << ImgAnnotations::annotations[i].x1 << ","
-                       << ImgAnnotations::annotations[i].y1 << ","
-                       << ImgAnnotations::annotations[i].x2 << ","
-                       << ImgAnnotations::annotations[i].y2;
-                if (ImgAnnotations::annotations[i].category == "Hazmat")
-                  outFile << ","<< ImgAnnotations::annotations[i].type.toStdString();
-                outFile << std::endl;
-               qDebug("%s %s %d %d %d %d\n",ImgAnnotations::annotations[i].imgName.c_str(),
-                      ImgAnnotations::annotations[i].category.c_str(),
-                      ImgAnnotations::annotations[i].x1,
-                      ImgAnnotations::annotations[i].y1,
-                      ImgAnnotations::annotations[i].x2,
-                      ImgAnnotations::annotations[i].y2);
-            }
-            }
-        }
-        outFile.close();
+      ROS_ERROR("cannot load file");
+      return;
     }
-
-
-
-    bool ImgAnnotations::is_file_exist(const char *fileName)
-   {
-     std::ifstream infile(fileName);
-     return infile.good();
-   }
-
-
-    void ImgAnnotations::setAnnotations(const std::string &imgName, const std::string &category, int x, int y)
+    else
     {
-      if(secondpoint)
+      if(inFile.is_open())
       {
-        ImgAnnotations::temp.x2 = x;
-        ImgAnnotations::temp.y2 = y;
-        ImgAnnotations::annotations.push_back(temp);
-        qDebug(" Annotations in current frame %ld",ImgAnnotations::annotations.size());
-        //ImgAnnotations::annPerImage++;
-        ImgAnnotations::secondpoint = false;
+        ROS_INFO("loading from file");
+        while(std::getline(inFile,line))
+        {  
+
+          if(line.substr(0,6) == frame)
+          {
+            std::stringstream ss(line);
+            ROS_INFO("stringstream %s",ss.str().c_str());
+            getline (ss, ImgAnnotations::temp.imgName,',');
+            getline (ss, ImgAnnotations::temp.category,',');
+            getline (ss, x1,',');
+            getline (ss, y1,',');
+            getline (ss, x2,',');
+            if(ImgAnnotations::temp.category == "Hazmat")
+            {
+              getline (ss, y2,',');
+              getline (ss, ImgAnnotations::temp.type);
+            }           
+            else
+              getline (ss, y2);
+            ImgAnnotations::temp.x1 = atoi(x1.c_str());
+            ImgAnnotations::temp.y1 = atoi(y1.c_str());
+            ImgAnnotations::temp.x2 = atoi(x2.c_str());
+            ImgAnnotations::temp.y2 = atoi(y2.c_str());
+
+            ROS_INFO_STREAM("Loading Annotation no: " << i+1 <<" for "<< frame << "\n");
+            ROS_INFO_STREAM(ImgAnnotations::temp.imgName << ","
+                            << ImgAnnotations::temp.category << ","
+                            << ImgAnnotations::temp.x1 << ","
+                            << ImgAnnotations::temp.y1<< ","
+                            << ImgAnnotations::temp.x2 << ","
+                            << ImgAnnotations::temp.y2 << "\n" );
+            ImgAnnotations::annotations.push_back(temp);
+            i++;
+        
+          }          
+        }
       }
-      else
+    }
+    inFile.close(); 
+  }
+
+  void ImgAnnotations::writeToFile(const std::string& filename)
+  {
+    outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
+    if (!outFile)
+    {
+      ROS_ERROR("cannot load file");
+      return;
+    }
+    else
+    {  
+      if(outFile.is_open())
       {
+        ROS_INFO("Writing to file" );
+        for (unsigned int i = 0; i < annotations.size(); i++)
+        {
+          outFile << ImgAnnotations::annotations[i].imgName << ","
+                  << ImgAnnotations::annotations[i].category << ","
+                  << ImgAnnotations::annotations[i].x1 << ","
+                  << ImgAnnotations::annotations[i].y1 << ","
+                  << ImgAnnotations::annotations[i].x2 << ","
+                  << ImgAnnotations::annotations[i].y2;
+          if (ImgAnnotations::annotations[i].category == "Hazmat")
+            outFile << ","<< ImgAnnotations::annotations[i].type;
+          outFile << std::endl;
+          qDebug("%s %s %d %d %d %d\n",ImgAnnotations::annotations[i].imgName.c_str(),
+                  ImgAnnotations::annotations[i].category.c_str(),
+                  ImgAnnotations::annotations[i].x1,
+                  ImgAnnotations::annotations[i].y1,
+                  ImgAnnotations::annotations[i].x2,
+                  ImgAnnotations::annotations[i].y2);
+         }
+      }
+    }
+    outFile.close();
+  }
+  bool ImgAnnotations::is_file_exist(const char *fileName)
+  {
+    std::ifstream infile(fileName);
+    return infile.good();
+  }
+
+  void ImgAnnotations::setAnnotations(const std::string &imgName, const std::string &category, int x, int y)
+  {
+    if(secondpoint)
+    {
+      ImgAnnotations::temp.x2 = x;
+      ImgAnnotations::temp.y2 = y;
+      ImgAnnotations::annotations.push_back(temp);
+      qDebug(" Annotations in current frame %ld",ImgAnnotations::annotations.size());
+      //ImgAnnotations::annPerImage++;
+      ImgAnnotations::secondpoint = false;
+    }
+    else
+    {
       ImgAnnotations::temp.imgName =imgName;
       ImgAnnotations::temp.category = category;
       ImgAnnotations::temp.x1 = x;
       ImgAnnotations::temp.y1 = y;
       ImgAnnotations::secondpoint = true;
-      }
     }
-
-    void ImgAnnotations::setAnnotations(const std::string &imgName, const std::string &category, int x, int y, QString type)
+  }
+  
+  void ImgAnnotations::setAnnotations(const std::string &imgName, const std::string &category, int x, int y, const std::string& type)
+  {
+    if(secondpoint)
     {
-      if(secondpoint)
-      {
-        ImgAnnotations::temp.x2 = x;
-        ImgAnnotations::temp.y2 = y;
-        ImgAnnotations::temp.type = type;
-        ImgAnnotations::annotations.push_back(temp);
-        qDebug(" Annotations in current frame %ld",ImgAnnotations::annotations.size());
-        //ImgAnnotations::annPerImage++;
-        ImgAnnotations::secondpoint = false;
-      }
-      else
-      {
+      ImgAnnotations::temp.x2 = x;
+      ImgAnnotations::temp.y2 = y;
+      ImgAnnotations::temp.type = type;
+      ImgAnnotations::annotations.push_back(temp);
+      qDebug(" Annotations in current frame %ld",ImgAnnotations::annotations.size());
+      //ImgAnnotations::annPerImage++;
+      ImgAnnotations::secondpoint = false;
+    }
+    else
+    {
       ImgAnnotations::temp.imgName =imgName;
       ImgAnnotations::temp.category = category;
       ImgAnnotations::temp.x1 = x;
       ImgAnnotations::temp.y1 = y;
       ImgAnnotations::secondpoint = true;
+    }
+  }
+
+  void ImgAnnotations::writeToFile(const std::string& filename,const std_msgs::Header& msg )
+  {
+    outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
+    if (!outFile)
+    {
+      ROS_ERROR("cannot load file");
+      return;
+    }
+    else
+    {
+      if(outFile.is_open())
+      {
+        ROS_INFO("Writing to file" );
+        outFile << msg.seq << "," << msg.stamp << "," << msg.frame_id << std::endl;
       }
     }
-
-    void ImgAnnotations::writeToFile(const std::string& filename,const std_msgs::Header& msg )
-    {
-      outFile.open(filename.c_str(), std::ofstream::out | std::ofstream::app);
-        if (!outFile)
-            {
-                ROS_ERROR("cannot load file");
-                return;
-            }
-        else
-        {  if(outFile.is_open())
-           {
-             ROS_INFO("Writing to file" );
-             outFile << msg.seq << "," << msg.stamp << "," << msg.frame_id << std::endl;
-           }
-        }
-        outFile.close();
-    }
+    outFile.close();
+  }
 }
