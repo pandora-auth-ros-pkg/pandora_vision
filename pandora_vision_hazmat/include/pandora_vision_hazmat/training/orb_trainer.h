@@ -39,82 +39,92 @@
 
 #include "pandora_vision_hazmat/training/planar_pattern_trainer.h"
 
-/** 
- @class OrbTrainer
- @brief Class that uses the ORB algorithm for HAZMAT pattern training.
- **/
-
-class OrbTrainer : public PlanarPatternTrainer
+namespace pandora_vision
 {
-  public:
-
-    /**
-      @brief Constructor for a Hazmat trainer module that uses ORB .
-     **/
-    OrbTrainer() : featureType_("ORB")
-    {
-      featureDetector_ = cv::FeatureDetector::create(featureType_);
-      // Feature Extractor Initialization.
-      featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
-    }
-    virtual ~OrbTrainer()
-    {}
-    /*
-     * @brief: Function used to produce the necessary keypoints and their
-     *          corresponding descriptors for an image. 
-     * @param image[const cv::Mat&] : The images that will be processed to 
-     * extract features and keypoints.
-     * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
-     * store the descriptors of the current image.
-     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
-     * containing the Keypoints detected in the current image.
-     **/
-    void getFeatures(const cv::Mat& image, cv::Mat* descriptors,
-        std::vector<cv::KeyPoint>* keyPoints);   
-    /*
-     * @brief: Function used to produce the necessary keypoints and their
-     *          corresponding descriptors for an image. 
-     * @param images[const std::vector<cv::Mat&>] : The image we want 
-     * to process.
-     * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
-     * used to store the descriptors for each image.
-     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
-     * containing the Keypoints detected in every image.
-     **/
-    virtual void getFeatures(const std::vector<cv::Mat>& images,
-        std::vector<cv::Mat>* descriptors,
-        std::vector<std::vector<cv::KeyPoint> >* keyPoints);
-    /*
-     * @brief: Function used to produce the necessary keypoints and their
-     *          corresponding descriptors for an image. 
-     * @param image[const cv::Mat&] : The images that will be processed to 
-     * extract features and keypoints.
-     * @param descriptors[cv::Mat*]: A pointer to the array that will be used 
-     * to store the descriptors of the current image.
-     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
-     * containing the Keypoints detected in the current image.
-     * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
-     * containing the bounding box for the pattern in the current image.
-     **/  
-    virtual void getFeatures(const cv::Mat& image, cv::Mat *descriptors , 
-        std::vector<cv::KeyPoint> *keyPoints , 
-        std::vector<cv::Point2f> *boundingBox );
-
+  namespace pandora_vision_hazmat
+  {
 
     /** 
-     *  @brief: Returns the type of features that were used to describe 
-     *          the pattern.   
+      @class OrbTrainer
+      @brief Class that uses the ORB algorithm for HAZMAT pattern training.
      **/
-    const std::string getFeatureType()
+
+    class OrbTrainer : public PlanarPatternTrainer
     {
-      return featureType_;
-    }
-  private:
+      public:
 
-    cv::Ptr<cv::FeatureDetector> featureDetector_;
-    cv::Ptr<cv::DescriptorExtractor> featureExtractor_;
-    const std::string featureType_; //!< ID of the algorithm used.
+        /**
+          @brief Constructor for a Hazmat trainer module that uses ORB .
+         **/
+        OrbTrainer() : featureType_("ORB")
+      {
+        featureDetector_ = cv::FeatureDetector::create(featureType_);
+        // Feature Extractor Initialization.
+        featureExtractor_ = cv::DescriptorExtractor::create(featureType_);
+      }
+        virtual ~OrbTrainer()
+        {}
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param image[const cv::Mat&] : The images that will be processed to 
+         * extract features and keypoints.
+         * @param descriptors[cv::Mat*]: A pointer to the array that will be
+         * used to store the descriptors of the current image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in the current image.
+         **/
+        bool getFeatures(const cv::Mat& image, cv::Mat* descriptors,
+            std::vector<cv::KeyPoint>* keyPoints);   
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param images[const std::vector<cv::Mat&>] : The image we want 
+         * to process.
+         * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+         * used to store the descriptors for each image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in every image.
+         **/
+        virtual bool getFeatures(const std::vector<cv::Mat>& images,
+            std::vector<cv::Mat>* descriptors,
+            std::vector<std::vector<cv::KeyPoint> >* keyPoints);
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param image[const cv::Mat&] : The images that will be processed to 
+         * extract features and keypoints.
+         * @param descriptors[cv::Mat*]: A pointer to the array that will be
+         * used  to store the descriptors of the current image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in the current image.
+         * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the
+         * vector containing the bounding box for the pattern in the current
+         * image.
+         **/  
+        virtual bool getFeatures(const cv::Mat& image, cv::Mat *descriptors , 
+            std::vector<cv::KeyPoint> *keyPoints , 
+            std::vector<cv::Point2f> *boundingBox );
 
-};
+
+        /** 
+         *  @brief: Returns the type of features that were used to describe 
+         *          the pattern.   
+         *  @return std::string : The name of the feature.
+         **/
+        std::string getFeatureType()
+        {
+          return featureType_;
+        }
+      private:
+
+        cv::Ptr<cv::FeatureDetector> featureDetector_;
+        cv::Ptr<cv::DescriptorExtractor> featureExtractor_;
+        const std::string featureType_; //!< ID of the algorithm used.
+
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_TRAINING_ORB_TRAINER_H

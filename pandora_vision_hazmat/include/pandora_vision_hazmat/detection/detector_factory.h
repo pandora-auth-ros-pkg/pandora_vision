@@ -38,20 +38,40 @@
 #ifndef PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H
 #define PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H
 
+#include <locale>
 #include "pandora_vision_hazmat/detection/planar_object_detector.h"
 #include "pandora_vision_hazmat/detection/sift_detector.h"
 #include "pandora_vision_hazmat/detection/surf_detector.h"
 #include "pandora_vision_hazmat/detection/orb_detector.h"
-#include <locale>
 
-class DetectorFactory
+namespace pandora_vision
 {
-  public:
+  namespace pandora_vision_hazmat
+  {
+    /** 
+      @class DetectorFactory 
+      @brief The class that is used to produce the detectors. 
+     **/
+    class DetectorFactory
+    {
+      public:
 
-    DetectorFactory(){};
+        /*
+         * @brief Default Constructor
+         */
+        DetectorFactory(){};
+        /*
+         * @brief : The main factory method that creates the different feature
+         * detectors
+         * @param featureType(const std::string&): The name of the feature
+         * that will be used.
+         */
+        PlanarObjectDetector* createDetectorObject(
+            const std::string& featureType);    
+      private:
+    };
 
-    PlanarObjectDetector* createDetectorObject(const std::string& featureType);    
-  private:
-};
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_FACTORY_H

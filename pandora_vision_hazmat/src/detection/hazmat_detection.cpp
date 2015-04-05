@@ -38,108 +38,177 @@
 
 #include "pandora_vision_hazmat/detection/hazmat_detection.h"
 
-HazmatDetectionNode::HazmatDetectionNode()
+namespace pandora_vision
 {
-  ROS_INFO("Starting Hazmat Detection Node!\n");
-  std::string ns = nodeHandle_.getNamespace();
-  if (!nodeHandle_.getParam(ns + "subscriber_topic_names/camera_topic",
-        imageTopic_))
+  namespace pandora_vision_hazmat
   {
-    ROS_ERROR("Could not get the topic name for image subscriber!\n");
-    ROS_BREAK();
-  }
-  imageSubscriber_ = nodeHandle_.subscribe( imageTopic_ , 1 ,
-      &HazmatDetectionNode::imageCallback, this);
-  // Get the path of the current package.
-  std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
-  PlanarObjectDetector::setFileName(packagePath);
-  DetectorFactory factory;
 
-  // Initiliaze the object detector
-  std::string featureType;
-  ROS_INFO("Node name space is : %s \n", ns.c_str());
-  if ( !nodeHandle_.getParam(ns + "/feature_type", featureType) )
-  {
-    ROS_ERROR("Could not get the feature type parameter!\n");
-    ROS_INFO("Initializing default detector!\n");
-    featureType = "SIFT"; 
-  }
-  detector_ = factory.createDetectorObject(featureType);
-  // Check if the detector was initialized.
-  if (detector_ == NULL )
-  {
-    ROS_FATAL("Could not create a detector object!\n");
-    ROS_FATAL("The node will now exit!\n");
-    ROS_BREAK();
-  }
-  ROS_INFO("Created the detector object!\n");
-  
-  // Initialize the alert Publisher.
-  if (!nodeHandle_.getParam(ns + "publisher_topic_names/alert_topic",
-        hazmatTopic_))
-  {
-    ROS_ERROR("Could not get the topic name for the alert publisher!\n");
-    ROS_BREAK();
-  }
-  hazmatPublisher_ = nodeHandle_.advertise<pandora_vision_msgs::HazmatAlertsVectorMsg>(hazmatTopic_, 10);
-
-}
-
-
-void HazmatDetectionNode::imageCallback(const sensor_msgs::Image& inputImage)
-{
-  std::vector<Object> detectedObjects;
-  cv_bridge::CvImagePtr imgPtr;
-  std::stringstream ss;
-  // Convert the image message to an OpenCV image.
-  imgPtr = cv_bridge::toCvCopy(inputImage, sensor_msgs::image_encodings::BGR8);
-  const clock_t begin_time = clock();
-
-  bool found = detector_->detect(imgPtr->image , &detectedObjects);
-  // bool found = detector.detect(frame , &x, &y);
-  double execTime = ( clock () - begin_time ) /  
-    static_cast<double>(CLOCKS_PER_SEC );
-  if (found )
-  {
-    int width = 640;
-    int height = 480;
-    float hfov = 58 * PI/180.0f;
-    float vfov = 45.00 * PI / 180.0f;
-    float x, y;
-    ROS_INFO("Found Hazmat! \n");
-    pandora_vision_msgs::HazmatAlertMsg hazmatMsg;
-    pandora_vision_msgs::HazmatAlertsVectorMsg hazmatVectorMsg;
-    hazmatVectorMsg.header.stamp = inputImage.header.stamp;
-    for (int i = 0 ; i < detectedObjects.size() ; i++)
+    /*
+     * @brief : Default Constructor that initiliazes the hazmat detector and
+     * the necessary ROS objects for communication.
+     */
+    HazmatDetectionNode::HazmatDetectionNode()
     {
-      x = detectedObjects[i].position.x - static_cast<float>(width) / 2;
-      y = static_cast<float>(height) / 2 - detectedObjects[i].position.y;
-      hazmatMsg.yaw = atan(2 * x / width * tan(hfov / 2));
-      hazmatMsg.pitch = atan(2 * y / height * tan(vfov / 2));
-      hazmatMsg.patternType = detectedObjects[i].id;
-      ROS_INFO("%d ", hazmatMsg.patternType);
-      hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
+      ROS_INFO("Starting Hazmat Detection Node!\n");
+
+      debugMsgFlag_ = false;
+      execTimerFlag_ = false;
+
+      std::string ns = nodeHandle_.getNamespace();
+      if (!nodeHandle_.getParam(ns + "subscriber_topic_names/camera_topic",
+            imageTopic_))
+      {
+        ROS_ERROR("Could not get the topic name for image subscriber!\n");
+        ROS_BREAK();
+      }
+      imageSubscriber_ = nodeHandle_.subscribe( imageTopic_ , 1 ,
+          &HazmatDetectionNode::imageCallback, this);
+      // Get the path of the current package.
+      std::string packagePath = ros::package::getPath("pandora_vision_hazmat");   
+
+      PlanarObjectDetector::setFileName(packagePath);
+
+      // Initiliaze the object detector
+      std::string featureType;
+
+      if ( !nodeHandle_.getParam(ns + "/feature_type", featureType) )
+      {
+        ROS_ERROR("Could not get the feature type parameter!\n");
+        ROS_INFO("Initializing default detector!\n");
+        featureType = "SIFT"; 
+      }
+
+      detector_ = factory_.createDetectorObject(featureType);
+
+      // Check if the detector was initialized.
+      if (detector_ == NULL )
+      {
+        ROS_FATAL("Could not create a detector object!\n");
+        ROS_FATAL("The node will now exit!\n");
+        ROS_BREAK();
+      }
+      ROS_INFO("Created the detector object!\n");
+
+      // Initialize the alert Publisher.
+      if (!nodeHandle_.getParam(ns + "publisher_topic_names/alert_topic",
+            hazmatTopic_))
+      {
+        ROS_ERROR("Could not get the topic name for the alert publisher!\n");
+        ROS_BREAK();
+      }
+      hazmatPublisher_ = nodeHandle_.advertise
+        <pandora_vision_msgs::HazmatAlertsVectorMsg>(hazmatTopic_, 10);
+
+      dynamicReconfServer_.setCallback(boost::bind(
+            &HazmatDetectionNode::dynamicReconfigCallback, this, _1, _2));
+
     }
-    ROS_INFO("Number of Hazmats Found = %d .", static_cast<int>(
-          detectedObjects.size()));
-    hazmatPublisher_.publish(hazmatVectorMsg);
-  }  
-  ROS_INFO("Execution Time for the node is : %f!\n", execTime);
-  ss << execTime * 1000;
 
-  cv::putText( imgPtr->image , "Exec Time : " + ss.str() + "ms", 
-      cv::Point( 0 , imgPtr->image.rows ) ,
-      CV_FONT_HERSHEY_PLAIN , 3 , cv::Scalar( 0 , 0 , 255 ) , 3 );
+    /*
+     * @brief : Class method that is used by the dynamic reconfigure server
+     * to change object parameters.
+     * @param config[const pandora_vision_hazmat::DisplayConfig&] :
+     *  The message containing the new configuration for the node.
+     * @param level[uint32_t]: Flag used by the dynamic reconfigure server.
+     *
+     */
+    void HazmatDetectionNode::dynamicReconfigCallback(
+        const ::pandora_vision_hazmat::DisplayConfig& config, uint32_t level)
+    {
+      if (detector_ == NULL)
+      {
+        ROS_ERROR("No detector object created!");
+        return;
+      }
+      // Check if the features type has changed. If yes create a new detector.
+      if ( detector_->getFeaturesName().compare(config.Feature_Type) != 0)
+      {
+        delete detector_;
+        ROS_INFO("[PANDORA_VISION_HAZMAT] : Create new %s detector",
+            config.Feature_Type.c_str());
+        detector_ = factory_.createDetectorObject(config.Feature_Type);
+      }
 
+      detector_->setDisplayResultsFlag(config.Display_Results);
+      detector_->setFeatureTimerFlag(config.Feature_Timer);
+      detector_->setMaskDisplayFlag(config.Mask_Display);
+      this->execTimerFlag_ = config.Execution_Timer;
+      this->debugMsgFlag_ = config.Debug_Messages;
+    }
 
-  // Clear the string stream.
-  ss.str( std::string() );
-  
-  // TO DO : Add visualization flag
-  cv::imshow("Input Image" , imgPtr->image);
-  if ( cv::waitKey(10) >= 0)
-  {
-    ROS_INFO("Goodbye! \n");
-    ros::shutdown();
-  }
-}
+    /*
+     * @brief : Receives an image message and detects the patterns on the 
+     * image, if any are present.
+     * @param imageMsg[const sensor_msgs::Image&] : The image message. 
+     */
+    void HazmatDetectionNode::imageCallback(
+        const sensor_msgs::Image& imageMsg)
+    {
+      std::vector<Object> detectedObjects;
+      cv_bridge::CvImagePtr imgPtr;
+      std::stringstream ss;
+      // Convert the image message to an OpenCV image.
+      imgPtr = cv_bridge::toCvCopy(imageMsg,
+          sensor_msgs::image_encodings::BGR8);
+      const clock_t begin_time = clock();
+
+      // Set the frame dimensions.
+      PlanarObjectDetector::setDims(imgPtr->image);
+      bool found = detector_->detect(imgPtr->image , &detectedObjects);
+      // bool found = detector.detect(frame , &x, &y);
+      double execTime = ( clock () - begin_time ) /  
+        static_cast<double>(CLOCKS_PER_SEC );
+      if (found )
+      {
+        int width = imgPtr->image.cols;
+        int height = imgPtr->image.rows;
+        float hfov = 58 * PI/180.0f;
+        float vfov = 45.00 * PI / 180.0f;
+        float x, y;
+        pandora_vision_msgs::HazmatAlertMsg hazmatMsg;
+        pandora_vision_msgs::HazmatAlertsVectorMsg hazmatVectorMsg;
+        hazmatVectorMsg.header.stamp = imageMsg.header.stamp;
+        for (int i = 0 ; i < detectedObjects.size() ; i++)
+        {
+          x = detectedObjects[i].position.x - static_cast<float>(width) / 2;
+          y = static_cast<float>(height) / 2 - detectedObjects[i].position.y;
+          hazmatMsg.yaw = atan(2 * x / width * tan(hfov / 2));
+          hazmatMsg.pitch = atan(2 * y / height * tan(vfov / 2));
+          hazmatMsg.patternType = detectedObjects[i].id;
+          hazmatVectorMsg.hazmatAlerts.push_back(hazmatMsg);
+        }
+
+        // Check if the debug message printing is enabled.
+        if ( debugMsgFlag_)
+        {
+          for (int i = 0 ; i < detectedObjects.size() ; i++)
+            ROS_INFO("[PANDORA_VISION_HAZMAT] : Found Hazmat : %d",
+                detectedObjects[i].id);
+          ROS_INFO("[PANDORA_VISION_HAZMAT] : Number of Hazmats Found = %d .",
+              static_cast<int>(detectedObjects.size()));
+        }
+
+        hazmatPublisher_.publish(hazmatVectorMsg);
+      }  
+      if (execTimerFlag_)
+        ROS_INFO("[PANDORA_VISION_HAZMAT] : Detection Execution Time is : %f!",
+            execTime);
+
+      ss << execTime * 1000;
+
+      cv::putText( imgPtr->image , "Exec Time : " + ss.str() + "ms", 
+          cv::Point( 0 , imgPtr->image.rows ) ,
+          CV_FONT_HERSHEY_PLAIN , 3 , cv::Scalar( 0 , 0 , 255 ) , 3 );
+
+      // TO DO : Add visualization flag
+      cv::imshow("Input Image" , imgPtr->image);
+      char key = cv::waitKey(10);
+      if ( key == 27)
+      {
+        ROS_INFO("Goodbye! \n");
+        ros::shutdown();
+      }
+    }
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision

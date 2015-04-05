@@ -39,63 +39,68 @@
 #include "pandora_vision_hazmat/filters/image_signature.h"
 #include "gtest/gtest.h"
 
-
-
-TEST( ImageSignatureTest , imageSign )
+namespace pandora_vision
 {
-  // Create a small image with positive elements .
-  cv::Mat testImage( 20 , 20 , CV_32SC3 );
-  testImage.setTo(100);
-
-  cv::Mat signs;
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Since we pass a multi channel matrix the function must return
-  // an empty matrix.
-  ASSERT_TRUE(signs.data == NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat( 20 , 20, CV_32FC1 );
-  testImage.setTo(100);
-
-  ImageSignature::signFunction( testImage , &signs );
-  ASSERT_TRUE(signs.data != NULL);
-
-  // Create a matrix with positive elements.
-  testImage = cv::Mat(20, 20, CV_32FC1);
-  testImage.setTo(100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is positive.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
+  namespace pandora_vision_hazmat
   {
-    for (int j = 0 ; j < testImage.cols ; j++ )
+
+    TEST( ImageSignatureTest , imageSign )
     {
-      int val = signs.at<float>( i , j );
-      ASSERT_GT(  val , 0 );
+      // Create a small image with positive elements .
+      cv::Mat testImage( 20 , 20 , CV_32SC3 );
+      testImage.setTo(100);
+
+      cv::Mat signs;
+
+      ImageSignature::signFunction(testImage , &signs );
+
+      // Since we pass a multi channel matrix the function must return
+      // an empty matrix.
+      ASSERT_TRUE(signs.data == NULL);
+
+      // Create a matrix with positive elements.
+      testImage = cv::Mat( 20 , 20, CV_32FC1 );
+      testImage.setTo(100);
+
+      ImageSignature::signFunction( testImage , &signs );
+      ASSERT_TRUE(signs.data != NULL);
+
+      // Create a matrix with positive elements.
+      testImage = cv::Mat(20, 20, CV_32FC1);
+      testImage.setTo(100);
+
+      ImageSignature::signFunction(testImage , &signs );
+
+      // Check that every value is positive.
+
+      for (int i = 0 ; i < testImage.rows ; i++)
+      {
+        for (int j = 0 ; j < testImage.cols ; j++ )
+        {
+          int val = signs.at<float>( i , j );
+          ASSERT_GT(  val , 0 );
+        }
+      }
+
+
+      // Create a matrix with negative elements.
+      testImage = cv::Mat(20, 20, CV_32FC1);
+      testImage.setTo(-100);
+
+      ImageSignature::signFunction(testImage , &signs );
+
+      // Check that every value is negative.
+
+      for (int i = 0 ; i < testImage.rows ; i++)
+      {
+        for (int j = 0 ; j < testImage.cols ; j++ )
+        {
+          int val = signs.at<float>( i , j);
+          ASSERT_LT( val , 0 );
+        }
+      }
+
     }
-  }
 
-
-  // Create a matrix with negative elements.
-  testImage = cv::Mat(20, 20, CV_32FC1);
-  testImage.setTo(-100);
-
-  ImageSignature::signFunction(testImage , &signs );
-
-  // Check that every value is negative.
-
-  for (int i = 0 ; i < testImage.rows ; i++)
-  {
-    for (int j = 0 ; j < testImage.cols ; j++ )
-    {
-      int val = signs.at<float>( i , j);
-      ASSERT_LT( val , 0 );
-    }
-  }
-
-}
-  
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision

@@ -17,9 +17,9 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_cmake_tools
 )
 
-#generate_dynamic_reconfigure_options(
-#  config/hazmat_cfg.cfg
-#)
+generate_dynamic_reconfigure_options(
+  config/Display.cfg
+)
 
 catkin_package(
     #DEPENDS
@@ -45,7 +45,6 @@ include_directories(include
 
 add_library(
   ${PROJECT_NAME}_filters
-  src/filters/histogram_mask.cpp
   src/filters/image_signature.cpp)
 target_link_libraries(
   ${PROJECT_NAME}_filters
@@ -76,18 +75,23 @@ target_link_libraries(
   ${catkin_LIBRARIES}
   )
 
-add_library(${PROJECT_NAME}_interface
+add_library(${PROJECT_NAME}_ros_interface
       src/detection/hazmat_detection.cpp
       )
-target_link_libraries(${PROJECT_NAME}_interface
+
+target_link_libraries(${PROJECT_NAME}_ros_interface
     ${PROJECT_NAME}_detector_factory
     ${catkin_LIBRARIES}
     )
+
+add_dependencies(${PROJECT_NAME}_ros_interface ${PROJECT_NAME}_gencfg)
+
 add_executable(${PROJECT_NAME}_node
       src/detection/hazmat_node.cpp
       )
+
 target_link_libraries(${PROJECT_NAME}_node
-    ${PROJECT_NAME}_interface
+    ${PROJECT_NAME}_ros_interface
     ${catkin_LIBRARIES} )
 add_dependencies(${PROJECT_NAME}_node
     ${catkin_EXPORTED_TARGETS}
@@ -101,15 +105,29 @@ download_extra_data(${PROJECT_NAME}_download_training_results
 option(${PROJECT_NAME}_training "Build flag for the training module")
 ########################### hazmatTrainNode ############################
 if(${PROJECT_NAME}_training)
+  add_library(${PROJECT_NAME}_feature_trainer
+    src/training/planar_pattern_trainer.cpp 
+    src/training/sift_trainer.cpp
+    src/training/surf_trainer.cpp
+    src/training/orb_trainer.cpp)
+
+  target_link_libraries(${PROJECT_NAME}_feature_trainer
+    ${catkin_LIBRARIES})
+
+  add_library(${PROJECT_NAME}_trainer_factory
+    src/training/factory.cpp)
+
+  target_link_libraries(${PROJECT_NAME}_trainer_factory
+    ${PROJECT_NAME}_feature_trainer
+    ${catkin_LIBRARIES})
+
   add_executable(${PROJECT_NAME}_trainer_node 
-          src/training/hazmat_trainer_node.cpp
-          src/training/planar_pattern_trainer.cpp 
-          src/training/factory.cpp
-          src/training/sift_trainer.cpp
-          src/training/surf_trainer.cpp
-          src/training/orb_trainer.cpp)
-        target_link_libraries(${PROJECT_NAME}_trainer_node
-          ${catkin_LIBRARIES} )
+    src/training/hazmat_trainer_node.cpp
+    )
+  target_link_libraries(${PROJECT_NAME}_trainer_node
+    ${PROJECT_NAME}_trainer_factory
+    ${catkin_LIBRARIES})
+
 endif()
 
 

@@ -38,303 +38,316 @@
 
 #include "pandora_vision_hazmat/detection/planar_object_detector.h"
 
-int PlanarObjectDetector::width = 640;
-int PlanarObjectDetector::height = 480;
-
-std::string PlanarObjectDetector::fileName_ = std::string();
-// Data input function . 
-
-PlanarObjectDetector::PlanarObjectDetector(const std::string &featureName) 
-      : featuresName_(featureName) , patterns_(new std::vector<Pattern>)
+namespace pandora_vision
 {
-  }
- 
+  namespace pandora_vision_hazmat
+  {
 
-// Detect the pattern in the frame.
-bool PlanarObjectDetector::detect(const cv::Mat &frame,
-    std::vector<Object>* detectedObjects) 
-{
-  // Check if the frame is not an empty matrix.
-  if ( !frame.data )
-  {
-    ROS_ERROR("The provided frame is empty!\n");
-    return false;
-  }
-  if ( patterns_ == NULL )
-  {
-    ROS_FATAL("ERROR :  Pointer to pattern array is NULL!\n");
-    ROS_BREAK();
-  }
-  // Check if that patterns have been read succesfully.
-  // TO DO : Produce Fatal Error on Failure.
-  if ( patterns_->size() < 1 )
-  {
-    std::cerr << "No patterns read . Detection cannot continue " << 
-      std::endl;
-    return false;
-  }
-  
-  bool foundPattern = false;
-  // The matrix that contains the descriptors of the frame.
-  cv::Mat frameDescriptors;
-  // The mask that will be applied to the frame so as to limit the
-  // the search space.
-  cv::Mat mask;
-  // The detected keypoints of the frame that will be matched to the 
-  // input pattern so as to find the correspondence from the training
-  // set to the query frame.
-  std::vector<cv::KeyPoint> frameKeyPoints;
-  
-  #ifdef CHRONO
-  gettimeofday(&startwtime , NULL);
-  #endif
+    int PlanarObjectDetector::width_ = 640;
+    int PlanarObjectDetector::height_ = 480;
+    std::string PlanarObjectDetector::fileName_ = std::string();
 
-  // Create the mask that will be used to extract regions of interest
-  // on the image based on the Image Signature Saliency Map .
-  ImageSignature::createSaliencyMapMask( frame , &mask );
-  //mask.setTo(1); 
-    // Calculate the keypoints and extract the descriptors from the 
-  // frame.
-  
-  #ifdef CHRONO
-  gettimeofday(&startwtime , NULL);
-  #endif
-  
-  getFeatures( frame , mask , &frameDescriptors , &frameKeyPoints ); 
-  
-  #ifdef CHRONO
-  gettimeofday(&endwtime , NULL);
-  double featuresTime = static_cast<double>((endwtime.tv_usec - 
-        startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-  ROS_INFO("Calculation time for the features in the frame is %f \n", 
-            featuresTime);
-  #endif
-  
-  bool matchesFound;
-  bool boundingBoxFound;
-  
-  std::vector<cv::Point2f> patternKeyPoints;
-  std::vector<cv::Point2f> sceneKeyPoints;
-  std::vector<cv::Point2f> sceneBB;
-  
-  // Temporary variables used to store the detected center of a pattern.
-  float x , y;
-  
-  // For every pattern in the list : 
-  for (int i = 0 ; i < patterns_->size() ; i++ )
-  {
-    #ifdef CHRONO
-    gettimeofday (&startwtime, NULL); 
-    #endif
-    
-      
-    // Try to find key point matches between the i-th pattern
-    // and the descriptors and the keypoints extracted from the frame.
-    matchesFound = findKeypointMatches(frameDescriptors , 
-      (*patterns_)[i].descriptors , (*patterns_)[i].keyPoints , 
-      frameKeyPoints , 
-      &patternKeyPoints , 
-      &sceneKeyPoints , i );
-      
-    #ifdef CHRONO
-    gettimeofday(&endwtime , NULL);
-    double keyPointTime = static_cast<double>((endwtime.tv_usec - 
-          startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-    ROS_INFO("Calculation time for the keypoints in the frame is %f \n", 
-            featuresTime);
-    #endif
-    
-    // If we have succesfully found the matches.
-    if (matchesFound)
+    /*
+     * @brief : This function is used to detect the desired 
+     * objects in the current frame .
+     * @param frame[const cv::Mat&] : The frame that will be processed.
+     * @param detectedObjects[std::vector<Object>*] : A vector containing
+     * all the objects detected in the scene.
+     * @return bool : True if an object has been detected,false otherwise.
+     */
+    bool PlanarObjectDetector::detect(const cv::Mat &frame,
+        std::vector<Object>* detectedObjects) 
     {
-      #ifdef CHRONO
-      gettimeofday(&startwtime , NULL);
-      #endif
-      
-      // Find the bounding box for this query pattern .
-      boundingBoxFound = findBoundingBox( patternKeyPoints , 
-        sceneKeyPoints ,  (*patterns_)[i].boundingBox , &sceneBB );
-        
-      #ifdef CHRONO
-      gettimeofday(&endwtime , NULL);
-      double boundingBoxTime = static_cast<double>((endwtime.tv_usec - 
-            startwtime.tv_usec) / 1.0e6 + endwtime.tv_sec - startwtime.tv_sec);
-      ROS_INFO("Calculation time for the bounding box for "
-        "the pattern %d  is : %f .\n", i, boundingBoxTime);
-      #endif      
-      
-      
-        
-      // If this flag is true then a valid match has been found and
-      // we have detected the pattern.
-      if (boundingBoxFound)  
+      // Check if the frame is not an empty matrix.
+      if ( !frame.data )
       {
-        #ifdef DEBUG
-        cv::Mat trackingFrame;
-        frame.copyTo(trackingFrame , cv::Mat());
-        cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , 
-            cv::Scalar(0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , 
-            cv::Scalar( 0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[3] , sceneBB[0] , 
-            cv::Scalar( 0, 255, 0), 4 );
-        cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , 
-            cv::Scalar( 0, 255, 0), 4 );
-        cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x , sceneBB[4].y)  , 
-            4.0 , cv::Scalar(0 , 0 , 255) , -1 , 8 );
-        imshow("Tracking Frame" , trackingFrame);
-        #endif
-        
-        
-        //~ std::cout <<"Pattern " <<   i << std::endl;
-        cv::Point2f base = sceneBB[0] - sceneBB[1];
-        cv::Point2f h = sceneBB[1] - sceneBB[2];
-        double sideA = cv::norm(base);
-        double sideB = cv::norm(h);
-        double surface = sideA * sideB;
-        
-        foundPattern |= boundingBoxFound; 
-        
-        //~ std::cout << "Surface " << surface << std::endl;
-        //~ std::cout << "SideA " << sideA << std::endl;
-        //~ std::cout << "SideB " << sideB << std::endl;
-        
-        
-        x = sceneBB[ sceneBB.size() - 1 ].x;
-        y = sceneBB[ sceneBB.size() - 1 ].y;
-  
-        
-        //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
-          //~ continue;
-        //if (surface < 10 || surface > frame.rows*frame.cols)
-        //{ 
-          //patternKeyPoints.clear();
-          //sceneBB.clear();
-          //sceneKeyPoints.clear();
-
-          //continue;
-        //}
-        
-        detectedObjects->push_back(Object((*patterns_)[i].name,
-              cv::Point2f(x, y ), i + 1));
+        ROS_ERROR("The provided frame is empty!\n");
+        return false;
       }
-      
+      if ( patterns_ == NULL )
+      {
+        ROS_FATAL("ERROR :  Pointer to pattern array is NULL!\n");
+        ROS_BREAK();
+      }
+      // Check if that patterns have been read succesfully.
+      // TO DO : Produce Fatal Error on Failure.
+      if ( patterns_->size() < 1 )
+      {
+        std::cerr << "No patterns read . Detection cannot continue " << 
+          std::endl;
+        return false;
+      }
+
+      bool foundPattern = false;
+      // The matrix that contains the descriptors of the frame.
+      cv::Mat frameDescriptors;
+      // The mask that will be applied to the frame so as to limit the
+      // the search space.
+      cv::Mat mask;
+      // The detected keypoints of the frame that will be matched to the 
+      // input pattern so as to find the correspondence from the training
+      // set to the query frame.
+      std::vector<cv::KeyPoint> frameKeyPoints;
+
+#ifdef CHRONO
+      gettimeofday(&startwtime , NULL);
+#endif
+
+      // Create the mask that will be used to extract regions of interest
+      // on the image based on the Image Signature Saliency Map .
+      ImageSignature::createSaliencyMapMask( frame , &mask );
+      // Calculate the keypoints and extract the descriptors from the 
+      // frame.
+
+      if (maskDisplayFlag_)
+      {
+        cv::Mat maskedFrame;
+        frame.copyTo(maskedFrame, mask);
+        imshow("Saliency Map Mask", maskedFrame);
+      }
+
+#ifdef CHRONO
+      gettimeofday(&startwtime , NULL);
+#endif
+
+      getFeatures(frame, mask, &frameDescriptors, &frameKeyPoints); 
+
+#ifdef CHRONO
+      gettimeofday(&endwtime , NULL);
+      double featuresTime = static_cast<double>((endwtime.tv_usec - 
+            startwtime.tv_usec) / 1.0e6 
+            + endwtime.tv_sec - startwtime.tv_sec);
+      ROS_INFO("Calculation time for the features in the frame is %f \n", 
+          featuresTime);
+#endif
+
+      bool matchesFound;
+      bool boundingBoxFound;
+
+      std::vector<cv::Point2f> patternKeyPoints;
+      std::vector<cv::Point2f> sceneKeyPoints;
+      std::vector<cv::Point2f> sceneBB;
+
+      // Temporary variables used to store the detected center of a pattern.
+      float x , y;
+
+      cv::Mat trackingFrame;
+      if (displayResultsFlag_)
+        frame.copyTo(trackingFrame , cv::Mat());
+
+      // For every pattern in the list : 
+      for (int i = 0 ; i < patterns_->size() ; i++ )
+      {
+#ifdef CHRONO
+        gettimeofday (&startwtime, NULL); 
+#endif
+
+
+        // Try to find key point matches between the i-th pattern
+        // and the descriptors and the keypoints extracted from the frame.
+        matchesFound = findKeypointMatches(frameDescriptors , 
+            (*patterns_)[i].descriptors , (*patterns_)[i].keyPoints , 
+            frameKeyPoints , 
+            &patternKeyPoints , 
+            &sceneKeyPoints , i );
+
+#ifdef CHRONO
+        gettimeofday(&endwtime , NULL);
+        double keyPointTime = static_cast<double>((endwtime.tv_usec - 
+              startwtime.tv_usec) / 1.0e6 + 
+              endwtime.tv_sec - startwtime.tv_sec);
+        ROS_INFO("Calculation time for the keypoints in the frame is %f \n", 
+            featuresTime);
+#endif
+
+        // If we have succesfully found the matches.
+        if (matchesFound)
+        {
+#ifdef CHRONO
+          gettimeofday(&startwtime , NULL);
+#endif
+
+          // Find the bounding box for this query pattern .
+          boundingBoxFound = findBoundingBox( patternKeyPoints , 
+              sceneKeyPoints ,  (*patterns_)[i].boundingBox , &sceneBB );
+
+#ifdef CHRONO
+          gettimeofday(&endwtime , NULL);
+          double boundingBoxTime = static_cast<double>((endwtime.tv_usec - 
+                startwtime.tv_usec) / 1.0e6 
+              + endwtime.tv_sec - startwtime.tv_sec);
+          ROS_INFO("Calculation time for the bounding box for "
+              "the pattern %d  is : %f .\n", i, boundingBoxTime);
+#endif      
+
+          // If this flag is true then a valid match has been found and
+          // we have detected the pattern.
+          if (boundingBoxFound)  
+          {
+            if (displayResultsFlag_)
+            {
+              cv::line( trackingFrame, sceneBB[0] , sceneBB[1] , 
+                  cv::Scalar(0, 255, 0), 4 );
+              cv::line( trackingFrame, sceneBB[1] , sceneBB[2] , 
+                  cv::Scalar( 0, 255, 0), 4 );
+              cv::line( trackingFrame, sceneBB[3] , sceneBB[0] , 
+                  cv::Scalar( 0, 255, 0), 4 );
+              cv::line( trackingFrame, sceneBB[2] , sceneBB[3] , 
+                  cv::Scalar( 0, 255, 0), 4 );
+              cv::circle( trackingFrame , cv::Point2f(sceneBB[4].x,
+                    sceneBB[4].y), 4.0, cv::Scalar(0 , 0 , 255), -1, 8);
+            }
+
+            cv::Point2f base = sceneBB[0] - sceneBB[1];
+            cv::Point2f h = sceneBB[1] - sceneBB[2];
+            double sideA = cv::norm(base);
+            double sideB = cv::norm(h);
+            double surface = sideA * sideB;
+
+            foundPattern |= boundingBoxFound; 
+
+            //~ std::cout << "Surface " << surface << std::endl;
+            //~ std::cout << "SideA " << sideA << std::endl;
+            //~ std::cout << "SideB " << sideB << std::endl;
+
+
+            x = sceneBB[ sceneBB.size() - 1 ].x;
+            y = sceneBB[ sceneBB.size() - 1 ].y;
+
+
+            //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
+            //~ continue;
+            //if (surface < 10 || surface > frame.rows*frame.cols)
+            //{ 
+            //patternKeyPoints.clear();
+            //sceneBB.clear();
+            //sceneKeyPoints.clear();
+
+            //continue;
+            //}
+
+            detectedObjects->push_back(Object((*patterns_)[i].name,
+                  cv::Point2f(x, y ), i + 1));
+          }
+
+        }
+        patternKeyPoints.clear();
+        sceneBB.clear();
+        sceneKeyPoints.clear();
+
+      }
+
+      if (displayResultsFlag_)
+        imshow("Tracking Frame" , trackingFrame);
+      /* if ( !boundingBoxFound )
+         {
+       *x = -1 ;
+       *y = -1 ;
+       patternKeyPoints.clear();
+       sceneBB.clear();
+       sceneKeyPoints.clear();
+       return false;
+       }
+
+*/
+
+      // If all these conditions are met return the coordinates of the 
+      // center of the detected pattern . 
+      /* if ( sceneBB.empty() )
+         {
+       *x = -1 ;
+       *y = -1 ;
+       patternKeyPoints.clear();
+       sceneBB.clear();
+       sceneKeyPoints.clear();
+
+       return false;
+       } */
+      patternKeyPoints.clear();
+      sceneBB.clear();
+      sceneKeyPoints.clear();
+
+      return foundPattern;
+
     }
-    patternKeyPoints.clear();
-    sceneBB.clear();
-    sceneKeyPoints.clear();
-    
-  }
-  
-  /* if ( !boundingBoxFound )
-  {
-    *x = -1 ;
-    *y = -1 ;
-    patternKeyPoints.clear();
-    sceneBB.clear();
-    sceneKeyPoints.clear();
-    return false;
-  }
-
-  */
-  
-  // If all these conditions are met return the coordinates of the 
-  // center of the detected pattern . 
-  /* if ( sceneBB.empty() )
-  {
-    *x = -1 ;
-    *y = -1 ;
-    patternKeyPoints.clear();
-    sceneBB.clear();
-    sceneKeyPoints.clear();
-  
-    return false;
-  } */
-  patternKeyPoints.clear();
-  sceneBB.clear();
-  sceneKeyPoints.clear();
-  
-  return foundPattern;
-
-    
-}
 
 
 
-/**
-  * @brief Find the homography between the scene and the pattern keypoints
-  * , check if it is valid and return the bounding box of the detected
-  * pattern .
-  * @param patternKeyPoints [std::vector<cv::KeyPoint> &] : Input 
-  * keypoints from detected descriptor matches on the pattern.
-  * @param sceneKeyPoints [std::vector<cv::KeyPoint> &] : Input 
-  * keypoints from detected descriptor matches in the scene.
-  * @param patternBB [std::vector<cv::Point2f *] : Vector of 2D float
-  * Points that containes the bounding box and the center of the 
-  * pattern.
+    /**
+     * @brief Find the homography between the scene and the pattern keypoints
+     * , check if it is valid and return the bounding box of the detected
+     * pattern .
+     * @param patternKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+     * keypoints from detected descriptor matches on the pattern.
+     * @param sceneKeyPoints [std::vector<cv::KeyPoint> &] : Input 
+     * keypoints from detected descriptor matches in the scene.
+     * @param patternBB [std::vector<cv::Point2f *] : Vector of 2D float
+     * Points that containes the bounding box and the center of the 
+     * pattern.
 
- **/
-  
-bool PlanarObjectDetector::findBoundingBox( 
-      const std::vector<cv::Point2f>& patternKeyPoints , 
-      const std::vector<cv::Point2f>& sceneKeyPoints , 
-      const std::vector<cv::Point2f>& patternBB , 
-      std::vector<cv::Point2f>* sceneBB) 
-{
+     **/
 
-  if (patternBB.size() <= 0)
-  {
-    ROS_ERROR("No bounding box has been read for the current pattern!\n");
-    return false;
-  }
-
-  // Check if we have enough points to find the homography between
-  // the pattern and the scene.
-  if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
-  {
-    // Calculate the homography matrix using RANSAC algorithm to 
-    // eliminate outliers.
-    cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
-      CV_RANSAC , 5 );
-    // Transform the bounding box to the frame coordinates.
-    cv::perspectiveTransform( patternBB , 
-      *sceneBB , H );
-    
-    // Check if every point of the bounding box is inside the image.
-    // If not then the correspondences are invalid and these keypoints
-    // are rejected.
-    for (int i = 0 ; i < sceneBB->size() ; i++ )
+    bool PlanarObjectDetector::findBoundingBox( 
+        const std::vector<cv::Point2f>& patternKeyPoints , 
+        const std::vector<cv::Point2f>& sceneKeyPoints , 
+        const std::vector<cv::Point2f>& patternBB , 
+        std::vector<cv::Point2f>* sceneBB) 
     {
-      if ( ( (*sceneBB)[i].x < 0 ) 
-        || ( (*sceneBB)[i].x > PlanarObjectDetector::width )
-        || ( (*sceneBB)[i].y < 0) 
-        || ( (*sceneBB)[i].y > PlanarObjectDetector::height ) )
+
+      if (patternBB.size() <= 0)
+      {
+        ROS_ERROR("No bounding box has been read for the current pattern!\n");
+        return false;
+      }
+
+      // Check if we have enough points to find the homography between
+      // the pattern and the scene.
+      if ( patternKeyPoints.size() > 4 &&  sceneKeyPoints.size() > 4 )
+      {
+        // Calculate the homography matrix using RANSAC algorithm to 
+        // eliminate outliers.
+        cv::Mat H = cv::findHomography( patternKeyPoints , sceneKeyPoints, 
+            CV_RANSAC , 5 );
+        // Transform the bounding box to the frame coordinates.
+        cv::perspectiveTransform( patternBB , 
+            *sceneBB , H );
+
+        // Check if every point of the bounding box is inside the image.
+        // If not then the correspondences are invalid and these keypoints
+        // are rejected.
+        for (int i = 0 ; i < sceneBB->size() ; i++ )
+        {
+          if ( ( (*sceneBB)[i].x < 0 ) 
+              || ( (*sceneBB)[i].x > PlanarObjectDetector::width_ )
+              || ( (*sceneBB)[i].y < 0) 
+              || ( (*sceneBB)[i].y > PlanarObjectDetector::height_ ))
           {
             sceneBB->clear();
             return false;
           }
+        }
+
+        // Check if the Bounding box is Convex 
+        // If not the resulting homography is incorrect due to false
+        // matching between the descriptors.
+        std::vector<cv::Point2f> boundingBox = *sceneBB;
+        boundingBox.pop_back();
+        if ( !cv::isContourConvex(boundingBox) )
+        {
+          boundingBox.clear();
+          return false;
+        }
+
+        // Clear the bounding box vector .
+        boundingBox.clear();
+        return true;
+
+      }
+      else
+        return false;
+
     }
-    
-    // Check if the Bounding box is Convex 
-    // If not the resulting homography is incorrect due to false
-    // matching between the descriptors.
-    std::vector<cv::Point2f> boundingBox = *sceneBB;
-    boundingBox.pop_back();
-    if ( !cv::isContourConvex(boundingBox) )
-    {
-      boundingBox.clear();
-      return false;
-    }
-    
-    // Clear the bounding box vector .
-    boundingBox.clear();
-    return true;
-    
-  }
-  else
-    return false;
-  
-}
 
 
-
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision

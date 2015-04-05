@@ -38,33 +38,48 @@
 
 #include "pandora_vision_hazmat/detection/detector_factory.h"
 
-PlanarObjectDetector* DetectorFactory::createDetectorObject(
-    const std::string& featureType)
+namespace pandora_vision
 {
-  std::locale loc;
-  std::string feature;
-  for (std::string::size_type i = 0; i < featureType.length() ; ++i)
-    feature += std::toupper(featureType[i], loc);
+  namespace pandora_vision_hazmat
+  {
 
-  if( !feature.compare("SIFT"))
-  {
-    ROS_INFO("Creating new SIFT Detector!\n");
-    return new SiftDetector();
-  } 
-  else if ( !feature.compare("SURF"))
-  {
-      ROS_INFO("Creating new SURF Detector!\n");
-      return new SurfDetector();
-  } 
-  else if ( !featureType.compare("ORB"))
-  {
-      ROS_INFO("Creating new ORB Detector!\n");
-      return new OrbDetector();
-  }
-  else
-  {
-      ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
+    /*
+     * @brief : The main factory method that creates the different feature
+     * detectors
+     * @param featureType(const std::string&): The name of the feature that
+     * will be used.
+     */
+    PlanarObjectDetector* DetectorFactory::createDetectorObject(
+        const std::string& featureType)
+    {
+      std::locale loc;
+      std::string feature;
+      // Convert the input string to upper case format.
+      for (std::string::size_type i = 0; i < featureType.length() ; ++i)
+        feature += std::toupper(featureType[i], loc);
+
+      if( !feature.compare("SIFT"))
+      {
+        ROS_INFO("Creating new SIFT Detector!\n");
+        return new SiftDetector();
+      } 
+      else if ( !feature.compare("SURF"))
+      {
+        ROS_INFO("Creating new SURF Detector!\n");
+        return new SurfDetector();
+      } 
+      else if ( !featureType.compare("ORB"))
+      {
+        ROS_INFO("Creating new ORB Detector!\n");
+        return new OrbDetector();
+      }
+      else
+      {
+        ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
+        return NULL;
+      }
       return NULL;
-  }
-  return NULL;
-}
+    }
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision

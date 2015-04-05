@@ -41,46 +41,52 @@
  
 #include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
-class SurfDetector : public FeatureMatchingDetector 
+namespace pandora_vision
 {
-  public:
-    SurfDetector();
+  namespace pandora_vision_hazmat
+  {
 
-    ~SurfDetector()
+    class SurfDetector : public FeatureMatchingDetector 
     {
-      delete[] matchers_;
+      public:
+
+        /*
+         * @brief : The constructor for the SURF detector objects
+         */
+        SurfDetector();
+
+        /*
+         * @brief : The destructor for the SURF detector objects that deletes
+         *          the memory allocated for the matcher object.
+         */
+        ~SurfDetector()
+        {
+          delete[] matchers_;
+        };
+
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param frame[const cv::Mat&] : The images that will be processed to 
+         * extract features and keypoints.
+         * @param mask[const cv::Mat&] : A mask defines the image regions that
+         * will be processed.
+         * @param descriptors[cv::Mat*]: A pointer to the array that will be
+         * used to store the descriptors of the current image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in the current image.
+         */
+        void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+            , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
+
+      private:
+
+        cv::SURF s_; //<! The object that calculates SURF keypoints 
+        //<! and descriptors.
+
     };
 
-    // Functions used to change the SURF algorithm parameters.
-
-    // Function for changing the threshold used for the hessian
-    // keypoint detector.
-    void setHessianThreshold(const double &t);
-
-    // Function that changes the number of pyramid octaves the keypoint
-    // detector uses.
-    void setOctavesNumber(const double &ocNum);
-
-    // Setter for the the number of octave layers in each octave.
-    void setOctaveLayersNumber(const double &ocLay);
-
-    // Setter for the flag that decides whether to use or not an
-    // extended descriptor vector( 128 element ) .
-    void setExtendedDescrFlag(const double &extFlag);
-
-    // Set the flag that will decide if the orientation of the features
-    // will be computed. 
-    void setOrientationFlag(const double &orFlag);
-
-    // Calculates the keypoints of the image and its descriptors.
-    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-        , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
-
-  private:
-
-    // SURF detector 
-    cv::SURF s_;
-
-};
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_SURF_DETECTOR_H_

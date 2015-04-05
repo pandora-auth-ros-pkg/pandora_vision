@@ -41,36 +41,52 @@
 
 #include "pandora_vision_hazmat/detection/feature_matching_detector.h"
 
-/**
-  @class SiftDetector
-  @brief Implements a detector that uses SIFT ( Scale Invariant 
-         Features Transformation) features to detect the different 
-         signs.
-**/
-
-class SiftDetector : public FeatureMatchingDetector 
+namespace pandora_vision
 {
-  public:
-        
-    SiftDetector();
-    // SiftDetector object destructor.
-    ~SiftDetector() 
+  namespace pandora_vision_hazmat
+  {
+
+    class SiftDetector : public FeatureMatchingDetector 
     {
-      delete[] matchers_;
+      public:
+
+        /*
+         * @brief : The constructor for the SIFT detector objects
+         */
+        SiftDetector();
+
+        /*
+         * @brief : The destructor for the SIFT detector objects that deletes
+         *          the memory allocated for the matcher object.
+         */
+        ~SiftDetector()
+        {
+          delete[] matchers_;
+        };
+
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param frame[const cv::Mat&] : The images that will be processed to 
+         * extract features and keypoints.
+         * @param mask[const cv::Mat&] : A mask defines the image regions that
+         * will be processed.
+         * @param descriptors[cv::Mat*]: A pointer to the array that will be
+         * used to store the descriptors of the current image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in the current image.
+         */
+        void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+            , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
+
+      private:
+
+        cv::SIFT s_; //<! The object that calculates SIFT keypoints 
+        //<! and descriptors.
+
     };
-    
-    // Function that returns the type of the feature detector used.
-    //~ const virtual TrainerType getType( void ) ;
-    
-    // Calculates the keypoints of the image and its descriptors.
-    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints );
-     
-  private:
-  
-    // SIFT detector 
-    cv::SIFT s_;
-    
-};
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_SIFT_DETECTOR_H

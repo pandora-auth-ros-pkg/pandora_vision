@@ -41,51 +41,92 @@
 
 #include "pandora_vision_hazmat/detection/planar_object_detector.h"
 
-/**
- @class FeatureMatchingDetector
- @brief An interface for all the detectors that extract features
-        from an image and compare them with those from the training set
-        to find a possible match in the current frame.
-**/
-
-class FeatureMatchingDetector : public PlanarObjectDetector
+namespace pandora_vision
 {
-  public:
-  
-    bool virtual readData(void);    
-    
-    // Function that returns the detected keypoints and features of the 
-    // the image .
-    
-    void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
-     , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) 
-      = 0; 
-    
-    // Find the matches between the pattern and the query frame.
-    bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
-      const cv::Mat &patternDescriptors , 
-      const std::vector<cv::Point2f>& patternKeyPoints ,
-      const std::vector<cv::KeyPoint>& sceneKeyPoints ,
-      std::vector<cv::Point2f>* matchedPatternKeyPoints , 
-      std::vector<cv::Point2f>* matchedSceneKeyPoints ,
-      const int &patternID = 0 );
-   
-    // Constructor
-    explicit FeatureMatchingDetector(const std::string &featureName);
-   
-    // Empty constructor used for testing purposes only.
-    FeatureMatchingDetector() {};
-    // Destructor 
-    virtual ~FeatureMatchingDetector() 
-    {};
-  
-  protected:
-  
-    /* Array of descriptors matchers used to match the keypoints
-     * found in the input frame and those of the training set
-    */
-    cv::Ptr<cv::DescriptorMatcher> *matchers_;
-    
-};
+  namespace pandora_vision_hazmat
+  {
+    /**
+      @class FeatureMatchingDetector
+      @brief An interface for all the detectors that extract features
+      from an image and compare them with those from the training set
+      to find a possible match in the current frame.
+     **/
+
+    class FeatureMatchingDetector : public PlanarObjectDetector
+    {
+      public:
+
+        /**
+          @brief Function used to read the necessary training data for
+          the detector to function.
+          @return [bool] : A flag that tells us whether we succeeded in 
+          reading the data.
+         **/
+        bool virtual readData(void);    
+
+        /*
+         * @brief: Function used to produce the necessary keypoints and their
+         *          corresponding descriptors for an image. 
+         * @param frame[const cv::Mat&] : The images that will be processed to 
+         * extract features and keypoints.
+         * @param mask[const cv::Mat&] : A mask defines the image regions that
+         * will be processed.
+         * @param descriptors[cv::Mat*]: A pointer to the array that will be
+         * used to store the descriptors of the current image.
+         * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the
+         * vector containing the Keypoints detected in the current image.
+         */
+
+        void virtual getFeatures( const cv::Mat &frame , const cv::Mat &mask
+            , cv::Mat *descriptors , std::vector<cv::KeyPoint> *keyPoints ) = 0; 
+
+        /**
+          @brief Function used to detect matches between a pattern and the 
+          input frame.
+          @param frameDescriptors [const cv::Mat & ] : Descriptors of the
+          frame.
+          @param patternDescriptors [const cv::Mat &] : Descriptors of the 
+          pattern.
+          @param patternKeyPoints [std::vector<cv::KeyPoint> *] : Vector of 
+          detected keypoints in the pattern.
+          @param sceneKeyPoints [std::vector<cv::KeyPoint> *] : Vector of 
+          detected keypoints in the frame.
+         **/
+        bool virtual findKeypointMatches(const cv::Mat &frameDescriptors ,
+            const cv::Mat &patternDescriptors , 
+            const std::vector<cv::Point2f>& patternKeyPoints ,
+            const std::vector<cv::KeyPoint>& sceneKeyPoints ,
+            std::vector<cv::Point2f>* matchedPatternKeyPoints , 
+            std::vector<cv::Point2f>* matchedSceneKeyPoints ,
+            const int &patternID = 0 );
+
+        /*
+         * @brief: Main constructor for the feature based detectors that reads
+         * all the necessary training data.
+         * @param featureName[const std::string& ]: The name of the feature
+         * that will be used.
+         */
+        explicit FeatureMatchingDetector(const std::string &featureName);
+
+        /*
+         * @brief : Empty constructor used for testing purposes.
+         */
+        FeatureMatchingDetector() {};
+
+        /*
+         * @brief : Default destructor.
+         */
+        virtual ~FeatureMatchingDetector() 
+        {};
+
+      protected:
+
+        cv::Ptr<cv::DescriptorMatcher> *matchers_; //!< The array of
+        //<! descriptor matchers for each pattern.
+
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_FEATURE_MATCHING_DETECTOR_H

@@ -47,7 +47,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "pandora_vision_hazmat");
-  HazmatDetectionNode hazmat_node;
+  pandora_vision::pandora_vision_hazmat::HazmatDetectionNode hazmat_node;
   ros::spin();
   return 0;
 }

@@ -35,87 +35,89 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 #include "pandora_vision_hazmat/training/sift_trainer.h"
- /*
- * @brief: Function used to produce the necessary keypoints and their
- *          corresponding descriptors for an image. 
- * @param image[const cv::Mat&] : The images that will be processed to 
- * extract features and keypoints.
- * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
- * store the descriptors of the current image.
- * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
- * containing the Keypoints detected in the current image.
- **/ 
-void SiftTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors,
-    std::vector<cv::KeyPoint>* keyPoints)
-{
-  // Calculate image keypoints.
-  featureDetector_->detect(image, *keyPoints);  
-  
-  // Extract Descriptors from image
-  featureExtractor_->compute(image, *keyPoints, *descriptors);
-}
 
-/*
- * @brief: Function used to produce the necessary keypoints and their
- *          corresponding descriptors for an image. 
- * @param images[const std::vector<cv::Mat&>] : The image we want 
- * to process.
- * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
- * used to store the descriptors for each image.
- * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
- * containing the Keypoints detected in every image.
- **/
-void SiftTrainer::getFeatures(const std::vector<cv::Mat>& images,
-    std::vector<cv::Mat>* descriptors,
-    std::vector<std::vector<cv::KeyPoint> >* keyPoints)
+namespace pandora_vision
 {
-  // Calculate image keypoints.
-  featureDetector_->detect( images , *keyPoints );  
-
-  cv::Mat tempDescriptorMat;
-  // Extract Descriptors from the images.
-  for (int i = 0 ; i < keyPoints->size(); i++)
+  namespace pandora_vision_hazmat
   {
-    featureExtractor_->compute( images[i] , (*keyPoints)[i] ,
-        tempDescriptorMat);
-    descriptors->push_back(tempDescriptorMat);
-  }
-}
-/*
- * @brief: Function used to produce the necessary keypoints and their
- *          corresponding descriptors for an image. 
- * @param image[const cv::Mat&] : The images that will be processed to 
- * extract features and keypoints.
- * @param descriptors[cv::Mat*]: A pointer to the array that will be used to
- * store the descriptors of the current image.
- * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
- * containing the Keypoints detected in the current image.
- * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
- * containing the bounding box for the pattern in the current image.
- **/
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const cv::Mat&] : The images that will be processed to 
+     * extract features and keypoints.
+     * @param descriptors[cv::Mat*]: A pointer to the array that will be used
+     * to store the descriptors of the current image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in the current image.
+     **/  
+    bool SiftTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors,
+        std::vector<cv::KeyPoint>* keyPoints)
+    {
+      // Calculate image keypoints.
+      featureDetector_->detect(image, *keyPoints);
 
-void SiftTrainer::getFeatures(const cv::Mat& image, cv::Mat *descriptors, 
-  std::vector<cv::KeyPoint> *keyPoints , 
-  std::vector<cv::Point2f> *boundingBox )
-{
-  
-  // Calculate image keypoints.
-  featureDetector_->detect( image , *keyPoints );  
-  
-  // Extract Descriptors from image
-  featureExtractor_->compute( image , *keyPoints , *descriptors );
-  // Calculate the bounding box for the current pattern 
-  (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
-  (*boundingBox).push_back(  cv::Point2f( image.cols , 0));
-  (*boundingBox).push_back ( cv::Point2f( image.cols  , 
-    image.rows)); 
-  (*boundingBox).push_back( cv::Point2f( 0.0f , 
-    image.rows));
-  
-  (*boundingBox).push_back( cv::Point2f( image.cols / 2.0f,
-    image.rows / 2.0f));
+      // Extract Descriptors from image
+      featureExtractor_->compute( image , *keyPoints , *descriptors );
 
-  }
+    }
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const std::vector<cv::Mat&>] : The image we want 
+     * to process.
+     * @param descriptors[cv::Mat*]: A pointer to the vector that will be 
+     * used to store the descriptors for each image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in every image.
+     **/
+    bool SiftTrainer::getFeatures(const std::vector<cv::Mat>& images,
+        std::vector<cv::Mat>* descriptors,
+        std::vector<std::vector<cv::KeyPoint> >* keyPoints)
+    {
+      // Calculate image keypoints.
+      featureDetector_->detect( images , *keyPoints );  
+
+      cv::Mat tempDescriptorMat;
+      // Extract Descriptors from the images.
+      for (int i = 0 ; i < keyPoints->size(); i++)
+      {
+        featureExtractor_->compute( images[i] , (*keyPoints)[i] ,
+            tempDescriptorMat);
+        descriptors->push_back(tempDescriptorMat);
+      }
+    }
+    /*
+     * @brief: Function used to produce the necessary keypoints and their
+     *          corresponding descriptors for an image. 
+     * @param images[const cv::Mat&] : The images that will be processed to 
+     * extract features and keypoints.
+     * @param descriptors[cv::Mat*]: A pointer to the array that will be used
+     * to store the descriptors of the current image.
+     * @param keyPoints[std::vector<cv::KeyPoint>*] : A pointer to the vector
+     * containing the Keypoints detected in the current image.
+     * @param boundingBox[std::vector<cv::Point2f>*] : A pointer to the vector
+     * containing the bounding box for the pattern in the current image.
+     **/  
+
+    bool SiftTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors, 
+        std::vector<cv::KeyPoint>* keyPoints , 
+        std::vector<cv::Point2f>* boundingBox )
+    {
+      this->getFeatures(image, descriptors, keyPoints);
+
+      // Calculate the bounding box for the current pattern 
+      (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
+      (*boundingBox).push_back(  cv::Point2f( image.cols , 0));
+      (*boundingBox).push_back ( cv::Point2f( image.cols  , 
+            image.rows)); 
+      (*boundingBox).push_back( cv::Point2f( 0.0f , 
+            image.rows));
+
+      (*boundingBox).push_back( cv::Point2f( image.cols / 2.0f ,
+            image.rows / 2.0f));
+    }
 
 
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 

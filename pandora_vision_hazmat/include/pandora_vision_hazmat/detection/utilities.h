@@ -44,25 +44,27 @@
   including the necessary libraries.
 **/
 
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <limits>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/math/constants/constants.hpp>
+
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include "opencv2/calib3d/calib3d.hpp"
 #include "opencv2/nonfree/nonfree.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include <boost/shared_ptr.hpp>
 #include "ros/ros.h"
-#include <ros/package.h>
+#include "ros/package.h"
 #include "sensor_msgs/image_encodings.h"
 #include "std_msgs/Bool.h"
 #include "cv_bridge/cv_bridge.h"
 
 // Filter Libraries.
-#include "pandora_vision_hazmat/filters/histogram_mask.h"
 #include "pandora_vision_hazmat/filters/image_signature.h"
 
 
@@ -70,50 +72,63 @@
 //#define CHRONO 
 #define DEBUG 
 #define FEATURES_CHRONO
-#define HUE_RANGE {0 , 180}
-#define SAT_RANGE {0 , 255}
-#define DEFAULT_HIST_CHANNELS {0 , 1}
-#define HIST_RANGE { HUE_RANGE , SAT_RANGE }
+
+#define PI boost::math::constants::pi<float>()
 
 #if defined(CHRONO) || defined(FEATURES_CHRONO) 
 #include "sys/time.h"
 #endif
 
-
-struct Object
+namespace pandora_vision
 {
- public:
-     std::string name;
-     int id;
-     cv::Point2f position;
-     Object(const std::string& objectName, const cv::Point2f& objectPosition,
-         const int& objectID)
-     {
-       name = objectName;
-       position = objectPosition;
-       id = objectID;
-     }
-};
+  namespace pandora_vision_hazmat
+  {
+    /*
+     * @struct Object
+     * @brief : Contains object information.
+     */
+    struct Object
+    {
+     public:
+       std::string name; //<! Name of the detected object.
+       int id; //<! A numerical id for the object.
+       cv::Point2f position; //<! The object's position on the image.
+       /*
+        * @brief Costructor for an object instance.
+        * @param objectName[const std::string&]: The name of the object
+        * @param objectPosition[const cv::Point2f&]: The position of the 
+        * object.
+        * param objectID[const int&]: The id of the object.
+        */
+       Object(const std::string& objectName,
+           const cv::Point2f& objectPosition, const int& objectID)
+       {
+         name = objectName;
+         position = objectPosition;
+         id = objectID;
+       }
+    };
 
-struct Pattern
-{
- public: 
+    struct Pattern
+    {
+     public: 
 
-    // Name of the pattern.
-    std::string name; 
+      std::string name; //<! Name of the pattern.
 
-    // A vector of 2D points that contains the bounding box
-    // and the center of the pattern.
-    std::vector<cv::Point2f> boundingBox;
+      std::vector<cv::Point2f> boundingBox; //<! A vector of 2D points that
+                                            //<! contains the bounding box
+                                            //<! and the center of 
+                                            //<!the pattern.
 
-    // Vector of detected keypoints in the pattern.
-    std::vector<cv::Point2f> keyPoints;
+      std::vector<cv::Point2f> keyPoints; //<! Vector of detected keypoints 
+                                          //<! in the pattern.
 
-    // Matrix of image descriptors .
-    cv::Mat descriptors;
+      cv::Mat descriptors; //<! Matrix of image descriptors .
 
-    // Color histogram of the pattern.
-    cv::Mat histogram;
-};
+      cv::Mat histogram; //<! Color histogram of the pattern.
+    };
   
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
+
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_UTILITIES_H

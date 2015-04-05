@@ -37,7 +37,10 @@
 
 #include "pandora_vision_hazmat/training/factory.h"
 
-  
+namespace pandora_vision
+{
+  namespace pandora_vision_hazmat
+  {
 /**
  @brief Function used to produce the correct Hazmat Trainer object. 
  @param featureType[const std::string&] : The type of the feature which the
@@ -75,3 +78,5 @@ PlanarPatternTrainer* PlanarPatternTrainerFactory::createObject(
   return NULL;
 }
   
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision

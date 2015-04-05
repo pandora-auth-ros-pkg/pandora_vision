@@ -49,8 +49,9 @@ int main(int argc , char* argv[])
       << std::endl;
     return -1;
   }
-  PlanarPatternTrainerFactory factory; 
-  PlanarPatternTrainer *trainer = factory.createObject(argv[1]);
+  pandora_vision::pandora_vision_hazmat::PlanarPatternTrainerFactory factory; 
+  pandora_vision::pandora_vision_hazmat::PlanarPatternTrainer *trainer =
+    factory.createObject(argv[1]);
   if ( trainer == NULL )
   {
     ROS_FATAL("No trainer was created ! Training will not proceed! ");

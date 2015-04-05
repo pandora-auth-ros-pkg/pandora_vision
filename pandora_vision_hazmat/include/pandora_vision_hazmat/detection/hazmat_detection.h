@@ -38,41 +38,81 @@
 #ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
 #define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
 
+#include <dynamic_reconfigure/server.h>
+#include "pandora_vision_hazmat/DisplayConfig.h"
 #include "pandora_vision_hazmat/detection/detector_factory.h"
 #include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
-#include <cmath>
 
-#define PI 3.14159265
-
-class HazmatDetectionNode
+namespace pandora_vision
 {
-  public:
-    HazmatDetectionNode();
-
-    ~HazmatDetectionNode()
+  namespace pandora_vision_hazmat
+  {
+    class HazmatDetectionNode
     {
-      ROS_INFO("Destroying the detector object!");
-      delete detector_;
-    }
-  
-    void imageCallback(const sensor_msgs::Image& inputImage);
-    
-    void setImageTopic(const std::string& imageTopic)
-    {
-      imageTopic_ = imageTopic;
-    }
-  private:
-    ros::NodeHandle nodeHandle_;
+      public:
 
-    ros::Subscriber imageSubscriber_;
-    
-    ros::Publisher hazmatPublisher_; 
+        /*
+         * @brief : Default Constructor that initiliazes the hazmat detector
+         * and the necessary ROS objects for communication.
+         */
+        HazmatDetectionNode();
 
-    std::string imageTopic_;
+        /*
+         * @brief : Class destructor that destroys the current detector. 
+         */
+        ~HazmatDetectionNode()
+        {
+          ROS_INFO("Destroying the detector object!");
+          delete detector_;
+        }
 
-    std::string hazmatTopic_;
+        /*
+         * @brief : Class method that is used by the dynamic reconfigure
+         * server to change object parameters.
+         * @param config[const pandora_vision_hazmat::DisplayConfig&] :
+         *  The message containing the new configuration for the node.
+         * @param level[uint32_t]: Flag used by the dynamic reconfigure
+         * server.
+         *
+         */
+        void dynamicReconfigCallback(
+            const ::pandora_vision_hazmat::DisplayConfig& config, 
+            uint32_t level);
 
-    PlanarObjectDetector *detector_;
-};
+        /*
+         * @brief : Receives an image message and detects the patterns on the 
+         * image, if any are present.
+         * @param imageMsg[const sensor_msgs::Image&] : The image message. 
+         */
+        void imageCallback(const sensor_msgs::Image& imageMsg);
+
+      private:
+        ros::NodeHandle nodeHandle_; //<! The node handle object for the node.
+
+        ros::Subscriber imageSubscriber_; //<! Camera Subscriber 
+
+        ros::Publisher hazmatPublisher_; //<! The publisher of hazmat alerts.
+
+        dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig> 
+          dynamicReconfServer_; //<! Reconfigure server for 
+                                //<! changing object params
+
+        bool execTimerFlag_; //<! Flag that toggles the execution time
+                             //<! printing.
+
+        bool debugMsgFlag_; //<! Flag that toggles debug messages that contain
+        //<! for the detected patterns.
+
+        std::string imageTopic_; //<! Image topic variable. 
+
+        std::string hazmatTopic_; //<! Alert topic variable. 
+
+        DetectorFactory factory_; //<! The factory that produces the detectors.
+
+        PlanarObjectDetector *detector_; //<! Pointer to the detector used.
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H

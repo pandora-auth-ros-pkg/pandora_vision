@@ -41,31 +41,51 @@
 
 #include "pandora_vision_hazmat/detection/utilities.h"
 
-// Abstract Interface 
-
-class Detector
+namespace pandora_vision
 {
-  public : 
-  
-    // Function for detection of the pattern on the current frame .   
-     
-    bool virtual detect(const cv::Mat &frame , std::vector<Object>*
-        detectedObjects ) = 0;
-    
-    // Function used for reading the training data from an xml file.
-    
-    bool virtual readData( void ) = 0;
-        
-    // Function used to get the best feature matches between a frame
-    // and a number of patterns.
-    // int virtual getBestMatches( const cv::Mat &frame ,
-    // const cv::Mat &features , double *minDist , double *maxDist  ) = 0;
-     
-    
-    Detector() {}
-    
-    virtual ~Detector() {};
-  
-};
+  namespace pandora_vision_hazmat
+  {
+    /*
+     * @class Detector
+     * @brief Interface for the detector objects.
+     */
+
+    class Detector
+    {
+      public : 
+
+        /*
+         * @brief : This function is used to detect the desired 
+         * objects in the current frame .
+         * @param frame[const cv::Mat&] : The frame that will be processed.
+         * @param detectedObjects[std::vector<Object>*] : A vector containing
+         * all the objects detected in the scene.
+         * @return bool : True if an object has been detected,false otherwise.
+         */
+        bool virtual detect(const cv::Mat &frame , std::vector<Object>*
+            detectedObjects ) = 0;
+
+        /**
+          @brief Function used to read the necessary training data for
+          the detector to function.
+          @return [bool] : A flag that tells us whether we succeeded in 
+          reading the data.
+         **/
+        bool virtual readData( void ) = 0;
+
+        /*
+         * @brief : The default empty constructor.
+         */
+        Detector() {}
+
+        /*
+         * @brief : The default destructor.
+         */
+        virtual ~Detector() {};
+
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_INTERFACE_H

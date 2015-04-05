@@ -41,30 +41,36 @@
 #include "pandora_vision_hazmat/training/surf_trainer.h"
 #include "pandora_vision_hazmat/training/orb_trainer.h"
 
-/**
- @class PlanarPatternTrainerFactory
- @brief The factory class used to produce the correct hazmat trainer 
-        object.
-**/        
-class PlanarPatternTrainerFactory
+namespace pandora_vision
 {
-
-  public:
-
+  namespace pandora_vision_hazmat
+  {
     /**
-      @brief Function used to detect Descriptors for the image.
+      @class PlanarPatternTrainerFactory
+      @brief The factory class used to produce the correct hazmat trainer 
+      object.
+     **/        
+    class PlanarPatternTrainerFactory
+    {
 
-     **/  
-    PlanarPatternTrainer *createObject(const std::string &featureType);
+      public:
 
-    /**
-      @brief Hazmat Trainer Factory constructor
-     **/
-    PlanarPatternTrainerFactory()
-    {};
+        /**
+          @brief Function used to detect Descriptors for the image.
 
-  private:
+         **/  
+        PlanarPatternTrainer *createObject(const std::string& featureType);
 
-};
+        /**
+          @brief Hazmat Trainer Factory constructor
+         **/
+        PlanarPatternTrainerFactory()
+        {};
 
+      private:
+
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 #endif  // PANDORA_VISION_HAZMAT_TRAINING_FACTORY_H

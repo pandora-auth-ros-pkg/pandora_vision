@@ -46,36 +46,55 @@
 #include "opencv2/nonfree/nonfree.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-/**
- @class ImageSignature 
- @brief Class that implements the image signature saliency map.
-**/
 
-class ImageSignature
+namespace pandora_vision
 {
-  public : 
-    
-    // Function that calculates the image signature.
-    static void calculateSignature(const cv::Mat &image , 
-      cv::Mat *imgSign);
-    
-    // Function the creates the mask that will be applied to the 
-    // incoming frame based on the saliency map produced by the 
-    // signature of the image.
-    static void createSaliencyMapMask(const cv::Mat &frame , 
-      cv::Mat *mask );
-       
-    // Return the array that containts the signs of an arbitrary
-    // matrix.
-    static void signFunction(const cv::Mat &array , cv::Mat *signs );
-     
-    // Constructor
-    ImageSignature() {};
-    
-    virtual ~ImageSignature() {}; 
-    
-  private :
+  namespace pandora_vision_hazmat
+  {
+    /**
+      @class ImageSignature 
+      @brief Class that implements the image signature saliency map.
+     **/
 
-};
+    class ImageSignature
+    {
+      public : 
+
+        /* 
+         * @brief : Calculates the signature of the image.
+         * @param image[const cv::Mat&] : The input image.
+         * @param imgSign[cv::Mat *]: The output saliency map.
+         */
+        static void calculateSignature(const cv::Mat& image , 
+            cv::Mat* imgSign);
+
+        /*
+         * @brief : Creates a mask for the frame based on the saliency map
+         * produced by the algorithm.
+         * @param frame[const cv::Mat&] : The input image.
+         * @param mask[cv::Mat*] : The output matsk.
+         */
+        static void createSaliencyMapMask(const cv::Mat& frame , 
+            cv::Mat* mask);
+
+        /**
+          @brief Calculates the signs of an arbitrary 1-channel matrix.
+          @param image [const cv::Mat &] : The input image
+          @param signs[cv::Mat *] : The output matrix with the signs of the 
+          image.
+         **/
+        static void signFunction(const cv::Mat& array, cv::Mat* signs);
+
+        /*
+         * @brief : Default Empty Constructor.
+         */
+        ImageSignature() {};
+
+      private :
+
+    };
+
+} // namespace pandora_vision_hazmat
+} // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HAZMAT_FILTERS_IMAGE_SIGNATURE_H
