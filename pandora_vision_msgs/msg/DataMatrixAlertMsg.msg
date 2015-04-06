@@ -1,2 +1,3 @@
-pandora_common_msgs/GeneralAlertInfo info
+float32 yaw
+float32 pitch
 string datamatrixContent
