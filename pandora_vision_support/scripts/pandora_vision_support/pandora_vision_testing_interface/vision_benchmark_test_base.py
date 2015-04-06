@@ -257,7 +257,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             for dictKey, dictValues in self.benchmarkDict.iteritems():
                 if (imageName in dictValues and
                     dictKey[0] == self.algorithm and
-                    dictKey[4] == alertsList.patternType):
+                    dictKey[4] == str(alertsList.patternType)):
 
                     isCorrectAlert = True
         else:
