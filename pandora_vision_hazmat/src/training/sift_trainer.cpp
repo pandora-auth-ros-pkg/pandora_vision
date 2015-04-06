@@ -89,8 +89,9 @@ namespace pandora_vision
             tempDescriptorMat);
         descriptors->push_back(tempDescriptorMat);
       }
-      return descriptors->size() > 0 ;
+      return descriptors->size() > 0;
     }
+
     /*
      * @brief: Function used to produce the necessary keypoints and their
      *          corresponding descriptors for an image. 

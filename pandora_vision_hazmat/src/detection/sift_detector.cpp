@@ -89,7 +89,7 @@ namespace pandora_vision
      * containing the Keypoints detected in the current image.
      */
     void SiftDetector::getFeatures( const cv::Mat &frame , 
-        const cv::Mat &mask , cv::Mat *descriptors , 
+        const cv::Mat &mask , cv::Mat *descriptors,
         std::vector<cv::KeyPoint> *keyPoints ) 
     {
 #ifdef FEATURES_CHRONO
