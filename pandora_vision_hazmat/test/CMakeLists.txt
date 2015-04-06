@@ -39,9 +39,9 @@ target_link_libraries(image_signature_test
   gtest
   )
 
-################################################################################
-#                               Functional Tests                               #
-################################################################################
+##############################################################################
+#                               Functional Tests                             #
+##############################################################################
 
 #download_extra_data(
 #  ${PROJECT_NAME}_hazmat_test_images
@@ -61,22 +61,22 @@ target_link_libraries(image_signature_test
 #                               Benchmark Tests                                #
 ################################################################################
 
-download_extra_data(
-  ${PROJECT_NAME}_benchmark_images_480p
-  EXTRA_FILES test/benchmark/images/images_480p/extra_files.yaml
-  #EXCLUDE_FROM_ALL
-  )
-add_dependencies(${PROJECT_NAME}_benchmark_images_480p tests)
+# download_extra_data(
+  # ${PROJECT_NAME}_benchmark_images_480p
+  # EXTRA_FILES test/benchmark/images/images_480p/extra_files.yaml
+  # EXCLUDE_FROM_ALL
+  # )
+# add_dependencies(${PROJECT_NAME}_benchmark_images_480p tests)
 
-download_extra_data(
-  ${PROJECT_NAME}_benchmark_images_720p
-  EXTRA_FILES test/benchmark/images/images_720p/extra_files.yaml
-  #EXCLUDE_FROM_ALL
-  )
-add_dependencies(${PROJECT_NAME}_benchmark_images_720p tests)
+# download_extra_data(
+  # ${PROJECT_NAME}_benchmark_images_720p
+  # EXTRA_FILES test/benchmark/images/images_720p/extra_files.yaml
+  # EXCLUDE_FROM_ALL
+  # )
+# add_dependencies(${PROJECT_NAME}_benchmark_images_720p tests)
 
-add_rostest(benchmark/hazmat_kinect_benchmark_test.launch)
-add_rostest(benchmark/hazmat_web_camera_benchmark_test.launch)
+# add_rostest(benchmark/hazmat_kinect_benchmark_test.launch)
+# add_rostest(benchmark/hazmat_web_camera_benchmark_test.launch)
 
 # add_rostest(benchmark/hazmat_kinect_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_480p)
 # add_rostest(benchmark/hazmat_web_camera_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_720p)
