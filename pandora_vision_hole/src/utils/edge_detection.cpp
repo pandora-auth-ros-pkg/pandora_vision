@@ -430,7 +430,7 @@ namespace pandora_vision
   }
 
   /**
-    @brief Takes as input a thermal image containing floats,
+    @brief Takes as input a thermal image containing unsigned chars,
     locates the edges in it and tries to clear as much noise as possible
     in the edges image. As noise we identify everything that is not,
     or does not look like, hole-like shapes,
@@ -440,7 +440,7 @@ namespace pandora_vision
     It outputs a binary image that contains areas that we wish to validate
     as holes.
     @param[in] inImage [const cv::Mat&] The thermal image extracted from the
-    depth sensor, of type CV_8UC1
+    thermal camera, of type CV_8UC1
     @param[out] edges [cv::Mat*] The final denoised edges image that
     corresponds to the input image
     @return void
@@ -463,11 +463,11 @@ namespace pandora_vision
     Timer::start("computeEdges", "findHoles");
     #endif
 
-    // The input depth image, in CV_8UC1 format
+    // The input thermal image, in CV_8UC1 format
     cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
       inImage, Parameters::Image::scale_method);
 
-    // The image of edges of the denoised depth image, in CV_32FC1 format
+    // The image of edges of the denoised thermal image, in CV_8UC1 format
     cv::Mat denoisedDepthImageEdges;
 
     // Detect edges in the visualizableDepthImage

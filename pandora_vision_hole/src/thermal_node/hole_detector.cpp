@@ -44,14 +44,14 @@
 namespace pandora_vision
 {
   /**
-    @brief Finds holes, provided a thermal image in CV_32FC1 format.
+    @brief Finds holes, provided a thermal image in CV_8UC1 format.
 
     First, the edges of the thermal image are detected.
     Then, keypoints of blobs are detected in the above image.
     Finally, the potential holes' outline is found, along with the bounding
     boxes of those outlines.
     @param[in] thermalImage [const cv::Mat&] The thermal
-    image in CV_32FC1 format
+    image in CV_8UC1 format
     @return HolesConveyor The struct that contains the holes found
    **/
   HolesConveyor HoleDetector::findHoles(const cv::Mat& thermalImage)

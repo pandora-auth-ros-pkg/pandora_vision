@@ -88,7 +88,7 @@ namespace pandora_vision
     in a cv::Mat image.
     Holes are then located inside this image and information about them,
     along with the denoised image, is then sent to the hole fusion node
-    @param msg [const std_msgs::UInt16MultiArray&] The thermal image message
+    @param msg [const std_msgs::UInt8MultiArray&] The thermal image message
     @return void
    **/
   void Thermal::inputThermalImageCallback(const std_msgs::UInt8MultiArray&  msg)
