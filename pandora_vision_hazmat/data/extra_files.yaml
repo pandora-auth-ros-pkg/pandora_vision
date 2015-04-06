@@ -1,174 +1,231 @@
 files:
 - md5: be7e41c6a3965522b4eda7b50120cf2c
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/input.xml
-- destination: training/ORB
-  md5: 19ab51da6b33896c16d55d7a50b50ba9
+- destination: training_data/ORB
+  md5: 95069df6d4a562b7cb80a86456dcdae7
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter6.xml
-- destination: training/ORB
-  md5: 972c63201a6da5cd69906494d92cccd3
+- destination: training_data/ORB
+  md5: 54ed6f168a9347e714a40b8621636cb9
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter17.xml
-- destination: training/ORB
-  md5: 5e799b9c1a29a69c2ea489f85acf95f2
+- destination: training_data/ORB
+  md5: 1be324f79844602d30ccbe610998d791
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter13.xml
-- destination: training/ORB
-  md5: 536ab3ae55f0a8bfad214b945d19c3e8
+- destination: training_data/ORB
+  md5: 464c78f06137d34dfd45325a297f9bac
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter10.xml
-- destination: training/ORB
-  md5: 959537fe35e55382e6d056409a4a7f41
+- destination: training_data/ORB
+  md5: f499abef3905e3c1f1a18220fe001eab
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter18.xml
-- destination: training/ORB
-  md5: 2af450e0f82a367563e0a300982488c8
+- destination: training_data/ORB
+  md5: 3f3984d96044401a66ea5eddfdd347ed
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter3.xml
-- destination: training/ORB
-  md5: 7de477bbe8be3805748ddc74a5c7bd7b
+- destination: training_data/ORB
+  md5: 1acf2ae6d5ef911ac79eba18bc5a1c08
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter11.xml
-- destination: training/ORB
-  md5: 338a3aaa19d65d2b6b9f42eac533a0b7
+- destination: training_data/ORB
+  md5: bdf0d5a53c965567f6e7998da927da74
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter7.xml
-- destination: training/ORB
-  md5: ab5753d4f89e7301d32ddf6aa790ebcb
+- destination: training_data/ORB
+  md5: 6d59b63a18be593d0c7dc79f8ca4604f
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter15.xml
-- destination: training/ORB
-  md5: 0acbee1c333a2261e0af965de17b78cd
+- destination: training_data/ORB
+  md5: 71684b1a4272d486fe1dea6c2e942aa1
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter8.xml
-- destination: training/ORB
-  md5: 16dca1f0fa33d70f141852c181ce3f9f
+- destination: training_data/ORB
+  md5: 764bd3b0c416d9f1489d92475615e4f3
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter12.xml
-- destination: training/ORB
-  md5: 6dbb05c026a9dffa732c0ad5d1c8bfa0
+- destination: training_data/ORB
+  md5: 87e141571bd365497ce07edc7e5ec6fb
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter4.xml
-- destination: training/ORB
-  md5: 1cff154ab8f52182001796d46b05a35c
+- destination: training_data/ORB
+  md5: a0e2e3248971ab6574b0bfefd69d6cbb
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter19.xml
-- destination: training/ORB
-  md5: 4b51edd1cdf1680b7710b2046fc9292b
+- destination: training_data/ORB
+  md5: 32f38c425d34c79e902f0eb8a04418e9
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter16.xml
-- destination: training/ORB
-  md5: 3410f7539ae291f9010e3f827a7a50b7
+- destination: training_data/ORB
+  md5: b21a51601149c08f653ca244a10b24f8
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter14.xml
-- destination: training/ORB
-  md5: 468fab0bfc289018fe3e1ec3e2b4cdd9
+- destination: training_data/ORB
+  md5: a93a7c96060c1c8cf7c2cc566c02c9d2
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter9.xml
-- destination: training/ORB
-  md5: 5ce7f511e6524104a4d801495f2ff248
+- destination: training_data/ORB
+  md5: f212fa480ce8bcf545b77863fcf513b8
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter1.xml
-- destination: training/ORB
-  md5: 73b1e25dcf987a32814011f0c4727bd8
+- destination: training_data/ORB
+  md5: b24730c25b51d0f0c331eed8f68a54fb
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter5.xml
-- destination: training/ORB
-  md5: b51e1f7cd631e3c291215d0206c81f6d
+- destination: training_data/ORB
+  md5: fbeea4aab6fe54d22c42159de71652a7
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/ORB/enter2.xml
-- destination: training/SURF
-  md5: dac83695ec7fbba4157246191b9a35df
+- destination: training_data/SURF
+  md5: 1900654c19c64f3dc171dcc2739b9a6d
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter6.xml
-- destination: training/SURF
-  md5: 89cc5cb317d2fc19953629666ad4d00b
+- destination: training_data/SURF
+  md5: b0c11f54a77bb8b44e581dfc3103b79c
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter17.xml
-- destination: training/SURF
-  md5: 11ce6a72dc0bdf89546e11cc6632326e
+- destination: training_data/SURF
+  md5: 92d67229cd1aee216584e578117dbe19
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter13.xml
-- destination: training/SURF
-  md5: 7d01605b6ff79672cf0a3a9a2012800a
+- destination: training_data/SURF
+  md5: 6ac1c7cccc9f0c4eb5b9c3696ea77e8d
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter10.xml
-- destination: training/SURF
-  md5: 03a2e46d963ba2f362544909770cc2fc
+- destination: training_data/SURF
+  md5: ac82a851117efb520be8278b1781cc35
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter18.xml
-- destination: training/SURF
-  md5: 7ca075a5069e8796273a82e026e31bdc
+- destination: training_data/SURF
+  md5: 44e87c335e2ed032914f16ffbbfa4476
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter3.xml
-- destination: training/SURF
-  md5: 97aad2aee875a6fc776de44619446e62
+- destination: training_data/SURF
+  md5: 56b6bf6113d069c6cfd2498ac2958146
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter11.xml
-- destination: training/SURF
-  md5: 9550ae528fbf1674d59544865b0be920
+- destination: training_data/SURF
+  md5: 21593741634521e7218edd437bee5b26
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter7.xml
-- destination: training/SURF
-  md5: 6aacd217aca066685bf5072e5f374c9b
+- destination: training_data/SURF
+  md5: ad5d58b293b339da5361f95db242fe9b
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter15.xml
-- destination: training/SURF
-  md5: 9c7c6ed34657580243dfe7ff771a6593
+- destination: training_data/SURF
+  md5: 50a6df07d3b41eedad577f7e848b153e
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter8.xml
-- destination: training/SURF
-  md5: 0634c52d7583abec3d3a1c235cae79da
+- destination: training_data/SURF
+  md5: b1077f1c2d383697a808aabf393be8e8
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter12.xml
-- destination: training/SURF
-  md5: 25913009416021e9f0b1a9e683328e99
+- destination: training_data/SURF
+  md5: 3a64d695d9c303d67def1abb753e7e29
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter4.xml
-- destination: training/SURF
-  md5: e720978d0bed4a712af0bc30d0cb751f
+- destination: training_data/SURF
+  md5: 31217335c3e2a1180acbfc23b2024cf1
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter19.xml
-- destination: training/SURF
-  md5: dc3c7706b15d44402bff05f43de59366
+- destination: training_data/SURF
+  md5: 4d549db832291c0b46ef368d413906a9
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter16.xml
-- destination: training/SURF
-  md5: 15c208afddc005d9a260b47d31c622f2
+- destination: training_data/SURF
+  md5: 921f7bc22c42756382b0be8e38d44f0e
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter14.xml
-- destination: training/SURF
-  md5: 099481081377c509b5f254726fe1cd61
+- destination: training_data/SURF
+  md5: fbba947024137f5500812e923198f882
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter9.xml
-- destination: training/SURF
-  md5: 83015c675c2d0427d8abece5b27a22e9
+- destination: training_data/SURF
+  md5: d79205878ae12b022f5a5e7deec83ffe
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter1.xml
-- destination: training/SURF
-  md5: 3a8467f18fefc82f1373f1ef86cc2e76
+- destination: training_data/SURF
+  md5: e3eede334c1ecad1be431df5bd0264a9
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter5.xml
-- destination: training/SURF
-  md5: 411bbf9c76a75dcf28dc1f9f0d365dbb
+- destination: training_data/SURF
+  md5: f0ae4f5ab6d79110995e001a17e729eb
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SURF/enter2.xml
-- destination: training/SIFT
-  md5: 72c105ad22b64cae6a4eebf5e487bb6a
+- destination: training_data/SIFT
+  md5: ff45356de3b8529cbd5cb0eed21d5d57
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter6.xml
-- destination: training/SIFT
-  md5: 55cba42f90860072fa58f17f61cbb688
+- destination: training_data/SIFT
+  md5: dfa8395a21ecd2ae220de2eb0b2dfc15
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter17.xml
-- destination: training/SIFT
-  md5: 918a0583bfd5f0e4062e73a16c59ea9c
+- destination: training_data/SIFT
+  md5: 6b2e747ff6a8411f46231246d2fb1c0c
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter13.xml
-- destination: training/SIFT
-  md5: 92cb6ebec4f206d6fc76cb4267f75af7
+- destination: training_data/SIFT
+  md5: b674054c7741e8516518845eadeb2b2b
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter10.xml
-- destination: training/SIFT
-  md5: de5b3e173dcc6dc2d09b81586a06221f
+- destination: training_data/SIFT
+  md5: 404eff7ec72e0b891b3dbb6a1900193b
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter18.xml
-- destination: training/SIFT
-  md5: 725caa5f802d5b95cf1fcf90fcabc8c9
+- destination: training_data/SIFT
+  md5: 3faeddfb9b1f64524fa730d730697930
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter3.xml
-- destination: training/SIFT
-  md5: 3bf601e2ab5771179fb4f1bab0f2d3a8
+- destination: training_data/SIFT
+  md5: 6f17195c4eb3b9539fb7ce356be939bf
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter11.xml
-- destination: training/SIFT
-  md5: 4f4d1c431323d75399dcd8850840d5df
+- destination: training_data/SIFT
+  md5: 7520e37584a05db2d458737fde000d1e
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter7.xml
-- destination: training/SIFT
-  md5: 15c11b2b9a574b2f601abb41309d435c
+- destination: training_data/SIFT
+  md5: e4f720fc5426f747257a52372323e3df
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter15.xml
-- destination: training/SIFT
-  md5: 85eaff936fe8dedd0759018dc77947d3
+- destination: training_data/SIFT
+  md5: a2e072465ef984721458d9061b65f4ad
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter8.xml
-- destination: training/SIFT
-  md5: 04c455d5c995cf369d6102e3a5af48db
+- destination: training_data/SIFT
+  md5: 8ae547fa6a2b50b58b0e0dbb6cd9597f
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter12.xml
-- destination: training/SIFT
-  md5: 4d8ec5cf4c3b4e56794ef0e653ed353b
+- destination: training_data/SIFT
+  md5: c1466e2164f2dfcc9a88ca02b3b4e328
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter4.xml
-- destination: training/SIFT
-  md5: 5d84b4a9c371e8072fe3b427b9f0777d
+- destination: training_data/SIFT
+  md5: 532c57691eeba3e07faa20cb547b7e1a
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter19.xml
-- destination: training/SIFT
-  md5: 53cbd4c89cb5eba570461b3177eda86e
+- destination: training_data/SIFT
+  md5: 796e4eb1c45b3b4678d0a9f1f5eb1e0d
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter16.xml
-- destination: training/SIFT
-  md5: 7d03cbbb45246fa4df85de42d38c8b34
+- destination: training_data/SIFT
+  md5: d17952832cfe05f1e30f8be7a36d8ab8
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter14.xml
-- destination: training/SIFT
-  md5: efae7a6bc56b81acf635c03dd4942ab6
+- destination: training_data/SIFT
+  md5: 9aa700c2f750a5c0ba29b01222e5d8de
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter9.xml
-- destination: training/SIFT
-  md5: f92e62eff177c205425fd29e8d4dfe4d
+- destination: training_data/SIFT
+  md5: a5c4a0bfcfc9a26ac77e9933823013e9
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter1.xml
-- destination: training/SIFT
-  md5: 875e944912c90ab736619cf344382794
+- destination: training_data/SIFT
+  md5: c918b1d2a066949558f64011ad760d55
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter5.xml
-- destination: training/SIFT
-  md5: 549c741d2552377b5e46070b28bf5150
+- destination: training_data/SIFT
+  md5: 9caf32a1df0ae737f52b7a6e8507ec4e
   url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_data/SIFT/enter2.xml
+- destination: training_input
+  md5: db136bc4968ccac0325aac1325b02c72
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter3.png
+- destination: training_input
+  md5: ae8996081067cd9412a4aca58b69036c
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter2.png
+- destination: training_input
+  md5: 0b9cddd80f975c839bf7c4727c045518
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter13.png
+- destination: training_input
+  md5: 9fa26826cf5ee068d89379ad62e273d2
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter12.png
+- destination: training_input
+  md5: 5a47f3a92582d10ca5d55d16edcdbe9c
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter4.png
+- destination: training_input
+  md5: 978fad5db298bdf09224baa660fc4c76
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter5.png
+- destination: training_input
+  md5: fb8063ea5327e3936de74e5a3dbe581a
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter16.png
+- destination: training_input
+  md5: 96f2f275c093d4293f77b1ce7f018fe3
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter10.png
+- destination: training_input
+  md5: 1b82df5ccaafe8e0c1f66b7a12635f97
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter19.png
+- destination: training_input
+  md5: ae611f196e63fc2d88467f65a6be75bd
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter15.png
+- destination: training_input
+  md5: 5db4612d095df2087d9171e076701bac
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter14.png
+- destination: training_input
+  md5: edfb6038a61f0697e56f11cf6b22a837
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter11.png
+- destination: training_input
+  md5: 5c19deff5e47d2a06a42b35b98c172f8
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter1.png
+- destination: training_input
+  md5: b93b1c6b110a95eed3cdd4be73184ae8
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter7.png
+- destination: training_input
+  md5: 5ad35435a36b8ac7b5fb32a8e32284e5
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter6.png
+- destination: training_input
+  md5: 638509993cf0a3ac739b1688d5e823ed
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter8.png
+- destination: training_input
+  md5: 2cb7f789b9fd7403bec0a57c0792f92c
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter9.png
+- destination: training_input
+  md5: 9cc8ecbaa70301cbca6dbd733028769e
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter17.png
+- destination: training_input
+  md5: 2211e6b16df22b7d470f4b0ab8d34829
+  url: http://downloads.pandora.ee.auth.gr/data/vision/new_hazmat_data/training_input/enter18.png

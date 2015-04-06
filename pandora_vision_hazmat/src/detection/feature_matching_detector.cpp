@@ -127,7 +127,8 @@ namespace pandora_vision
       fs.release();
 
       // For every pattern name read the necessary training data.
-      std::string trainingDataDir = fileName_ + std::string( "/data/training/")
+      std::string trainingDataDir = fileName_ + std::string( "/data/"
+          "training_data/")
         + this->getFeaturesName();
 
       std::string fileName;
