@@ -160,10 +160,13 @@ namespace pandora_vision
         static_cast<double>(CLOCKS_PER_SEC );
       if (found )
       {
-        int width = imgPtr->image.cols;
-        int height = imgPtr->image.rows;
-        float hfov = 58 * PI/180.0f;
-        float vfov = 45.00 * PI / 180.0f;
+        
+        // int width = imgPtr->image.cols;
+        // int height = imgPtr->image.rows;
+        int width = 1280;
+        int height = 720;
+        float hfov = 60 * PI / 180.0f;
+        float vfov = 33.75 * PI / 180.0f;
         float x, y;
         pandora_vision_msgs::HazmatAlertMsg hazmatMsg;
         pandora_vision_msgs::HazmatAlertsVectorMsg hazmatVectorMsg;

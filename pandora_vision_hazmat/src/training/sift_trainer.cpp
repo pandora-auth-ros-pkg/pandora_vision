@@ -53,12 +53,14 @@ namespace pandora_vision
     bool SiftTrainer::getFeatures(const cv::Mat& image, cv::Mat* descriptors,
         std::vector<cv::KeyPoint>* keyPoints)
     {
+      if (!image.data)
+        return false;
       // Calculate image keypoints.
       featureDetector_->detect(image, *keyPoints);
 
       // Extract Descriptors from image
       featureExtractor_->compute( image , *keyPoints , *descriptors );
-
+      return true;
     }
     /*
      * @brief: Function used to produce the necessary keypoints and their
@@ -81,10 +83,13 @@ namespace pandora_vision
       // Extract Descriptors from the images.
       for (int i = 0 ; i < keyPoints->size(); i++)
       {
+        if (!images[i].data)
+          continue;
         featureExtractor_->compute( images[i] , (*keyPoints)[i] ,
             tempDescriptorMat);
         descriptors->push_back(tempDescriptorMat);
       }
+      return descriptors->size() > 0 ;
     }
     /*
      * @brief: Function used to produce the necessary keypoints and their
@@ -103,7 +108,9 @@ namespace pandora_vision
         std::vector<cv::KeyPoint>* keyPoints , 
         std::vector<cv::Point2f>* boundingBox )
     {
-      this->getFeatures(image, descriptors, keyPoints);
+      if (!image.data)
+        return false;
+      bool featureFlag = this->getFeatures(image, descriptors, keyPoints);
 
       // Calculate the bounding box for the current pattern 
       (*boundingBox).push_back( cv::Point2f( 0.0f , 0.0f  )); 
@@ -115,6 +122,7 @@ namespace pandora_vision
 
       (*boundingBox).push_back( cv::Point2f( image.cols / 2.0f ,
             image.rows / 2.0f));
+      return featureFlag;
     }
 
 

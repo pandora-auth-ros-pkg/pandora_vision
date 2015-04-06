@@ -45,7 +45,11 @@ namespace pandora_vision
 {
   namespace pandora_vision_hazmat
   {
-
+    /*
+     * @class SurfDetector
+     * @brief : A planar object detector that uses SURF features to match
+     * the pattern with any candidates on the frame.
+    */
     class SurfDetector : public FeatureMatchingDetector 
     {
       public:

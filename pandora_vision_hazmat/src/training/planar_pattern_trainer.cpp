@@ -75,7 +75,7 @@ namespace pandora_vision
 
       // Initialize the path to the data that will be used to train the system. 
       boost::filesystem::path trainingInputPath(packagePath_ +
-          "/data/trainingInput/");
+          "/data/training_input/");
 
       // Create the container for all the files in the directory containing
       // the input of the training module.
@@ -719,7 +719,7 @@ namespace pandora_vision
       file.close();
 
       // Check if any homography was read.
-      return homographyMatrices->size() <= 0;
+      return homographyMatrices->size() > 0;
 
     }
 

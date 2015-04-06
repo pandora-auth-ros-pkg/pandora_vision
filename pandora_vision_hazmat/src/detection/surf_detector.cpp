@@ -41,10 +41,9 @@ namespace pandora_vision
 {
   namespace pandora_vision_hazmat
   {
-    /** 
-     *  SURF detector 
-     **/
-
+    /*
+     * @brief : The constructor for the SURF detector objects
+     */
     SurfDetector::SurfDetector() :
       FeatureMatchingDetector("SURF")
     {
@@ -53,13 +52,12 @@ namespace pandora_vision
       // Initialize the matchers that will be used for the 
       // detection of the pattern.
       matchers_ = new cv::Ptr<cv::DescriptorMatcher>[patternNum];
-
       // A temporary container for the descriptors of each pattern.
       std::vector<cv::Mat> descriptors;
 
       for (int i = 0 ; i < patternNum ; i++ )
       {
-        matchers_[i] = cv::DescriptorMatcher::create("Flann-Based");
+        matchers_[i] = cv::DescriptorMatcher::create("FlannBased");
         // Add the descriptors of the i-th pattern to the 
         // container.
         descriptors.push_back( (*patterns_ )[i].descriptors );

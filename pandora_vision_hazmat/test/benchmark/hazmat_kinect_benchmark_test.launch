@@ -1,18 +1,15 @@
 <launch>
 
   <include file="$(find state_manager)/launch/stateManager.launch" />
-
-  <node name="hazmat_node" type="hazmat_node" pkg="pandora_vision_hazmat" respawn="False" />
+  <include file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
   <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 
-  <rosparam file="$(find pandora_vision_hazmat)/config/hazmat_topics.yaml" 
-    command="load" ns="hazmat"/>
   
   <rosparam file="$(find pandora_vision_support)/config/camera_kinect_params.yaml" 
     command="load" ns="hazmat"/>
 
   <rosparam file="$(find pandora_vision_support)/config/camera_benchmark_params.yaml" 
-    command="load"/>
+      command="load"/>
 
   <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
 

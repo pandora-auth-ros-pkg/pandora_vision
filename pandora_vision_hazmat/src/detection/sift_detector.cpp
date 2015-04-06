@@ -59,7 +59,7 @@ namespace pandora_vision
 
       for (int i = 0 ; i < patternNum ; i++ )
       {
-        matchers_[i] = cv::DescriptorMatcher::create("Flann-Based");
+        matchers_[i] = cv::DescriptorMatcher::create("FlannBased");
         // Add the descriptors of the i-th pattern to the 
         // container.
         descriptors.push_back( (*patterns_ )[i].descriptors );

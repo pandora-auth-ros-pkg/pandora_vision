@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-PKG = "pandora_vision_qrcode"
+PKG = "pandora_vision_hazmat"
 NAME = "hazmat_benchmark_test"
 import os
 import sys
