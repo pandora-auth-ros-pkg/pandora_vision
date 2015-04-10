@@ -51,17 +51,10 @@ namespace pandora_vision
   
   //!< Static parameters
   std::string VictimParameters::packagePath = "";
-  std::string VictimParameters::victimAlertTopic = "";
   std::string VictimParameters::victimDebugImg = "";
   std::string VictimParameters::interpolatedDepthImg = "";
-  std::string VictimParameters::enhancedHolesTopic = "";
-  std::string VictimParameters::cameraName = "";
-  int VictimParameters::frameHeight = 0;
-  int VictimParameters::frameWidth = 0;
   int VictimParameters::modelImageHeight = 0;
   int VictimParameters::modelImageWidth = 0;
-  double VictimParameters::vfov = 0.0;
-  double VictimParameters::hfov = 0.0;
   
   std::string VictimParameters::cascade_path = "";
   std::string VictimParameters::model_url = "";
@@ -127,7 +120,7 @@ namespace pandora_vision
     int int_param;
     double double_param;
     
-    if (_nh.getParam("published_topic_names/victim_debug_img", str_param))
+    if (_nh.getParam("victim_debug_img_topic", str_param))
     {
       VictimParameters::victimDebugImg = str_param;
     }
@@ -137,7 +130,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     
-    if (_nh.getParam("published_topic_names/victim_interpolated_depth_img", 
+    if (_nh.getParam("victim_interpolated_depth_img_topic", 
       str_param))
     {
       VictimParameters::interpolatedDepthImg = str_param;
@@ -147,68 +140,7 @@ namespace pandora_vision
       ROS_FATAL("[victim_node] : interpolatedDepthImg name param not found");
       ROS_BREAK();
     }
-    
-    if (_nh.getParam("published_topic_names/victim_alert", str_param))
-    {
-      VictimParameters::victimAlertTopic = str_param;
-    }
-    else
-    {
-      ROS_FATAL("[victim_node] : Victim alert topic name param not found");
-      ROS_BREAK();
-    }
 
-    //! Declare subsciber's topic name
-    if (_nh.getParam("subscribed_topic_names/enhanded_hole_alert", str_param))
-    {
-      ROS_INFO_STREAM("PARAM"<< str_param);
-      VictimParameters::enhancedHolesTopic = str_param;
-    }  
-    else
-    {
-      ROS_FATAL("[victim_node] : Victim subscribed topic name param not found");
-      ROS_BREAK();
-    }  
-    
-        
-    //!< Get the camera to be used by motion node;
-    if (_nh.getParam("camera_name", str_param)) 
-    {
-      VictimParameters::cameraName = str_param;
-      ROS_DEBUG_STREAM("camera_name : " << str_param);
-    }
-    else 
-    {
-      ROS_FATAL("[victim_node]: Camera name not found");
-      ROS_BREAK(); 
-    }
-
-    //! Get the Height parameter if available;
-    if (_nh.getParam("image_height", int_param)) 
-    {
-      VictimParameters::frameHeight = int_param;
-      ROS_DEBUG_STREAM("height : " << int_param);
-    }
-    else 
-    {
-      ROS_FATAL
-        ("[victim_node] : Parameter frameHeight not found. Using Default");
-      ROS_BREAK();
-    }
-    
-    //! Get the Width parameter if available;
-    if ( _nh.getParam("image_width", int_param)) 
-    {
-      VictimParameters::frameWidth = int_param;
-      ROS_DEBUG_STREAM("width : " << frameWidth);
-    }
-    else 
-    {
-      ROS_FATAL
-        ("[victim_node] : Parameter frameWidth not found. Using Default");
-      ROS_BREAK();
-    }
-    
     //! Get the Height parameter if available;
     if (_nh.getParam("model_image_height", int_param)) 
     {
@@ -234,30 +166,6 @@ namespace pandora_vision
         ("[victim_node] : Parameter modelImageWidth not found. Using Default");
       ROS_BREAK();
     }
-  
-    //!< Get the HFOV parameter if available;
-    if (_nh.getParam("hfov", double_param))
-    {
-      VictimParameters::hfov = double_param;
-      ROS_DEBUG_STREAM("HFOV : " << double_param);
-    }
-    else 
-    {
-     ROS_FATAL("[victim_node]: Horizontal field of view not found");
-     ROS_BREAK();
-    }
-    
-    //!< Get the VFOV parameter if available;
-    if (_nh.getParam("vfov", double_param))
-    { 
-      VictimParameters::vfov = double_param;
-      ROS_DEBUG_STREAM("VFOV : " << double_param);
-    }
-    else 
-    {
-     ROS_FATAL("[victim_node]: Vertical field of view not found");
-     ROS_BREAK();
-    }  
     
     if (_nh.getParam("rgb_svm_C", double_param))
     { 

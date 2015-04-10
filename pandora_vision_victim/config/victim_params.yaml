@@ -17,4 +17,3 @@ depth_svm_C: 312.5
 depth_svm_gamma: 0.50625
 depth_svm_prob_scaling: 0.5
 depth_svm_prob_translation: 7.0
-
