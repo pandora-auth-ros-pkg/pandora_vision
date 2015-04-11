@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   VictimPreProcessor::VictimPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    PreProcessor<pandora_vision_msgs::EnhancedHolesVectorMsg, CVMatStamped>(ns, handler)
+    PreProcessor<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped>(ns, handler)
   {
   }
   
@@ -50,14 +50,29 @@ namespace pandora_vision
   {
   }
   
-  bool VictimPreProcessor::preProcess(const EnhancedHolesVectorMsgConstPtr& input, const CVMatStampedPtr& output)
+  bool VictimPreProcessor::preProcess(const EnhancedHolesVectorMsgConstPtr& input, const VictimCVMatStampedPtr& output)
   {
     cv_bridge::CvImagePtr inMsg;
     inMsg = cv_bridge::toCvCopy(input->rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
     output->image = inMsg->image.clone();
-
     output->header = input->header;
+    
+    cv_bridge::CvImagePtr inMsgD = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
+    cv::Mat depthImage = inMsgD->image.clone();
 
+    //! Interpolated depth image publishing
+    {  // BLOCK MBY DELETED
+      // Convert the image into a message
+      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+      msgPtr->header = input->header;
+      msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
+      depthImage.copyTo(msgPtr->image);
+
+      // Publish the image message
+      interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
+    }
+    
     if (output->image.empty())
     {
       ROS_ERROR("[Node] No more Frames or something went wrong with bag file");

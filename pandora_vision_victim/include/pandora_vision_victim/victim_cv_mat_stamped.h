@@ -33,34 +33,56 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
+ *   Chatzielefthriou Eirini <eirini.ch0@gmail.com>
  *   Tsirigotis Christos <tsirif@gmail.com>
- *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
+#ifndef PANDORA_VISION_COMMON_VICTIM_CV_MAT_STAMPED_H
+#define PANDORA_VISION_COMMON_VICTIM_CV_MAT_STAMPED_H
 
-#include <string>
-#include "sensor_processor/abstract_handler.h"
-#include "sensor_processor/preprocessor.h"
-#include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
-#include "pandora_vision_victim/victim_cv_mat_stamped.h"
+#include <opencv2/opencv.hpp>
+#include "pandora_vision_common/cv_mat_stamped.h"
 
 namespace pandora_vision
 {
-  class VictimPreProcessor : public PreProcessor<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped>
+  class VictimCVMatStamped : public CVMatStamped  // TO FIX!!!!!!!!!!!!!!!
   {
-    protected:
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedHolesVectorMsg> EnhancedHolesVectorMsgPtr;
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedHolesVectorMsg const> EnhancedHolesVectorMsgConstPtr;
-      
     public:
-      VictimPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
-      virtual ~VictimPreProcessor();
+      typedef boost::shared_ptr<VictimCVMatStamped> Ptr;
+      typedef boost::shared_ptr<VictimCVMatStamped const> ConstPtr;
+
+    public:
+      cv::Rect boundingBox;
+      cv::Point2f keypoint;
+
+    public:
+      void setBoundingBox(const cv::Rect&);
+      void setKeypoint(const cv::Point2f&);
       
-      virtual bool
-        preProcess(const EnhancedHolesVectorMsgConstPtr& input, const VictimCVMatStampedPtr& output);
+      cv::Rect& getBoundingBox() const;
+      cv::Point2f getKeypoint() const;
   };
+
+  void VictimCVMatStamped::setBoundingBox(const cv::Rect& boundingBoxArg)
+  {
+    boundingBox = boundingBoxArg;
+  }
+  void VictimCVMatStamped::setKeypoint(const cv::Point2f& keypointArg)
+  {
+    keypoint = keypointArg;
+  }
+  
+  const cv::Rect& VictimCVMatStamped::getBoundingBox() const
+  {
+    return boundingBox;
+  }
+  cv::Point2f VictimCVMatStamped::getKeypoint() const
+  {
+    return keypoint;
+  }
+
+  typedef VictimCVMatStamped::Ptr VictimCVMatStampedPtr;
+  typedef VictimCVMatStamped::ConstPtr VictimCVMatStampedConstPtr;
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
+#endif  // PANDORA_VISION_COMMON_VICTIM_CV_MAT_STAMPED_H
