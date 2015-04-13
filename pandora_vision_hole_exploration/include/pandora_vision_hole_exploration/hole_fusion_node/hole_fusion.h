@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
+ * Authors: Vasilis Bosdelekidis, Alexandros Philotheou, Manos Tsardoulias 
  *********************************************************************/
 
 #ifndef HOLE_FUSION_NODE_HOLE_FUSION_H
@@ -258,14 +258,14 @@ namespace pandora_vision
       //  general_cfgConfig>::CallbackType f_general;
 
 
-      //// The dynamic reconfigure server for parameters pertaining to
-      //// the validity of holes
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  validity_cfgConfig> serverValidity;
+      // The dynamic reconfigure server for parameters pertaining to
+      // the validity of holes
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
+        validity_cfgConfig> serverValidity;
 
-      //// The dynamic reconfigure callback type for the above server
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  validity_cfgConfig>::CallbackType f_validity;
+      // The dynamic reconfigure callback type for the above server
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
+        validity_cfgConfig>::CallbackType f_validity;
 
 
       /**
@@ -284,8 +284,8 @@ namespace pandora_vision
         @return void
        **/
       void depthCandidateHolesCallback(
-        const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
-        depthCandidateHolesVector);
+          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+          depthCandidateHolesVector);
 
       /**
         @brief Runs candidate holes through selected filters.
@@ -301,7 +301,7 @@ namespace pandora_vision
         filter applied, each column to a particular hole
        **/
       std::vector<std::vector<float> > filterHoles(
-        const HolesConveyor& conveyor);
+          const HolesConveyor& conveyor);
 
       /**
         @brief Recreates the HolesConveyor struct for the
@@ -318,10 +318,10 @@ namespace pandora_vision
         @return void
        **/
       void fromCandidateHoleMsgToConveyor(
-        const std::vector<pandora_vision_msgs::ExplorerCandidateHoleMsg>&
-        candidateHolesVector,
-        HolesConveyor* conveyor,
-        const cv::Mat& inImage);
+          const std::vector<pandora_vision_msgs::ExplorerCandidateHoleMsg>&
+          candidateHolesVector,
+          HolesConveyor* conveyor,
+          const cv::Mat& inImage);
 
       /**
         @brief Retrieves the parent to the frame_id of the input point cloud,
@@ -366,7 +366,7 @@ namespace pandora_vision
         @return void
        **/
       void makeValidHolesUnique(HolesConveyor* allHoles,
-        std::map<int, float>* validHolesMap);
+          std::map<int, float>* validHolesMap);
 
       /**
         @brief The function called when a debugging parameter is changed
@@ -392,46 +392,57 @@ namespace pandora_vision
       //  const uint32_t& level);
 
       /**
-        @brief Callback for the point cloud that the synchronizer node
-        publishes.
-
-        This method interpolates the input point cloud so that depth-based
-        filters using it have an integral input and sets it and header-related
-        variables.
-        If the depth and RGB callback counterparts have done
-        what must be, it resets the number of ready nodes, unlocks
-        the synchronizer and calls for processing of the candidate
-        holes.
-        @param[in] msg [const PointCloudPtr&] The message containing
-        the point cloud
+        @brief The function called when a validity parameter is changed
+        @param[in] config
+        [const pandora_vision_hole_exploration::validity_cfgConfig&]
+        @param[in] level [const uint32_t]
         @return void
        **/
-      //void pointCloudCallback(const PointCloudPtr& msg);
+      void parametersCallbackValidity(
+          const pandora_vision_hole_exploration::validity_cfgConfig &config,
+          const uint32_t& level);
 
-      /**
-        @brief Implements a strategy to combine information from both
-        the depth and rgb image and holes sources in order to accurately
-        find valid holes.
+        /**
+          @brief Callback for the point cloud that the synchronizer node
+          publishes.
 
-        It first assimilates all the holes that can be assimilated into other
-        ones, amalgamates holes that can be amalgamated with others and
-        connectes nearby holes with each other. Then, it passes each of the
-        resulting holes through a series of depth-based (if depth analysis
-        is possible) filters and rgb-based filters in order to extract a series
-        of probabilities for each hole. Each probability is a measure of each
-        candidate hole's validity: the more a value of a probability, the more
-        a candidate hole is indeed a hole in space. Next, a selection regime
-        is implemented in order to assess a hole's validity in the totality
-        of the filters it has been through. Finally, information about the
-        valid holes is published, along with enhanced information about them.
-        @param void
-        @return void
-       **/
-      void processCandidateHoles();
+          This method interpolates the input point cloud so that depth-based
+          filters using it have an integral input and sets it and header-related
+          variables.
+          If the depth and RGB callback counterparts have done
+          what must be, it resets the number of ready nodes, unlocks
+          the synchronizer and calls for processing of the candidate
+          holes.
+          @param[in] msg [const PointCloudPtr&] The message containing
+          the point cloud
+          @return void
+         **/
+        //void pointCloudCallback(const PointCloudPtr& msg);
+
+        /**
+          @brief Implements a strategy to combine information from both
+          the depth and rgb image and holes sources in order to accurately
+          find valid holes.
+
+          It first assimilates all the holes that can be assimilated into other
+          ones, amalgamates holes that can be amalgamated with others and
+          connectes nearby holes with each other. Then, it passes each of the
+          resulting holes through a series of depth-based (if depth analysis
+          is possible) filters and rgb-based filters in order to extract a series
+          of probabilities for each hole. Each probability is a measure of each
+          candidate hole's validity: the more a value of a probability, the more
+          a candidate hole is indeed a hole in space. Next, a selection regime
+          is implemented in order to assess a hole's validity in the totality
+          of the filters it has been through. Finally, information about the
+          valid holes is published, along with enhanced information about them.
+          @param void
+          @return void
+         **/
+        void processCandidateHoles();
 
       void produceDataset(
-        const HolesConveyor& conveyor,
-        const std::vector<std::vector<float> >& probabilities);
+          const HolesConveyor& conveyor,
+          const std::vector<std::vector<float> >& probabilities);
 
       /**
         @brief Publishes the holes' enhanced information.
@@ -443,7 +454,7 @@ namespace pandora_vision
         @return void
        **/
       void publishEnhancedHoles (const HolesConveyor& conveyor,
-        std::map<int, float>* validHolesMap);
+          std::map<int, float>* validHolesMap);
 
       /**
         @brief Publishes an image showing holes found from the Depth node
@@ -463,7 +474,7 @@ namespace pandora_vision
         @return void
        **/
       void publishValidHoles(const HolesConveyor& conveyor,
-        std::map<int, float>* map);
+          std::map<int, float>* map);
 
       /**
         @brief Callback for the candidate holes via the rgb node
@@ -481,8 +492,8 @@ namespace pandora_vision
         @return void
        **/
       void rgbCandidateHolesCallback(
-        const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
-        rgbCandidateHolesVector);
+          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+          rgbCandidateHolesVector);
 
       /**
         @brief Sets the depth values of a point cloud according to the
@@ -522,10 +533,10 @@ namespace pandora_vision
         @return void
        **/
       void unpackMessage(
-        const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg& holesMsg,
-        HolesConveyor* conveyor,
-        cv::Mat* image,
-        const std::string& encoding);
+          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg& holesMsg,
+          HolesConveyor* conveyor,
+          cv::Mat* image,
+          const std::string& encoding);
 
 
     public:

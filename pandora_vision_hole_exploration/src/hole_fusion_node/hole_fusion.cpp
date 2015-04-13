@@ -156,11 +156,11 @@ namespace pandora_vision
     //  boost::bind(&HoleFusion::parametersCallbackGeneral,
     //    this, _1, _2));
 
-    //// The dynamic reconfigure server for parameters pertaining to
-    //// the validity of holes
-    //serverValidity.setCallback(
-    //  boost::bind(&HoleFusion::parametersCallbackValidity,
-    //    this, _1, _2));
+    // The dynamic reconfigure server for parameters pertaining to
+    // the validity of holes
+    serverValidity.setCallback(
+      boost::bind(&HoleFusion::parametersCallbackValidity,
+        this, _1, _2));
 
     // Set the initial on/off state of the Hole Detector package to off
     isOn_ = false;
@@ -718,6 +718,28 @@ namespace pandora_vision
   //    config.watershed_background_erosion_factor;
 
   //}
+  
+
+  /**
+    @brief The function called when a validity parameter is changed
+    @param[in] config
+    [const pandora_vision_hole_exploration::validity_cfgConfig&]
+    @param[in] level [const uint32_t]
+    @return void
+   **/
+  void HoleFusion::parametersCallbackValidity(
+    const pandora_vision_hole_exploration::validity_cfgConfig &config,
+    const uint32_t& level)
+  {
+    Parameters::HoleFusion::keypoint_overlap_threshold =
+      config.keypoint_overlap_threshold;
+    Parameters::HoleFusion::valid_strong_probability =
+      config.valid_strong_probability;
+    Parameters::HoleFusion::valid_medium_probability =
+      config.valid_medium_probability;
+    Parameters::HoleFusion::valid_light_probability =
+      config.valid_light_probability;
+  }
 
 
 

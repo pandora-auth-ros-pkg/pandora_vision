@@ -43,12 +43,12 @@
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole_exploration/depth_cfgConfig.h>
 #include <pandora_vision_hole_exploration/rgb_cfgConfig.h>
-#include <pandora_vision_hole/hole_fusion_cfgConfig.h>
+#include <pandora_vision_hole_exploration/hole_fusion_cfgConfig.h>
 //#include <pandora_vision_hole/debug_cfgConfig.h>
 //#include <pandora_vision_hole/filters_priority_cfgConfig.h>
 //#include <pandora_vision_hole/filters_thresholds_cfgConfig.h>
 //#include <pandora_vision_hole/general_cfgConfig.h>
-//#include <pandora_vision_hole/validity_cfgConfig.h>
+#include <pandora_vision_hole_exploration/validity_cfgConfig.h>
 
 /**
   @namespace pandora_vision
