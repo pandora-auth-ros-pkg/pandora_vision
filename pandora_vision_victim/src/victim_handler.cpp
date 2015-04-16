@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   VictimHandler::VictimHandler(const std::string& ns) : sensor_processor::
-    Handler<pandora_vision_msgs::EnhancedHolesVectorMsg, CVMatStamped, POIsStamped, 
+    Handler<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped, POIsStamped, 
     pandora_common_msgs::GeneralAlertInfoVector>(ns)
   {
   }

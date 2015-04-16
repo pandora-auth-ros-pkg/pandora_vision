@@ -44,6 +44,7 @@ namespace pandora_vision
   VictimPreProcessor::VictimPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
     PreProcessor<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped>(ns, handler)
   {
+    interpolatedDepthPublisher_ = imageTransport_.advertise(VictimParameters::interpolatedDepthImg, 1, true);
   }
   
   VictimPreProcessor::~VictimPreProcessor()
@@ -57,8 +58,11 @@ namespace pandora_vision
     output->image = inMsg->image.clone();
     output->header = input->header;
     
+    // PUBLISH DEPTH IMAGE TO PROCESSOR???
     cv_bridge::CvImagePtr inMsgD = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     cv::Mat depthImage = inMsgD->image.clone();
+    
+    // output->... = .... according to VictimCVMatStamped
 
     //! Interpolated depth image publishing
     {  // BLOCK MBY DELETED

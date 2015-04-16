@@ -41,6 +41,7 @@
 #define PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
 
 #include <string>
+#include <image_transport/image_transport.h>
 #include "sensor_processor/abstract_handler.h"
 #include "sensor_processor/preprocessor.h"
 #include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
@@ -60,6 +61,10 @@ namespace pandora_vision
       
       virtual bool
         preProcess(const EnhancedHolesVectorMsgConstPtr& input, const VictimCVMatStampedPtr& output);
+        
+    private:
+      // image_transport::ImageTransport ... ??
+      image_transport::Publisher interpolatedDepthPublisher_;
   };
 }  // namespace pandora_vision
 

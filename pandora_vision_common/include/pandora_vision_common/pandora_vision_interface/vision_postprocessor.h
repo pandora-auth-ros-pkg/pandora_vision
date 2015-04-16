@@ -105,8 +105,8 @@ namespace pandora_vision
 
       float x = 0, y = 0;
       // fov are in radians
-      float hfov = findParam<double>(&hfovDict_, result->header.frame_id);
-      float vfov = findParam<double>(&vfovDict_, result->header.frame_id);
+      float hfov = findParam<double>(&hfovDict_, result->header.frame_id + "/hfov");
+      float vfov = findParam<double>(&vfovDict_, result->header.frame_id + "/vfov");
       std::string parentFrameId = findParentFrameId(&parentFrameDict_,
           result->header.frame_id, "/robot_description");
 
