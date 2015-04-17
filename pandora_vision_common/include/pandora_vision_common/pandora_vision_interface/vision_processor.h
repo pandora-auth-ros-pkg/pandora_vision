@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,11 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Miltiadis-Alexios Papadopoulos
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
-#define PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
+#ifndef PANDORA_VISION_COMMON_COMMON_DETECTOR_H
+#define PANDORA_VISION_COMMON_COMMON_DETECTOR_H
 
 #include <string>
 
@@ -52,10 +52,20 @@ namespace pandora_vision
   class VisionProcessor : public sensor_processor::Processor<CVMatStamped, POIsStamped>
   {
     public:
+      /**
+       * @brief Constructor
+       * @param ns [const std::string&] The namespace of this processor's nodeHandle
+       * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
+       * handles this processor
+       **/ 
       VisionProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
         sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler) {}
+        
+      /**
+       * @brief Virtual Destructor
+       **/
       virtual ~VisionProcessor() {}
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_QRCODE_QRCODE_DETECTOR_H
+#endif  // PANDORA_VISION_COMMON_COMMON_DETECTOR_H

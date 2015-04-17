@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,12 @@ namespace pandora_vision
       typedef boost::shared_ptr<CVMatStamped const> ConstPtr;
 
     public:
+    
+    /// Message Header referring to the openCV matrix that corresponds
+    /// to a frame
     std_msgs::Header header;
+    
+    /// OpenCV matrix that corresponds to the current frame to be processed
     cv::Mat image;
 
     public:

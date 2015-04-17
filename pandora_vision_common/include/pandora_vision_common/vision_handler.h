@@ -56,14 +56,31 @@ namespace pandora_vision
     CVMatStamped, POIsStamped, VisionAlertMsg>
   {
     public:
+      /**
+       * @brief Constructor
+       * @param ns [const std::string&] The namespace of this handler's nodeHandle
+       **/ 
       explicit VisionHandler(const std::string& ns) :
         sensor_processor::Handler<sensor_msgs::Image, CVMatStamped,
         POIsStamped, VisionAlertMsg>(ns) {}
-
+      
+      /**
+       * @brief Virtual Destructor
+       **/
       virtual ~VisionHandler() {}
 
     protected:
+      /**
+       * @brief Function that performs all the needed procedures when the robot's 
+       * state is changed
+       * @param newState [int] Robot's new state
+       **/ 
       virtual void startTransition(int newState);
+      
+      /**
+       * @brief Function that is called after the transition from one state to
+       * another is completed
+       **/ 
       virtual void completeTransition();
   };
 }  // namespace pandora_vision

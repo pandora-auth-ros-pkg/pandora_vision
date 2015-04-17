@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -60,10 +60,29 @@ namespace pandora_vision
       typedef boost::shared_ptr<sensor_msgs::Image const> ImageConstPtr;
 
     public:
+      /**
+       * @brief Constructor
+       * @param ns [const std::string&] The namespace of this preprocessor's nodeHandle
+       * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
+       * handles this preprocessor
+       **/ 
       VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      
+      /**
+       * @brief Virtual Destructor
+       **/ 
       virtual
         ~VisionPreProcessor() {}
-
+      
+      /**
+       * @brief Function that gets a message containing an image and converts it to a matrix
+       * also considering the image's timestamp
+       * @param input [const ImageConstPtr&] A constant reference to a constant shared pointer 
+       * of a sensor_msgs::Image
+       * @param output [const CVMatStampedPtr&] A constant reference to a shared pointer of a 
+       * structure that includes an openCV matrix and a timestamp
+       * @return [bool] whether preprocessing finished
+       **/ 
       virtual bool
         preProcess(const ImageConstPtr& input, const CVMatStampedPtr& output);
   };

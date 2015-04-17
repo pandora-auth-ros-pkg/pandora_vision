@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -63,29 +63,84 @@ namespace pandora_vision
     typedef boost::shared_ptr<VisionAlertMsg> VisionAlertMsgPtr;
 
   public:
+    /**
+     * @brief Constructor
+     * @param ns [const std::string&] The namespace of this postprocessor's nodeHandle
+     * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
+     * handles this postprocessor
+     **/ 
     VisionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+    
+    /**
+     * @brief Virtual Destructor
+     **/ 
     virtual
       ~VisionPostProcessor() {}
-
+    
+    /**
+     * @brief Function that gets the Points of Interest with their timestamp and converts them 
+     * to a ROS message type in order to be published by a vision node
+     * @param input [const POIsStampedConstPtr&] A constant reference to a constant shared pointer 
+     * of a POI with timestamp
+     * @param output [const VisionAlertMsgPtr&] A constant reference to a shared pointer of a 
+     * template class that signifies the output ROS message type of each vision node
+     * @return [bool] whether postprocessing finished
+     **/ 
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const VisionAlertMsgPtr& output) = 0;
 
   protected:
+    /**
+     * @brief Function that calculates parameters yaw and pitch for every POI, given its 
+     * coordinates, and puts them in a structure with POI's probability and timestamp 
+     * @param result [const POIsStampedConstPtr&] A constant reference to a constant shared 
+     * pointer of a POI with timestamp
+     * @return [pandora_common_msgs::GeneralAlertInfoVector] ROS message type that contains
+     * yaw, pitch and probability of every POI in the processed frame and the frame's header
+     **/
     pandora_common_msgs::GeneralAlertInfoVector
       getGeneralAlertInfo(const POIsStampedConstPtr& result);
 
   private:
+    /**
+     * @brief Function that finds in a dictionary a parameter of type T with the frame id
+     * as key. If the parameter is not found there, external files (yaml files, launchers) 
+     * are searched and, when found, the parameter is inserted to the dictionary
+     * @param dict [std::map<std::string, T>*] Pointer to the dictionary to be searched and
+     * possibly altered
+     * @param key [const std::string&] The key used to search in the dictionary
+     * @return [T] The parameter that is found
+     **/
     template <class T>
       T
       findParam(std::map<std::string, T>* dict, const std::string& key);
+      
+    /**
+     * @brief Function that finds in a dictionary the parent frame id with the frame id
+     * as key. If the parameter is not found there, the robot model is searched and when 
+     * the connection to the frame id is found, it is inserted to the dictionary
+     * @param dict [std::map<std::string, std::string>*] Pointer to the dictionary to be 
+     * searched and possibly altered
+     * @param key [std::string&] The key used to search in the dictionary
+     * @param model_param_name [std::string&] The model parameter name
+     * @return [std::string] The parent frame id
+     **/ 
     std::string
       findParentFrameId(std::map<std::string, std::string>* dict,
         const std::string& key,
         const std::string& model_param_name);
 
   protected:
+    /// A dictionary that includes every parent frame id that the node uses 
+    /// with frame id as key
     std::map<std::string, std::string> parentFrameDict_;
+    
+    /// A dictionary that includes Horizontal Fields Of View for every camera
+    /// with frame id as key
     std::map<std::string, double> hfovDict_;
+    
+    /// A dictionary that includes Vertical Fields Of View for every camera
+    /// with frame id as key
     std::map<std::string, double> vfovDict_;
   };
 
