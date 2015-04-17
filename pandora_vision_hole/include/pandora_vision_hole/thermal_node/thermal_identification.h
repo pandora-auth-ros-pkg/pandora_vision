@@ -49,9 +49,25 @@ namespace pandora_vision
 {
   class ThermalIdentification : public sensor_processor::Processor<CVMatStamped, HolesConveyor>
   {
+
+    // The dynamic reconfigure (thermal) parameters' server
+    dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig> server;
+
+    //The dynamic reconfigure (thermal) parameters' callback
+    dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig> :: CallbackType f; 
+
+    /**
+      @brief The function called when a parameter is changed
+      @param[in] config [const pandora_vision_hole::thermal_cfgConfig&]
+      @param[in] level [const uint32_t]
+      @return void
+    **/
+    void parametersCallback(
+    const pandora_vision_hole::thermal_cfgConfig& config,
+    const uint32_t& level);   
+
     public:
-      ThermalIdentification(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-        sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler) {}
+      ThermalIdentification(const std::string& ns, sensor_processor::AbstractHandler* handler);
       virtual ~ThermalIdentification() {}
 
       virtual bool
