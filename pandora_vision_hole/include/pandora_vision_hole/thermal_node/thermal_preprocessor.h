@@ -35,8 +35,8 @@
  * Authors:
  *********************************************************************/
 
-#ifndef PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
-#define PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
+#ifndef PANDORA_VISION_THERMAL_PREPROCESSOR_H
+#define PANDORA_VISION_THERMAL_PREPROCESSOR_H
 
 #include <string>
 
@@ -56,16 +56,17 @@ namespace pandora_vision
     protected:
       typedef boost::shared_ptr<std_msgs::UInt8MultiArray> MultiArrayPtr;
       typedef boost::shared_ptr<std_msgs::UInt8MultiArray const> MultiArrayConstPtr;
-
+      cv::Mat convertRawToMat(const std_msgs::UInt8MultiArray& msg);
+     
     public:
       ThermalPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
       virtual
         ~ThermalPreProcessor() {}
 
       virtual bool
-        preProcess(const ImageConstPtr& input, const CVMatStampedPtr& output);
+        preProcess(const MultiArrayConstPtr& input, const CVMatStampedPtr& output);
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
+#endif  // PANDORA_VISION_THERMAL_PREPROCESSOR_H
 
