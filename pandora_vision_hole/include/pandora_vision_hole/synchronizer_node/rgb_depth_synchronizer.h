@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Philotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias, Angelos Triantafyllidis
  *********************************************************************/
 
 #ifndef SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
@@ -42,6 +42,9 @@
 #include <utils/defines.h>
 #include <utils/parameters.h>
 #include <std_msgs/Empty.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include "std_msgs/UInt8MultiArray.h"
 
 /**
   @namespace pandora_vision
@@ -62,10 +65,18 @@ namespace pandora_vision
       ros::NodeHandle nodeHandle_;
 
       // The subscriber to the point cloud topic
-      ros::Subscriber inputPointCloudSubscriber_;
+      message_filters::Subscriber<PointCloudPtr>
+        inputPointCloudSubscriber_;
+
+      // The subscriber to the input thermal topic
+      message_filters::Subscriber<std_msgs::UInt8MultiArray>
+        inputThermalSubscriber_;
 
       // The name of the topic from where the input point cloud is acquired
       std::string inputPointCloudTopic_;
+
+      // The name of the topic from where the Thermal info is acquired
+      std::string inputThermalTopic_;
 
       // The subscriber to the topic where the hole_fusion node publishes
       // lock/unlock messages concerning the rgb_depth_synchronizer's
@@ -97,18 +108,25 @@ namespace pandora_vision
 
       // The publishers which will advertise the
       // synchronized point cloud, depth and rgb images extracted from the
-      // point cloud;
+      // point cloud
       ros::Publisher synchronizedPointCloudPublisher_;
       ros::Publisher synchronizedDepthImagePublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
 
+      // The publisher which will advertise the
+      // synchronized thermal information from flir camera
+      ros::Publisher synchronizedThermalImagePublisher_;
+
       // The names of the topic to which the synchronizer node publishes the
       // synchronized point cloud, depth and rgb images extracted from the
-      // point cloud;
+      // point cloud
       std::string synchronizedPointCloudTopic_;
       std::string synchronizedDepthImageTopic_;
       std::string synchronizedRgbImageTopic_;
 
+      // The name of the topic to which the synchronizer node publisher the
+      // synchronized thermal images
+      std::string synchronizedThermalImageTopic_;
 
       // A boolean indicating whether the node is publishing through the
       // above two publishers
@@ -142,23 +160,30 @@ namespace pandora_vision
 
       /**
         @brief The synchronized callback for the point cloud
-        obtained by the depth sensor.
+        obtained by the depth sensor and the thermal info by
+        flir camera.
 
         If the synchronizer node is unlocked, it extracts a depth image from
-        the input point cloud's depth measurements, a RGB image from the colour
-        measurements of the input point cloud and then publishes these images
+        the input point cloud's depth measurements, an RGB image from the colour
+        measurements of the input point cloud and thermal info.
+        Then publishes these images and thermal info
         to their respective recipients. Finally, the input point cloud is
         published directly to the hole fusion node.
         @param[in] pointCloudMessage [const PointCloudPtr&]
         The input point cloud
+        @param[in] thermalMessage [const UInt8MultiArray&]
+        The input thermal info
         @return void
        **/
-      void inputPointCloudCallback(const PointCloudPtr& pointCloudMessage);
+      void inputPointCloudThermalCallback(
+        const PointCloudPtr& pointCloudMessage,
+        const std_msgs::UInt8MultiArray& thermalMessage);
+
 
       /**
         @brief The callback executed when the Hole Fusion node requests
         from the synchronizer node to leave its subscription to the
-        input point cloud topic.
+        input point cloud topic and flir camera topic.
         This happens when the state of the hole detector package is set
         to "off" so as to minimize processing resources.
         @param[in] msg [const std_msgs::Empty&] An empty message used to
@@ -170,9 +195,9 @@ namespace pandora_vision
 
       /**
         @brief The callback executed when the Hole Fusion node requests
-        from the synchronizer node to subscribe to the input point cloud.
+        from the synchronizer node to subscribe to the input point cloud and flir.
         This happens when the hole detector is in an "off" state, where the
-        synchronizer node is not subscribed to the input point cloud and
+        synchronizer node is not subscribed to the input point cloud(and flir) and
         transitions to an "on" state, where the synchronizer node needs to be
         subscribed to the input point cloud topic in order for the hole detector
         to function.

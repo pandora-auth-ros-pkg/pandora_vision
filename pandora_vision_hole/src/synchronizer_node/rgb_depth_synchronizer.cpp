@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Philotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias, Angelos Triantafyllidis
  *********************************************************************/
 
 #include "synchronizer_node/rgb_depth_synchronizer.h"
@@ -61,6 +61,12 @@ namespace pandora_vision
     // acquired from the point cloud message.
     // The parameters concerned are needed only if in simulation mode
     getSimulationDimensions();
+
+    // The subscriber to the point cloud topic
+    inputPointCloudSubscriber_(nodeHandle_, inputPointCloudTopic_, 1);
+
+    // The subscriber to the input thermal topic
+    inputThermalSubscriber_(nodeHandle_, inputThermalTopic_, 1);
 
     // Subscribe to the hole_fusion lock/unlock topic
     unlockSubscriber_ = nodeHandle_.subscribe(unlockTopic_, 1,
@@ -91,6 +97,10 @@ namespace pandora_vision
     // Advertise the synchronized rgb image
     synchronizedRGBImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1000);
+
+    // Advertise the synchronized thermal image
+    synchronizedThermalImagePublisher_ = nodeHandle_.advertise
+      <std_msgs::UInt8MultiArray>(synchronizedThermalImageTopic_, 1000);
 
     ROS_INFO_NAMED(PKG_NAME, "[Synchronizer node] Initiated");
   }
@@ -179,6 +189,21 @@ namespace pandora_vision
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "[Synchronizer Node] Could not find topic input_topic");
+    }
+
+    // Read the name of the topic from where the synchronizer node acquires the
+    // input thermal info
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/subscribed_topics/input_thermal_topic",
+        inputThermalTopic_ ))
+    {
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Synchronizer Node] Subscribed to the input thermal info");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Synchronizer Node] Could not find topic input_thermal_topic");
     }
 
     // Read the name of the topic that the Hole Fusion node uses to unlock
@@ -292,30 +317,54 @@ namespace pandora_vision
       ROS_ERROR_NAMED(PKG_NAME,
         "[Synchronizer Node] Could not find topic rgb_image_topic");
     }
+
+    // Read the name of the topic that the synchronizer node will be publishing
+    // the thermal info extracted from flir camera
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/published_topics/thermal_info_topic",
+        synchronizedThermalImageTopic_))
+    {
+      // Make the topic's name absolute
+      synchronizedThermalImageTopic_ = ns + "/" + synchronizedThermalImageTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Synchronizer Node] Advertising to the internal thermal image");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Synchronizer Node] Could not find topic thermal_image_topic");
+    }
+
   }
 
 
 
   /**
     @brief The synchronized callback for the point cloud
-    obtained by the depth sensor.
+    obtained by the depth sensor and the thermal info by flir camera.
 
     If the synchronizer node is unlocked, it extracts a depth image from
-    the input point cloud's depth measurements, a RGB image from the colour
-    measurements of the input point cloud and then publishes these images
+    the input point cloud's depth measurements, an RGB image from the colour
+    measurements of the input point cloud and thermal info.
+    Then publishes these images and thermal info
     to their respective recipients. Finally, the input point cloud is
     published directly to the hole fusion node.
     @param[in] pointCloudMessage [const PointCloudPtr&]
     The input point cloud
+    @param[in] thermalMessage [const UInt8MultiArray&]
+    the input thermal info
     @return void
    **/
-  void RgbDepthSynchronizer::inputPointCloudCallback(
-    const PointCloudPtr& pointCloudMessage)
+  void RgbDepthSynchronizer::inputPointCloudThermalCallback(
+    const PointCloudPtr& pointCloudMessage,
+    const std_msgs::UInt8MultiArray& thermalMessage)
   {
     if (!isLocked_)
     {
-      // Lock the rgb_depth_synchronizer node; aka prevent the execution
-      // of this if-block without the explicit request of the hole fusion node
+      // Lock the rgb_depth_thermal_synchronizer node; aka prevent
+      // the execution of this if-block without the explicit request
+      // of the hole fusion node
       isLocked_ = true;
 
       #ifdef DEBUG_TIME
@@ -396,7 +445,9 @@ namespace pandora_vision
       synchronizedDepthImagePublisher_.publish(
         depthImageMessagePtr->toImageMsg());
 
-
+      // Publish the synchronized thermal info
+      synchronizedThermalImagePublisher_.publish(thermalMessage);
+     
       // Publish the synchronized point cloud
       synchronizedPointCloudPublisher_.publish(pointCloud);
 
@@ -406,7 +457,6 @@ namespace pandora_vision
       #endif
     }
   }
-
 
 
   /**
@@ -423,14 +473,17 @@ namespace pandora_vision
     const std_msgs::Empty& msg)
   {
     // Shutdown the input point cloud subscriber
-    inputPointCloudSubscriber_.shutdown();
+    inputPointCloudSubscriber_.unsubscribe();
+
+    // Shutdown the input thermal subscriber
+    inputThermalSubscriber_.unsubscribe();
   }
 
 
 
   /**
     @brief The callback executed when the Hole Fusion node requests
-    from the synchronizer node to subscribe to the input point cloud.
+    from the synchronizer node to subscribe to the input point cloud and flir.
     This happens when the hole detector is in an "off" state, where the
     synchronizer node is not subscribed to the input point cloud and
     transitions to an "on" state, where the synchronizer node needs to be
@@ -443,9 +496,15 @@ namespace pandora_vision
   void RgbDepthSynchronizer::subscribeToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   {
-    // Subscribe to the input point cloud topic
-    inputPointCloudSubscriber_ = nodeHandle_.subscribe(inputPointCloudTopic_, 1,
-      &RgbDepthSynchronizer::inputPointCloudCallback, this);
+    // Subscribe to the input point cloud and thermal topic
+    message_filters::TimeSynchronizer<
+      PointCloudPtr&, std_msgs::UInt8MultiArray>
+      sync(inputPointCloudSubscriber_, inputThermalSubscriber_, 10);
+
+    sync.registerCallback(boost::bind(
+      &RgbDepthSynchronizer::inputPointCloudThermalCallback,
+      _1, _2, this));
+
   }
 
 
