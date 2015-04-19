@@ -414,8 +414,8 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 print len(alerts)
                 queueIndex += 1
                 for iiAlert in xrange(len(alerts)):
-                    imageYaw = float(alerts[iiAlert].info.yaw)
-                    imagePitch = float(alerts[iiAlert].info.pitch)
+                    imageYaw = float(alerts[iiAlert].yaw)
+                    imagePitch = float(alerts[iiAlert].pitch)
                     rospy.logdebug("Yaw: %f Degrees",
                                    imageYaw * 180 / math.pi)
                     rospy.logdebug("Pitch: %f Degrees",
