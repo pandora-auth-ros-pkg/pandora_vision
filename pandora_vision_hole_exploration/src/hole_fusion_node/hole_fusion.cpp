@@ -104,16 +104,16 @@ namespace pandora_vision
 
     // Advertise the topic where the Hole Fusion node requests from the
     // synchronizer node to subscribe to the input point cloud topic
-    //synchronizerSubscribeToInputPointCloudPublisher_ =
-    //  nodeHandle_.advertise <std_msgs::Empty>(
-    //      synchronizerSubscribeToInputPointCloudTopic_, 1000, true);
+    synchronizerSubscribeToInputPointCloudPublisher_ =
+      nodeHandle_.advertise <std_msgs::Empty>(
+          synchronizerSubscribeToInputPointCloudTopic_, 1000, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
     // synchronizer node to leave its subscription to the
     // input point cloud topic
-    //synchronizerLeaveSubscriptionToInputPointCloudPublisher_=
-    //  nodeHandle_.advertise <std_msgs::Empty>(
-    //      synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1000, true);
+    synchronizerLeaveSubscriptionToInputPointCloudPublisher_=
+      nodeHandle_.advertise <std_msgs::Empty>(
+          synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1000, true);
 
     // Subscribe to the topic where the depth node publishes
     // candidate holes
@@ -159,8 +159,8 @@ namespace pandora_vision
     // The dynamic reconfigure server for parameters pertaining to
     // the validity of holes
     serverValidity.setCallback(
-      boost::bind(&HoleFusion::parametersCallbackValidity,
-        this, _1, _2));
+        boost::bind(&HoleFusion::parametersCallbackValidity,
+          this, _1, _2));
 
     // Set the initial on/off state of the Hole Detector package to off
     isOn_ = false;
@@ -246,7 +246,8 @@ namespace pandora_vision
     // If the RGB candidate holes and the RGB image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 3)
+    ROS_INFO("nodesReady %d \n", numNodesReady_);
+    if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
 
@@ -321,8 +322,8 @@ namespace pandora_vision
     //      ns + "/hole_fusion_node/subscribed_topics/point_cloud_internal_topic",
     //      pointCloudTopic_))
     //{
-      // Make the topic's name absolute
-      //pointCloudTopic_ = ns + "/" + pointCloudTopic_;
+    // Make the topic's name absolute
+    //pointCloudTopic_ = ns + "/" + pointCloudTopic_;
 
     //  ROS_INFO_NAMED(PKG_NAME,
     //      "[Hole Fusion Node] Subscribed to the internal point cloud topic");
@@ -421,37 +422,37 @@ namespace pandora_vision
     // Read the name of the topic that the Hole Fusion node uses to publish
     // messages so that the synchronizer node subscribes to the
     // input point cloud
-    //if (nodeHandle_.getParam(ns +
-    //      "/hole_fusion_node/published_topics/make_synchronizer_subscribe_to_input",
-    //      synchronizerSubscribeToInputPointCloudTopic_))
-    //{
-    //  ROS_INFO_NAMED(PKG_NAME,
-    //      "[Hole Fusion Node] Advertising to topic where the synchronizer"
-    //      " expects messages dictating its subscription to the input point cloud");
-    //}
-    //else
-    //{
-    //  ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
-    //      " make_synchronizer_subscribe_to_input");
-    //}
+    if (nodeHandle_.getParam(ns +
+          "/hole_fusion_node/published_topics/make_synchronizer_subscribe_to_input",
+          synchronizerSubscribeToInputPointCloudTopic_))
+    {
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Advertising to topic where the synchronizer"
+          " expects messages dictating its subscription to the input point cloud");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
+          " make_synchronizer_subscribe_to_input");
+    }
 
     // Read the name of the topic that the Hole Fusion node uses to publish
     // messages so that the synchronizer node leaves its subscription to the
     // input point cloud
-    //if (nodeHandle_.getParam(ns +
-    //      "/hole_fusion_node/published_topics/make_synchronizer_leave_subscription_to_input",
-    //      synchronizerLeaveSubscriptionToInputPointCloudTopic_))
-    //{
-    //  ROS_INFO_NAMED(PKG_NAME,
-    //      "[Hole Fusion Node] Advertising to topic where the synchronizer"
-    //      " expects messages dictating its leave of subscription to the"
-    //      " input point cloud");
-    //}
-    //else
-    //{
-    //  ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
-    //      " make_synchronizer_leave_subscription_to_input");
-    //}
+    if (nodeHandle_.getParam(ns +
+          "/hole_fusion_node/published_topics/make_synchronizer_leave_subscription_to_input",
+          synchronizerLeaveSubscriptionToInputPointCloudTopic_))
+    {
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Advertising to topic where the synchronizer"
+          " expects messages dictating its leave of subscription to the"
+          " input point cloud");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
+          " make_synchronizer_leave_subscription_to_input");
+    }
 
     // Read the name of the topic that the Hole Fusion node uses to publish
     // an image of holes found by the Depth and RGB nodes
@@ -718,7 +719,7 @@ namespace pandora_vision
   //    config.watershed_background_erosion_factor;
 
   //}
-  
+
 
   /**
     @brief The function called when a validity parameter is changed
@@ -728,8 +729,8 @@ namespace pandora_vision
     @return void
    **/
   void HoleFusion::parametersCallbackValidity(
-    const pandora_vision_hole_exploration::validity_cfgConfig &config,
-    const uint32_t& level)
+      const pandora_vision_hole_exploration::validity_cfgConfig &config,
+      const uint32_t& level)
   {
     Parameters::HoleFusion::keypoint_overlap_threshold =
       config.keypoint_overlap_threshold;
@@ -848,17 +849,7 @@ namespace pandora_vision
     the depth and rgb image and holes sources in order to accurately
     find valid holes.
 
-    It first assimilates all the holes that can be assimilated into other
-    ones, amalgamates holes that can be amalgamated with others and
-    connectes nearby holes with each other. Then, it passes each of the
-    resulting holes through a series of depth-based (if depth analysis
-    is possible) filters and rgb-based filters in order to extract a series
-    of probabilities for each hole. Each probability is a measure of each
-    candidate hole's validity: the more a value of a probability, the more
-    a candidate hole is indeed a hole in space. Next, a selection regime
-    is implemented in order to assess a hole's validity in the totality
-    of the filters it has been through. Finally, information about the
-    valid holes is published, along with enhanced information about them.
+    Each probability is a measure of each candidate hole's validity: the more a value of a probability, the more a candidate hole is indeed a hole in space. Next, a selection regime is implemented in order to assess a hole's validity in the totality of the filters it has been through. Finally, information about the valid holes is published, along with enhanced information about them.
     @param void
     @return void
    **/
@@ -1096,7 +1087,7 @@ namespace pandora_vision
     // If the depth candidate holes and the interpolated depth image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 3)
+    if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
 
@@ -1183,7 +1174,7 @@ namespace pandora_vision
       // synchronizer is not subscribed to the input point cloud.
       // Make him subscribe to it now
       std_msgs::Empty msg;
-      //synchronizerSubscribeToInputPointCloudPublisher_.publish(msg);
+      synchronizerSubscribeToInputPointCloudPublisher_.publish(msg);
 
       // Set the Hole Detector's on/off state to the new one.
       // In this case, it has to be before the call to unlockSynchronizer
@@ -1212,7 +1203,7 @@ namespace pandora_vision
       // resources of the robot's computer pertaining to the Hole Detector
       // package are minimized
       std_msgs::Empty msg;
-      //synchronizerLeaveSubscriptionToInputPointCloudPublisher_.publish(msg);
+      synchronizerLeaveSubscriptionToInputPointCloudPublisher_.publish(msg);
     }
     else
     {

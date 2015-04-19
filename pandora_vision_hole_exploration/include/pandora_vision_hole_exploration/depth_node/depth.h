@@ -42,6 +42,7 @@
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
+#include "utils/visualization.h"
 
 /**
   @namespace pandora_vision

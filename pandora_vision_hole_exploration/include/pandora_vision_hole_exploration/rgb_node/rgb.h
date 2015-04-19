@@ -38,11 +38,12 @@
 #ifndef RGB_NODE_RGB_H
 #define RGB_NODE_RGB_H
 
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
+#include "pandora_vision_msgs/ExplorerCandidateHolesVectorMsg.h"
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
 #include "utils/haralickfeature_extractor.h"
 #include "utils/parameters.h"
+#include "utils/visualization.h"
 
 /**
   @namespace pandora_vision

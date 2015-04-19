@@ -61,11 +61,13 @@ namespace pandora_vision
   //
   //  ///////////////////////// Debug-specific parameters //////////////////////////
   //
-  //  // Show the depth image that arrives in the depth node
-  //  bool Parameters::Debug::show_depth_image = false;
+  // Show the depth image that arrives in the depth node
+  bool Parameters::Debug::show_depth_image = false;
   //
-  //  // Show the rgb image that arrives in the rgb node
-  //  bool Parameters::Debug::show_rgb_image = false;
+  // Show the rgb image that arrives in the rgb node
+  bool Parameters::Debug::show_rgb_image = false;
+  // Show the std variance image after processing rgb image
+  bool Parameters::Debug::show_std_variance_image = false;
   //
   //  // Show the holes that each of the depth and RGB nodes transmit to the
   //  // hole fusion node, on top of their respective origin images
@@ -84,8 +86,8 @@ namespace pandora_vision
   //  // Show the texture's watersheded backprojection
   //  bool Parameters::Debug::show_texture = false;
   //
-  //  bool Parameters::Debug::show_find_holes = false;
-  //  int Parameters::Debug::show_find_holes_size = 1000;
+  bool Parameters::Debug::show_find_holes = false;
+  int Parameters::Debug::show_find_holes_size = 1000;
   //
   //  bool Parameters::Debug::show_produce_edges = false;
   //  int Parameters::Debug::show_produce_edges_size = 900;
@@ -114,6 +116,7 @@ namespace pandora_vision
   //  // 1 for brushfire near
   //  // 2 for brushfire far
   //  int Parameters::Depth::interpolation_method = 0;
+  float Parameters::Depth::intensity_threshold = 0.1;
   int Parameters::Depth::morphology_open_kernel_size = 2;
   int Parameters::Depth::morphology_close_kernel_size = 24;
   int Parameters::Depth::border_thresh = 20;
@@ -298,8 +301,8 @@ namespace pandora_vision
   //  // 1 through wavelet analysis
   //  int Parameters::Image::image_representation_method = 1;
   //
-  //  // Method to scale the CV_32F image to CV_8UC1
-  //  int Parameters::Image::scale_method = 0;
+  // Method to scale the CV_32F image to CV_8UC1
+  int Parameters::Image::scale_method = 0;
   //
   //  // Term criteria for segmentation purposes
   //  int Parameters::Image::term_criteria_max_iterations = 5;

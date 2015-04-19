@@ -59,7 +59,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the rgb node
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      <pandora_vision_msgs::ExplorerCandidateHolesVectorMsg>(
           candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (RGB) parameter's callback
@@ -105,12 +105,12 @@ namespace pandora_vision
     MessageConversions::extractImageFromMessage(msg, &rgbImage,
         sensor_msgs::image_encodings::BGR8);
 
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_rgb_image)
-    //    {
-    //      Visualization::show("RGB image", rgbImage, 1);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_rgb_image)
+    {
+      Visualization::show("RGB image", rgbImage, 1);
+    }
+#endif
 
     // Regardless of the image representation method, the RGB node
     // will publish the RGB image of original size to the Hole Fusion node
@@ -258,13 +258,16 @@ namespace pandora_vision
     //////////////////////////////// Debug parameters ////////////////////////////
 
     //// Show the rgb image that arrives in the rgb node
-    //Parameters::Debug::show_rgb_image =
-    //  config.show_rgb_image;
+    Parameters::Debug::show_rgb_image =
+      config.show_rgb_image;
 
-    //Parameters::Debug::show_find_holes =
-    //  config.show_find_holes;
-    //Parameters::Debug::show_find_holes_size =
-    //  config.show_find_holes_size;
+    Parameters::Debug::show_std_variance_image =
+      config.show_std_variance_image;
+
+    Parameters::Debug::show_find_holes =
+      config.show_find_holes;
+    Parameters::Debug::show_find_holes_size =
+      config.show_find_holes_size;
 
     //Parameters::Debug::show_produce_edges =
     //  config.show_produce_edges;
@@ -463,23 +466,23 @@ namespace pandora_vision
     //    Timer::start("findHoles", "inputRgbImageCallback");
     //#endif
     //
-    //#ifdef DEBUG_SHOW
-    //    std::string msg;
-    //    std::vector<cv::Mat> imgs;
-    //    std::vector<std::string> msgs;
-    //#endif
+#ifdef DEBUG_SHOW
+    std::string msg;
+    std::vector<cv::Mat> imgs;
+    std::vector<std::string> msgs;
+#endif
     //
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      cv::Mat tmp;
-    //      rgbImage.copyTo(tmp);
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += " : Initial RGB image";
-    //      msgs.push_back(msg);
-    //      imgs.push_back(tmp);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      cv::Mat tmp;
+      rgbImage.copyTo(tmp);
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Initial RGB image";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+#endif
 
     // Initial filtering of contours variant from the background
     cv::Mat bigVarianceContours;
@@ -487,17 +490,17 @@ namespace pandora_vision
         rgbImage,
         &bigVarianceContours);
 
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      cv::Mat tmp;
-    //      bigVarianceContours.copyTo(tmp);
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Edges after denoise");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(tmp);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      cv::Mat tmp;
+      bigVarianceContours.copyTo(tmp);
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Edges after denoise");
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+#endif
 
     std::vector<std::vector<cv::Point> > contours;
     // Find contours in the variance image.
@@ -507,65 +510,66 @@ namespace pandora_vision
     std::vector<cv::Rect> boundRect(contours.size());
     // Get center of mass and bounding box of each contour.
     getContourInfo(contours ,&mc, &boundRect);
-    std::vector<bool> realContours;
+    std::vector<bool> realContours(contours.size(), true);
     // True contour sizes after possible merging
     std::vector<int> contourWidth(contours.size());
     std::vector<int> contourHeight(contours.size());
     // Validate contours found. The product is a vector with a flag for each contour.
     validateContours(rgbImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
-
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Initial keypoints");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(Visualization::showKeypoints(msg, edges, -1, keyPoints));
-    //    }
-    //#endif
-
     // The final vectors of keypoints, and rectangles.
     HolesConveyor conveyor;
-
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_find_holes)
-    //    {
-    //      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Blobs");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(
-    //          Visualization::showHoles(
-    //            msg,
-    //            rgbImage,
-    //            conveyor,
-    //            -1,
-    //            std::vector<std::string>())
-    //          );
-    //    }
-    //#endif
-    //
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_find_holes)
-    //    {
-    //      Visualization::multipleShow("RGB node", imgs, msgs,
-    //          Parameters::Debug::show_find_holes_size, 1);
-    //    }
-    //#endif
-    //
-    //#ifdef DEBUG_TIME
-    //    Timer::tick("findHoles");
-    //#endif
     std::vector<cv::Point2f> keypoints;
     std::vector<cv::Rect> rectangles;
     for(int i = 0; i < contours.size(); i++)
+    {
       if(realContours.at(i))
       {
         keypoints.push_back(mc[i]);
         rectangles.push_back(boundRect[i]);
       }
+    }
 
     conveyor.keypoint = keypoints;
     conveyor.rectangle = rectangles;
+
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Initial keypoints");
+      msgs.push_back(msg);
+      imgs.push_back(Visualization::showKeypoints(msg, bigVarianceContours, -1, keypoints));
+    }
+#endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_find_holes)
+    {
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Blobs");
+      msgs.push_back(msg);
+      imgs.push_back(
+          Visualization::showHoles(
+            msg,
+            rgbImage,
+            conveyor,
+            -1,
+            std::vector<std::string>())
+          );
+    }
+#endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_find_holes)
+    {
+      Visualization::multipleShow("RGB node", imgs, msgs,
+          Parameters::Debug::show_find_holes_size, 1);
+    }
+#endif
+
+#ifdef DEBUG_TIME
+    Timer::tick("findHoles");
+#endif
 
     return conveyor;
   }
@@ -588,7 +592,8 @@ namespace pandora_vision
     cv::sqrt(mu2 - mu.mul(mu), (*bigVarianceContours));
 
     cv::normalize((*bigVarianceContours), (*bigVarianceContours), 0.0, 1.0, cv::NORM_MINMAX);
-    cv::cvtColor((*bigVarianceContours), (*bigVarianceContours), CV_BGR2GRAY);
+    if((*bigVarianceContours).channels() == 3)
+      cv::cvtColor((*bigVarianceContours), (*bigVarianceContours), CV_BGR2GRAY);
 
     double minVal, maxVal;
     cv::minMaxLoc((*bigVarianceContours), &minVal, &maxVal);
@@ -604,6 +609,12 @@ namespace pandora_vision
     morphologyKernel = Parameters::Rgb::std_variance_morphology_open_size;
     structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx((*bigVarianceContours), (*bigVarianceContours), cv::MORPH_OPEN, structuringElement );
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_std_variance_image)
+    {
+      Visualization::show("Std variance image", (*bigVarianceContours), 1);
+    }
+#endif
   }
 
 

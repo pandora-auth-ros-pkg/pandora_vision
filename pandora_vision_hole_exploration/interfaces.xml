@@ -1,6 +1,6 @@
 <package>
 
-  <!--
+  
   <node>
     /synchronizer_node
 
@@ -22,7 +22,7 @@
     <publisher>/synchronized/depth/candidate_holes</publisher>
 
   </node>
-  --!>
+  
 
 
   <node>
@@ -34,7 +34,7 @@
 
   </node>
 
-  <!--
+  
 
   <node>
     /hole_fusion_node
@@ -49,6 +49,6 @@
     <publisher>/vision/hole_detector/debug_valid_holes_found</publisher>
 
   </node>
-  --!>
+  
 
 </package>

@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Philotheou, Manos Tsardoulias
+ * Authors: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
  *********************************************************************/
 
 #ifndef UTILS_PARAMETERS_H
@@ -44,7 +44,7 @@
 #include <pandora_vision_hole_exploration/depth_cfgConfig.h>
 #include <pandora_vision_hole_exploration/rgb_cfgConfig.h>
 #include <pandora_vision_hole_exploration/hole_fusion_cfgConfig.h>
-//#include <pandora_vision_hole/debug_cfgConfig.h>
+#include <pandora_vision_hole_exploration/debug_cfgConfig.h>
 //#include <pandora_vision_hole/filters_priority_cfgConfig.h>
 //#include <pandora_vision_hole/filters_thresholds_cfgConfig.h>
 //#include <pandora_vision_hole/general_cfgConfig.h>
@@ -83,53 +83,55 @@ namespace pandora_vision
     //
     //
     //    //! Debug-specific parameters
-    //    struct Debug
-    //    {
-    //      // Show the depth image that arrives in the depth node
-    //      static bool show_depth_image;
-    //
-    //      // Show the rgb image that arrives in the rgb node
-    //      static bool show_rgb_image;
-    //
-    //      // Show the holes that each of the depth and RGB nodes transmit to the
-    //      // hole fusion node, on top of their respective origin images
-    //      static bool show_respective_holes;
-    //
-    //      // Show all valid holes, from either the Depth or RGB source, or
-    //      // the merges between them
-    //      static bool show_valid_holes;
-    //
-    //      // The product of this package: unique, valid holes
-    //      static bool show_final_holes;
-    //
-    //      // In the terminal's window, show the probabilities of candidate holes
-    //      static bool show_probabilities;
-    //
-    //      // Show the texture's watersheded backprojection
-    //      static bool show_texture;
-    //
-    //      static bool show_find_holes;
-    //      static int show_find_holes_size;
-    //
-    //      static bool show_produce_edges;
-    //      static int show_produce_edges_size;
-    //
-    //      static bool show_denoise_edges;
-    //      static int show_denoise_edges_size;
-    //
-    //      static bool print_connect_pairs;
-    //      static bool show_connect_pairs;
-    //      static int show_connect_pairs_size;
-    //
-    //      static bool show_get_shapes_clear_border;
-    //      static int show_get_shapes_clear_border_size;
-    //
-    //      static bool show_check_holes;
-    //      static int show_check_holes_size;
-    //
-    //      static bool show_merge_holes;
-    //      static int show_merge_holes_size;
-    //    };
+    struct Debug
+    {
+      // Show the depth image that arrives in the depth node
+      static bool show_depth_image;
+      
+      //Show the rgb image that arrives in the rgb node
+      static bool show_rgb_image;
+      //Show the std variance image after rgb image processing
+      static bool show_std_variance_image;
+      //
+      //      // Show the holes that each of the depth and RGB nodes transmit to the
+      //      // hole fusion node, on top of their respective origin images
+      //      static bool show_respective_holes;
+      //
+      //      // Show all valid holes, from either the Depth or RGB source, or
+      //      // the merges between them
+      //      static bool show_valid_holes;
+      //
+      //      // The product of this package: unique, valid holes
+      //      static bool show_final_holes;
+      //
+      //      // In the terminal's window, show the probabilities of candidate holes
+      //      static bool show_probabilities;
+      //
+      //      // Show the texture's watersheded backprojection
+      //      static bool show_texture;
+      //
+      static bool show_find_holes;
+      static int show_find_holes_size;
+      //
+      //      static bool show_produce_edges;
+      //      static int show_produce_edges_size;
+      //
+      //      static bool show_denoise_edges;
+      //      static int show_denoise_edges_size;
+      //
+      //      static bool print_connect_pairs;
+      //      static bool show_connect_pairs;
+      //      static int show_connect_pairs_size;
+      //
+      //      static bool show_get_shapes_clear_border;
+      //      static int show_get_shapes_clear_border_size;
+      //
+      //      static bool show_check_holes;
+      //      static int show_check_holes_size;
+      //
+      //      static bool show_merge_holes;
+      //      static int show_merge_holes_size;
+    };
     //
     //
     //
@@ -141,6 +143,7 @@ namespace pandora_vision
       //// 1 for brushfire near
       //// 2 for brushfire far
       //static int interpolation_method;
+      static float intensity_threshold;
       static int morphology_open_kernel_size;
       static int morphology_close_kernel_size;
       static int depth_thresh;
@@ -381,8 +384,8 @@ namespace pandora_vision
       //      // 1 through wavelet analysis
       //      static int image_representation_method;
       //
-      //      // Method to scale the CV_32F images to CV_8UC1
-      //      static int scale_method;
+      // Method to scale the CV_32F images to CV_8UC1
+      static int scale_method;
       //
       //      // Term criteria for segmentation purposes
       //      static int term_criteria_max_iterations;

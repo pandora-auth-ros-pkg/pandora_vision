@@ -59,7 +59,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the depth node
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      <pandora_vision_msgs::ExplorerCandidateHolesVectorMsg>(
           candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (Depth) parameter's callback
@@ -81,13 +81,13 @@ namespace pandora_vision
 
 
   /**
-    @brief Callback for the rgb image received by the synchronizer node.
+    @brief Callback for the depth image received by the synchronizer node.
 
-    The rgb image message received by the synchronizer node is unpacked
+    The depth image message received by the synchronizer node is unpacked
     in a cv::Mat image. Holes are then located inside this image and
     information about them, along with the depth image, is then sent to the
     hole fusion node
-    @param msg [const sensor_msgs::Image&] The rgb image message
+    @param msg [const sensor_msgs::Image&] The depth image message
     @return void
    **/
   void Depth::inputDepthImageCallback(const sensor_msgs::Image& msg)
@@ -105,14 +105,14 @@ namespace pandora_vision
     MessageConversions::extractImageFromMessage(msg, &depthImage,
         sensor_msgs::image_encodings::TYPE_32FC1);
 
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_rgb_image)
-    //    {
-    //      Visualization::show("RGB image", rgbImage, 1);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_depth_image)
+    {
+      Visualization::show("Depth image", depthImage, 1);
+    }
+#endif
 
-    // Regardless of the image representation method, the RGB node
+    // Regardless of the image representation method, the depth node
     // will publish the RGB image of original size to the Hole Fusion node
     cv::Mat depthImageSent;
     depthImage.copyTo(depthImageSent);
@@ -121,19 +121,19 @@ namespace pandora_vision
     HolesConveyor conveyor = findHoles(depthImage);
 
     // Create the candidate holes message
-    pandora_vision_msgs::CandidateHolesVectorMsg depthCandidateHolesMsg;
+    pandora_vision_msgs::ExplorerCandidateHolesVectorMsg depthCandidateHolesMsg;
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.
     // This message will be published to and received by the hole fusion node
-    //MessageConversions::createCandidateHolesVectorMessage(holes,
-    //    interpolatedDepthImageSent,
-    //    &depthCandidateHolesMsg,
-    //    sensor_msgs::image_encodings::TYPE_32FC1,
-    //    msg);
+    MessageConversions::createCandidateHolesVectorMessage(conveyor,
+        depthImageSent,
+        &depthCandidateHolesMsg,
+        sensor_msgs::image_encodings::TYPE_32FC1,
+        msg);
 
-    //// Publish the candidate holes message
-    //candidateHolesPublisher_.publish(depthCandidateHolesMsg);
+    // Publish the candidate holes message
+    candidateHolesPublisher_.publish(depthCandidateHolesMsg);
 
 #ifdef DEBUG_TIME
     Timer::tick("inputDepthImageCallback");
@@ -259,14 +259,14 @@ namespace pandora_vision
 
     //  //////////////////////////////// Debug parameters ////////////////////////////
 
-    //  //// Show the rgb image that arrives in the rgb node
-    //  //Parameters::Debug::show_rgb_image =
-    //  //  config.show_rgb_image;
+    // Show the rgb image that arrives in the rgb node
+    Parameters::Debug::show_depth_image =
+      config.show_depth_image;
 
-    //  //Parameters::Debug::show_find_holes =
-    //  //  config.show_find_holes;
-    //  //Parameters::Debug::show_find_holes_size =
-    //  //  config.show_find_holes_size;
+    Parameters::Debug::show_find_holes =
+      config.show_find_holes;
+    Parameters::Debug::show_find_holes_size =
+      config.show_find_holes_size;
 
     //  //Parameters::Debug::show_produce_edges =
     //  //  config.show_produce_edges;
@@ -448,6 +448,8 @@ namespace pandora_vision
     //    config.homogenity_thresh;
     //  Parameters::Rgb::neighbor_tiny_distance_thresh 
     //    config.neighbor_tiny_distance_thresh;
+    Parameters::Depth::intensity_threshold =
+      config.intensity_threshold;
     Parameters::Depth::morphology_open_kernel_size =
       config.morphology_open_kernel_size;
     Parameters::Depth::morphology_close_kernel_size =
@@ -492,42 +494,44 @@ namespace pandora_vision
     //    Timer::start("findHoles", "inputRgbImageCallback");
     //#endif
     //
-    //#ifdef DEBUG_SHOW
-    //    std::string msg;
-    //    std::vector<cv::Mat> imgs;
-    //    std::vector<std::string> msgs;
-    //#endif
-    //
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      cv::Mat tmp;
-    //      rgbImage.copyTo(tmp);
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += " : Initial RGB image";
-    //      msgs.push_back(msg);
-    //      imgs.push_back(tmp);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    std::string msg;
+    std::vector<cv::Mat> imgs;
+    std::vector<std::string> msgs;
+#endif
 
-    cv::cvtColor(depthImage, depthImage, CV_BGR2GRAY);
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      cv::Mat tmp;
+      depthImage.copyTo(tmp);
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += " : Initial depth image";
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+#endif
+
+
+    if(depthImage.channels() >= 3)
+      cv::cvtColor(depthImage, depthImage, CV_BGR2GRAY);
     // Initial filtering of contours variant from the background
     cv::Mat filteredImage;
     filterImage(
         depthImage,
         &filteredImage);
 
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      cv::Mat tmp;
-    //      bigVarianceContours.copyTo(tmp);
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Edges after denoise");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(tmp);
-    //    }
-    //#endif
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      cv::Mat tmp;
+      filteredImage.copyTo(tmp);
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Edges after filtering");
+      msgs.push_back(msg);
+      imgs.push_back(tmp);
+    }
+#endif
 
     std::vector<std::vector<cv::Point> > contours;
     // Find contours in the variance image.
@@ -537,54 +541,14 @@ namespace pandora_vision
     std::vector<cv::Rect> boundRect(contours.size());
     // Get center of mass and bounding box of each contour.
     getContourInfo(contours ,&mc, &boundRect);
-    std::vector<bool> realContours;
+    std::vector<bool> realContours(contours.size(), true);
     // True contour sizes after possible merging
     std::vector<int> contourWidth(contours.size());
     std::vector<int> contourHeight(contours.size());
     // Validate contours found. The product is a vector with a flag for each contour.
     validateContours(depthImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
-
-    //#ifdef DEBUG_SHOW
-    //    if(Parameters::Debug::show_find_holes) // Debug
-    //    {
-    //      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Initial keypoints");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(Visualization::showKeypoints(msg, edges, -1, keyPoints));
-    //    }
-    //#endif
-
     // The final vectors of keypoints, and rectangles.
     HolesConveyor conveyor;
-
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_find_holes)
-    //    {
-    //      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-    //      msg += STR(" : Blobs");
-    //      msgs.push_back(msg);
-    //      imgs.push_back(
-    //          Visualization::showHoles(
-    //            msg,
-    //            rgbImage,
-    //            conveyor,
-    //            -1,
-    //            std::vector<std::string>())
-    //          );
-    //    }
-    //#endif
-    //
-    //#ifdef DEBUG_SHOW
-    //    if (Parameters::Debug::show_find_holes)
-    //    {
-    //      Visualization::multipleShow("RGB node", imgs, msgs,
-    //          Parameters::Debug::show_find_holes_size, 1);
-    //    }
-    //#endif
-    //
-    //#ifdef DEBUG_TIME
-    //    Timer::tick("findHoles");
-    //#endif
     std::vector<cv::Point2f> keypoints;
     std::vector<cv::Rect> rectangles;
     for(int i = 0; i < contours.size(); i++)
@@ -597,13 +561,53 @@ namespace pandora_vision
     conveyor.keypoint = keypoints;
     conveyor.rectangle = rectangles;
 
+#ifdef DEBUG_SHOW
+    if(Parameters::Debug::show_find_holes) // Debug
+    {
+      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Initial keypoints");
+      msgs.push_back(msg);
+      imgs.push_back(Visualization::showKeypoints(msg, filteredImage, -1, mc));
+    }
+#endif
+
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_find_holes)
+    {
+      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+      msg += STR(" : Blobs");
+      msgs.push_back(msg);
+      imgs.push_back(
+          Visualization::showHoles(
+            msg,
+            depthImage,
+            conveyor,
+            -1,
+            std::vector<std::string>())
+          );
+    }
+#endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_find_holes)
+    {
+      Visualization::multipleShow("Depth node", imgs, msgs,
+          Parameters::Debug::show_find_holes_size, 1);
+    }
+#endif
+    //
+    //#ifdef DEBUG_TIME
+    //    Timer::tick("findHoles");
+    //#endif
+
     return conveyor;
   }
 
 
   void Depth::filterImage(const cv::Mat& depthImage, cv::Mat* filteredImage)
   {
-    cv::threshold(depthImage, (*filteredImage), 1, 255, CV_THRESH_BINARY_INV);
+    cv::threshold(depthImage, (*filteredImage), Parameters::Depth::intensity_threshold, 1.0, CV_THRESH_BINARY);
     int morphologyKernel = Parameters::Depth::morphology_open_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx( (*filteredImage), (*filteredImage), cv::MORPH_OPEN, structuringElement );
@@ -630,9 +634,11 @@ namespace pandora_vision
     cv::Mat temp;
     int dilationKernel = Parameters::Depth::dilation_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(dilationKernel, dilationKernel));
-    cv::dilate(filteredImage, temp, structuringElement);
+    cv::dilate(filteredImage, filteredImage, structuringElement);
     cv::vector<cv::Vec4i> hierarchy;
-    findContours(temp, (*contours), hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    cv::Mat temp1;
+    filteredImage.convertTo(temp1, CV_8UC1);
+    findContours(temp1, (*contours), hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
   }
 
 
@@ -816,7 +822,7 @@ namespace pandora_vision
               float euclideanDistance = 1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
               // TODO Toda Vez! ignore double registration same contours with other label. Maybe OK.
               float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
-              std::cout << mergeProbability << "\n";
+              //std::cout << mergeProbability << "\n";
               if(mergeProbability > Parameters::Depth::merge_thresh)
               {
                 if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())

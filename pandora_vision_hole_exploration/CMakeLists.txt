@@ -37,7 +37,7 @@ generate_dynamic_reconfigure_options(
   cfg/depth_node_cfg/depth_cfg.cfg
   cfg/hole_fusion_node_cfg/hole_fusion_cfg.cfg
   cfg/hole_fusion_node_cfg/validity_cfg.cfg
-  #cfg/hole_fusion_node_cfg/debug_cfg.cfg
+  cfg/hole_fusion_node_cfg/debug_cfg.cfg
   #cfg/hole_fusion_node_cfg/filters_priority_cfg.cfg
   #cfg/hole_fusion_node_cfg/filters_thresholds_cfg.cfg
   #cfg/hole_fusion_node_cfg/general_cfg.cfg
@@ -72,7 +72,7 @@ include_directories(
 add_library(${PROJECT_NAME}_utils
    src/utils/parameters.cpp
    src/utils/timer.cpp
-#  src/utils/visualization.cpp
+   src/utils/visualization.cpp
    src/utils/message_conversions.cpp
    src/utils/holes_conveyor.cpp
    src/utils/haralickfeature_extractor.cpp
@@ -136,7 +136,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   include/utils/parameters.h
   include/utils/timer.h
-  #include/utils/visualization.h
+  include/utils/visualization.h
   include/utils/message_conversions.h
   include/utils/defines.h
   include/utils/holes_conveyor.h
@@ -144,7 +144,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   src/utils/parameters.cpp
   #src/utils/timer.cpp
-  #src/utils/visualization.cpp
+  src/utils/visualization.cpp
   src/utils/message_conversions.cpp
   src/utils/holes_conveyor.cpp
   src/utils/haralickfeature_extractor.cpp

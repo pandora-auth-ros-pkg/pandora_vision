@@ -131,12 +131,11 @@ namespace pandora_vision
     @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
     message
     @param[in] conveyor [HolesConveyor&] A struct containing
-    vectors of the holes' keypoints, bounding rectangles' vertices
-    and blobs' outlines
+    vectors of the holes' keypoints and bounding rectangles
     @param[out] candidateHolesVector
-    [std::vector<pandora_vision_msgs::CandidateHolesVectorMsg>*]
+    [std::vector<pandora_vision_msgs::ExplorerCandidateHolesVectorMsg>*]
     The vector containing the conveyor's holes in
-    pandora_vision_msgs::CandidateHolesVectorMsg format
+    pandora_vision_msgs::ExplorerCandidateHolesVectorMsg format
     @return void
    **/
   void MessageConversions::createCandidateHolesVector(
@@ -180,11 +179,10 @@ namespace pandora_vision
 
 
   /**
-    @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
+    @brief Constructs a pandora_vision_msgs/ExplorerCandidateHolesVectorMsg
     message
     @param[in] conveyor [HolesConveyor&] A struct containing
-    vectors of the holes' keypoints, bounding rectangles' vertices
-    and blobs' outlines
+    vectors of the holes' keypoints and bounding rectangles
     @param[in] image [cv::Mat&] The image to be packed in the message
     @param[out] candidateHolesVectorMsg
     [pandora_vision_msgs::CandidateHolesVectorMsg*] The output message
