@@ -41,15 +41,14 @@
 #define PANDORA_VISION_QRCODE_QRCODE_HANDLER_H
 
 #include <string>
-#include "sensor_processor/handler.h"
+#include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_qrcode/qrcode_preprocessor.h"
 #include "pandora_vision_qrcode/qrcode_postprocessor.h"
 #include "pandora_vision_qrcode/qrCode_detector.h"
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped,
-    pandora_vision_msgs::QRAlertsVectorMsg>
+  class QrCodeHandler : public VisionHandler
   {
     public:
       explicit QrCodeHandler(const std::string& ns);

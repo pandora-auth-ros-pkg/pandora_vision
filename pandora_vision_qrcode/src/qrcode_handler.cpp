@@ -41,8 +41,7 @@
 
 namespace pandora_vision
 {
-  QrCodeHandler::QrCodeHandler(const std::string& ns) : sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, 
-    POIsStamped, pandora_vision_msgs::QRAlertsVectorMsg>(ns)
+  QrCodeHandler::QrCodeHandler(const std::string& ns) : VisionHandler(ns)
   {
   }
   

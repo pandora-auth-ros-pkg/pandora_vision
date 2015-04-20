@@ -41,7 +41,6 @@
 #define PANDORA_VISION_QRCODE_QRCODE_PREPROCESSOR_H
 
 #include <string>
-#include "sensor_processor/abstract_handler.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_preprocessor.h"
 
 namespace pandora_vision
@@ -49,7 +48,7 @@ namespace pandora_vision
   class QrCodePreProcessor : public VisionPreProcessor
   {
     public:
-      QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      QrCodePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~QrCodePreProcessor();
   };
 }  // namespace pandora_vision

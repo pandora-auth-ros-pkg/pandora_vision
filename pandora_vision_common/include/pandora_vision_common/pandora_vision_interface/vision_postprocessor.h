@@ -47,7 +47,6 @@
 #include <urdf_parser/urdf_parser.h>
 
 #include "sensor_processor/postprocessor.h"
-#include "sensor_processor/abstract_handler.h"
 #include "pandora_common_msgs/GeneralAlertInfoVector.h"
 #include "pandora_common_msgs/GeneralAlertInfo.h"
 
@@ -69,7 +68,7 @@ namespace pandora_vision
      * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
      * handles this postprocessor
      **/ 
-    VisionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+    VisionPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
     
     /**
      * @brief Virtual Destructor
@@ -146,7 +145,7 @@ namespace pandora_vision
 
   template <class VisionAlertMsg>
     VisionPostProcessor<VisionAlertMsg>::
-    VisionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+    VisionPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
       sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
     {
     }

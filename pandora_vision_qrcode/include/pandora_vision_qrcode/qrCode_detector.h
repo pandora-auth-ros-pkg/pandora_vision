@@ -47,19 +47,19 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include "sensor_processor/processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_qrcode/qrcode_poi.h"
 
 namespace pandora_vision
 {
-  class QrCodeDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
+  class QrCodeDetector : public VisionProcessor
   {
     public:
       typedef boost::shared_ptr<QrCodePOI> QrCodePOIPtr;
 
-      QrCodeDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      QrCodeDetector(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~QrCodeDetector() {}
 
       virtual bool

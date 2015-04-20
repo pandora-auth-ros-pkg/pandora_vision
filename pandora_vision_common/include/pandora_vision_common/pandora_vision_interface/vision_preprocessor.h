@@ -46,7 +46,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 
-#include "sensor_processor/abstract_handler.h"
 #include "sensor_processor/preprocessor.h"
 
 #include "pandora_vision_common/cv_mat_stamped.h"
@@ -66,7 +65,7 @@ namespace pandora_vision
        * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
        * handles this preprocessor
        **/ 
-      VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      VisionPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
       
       /**
        * @brief Virtual Destructor
@@ -81,14 +80,14 @@ namespace pandora_vision
        * of a sensor_msgs::Image
        * @param output [const CVMatStampedPtr&] A constant reference to a shared pointer of a 
        * structure that includes an openCV matrix and a timestamp
-       * @return [bool] whether preprocessing finished
+       * @return [bool] whether preprocessing output is full or something went wrong
        **/ 
       virtual bool
         preProcess(const ImageConstPtr& input, const CVMatStampedPtr& output);
   };
 
   VisionPreProcessor::
-  VisionPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+  VisionPreProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>(ns, handler)
   {
   }

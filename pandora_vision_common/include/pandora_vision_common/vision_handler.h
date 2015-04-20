@@ -51,9 +51,7 @@
 
 namespace pandora_vision
 {
-  template <class VisionAlertMsg>
-  class VisionHandler : public sensor_processor::Handler<sensor_msgs::Image,
-    CVMatStamped, POIsStamped, VisionAlertMsg>
+  class VisionHandler : public sensor_processor::Handler
   {
     public:
       /**
@@ -61,8 +59,7 @@ namespace pandora_vision
        * @param ns [const std::string&] The namespace of this handler's nodeHandle
        **/ 
       explicit VisionHandler(const std::string& ns) :
-        sensor_processor::Handler<sensor_msgs::Image, CVMatStamped,
-        POIsStamped, VisionAlertMsg>(ns) {}
+        sensor_processor::Handler(ns) {}
       
       /**
        * @brief Virtual Destructor
@@ -75,13 +72,13 @@ namespace pandora_vision
        * state is changed
        * @param newState [int] Robot's new state
        **/ 
-      virtual void startTransition(int newState);
+      virtual void startTransition(int newState) {}
       
       /**
        * @brief Function that is called after the transition from one state to
        * another is completed
        **/ 
-      virtual void completeTransition();
+      virtual void completeTransition() {}
   };
 }  // namespace pandora_vision
 

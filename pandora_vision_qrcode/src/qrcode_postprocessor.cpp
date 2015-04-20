@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   
-  QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+  QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>(ns, handler)
   {
   }

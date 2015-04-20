@@ -41,8 +41,8 @@
 
 namespace pandora_vision
 {
-  QrCodePreProcessor::QrCodePreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    VisionPreProcessor(ns, handler)
+  QrCodePreProcessor::QrCodePreProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler)
   {
   }
   
