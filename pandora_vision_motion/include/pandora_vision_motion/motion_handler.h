@@ -41,15 +41,14 @@
 #define PANDORA_VISION_MOTION_MOTION_HANDLER_H
 
 #include <string>
-#include "sensor_processor/handler.h"
+#include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_motion/motion_preprocessor.h"
 #include "pandora_vision_motion/motion_postprocessor.h"
 #include "pandora_vision_motion/motion_detector.h"
 
 namespace pandora_vision
 {
-  class MotionHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_common_msgs::GeneralAlertInfoVector>
+  class MotionHandler : public VisionHandler
   {
     public:
       explicit MotionHandler(const std::string& ns);

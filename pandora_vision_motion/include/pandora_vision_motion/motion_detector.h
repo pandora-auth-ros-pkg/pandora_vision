@@ -41,7 +41,7 @@
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
-#include "sensor_processor/processor.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_motion/motion_poi.h"
@@ -49,14 +49,14 @@
 
 namespace pandora_vision 
 {
-  class MotionDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
+  class MotionDetector : public VisionProcessor
   {
     public:
       /**
         @brief Class Constructor
         Initializes all varialbes for thresholding
       */
-      MotionDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      MotionDetector(const std::string& ns, sensor_processor::Handler* handler);
       
       /**
         @brief Class Destructor

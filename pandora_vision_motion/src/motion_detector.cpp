@@ -45,8 +45,8 @@ namespace pandora_vision
     @brief Class Constructor
     Initializes all varialbes for thresholding
   */
-  MotionDetector::MotionDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler)
+  MotionDetector::MotionDetector(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionProcessor(ns, handler)
   { 
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
     bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,

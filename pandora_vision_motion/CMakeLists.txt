@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
     pandora_vision_common
-    sensor_processor
     state_manager
     state_manager_msgs
     cv_bridge
@@ -28,7 +27,6 @@ catkin_package(
       roscpp
       pandora_common_msgs
       pandora_vision_common
-      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge

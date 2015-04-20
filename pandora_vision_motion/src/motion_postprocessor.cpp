@@ -41,7 +41,7 @@
 
 namespace pandora_vision
 {
-  MotionPostProcessor::MotionPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+  MotionPostProcessor::MotionPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>(ns, handler)
   {
   }
