@@ -53,7 +53,7 @@ namespace pandora_vision
     public:
       typedef boost::shared_ptr<pandora_vision_msgs::LandoltcAlertsVectorMsg> LandoltcAlertsVectorMsgPtr;
       
-      LandoltCPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      LandoltCPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~LandoltCPostProcessor();
       
       virtual bool

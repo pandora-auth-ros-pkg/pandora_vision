@@ -41,7 +41,7 @@
 
 namespace pandora_vision
 {
-  LandoltCPreProcessor::LandoltCPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+  LandoltCPreProcessor::LandoltCPreProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPreProcessor(ns, handler)
   {
   }

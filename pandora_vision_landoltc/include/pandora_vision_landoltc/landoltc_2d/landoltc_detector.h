@@ -38,7 +38,7 @@
 #ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H
 
-#include "sensor_processor/processor.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_poi.h"
@@ -46,11 +46,11 @@
 
 namespace pandora_vision
 {
-  class LandoltCDetector : public sensor_processor::Processor<CVMatStamped, POIsStamped>
+  class LandoltCDetector : public VisionProcessor
   {
     public:
       //!< Constructor
-      LandoltCDetector(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      LandoltCDetector(const std::string& ns, sensor_processor::Handler* handler);
 
       //!< Destructor
       virtual ~LandoltCDetector();

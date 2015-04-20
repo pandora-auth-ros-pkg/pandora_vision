@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_common_msgs
     pandora_vision_msgs
     pandora_vision_common
-    sensor_processor
     state_manager
     state_manager_msgs
     cv_bridge
@@ -33,7 +32,6 @@ catkin_package(
       pandora_vision_common
       pandora_vision_msgs
       pandora_common_msgs
-      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge

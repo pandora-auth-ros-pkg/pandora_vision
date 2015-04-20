@@ -40,8 +40,8 @@
 namespace pandora_vision
 {
   //!< Constructor
-  LandoltCDetector::LandoltCDetector(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler)
+  LandoltCDetector::LandoltCDetector(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionProcessor(ns, handler)
   {
     _minDiff = 60;
     _threshold = 90;

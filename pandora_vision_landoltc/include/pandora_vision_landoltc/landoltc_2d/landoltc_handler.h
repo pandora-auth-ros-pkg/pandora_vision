@@ -41,15 +41,14 @@
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_HANDLER_H
 
 #include <string>
-#include "sensor_processor/handler.h"
+#include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_preprocessor.h"
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_postprocessor.h"
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_detector.h"
 
 namespace pandora_vision
 {
-  class LandoltCHandler : public sensor_processor::Handler<sensor_msgs::Image, CVMatStamped, POIsStamped, 
-    pandora_vision_msgs::LandoltcAlertsVectorMsg>
+  class LandoltCHandler : public VisionHandler
   {
     public:
       explicit LandoltCHandler(const std::string& ns);

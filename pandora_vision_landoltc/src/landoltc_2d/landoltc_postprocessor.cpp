@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   
-  LandoltCPostProcessor::LandoltCPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
+  LandoltCPostProcessor::LandoltCPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_vision_msgs::LandoltcAlertsVectorMsg>(ns, handler)
   {
   }
