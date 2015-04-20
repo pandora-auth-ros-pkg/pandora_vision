@@ -43,8 +43,10 @@
 #include <utils/parameters.h>
 #include <std_msgs/Empty.h>
 #include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include "std_msgs/UInt8MultiArray.h"
+#include "pandora_vision_msgs/FlirMsg.h"
 
 /**
   @namespace pandora_vision
@@ -64,13 +66,14 @@ namespace pandora_vision
       // The ROS node handle
       ros::NodeHandle nodeHandle_;
 
+   
       // The subscriber to the point cloud topic
-      message_filters::Subscriber<PointCloudPtr>
-        inputPointCloudSubscriber_;
+      message_filters::Subscriber<PointCloud>
+        *inputPointCloudSubscriber_;
 
       // The subscriber to the input thermal topic
-      message_filters::Subscriber<std_msgs::UInt8MultiArray>
-        inputThermalSubscriber_;
+      message_filters::Subscriber<sensor_msgs::Image>
+        *inputThermalSubscriber_;
 
       // The name of the topic from where the input point cloud is acquired
       std::string inputPointCloudTopic_;
@@ -177,7 +180,7 @@ namespace pandora_vision
        **/
       void inputPointCloudThermalCallback(
         const PointCloudPtr& pointCloudMessage,
-        const std_msgs::UInt8MultiArray& thermalMessage);
+        const sensor_msgs::Image& thermalMessage);
 
 
       /**

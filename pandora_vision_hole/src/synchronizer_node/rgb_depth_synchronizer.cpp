@@ -63,10 +63,12 @@ namespace pandora_vision
     getSimulationDimensions();
 
     // The subscriber to the point cloud topic
-    inputPointCloudSubscriber_(nodeHandle_, inputPointCloudTopic_, 1);
+    inputPointCloudSubscriber_ = new message_filters::Subscriber<PointCloud>
+      (nodeHandle_, inputPointCloudTopic_, 1);
 
     // The subscriber to the input thermal topic
-    inputThermalSubscriber_(nodeHandle_, inputThermalTopic_, 1);
+    inputThermalSubscriber_ = new message_filters::Subscriber
+      <sensor_msgs::Image> (nodeHandle_, inputThermalTopic_, 1);
 
     // Subscribe to the hole_fusion lock/unlock topic
     unlockSubscriber_ = nodeHandle_.subscribe(unlockTopic_, 1,
@@ -230,7 +232,6 @@ namespace pandora_vision
         ns + "/synchronizer_node/subscribed_topics/subscribe_to_input",
         subscribeToInputPointCloudTopic_))
     {
-      // Make the topic's name absolute
       subscribeToInputPointCloudTopic_ =
         ns + "/" + subscribeToInputPointCloudTopic_;
 
@@ -358,7 +359,7 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::inputPointCloudThermalCallback(
     const PointCloudPtr& pointCloudMessage,
-    const std_msgs::UInt8MultiArray& thermalMessage)
+    const sensor_msgs::Image& thermalMessage)
   {
     if (!isLocked_)
     {
@@ -473,10 +474,10 @@ namespace pandora_vision
     const std_msgs::Empty& msg)
   {
     // Shutdown the input point cloud subscriber
-    inputPointCloudSubscriber_.unsubscribe();
+    inputPointCloudSubscriber_->unsubscribe();
 
     // Shutdown the input thermal subscriber
-    inputThermalSubscriber_.unsubscribe();
+    inputThermalSubscriber_->unsubscribe();
   }
 
 
@@ -496,14 +497,19 @@ namespace pandora_vision
   void RgbDepthSynchronizer::subscribeToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   {
+ 
     // Subscribe to the input point cloud and thermal topic
-    message_filters::TimeSynchronizer<
-      PointCloudPtr&, std_msgs::UInt8MultiArray>
-      sync(inputPointCloudSubscriber_, inputThermalSubscriber_, 10);
+     message_filters::Synchronizer<
+       message_filters::sync_policies::ApproximateTime<PointCloud,
+       sensor_msgs::Image> >
+       sync(message_filters::sync_policies::ApproximateTime<
+       PointCloud, sensor_msgs::Image>(10),
+       *inputPointCloudSubscriber_,
+       *inputThermalSubscriber_);
 
-    sync.registerCallback(boost::bind(
-      &RgbDepthSynchronizer::inputPointCloudThermalCallback,
-      _1, _2, this));
+   // sync.registerCallback(boost::bind(
+     // &RgbDepthSynchronizer::inputPointCloudThermalCallback,
+     // _1, _2, this));
 
   }
 
