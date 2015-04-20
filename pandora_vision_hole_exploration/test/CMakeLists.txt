@@ -11,12 +11,12 @@
 #  gtest_main)
 
 
-#catkin_add_gtest(holes_conveyor_test
-#  unit/utils/holes_conveyor_test.cpp)
-#target_link_libraries(holes_conveyor_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_utils
-#  gtest_main)
+catkin_add_gtest(holes_conveyor_test
+  unit/utils/holes_conveyor_test.cpp)
+target_link_libraries(holes_conveyor_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
 
 catkin_add_gtest(message_conversions_test
   unit/utils/message_conversions_test.cpp)
@@ -25,12 +25,12 @@ target_link_libraries(message_conversions_test
   ${PROJECT_NAME}_utils
   gtest_main)
 
-#catkin_add_gtest(visualization_test
-#  unit/utils/visualization_test.cpp)
-#target_link_libraries(visualization_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_utils
-#  gtest_main)
+catkin_add_gtest(visualization_test
+  unit/utils/visualization_test.cpp)
+target_link_libraries(visualization_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
 
 
 ################################ depth node ####################################
@@ -44,13 +44,13 @@ target_link_libraries(message_conversions_test
 
 
 ################################# rgb node #####################################
-#catkin_add_gtest(rgb_hole_detector_test
-#  unit/rgb_node/hole_detector_test.cpp)
-#
-#target_link_libraries(rgb_hole_detector_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_rgb
-#  gtest_main)
+catkin_add_gtest(rgb_test
+  unit/rgb_node/rgb_test.cpp)
+
+target_link_libraries(rgb_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_rgb
+  gtest_main)
 
 ############################# hole fusion node #################################
 

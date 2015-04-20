@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Alexandros Philotheou
+ * Author: Alexandros Philotheou, Vasilis Bosdelekidis
  *********************************************************************/
 
 #include "utils/visualization.h"
@@ -89,22 +89,11 @@ namespace pandora_vision
         }
 
         // Set up the conveyor
-        HoleConveyor hole;
 
-        cv::KeyPoint k ( 150, 150, 1 );
-        hole.keypoint = k;
-
-        hole.rectangle.push_back( cv::Point2f( 100, 100 ) );
-        hole.rectangle.push_back( cv::Point2f( 100, 199 ) );
-        hole.rectangle.push_back( cv::Point2f( 199, 199 ) );
-        hole.rectangle.push_back( cv::Point2f( 199, 100 ) );
-
-        hole.outline.push_back( cv::Point2f( 90, 90 ) );
-        hole.outline.push_back( cv::Point2f( 90, 209 ) );
-        hole.outline.push_back( cv::Point2f( 209, 209 ) );
-        hole.outline.push_back( cv::Point2f( 209, 90 ) );
-
-        conveyor.holes.push_back( hole );
+        cv::Point2f k ( 150, 150 );
+        conveyor.keypoint.push_back(k);
+        cv::Rect r(100, 100, 99, 99);
+        conveyor.rectangle.push_back(r);
       }
 
       // The images' dimensions
@@ -207,9 +196,9 @@ namespace pandora_vision
   TEST_F ( VisualizationTest, showKeypointsTest )
   {
     // The vector of keypoints
-    std::vector< cv::KeyPoint > kVector;
+    std::vector< cv::Point2f > kVector;
 
-    cv::KeyPoint k ( 150, 150, 1 );
+    cv::Point2f k ( 150, 150 );
     kVector.push_back( k );
 
     // The vector of available images

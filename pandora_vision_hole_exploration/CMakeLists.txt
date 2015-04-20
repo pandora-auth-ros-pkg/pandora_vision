@@ -196,8 +196,9 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   #test/unit/utils/blob_detection_test.cpp
   #test/unit/utils/edge_detection_test.cpp
   #test/unit/utils/hole_filters_test.cpp
-  #test/unit/utils/holes_conveyor_test.cpp
+  test/unit/utils/holes_conveyor_test.cpp
   test/unit/utils/message_conversions_test.cpp
+  test/unit/utils/visualization_test.cpp
   #test/unit/utils/morphological_operators_test.cpp
   #test/unit/utils/noise_elimination_test.cpp
   #test/unit/utils/outline_discovery_test.cpp
@@ -207,7 +208,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   #test/unit/depth_node/hole_detector_test.cpp
 
   #################### rgb node ####################
-  #test/unit/rgb_node/hole_detector_test.cpp
+  test/unit/rgb_node/rgb_test.cpp
 
   ################ hole fusion node ################
   #test/unit/hole_fusion_node/depth_filters_test.cpp

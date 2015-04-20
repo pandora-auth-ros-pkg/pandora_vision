@@ -720,7 +720,7 @@ namespace pandora_vision
                   HaralickFeaturesExtractor haralickFeaturesDetector_;
                   haralickFeaturesDetector_.findHaralickFeatures(ROI);
                   std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
-                  if((((std::abs(curAvg[0] - otherAvg[0]) < Parameters::Rgb::neighbor_value_thresh) && haralickFeatures[0] > Parameters::Rgb::homogenity_thresh)) || ((std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_tiny_distance_thresh) && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_tiny_distance_thresh)))
+                  if((((std::abs(curAvg[0] - otherAvg[0]) < Parameters::Rgb::neighbor_value_thresh) && haralickFeatures[0] > Parameters::Rgb::homogenity_thresh)) || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_tiny_distance_thresh) && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_tiny_distance_thresh)) && false))
                   {
                     if(cv::contourArea(contours[i]) > cv::contourArea(contours[ci]))
                     {
