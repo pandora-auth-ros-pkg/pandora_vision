@@ -34,61 +34,61 @@
  *
  * Authors:
  *   Tsirigotis Christos <tsirif@gmail.com>
+ *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_COMMON_POI_H
-#define PANDORA_VISION_COMMON_POI_H
+#ifndef PANDORA_VISION_COMMON_BBOX_POI_H
+#define PANDORA_VISION_COMMON_BBOX_POI_H
 
-#include <boost/shared_ptr.hpp>
-#include <opencv2/opencv.hpp>
+#include "pandora_vision_common/poi.h"
 
 namespace pandora_vision
 {
-  class POI {
-  public:
-    typedef boost::shared_ptr<POI> Ptr;
-    typedef boost::shared_ptr<POI const> ConstPtr;
+  class BBoxPOI : public POI
+  {
+    public:
+      typedef boost::shared_ptr<BBoxPOI> Ptr;
+      typedef boost::shared_ptr<BBoxPOI const> Ptr;
 
-  public:
-    /// Coordinates of Point of Interest
-    cv::Point point;
+    public:
+      /// Width of the bounding box
+      int width;
+      /// Height of the bounding box
+      int height;
 
-    /// The possibility of this actually being a Point of Interest
-    float probability;
+    public:
+      BBoxPOI() {}
+      virtual ~BBoxPOI() {}
 
-  public:
-    POI() {}
-    virtual ~POI() {}
-
-    void setPoint(const cv::Point&);
-    cv::Point getPoint() const;
-
-    void setProbability(float);
-    float getProbability() const;
+      void setWidth(int width);
+      void setHeight(int height);
+      int getWidth() const;
+      int getHeight() const;
   };
 
-  void POI::setPoint(const cv::Point& pointArg)
+  void BBoxPOI::setWidth(int width)
   {
-    point = pointArg;
+    this->width = width;
   }
 
-  cv::Point POI::getPoint() const
+  void BBoxPOI::setHeight(int height)
   {
-    return point;
+    this->height = height;
   }
 
-  void POI::setProbability(float probArg)
+  int BBoxPOI::getWidth() const
   {
-    probability = probArg;
+    return width;
   }
 
-  float POI::getProbability() const
+  int BBoxPOI::getHeight() const
   {
-    return probability;
+    return height;
   }
 
-  typedef POI::Ptr POIPtr;
-  typedef POI::ConstPtr POIConstPtr;
+  typedef BBoxPOI::Ptr BBoxPOIPtr;
+  typedef BBoxPOI::ConstPtr BBoxPOIConstPtr;
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_COMMON_POI_H
+#endif  // PANDORA_VISION_COMMON_BBOX_POI_H
+
