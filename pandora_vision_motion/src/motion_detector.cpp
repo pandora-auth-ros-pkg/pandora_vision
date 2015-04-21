@@ -48,6 +48,7 @@ namespace pandora_vision
   MotionDetector::MotionDetector(const std::string& ns, sensor_processor::Handler* handler) :
     VisionProcessor(ns, handler)
   {
+    params.configMotion(*this->accessPublicNh());
     setUpMotionDetector();
   }
 
@@ -75,8 +76,8 @@ namespace pandora_vision
   {
     bounding_box_.reset( new BBoxPOI() );
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
-    bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,
-      MotionParameters::varThreshold, MotionParameters::bShadowDetection);
+    bg_ = cv::BackgroundSubtractorMOG2(params.history,
+      params.varThreshold, params.bShadowDetection);
 
     bounding_box_->setPoint(cv::Point(0, 0));
     bounding_box_->setWidth(0);
@@ -110,7 +111,7 @@ namespace pandora_vision
       cv::cvtColor(thresholdedDifference, thresholdedDifference, CV_BGR2GRAY);
 
       cv::threshold(thresholdedDifference, thresholdedDifference,
-        MotionParameters::diff_threshold, 255, cv::THRESH_BINARY);
+        params.diff_threshold, 255, cv::THRESH_BINARY);
 
       int typeOfMovement = motionIdentification(thresholdedDifference);
 
@@ -126,9 +127,9 @@ namespace pandora_vision
         floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
       bounding_box_->setPoint(boxCenter);
 
-      if (MotionParameters::visualization || MotionParameters::show_image ||
-        MotionParameters::show_background || MotionParameters::show_diff_image ||
-        MotionParameters::show_moving_objects_contours)
+      if (params.visualization || params.show_image ||
+        params.show_background || params.show_diff_image ||
+        params.show_moving_objects_contours)
       {
         debugShow(thresholdedDifference, frame);
       }
@@ -233,9 +234,9 @@ namespace pandora_vision
     //!< to find the exact number of pixels, that differ from current
     //!< frame and background
     int countDiff = countNonZero(thresholdedDifference);
-    if (countDiff > MotionParameters::motion_high_thres)
+    if (countDiff > params.motion_high_thres)
       return 2;
-    else if (countDiff > MotionParameters::motion_low_thres)
+    else if (countDiff > params.motion_low_thres)
       return 1;
     else
       return 0;
@@ -262,13 +263,13 @@ namespace pandora_vision
     cv::findContours(foreground_, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
     cv::drawContours(frame, contours, -1, cv::Scalar(0, 0, 255), 2);
 
-    if (MotionParameters::visualization || MotionParameters::show_image)
+    if (params.visualization || params.show_image)
       cv::imshow("Frame", frame);
-    if (MotionParameters::visualization || MotionParameters::show_background)
+    if (params.visualization || params.show_background)
       cv::imshow("Background", background_);
-    if (MotionParameters::visualization || MotionParameters::show_diff_image)
+    if (params.visualization || params.show_diff_image)
       cv::imshow("Thresholded difference between background and current frame", thresholdedDifference);
-    if (MotionParameters::visualization || MotionParameters::show_moving_objects_contours)
+    if (params.visualization || params.show_moving_objects_contours)
       cv::imshow("Moving objects in current frame", movingObjects_);
     cv::waitKey(10);
 

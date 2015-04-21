@@ -143,6 +143,8 @@ namespace pandora_vision
       int max_deviation_;
       //!< Bounding box of moving objects.
       BBoxPOIPtr bounding_box_;
+      
+      MotionParameters params;
 
       friend class MotionDetectorTest;
   };
