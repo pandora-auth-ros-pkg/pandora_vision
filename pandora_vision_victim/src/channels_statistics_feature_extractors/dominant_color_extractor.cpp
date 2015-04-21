@@ -67,11 +67,13 @@ namespace pandora_vision
 
     double maxVal = 0;
     double indexVal = 0;
-    unsigned int size = cv::Size(img_->size()).height;
+    int size = cv::Size(img_->size()).height;
     /*/
     ROS_INFO_STREAM("HIST SIZE" <<img_->size());
     ROS_INFO_STREAM("HEIGHT" << size);
     //*/
+
+    /// Image contains the image histogram, not the actual image.
     for(int ii = 0; ii < size; ii++)
     {
       double binVal = static_cast<double>(img_->at<float>(ii));
@@ -83,7 +85,8 @@ namespace pandora_vision
     }
 
     dominantColor.push_back(indexVal);
-    dominantColor.push_back(maxVal / (640 * 480));
+    cv::Scalar histSum = cv::sum(*img_);
+    dominantColor.push_back(maxVal / histSum.val[0]);
 
     return dominantColor;
   }
