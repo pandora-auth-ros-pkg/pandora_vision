@@ -43,6 +43,8 @@
 
 namespace pandora_vision
 {
+  // TODO remove static variables and define/implement methods to get params
+  // from yaml
   struct MotionParameters
   {
     //!< Background segmentation parameters

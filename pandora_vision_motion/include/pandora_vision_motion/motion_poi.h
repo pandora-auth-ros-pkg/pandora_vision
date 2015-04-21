@@ -49,23 +49,23 @@ namespace pandora_vision
   {
     public:
       typedef boost::shared_ptr<MotionPOI> Ptr;
-      
+
       virtual ~MotionPOI() {}
-    
+
     public:
       int width;
       int height;
-      
+
     public:
-      void setWidth(const int& width)
+      void setWidth(int width)
       {
         this->width = width;
       }
-      void setHeight(const int& height)
+      void setHeight(int height)
       {
         this->height = height;
       }
-      
+
       int getWidth() const
       {
         return width;
@@ -75,7 +75,7 @@ namespace pandora_vision
         return height;
       }
   };
-  
+
   typedef MotionPOI::Ptr MotionPOIPtr;
 }  // namespace pandora_vision
 

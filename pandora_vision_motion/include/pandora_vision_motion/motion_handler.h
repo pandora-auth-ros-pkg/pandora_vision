@@ -53,7 +53,7 @@ namespace pandora_vision
     public:
       explicit MotionHandler(const std::string& ns);
       virtual ~MotionHandler() {}
-      
+
     private:
       virtual void startTransition(int newState);
       virtual void completeTransition();

@@ -37,30 +37,31 @@
 
 #include "pandora_vision_motion/motion_parameters.h"
 
+// TODO WTF!!!!!!! YAML CONFIG or DYN RECONFIG!!!!
 namespace pandora_vision
 {
   //!< Background segmentation parameters
   /// Length of the history according to which we calculate background image
   int MotionParameters::history = 10;
-  
+
   /// Threshold of the sqaured Mahalanobis distance to decide whether
   /// it is well described by the background model
   int MotionParameters::varThreshold = 16;
-  
+
   /// Parameter defining whether shadow detection should be enabled
   bool MotionParameters::bShadowDetection = true;
-  
+
   /// Maximum allowed number of mixture components
   int MotionParameters::nmixtures = 3;
-  
+
   //!< Threshold parameters
   /// Threshold between pixel (grayscale) values to be considered "different"
   /// between 2 frames
   int MotionParameters::diff_threshold = 45;
-  
+
   /// Evaluation threshold: higher value means a lot of movement
   double MotionParameters::motion_high_thres = 7500;
-  
+
   /// Evaluation threshold: higher value means a little movement -
   /// less means no movement at all
   double MotionParameters::motion_low_thres = 200;
