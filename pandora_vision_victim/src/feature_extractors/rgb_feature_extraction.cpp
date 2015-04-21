@@ -67,7 +67,7 @@ namespace pandora_vision
   {
     /// Extract Color Statistics features from RGB image
     std::vector<double> channelsStatisticsFeatureVector;
-    ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(inImage,
+    ChannelsStatisticsExtractor::findColorChannelsStatisticsFeatures(inImage,
         &channelsStatisticsFeatureVector);
 
     /// Extract Edge Orientation features from RGB image

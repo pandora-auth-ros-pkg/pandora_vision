@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,9 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 #ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
@@ -48,31 +50,26 @@ namespace pandora_vision
   {
     public:
       /**
-      @brief This function returns the histogram of one color component from
-      the src image.
-      @param planes [cv::Mat] contains the pixel values of a color component.
-      @param bins [int] num of bins where the histogram will be divided.
-      @param histRange [const float*] the range of the histogram.
-      @return [cv::Mat] the calculated histogram.
-      **/
-      static cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
+       * @brief This function extracts color related statistic features from a
+       * color image.
+       * @param src [const cv::Mat&] Color image to be processed.
+       * @param colorStatisticsVector [std::vector<double>*] The color
+       * statistics vector.
+       * @return void
+       */
+      static void findColorChannelsStatisticsFeatures(const cv::Mat& src,
+          std::vector<double>* colorStatisticsVector);
 
       /**
-      @brief This is the main function which calls all other for the
-      computation of the color features.
-      @param src [cv::Mat] current frame to be processed
-      @return void
-      **/
-      static void findChannelsStatisticsFeatures(const cv::Mat& src, std::vector<double>* rgbStatisticsVector);
-
-      /**
-      @brief This is the main function which calls all other for the 
-      computation of the statistics feature for depth image.
-      @param src [cv::Mat] depth image to be processed
-      @return void
-      **/ 
-      static void findDepthChannelsStatisticsFeatures(const cv::Mat& src, std::vector<double>* depthStatisticsVector);
+       * @brief This function extracts color related statistic features from a
+       * depth image.
+       * @param src [const cv::Mat&] Depth image to be processed.
+       * @param depthStatisticsVector [std::vector<double>*] The depth
+       * statistics vector.
+       * @return void
+       */
+      static void findDepthChannelsStatisticsFeatures(const cv::Mat& src,
+          std::vector<double>* depthStatisticsVector);
   };
-
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H

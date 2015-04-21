@@ -37,9 +37,9 @@
 #ifndef PANDORA_VISION_VICTIM_RGB_SYSTEM_VALIDATOR_H
 #define PANDORA_VISION_VICTIM_RGB_SYSTEM_VALIDATOR_H
 
-#include "pandora_vision_victim/utilities/edge_orientation_extractor.h"
-#include "pandora_vision_victim/utilities/channels_statistics_extractor.h"
-#include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
+#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
+#include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
+#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
 
 namespace pandora_vision
 {
