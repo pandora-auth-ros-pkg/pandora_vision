@@ -13,7 +13,7 @@ include_directories(
 ${pandora_testing_tools_INCLUDE_DIRS}
 ${roslib_INCLUDE_DIRS}
 ${catkin_INCLUDE_DIRS})
-#~ 
+#~
 #~ catkin_add_gtest(histogram_mask_test unit/histogram_mask_test.cpp)
 #~ target_link_libraries(histogram_mask_test
   #~ ${catkin_LIBRARIES}
@@ -28,10 +28,10 @@ target_link_libraries(image_signature_test
   gtest_main
   )
 
-download_extra_data(
-  ${PROJECT_NAME}_hazmat_test_images
-  EXTRA_FILES test/functional/images/extra_files.yaml
-)
-add_dependencies(${PROJECT_NAME}_hazmat_test_images tests)
+# download_extra_data(
+#   ${PROJECT_NAME}_hazmat_test_images
+#   EXTRA_FILES test/functional/images/extra_files.yaml
+# )
+# add_dependencies(${PROJECT_NAME}_hazmat_test_images tests)
 
 add_rostest(functional/hazmat_test.launch)
