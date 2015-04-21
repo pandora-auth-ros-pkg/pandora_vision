@@ -66,7 +66,7 @@ namespace pandora_vision
   }
 
 
-  MotionPOIPtr MotionDetector::getMotionPosition(void)
+  BBoxPOIPtr MotionDetector::getMotionPosition(void)
   {
     return bounding_box_;
   }
@@ -286,7 +286,7 @@ namespace pandora_vision
     output->frameHeight = input->image.rows;
     if (bounding_box_->getProbability() > 0.1)
     {
-      output->pois.push_back(bounding_box_);  // mby push back?
+      output->pois.push_back(bounding_box_);
       return true;
     }
     return false;

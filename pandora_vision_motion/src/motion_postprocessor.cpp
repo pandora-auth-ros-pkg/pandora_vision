@@ -45,11 +45,11 @@ namespace pandora_vision
     VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>(ns, handler)
   {
   }
-  
+
   MotionPostProcessor::~MotionPostProcessor()
   {
   }
-  
+
   bool MotionPostProcessor::postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output)
   {
     pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);

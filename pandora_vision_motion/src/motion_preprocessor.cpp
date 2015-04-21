@@ -45,7 +45,7 @@ namespace pandora_vision
     VisionPreProcessor(ns, handler)
   {
   }
-  
+
   MotionPreProcessor::~MotionPreProcessor()
   {
   }

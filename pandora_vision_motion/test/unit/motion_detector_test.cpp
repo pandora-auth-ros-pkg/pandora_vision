@@ -38,7 +38,7 @@
 
 #include "gtest/gtest.h"
 
-#include "pandora_vision_motion/motion_poi.h"
+#include "pandora_vision_common/bbox_poi.h"
 #include "pandora_vision_motion/motion_detector.h"
 
 namespace pandora_vision
@@ -60,10 +60,10 @@ namespace pandora_vision
       }
 
       /* accessors to private functions */
-      MotionPOIPtr detectMotionPosition(const cv::Mat& frame);
+      BBoxPOIPtr detectMotionPosition(const cv::Mat& frame);
 
       int detectMotion(const cv::Mat& frame);
-      MotionPOIPtr getMotionPosition();
+      BBoxPOIPtr getMotionPosition();
 
     protected:
       int WIDTH;
@@ -73,13 +73,13 @@ namespace pandora_vision
       MotionDetector motionDetector_;
   };
 
-  MotionPOIPtr MotionDetectorTest::detectMotionPosition(const cv::Mat& frame)
+  BBoxPOIPtr MotionDetectorTest::detectMotionPosition(const cv::Mat& frame)
   {
     motionDetector_.detectMotionPosition(frame);
     return motionDetector_.getMotionPosition();
   }
 
-  MotionPOIPtr MotionDetectorTest::getMotionPosition()
+  BBoxPOIPtr MotionDetectorTest::getMotionPosition()
   {
     return motionDetector_.getMotionPosition();
   }
@@ -94,7 +94,7 @@ namespace pandora_vision
   TEST_F(MotionDetectorTest, detectMotionPositionImageNoData)
   {
     cv::Mat frame;
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(frame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(0, bounding_boxes->getWidth());
     EXPECT_EQ(0, bounding_boxes->getHeight());
     EXPECT_EQ(0, bounding_boxes->getPoint().x);
@@ -105,7 +105,7 @@ namespace pandora_vision
   TEST_F(MotionDetectorTest, detectMotionPositionBlackImage)
   {
     cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(blackFrame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(blackFrame);
     EXPECT_EQ(0, bounding_boxes->getWidth());
     EXPECT_EQ(0, bounding_boxes->getHeight());
     EXPECT_EQ(0, bounding_boxes->getPoint().x);
@@ -118,7 +118,7 @@ namespace pandora_vision
     cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     frame(cv::Rect(17, 63, 8, 8)) = 255;
 
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(frame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(21, bounding_boxes->getPoint().x);
     EXPECT_EQ(67, bounding_boxes->getPoint().y);
     EXPECT_EQ(8, bounding_boxes->getWidth());
@@ -130,7 +130,7 @@ namespace pandora_vision
     cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     frame(cv::Rect(100, 50, 75, 45)) = 255;
 
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(frame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(137, bounding_boxes->getPoint().x);
     EXPECT_EQ(72, bounding_boxes->getPoint().y);
     EXPECT_EQ(75, bounding_boxes->getWidth());
@@ -149,7 +149,7 @@ namespace pandora_vision
 
     cv::fillConvexPoly(frame, &rectangleVertices[0], rectangleVertices.size(), 255);
 
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(frame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(125, bounding_boxes->getPoint().x);
     EXPECT_EQ(250, bounding_boxes->getPoint().y);
     EXPECT_EQ(51, bounding_boxes->getWidth());
@@ -161,7 +161,7 @@ namespace pandora_vision
     cv::Mat frame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     frame(cv::Rect(50, 50, 400, 400)) = 255;
 
-    MotionPOIPtr bounding_boxes  = detectMotionPosition(frame);
+    BBoxPOIPtr bounding_boxes  = detectMotionPosition(frame);
     EXPECT_EQ(0, bounding_boxes->getPoint().x);
     EXPECT_EQ(0, bounding_boxes->getPoint().y);
     EXPECT_EQ(0, bounding_boxes->getWidth());
@@ -265,7 +265,7 @@ namespace pandora_vision
       motionEvaluation  = detectMotion(frame);
       EXPECT_EQ(2, motionEvaluation);
 
-      MotionPOIPtr bounding_boxes  = getMotionPosition();
+      BBoxPOIPtr bounding_boxes  = getMotionPosition();
       EXPECT_EQ(topLeftXCoordinate + 50, bounding_boxes->getPoint().x);
       EXPECT_EQ(topLeftYCoordinate + 50, bounding_boxes->getPoint().y);
       EXPECT_EQ(objectWidth, bounding_boxes->getWidth());
@@ -303,7 +303,7 @@ namespace pandora_vision
     int motionEvaluation  = detectMotion(frame);
     EXPECT_EQ(0, motionEvaluation);
 
-    MotionPOIPtr bounding_boxes  = getMotionPosition();
+    BBoxPOIPtr bounding_boxes  = getMotionPosition();
     EXPECT_EQ(0, bounding_boxes->getPoint().x);
     EXPECT_EQ(0, bounding_boxes->getPoint().y);
     EXPECT_EQ(0, bounding_boxes->getWidth());

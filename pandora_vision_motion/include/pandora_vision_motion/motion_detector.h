@@ -44,7 +44,7 @@
 #include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_motion/motion_poi.h"
+#include "pandora_vision_common/bbox_poi.h"
 #include "pandora_vision_motion/motion_parameters.h"
 
 namespace pandora_vision
@@ -66,7 +66,7 @@ namespace pandora_vision
 
     protected:
 
-      MotionPOIPtr getMotionPosition(void);
+      BBoxPOIPtr getMotionPosition(void);
 
       void setUpMotionDetector(void);
 
@@ -142,7 +142,7 @@ namespace pandora_vision
       //!< Maximum deviation for calculation position of moving objects;
       int max_deviation_;
       //!< Bounding box of moving objects.
-      MotionPOIPtr bounding_box_;
+      BBoxPOIPtr bounding_box_;
 
       friend class MotionDetectorTest;
   };
