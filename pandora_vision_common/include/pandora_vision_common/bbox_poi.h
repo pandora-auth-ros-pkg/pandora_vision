@@ -48,7 +48,7 @@ namespace pandora_vision
   {
     public:
       typedef boost::shared_ptr<BBoxPOI> Ptr;
-      typedef boost::shared_ptr<BBoxPOI const> Ptr;
+      typedef boost::shared_ptr<BBoxPOI const> ConstPtr;
 
     public:
       /// Width of the bounding box

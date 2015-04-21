@@ -48,23 +48,23 @@ namespace pandora_vision
     _parent_frame_id = "";
     _frame_id = "";
     _camera_indicator = -1;
-    
+
     //!< Get General Parameters, such as frame width & height , camera id
     getGeneralParams();
-    
+
     //!< Convert field of view from degrees to rads
     for(int ii= 0; ii < _hfov.size(); ii++){
       _hfov.at(ii) = _hfov.at(ii) * CV_PI / 180;
       _vfov.at(ii) = _vfov.at(ii) * CV_PI / 180;
     }
-    
+
     for(int ii = 0; ii < _imageTopics.size(); ii++ ){
       //!< subscribe to input image's topic
       _frameSubscriber = _nh.subscribe(
         _imageTopics.at(ii), 1, &DatamatrixDetection::imageCallback, this);
       _frameSubscribers.push_back(_frameSubscriber);
     }
- 
+
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
     prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
@@ -72,10 +72,10 @@ namespace pandora_vision
     clientInitialize();
 
     ROS_INFO("[Datamatrix_node] : Created Datamatrix Detection instance");
-    
+
   }
-  
-  
+
+
   /**
     @brief Destructor
    */
@@ -83,20 +83,20 @@ namespace pandora_vision
   {
     ROS_INFO("[Datamatrix_node] : Destroying datamatrix Detection instance");
   }
-  
-  
+
+
   /**
-   * @brief Get parameters referring to view and frame characteristics 
+   * @brief Get parameters referring to view and frame characteristics
    * from launch file
    * @return void
    */
   void DatamatrixDetection::getGeneralParams()
   {
-    
+
     packagePath = ros::package::getPath("pandora_vision_datamatrix");
-    
+
     //! Publishers
-    
+
     //! Declare publisher and advertise topic
     //! where algorithm results are posted
     if (_nh.getParam("published_topic_names/datamatrix_alert", param))
@@ -109,62 +109,62 @@ namespace pandora_vision
       ROS_FATAL("Datamatrix alert topic name param not found");
       ROS_BREAK();
     }
-    
+
     XmlRpc::XmlRpcValue cameras_list;
     _nh.getParam("camera_sensors", cameras_list);
-    ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray); 
+    ROS_ASSERT(cameras_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
     std::string key;
     for (int ii = 0; ii < cameras_list.size(); ii++)
     {
       ROS_ASSERT(
         cameras_list[ii].getType() == XmlRpc::XmlRpcValue::TypeStruct);
-      
+
       key = "name";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeString);
       cameraName = static_cast<std::string>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[Datamatrix_node]: camera_name : " << cameraName);
-      
+
       //!< Get the listener's topic for camera
       if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
         ROS_INFO_STREAM("[Datamatrix_node]: imageTopic for camera : " << imageTopic);
       else
       {
        ROS_FATAL("[Datamatrix_node]: Image topic name not found");
-       ROS_BREAK(); 
+       ROS_BREAK();
       }
       _imageTopics.push_back("/"+imageTopic);
-      
+
       key = "image_height";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameHeight = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[Datamatrix_node]: image_height : " << frameHeight);
-        
+
       _frameHeight.push_back(frameHeight);
-        
+
       key = "image_width";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       frameWidth = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[Datamatrix_node]: image_width : " << frameWidth);
-        
-      _frameWidth.push_back(frameWidth);  
-      
+
+      _frameWidth.push_back(frameWidth);
+
       key = "hfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeInt);
       hfov = static_cast<int>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[Datamatrix_node]: hfov : " << hfov);
-        
-      _hfov.push_back(hfov);  
-      
+
+      _hfov.push_back(hfov);
+
       key = "vfov";
       ROS_ASSERT(cameras_list[ii][key].getType() == XmlRpc::XmlRpcValue::TypeDouble);
       vfov = static_cast<double>(cameras_list[ii][key]);
       ROS_INFO_STREAM("[Datamatrix_node]: vfov : " << vfov);
-        
-      _vfov.push_back(vfov);  
-    
-    } 
+
+      _vfov.push_back(vfov);
+
+    }
   }
-  
+
     /**
   @brief Function that retrieves the parent to the frame_id.
   @param void
@@ -183,7 +183,7 @@ namespace pandora_vision
       ROS_ERROR("[Datamatrix_node]:Robot description couldn't be retrieved from the parameter server.");
       return false;
     }
-  
+
     boost::shared_ptr<urdf::ModelInterface> model(
       urdf::parseURDF(robot_description));
 
@@ -197,10 +197,10 @@ namespace pandora_vision
     }
     else
       _parent_frame_id = _frame_id;
-      
+
     return false;
   }
-  
+
   /**
    * @brief Function called when new ROS message appears from camera
    * @param msg [const sensor_msgs::Image&] The message
@@ -208,41 +208,41 @@ namespace pandora_vision
   */
   void DatamatrixDetection::imageCallback(const sensor_msgs::Image& msg)
   {
-    
+
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     datamatrixFrame = in_msg->image.clone();
     datamatrixFrameTimestamp = msg.header.stamp;
     _frame_id = msg.header.frame_id;
-    
+
     if(_frame_id.c_str()[0] == '/'){
       _frame_id = _frame_id.substr(1);
       _camera_indicator = 1;
     }
-      
+
     if (!datamatrixFrame.data)
     {
       ROS_ERROR("[Datamatrix_node] : No more Frames!");
       return;
     }
-    
+
     std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
-      
+
     if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) {
       bool _indicator = getParentFrameId();
-      
+
       _frame_ids_map.insert( it , std::pair<std::string, std::string>(
          _frame_id, _parent_frame_id));
-      
+
        for (it =_frame_ids_map.begin(); it !=_frame_ids_map.end(); ++it)
           ROS_DEBUG_STREAM("" << it->first << " => " << it->second );
-    } 
-    
+    }
+
     datamatrixDetect();
   }
-  
+
   /**
-   * @brief This method uses a DatamatrixDetector instance to detect 
+   * @brief This method uses a DatamatrixDetector instance to detect
    * all present datamatrixes in a given frame
    * @return void
   */
@@ -260,7 +260,7 @@ namespace pandora_vision
 
     _datamatrixDetector.detect_datamatrix(datamatrixFrame);
     std::vector<DataMatrixQode> list_datamatrices = _datamatrixDetector.get_detected_datamatrix();
-    
+
     if( _camera_indicator == -1){
       frameWidth = _frameWidth.at(1);
       frameHeight = _frameHeight.at(1);
@@ -273,7 +273,7 @@ namespace pandora_vision
       hfov = _hfov.at(0);
       vfov = _vfov.at(0);
     }
-    
+
     for(int i = 0; i < static_cast<int>(list_datamatrices.size()); i++)
     {
       datamatrixcodeMsg.datamatrixContent = list_datamatrices[i].message;
@@ -285,8 +285,9 @@ namespace pandora_vision
         - list_datamatrices[i].datamatrix_center.y;
 
       // Datamatrix center's yaw and pitch
-      datamatrixcodeMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-      datamatrixcodeMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+      datamatrixcodeMsg.info.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      datamatrixcodeMsg.info.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+      datamatrixcodeMsg.info.probability = 1;
 
       datamatrixcodeVectorMsg.dataMatrixAlerts.push_back(datamatrixcodeMsg);
 
@@ -298,7 +299,7 @@ namespace pandora_vision
       _datamatrixCodePublisher.publish(datamatrixcodeVectorMsg);
     }
   }
-  
+
   /**
    * @brief Node's state manager
    * @param newState [int] The robot's new state
@@ -341,5 +342,5 @@ namespace pandora_vision
   {
     ROS_INFO("[Datamatrix_node] : Transition Complete");
   }
-  
+
 }// namespace pandora_vision

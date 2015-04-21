@@ -46,9 +46,9 @@ namespace pandora_vision
   {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
     scanner.set_config(zbar::ZBAR_QRCODE, zbar::ZBAR_CFG_ENABLE, 1);
-    
+
     std::string debugTopic;
-    
+
     if (this->accessPublicNh()->getParam("debugQrCode", debugQrcode_))
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrcode_);
     else
@@ -56,9 +56,9 @@ namespace pandora_vision
       debugQrcode_ = false;
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrcode_);
     }
-    
+
     if(debugQrcode_)
-    {    
+    {
       //! Advertise topics for debugging if we are in debug mode
       if (this->accessPublicNh()->getParam("debug_qrcode_topic", debugTopic))
       {
@@ -203,7 +203,7 @@ namespace pandora_vision
     output->header = input->header;
     getQrCodeParams();
     output->pois = detectQrCode(input->image);
-    
+
     if (debugQrcode_)
     {
       cv_bridge::CvImage qrcodeDebug;

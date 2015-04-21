@@ -37,9 +37,9 @@
 
 #include "pandora_vision_datamatrix/datamatrix_detector.h"
 
-namespace pandora_vision 
+namespace pandora_vision
 {
-  
+
   /**
    *@brief Constructor
   **/
@@ -55,7 +55,7 @@ namespace pandora_vision
     detected_datamatrix.message = "";
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
-  
+
 
   /**
     @brief Destructor
@@ -65,14 +65,14 @@ namespace pandora_vision
     //!< Deallocate memory
     dmtxMessageDestroy(&msg);
     dmtxDecodeDestroy(&dec);
-    dmtxImageDestroy(&img);  
+    dmtxImageDestroy(&img);
     dmtxRegionDestroy(&reg);
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance destroyed");
   }
-  
-  
+
+
   /**
-    @brief Detects datamatrixes and stores them in a vector. 
+    @brief Detects datamatrixes and stores them in a vector.
     @param image [cv::Mat] The image in which the QRs are detected
     @return void
    */
@@ -83,35 +83,35 @@ namespace pandora_vision
 
     datamatrix_list.clear();
 
-    
+
     img = NULL;
     dec = NULL;
     reg = NULL;
     msg = NULL;
-    //!< creates and initializes a new DmtxImage structure using pixel 
-    //!< data provided  by  the calling application. 
-    img = dmtxImageCreate(image.data, image.cols, image.rows, 
+    //!< creates and initializes a new DmtxImage structure using pixel
+    //!< data provided  by  the calling application.
+    img = dmtxImageCreate(image.data, image.cols, image.rows,
         DmtxPack24bppBGR);
-    ROS_ASSERT(img != NULL);    
-    
-    //!< creates  and  initializes a new DmtxDecode struct, which 
-    //!< designates the image to be scanned and initializes the scan 
-    //!< grid pattern.    
+    ROS_ASSERT(img != NULL);
+
+    //!< creates  and  initializes a new DmtxDecode struct, which
+    //!< designates the image to be scanned and initializes the scan
+    //!< grid pattern.
     dec = dmtxDecodeCreate(img, 1);
     ROS_ASSERT(dec != NULL);
-    
+
     //!< add msecs to timeout
     timeout = dmtxTimeAdd(dmtxTimeNow(), 1000);
-    
-    //!< searches  every  pixel location in a grid pattern looking 
-    //!< for potential barcode regions. A DmtxRegion is returned 
-    //!< whenever a potential  barcode region  is found, or if the final 
+
+    //!< searches  every  pixel location in a grid pattern looking
+    //!< for potential barcode regions. A DmtxRegion is returned
+    //!< whenever a potential  barcode region  is found, or if the final
     //!< pixel location has been scanned.
     reg = dmtxRegionFindNext(dec, &timeout);
-    if(reg != NULL) 
+    if(reg != NULL)
     {
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
-      if(msg != NULL) 
+      if(msg != NULL)
       {
         detected_datamatrix.message.assign((const char*) msg->output, msg->outputIdx);
         //!< Find datamatrixe's center exact position
@@ -120,7 +120,7 @@ namespace pandora_vision
       }
     }
   }
-  
+
   /**
     @brief Function that finds the position of datamatrixe's center
     @param image [cv::Mat] The image in which the QRs are detected
@@ -130,7 +130,7 @@ namespace pandora_vision
   {
     DmtxVector2 p00, p10, p11, p01;
     std::vector<cv::Point2f> datamatrixVector;
-    
+
     p00.X = p00.Y = p01.X = p10.Y = 0.0;
     p01.Y = p10.X = p11.X = p11.Y = 1.0;
 
@@ -143,27 +143,27 @@ namespace pandora_vision
     cv::Point2f corner2(p10.X, image.rows - p10.Y);
     cv::Point2f corner3(p11.X, image.rows - p11.Y);
     cv::Point2f corner4(p01.X, image.rows - p01.Y);
-    
+
     datamatrixVector.push_back(corner1);
     datamatrixVector.push_back(corner2);
     datamatrixVector.push_back(corner4);
     datamatrixVector.push_back(corner3);
-    
+
     cv::RotatedRect calculatedRect;
     calculatedRect = minAreaRect(datamatrixVector);
-    
+
     detected_datamatrix.datamatrix_center.y = calculatedRect.center.y;
     detected_datamatrix.datamatrix_center.x = calculatedRect.center.x;
-    
+
     #if DEBUG_MODE
       debug_show(image, datamatrixVector);
     #endif
   }
-  
+
   /**
     @brief Function that creates view for debugging purposes.
     @param image [cv::Mat] The image in which the datamatrixes are detected
-    @param datamatrixVector [std::vector<cv::Point2f>] The vector of 4 corners 
+    @param datamatrixVector [std::vector<cv::Point2f>] The vector of 4 corners
     of datamatrix image, according to which i draw lines for debug reasons
     @return debug_frcame [cv::Mat], frame with rotated rectangle
     and center of it
@@ -175,7 +175,7 @@ namespace pandora_vision
     cv::line(debug_frame, datamatrixVector.at(1), datamatrixVector.at(2), cv::Scalar(255, 0, 0), 3);
     cv::line(debug_frame, datamatrixVector.at(2), datamatrixVector.at(3), cv::Scalar(0, 0, 255), 3);
     cv::line(debug_frame, datamatrixVector.at(3), datamatrixVector.at(0), cv::Scalar(255, 255, 0), 3);
-    
+
     cv::RotatedRect calculatedRect;
     calculatedRect = minAreaRect(datamatrixVector);
     for (int i = 0; i < 4; i++)
@@ -191,9 +191,9 @@ namespace pandora_vision
     #if DEBUG_MODE
       _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
     #endif
-    
+
   }
-  
+
    /**
     @brief Function that returns a list of all detected
     datamatrixes in current frame.

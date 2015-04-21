@@ -73,7 +73,7 @@ namespace pandora_vision
 
   void MotionDetector::setUpMotionDetector(void)
   {
-    bounding_box_.reset( new MotionPOI() );
+    bounding_box_.reset( new BBoxPOI() );
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
     bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,
       MotionParameters::varThreshold, MotionParameters::bShadowDetection);

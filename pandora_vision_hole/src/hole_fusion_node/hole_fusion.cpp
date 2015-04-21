@@ -1666,9 +1666,9 @@ namespace pandora_vision
       float pitch = atan(2 * y / height * tan(vfov / 2));
 
       // Setup everything needed by the single hole's message
-      holeMsg.yaw = yaw;
-      holeMsg.pitch = pitch;
-      holeMsg.probability = it->second;
+      holeMsg.info.yaw = yaw;
+      holeMsg.info.pitch = pitch;
+      holeMsg.info.probability = it->second;
       holeMsg.holeId = holeId;
 
       // Fill the overall holes found message with the current hole message
