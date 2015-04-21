@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,29 +32,47 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_DFT_COEFFS_H
-#define PANDORA_VISION_VICTIM_DFT_COEFFS_H
+#ifndef PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
+#define PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
 
-#include "pandora_vision_victim/feature_extractors/base_feature_extractor.h"
+#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
+#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
+#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
 
-
+/**
+ * @namespace pandora_vision
+ * @brief The main namespace for PANDORA vision
+ */
 namespace pandora_vision
 {
-  class DFTCoeffsExtractor : public BaseFeatureExtractor
+  /**
+   * @class RgbFeatureExtraction
+   * @brief This class extracts features from RGB images.
+   */
+  class RgbFeatureExtraction : public FeatureExtraction
   {
-    private:
-
     public:
+      /**
+       * @brief Default Constructor
+       */
+      RgbFeatureExtraction();
 
-      DFTCoeffsExtractor(cv::Mat* img);
+      /**
+       * @brief Default Destructor
+       */
+      virtual ~RgbFeatureExtraction();
 
-      virtual std::vector<double> extract(void);
-
+      /**
+       * @brief This function extracts features from RGB images according to
+       * a predefined set of feature extraction algorithms.
+       * @param inImage [const cv::Mat&] RGB frame to extract features from.
+       * @return void
+       */
+      virtual void extractFeatures(const cv::Mat& inImage);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
-
+#endif  // PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H

@@ -34,27 +34,45 @@
 *
 * Author: Marios Protopapas
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
 
-#ifndef PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
-#define PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
-
-#include "pandora_vision_victim/feature_extractors/base_feature_extractor.h"
-
+#include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dft_coeffs.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles.h"
 
 namespace pandora_vision
 {
-  class DominantColorExtractor : public BaseFeatureExtractor
+  class ChannelsStatisticsExtractor
   {
-    private:
-
     public:
+      /**
+      @brief This function returns the histogram of one color component from
+      the src image.
+      @param planes [cv::Mat] contains the pixel values of a color component.
+      @param bins [int] num of bins where the histogram will be divided.
+      @param histRange [const float*] the range of the histogram.
+      @return [cv::Mat] the calculated histogram.
+      **/
+      static cv::Mat computeHist(cv::Mat planes, int bins, const float* histRange);
 
-      DominantColorExtractor(cv::Mat* img);
+      /**
+      @brief This is the main function which calls all other for the
+      computation of the color features.
+      @param src [cv::Mat] current frame to be processed
+      @return void
+      **/
+      static void findChannelsStatisticsFeatures(const cv::Mat& src, std::vector<double>* rgbStatisticsVector);
 
-      virtual std::vector<double> extract(void);
-
+      /**
+      @brief This is the main function which calls all other for the 
+      computation of the statistics feature for depth image.
+      @param src [cv::Mat] depth image to be processed
+      @return void
+      **/ 
+      static void findDepthChannelsStatisticsFeatures(const cv::Mat& src, std::vector<double>* depthStatisticsVector);
   };
+
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
-
+#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H

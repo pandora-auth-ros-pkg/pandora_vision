@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,39 +32,48 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/mean_std_dev.h"
+#ifndef PANDORA_VISION_VICTIM_DEPTH_FEATURE_EXTRACTION_H
+#define PANDORA_VISION_VICTIM_DEPTH_FEATURE_EXTRACTION_H
 
+#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
+#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
+#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
 
+/**
+ * @namespace pandora_vision
+ * @brief The main namespace for PANDORA vision
+ */
 namespace pandora_vision
 {
   /**
-  brief Constructor
-  **/
-  MeanStdDevExtractor::MeanStdDevExtractor(cv::Mat* img)
-    :BaseFeatureExtractor(img)
+   * @class DepthFeatureExtraction
+   * @brief This class extracts features from Depth images.
+   */
+  class DepthFeatureExtraction : public FeatureExtraction
   {
+    public:
+      /**
+       * @brief Default Constructor
+       */
+      DepthFeatureExtraction();
 
-  }
-  
-  /**
-  @brief this function extracts the mean and std value of a color
-  component
-  @returns meanStd Vector
-  **/
-  std::vector<double> MeanStdDevExtractor::extract(void)
-  {
-    std::vector<double> ret;
-    cv::Scalar avg, st;
-    cv::meanStdDev(*_img, avg, st);
-    for(unsigned int i = 0 ; i < _img->channels() ; i++)
-    {
-      ret.push_back(avg.val[i]);
-      ret.push_back(st.val[i]);
-    }
-    return ret;
-  }
+      /**
+       * @brief Default Destructor
+       */
+      virtual ~DepthFeatureExtraction();
+
+      /**
+       * @brief This function extracts features from Depth images according to
+       * a predefined set of feature extraction algorithms.
+       * @param inImage [const cv::Mat&] RGB frame to extract features from.
+       * @return void
+       */
+      virtual void extractFeatures(const cv::Mat& inImage);
+  };
 }// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_DEPTH_FEATURE_EXTRACTION_H
 

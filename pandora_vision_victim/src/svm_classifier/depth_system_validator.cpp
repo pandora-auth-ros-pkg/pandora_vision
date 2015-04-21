@@ -35,76 +35,74 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#include "pandora_vision_victim/rgb_system_validator.h"
+#include "pandora_vision_victim/svm_classifier/depth_system_validator.h"
 
 namespace pandora_vision
 {
-  CvSVM RgbSystemValidator::_rgbSvm;
-  CvSVMParams RgbSystemValidator::_params;
-  std::string RgbSystemValidator:: _rgb_classifier_path;
-  std::vector<double> RgbSystemValidator:: _rgbFeatureVector;
+  CvSVM DepthSystemValidator::_depthSvm;
+  CvSVMParams DepthSystemValidator::_params;
+  std::string DepthSystemValidator:: _depth_classifier_path;
+  std::vector<double> DepthSystemValidator:: _depthFeatureVector;
 
   /**
   @brief This function initializes the depth clasifier path and the svm params
   @params depth_classifier_path [string]: the path of the depth classifier
   @return void
   **/
-  void RgbSystemValidator::initialize(const std::string& rgb_classifier_path)
+  void DepthSystemValidator::initialize(const std::string& depth_classifier_path)
   {
-    ROS_INFO("ENTER RGBSYSTEM INITIALIZE");
+    _depth_classifier_path = depth_classifier_path;
 
-    _rgb_classifier_path = rgb_classifier_path;
+    ///Load classifier path for depth subsystem
+    _depthSvm.load(depth_classifier_path.c_str());
 
     _params.svm_type = CvSVM::C_SVC;
     _params.kernel_type = CvSVM::RBF;
-    _params.C = VictimParameters::rgb_svm_C;
-    _params.gamma = VictimParameters::rgb_svm_gamma;
+    _params.C = VictimParameters::depth_svm_C;
+    _params.gamma = VictimParameters::depth_svm_gamma;
     _params.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
-      10000, 1e-6);
-
-    ///Load classifier path for rgb subsystem
-    _rgbSvm.load(rgb_classifier_path.c_str());
+      100000, 1e-6);
   }
 
   /**
-   * @brief This function extract features according to the
-   * predifined features for the rgb image
-   * @param inImage [cv::Mat] current rgb frame to be processed
-   * @return void
-  */
-  float RgbSystemValidator::calculateSvmRgbProbability(const cv::Mat& inImage)
+  @brief This function extract features according to the
+  predifined features for the depth image
+  @param inImage [cv::Mat] current depth frame to be processed
+  @return void
+  **/
+  float DepthSystemValidator::calculateSvmDepthProbability(const cv::Mat& inImage)
   {
     ///Extract color and statistics oriented features
-    ///for rgb image
+    ///for depth image
 
-    std::vector<double> channelsStatisticsFeatureVector;
-    ChannelsStatisticsExtractor::findChannelsStatisticsFeatures(inImage, &channelsStatisticsFeatureVector);
+    std::vector<double> channelsStatictisFeatureVector;
+    ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
 
-    ///Extract edge orientation features for rgb image
+    ///Extract edge orientation features for depth image
 
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
 
-    ///Extract haralick features for rgb image
+    ///Extract haralick features for depth image
 
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
 
-    if(!_rgbFeatureVector.empty())
-      _rgbFeatureVector.clear();
+    if(!_depthFeatureVector.empty())
+      _depthFeatureVector.clear();
 
-    ///Append to rgbFeatureVector features according to color
+    ///Append to depthFeatureVector features according to color
     ///histogramms and other statistics
-    for(int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(channelsStatisticsFeatureVector[ii]);
+    for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
+          _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
 
-    ///Append to rgbFeatureVector features according to edge orientation
+    ///Append to depthFeatureVector features according to edge orientation
     for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
+          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
 
-    ///Append to rgbFeatureVector features according to haralick features
+    ///Append to depthFeatureVector features according to haralick features
     for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(haralickFeatureVector[ii]);
+          _depthFeatureVector.push_back(haralickFeatureVector[ii]);
 
     return predictionToProbability(predict());
   }
@@ -112,12 +110,12 @@ namespace pandora_vision
   /**
   @brief This function returns current feature vector according
   to the features found in rgb image
-  @return [std::vector<double>] _rgbFeatureVector, feature vector
+  @return [std::vector<double>] _depthFeatureVector, feature vector
   for current rgb image
   **/
-  std::vector<double> RgbSystemValidator::getRgbFeatureVector()
+  std::vector<double> DepthSystemValidator::getDepthFeatureVector()
   {
-    return _rgbFeatureVector;
+    return _depthFeatureVector;
   }
 
   /**
@@ -125,14 +123,15 @@ namespace pandora_vision
   according to the featurevector given for each image
   @return void
   **/
-  float RgbSystemValidator::predict()
+  float DepthSystemValidator::predict()
   {
-    cv::Mat samples_mat = vectorToMat(_rgbFeatureVector);
+    cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
 
     ///Normalize the data from [-1,1]
     cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);
-    ROS_INFO_STREAM("RGB_SVM class label :" << _rgbSvm.predict(samples_mat, false));
-    return _rgbSvm.predict(samples_mat, true);
+    ROS_INFO_STREAM("DEPTH_SVM class label :" << _depthSvm.predict(samples_mat, false));
+    float prediction = _depthSvm.predict(samples_mat, true);
+    return prediction;
   }
 
   /**
@@ -142,7 +141,7 @@ namespace pandora_vision
   converted
   @return [cv::Mat] output Mat of size size_of_vectorx1
   **/
-  cv::Mat RgbSystemValidator::vectorToMat(std::vector<double> data)
+  cv::Mat DepthSystemValidator::vectorToMat(std::vector<double> data)
   {
     int size = data.size();
     cv::Mat mat(size, 1, CV_32F);
@@ -151,26 +150,23 @@ namespace pandora_vision
         mat.at<float>(i, 0) = data[i];
     }
     return mat;
-
   }
 
   /**
   @brief This function prediction according to the rgb classifier
   @return [float] prediction
   **/
-  float RgbSystemValidator::predictionToProbability(float prediction)
+  float DepthSystemValidator::predictionToProbability(float prediction)
   {
     float probability;
-
-    if(prediction < 0)
-      prediction = fabs(prediction);
-
     //~ Normalize probability to [-1,1]
-    probability = tanh(VictimParameters::rgb_svm_prob_scaling *
-      prediction - VictimParameters::rgb_svm_prob_translation);
+    probability = tanh(VictimParameters::depth_svm_prob_scaling
+      * (prediction - VictimParameters::depth_svm_prob_translation) );
     //~ Normalize probability to [0,1]
     probability = (1 + probability) / 2.0;
-    ROS_INFO_STREAM("SVM RGB pred/prob :" << prediction << " " <<probability);
+    if(probability > 0)
+      ROS_INFO_STREAM("SVM DEPTH pred/prob :" << prediction << " " <<probability);
     return probability;
   }
+
 }// namespace pandora_vision

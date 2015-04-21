@@ -35,7 +35,7 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/training.h"
+#include "pandora_vision_victim/svm_classifier/training.h"
 
 namespace pandora_vision
 {
@@ -101,20 +101,20 @@ namespace pandora_vision
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
 
 
-    if(!_rgbFeatureVector.empty())
+    if (!_rgbFeatureVector.empty())
       _rgbFeatureVector.clear();
 
      ///Append to rgbFeatureVector features according to color histogramms and other statistics
-    for(int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(channelsStatisticsFeatureVector[ii]);
+    for (int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++)
+      _rgbFeatureVector.push_back(channelsStatisticsFeatureVector[ii]);
 
     ///Append to rgbFeatureVector features according to edge orientation
-    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
+    for (int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++)
+      _rgbFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
 
     ///Append to rgbFeatureVector features according to haralick features
-    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
-          _rgbFeatureVector.push_back(haralickFeatureVector[ii]);
+    for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
+      _rgbFeatureVector.push_back(haralickFeatureVector[ii]);
 
   }
 
@@ -151,21 +151,21 @@ namespace pandora_vision
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
 
-    if(!_depthFeatureVector.empty())
+    if (!_depthFeatureVector.empty())
       _depthFeatureVector.clear();
 
     ///Append to depthFeatureVector features according to color
     ///histogramms and other statistics
-    for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
-          _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
+    for (int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++)
+      _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
 
     ///Append to depthFeatureVector features according to edge orientation
-    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
-          _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
+    for (int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++)
+      _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
 
     ///Append to depthFeatureVector features according to haralick features
-    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
-          _depthFeatureVector.push_back(haralickFeatureVector[ii]);
+    for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
+      _depthFeatureVector.push_back(haralickFeatureVector[ii]);
 
   }
 
@@ -198,25 +198,24 @@ namespace pandora_vision
     std::stringstream img_name;
     for (int ii = 0; ii < num_files; ii++)
     {
-      if(type == 1)
+      if (type == 1)
       {
-      if(ii < TrainingParameters::numOfPositiveSamples)
-        img_name << path_to_samples << "/data/"
-            << "Positive_Images/positive" << ii + 1 << ".jpg";
-      else
-        img_name << path_to_samples << "/data/" << "Negative_Images/negative"
-        << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
+        if (ii < TrainingParameters::numOfPositiveSamples)
+          img_name << path_to_samples << "/data/"
+              << "Positive_Images/positive" << ii + 1 << ".jpg";
+        else
+          img_name << path_to_samples << "/data/" << "Negative_Images/negative"
+              << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
       }
       else
-
       {
-      if(ii < TrainingParameters::numOfPositiveSamples)
-        img_name << path_to_samples << "/data/"
-            << "Depth_Positive_Images/positive" << ii + 1 << ".jpg";
-      else
-        img_name << path_to_samples << "/data/"
-        << "Depth_Negative_Images/negative"
-        << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
+        if (ii < TrainingParameters::numOfPositiveSamples)
+          img_name << path_to_samples << "/data/"
+              << "Depth_Positive_Images/positive" << ii + 1 << ".jpg";
+        else
+          img_name << path_to_samples << "/data/"
+              << "Depth_Negative_Images/negative"
+              << ii + 1 - TrainingParameters::numOfPositiveSamples << ".jpg";
       }
 
       std::cout << img_name.str() << std::endl;
@@ -224,19 +223,18 @@ namespace pandora_vision
       img = cv::imread(img_name.str());
       if (!img.data)
       {
-       std::cout << "Error reading file " << img_name.str() << std::endl;
-       return;
+        std::cout << "Error reading file " << img_name.str() << std::endl;
+        return;
       }
 
       cv::Size size(640, 480);
       cv::resize(img, img, size);
 
-      if(type == 1)
+      if (type == 1)
       {
         extractRgbFeatures(img);
         _featureVector = getRgbFeatureVector();
       }
-
       else
       {
         extractDepthFeatures(img);
@@ -244,29 +242,22 @@ namespace pandora_vision
       }
 
       std::cout << "Feature vector of image " << img_name.str() << " "
-               << _featureVector.size() << std::endl;
+                << _featureVector.size() << std::endl;
+      /// display feature vector
+      for (int kk = 0; kk < _featureVector.size(); kk++)
+        std::cout << _featureVector[kk] << " ";
 
-       /// display feature vector
-
-        for(int kk = 0; kk < _featureVector.size(); kk++)
-       {
-          std::cout << _featureVector[kk] << " ";
-
-       }
 
       for (int jj = 0; jj < _featureVector.size(); jj++)
         training_mat.at<double>(ii, jj) = _featureVector[jj];
 
-      if(ii < TrainingParameters::numOfPositiveSamples)
+      if (ii < TrainingParameters::numOfPositiveSamples)
         labels_mat.at<double>(ii, 0) = 1.0;
-
       else
         labels_mat.at<double>(ii, 0) = -1.0;
 
-
       ///Empty stringstream for next image
       img_name.str("");
-
     }
 
     /// Perform pca to reduce the dimensions of the features
@@ -284,23 +275,22 @@ namespace pandora_vision
     /// Normalize the training matrix
 
     for (int kk = 0; kk < training_mat.rows; kk++)
-    cv::normalize(training_mat.row(kk), training_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
+      cv::normalize(training_mat.row(kk), training_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
 
     std::stringstream training_mat_file_stream;
     training_mat_file_stream << package_path << "/data/" << file_name;
     saveToFile(training_mat_file_stream.str(), "training_mat", training_mat);
 
-    std::cout << training_mat_file_stream.str() << std::endl <<
-        " " << training_mat.size() << std::endl;
+    std::cout << training_mat_file_stream.str() << std::endl << " "
+              << training_mat.size() << std::endl;
 
     std::stringstream labels_mat_file_stream;
-    labels_mat_file_stream << package_path << "/data/" << "labels_"+file_name;
+    labels_mat_file_stream << package_path << "/data/labels_" << file_name;
     saveToFile(labels_mat_file_stream.str(), "labels_mat", labels_mat);
 
-    std::cout << labels_mat_file_stream.str() << std::endl <<
-        " " << labels_mat.size() << std::endl;
+    std::cout << labels_mat_file_stream.str() << std::endl << " "
+              << labels_mat.size() << std::endl;
    
-    
     std::string training_matrix_csv_file;
     training_matrix_csv_file = "rgb_training_matrix.csv";
     training_mat_file_stream.str("");
@@ -327,24 +317,25 @@ namespace pandora_vision
     std::stringstream img_name;
     for (int ii = 0; ii < test_num_files; ii++)
     {
-      if(type == 1)
+      if (type == 1)
       {
-      if(ii < TrainingParameters::numOfTestPositiveSamples )
-        img_name << path_to_samples << "/data/"
-            << "Test_Positive_Images/positive" << ii + 1 << ".jpg";
-      else
-        img_name << path_to_samples << "/data/"
-            << "Test_Negative_Images/negative" << ii + 1 - TrainingParameters::numOfTestPositiveSamples  << ".jpg";
+        if (ii < TrainingParameters::numOfTestPositiveSamples)
+          img_name << path_to_samples << "/data/"
+              << "Test_Positive_Images/positive" << ii + 1 << ".jpg";
+        else
+          img_name << path_to_samples << "/data/"
+              << "Test_Negative_Images/negative"
+              << ii + 1 - TrainingParameters::numOfTestPositiveSamples << ".jpg";
       }
       else
       {
-        if(ii < TrainingParameters::numOfTestPositiveSamples )
-        img_name << path_to_samples << "/data/"
-            << "Test_Depth_Positive_Images/positive" << ii + 1 << ".jpg";
-      else
-        img_name << path_to_samples << "/data/"
-            << "Test_Depth_Negative_Images/negative" << ii + 1 -
-              TrainingParameters::numOfTestPositiveSamples  << ".jpg";
+        if (ii < TrainingParameters::numOfTestPositiveSamples)
+          img_name << path_to_samples << "/data/"
+              << "Test_Depth_Positive_Images/positive" << ii + 1 << ".jpg";
+        else
+          img_name << path_to_samples << "/data/"
+              << "Test_Depth_Negative_Images/negative" 
+              << ii + 1 - TrainingParameters::numOfTestPositiveSamples << ".jpg";
       }
 
       std::cout << img_name.str() << std::endl;
@@ -353,19 +344,18 @@ namespace pandora_vision
 
       if (!img.data)
       {
-       std::cout << "Error reading file " << img_name.str() << std::endl;
-       return;
+        std::cout << "Error reading file " << img_name.str() << std::endl;
+        return;
       }
 
       cv::Size size(640, 480);
       cv::resize(img, img, size);
 
-      if(type == 1)
+      if (type == 1)
       {
         extractRgbFeatures(img);
         _featureVector = getRgbFeatureVector();
       }
-
       else
       {
         extractDepthFeatures(img);
@@ -373,28 +363,22 @@ namespace pandora_vision
       }
 
       std::cout << "Feature vector of image " << img_name.str() << " "
-          << _featureVector.size() << std::endl;
-
+                << _featureVector.size() << std::endl;
       /// display feature vector
+      for(int kk = 0; kk < _featureVector.size(); kk++)
+        std::cout << _featureVector[kk] << " ";
 
-        for(int kk = 0; kk < _featureVector.size(); kk++)
-       {
-          std::cout << _featureVector[kk] << " ";
-
-       }
 
       for (int jj = 0; jj < _featureVector.size(); jj++)
-        test_mat.at<double>(ii, jj)=_featureVector[jj];
+        test_mat.at<double>(ii, jj) = _featureVector[jj];
 
       if(ii < TrainingParameters::numOfTestPositiveSamples)
         test_labels_mat.at<double>(ii, 0) = 1.0;
-
       else
         test_labels_mat.at<double>(ii, 0) = -1.0;
 
       /// Empty stringstream for next image
       img_name.str("");
-
     }
 
     /// Perform pca to reduce the dimensions of the features
@@ -410,21 +394,21 @@ namespace pandora_vision
 
     /// Normalize the test matrix
     for (int kk = 0; kk < test_mat.rows; kk++)
-    cv::normalize(test_mat.row(kk), test_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
+      cv::normalize(test_mat.row(kk), test_mat.row(kk), -1, 1, cv::NORM_MINMAX, -1);
 
     std::stringstream test_mat_file_stream;
     test_mat_file_stream << package_path << "/data/" << file_name;
     saveToFile(test_mat_file_stream.str(), "test_mat", test_mat);
 
-    std::cout << test_mat_file_stream.str() << std::endl <<
-        " " << test_mat.size() << std::endl;
+    std::cout << test_mat_file_stream.str() << std::endl << " "
+              << test_mat.size() << std::endl;
 
     std::stringstream test_labels_mat_file_stream;
-    test_labels_mat_file_stream << package_path << "/data/" << "labels_"+file_name;
+    test_labels_mat_file_stream << package_path << "/data/labels_" << file_name;
     saveToFile(test_labels_mat_file_stream.str(), "test_labels_mat", test_labels_mat);
 
-    std::cout << test_labels_mat_file_stream.str() << std::endl <<
-        " " << test_labels_mat.size() << std::endl;
+    std::cout << test_labels_mat_file_stream.str() << std::endl << " "
+              << test_labels_mat.size() << std::endl;
  
     std::string test_matrix_csv_file;
     test_matrix_csv_file = "rgb_test_matrix.csv";
@@ -456,7 +440,6 @@ namespace pandora_vision
     cv::Mat results = cv::Mat::zeros(test_num_files, 1, CV_64FC1);
     float prediction;
     double A, B;
-
 
     switch(type){
       case 1:
@@ -659,7 +642,7 @@ namespace pandora_vision
       {
         for(int kk = 0; kk < training_mat.cols; kk++)
         {
-          outFile <<"a" <<kk ;
+          outFile << "a" << kk;
           if(kk < training_mat.cols - 1)
              outFile <<",";
           else
@@ -670,7 +653,7 @@ namespace pandora_vision
           outFile << labels_mat.at<double>(ii) << ",";
           for(int jj =0; jj < training_mat.cols; jj++)
           {
-            outFile << training_mat.at<double>(ii,jj);
+            outFile << training_mat.at<double>(ii, jj);
             if(jj < training_mat.cols-1)
               outFile << ",";
             else
@@ -789,7 +772,6 @@ namespace pandora_vision
     std::cout << "svm precision= " << precision << std::endl;
     std::cout << "svm recall= " << recall << std::endl;
     std::cout << "svm fmeasure= " << fmeasure << std::endl;
-
   }
 
   /**

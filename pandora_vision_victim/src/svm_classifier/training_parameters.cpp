@@ -32,39 +32,15 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Author: Despoina Paschalidou, Marios Protopapas
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
-#include "pandora_vision_victim/victim_parameters.h"
-
+#include "pandora_vision_victim/svm_classifier/training_parameters.h"
 
 namespace pandora_vision
 {
-  class BaseFeatureExtractor
-  {
-    protected:
-
-      //! In case the extractor is not purely functional, multiple
-      //! sub-extractors exist
-      std::vector<BaseFeatureExtractor*> extractors;
-
-      cv::Mat* _img;
-
-    public:
-
-      //! Default constructor
-      BaseFeatureExtractor(cv::Mat* img)
-      {
-        _img = img;
-      }
-
-      virtual std::vector<double> extract(void) = 0;
-
-  };
-}// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
-
+  int TrainingParameters::numOfPositiveSamples = 10;
+  int TrainingParameters::numOfNegativeSamples = 10;
+  int TrainingParameters::numOfTestPositiveSamples = 5;
+  int TrainingParameters::numOfTestNegativeSamples = 5;
+}

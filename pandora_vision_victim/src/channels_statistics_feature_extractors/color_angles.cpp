@@ -35,112 +35,120 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/color_angles.h"
-
+#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles.h"
 
 namespace pandora_vision
 {
   /**
-  @brief Constructor
-  **/
+   * @brief Constructor
+   */
   ColorAnglesExtractor::ColorAnglesExtractor(cv::Mat* img)
     : BaseFeatureExtractor(img)
   {
 
   }
+
   /**
-  @brief this function extracts the color angles features
-  @return color angles vector
-  **/
+   * @brief this function extracts the color angles features
+   * @return [std::vector<double>] The color angles vector
+   */
   std::vector<double> ColorAnglesExtractor::extract(void)
   {
     std::vector<double> colorAnglesAndStd;
 
-    //!< Separate the image in 3 places (R,G,B) one for each channel
+    //! Separate the image in 3 places (R,G,B) one for each channel
     std::vector<cv::Mat> rgb_planes;
     split( *_img, rgb_planes );
-    //!< Compute the average pixel value of each r,g,b color component
+    //! Compute the average pixel value of each r,g,b color component
     cv::Scalar bmean = mean(rgb_planes[0]);
     cv::Scalar gmean = mean(rgb_planes[1]);
     cv::Scalar rmean = mean(rgb_planes[2]);
 
-    //!< Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
-    //!< Corresponding average pixel value of each original colour vector
+    //! Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
+    //! Corresponding average pixel value of each original colour vector
     cv::Mat r0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
     cv::Mat b0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
     cv::Mat g0 = cv::Mat::zeros(_img->rows, _img->cols, CV_64FC1);
 
     for (int ii = 0; ii < _img->rows; ii++)
+    {
       for (int jj = 0; jj < _img->cols; jj++)
+      {
         b0.at<double>(ii, jj) = rgb_planes[0].at<uchar>(ii, jj) - bmean.val[0];
-    for (int ii = 0; ii < _img->rows; ii++)
-      for (int jj = 0; jj < _img->cols; jj++)
         g0.at<double>(ii, jj) = rgb_planes[1].at<uchar>(ii, jj) - gmean.val[0];
+        r0.at<double>(ii, jj) = rgb_planes[2].at<uchar>(ii, jj) - rmean.val[0];
+      }
+    }
+    /*
     for (int ii = 0; ii < _img->rows; ii++)
       for (int jj = 0; jj < _img->cols; jj++)
-        r0.at<double>(ii, jj) = rgb_planes[2].at<uchar>(ii, jj) - rmean.val[0];
+        ROS_INFO_STREAM(b0.at<double>(ii,jj));
+    //*/
 
-/*   for (int ii=0; ii< _img->rows; ii++)*/
-     //for(int jj=0; jj<_img->cols; jj++)
-      /*ROS_INFO_STREAM(b0.at<double>(ii,jj));*/
-
-    //!< Compute the dot product of rgb color components
+    //! Compute the dot product of rgb color components
     double rgdot = r0.dot(g0);
     double gbdot = g0.dot(b0);
     double rbdot = r0.dot(b0);
     double rsum = 0, bsum = 0, gsum = 0;
+    /*
+    ROS_INFO_STREAM("rgdot= " << rgdot);
+    ROS_INFO_STREAM("gbdot= " << gbdot);
+    ROS_INFO_STREAM("rbdot= " << rbdot);
+    //*/
 
-/*    ROS_INFO_STREAM("rgdot= " << rgdot);*/
-    //ROS_INFO_STREAM("gbdot= " << gbdot);
-    //ROS_INFO_STREAM("rbdot= " << rbdot);
-
-    //!< Compute the lengh of the color angle vector
+    //! Compute the lengh of the color angle vector
     for (int ii = 0; ii < r0.rows; ii++)
+    {
       for(int jj = 0; jj < r0.cols; jj++)
-        {
-           rsum+= pow(r0.at<double>(ii, jj), 2);
-           gsum+= pow(g0.at<double>(ii, jj), 2);
-           bsum+= pow(b0.at<double>(ii, jj), 2);
-        }
-/*    ROS_INFO_STREAM("rsum= " << rsum);*/
-    //ROS_INFO_STREAM("gsum= " << gsum);
-    /*ROS_INFO_STREAM("bsum= " << bsum);*/
+      {
+         rsum+= pow(r0.at<double>(ii, jj), 2);
+         gsum+= pow(g0.at<double>(ii, jj), 2);
+         bsum+= pow(b0.at<double>(ii, jj), 2);
+      }
+    }
+    /*
+    ROS_INFO_STREAM("rsum= " << rsum);
+    ROS_INFO_STREAM("gsum= " << gsum);
+    ROS_INFO_STREAM("bsum= " << bsum);
+    //*/
 
     double rlength = sqrt(rsum);
     double glength = sqrt(gsum);
     double blength = sqrt(bsum);
+    /*
+    ROS_INFO_STREAM("rlength= " << rlength);
+    ROS_INFO_STREAM("glength= " << glength);
+    ROS_INFO_STREAM("blength= " << blength);
+    //*/
 
-/*    ROS_INFO_STREAM("rlength= " << rlength);*/
-    //ROS_INFO_STREAM("glength= " << glength);
-    /*ROS_INFO_STREAM("blength= " << blength);*/
     rgdot/= (rlength*glength);
     gbdot/= (glength*blength);
     rbdot/= (rlength*blength);
+    /*
+    ROS_INFO_STREAM("rgdot= " << rgdot);
+    ROS_INFO_STREAM("gbdot= " << gbdot);
+    ROS_INFO_STREAM("rbdot= " << rbdot);
+    //*/
 
-
-/*    ROS_INFO_STREAM("rgdot= " << rgdot);*/
-    //ROS_INFO_STREAM("gbdot= " << gbdot);
-    /*ROS_INFO_STREAM("rbdot= " << rbdot);*/
-
-
-
-    //!< Compute the color angles
+    //! Compute the color angles
     double rgAngle = acos(rgdot);
     double gbAngle = acos(gbdot);
     double rbAngle = acos(rbdot);
-/*    ROS_INFO_STREAM("rgAngle= " << rgAngle);*/
-    //ROS_INFO_STREAM("gbAngle= " << gbAngle);
-    /*ROS_INFO_STREAM("rbAngle= " << rbAngle);*/
+    /*/
+    ROS_INFO_STREAM("rgAngle= " << rgAngle);
+    ROS_INFO_STREAM("gbAngle= " << gbAngle);
+    ROS_INFO_STREAM("rbAngle= " << rbAngle);
+    //*/
+
     cv::Mat gray;
-    //!< Normalised intensity standard deviation
-    //!< Transform the src image to grayscale
+    //! Normalised intensity standard deviation
+    //! Transform the src image to grayscale
     cvtColor( *_img, gray, CV_BGR2GRAY );
 
-    //!< Compute the mean intensity value
+    //! Compute the mean intensity value
     cv::Scalar meanI = mean(gray);
 
-
-    //!< Find the maximum intensity value
+    //! Find the maximum intensity value
     double maxVal, std, sum = 0;
     cv::minMaxLoc( gray, NULL, &maxVal );
 
@@ -152,7 +160,7 @@ namespace pandora_vision
 
     std = 2.0 / (maxVal * gray.cols * gray.rows) * sqrt(sum);
 
-    //!< Construct the final feature vector
+    //! Construct the final feature vector
     colorAnglesAndStd.push_back(rgAngle);
     colorAnglesAndStd.push_back(gbAngle);
     colorAnglesAndStd.push_back(rbAngle);
@@ -161,5 +169,4 @@ namespace pandora_vision
     return colorAnglesAndStd;
   }
 }// namespace pandora_vision
-
 

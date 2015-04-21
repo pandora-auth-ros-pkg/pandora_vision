@@ -35,7 +35,7 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/utilities/channels_statistics_extractor.h"
+#include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
 
 namespace pandora_vision
 {

@@ -32,61 +32,58 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Victor Daropoulos
+* Authors:
+*   Victor Daropoulos
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-
-#include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
+#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
 
 namespace pandora_vision
 {
-
-
   /**
-    @brief Function for updating the values of the GLCM matrix.
-    @param y1 [int] The y coordinate of the first pixel
-    @param x1 [int] The x coordinate of the first pixel
-    @param y2 [int] The y coordinate of the second pixel
-    @param x2 [int] The x coordinate of the second pixel
-    @param out [cv::Mat*] The updated GLCM matrix
-    @param in [cv::Mat&] The GLCM matrix
-    @return void
-  **/
+   * @brief Function for updating the values of the GLCM matrix.
+   * @param y1 [int] The y coordinate of the first pixel
+   * @param x1 [int] The x coordinate of the first pixel
+   * @param y2 [int] The y coordinate of the second pixel
+   * @param x2 [int] The x coordinate of the second pixel
+   * @param out [cv::Mat*] The updated GLCM matrix
+   * @param in [cv::Mat&] The GLCM matrix
+   * @return void
+   */
   void HaralickFeaturesExtractor::updateGLCM(int y1, int x1, int y2, int x2,
       cv::Mat* out, const cv::Mat& in)
   {
-    if(y2 < 0 || y2 >= in.rows || x2<0 || x2 >= in.cols) return;
-
-    out->at<double>(in.at<uchar>(y1, x1), in.at<uchar>(y2, x2))+=1.0;
-
+    if(y2 < 0 || y2 >= in.rows || x2 < 0 || x2 >= in.cols)
+      return;
+    out->at<double>(in.at<uchar>(y1, x1), in.at<uchar>(y2, x2)) += 1.0;
   }
 
   /**
-    @brief Function for calculating the normalized GLCM matrix, considering an
-    horizontal relationship between pixels with offset equal to 1. The returned
-    matrix is symmetric with respect to the main diagonal.
-    @param in [cv::Mat&] A grayscale image with 8 bit values.
-    @return [cv::Mat] The GLCM matrix.
-  **/
-  cv::Mat HaralickFeaturesExtractor::calculateGLCM(const cv::Mat& in)
+   * @brief Function for calculating the normalized GLCM matrix.
+   * The returned matrix is symmetric with respect to the main diagonal.
+   * @param xOffset [int] horizontal offset.
+   * @param yOffset [int] vertical offset.
+   * @param in [cv::Mat&] A grayscale image with 8 bit values.
+   * @return [cv::Mat] The GLCM matrix.
+   */
+  cv::Mat HaralickFeaturesExtractor::calculateGLCM(int xOffset, int yOffset,
+      const cv::Mat& in)
   {
     cv::Mat out = cv::Mat::zeros(256, 256, CV_64FC1);
-
     cv::Mat temp;
-
-    int offset = 1;
 
     for(int y = 0; y < in.rows; y++)
     {
       for(int x = 0; x < in.cols; x++)
       {
-        updateGLCM(y, x, y+offset, x, &out, in);
+        updateGLCM(y, x, y + yOffset, x + xOffset, &out, in);
       }
     }
 
     cv::transpose(out, temp);
 
-    out = out+temp;
+    out = out + temp;
 
     normalizeGLCM(&out);
 
@@ -94,54 +91,35 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for normalizing the values of the GLCM matrix.
-    @param in [cv::Mat*] The matrix to be normalized
-    @return [cv::Mat] The normalized matrix
-  **/
-  cv::Mat HaralickFeaturesExtractor::normalizeGLCM(cv::Mat* in)
+   * @brief Function for normalizing the values of the GLCM matrix.
+   * @param in [cv::Mat*] The matrix to be normalized
+   * @return void
+   */
+  void HaralickFeaturesExtractor::normalizeGLCM(cv::Mat* in)
   {
     cv::Scalar totalSum = cv::sum(*in);
-
-    for(int y = 0; y < in->rows; y++)
-    {
-      for(int x = 0; x < in->cols; x++)
-      {
-        in->at<double>(y, x) =
-        static_cast<double>(in->at<double>(y, x)/static_cast<double>(totalSum[0]));
-      }
-    }
-    return *in;
+    *in = in->mul(1.0 / totalSum[0]);
   }
 
   /**
-    @brief Function for calculating the Angular Second Moment,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating the Angular Second Moment,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The angular second moment
+   */
   double HaralickFeaturesExtractor::getAngularSecondMoment(const cv::Mat& in)
   {
-    double sum = 0;
-
-    for(int y = 0; y < in.rows; y++)
-    {
-      for(int x = 0; x < in.cols; x++)
-      {
-        sum+=in.at<double>(y, x)*in.at<double>(y, x);
-      }
-    }
-
-    // _haralickFeatures.push_back(sum);
-    return sum;
+    cv::Scalar sum = cv::sum(in.mul(in));
+    // _haralickFeatures.push_back(sum[0]);
+    return sum[0];
   }
 
-
   /**
-    @brief Function for calculating entropy,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating entropy,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The entropy
+   */
   double HaralickFeaturesExtractor::getEntropy(const cv::Mat& in)
   {
     double sum = 0;
@@ -163,11 +141,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating contrast,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating contrast,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The contrast
+   */
   double HaralickFeaturesExtractor::getContrast(const cv::Mat& in)
   {
     double sum= 0;
@@ -185,11 +163,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating variance,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating variance,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The variance
+   */
   double HaralickFeaturesExtractor::getVariance(const cv::Mat& in)
   {
     double w_mean = 0;
@@ -216,13 +194,12 @@ namespace pandora_vision
     return variance;
   }
 
-
   /**
-    @brief Function for calculating correlation,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating correlation,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The correlation
+   */
   double HaralickFeaturesExtractor::getCorrelation(const cv::Mat& in)
   {
     double mean = 0;
@@ -260,11 +237,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating homogeneity,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating homogeneity,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The homogeneity
+   */
   double HaralickFeaturesExtractor::getHomogeneity(const cv::Mat& in)
   {
     double temp = 0;
@@ -282,11 +259,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating sum average,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating sum average,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The sum average
+   */
   double HaralickFeaturesExtractor::getSumAverage(const cv::Mat& in)
   {
     cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
@@ -312,11 +289,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating sum variance,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating sum variance,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The sum variance
+   */
   double HaralickFeaturesExtractor::getSumVariance(const cv::Mat& in, const double& sumAverage)
   {
     cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
@@ -346,11 +323,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating sum entropy,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating sum entropy,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The sum entropy
+   */
   double HaralickFeaturesExtractor::getSumEntropy(const cv::Mat& in)
   {
     cv::Mat temp = cv::Mat::zeros(1, 2*(in.rows-1)+1, CV_64FC1);
@@ -381,11 +358,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating difference variance,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating difference variance,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The difference variance
+   */
   double HaralickFeaturesExtractor::getDifferenceVariance(const cv::Mat& in)
   {
     cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_64FC1);
@@ -418,11 +395,11 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating difference entropy,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating difference entropy,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @return [double] The difference entropy
+   */
   double HaralickFeaturesExtractor::getDifferenceEntropy(const cv::Mat& in)
   {
     cv::Mat temp = cv::Mat::zeros(1, in.rows, CV_64FC1);
@@ -453,11 +430,13 @@ namespace pandora_vision
   }
 
   /**
-    @brief Function for calculating Info Measure of Correlation 1 and 2,
-    http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
-    @param in [cv::Mat&] The normalized GLCM matrix
-    @return void
-  **/
+   * @brief Function for calculating Info Measure of Correlation 1 and 2,
+   * http://murphylab.web.cmu.edu/publications/boland/boland_node26.html
+   * @param in [cv::Mat&] The normalized GLCM matrix
+   * @param feat1 [double*] The Info Measure of Correlation 1
+   * @param feat2 [double*] The Info Measure of Correlation 2
+   * @return void
+   */
   void HaralickFeaturesExtractor::getInfoMeasuresCorr(const cv::Mat& in, double*feat1, double* feat2)
   {
     cv::Mat px = cv::Mat::zeros(1, in.rows, CV_64FC1);
@@ -528,48 +507,64 @@ namespace pandora_vision
   }
 
   /**
-    @brief This is the main function called to extract haralick features
-    @param image [cv::Mat] The current frame to be processed
-    @param void return
-  **/
+   * @brief This is the main function called to extract haralick features
+   * @param image [cv::Mat&] The current frame to be processed
+   * @param haralickFeatures [std::vector<double>*] The vector containing
+   * the Haralick features
+   * @return void
+   */
   void HaralickFeaturesExtractor::findHaralickFeatures(const cv::Mat& image, std::vector<double>* haralickFeatures)
-  { //ROS_INFO("ENTER FIND HARALICK");
+  {
+    //ROS_INFO("ENTER FIND HARALICK");
     cv::Mat temp = cv::Mat(image.rows, image.cols, CV_8UC1);
     cv::Mat out;
-     if(image.channels() !=1)
-     {
-      cv::cvtColor(image, temp, CV_BGR2GRAY);
-      out = calculateGLCM(temp);
-     }
-    else
-      out = calculateGLCM(image);
+    const int arrayLength = 4;
+    const int xOffset[4] = {0, 1, 1, 1};
+    const int yOffset[arrayLength] = {1, 0, 1, -1};
+    const int numHaralickFeatures = 13;
+    double haralickFeaturesArray[numHaralickFeatures] = {0.0};
 
-    haralickFeatures->push_back(getAngularSecondMoment(out));
-    haralickFeatures->push_back(getContrast(out));
-    haralickFeatures->push_back(getEntropy(out));
-    haralickFeatures->push_back(getVariance(out));
-    haralickFeatures->push_back(getCorrelation(out));
-    haralickFeatures->push_back(getHomogeneity(out));
-    double f7 = getSumAverage(out);
-    haralickFeatures->push_back(f7);
-    haralickFeatures->push_back(getSumVariance(out, f7));
-    haralickFeatures->push_back(getSumEntropy(out));
-    haralickFeatures->push_back(getDifferenceVariance(out));
-    haralickFeatures->push_back(getDifferenceEntropy(out));
+    for (int ii = 0; ii < arrayLength; ii++)
+    {
+      if(image.channels() != 1)
+      {
+        cv::cvtColor(image, temp, CV_BGR2GRAY);
+        out = calculateGLCM(xOffset[ii], yOffset[ii], temp);
+      }
+      else
+      {
+        out = calculateGLCM(xOffset[ii], yOffset[ii], image);
+      }
 
-    double feat1, feat2;
-    getInfoMeasuresCorr(out, &feat1, &feat2);
-    haralickFeatures->push_back(feat1);
-    haralickFeatures->push_back(feat2);
+      haralickFeaturesArray[0] += getAngularSecondMoment(out);
+      haralickFeaturesArray[1] += getContrast(out);
+      haralickFeaturesArray[2] += getEntropy(out);
+      haralickFeaturesArray[3] += getVariance(out);
+      haralickFeaturesArray[4] += getCorrelation(out);
+      haralickFeaturesArray[5] += getHomogeneity(out);
+      double f7 = getSumAverage(out);
+      haralickFeaturesArray[6] += f7;
+      haralickFeaturesArray[7] += getSumVariance(out, f7);
+      haralickFeaturesArray[8] += getSumEntropy(out);
+      haralickFeaturesArray[9] += getDifferenceVariance(out);
+      haralickFeaturesArray[10] += getDifferenceEntropy(out);
 
-    if( haralickFeatures->size() != 13){
+      double feat1, feat2;
+      getInfoMeasuresCorr(out, &feat1, &feat2);
+      haralickFeaturesArray[11] += feat1;
+      haralickFeaturesArray[12] += feat2;
+    }
+    for (int ii = 0; ii < numHaralickFeatures; ii++)
+    {
+      haralickFeatures->push_back(haralickFeaturesArray[ii] / arrayLength);
+    }
+
+    if( haralickFeatures->size() != numHaralickFeatures)
+    {
       ROS_FATAL("Clean the vector:HARALICK");
       ROS_INFO_STREAM("vector's size"<< haralickFeatures->size() );
-     }
-
-
+    }
   }
-
 }// namespace pandora_vision
 
 

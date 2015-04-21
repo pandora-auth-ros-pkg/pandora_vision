@@ -35,26 +35,20 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_MEAN_STD_DEV_H
-#define PANDORA_VISION_VICTIM_MEAN_STD_DEV_H
+#ifndef PANDORA_VISION_VICTIM_COLOR_ANGLES_H
+#define PANDORA_VISION_VICTIM_COLOR_ANGLES_H
 
-#include "pandora_vision_victim/feature_extractors/base_feature_extractor.h"
-
+#include "pandora_vision_victim/channels_statistics_feature_extractors/base_feature_extractor.h"
 
 namespace pandora_vision
 {
-  class MeanStdDevExtractor : public BaseFeatureExtractor
+  class ColorAnglesExtractor : public BaseFeatureExtractor
   {
-    private:
-
     public:
-
-      MeanStdDevExtractor(cv::Mat* img);
+      ColorAnglesExtractor(cv::Mat* img);
 
       virtual std::vector<double> extract(void);
-
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
+#endif  // PANDORA_VISION_VICTIM_COLOR_ANGLES_H
 

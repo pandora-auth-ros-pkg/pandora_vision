@@ -40,8 +40,8 @@
 
 #include "pandora_vision_victim/victim_vj_detector.h"
 //#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/rgb_system_validator.h"
-#include "pandora_vision_victim/depth_system_validator.h"
+#include "pandora_vision_victim/svm_classifier/rgb_system_validator.h"
+#include "pandora_vision_victim/svm_classifier/depth_system_validator.h"
 
 
 namespace pandora_vision

@@ -35,26 +35,36 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_COLOR_ANGLES_H
-#define PANDORA_VISION_VICTIM_COLOR_ANGLES_H
-
-#include "pandora_vision_victim/feature_extractors/base_feature_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev.h"
 
 
 namespace pandora_vision
 {
-  class ColorAnglesExtractor : public BaseFeatureExtractor
+  /**
+   * @brief Constructor
+   */
+  MeanStdDevExtractor::MeanStdDevExtractor(cv::Mat* img)
+    :BaseFeatureExtractor(img)
   {
-    private:
 
-    public:
+  }
 
-      ColorAnglesExtractor(cv::Mat* img);
-
-      virtual std::vector<double> extract(void);
-
-  };
+  /**
+   * @brief this function extracts the mean and std value of a color
+   * component
+   * @return [std::vector<double>] The mean and standard deviation vector
+   */
+  std::vector<double> MeanStdDevExtractor::extract(void)
+  {
+    std::vector<double> ret;
+    cv::Scalar avg, st;
+    cv::meanStdDev(*_img, avg, st);
+    for(unsigned int i = 0 ; i < _img->channels() ; i++)
+    {
+      ret.push_back(avg.val[i]);
+      ret.push_back(st.val[i]);
+    }
+    return ret;
+  }
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-
 

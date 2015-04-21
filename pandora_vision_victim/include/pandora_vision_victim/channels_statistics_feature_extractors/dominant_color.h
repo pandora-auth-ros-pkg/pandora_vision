@@ -35,53 +35,20 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/dominant_color.h"
+#ifndef PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
+#define PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
 
-
+#include "pandora_vision_victim/channels_statistics_feature_extractors/base_feature_extractor.h"
 
 namespace pandora_vision
-{ 
-  /**
-  @brief Constructor
-  **/
-  DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
-    : BaseFeatureExtractor(img)
+{
+  class DominantColorExtractor : public BaseFeatureExtractor
   {
+    public:
+      DominantColorExtractor(cv::Mat* img);
 
-  }
-
-  /**
-  @brief this function extracts the dominant color from ever
-  color coordinate and also their density
-  @return the dominant color vector
-  **/
-  std::vector<double> DominantColorExtractor::extract(void)
-  {
-    std::vector<double> ret;
-
-    double maxVal = 0;
-    double val = 0;
-    unsigned int size = cv::Size(_img->size()).height;
-/*    ROS_INFO_STREAM("HIST SIZE" <<_img->size());*/
-    /*ROS_INFO_STREAM("HEIGHT" << size);*/
-    for( int i = 0 ; i < size ; i++ )
-    {
-      double binVal = static_cast<double>(_img->at<float>(i));
-      if(binVal > maxVal)
-      {
-        maxVal = binVal;
-        val = i;
-      }
-    }
-
-    ret.push_back(val);
-    if(maxVal != 0)
-      ret.push_back(maxVal/(640 * 480));
-    else
-      ret.push_back(0);
-
-    return ret;
-  }
+      virtual std::vector<double> extract(void);
+  };
 }// namespace pandora_vision
-
+#endif  // PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
 
