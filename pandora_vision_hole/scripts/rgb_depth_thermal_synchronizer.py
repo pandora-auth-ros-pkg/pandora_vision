@@ -11,11 +11,13 @@ def callback(pointCloud, image2):
 
 if __name__=='__main__':
    
-    rospy.loginfo("loged in synch rgbdt")
+    rospy.init_node('rgbdt_synchronizer')
+    rospy.logerr("loged in synch rgbdt")
     ns = rospy.get_namespace()
 
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/subscribed_topics/input_topic")):    
         kinect_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/subscribed_topics/input_topic")
+        rospy.logerr("%s", kinect_topic)
     else:
         print "No point cloud topic found"
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
@@ -23,6 +25,8 @@ if __name__=='__main__':
 
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/subscribed_topics/input_thermal_topic")):    
         flir_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/subscribed_topics/input_thermal_topic")
+
+        rospy.logerr("%s", flir_topic)
     else:    
         print "No flir topic found"
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
@@ -37,5 +41,4 @@ if __name__=='__main__':
     sync = approxsync.ApproximateSynchronizer(0.02,[kinect_subscriber, flir_subscriber], 10)
     sync.registerCallback(callback)
 
-    rospy.init_node('RGBDT synchronizer')
     rospy.spin()
