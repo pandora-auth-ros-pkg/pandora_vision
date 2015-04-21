@@ -46,6 +46,7 @@ namespace pandora_vision
     _minDiff = 60;
     _threshold = 90;
     _edges = 0;
+    params.configLandoltC(*this->accessPublicNh());
   }
 
   //!< Destructor
@@ -196,7 +197,7 @@ namespace pandora_vision
       temp->getAngles().push_back(angle);
     }
     
-    if (LandoltcParameters::visualization)
+    if (params.visualization)
     {
       cv::imshow("paddedptr", paddedptr); 
       cv::waitKey(30); 
@@ -317,8 +318,8 @@ namespace pandora_vision
         float dx = grX[i];
         float dy = grY[i];
         float mag = dx * dx + dy * dy;
-        if (mag > (LandoltcParameters::gradientThreshold 
-          * LandoltcParameters::gradientThreshold))  // old _minDiff* _minDiff
+        if (mag > (params.gradientThreshold 
+          * params.gradientThreshold))  // old _minDiff* _minDiff
         {
           mag = sqrt(mag);
           float s = 20 / mag;
@@ -337,7 +338,7 @@ namespace pandora_vision
       {
         int i = y * cols + x;
         int cur = readvoting[i];
-        if (cur >= LandoltcParameters::centerThreshold)  // old _threshold
+        if (cur >= params.centerThreshold)  // old _threshold
         {
           bool biggest = true;
 
@@ -385,7 +386,7 @@ namespace pandora_vision
         cv::Mat padded;
         cv::copyMakeBorder(out, padded, 8, 8, 8, 8, cv::BORDER_CONSTANT, cv::Scalar(0));
       
-        if (LandoltcParameters::visualization)
+        if (params.visualization)
         {
           cv::imshow("padded", padded); 
           cv::waitKey(30);
@@ -430,7 +431,7 @@ namespace pandora_vision
     // Apply perspective transformation
     cv::warpPerspective(in, quad, transmtx, quad.size());
     
-    if (LandoltcParameters::visualization)
+    if (params.visualization)
     {
       cv::imshow("warp", quad);
       cv::waitKey(5);      
@@ -484,7 +485,7 @@ namespace pandora_vision
         std::vector<cv::Point> cnt = contours[i];
         double prec = cv::matchShapes(cv::Mat(ref), cv::Mat(cnt), CV_CONTOURS_MATCH_I3, 0);
         if (!isContourConvex(cv::Mat(cnt)) && fabs(mc[i].x - (*it).x) < 7 && fabs(mc[i].y - (*it).y) < 7 
-        && prec < LandoltcParameters::huMomentsPrec)
+        && prec < params.huMomentsPrec)
         {
           flag = true;
           cv::Rect bounding_rect = boundingRect((contours[i]));
@@ -541,7 +542,7 @@ namespace pandora_vision
     blur(gray, gray, cv::Size(3, 3));
 
     cv::adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-      cv::THRESH_BINARY_INV, 7, LandoltcParameters::adaptiveThresholdSubtractSize);
+      cv::THRESH_BINARY_INV, 7, params.adaptiveThresholdSubtractSize);
 
     cv::erode(binary, binary, erodeKernel);
 
@@ -556,7 +557,7 @@ namespace pandora_vision
     }
     applyMask();
     
-    if (LandoltcParameters::visualization)
+    if (params.visualization)
     {
       cv::imshow("Raw", input);
       cv::waitKey(20);

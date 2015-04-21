@@ -206,6 +206,8 @@ namespace pandora_vision
       cv::Mat _mask;
       //!<Vector containing LandoltCPOIPtrs
       std::vector<LandoltCPOIPtr> _landoltc;
+      
+      LandoltcParameters params;
 
       friend class LandoltcDetectorTest;
   };
