@@ -39,7 +39,8 @@ catkin_package(
     LIBRARIES
 )
 
-include_directories(include
+include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -86,10 +87,10 @@ target_link_libraries(${PROJECT_NAME}_handler
 ################# motion node #################
 add_executable(${PROJECT_NAME}_node
     src/motion_node.cpp
-    src/dbscan.cpp
+    # src/dbscan.cpp
 )
-target_link_libraries(${PROJECT_NAME}_node 
-  ${catkin_LIBRARIES} 
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
   ${PROJECT_NAME}_handler
 )
 add_dependencies(${PROJECT_NAME}_node

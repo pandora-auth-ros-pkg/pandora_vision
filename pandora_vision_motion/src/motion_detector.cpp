@@ -51,7 +51,7 @@ namespace pandora_vision
     setUpMotionDetector();
   }
 
-  MotionDetector::MotionDetector(void) : VisionProcessor(void)
+  MotionDetector::MotionDetector(void) : VisionProcessor()
   {
     setUpMotionDetector();
   }
@@ -65,8 +65,15 @@ namespace pandora_vision
     ROS_INFO("Destroying MotionDetector instance");
   }
 
+
+  MotionPOIPtr MotionDetector::getMotionPosition(void)
+  {
+    return bounding_box_;
+  }
+
   void MotionDetector::setUpMotionDetector(void)
   {
+    bounding_box_.reset( new MotionPOI() );
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
     bg_ = cv::BackgroundSubtractorMOG2(MotionParameters::history,
       MotionParameters::varThreshold, MotionParameters::bShadowDetection);
@@ -275,9 +282,11 @@ namespace pandora_vision
   {
     output->header = input->header;
     findMotionParameters(input->image);
+    output->frameWidth = input->image.cols;
+    output->frameHeight = input->image.rows;
     if (bounding_box_->getProbability() > 0.1)
     {
-      output->pois[0] = bounding_box_;
+      output->pois.push_back(bounding_box_);  // mby push back?
       return true;
     }
     return false;

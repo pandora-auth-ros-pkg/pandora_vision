@@ -66,6 +66,8 @@ namespace pandora_vision
 
     protected:
 
+      MotionPOIPtr getMotionPosition(void);
+
       void setUpMotionDetector(void);
 
       /**
