@@ -37,15 +37,33 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <ros/console.h>
-#include "pandora_vision_datamatrix/datamatrix_handler.h"
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_POI_H
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_POI_H
 
-using pandora_vision::DataMatrixHandler;
+#include <string>
+#include "pandora_vision_common/poi.h"
 
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler("datamatrixcode");
-  ros::spin();
-  return 0;
-}
+  class DataMatrixPOI : public POI
+  {
+    public:
+      virtual ~DataMatrixPOI() {}
+
+    public:
+      std::string datamatrixContent;
+
+    public:
+      void setContent(const std::string& content)
+      {
+        datamatrixContent = content;
+      }
+      std::string getContent() const
+      {
+        return datamatrixContent;
+      }
+  };
+  typedef boost::shared_ptr<DataMatrixPOI> DataMatrixPOIPtr;
+}  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_POI_H

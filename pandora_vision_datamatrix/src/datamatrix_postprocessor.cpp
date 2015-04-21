@@ -37,15 +37,39 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <ros/console.h>
-#include "pandora_vision_datamatrix/datamatrix_handler.h"
+#include "pandora_vision_datamatrix/datamatrix_postprocessor.h"
 
-using pandora_vision::DataMatrixHandler;
-
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler("datamatrixcode");
-  ros::spin();
-  return 0;
-}
+
+  DataMatrixPostProcessor::DataMatrixPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionPostProcessor<pandora_vision_msgs::DataMatrixAlertsVectorMsg>(ns, handler)
+  {
+  }
+
+  DataMatrixPostProcessor::~DataMatrixPostProcessor()
+  {
+  }
+
+  bool DataMatrixPostProcessor::postProcess(const POIsStampedConstPtr& input, 
+    const DataMatrixAlertsVectorMsgPtr& output)
+  {
+    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    output->header = alertVector.header;
+
+    for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
+    {
+      pandora_vision_msgs::DataMatrixAlertMsg dataMatrixAlert;
+
+      dataMatrixAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
+      dataMatrixAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
+
+      boost::shared_ptr<DataMatrixPOI> dataMatrixPOI(
+        boost::dynamic_pointer_cast<DataMatrixPOI>(input->pois[ii]));
+      dataMatrixAlert.datamatrixContent = dataMatrixPOI->getContent();
+
+      output->dataMatrixAlerts.push_back(dataMatrixAlert);
+    }
+    return true;
+  }
+}  // namespace pandora_vision

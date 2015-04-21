@@ -37,15 +37,20 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <ros/console.h>
-#include "pandora_vision_datamatrix/datamatrix_handler.h"
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_PREPROCESSOR_H
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_PREPROCESSOR_H
 
-using pandora_vision::DataMatrixHandler;
+#include <string>
+#include "pandora_vision_common/pandora_vision_interface/vision_preprocessor.h"
 
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler("datamatrixcode");
-  ros::spin();
-  return 0;
-}
+  class DataMatrixPreProcessor : public VisionPreProcessor
+  {
+    public:
+      DataMatrixPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~DataMatrixPreProcessor();
+  };
+}  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_PREPROCESSOR_H

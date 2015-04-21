@@ -39,23 +39,32 @@
 
 namespace pandora_vision
 {
-
   /**
    *@brief Constructor
   **/
-  DatamatrixDetector::DatamatrixDetector()
+  DatamatrixDetector::DatamatrixDetector(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionProcessor(ns, handler)
   {
     img = NULL;
     dec = NULL;
     reg = NULL;
     msg = NULL;
-    #if DEBUG_MODE
-      _datamatrixPublisher = image_transport::ImageTransport(_nh).advertise("debugDatamatrix", 1);
+    
+    #ifdef DEBUG_MODE
+      std::string debugTopic;
+      if (this->accessPublicNh()->getParam("debug_topic", debugTopic))
+      ROS_DEBUG_STREAM("debugTopic : " << debugTopic);
+      else
+      {
+        ROS_WARN("Cannot find datamatrix debug show topic");
+      }
+      _datamatrixPublisher = image_transport::ImageTransport(
+        *this->accessProcessorNh()).advertise(debugTopic, 1);
     #endif
-    detected_datamatrix.message = "";
+    
+    detected_datamatrix->setContent("");
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
-
 
   /**
     @brief Destructor
@@ -70,19 +79,17 @@ namespace pandora_vision
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance destroyed");
   }
 
-
   /**
     @brief Detects datamatrixes and stores them in a vector.
     @param image [cv::Mat] The image in which the QRs are detected
     @return void
    */
-  void DatamatrixDetector::detect_datamatrix(cv::Mat image)
+  std::vector<POIPtr> DatamatrixDetector::detect_datamatrix(cv::Mat image)
   {
     if (image.channels() < 3)
       cv::cvtColor(image, image, CV_GRAY2BGR);
 
     datamatrix_list.clear();
-
 
     img = NULL;
     dec = NULL;
@@ -113,12 +120,13 @@ namespace pandora_vision
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
       if(msg != NULL)
       {
-        detected_datamatrix.message.assign((const char*) msg->output, msg->outputIdx);
+        detected_datamatrix->getContent().assign((const char*) msg->output, msg->outputIdx);
         //!< Find datamatrixe's center exact position
         locate_datamatrix(image);
         datamatrix_list.push_back(detected_datamatrix);
       }
     }
+    return datamatrix_list;
   }
 
   /**
@@ -152,10 +160,9 @@ namespace pandora_vision
     cv::RotatedRect calculatedRect;
     calculatedRect = minAreaRect(datamatrixVector);
 
-    detected_datamatrix.datamatrix_center.y = calculatedRect.center.y;
-    detected_datamatrix.datamatrix_center.x = calculatedRect.center.x;
+    detected_datamatrix->setPoint(calculatedRect.center);
 
-    #if DEBUG_MODE
+    #ifdef DEBUG_MODE
       debug_show(image, datamatrixVector);
     #endif
   }
@@ -180,7 +187,7 @@ namespace pandora_vision
     calculatedRect = minAreaRect(datamatrixVector);
     for (int i = 0; i < 4; i++)
     {
-      line(debug_frame, datamatrixVector[i], datamatrixVector[(i+1)%4], cv::Scalar(255, 0, 0));
+      line(debug_frame, datamatrixVector[i], datamatrixVector[(i + 1) % 4], cv::Scalar(255, 0, 0));
     }
     cv::circle(debug_frame, calculatedRect.center, 4, cv::Scalar(0, 0, 255), 8, 8);
     ROS_INFO_STREAM("Angle given by minAreaRect:" << calculatedRect.angle);
@@ -188,20 +195,24 @@ namespace pandora_vision
     cv_bridge::CvImage datamatrixMSg;
     datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
     datamatrixMSg.image = debug_frame.clone();
-    #if DEBUG_MODE
-      _datamatrixPublisher.publish( datamatrixMSg.toImageMsg());
+    
+    #ifdef DEBUG_MODE
+      _datamatrixPublisher.publish(datamatrixMSg.toImageMsg());
     #endif
-
   }
+  
+  /**
+   * @brief
+   **/ 
+  bool DatamatrixDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->header;
+    output->pois = detect_datamatrix(input->image);
 
-   /**
-    @brief Function that returns a list of all detected
-    datamatrixes in current frame.
-    @return vector of DataMatrixQode reffering to
-    all detected datamatrixes in current frame
-    */
-    std::vector<DataMatrixQode> DatamatrixDetector::get_detected_datamatrix()
+    if (output->pois.empty())
     {
-      return datamatrix_list;
+      return false;
     }
+    return true;
+  }
 }// namespace pandora_vision

@@ -37,15 +37,55 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <ros/console.h>
 #include "pandora_vision_datamatrix/datamatrix_handler.h"
 
-using pandora_vision::DataMatrixHandler;
-
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler("datamatrixcode");
-  ros::spin();
-  return 0;
-}
+  DataMatrixHandler::DataMatrixHandler(const std::string& ns) : VisionHandler(ns)
+  {
+  }
+  
+  void DataMatrixHandler::startTransition(int newState)
+  {
+    currentState_ = newState;
+    
+    bool previouslyOff = (previousState_ != state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
+      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    
+    bool currentlyOn = (currentState_ == state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
+      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    
+    if (previouslyOff && currentlyOn)
+    {
+      preProcPtr_.reset(new DataMatrixPreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new DatamatrixDetector("~/processor", this));
+      postProcPtr_.reset(new DataMatrixPostProcessor("~/postprocessor", this));
+    }
+    else if (!previouslyOff && !currentlyOn)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+    }
+    
+    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+      
+      ros::shutdown();
+      return;
+    }
+    previousState_ = currentState_;
+    transitionComplete(currentState_);
+  }
+  
+  void DataMatrixHandler::completeTransition()
+  {
+  }
+}  // namespace pandora_vision

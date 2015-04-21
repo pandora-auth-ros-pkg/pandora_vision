@@ -37,15 +37,29 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <ros/console.h>
-#include "pandora_vision_datamatrix/datamatrix_handler.h"
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_POSTPROCESSOR_H
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_POSTPROCESSOR_H
 
-using pandora_vision::DataMatrixHandler;
+#include <string>
+#include "pandora_common_msgs/GeneralAlertInfoVector.h"
+#include "pandora_vision_msgs/DataMatrixAlertMsg.h"
+#include "pandora_vision_msgs/DataMatrixAlertsVectorMsg.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+#include "pandora_vision_datamatrix/datamatrix_poi.h"
 
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler("datamatrixcode");
-  ros::spin();
-  return 0;
-}
+  class DataMatrixPostProcessor : public VisionPostProcessor<pandora_vision_msgs::DataMatrixAlertsVectorMsg>
+  {
+    public:
+      typedef boost::shared_ptr<pandora_vision_msgs::DataMatrixAlertsVectorMsg> DataMatrixAlertsVectorMsgPtr;
+
+      DataMatrixPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~DataMatrixPostProcessor();
+      
+    virtual bool
+      postProcess(const POIsStampedConstPtr& input, const DataMatrixAlertsVectorMsgPtr& output);
+  };
+}  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_POSTPROCESSOR_H
