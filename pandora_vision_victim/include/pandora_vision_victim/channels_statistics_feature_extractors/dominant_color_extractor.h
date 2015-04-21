@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,39 +32,38 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev.h"
+#ifndef PANDORA_VISION_VICTIM_DOMINANT_COLOR_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_DOMINANT_COLOR_EXTRACTOR_H
 
+#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
 {
-  /**
-   * @brief Constructor
-   */
-  MeanStdDevExtractor::MeanStdDevExtractor(cv::Mat* img)
-    :BaseFeatureExtractor(img)
+  class DominantColorExtractor : public ChannelsStatisticsFeatureExtractor
   {
+    public:
+      /**
+       * @brief Constructor
+       */
+      DominantColorExtractor(cv::Mat* img);
 
-  }
+      /**
+       * @brief Destructor
+       */
+      virtual ~DominantColorExtractor();
 
-  /**
-   * @brief this function extracts the mean and std value of a color
-   * component
-   * @return [std::vector<double>] The mean and standard deviation vector
-   */
-  std::vector<double> MeanStdDevExtractor::extract(void)
-  {
-    std::vector<double> ret;
-    cv::Scalar avg, st;
-    cv::meanStdDev(*_img, avg, st);
-    for(unsigned int i = 0 ; i < _img->channels() ; i++)
-    {
-      ret.push_back(avg.val[i]);
-      ret.push_back(st.val[i]);
-    }
-    return ret;
-  }
+      /**
+       * @brief This function extracts the dominant color and the density from
+       * every color coordinate.
+       * @return [std::vector<double>] The dominant color feature vector.
+       */
+      virtual std::vector<double> extract(void);
+  };
 }// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_DOMINANT_COLOR_EXTRACTOR_H
 

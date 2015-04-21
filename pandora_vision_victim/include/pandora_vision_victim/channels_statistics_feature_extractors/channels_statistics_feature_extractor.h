@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,23 +32,49 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
-#define PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
+#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/base_feature_extractor.h"
+#include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
 {
-  class DominantColorExtractor : public BaseFeatureExtractor
+  class ChannelsStatisticsFeatureExtractor
   {
     public:
-      DominantColorExtractor(cv::Mat* img);
+      /**
+       * @brief Constructor
+       */
+      ChannelsStatisticsFeatureExtractor(cv::Mat* img)
+      {
+        img_ = img;
+      }
 
-      virtual std::vector<double> extract(void);
+      /**
+       * @brief Destructor
+       */
+      virtual ~ChannelsStatisticsFeatureExtractor()
+      {
+      }
+
+      /**
+       * @brief This function extracts features from an image.
+       * @return [std::vector<double>] The feature vector.
+       */
+      virtual std::vector<double> extract(void) = 0;
+
+    protected:
+      //! In case the extractor is not purely functional, multiple
+      //! sub-extractors exist
+      std::vector<ChannelsStatisticsFeatureExtractor*> extractors;
+
+      cv::Mat* img_;
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_DOMINANT_COLOR_H
+#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 

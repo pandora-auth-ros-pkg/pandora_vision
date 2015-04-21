@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,56 +32,39 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color.h"
+#ifndef PANDORA_VISION_VICTIM_MEAN_STD_DEV_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_MEAN_STD_DEV_EXTRACTOR_H
+
+#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
 {
-  /**
-   * @brief Constructor
-   */
-  DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
-    : BaseFeatureExtractor(img)
+  class MeanStdDevExtractor : public ChannelsStatisticsFeatureExtractor
   {
+    public:
 
-  }
+      /**
+       * @brief Constructor
+       */
+      MeanStdDevExtractor(cv::Mat* img);
 
-  /**
-   * @brief this function extracts the dominant color from ever
-   * color coordinate and also their density
-   * @return [std::vector<double>] The dominant color vector
-   */
-  std::vector<double> DominantColorExtractor::extract(void)
-  {
-    std::vector<double> ret;
+      /**
+       * @brief Destructor
+       */
+      virtual ~MeanStdDevExtractor();
 
-    double maxVal = 0;
-    double val = 0;
-    unsigned int size = cv::Size(_img->size()).height;
-    /*
-    ROS_INFO_STREAM("HIST SIZE" <<_img->size());
-    ROS_INFO_STREAM("HEIGHT" << size);
-    //*/
-    for( int i = 0 ; i < size ; i++ )
-    {
-      double binVal = static_cast<double>(_img->at<float>(i));
-      if(binVal > maxVal)
-      {
-        maxVal = binVal;
-        val = i;
-      }
-    }
-
-    ret.push_back(val);
-    if(maxVal != 0)
-      ret.push_back(maxVal/(640 * 480));
-    else
-      ret.push_back(0);
-
-    return ret;
-  }
+      /**
+       * @brief This function extracts the mean and standard deviation value of
+       * a color component.
+       * @return [std::vector<double>] The mean and standard deviation vector.
+       */
+      virtual std::vector<double> extract(void);
+  };
 }// namespace pandora_vision
-
+#endif  // PANDORA_VISION_VICTIM_MEAN_STD_DEV_EXTRACTOR_H
 

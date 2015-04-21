@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,23 +32,38 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_COLOR_ANGLES_H
-#define PANDORA_VISION_VICTIM_COLOR_ANGLES_H
+#ifndef PANDORA_VISION_VICTIM_DFT_COEFFS_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_DFT_COEFFS_EXTRACTOR_H
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/base_feature_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
 {
-  class ColorAnglesExtractor : public BaseFeatureExtractor
+  class DFTCoeffsExtractor : public ChannelsStatisticsFeatureExtractor
   {
     public:
-      ColorAnglesExtractor(cv::Mat* img);
+      /**
+       * @brief Constructor
+       */
+      DFTCoeffsExtractor(cv::Mat* img);
 
+      /**
+       * @brief Destructor
+       */
+      virtual ~DFTCoeffsExtractor();
+
+      /**
+       * @brief This function extracts the 6 first DFT coefficients, using
+       * zigzag scanning.
+       * @return [std::vector<double>] The vector of DFT coefficients.
+       */
       virtual std::vector<double> extract(void);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_COLOR_ANGLES_H
+#endif  // PANDORA_VISION_VICTIM_DFT_COEFFS_EXTRACTOR_H
 

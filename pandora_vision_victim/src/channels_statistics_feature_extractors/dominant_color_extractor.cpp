@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,23 +32,61 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_DFT_COEFFS_H
-#define PANDORA_VISION_VICTIM_DFT_COEFFS_H
-
-#include "pandora_vision_victim/channels_statistics_feature_extractors/base_feature_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
 
 namespace pandora_vision
 {
-  class DFTCoeffsExtractor : public BaseFeatureExtractor
+  /**
+   * @brief Constructor
+   */
+  DominantColorExtractor::DominantColorExtractor(cv::Mat* img)
+    : ChannelsStatisticsFeatureExtractor(img)
   {
-    public:
-      DFTCoeffsExtractor(cv::Mat* img);
+  }
 
-      virtual std::vector<double> extract(void);
-  };
+  /**
+   * @brief Destructor
+   */
+  DominantColorExtractor::~DominantColorExtractor()
+  {
+  }
+
+  /**
+   * @brief This function extracts the dominant color and the density from
+   * every color coordinate.
+   * @return [std::vector<double>] The dominant color feature vector.
+   */
+  std::vector<double> DominantColorExtractor::extract(void)
+  {
+    std::vector<double> dominantColor;
+
+    double maxVal = 0;
+    double indexVal = 0;
+    unsigned int size = cv::Size(img_->size()).height;
+    /*/
+    ROS_INFO_STREAM("HIST SIZE" <<img_->size());
+    ROS_INFO_STREAM("HEIGHT" << size);
+    //*/
+    for(int ii = 0; ii < size; ii++)
+    {
+      double binVal = static_cast<double>(img_->at<float>(ii));
+      if(binVal > maxVal)
+      {
+        maxVal = binVal;
+        indexVal = ii;
+      }
+    }
+
+    dominantColor.push_back(indexVal);
+    dominantColor.push_back(maxVal / (640 * 480));
+
+    return dominantColor;
+  }
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_DFT_COEFFS_H
+
 

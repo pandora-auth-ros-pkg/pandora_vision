@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,34 +32,37 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
+#ifndef PANDORA_VISION_VICTIM_COLOR_ANGLES_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_COLOR_ANGLES_EXTRACTOR_H
 
-#include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
 {
-  class BaseFeatureExtractor
+  class ColorAnglesExtractor : public ChannelsStatisticsFeatureExtractor
   {
     public:
-      //! Default constructor
-      BaseFeatureExtractor(cv::Mat* img)
-      {
-        _img = img;
-      }
+      /**
+       * @brief Constructor
+       */
+      ColorAnglesExtractor(cv::Mat* img);
 
-      virtual std::vector<double> extract(void) = 0;
+      /**
+       * @brief Destructor
+       */
+      virtual ~ColorAnglesExtractor();
 
-    protected:
-      //! In case the extractor is not purely functional, multiple
-      //! sub-extractors exist
-      std::vector<BaseFeatureExtractor*> extractors;
-
-      cv::Mat* _img;
+      /**
+       * @brief This function extracts the color angles features.
+       * @return [std::vector<double>] The color angles vector.
+       */
+      virtual std::vector<double> extract(void);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_BASE_FEATURE_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_COLOR_ANGLES_EXTRACTOR_H
 

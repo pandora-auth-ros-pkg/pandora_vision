@@ -37,10 +37,10 @@
 #ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev.h"
-#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color.h"
-#include "pandora_vision_victim/channels_statistics_feature_extractors/dft_coeffs.h"
-#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dft_coeffs_extractor.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles_extractor.h"
 
 namespace pandora_vision
 {

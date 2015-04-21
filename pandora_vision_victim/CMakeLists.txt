@@ -48,10 +48,10 @@ target_link_libraries(${PROJECT_NAME}_victim_parameters ${catkin_LIBRARIES})
 
 ################################ Channels Statistics Feature Extractors library #################################
 add_library(${PROJECT_NAME}_channels_statistics_feature_extractors
-            src/channels_statistics_feature_extractors/mean_std_dev.cpp
-            src/channels_statistics_feature_extractors/dominant_color.cpp
-            src/channels_statistics_feature_extractors/dft_coeffs.cpp
-            src/channels_statistics_feature_extractors/color_angles.cpp
+            src/channels_statistics_feature_extractors/mean_std_dev_extractor.cpp
+            src/channels_statistics_feature_extractors/dominant_color_extractor.cpp
+            src/channels_statistics_feature_extractors/dft_coeffs_extractor.cpp
+            src/channels_statistics_feature_extractors/color_angles_extractor.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_channels_statistics_feature_extractors ${catkin_LIBRARIES} ${PROJECT_NAME}_victim_parameters)
