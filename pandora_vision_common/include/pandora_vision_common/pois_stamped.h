@@ -53,13 +53,13 @@ namespace pandora_vision
     public:
       /// Message Header referring to the Points of Interest in a frame
       std_msgs::Header header;
-      
+
       /// Vector containing shared pointers to Point of Interest structure
       std::vector<POIPtr> pois;
-      
+
       /// Frame's Width
       int frameWidth;
-      
+
       /// Frame's Height
       int frameHeight;
   };
