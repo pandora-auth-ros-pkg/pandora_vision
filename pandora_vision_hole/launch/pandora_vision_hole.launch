@@ -4,6 +4,8 @@
 
   <arg name="namespace" default="hole_detector" />
 
+  <!-- Output selection -->
+  <arg name="output" default="screen" />
 
   <!-- ========================= Synchronizer node ========================= -->
 
@@ -21,6 +23,20 @@
               command="load" />
   </node>
 
+  <!-- ======================= RGBDT Synchronizer node ===================== -->
+  
+  <node name="rgb_depth_thermal_synchronizer_node"
+        type="rgb_depth_thermal_synchronizer.py"
+        pkg="pandora_vision_hole"
+        respawn="false"
+        output="$(arg output)"
+        ns="$(arg namespace)">
+        
+
+    <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
+              command="load" />
+
+  </node>
 
   <!-- ============================ Depth node ============================= -->
 

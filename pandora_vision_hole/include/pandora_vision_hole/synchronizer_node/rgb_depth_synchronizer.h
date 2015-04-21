@@ -66,12 +66,12 @@ namespace pandora_vision
 
    
       // The subscriber to the point cloud topic
-      message_filters::Subscriber<PointCloud>
-        *inputPointCloudSubscriber_;
+    //  message_filters::Subscriber<sensor_msgs::PointCloud2>
+      //  *inputPointCloudSubscriber_;
 
       // The subscriber to the input thermal topic
-      message_filters::Subscriber<sensor_msgs::Image>
-        *inputThermalSubscriber_;
+      //message_filters::Subscriber<sensor_msgs::Image>
+       // *inputThermalSubscriber_;
 
       // The name of the topic from where the input point cloud is acquired
       std::string inputPointCloudTopic_;
