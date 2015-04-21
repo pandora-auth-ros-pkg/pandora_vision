@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>917</width>
-    <height>778</height>
+    <width>1138</width>
+    <height>825</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -268,13 +268,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QRadioButton" name="realTimeRadioButton">
-         <property name="text">
-          <string>Realtime</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item row="2" column="0">
@@ -282,14 +275,14 @@
        <item>
         <widget class="QLineEdit" name="bagLineEdit">
          <property name="text">
-          <string>benchmark_dataset.bag</string>
+          <string>cropped.bag</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="rosTopicLineEdit">
          <property name="text">
-          <string>/camera/image</string>
+          <string>/kinect/rgb/image_raw</string>
          </property>
         </widget>
        </item>
@@ -300,6 +293,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="predatorPushButton">
+         <property name="text">
+          <string>Enable Predator</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -307,10 +307,10 @@
    <widget class="QLabel" name="imageLabel">
     <property name="geometry">
      <rect>
-      <x>306</x>
-      <y>10</y>
+      <x>320</x>
+      <y>20</y>
       <width>640</width>
-      <height>641</height>
+      <height>631</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -345,13 +345,23 @@
      <string/>
     </property>
    </widget>
+   <widget class="QListWidget" name="framesListWidget">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>20</y>
+      <width>151</width>
+      <height>681</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>917</width>
+     <width>1138</width>
      <height>25</height>
     </rect>
    </property>

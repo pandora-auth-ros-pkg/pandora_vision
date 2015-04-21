@@ -37,6 +37,8 @@
 
 #include "pandora_common_msgs/GeneralAlertMsg.h"
 #include "pandora_vision_msgs/LandoltcPredatorMsg.h"
+#include "pandora_vision_msgs/PredatorMsg.h"
+#include "pandora_vision_msgs/AnnotationMsg.h"
 
 #include <tld/TLD.h>
 #include <urdf_parser/urdf_parser.h>
@@ -92,6 +94,8 @@ class Predator : public StateClient
     
     //!< The topic subscribed to for the front camera
     std::string imageTopic;
+    //!< The topic subscribed to be used with annotator 
+    std::string annotator_topic_name;
     
     //!< Frame height
     int frameHeight;
@@ -144,6 +148,10 @@ class Predator : public StateClient
     //!<Flag to identify if it works alone or in combination with
     //!<landoltc3d_node
     bool operation_state;
+
+    //!<Flag to identify if it works with
+    //!<annotator_node
+    bool annotations;
     
     //!<Vertical Field of view
     double hfov;
@@ -157,6 +165,13 @@ class Predator : public StateClient
     @return void
     **/
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+
+    /**
+    @brief Callback for the RGB Image
+    @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
+    @return void
+    **/
+    void annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg);
     
     /**
     @brief Function that retrieves the parent to the frame_id
@@ -217,6 +232,13 @@ class Predator : public StateClient
     **/
     void sendMessage(const cv::Rect& rec, const float& posterior, const sensor_msgs::ImageConstPtr& frame);
 
+    /**
+    @brief Sends message of tracked object
+    @param rec [const cv::Rect&] The Bounding Box
+    @param posterior [const float&] Confidence
+    @return void
+    **/
+    void sendAnnotation(const cv::Rect& rec, const float& posterior);
 
     /**
     @brief Default Destructor
