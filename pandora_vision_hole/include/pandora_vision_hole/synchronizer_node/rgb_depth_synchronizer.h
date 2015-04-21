@@ -45,8 +45,6 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include "std_msgs/UInt8MultiArray.h"
-#include "pandora_vision_msgs/FlirMsg.h"
 
 /**
   @namespace pandora_vision

@@ -102,7 +102,7 @@ namespace pandora_vision
 
     // Advertise the synchronized thermal image
     synchronizedThermalImagePublisher_ = nodeHandle_.advertise
-      <std_msgs::UInt8MultiArray>(synchronizedThermalImageTopic_, 1000);
+      <sensor_msgs::Image>(synchronizedThermalImageTopic_, 1000);
 
     ROS_INFO_NAMED(PKG_NAME, "[Synchronizer node] Initiated");
   }
