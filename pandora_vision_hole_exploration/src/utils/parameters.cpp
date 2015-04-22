@@ -69,9 +69,9 @@ namespace pandora_vision
   // Show the std variance image after processing rgb image
   bool Parameters::Debug::show_std_variance_image = false;
   //
-  //  // Show the holes that each of the depth and RGB nodes transmit to the
-  //  // hole fusion node, on top of their respective origin images
-  //  bool Parameters::Debug::show_respective_holes = false;
+  // Show the holes that each of the depth and RGB nodes transmit to the
+  // hole fusion node, on top of their respective origin images
+  bool Parameters::Debug::show_respective_holes = false;
   //
   //  // Show all valid holes, from either the Depth or RGB source, or
   //  // the merges between them
@@ -278,6 +278,8 @@ namespace pandora_vision
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
+  float Parameters::HoleFusion::max_depth_to_test_small_thresh = 0.2;
+  int Parameters::HoleFusion::small_rect_thresh = 900;
   //
   //
   //

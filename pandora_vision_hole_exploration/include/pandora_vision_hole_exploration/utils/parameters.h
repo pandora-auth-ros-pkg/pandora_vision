@@ -87,15 +87,15 @@ namespace pandora_vision
     {
       // Show the depth image that arrives in the depth node
       static bool show_depth_image;
-      
+
       //Show the rgb image that arrives in the rgb node
       static bool show_rgb_image;
       //Show the std variance image after rgb image processing
       static bool show_std_variance_image;
       //
       //      // Show the holes that each of the depth and RGB nodes transmit to the
-      //      // hole fusion node, on top of their respective origin images
-      //      static bool show_respective_holes;
+      // hole fusion node, on top of their respective origin images
+      static bool show_respective_holes;
       //
       //      // Show all valid holes, from either the Depth or RGB source, or
       //      // the merges between them
@@ -361,6 +361,8 @@ namespace pandora_vision
       static float valid_strong_probability;
       static float valid_medium_probability;
       static float valid_light_probability;
+      static float max_depth_to_test_small_thresh;
+      static int small_rect_thresh;
     };
     //
     //

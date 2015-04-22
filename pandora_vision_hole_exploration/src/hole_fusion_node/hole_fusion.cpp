@@ -134,10 +134,10 @@ namespace pandora_vision
     //    &HoleFusion::pointCloudCallback, this);
 
 
-    //// The dynamic reconfigure server for debugging parameters
-    //serverDebug.setCallback(
-    //  boost::bind(&HoleFusion::parametersCallbackDebug,
-    //    this, _1, _2));
+    // The dynamic reconfigure server for debugging parameters
+    serverDebug.setCallback(
+        boost::bind(&HoleFusion::parametersCallbackDebug,
+          this, _1, _2));
 
     //// The dynamic reconfigure server for parameters pertaining to the
     //// priority of filters' execution
@@ -270,38 +270,38 @@ namespace pandora_vision
     @param void
     @return void
    **/
-  //void HoleFusion::getParentFrameId()
-  //{
-  //  // Parse robot description
-  //  const std::string model_param_name = "/robot_description";
+  void HoleFusion::getParentFrameId()
+  {
+    // Parse robot description
+    const std::string model_param_name = "/robot_description";
 
-  //  bool res = nodeHandle_.hasParam(model_param_name);
+    bool res = nodeHandle_.hasParam(model_param_name);
 
-  //  std::string robot_description = "";
+    std::string robot_description = "";
 
-  //  // The parameter was not found.
-  //  // Set the parent of the frame_id to a default value.
-  //  if(!res || !nodeHandle_.getParam(model_param_name, robot_description))
-  //  {
-  //    ROS_ERROR_NAMED(PKG_NAME,
-  //      "Robot description couldn't be retrieved from the parameter server.");
+    // The parameter was not found.
+    // Set the parent of the frame_id to a default value.
+    if(!res || !nodeHandle_.getParam(model_param_name, robot_description))
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+          "Robot description couldn't be retrieved from the parameter server.");
 
-  //    parent_frame_id_ = "kinect_rgb_frame";
+      parent_frame_id_ = "kinect_rgb_frame";
 
-  //    return;
-  //  }
+      return;
+    }
 
-  //  boost::shared_ptr<urdf::ModelInterface> model(
-  //    urdf::parseURDF(robot_description));
+    boost::shared_ptr<urdf::ModelInterface> model(
+        urdf::parseURDF(robot_description));
 
-  //  // Get current link and its parent
-  //  boost::shared_ptr<const urdf::Link> currentLink = model->getLink(frame_id_);
+    // Get current link and its parent
+    boost::shared_ptr<const urdf::Link> currentLink = model->getLink(frame_id_);
 
-  //  boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
+    boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
 
-  //  // Set the parent frame_id to the parent of the frame_id_
-  //  parent_frame_id_ = parentLink->name;
-  //}
+    // Set the parent frame_id to the parent of the frame_id_
+    parent_frame_id_ = parentLink->name;
+  }
 
 
 
@@ -318,21 +318,21 @@ namespace pandora_vision
 
     // Read the name of the topic from where the Hole Fusion node acquires the
     // input point cloud
-    //if (nodeHandle_.getParam(
-    //      ns + "/hole_fusion_node/subscribed_topics/point_cloud_internal_topic",
-    //      pointCloudTopic_))
-    //{
-    // Make the topic's name absolute
-    //pointCloudTopic_ = ns + "/" + pointCloudTopic_;
+    if (nodeHandle_.getParam(
+          ns + "/hole_fusion_node/subscribed_topics/point_cloud_internal_topic",
+          pointCloudTopic_))
+    {
+      // Make the topic's name absolute
+      pointCloudTopic_ = ns + "/" + pointCloudTopic_;
 
-    //  ROS_INFO_NAMED(PKG_NAME,
-    //      "[Hole Fusion Node] Subscribed to the internal point cloud topic");
-    //}
-    //else
-    //{
-    //  ROS_INFO_NAMED (PKG_NAME,
-    //      "[Hole Fusion Node] Could not find topic point_cloud_internal_topic");
-    //}
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Subscribed to the internal point cloud topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+          "[Hole Fusion Node] Could not find topic point_cloud_internal_topic");
+    }
 
     // Read the name of the topic from where the Hole Fusion node acquires the
     // candidate holes originated from the Depth node
@@ -516,64 +516,64 @@ namespace pandora_vision
   //  @param[in] level [const uint32_t]
   //  @return void
   // **/
-  //void HoleFusion::parametersCallbackDebug(
-  //  const pandora_vision_hole::debug_cfgConfig &config,
-  //  const uint32_t& level)
-  //{
-  //  ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+  void HoleFusion::parametersCallbackDebug(
+      const pandora_vision_hole::debug_cfgConfig &config,
+      const uint32_t& level)
+  {
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
 
-  //  ////////////////////////////// Debug parameters ////////////////////////////
+    //  ////////////////////////////// Debug parameters ////////////////////////////
 
-  //  // Show the holes that each of the depth and RGB nodes transmit to the
-  //  // hole fusion node, on top of their respective origin images
-  //  Parameters::Debug::show_respective_holes =
-  //    config.show_respective_holes;
+    // Show the holes that each of the depth and RGB nodes transmit to the
+    // hole fusion node, on top of their respective origin images
+    Parameters::Debug::show_respective_holes =
+      config.show_respective_holes;
 
-  //  // Show all valid holes, from either the Depth or RGB source, or
-  //  // the merges between them
-  //  Parameters::Debug::show_valid_holes =
-  //   config.show_valid_holes;
+    //  // Show all valid holes, from either the Depth or RGB source, or
+    //  // the merges between them
+    //  Parameters::Debug::show_valid_holes =
+    //   config.show_valid_holes;
 
-  //  // The product of this package: unique, valid holes
-  //  Parameters::Debug::show_final_holes =
-  //   config.show_final_holes;
+    //  // The product of this package: unique, valid holes
+    //  Parameters::Debug::show_final_holes =
+    //   config.show_final_holes;
 
-  //  // In the terminal's window, show the probabilities of candidate holes
-  //  Parameters::Debug::show_probabilities =
-  //    config.show_probabilities;
+    //  // In the terminal's window, show the probabilities of candidate holes
+    //  Parameters::Debug::show_probabilities =
+    //    config.show_probabilities;
 
-  //  // Show the texture's watersheded backprojection
-  //  Parameters::Debug::show_texture =
-  //    config.show_texture;
+    //  // Show the texture's watersheded backprojection
+    //  Parameters::Debug::show_texture =
+    //    config.show_texture;
 
-  //  Parameters::Debug::show_find_holes =
-  //    config.show_find_holes;
-  //  Parameters::Debug::show_find_holes_size =
-  //    config.show_find_holes_size;
-  //  Parameters::Debug::show_denoise_edges =
-  //    config.show_denoise_edges;
-  //  Parameters::Debug::show_denoise_edges_size =
-  //    config.show_denoise_edges_size;
-  //  Parameters::Debug::show_connect_pairs =
-  //    config.show_connect_pairs;
-  //  Parameters::Debug::show_connect_pairs_size =
-  //    config.show_connect_pairs_size;
+    //  Parameters::Debug::show_find_holes =
+    //    config.show_find_holes;
+    //  Parameters::Debug::show_find_holes_size =
+    //    config.show_find_holes_size;
+    //  Parameters::Debug::show_denoise_edges =
+    //    config.show_denoise_edges;
+    //  Parameters::Debug::show_denoise_edges_size =
+    //    config.show_denoise_edges_size;
+    //  Parameters::Debug::show_connect_pairs =
+    //    config.show_connect_pairs;
+    //  Parameters::Debug::show_connect_pairs_size =
+    //    config.show_connect_pairs_size;
 
-  //  Parameters::Debug::show_get_shapes_clear_border  =
-  //    config.show_get_shapes_clear_border;
-  //  Parameters::Debug::show_get_shapes_clear_border_size =
-  //    config.show_get_shapes_clear_border_size;
+    //  Parameters::Debug::show_get_shapes_clear_border  =
+    //    config.show_get_shapes_clear_border;
+    //  Parameters::Debug::show_get_shapes_clear_border_size =
+    //    config.show_get_shapes_clear_border_size;
 
-  //  Parameters::Debug::show_check_holes =
-  //    config.show_check_holes;
-  //  Parameters::Debug::show_check_holes_size =
-  //    config.show_check_holes_size;
+    //  Parameters::Debug::show_check_holes =
+    //    config.show_check_holes;
+    //  Parameters::Debug::show_check_holes_size =
+    //    config.show_check_holes_size;
 
-  //  Parameters::Debug::show_merge_holes =
-  //    config.show_merge_holes;
-  //  Parameters::Debug::show_merge_holes_size =
-  //    config.show_merge_holes_size;
-  //}
+    //  Parameters::Debug::show_merge_holes =
+    //    config.show_merge_holes;
+    //  Parameters::Debug::show_merge_holes_size =
+    //    config.show_merge_holes_size;
+  }
 
 
 
@@ -740,6 +740,11 @@ namespace pandora_vision
       config.valid_medium_probability;
     Parameters::HoleFusion::valid_light_probability =
       config.valid_light_probability;
+    Parameters::HoleFusion::max_depth_to_test_small_thresh =
+      config.max_depth_to_test_small_thresh;
+    Parameters::HoleFusion::small_rect_thresh =
+      config.small_rect_thresh;
+
   }
 
 
@@ -759,88 +764,87 @@ namespace pandora_vision
     the point cloud
     @return void
    **/
-  //void HoleFusion::pointCloudCallback(const PointCloudPtr& msg)
-  //{
-  //  #ifdef DEBUG_TIME
-  //  Timer::start("pointCloudCallback", "", true);
-  //  #endif
+  void HoleFusion::pointCloudCallback(const PointCloudPtr& msg)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("pointCloudCallback", "", true);
+#endif
 
-  //  ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Point Cloud callback");
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Point Cloud callback");
 
-  //  // Convert the header of the point cloud message
-  //  std_msgs::Header header;
-  //  pcl_conversions::fromPCL(msg->header, header);
+    // Convert the header of the point cloud message
+    std_msgs::Header header;
+    pcl_conversions::fromPCL(msg->header, header);
 
-  //  // Store the frame_id and timestamp of the point cloud under processing.
-  //  // The respective variables in the headers of the published messages will
-  //  // be set to these values.
-  //  // Because the frame_id will be used to retrieve its parent frame_id from
-  //  // the robot's description, and the frame_id starts with a forward slash,
-  //  // remove it, in order for the search to be successful.
-  //  frame_id_ = header.frame_id.substr(1);
-  //  timestamp_ = header.stamp;
+    // Store the frame_id and timestamp of the point cloud under processing.
+    // The respective variables in the headers of the published messages will
+    // be set to these values.
+    // Because the frame_id will be used to retrieve its parent frame_id from
+    // the robot's description, and the frame_id starts with a forward slash,
+    // remove it, in order for the search to be successful.
+    frame_id_ = header.frame_id.substr(1);
+    timestamp_ = header.stamp;
 
-  //  // The parent frame_id cannot be set in the constructor because the
-  //  // frame_id is not known until the first point cloud message arrives.
-  //  // In order not to parse the urdf file every time,
-  //  // set the parent frame_id string once
-  //  if (parent_frame_id_.compare("") == 0)
-  //  {
-  //    getParentFrameId();
-  //  }
+    // The parent frame_id cannot be set in the constructor because the
+    // frame_id is not known until the first point cloud message arrives.
+    // In order not to parse the urdf file every time,
+    // set the parent frame_id string once
+    if (parent_frame_id_.compare("") == 0)
+    {
+      getParentFrameId();
+    }
 
-  //  // Because the input point cloud is marked as const,
-  //  // and we need to interpolate the noise in it,
-  //  // copy the input point cloud to a local one.
-  //  pcl::copyPointCloud(*msg, *pointCloud_);
+    // Because the input point cloud is marked as const,
+    // and we need to interpolate the noise in it,
+    // copy the input point cloud to a local one.
+    pcl::copyPointCloud(*msg, *pointCloud_);
 
-  //  // Extract the depth image from the point cloud message
-  //  cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
-  //    msg, CV_32FC1);
+    // Extract the depth image from the point cloud message
+    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
+        msg, CV_32FC1);
 
-  //  // Interpolate the depthImage
-  //  cv::Mat interpolatedDepthImage;
-  //  NoiseElimination::performNoiseElimination(depthImage,
-  //    &interpolatedDepthImage);
+    // Interpolate the depthImage
+    cv::Mat interpolatedDepthImage;
+    depthImage.copyTo(interpolatedDepthImage);
 
-  //  // The noise elimination method above defines the interpolation method.
-  //  // Only in interpolation_method of zero can the depth filters through which
-  //  // each candidate hole is passed be utilized: there is no valid depth
-  //  // information available if the value of interpolation_method is set to
-  //  // other than zero.
-  //  if (Parameters::Depth::interpolation_method == 0)
-  //  {
-  //    filteringMode_ = RGBD_MODE;
-  //  }
-  //  else
-  //  {
-  //    filteringMode_ = RGB_ONLY_MODE;
-  //  }
+    // The noise elimination method above defines the interpolation method.
+    // Only in interpolation_method of zero can the depth filters through which
+    // each candidate hole is passed be utilized: there is no valid depth
+    // information available if the value of interpolation_method is set to
+    // other than zero.
+    //if (Parameters::Depth::interpolation_method == 0)
+    //{
+    //  filteringMode_ = RGBD_MODE;
+    //}
+    //else
+    //{
+    //  filteringMode_ = RGB_ONLY_MODE;
+    //}
 
-  //  // Set the interpolatedDepthImage's values as the depth values
-  //  // of the point cloud
-  //  setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloud_);
+    // Set the interpolatedDepthImage's values as the depth values
+    // of the point cloud
+    setDepthValuesInPointCloud(interpolatedDepthImage, &pointCloud_);
 
-  //  // The interpolated point cloud, frame_id and timestamp are set
-  //  numNodesReady_++;
+    // The interpolated point cloud, frame_id and timestamp are set
+    numNodesReady_++;
 
-  //  // If the depth and RGB candidate holes, the interpolated depth image
-  //  // and the RGB image are set,
-  //  // unlock the synchronizer and process the candidate holes from both sources
-  //  if (numNodesReady_ == 3)
-  //  {
-  //    numNodesReady_ = 0;
+    // If the depth and RGB candidate holes, the interpolated depth image
+    // and the RGB image are set,
+    // unlock the synchronizer and process the candidate holes from both sources
+    if (numNodesReady_ == 2)
+    {
+      numNodesReady_ = 0;
 
-  //    unlockSynchronizer();
+      unlockSynchronizer();
 
-  //    processCandidateHoles();
-  //  }
+      processCandidateHoles();
+    }
 
-  //  #ifdef DEBUG_TIME
-  //  Timer::tick("pointCloudCallback");
-  //  Timer::printAllMeansTree();
-  //  #endif
-  //}
+#ifdef DEBUG_TIME
+    Timer::tick("pointCloudCallback");
+    Timer::printAllMeansTree();
+#endif
+  }
 
 
 
@@ -860,6 +864,72 @@ namespace pandora_vision
 #ifdef DEBUG_TIME
     Timer::start("processCandidateHoles", "", true);
 #endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_respective_holes)
+    {
+      std::vector<std::string> msgs;
+
+      // Holes originated from analysis on the depth image,
+      // on top of the depth image
+      cv::Mat depthHolesOnDepthImage =
+        Visualization::showHoles(
+            "Holes originated from Depth analysis, on the Depth image",
+            interpolatedDepthImage_,
+            depthHolesConveyor_,
+            -1,
+            msgs);
+
+      // Holes originated from analysis on the RGB image,
+      // on top of the RGB image
+      cv::Mat rgbHolesOnRgbImage =
+        Visualization::showHoles(
+            "Holes originated from RGB analysis, on the RGB image",
+            rgbImage_,
+            rgbHolesConveyor_,
+            -1,
+            msgs);
+
+      // Holes originated from analysis on the depth image,
+      // on top of the RGB image
+      cv::Mat depthHolesOnRgbImage =
+        Visualization::showHoles(
+            "Holes originated from Depth analysis, on the RGB image",
+            rgbImage_,
+            depthHolesConveyor_,
+            -1,
+            msgs);
+
+      // Holes originated from analysis on the RGB image,
+      // on top of the Depth image
+      cv::Mat rgbHolesOnDepthImage =
+        Visualization::showHoles(
+            "Holes originated from RGB analysis, on the Depth image",
+            interpolatedDepthImage_,
+            rgbHolesConveyor_,
+            -1,
+            msgs);
+
+      // The four images
+      std::vector<cv::Mat> imgs;
+      imgs.push_back(depthHolesOnDepthImage);
+      imgs.push_back(depthHolesOnRgbImage);
+      imgs.push_back(rgbHolesOnRgbImage);
+      imgs.push_back(rgbHolesOnDepthImage);
+
+      // The titles of the images
+      std::vector<std::string> titles;
+
+      titles.push_back("Holes originated from Depth analysis, on the Depth image");
+      titles.push_back("Holes originated from Depth analysis, on the RGB image");
+      titles.push_back("Holes originated from RGB analysis, on the RGB image");
+      titles.push_back("Holes originated from RGB analysis, on the Depth image");
+
+      Visualization::multipleShow("Respective keypoints", imgs, titles, 1280, 1);
+    }
+#endif
+
+    mergeHoles(&rgbHolesConveyor_, &depthHolesConveyor_, interpolatedDepthImage_, pointCloud_);
     int counter = 0;
     std::map<int, float> validHolesMap;
     std::vector<bool> rgbSoloValid(rgbHolesConveyor_.rectangle.size(), true);
@@ -1102,6 +1172,129 @@ namespace pandora_vision
 #endif
   }
 
+  /**
+    @brief Applies a merging operation of @param operationId, until
+    every candidate hole, even as it changes through the various merges that
+    happen, has been merged with every candidate hole that can be merged
+    with it.
+    @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    candidate holes conveyor
+    @param[in] image [const cv::Mat&] An image used for filters' resources
+    creation and size usage
+    @param[in] pointCloud [const PointCloudPtr] An interpolated point
+    cloud used in the connection operation; it is used to obtain real world
+    distances between holes
+    @param[in] operationId [const int&] The identifier of the merging
+    process. Values: 0 for assimilation, 1 for amalgamation and
+    2 for connecting
+    @return void
+   **/
+  void HoleFusion::mergeHoles(
+      HolesConveyor* rgbHolesConveyor,
+      HolesConveyor* depthHolesConveyor,
+      const cv::Mat& image,
+      const PointCloudPtr& pointCloud)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("applyMergeOperation", "mergeHoles");
+#endif
+    std::vector<bool> realRgbContours(rgbHolesConveyor -> rectangle.size(), true);
+    std::vector<bool> realDepthContours(depthHolesConveyor -> rectangle.size() ,true);
+    // Small contours at a small distance are not valid
+
+    distanceValidation(image, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
+    distanceValidation(image, &(*depthHolesConveyor), &realDepthContours, pointCloud);
+    HolesConveyor conveyorTemp;
+
+    for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+      if(realRgbContours[i])
+      {
+        conveyorTemp.keypoint.push_back((*rgbHolesConveyor).keypoint[i]);
+        conveyorTemp.rectangle.push_back((*rgbHolesConveyor).rectangle[i]);
+      }
+    // Replace RGB conveyor with the valid holes
+    (*rgbHolesConveyor).rectangle = conveyorTemp.rectangle;
+    (*rgbHolesConveyor).keypoint = conveyorTemp.keypoint;
+    conveyorTemp.rectangle.clear();
+    conveyorTemp.keypoint.clear();
+    for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      if(realDepthContours[i])
+      {
+        conveyorTemp.keypoint.push_back((*depthHolesConveyor).keypoint[i]);
+        conveyorTemp.rectangle.push_back((*depthHolesConveyor).rectangle[i]);
+      }
+    // Replace Depth conveyor with the valid holes
+    (*depthHolesConveyor).rectangle = conveyorTemp.rectangle;
+    (*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
+    conveyorTemp.rectangle.clear();
+    conveyorTemp.keypoint.clear();
+
+    // If there are no candidate holes from both RGB and Depth,
+    // there is no meaning to this operation
+    if (rgbHolesConveyor -> rectangle.size() == 0 || depthHolesConveyor -> rectangle.size() == 0)
+    {
+      return;
+    }
+    // eliminate small contours in small average distance
+    // eliminate small RGB contours with low distance homogenity
+    //   float connectorOutlinePointX = pointCloud->points[
+    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
+    //     + pointCloud->width *
+    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].x;
+
+    //   float connectorOutlinePointY = pointCloud->points[
+    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
+    //     + pointCloud->width *
+    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].y;
+
+    // merge based on overlapping
+
+    // merge based on distance and homogenity in RGB
+    //    for(int i = 0; i < rgbHolesConveyor -> size(); i ++)
+
+
+    // merge based on overlapping
+
+
+#ifdef DEBUG_TIME
+    Timer::tick("applyMergeOperation");
+#endif
+  }
+
+  void HoleFusion::distanceValidation(
+      const cv::Mat& image,
+      HolesConveyor* holesConveyor,
+      std::vector<bool>* realContours,
+      const PointCloudPtr& pointCloud)
+  {
+    for(int i = 0; i < holesConveyor -> rectangle.size(); i ++)
+    {
+      int sumDepths = 0;
+      int upperX = static_cast<int>(holesConveyor -> keypoint[i].x - holesConveyor -> rectangle[i].width / 2);
+      int upperY = static_cast<int>(holesConveyor -> keypoint[i].y - holesConveyor -> rectangle[i].height / 2);
+      int lowerX = static_cast<int>(holesConveyor -> keypoint[i].x + holesConveyor -> rectangle[i].width / 2);
+      int lowerY = static_cast<int>(holesConveyor -> keypoint[i].y + holesConveyor -> rectangle[i].height / 2);
+      if(upperX < 0)
+        upperX = 0;
+      if(lowerX > image.cols)
+        lowerX = image.cols;
+      if(upperY < 0)
+        upperY = 0;
+      if(lowerY > image.rows)
+        lowerY = image.rows;
+      for(int col = upperX; col < lowerX; col ++ )
+        for(int row = upperY; row < lowerY; row ++)
+        {
+          sumDepths += static_cast<int>(image.at<uchar>(col, row));
+        }
+      float avgDepth = sumDepths / (holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height);
+      if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height <  Parameters::HoleFusion::small_rect_thresh  && avgDepth < Parameters::HoleFusion::max_depth_to_test_small_thresh);
+      {
+        (*realContours)[i] = false;
+      }
+    }
+  }
+
 
 
   /**
@@ -1119,32 +1312,32 @@ namespace pandora_vision
     @param[out] pointCloudPtr [PointCloudPtr*] The point cloud
     @return void
    **/
-  //void HoleFusion::setDepthValuesInPointCloud(const cv::Mat& inImage,
-  //  PointCloudPtr* pointCloudPtr)
-  //{
-  //  #ifdef DEBUG_TIME
-  //  Timer::start("setDepthValuesInPointCloud", "pointCloudCallback");
-  //  #endif
+  void HoleFusion::setDepthValuesInPointCloud(const cv::Mat& inImage,
+      PointCloudPtr* pointCloudPtr)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("setDepthValuesInPointCloud", "pointCloudCallback");
+#endif
 
-  //  // If the inImage is not of type CV_32FC1, return
-  //  if(inImage.type() != CV_32FC1)
-  //  {
-  //    return;
-  //  }
+    // If the inImage is not of type CV_32FC1, return
+    if(inImage.type() != CV_32FC1)
+    {
+      return;
+    }
 
-  //  for (unsigned int row = 0; row < (*pointCloudPtr)->height; ++row)
-  //  {
-  //    for (unsigned int col = 0; col < (*pointCloudPtr)->width; ++col)
-  //    {
-  //      (*pointCloudPtr)->points[col + (*pointCloudPtr)->width * row].z =
-  //        inImage.at<float>(row, col);
-  //    }
-  //  }
+    for (unsigned int row = 0; row < (*pointCloudPtr)->height; ++row)
+    {
+      for (unsigned int col = 0; col < (*pointCloudPtr)->width; ++col)
+      {
+        (*pointCloudPtr)->points[col + (*pointCloudPtr)->width * row].z =
+          inImage.at<float>(row, col);
+      }
+    }
 
-  //  #ifdef DEBUG_TIME
-  //  Timer::tick("setDepthValuesInPointCloud");
-  //  #endif
-  //}
+#ifdef DEBUG_TIME
+    Timer::tick("setDepthValuesInPointCloud");
+#endif
+  }
 
 
 
