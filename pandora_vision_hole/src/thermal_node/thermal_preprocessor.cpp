@@ -32,7 +32,7 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors:
+* Authors: Angelos Triantafyllidis, Alexandros Philotheou, Manos Tsardoulias
 *********************************************************************/
 
 #include "thermal_node/thermal_preprocessor.h"
@@ -42,7 +42,7 @@ namespace pandora_vision
 
 
   ThermalPreProcessor::ThermalPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-  sensor_processor::PreProcessor<std_msgs::UInt8MultiArray, CVMatStamped>(ns, handler)
+  sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>(ns, handler)
   {
     
   } 
@@ -55,32 +55,6 @@ namespace pandora_vision
   }
 
 
-
-  virtual bool ThermalPreProcessor::preProcess(const MultiArrayConstPtr& input, const CVMatStampedPtr& output)
-  {
-    output->image = convertRawToMat(*input);
-    output->header = input->header;
-    return true;
-  }
-
-  
-  cv::Mat ThermalPreProcessor::convertRawToMat(const std_msgs::UInt8MultiArray& msg)
-  {
-    
-    int width = msg.layout.dim[1].size;
-    int height = msg.layout.dim[0].size;
-    cv::Mat thermalImage=cv::Mat::zeros(width, height, CV_8UC1);
-    for(int i = 0; i<width; i++)
-    {
-      for(int j = 0; j<height; j++)
-      {
-        thermalImage.at<unsigned char>(i, j)= msg.data[i * height + j];
-      }
-    }
-
-    return thermalImage;
-
-  }
 
 
 

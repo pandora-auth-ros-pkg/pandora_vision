@@ -32,16 +32,13 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors:
+ * Authors: Angelos Triantafyllidis, Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
 #ifndef PANDORA_VISION_THERMAL_PREPROCESSOR_H
 #define PANDORA_VISION_THERMAL_PREPROCESSOR_H
 
 #include <string>
-
-#include <std_msgs/UInt8MultiArray.h>
-
 #include "sensor_processor/abstract_handler.h"
 #include "sensor_processor/preprocessor.h"
 
@@ -49,22 +46,26 @@
 
 // #include "utils/message_conversions.h"
 
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision 
+ **/
 namespace pandora_vision
 {
-  class ThermalPreProcessor : public sensor_processor::PreProcessor<std_msgs::UInt8MultiArray, CVMatStamped>
+  /**
+    @class ThermalPreProcessor
+    @brief Provides functionalities for communication between synchronizer
+    and thermal node.
+   **/
+  class ThermalPreProcessor : public sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>
   {
-    protected:
-      typedef boost::shared_ptr<std_msgs::UInt8MultiArray> MultiArrayPtr;
-      typedef boost::shared_ptr<std_msgs::UInt8MultiArray const> MultiArrayConstPtr;
-      cv::Mat convertRawToMat(const std_msgs::UInt8MultiArray& msg);
+    private:
      
+
     public:
       ThermalPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
       virtual
         ~ThermalPreProcessor() {}
-
-      virtual bool
-        preProcess(const MultiArrayConstPtr& input, const CVMatStampedPtr& output);
   };
 }  // namespace pandora_vision
 
