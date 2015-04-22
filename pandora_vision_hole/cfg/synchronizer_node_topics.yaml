@@ -10,4 +10,5 @@ published_topics:
   point_cloud_internal_topic: synchronized/depth/points
   depth_image_topic: synchronized/depth/image
   rgb_image_topic: synchronized/rgb/image
-  thermal_info_topic: synchronized/thermal/info
+  thermal_image_topic: synchronized/thermal/info
+  pointcloud2_topic: synchronized/pointcloud2/info
