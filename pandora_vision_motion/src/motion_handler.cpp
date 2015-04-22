@@ -41,44 +41,11 @@
 
 namespace pandora_vision
 {
-  MotionHandler::MotionHandler(const std::string& ns) : VisionHandler(ns)
+  MotionHandler::MotionHandler(const std::string& ns) : 
+    VisionHandler<MotionPreProcessor, MotionDetector, MotionPostProcessor>(ns)
   {
-  }
-  
-  void MotionHandler::startTransition(int newState)
-  {
-    currentState_ = newState;
-    
-    bool previouslyOff = (previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD 
-      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    bool currentlyOn = (currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD 
-      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    
-    if (previouslyOff && currentlyOn)
-    {
-      preProcPtr_.reset(new MotionPreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new MotionDetector("~/processor", this));
-      postProcPtr_.reset(new MotionPostProcessor("~/postprocessor", this));
-    }
-    else if (!previouslyOff && !currentlyOn)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-    }
-    
-    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-      
-      ros::shutdown();
-      return;
-    }
-
-    previousState_ = currentState_;
-    transitionComplete(currentState_);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
   }
   
   void MotionHandler::completeTransition()

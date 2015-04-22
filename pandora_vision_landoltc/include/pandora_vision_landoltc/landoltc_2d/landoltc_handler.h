@@ -48,14 +48,14 @@
 
 namespace pandora_vision
 {
-  class LandoltCHandler : public VisionHandler
+  class LandoltCHandler : public VisionHandler<LandoltCPreProcessor, 
+    LandoltCDetector, LandoltCPostProcessor>
   {
     public:
       explicit LandoltCHandler(const std::string& ns);
       virtual ~LandoltCHandler() {}
       
     private:
-      virtual void startTransition(int newState);
       virtual void completeTransition();
   };
 }  // namespace pandora_vision

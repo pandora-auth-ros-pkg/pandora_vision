@@ -1,4 +1,4 @@
-subscribed_topic: 
+subscribed_topics: 
   [/kinect/rgb/image_raw]
-published_topic: /vision/datamatrix_alert
+published_topics: /vision/datamatrix_alert
 debug_topic: debugDatamatrix

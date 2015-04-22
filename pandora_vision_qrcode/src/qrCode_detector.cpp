@@ -62,7 +62,8 @@ namespace pandora_vision
       //! Advertise topics for debugging if we are in debug mode
       if (this->accessPublicNh()->getParam("debug_qrcode_topic", debugTopic))
       {
-        debugPublisher_ = image_transport::ImageTransport(*this->accessPublicNh()).advertise(debugTopic, 1);
+        debugPublisher_ = image_transport::ImageTransport(
+          *this->accessProcessorNh()).advertise(debugTopic, 1);
       }
       else
       {

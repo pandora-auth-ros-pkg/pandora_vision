@@ -41,48 +41,13 @@
 
 namespace pandora_vision
 {
-  DataMatrixHandler::DataMatrixHandler(const std::string& ns) : VisionHandler(ns)
+  DataMatrixHandler::DataMatrixHandler(const std::string& ns) : 
+    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>(ns)
   {
-  }
-  
-  void DataMatrixHandler::startTransition(int newState)
-  {
-    currentState_ = newState;
-    
-    bool previouslyOff = (previousState_ != state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
-      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
-      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
-      && previousState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    
-    bool currentlyOn = (currentState_ == state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE
-      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
-      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
-      || currentState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    
-    if (previouslyOff && currentlyOn)
-    {
-      preProcPtr_.reset(new DataMatrixPreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new DatamatrixDetector("~/processor", this));
-      postProcPtr_.reset(new DataMatrixPostProcessor("~/postprocessor", this));
-    }
-    else if (!previouslyOff && !currentlyOn)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-    }
-    
-    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-      
-      ros::shutdown();
-      return;
-    }
-    previousState_ = currentState_;
-    transitionComplete(currentState_);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
   }
   
   void DataMatrixHandler::completeTransition()

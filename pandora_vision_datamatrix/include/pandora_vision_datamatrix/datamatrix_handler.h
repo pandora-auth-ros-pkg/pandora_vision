@@ -48,14 +48,14 @@
 
 namespace pandora_vision
 {
-  class DataMatrixHandler : public VisionHandler
+  class DataMatrixHandler : public VisionHandler<DataMatrixPreProcessor, 
+    DatamatrixDetector, DataMatrixPostProcessor>
   {
     public:
       explicit DataMatrixHandler(const std::string& ns);
       virtual ~DataMatrixHandler() {}
 
     private:
-      virtual void startTransition(int newState);
       virtual void completeTransition();
   };
 }  // namespace pandora_vision

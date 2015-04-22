@@ -42,7 +42,7 @@
 
 #include <string>
 #include <image_transport/image_transport.h>
-#include "sensor_processor/abstract_handler.h"
+#include "sensor_processor/handler.h"
 #include "sensor_processor/preprocessor.h"
 #include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
 #include "pandora_vision_victim/victim_cv_mat_stamped.h"
@@ -56,7 +56,7 @@ namespace pandora_vision
       typedef boost::shared_ptr<pandora_vision_msgs::EnhancedHolesVectorMsg const> EnhancedHolesVectorMsgConstPtr;
       
     public:
-      VictimPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      VictimPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~VictimPreProcessor();
       
       virtual bool

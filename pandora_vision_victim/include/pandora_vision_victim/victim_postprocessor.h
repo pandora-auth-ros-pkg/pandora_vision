@@ -52,7 +52,7 @@ namespace pandora_vision
     public:
       typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
 
-      VictimPostProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler);
+      VictimPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~VictimPostProcessor();
       
     virtual bool
