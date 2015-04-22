@@ -52,6 +52,8 @@
 #include "pandora_vision_victim/svm_classifier/training_parameters.h"
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 #define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
 
@@ -69,19 +71,6 @@ namespace pandora_vision
        * @brief The Destructor
        */
       virtual ~RgbSvmTraining();
-
-      /**
-       * @brief This method constructs the training matrix
-       * to be used for the training
-       * @param fileName [const std::string&]: name of the file to save the
-       * extracted training matrix
-       * @return void
-       */
-      virtual void constructFeaturesMatrix(const std::string& fileName,
-                                           const boost::filesystem::path& directory,
-                                           const std::string& prefix,
-                                           cv::Mat* featuresMat,
-                                           cv::Mat* labelsMat);
 
       /**
       @brief Function that implements the training for the subsystems

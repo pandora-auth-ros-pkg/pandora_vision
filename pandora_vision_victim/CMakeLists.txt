@@ -41,6 +41,11 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+############################ File Utilities Library ############################
+add_library(${PROJECT_NAME}_utilities
+            src/utilities/file_utilities.cpp)
+target_link_libraries(${PROJECT_NAME}_utilities ${catkin_LIBRARIES})
+
 ########################## Victim_Parameters library ###############################
 
 add_library(${PROJECT_NAME}_victim_parameters src/victim_parameters.cpp)
@@ -67,7 +72,7 @@ add_library(${PROJECT_NAME}_feature_extractors
 
 
 target_link_libraries(${PROJECT_NAME}_feature_extractors ${catkin_LIBRARIES} ${PROJECT_NAME}_channels_statistics_feature_extractors
-${PROJECT_NAME}_victim_parameters)
+${PROJECT_NAME}_victim_parameters ${PROJECT_NAME}_utilities)
 
 ########################## SVM Classifier Library###############################
 add_library(${PROJECT_NAME}_svm_classifier
@@ -77,7 +82,7 @@ add_library(${PROJECT_NAME}_svm_classifier
 )
 
 target_link_libraries(${PROJECT_NAME}_svm_classifier ${catkin_LIBRARIES} ${PROJECT_NAME}_feature_extractors
-${PROJECT_NAME}_victim_parameters)
+  ${PROJECT_NAME}_victim_parameters ${PROJECT_NAME}_utilities)
 
 #############################  victim node ##################################################
 

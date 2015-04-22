@@ -38,7 +38,9 @@
 #ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H
 #define PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H
 
+#include <string>
 #include <vector>
+#include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
 
 /**
@@ -61,6 +63,8 @@ namespace pandora_vision
       {
         if (!featureVector_.empty())
           featureVector_.clear();
+        if (!featureMatrix_.empty())
+          featureMatrix_.clear();
       }
 
       /**
@@ -80,14 +84,42 @@ namespace pandora_vision
       {
       }
 
+      /**
+       * @brief
+       */
+      virtual void constructFeaturesMatrix(
+          const boost::filesystem::path& directory, const std::string& prefix,
+          const std::string& fileName,
+          cv::Mat* featuresMat, cv::Mat* labelsMat)
+      {
+      }
+
+      /**
+       * @brief
+       */
       std::vector<double> getFeatureVector() const
       {
         return featureVector_;
       }
 
+      /**
+       * @brief
+       */
+      std::vector<std::vector<double> > getFeatureMatrix() const
+      {
+        return featureMatrix_;
+      }
+
     protected:
       //! Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;
+
+      //! Matrix containing the feature vectors extracted from a set of images.
+      std::vector<std::vector<double> > featureMatrix_;
+
+      //! String containing the type of the images used in the feature
+      //! extraction process.
+      std::string imageType_;
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H

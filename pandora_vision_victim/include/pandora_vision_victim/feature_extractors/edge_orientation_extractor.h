@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Marios Protopapas
+* Author: Marios Protopapas <protopapas_marios@hotmail.com>
 *********************************************************************/
 #ifndef PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
@@ -45,14 +45,14 @@ namespace pandora_vision
 {
   enum ConvolutionType
   {
-    //!<Return the full convolution, including border
-    CONVOLUTION_FULL, 
+    //! Return the full convolution, including border
+    CONVOLUTION_FULL,
 
-    //!<Return only the part that corresponds to the original image 
+    //! Return only the part that corresponds to the original image
     CONVOLUTION_SAME,
 
-    //!<Return only the submatrix containing elements that were not influenced 
-    //!<by the border 
+    //! Return only the submatrix containing elements that were not influenced
+    //! by the border
     CONVOLUTION_VALID
   };
 

@@ -36,7 +36,7 @@
 *********************************************************************/
 
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
-
+#include "pandora_vision_victim/utilities/file_utilities.h"
 /**
  * @namespace pandora_vision
  * @brief The main namespace for PANDORA vision
@@ -48,6 +48,7 @@ namespace pandora_vision
    */
   RgbFeatureExtraction::RgbFeatureExtraction() : FeatureExtraction()
   {
+    imageType_ = "rgb_";
   }
 
   /**
@@ -95,5 +96,68 @@ namespace pandora_vision
     /// Append Haralick features to RGB feature vector.
     for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
       featureVector_.push_back(haralickFeatureVector[ii]);
+  }
+
+  /**
+  @brief This method constructs the rgb training matrix
+  to be used for the training
+  @param file_name [std::string] : filename to save the extracted training matrix
+  @param type [int]:  Value that indicates, if we train depth subsystem,
+  or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
+  @return void
+  **/
+  void RgbFeatureExtraction::constructFeaturesMatrix(
+      const boost::filesystem::path& directory, const std::string& prefix,
+      const std::string& fileName,
+      cv::Mat* featuresMat, cv::Mat* labelsMat)
+  {
+    cv::Mat image;
+
+    int rowIndex = 0;
+    for (boost::filesystem::recursive_directory_iterator iter(directory);
+         iter != boost::filesystem::recursive_directory_iterator();
+         iter++)
+    {
+      if (is_directory(iter->status()))
+        continue;
+      std::string imageAbsolutePath = iter->path().string();
+      std::string imageName = iter->path().filename().string();
+      image = cv::imread(imageAbsolutePath);
+      if (!image.data)
+      {
+        std::cout << "Error reading file " << imageName << std::endl;
+        continue;
+      }
+
+      // cv::Size size(640, 480);
+      // cv::resize(image, image, size);
+
+      extractFeatures(image);
+      std::cout << "Feature vector of image " << imageName << " "
+                << featureVector_.size() << std::endl;
+      /// display feature vector
+      /*
+       *for (int kk = 0; kk < featureVector_.size(); kk++)
+       *  std::cout << featureVector_[kk] << " ";
+       */
+
+      for (int jj = 0; jj < featureVector_.size(); jj++)
+        featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
+
+      std::string checkIfPositive = "positive";
+      if (boost::algorithm::contains(imageName, checkIfPositive))
+        labelsMat->at<double>(rowIndex, 0) = 1.0;
+      else
+        labelsMat->at<double>(rowIndex, 0) = -1.0;
+
+      rowIndex += 1;
+    }
+    /// Normalize the training matrix
+    // zScoreNormalization(featuresMat);
+
+    /// Perform PCA to reduce the dimensions of the features
+    // performPcaAnalysis(featuresMat);
+    file_utilities::saveFeaturesInFile(*featuresMat, *labelsMat, prefix,
+        fileName, imageType_);
   }
 }// namespace pandora_vision

@@ -55,6 +55,7 @@
 
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 #define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
 
@@ -79,14 +80,10 @@ namespace pandora_vision
       @param file_name [std::string]: file name to save the extracted training matrix
       @return void
       **/
-      virtual void constructFeaturesMatrix(const std::string& fileName,
-                                           const boost::filesystem::path& directory,
-                                           const std::string& prefix,
-                                           cv::Mat* featuresMat,
-                                           cv::Mat* labelsMat)
-      {
-      }
-
+      void constructFeaturesMatrix(
+          const boost::filesystem::path& directory, const std::string& prefix,
+          const std::string& fileName,
+          cv::Mat* featuresMat, cv::Mat* labelsMat);
       /**
        * @brief
        * @param dataMat [cv::Mat*]
@@ -134,45 +131,6 @@ namespace pandora_vision
       @return void
       **/
       void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A, double* B);
-
-      /**
-      @brief Function that checks if a file exists
-      @param name [char*]: Name of file to check if exists
-      @return true if the file was found, and false if not
-      **/
-      bool exist(const char *name);
-
-      /**
-      @brief Function that saves a variable to a file
-      @param file_name [std::string]:  name of the file to be created
-      @param var_name [std::string]:  name of the variable to be saved to the file
-      @param var [cv::Mat]: variable to be saved to the file
-      @return void
-      **/
-      void saveToFile(std::string file_name, std::string var_name, cv::Mat var);
-
-      /**
-      @brief Function that saves a variable to a file
-      @param file_name [std::string] : name of the file to be created
-      @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
-      @param labels_mat [cv::Mat] : name of the mat of labels to be saved to the file
-      @return void
-      **/
-      void saveToCSV(const std::string& file_name, const cv::Mat& training_mat, const cv::Mat& labels_mat);
-
-      /**
-      @brief Function that loads the necessary files for the training
-      @param training_mat_file [std::string]:  name of the file that contains the training data
-      @param labels_mat_file [std::string]:  name of the file that contains the labels of each class
-      of the training data
-      @return void
-      **/
-      void loadFiles(std::string training_mat_file_stream, std::string labels_mat_file_stream,
-                    std::string test_mat_file, std::string test_labels_mat_file);
-
-      int countFilesInDirectory(const boost::filesystem::path& directory);
-
-      virtual void extractFeatures(const cv::Mat& inImage);
 
     protected:
       //! The NodeHandle

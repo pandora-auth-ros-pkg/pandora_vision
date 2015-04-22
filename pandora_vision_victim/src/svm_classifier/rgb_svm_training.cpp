@@ -33,7 +33,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
@@ -56,96 +56,6 @@ namespace pandora_vision
    */
   RgbSvmTraining::~RgbSvmTraining()
   {
-  }
-
-  /**
-  @brief This method constructs the rgb training matrix
-  to be used for the training
-  @param file_name [std::string] : filename to save the extracted training matrix
-  @param type [int]:  Value that indicates, if we train depth subsystem,
-  or rgb subsystem. Default value is 1, that corresponds to rgb subsystem
-  @return void
-  **/
-  void RgbSvmTraining::constructFeaturesMatrix(const std::string& fileName,
-                                               const boost::filesystem::path& directory,
-                                               const std::string& prefix,
-                                               cv::Mat* featuresMat,
-                                               cv::Mat* labelsMat)
-  {
-    std::cout << "Constructing Features Matrix" << std::endl;
-    cv::Mat image;
-
-    int rowIndex = 0;
-    for (boost::filesystem::recursive_directory_iterator iter(directory);
-         iter != boost::filesystem::recursive_directory_iterator();
-         iter++)
-    {
-      if (is_directory(iter->status()))
-        continue;
-      std::string imageAbsolutePath = iter->path().string();
-      std::string imageName = iter->path().filename().string();
-      image = cv::imread(imageAbsolutePath);
-      if (!image.data)
-      {
-        std::cout << "Error reading file " << imageName << std::endl;
-        continue;
-      }
-
-      // cv::Size size(640, 480);
-      // cv::resize(image, image, size);
-
-      featureExtraction_->extractFeatures(image);
-      std::vector<double> featureVector;
-      if (!featureVector.empty())
-        featureVector.clear();
-      featureVector = featureExtraction_->getFeatureVector();
-      std::cout << "Feature vector of image " << imageName << " "
-                << featureVector.size() << std::endl;
-      /// display feature vector
-      /*
-       *for (int kk = 0; kk < featureVector.size(); kk++)
-       *  std::cout << featureVector[kk] << " ";
-       */
-
-      for (int jj = 0; jj < featureVector.size(); jj++)
-        featuresMat->at<double>(rowIndex, jj) = featureVector[jj];
-
-      std::string checkIfPositive = "positive";
-      if (boost::algorithm::contains(imageName, checkIfPositive))
-        labelsMat->at<double>(rowIndex, 0) = 1.0;
-      else
-        labelsMat->at<double>(rowIndex, 0) = -1.0;
-
-      rowIndex += 1;
-    }
-
-    /// Normalize the training matrix
-    // zScoreNormalization(&featuresMat);
-
-    /// Perform PCA to reduce the dimensions of the features
-    // performPcaAnalysis(&trainingMat);
-
-    std::stringstream features_mat_file_stream;
-    features_mat_file_stream << package_path << "/data/" << fileName;
-    std::string varName = prefix + "features_mat";
-    saveToFile(features_mat_file_stream.str(), varName, *featuresMat);
-
-    std::cout << features_mat_file_stream.str() << std::endl << " "
-              << featuresMat->size() << std::endl;
-
-    std::stringstream labels_mat_file_stream;
-    labels_mat_file_stream << package_path << "/data/labels_" << fileName;
-    varName = prefix + "labels_mat";
-    saveToFile(labels_mat_file_stream.str(), varName, *labelsMat);
-
-    std::cout << labels_mat_file_stream.str() << std::endl << " "
-              << labelsMat->size() << std::endl;
-
-    std::string features_matrix_csv_file;
-    features_matrix_csv_file = prefix + "rgb_matrix.csv";
-    features_mat_file_stream.str("");
-    features_mat_file_stream << package_path << "/data/" << features_matrix_csv_file;
-    saveToCSV(features_mat_file_stream.str(), *featuresMat, *labelsMat);
   }
 
   /**
@@ -187,44 +97,55 @@ namespace pandora_vision
     std::stringstream trainingDatasetPath;
     trainingDatasetPath << path_to_samples << "/data/Training_Images";
     boost::filesystem::path trainingDirectory(trainingDatasetPath.str());
-    int numTrainingFiles = countFilesInDirectory(trainingDirectory);
+    int numTrainingFiles = file_utilities::countFilesInDirectory(trainingDirectory);
 
     std::stringstream testDatasetPath;
     testDatasetPath << path_to_samples << "/data/Test_Images";
     boost::filesystem::path testDirectory(testDatasetPath.str());
-    int numTestFiles = countFilesInDirectory(testDirectory);
+    int numTestFiles = file_utilities::countFilesInDirectory(testDirectory);
 
     cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, num_feat, CV_64FC1);
     cv::Mat trainingLabelsMat = cv::Mat::zeros(numTrainingFiles, 1, CV_64FC1);
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, num_feat, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    //if(exist(in_file_stream.str().c_str()) == false)
-    //{
+    //if(file_utilities::exist(in_file_stream.str().c_str()) == false)
+    if (true)
+    {
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
-      constructFeaturesMatrix(training_matrix_file_path,
-          trainingDirectory, prefix, &trainingFeaturesMat, &trainingLabelsMat);
-    //}
+      constructFeaturesMatrix(trainingDirectory, prefix,
+          training_matrix_file_path, &trainingFeaturesMat, &trainingLabelsMat);
 
-    //if(exist(in_test_file_stream.str().c_str()) == false)
-    //{
+      trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
+      trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
+    }
+    else
+    {
+      trainingFeaturesMat = file_utilities::loadFiles(
+          in_file_stream.str(), "training_features_mat");
+      trainingLabelsMat = file_utilities::loadFiles(
+          labels_mat_file_stream.str(), "training_labels_mat");
+    }
+
+    //if(file_utilities::exist(in_test_file_stream.str().c_str()) == false)
+    if (true)
+    {
       std::cout << "Create necessary test matrix" << std::endl;
-      //std::string
-        prefix = "test_";
-      constructFeaturesMatrix(test_matrix_file_path,
-          testDirectory, prefix, &testFeaturesMat, &testLabelsMat);
-    //}
-    trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
-    trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
-    testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
-    testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
-    /*
-     *loadFiles(in_file_stream.str(),
-     *          labels_mat_file_stream.str(),
-     *          in_test_file_stream.str(),
-     *          test_labels_mat_file_stream.str());
-     */
+      std::string prefix = "test_";
+      constructFeaturesMatrix(testDirectory, prefix, test_matrix_file_path,
+          &testFeaturesMat, &testLabelsMat);
+
+      testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
+      testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
+    }
+    else
+    {
+      testFeaturesMat = file_utilities::loadFiles(
+          in_test_file_stream.str(), "test_features_mat");
+      testLabelsMat = file_utilities::loadFiles(
+          test_labels_mat_file_stream.str(), "test_labels_mat");
+    }
 
     //calcMinDistance();
 
@@ -274,7 +195,7 @@ namespace pandora_vision
           //~ results.at<float>(ii, jj) = -1;
     SVM.predict(testFeaturesMat, results);
     //std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
-    saveToFile(results_file_stream.str(), "results", results);
+    file_utilities::saveToFile(results_file_stream.str(), "results", results);
     evaluate(results, testLabelsMat);
   }
 }// namespace pandora_vision
