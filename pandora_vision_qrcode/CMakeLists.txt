@@ -38,7 +38,8 @@ catkin_package(
     #LIBRARIES
 )
 
-include_directories(include
+include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -102,7 +103,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
   include/*
   src/*
-  test/unit/qrCode_detector_test.cpp
+  test/*
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
@@ -110,6 +111,6 @@ roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 #                                   Testing                                    #
 ################################################################################
 
-#~ if(CATKIN_ENABLE_TESTING)
-  #~ add_subdirectory(test)
-#~ endif()
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()

@@ -41,182 +41,170 @@
 
 namespace pandora_vision
 {
+  /**
+   *     @class QrCodeDetectorTests
+   *     @brief Tests the integrity of methods of class QrCodeDetector
+   **/
+  class QrCodeDetectorTest : public ::testing::Test
+  {
+    public:
+      QrCodeDetectorTest() : qrCodeDetector_("test", 
+        new sensor_processor::Handler("test")) {}
 
-    /**
-     *     @class QrCodeDetectorTests
-     *     @brief Tests the integrity of methods of class QrCodeDetector
-     **/
+      virtual void SetUp()
+      {
+        WIDTH = 640;  // getParam
+        HEIGHT = 480;
+      }
 
-    class QrCodeDetectorTest : public ::testing::Test
+      std::vector<POIPtr> detectQrCode(cv::Mat frame);
+      int* locateQrCode(cv::Point2f center);
+
+      void drawChessboard (int blocksNumberH, int blocksNumberV, cv::Mat &image);
+
+      int WIDTH;
+      int HEIGHT;
+
+    private:
+      QrCodeDetector qrCodeDetector_;
+  };
+
+  std::vector<POIPtr> QrCodeDetectorTest::detectQrCode(cv::Mat frame)
+  {
+    return qrCodeDetector_.detectQrCode(frame);
+  }
+
+  int* QrCodeDetectorTest::locateQrCode(cv::Point2f qrcode_center)
+  {
+    int* center = new int[2];
+    center[0] = round(qrcode_center.y);
+    center[1] = round(qrcode_center.x);
+    return center;
+  }
+
+  /**
+    @brief Constructs a chessboard with specific number of blocks.
+    @param blocksNumberH [int] The number of chessboard blocks, horizontal direction
+    @param blocksNumberV [int] The number of chessboard blocks, vertical direction
+    @param image [cv::Mat&] The final chessboard image
+    @return void
+   **/
+  void QrCodeDetectorTest::drawChessboard(int blocksNumberH, int blocksNumberV, cv::Mat &image)
+  {
+    int imageSize = WIDTH * HEIGHT;
+    int blockWidth = static_cast<int>(WIDTH / blocksNumberH);
+    int blockHeight = static_cast<int>(HEIGHT / blocksNumberV);
+    cv::Mat chessBoard(HEIGHT, WIDTH, CV_8UC3, cv::Scalar::all(0));          
+    unsigned char color = 255;
+    for (int i = 0; i < WIDTH - blockWidth; i += blockWidth)
     {
-        public:
-            QrCodeDetectorTest() {}
-
-            virtual void SetUp()
-            {
-                WIDTH = 640;
-                HEIGHT = 480;
-            }
-
-            std::vector<QrCode> detectQrCode(cv::Mat frame);
-            int* locateQrCode(cv::Point2f center);
-
-            void drawChessboard (
-                    int blocksNumberH,
-                    int blocksNumberV,
-                    cv::Mat &image
-                    );
-
-            int WIDTH;
-            int HEIGHT;
-
-        private:
-            QrCodeDetector qrCodeDetector_;
-    };
-
-
-    std::vector<QrCode> QrCodeDetectorTest::detectQrCode(cv::Mat frame)
-    {
-        qrCodeDetector_.detectQrCode(frame);
-        return qrCodeDetector_.get_detected_qr();
+      for (int j = 0; j < HEIGHT - blockHeight; j += blockHeight)
+      {
+        cv::Mat ROI = chessBoard(cv::Rect(i, j, blockWidth, blockHeight));
+        ROI.setTo(cv::Scalar::all(color));
+        color = abs(color-255);
+      }
     }
+    chessBoard.copyTo(image);
+  }
+  //! Tests QrCodeDetector::detectQrCode
+  TEST_F (QrCodeDetectorTest, detectQrCodeBlackImage)
+  {
+    cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+    std::vector<POIPtr> qrcode_list = detectQrCode(blackFrame);
+    // there shouldn't be any qrcodes
+    EXPECT_EQ(0, qrcode_list.size());
+    // neither when 3 channels are used
+    blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+    qrcode_list = detectQrCode(blackFrame);
+    EXPECT_EQ(0, qrcode_list.size());
+  }
 
-    int* QrCodeDetectorTest::locateQrCode(cv::Point2f qrcode_center)
-    {
-        int* center = new int[2];
-        center[0] = round(qrcode_center.y);
-        center[1] = round(qrcode_center.x);
-        return center;
-    }
+  TEST_F (QrCodeDetectorTest, detectQrCodeWhiteImage)
+  {
+    cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
+    whiteFrame.setTo(cv::Scalar(255, 255, 255));
+    std::vector<POIPtr> qrcode_list = detectQrCode(whiteFrame);
+    // there shouldn't be any qrcodes
+    EXPECT_EQ(0, qrcode_list.size());
+  }
 
-    /**
-      @brief Constructs a chessboard with specific number of blocks.
-      @param blocksNumberH [int] The number of chessboard blocks, horizontal direction
-      @param blocksNumberV [int] The number of chessboard blocks, vertical direction
-      @param image [cv::Mat&] The final chessboard image
-      @return void
-     **/
-    void QrCodeDetectorTest::drawChessboard (
-            int blocksNumberH,
-            int blocksNumberV,
-            cv::Mat &image
-            )
-    {
-        int imageSize = WIDTH * HEIGHT;
-        int blockWidth = static_cast<int>(WIDTH / blocksNumberH);
-        int blockHeight = static_cast<int>(HEIGHT / blocksNumberV);
-        cv::Mat chessBoard(HEIGHT, WIDTH, CV_8UC3, cv::Scalar::all(0));          
-        unsigned char color = 255;
-        for (int i = 0; i < WIDTH - blockWidth; i += blockWidth)
-        {
-            for (int j = 0; j < HEIGHT - blockHeight; j += blockHeight)
-            {
-                cv::Mat ROI = chessBoard(cv::Rect(i, j, blockWidth, blockHeight));
-                ROI.setTo(cv::Scalar::all(color));
-                color = abs(color-255);
-            }
-        }
-        chessBoard.copyTo(image);
-    }
-    //! Tests QrCodeDetector::detectQrCode
-    TEST_F (QrCodeDetectorTest, detectQrCodeBlackImage)
-    {
-        cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-        std::vector<QrCode> qrcode_list = detectQrCode(blackFrame);
-        // there shouldn't be any qrcodes
-        EXPECT_EQ(0, qrcode_list.size());
-        // neither when 3 channels are used
-        blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
-        qrcode_list = detectQrCode(blackFrame);
-        EXPECT_EQ(0, qrcode_list.size());
-    }
+  TEST_F (QrCodeDetectorTest, detectQrCodeWhiteBlackMixImage)
+  {
+    // Vertically concatenated
+    cv::Mat blackFrame = cv::Mat::zeros(HEIGHT / 2, WIDTH / 2, CV_8UC3);
+    cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT / 2, WIDTH / 2, CV_8UC3);
+    whiteFrame.setTo(cv::Scalar(255, 255, 255));
+    cv::Mat H, V;
+    cv::hconcat(blackFrame, whiteFrame, H);
+    cv::vconcat(blackFrame, whiteFrame, V);
+    std::vector<POIPtr> qrcode_list = detectQrCode(H);
+    // there shouldn't be any qrcodes
+    EXPECT_EQ(0, qrcode_list.size());
+    qrcode_list = detectQrCode(V);
+    EXPECT_EQ(0, qrcode_list.size());
+  }
 
-    TEST_F (QrCodeDetectorTest, detectQrCodeWhiteImage)
-    {
-        cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-        whiteFrame.setTo(cv::Scalar(255, 255, 255));
-        std::vector<QrCode> qrcode_list = detectQrCode(whiteFrame);
-        // there shouldn't be any qrcodes
-        EXPECT_EQ(0, qrcode_list.size());
-    }
+  TEST_F (QrCodeDetectorTest, detectQrCodeRandomChessboardImage)
+  {
+    cv::Mat frame;
+    int blocksNumberH = 10;
+    int blocksNumberV = 10;
+    drawChessboard( blocksNumberH, blocksNumberV, frame);
+    std::vector<POIPtr> qrcode_list = detectQrCode(frame);
+    // there shouldn't be any qrcodes
+    EXPECT_EQ(0, qrcode_list.size());
+    blocksNumberH = 100;
+    blocksNumberV = 100;
+    drawChessboard( blocksNumberH, blocksNumberV, frame);
+    qrcode_list = detectQrCode(frame);
+    // there shouldn't be any qrcodes
+    EXPECT_EQ(0, qrcode_list.size());
+  }
 
-    TEST_F (QrCodeDetectorTest, detectQrCodeWhiteBlackMixImage)
-    {
-        // Vertically concatenated
-        cv::Mat blackFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
-        cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT/2, WIDTH/2, CV_8UC3);
-        whiteFrame.setTo(cv::Scalar(255, 255, 255));
-        cv::Mat H, V;
-        cv::hconcat(blackFrame, whiteFrame, H);
-        cv::vconcat(blackFrame, whiteFrame, V);
-        std::vector<QrCode> qrcode_list = detectQrCode(H);
-        // there shouldn't be any qrcodes
-        EXPECT_EQ(0, qrcode_list.size());
-        qrcode_list = detectQrCode(V);
-        EXPECT_EQ(0, qrcode_list.size());
-    }
-
-    TEST_F (QrCodeDetectorTest, detectQrCodeRandomChessboardImage)
-    {
-        cv::Mat frame;
-        int blocksNumberH = 10;
-        int blocksNumberV = 10;
-        drawChessboard( blocksNumberH, blocksNumberV, frame);
-        std::vector<QrCode> qrcode_list = detectQrCode(frame);
-        // there shouldn't be any qrcodes
-        EXPECT_EQ(0, qrcode_list.size());
-        blocksNumberH = 100;
-        blocksNumberV = 100;
-        drawChessboard( blocksNumberH, blocksNumberV, frame);
-        qrcode_list = detectQrCode(frame);
-        // there shouldn't be any qrcodes
-        EXPECT_EQ(0, qrcode_list.size());
-    }
-
-    //TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
-    //{
-    //    std::stringstream fileName;
-    //    std::vector<QrCode> qrcode_list;
-    //    cv::Mat inputFrame;
-    //    int* center;
-    //    int  cArray[9];
-    //    FILE *fpr;
-    //    fileName.str("");
-    //    fileName << ros::package::getPath("pandora_vision_qrcode");
-    //    fileName << "/test/unit/data/" << "test_qr_centers.txt"; 
-    //    fpr = fopen(fileName.str().c_str(), "r");
-    //    fileName.str("");
-    //    for(int i = 1; i < 13; i ++){
-    //        fileName << ros::package::getPath("pandora_vision_qrcode");
-    //        fileName << "/test/unit/data/" << "test_qr_" << i << ".jpg"; 
-    //        inputFrame = cv::imread(fileName.str());
-    //        fscanf(fpr, " %d", &cArray[0]);
-    //        for( int j = 1; j < (1 + cArray[0] * 4); j ++)
-    //        {
-    //            fscanf(fpr, " %d", &cArray[j]);
-    //        }
-    //        if(!inputFrame.data)
-    //        {
-    //            ROS_ERROR("Cannot open image.");
-    //            fileName.str("");
-    //            continue;
-    //        }
-    //        qrcode_list = detectQrCode(inputFrame);
-    //        EXPECT_EQ(cArray[0], qrcode_list.size());
-    //        if(cArray[0] == qrcode_list.size())
-    //        {
-    //            for( int j = 0; j < qrcode_list.size(); j ++)
-    //            {
-    //                center = locateQrCode(qrcode_list[j].qrcode_center);
-    //                EXPECT_LE(cArray[1 + 0 + j * 4], center[0]);   
-    //                EXPECT_GE(cArray[1 + 1 + j * 4], center[0]);   
-    //                EXPECT_LE(cArray[1 + 2 + j * 4], center[1]);   
-    //                EXPECT_GE(cArray[1 + 3 + j * 4], center[1]);   
-    //            }
-    //        }
-    //        fileName.str("");
-    //    }
-    //    fclose(fpr);
-    //}
-
-}// namespace pandora_vision
+  //TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
+  //{
+  //    std::stringstream fileName;
+  //    std::vector<QrCode> qrcode_list;
+  //    cv::Mat inputFrame;
+  //    int* center;
+  //    int  cArray[9];
+  //    FILE *fpr;
+  //    fileName.str("");
+  //    fileName << ros::package::getPath("pandora_vision_qrcode");
+  //    fileName << "/test/unit/data/" << "test_qr_centers.txt"; 
+  //    fpr = fopen(fileName.str().c_str(), "r");
+  //    fileName.str("");
+  //    for(int i = 1; i < 13; i ++){
+  //        fileName << ros::package::getPath("pandora_vision_qrcode");
+  //        fileName << "/test/unit/data/" << "test_qr_" << i << ".jpg"; 
+  //        inputFrame = cv::imread(fileName.str());
+  //        fscanf(fpr, " %d", &cArray[0]);
+  //        for( int j = 1; j < (1 + cArray[0] * 4); j ++)
+  //        {
+  //            fscanf(fpr, " %d", &cArray[j]);
+  //        }
+  //        if(!inputFrame.data)
+  //        {
+  //            ROS_ERROR("Cannot open image.");
+  //            fileName.str("");
+  //            continue;
+  //        }
+  //        qrcode_list = detectQrCode(inputFrame);
+  //        EXPECT_EQ(cArray[0], qrcode_list.size());
+  //        if(cArray[0] == qrcode_list.size())
+  //        {
+  //            for( int j = 0; j < qrcode_list.size(); j ++)
+  //            {
+  //                center = locateQrCode(qrcode_list[j].qrcode_center);
+  //                EXPECT_LE(cArray[1 + 0 + j * 4], center[0]);   
+  //                EXPECT_GE(cArray[1 + 1 + j * 4], center[0]);   
+  //                EXPECT_LE(cArray[1 + 2 + j * 4], center[1]);   
+  //                EXPECT_GE(cArray[1 + 3 + j * 4], center[1]);   
+  //            }
+  //        }
+  //        fileName.str("");
+  //    }
+  //    fclose(fpr);
+  //}
+}  // namespace pandora_vision

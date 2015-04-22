@@ -120,6 +120,8 @@ namespace pandora_vision
         @return void
        **/
       void debug_show(const zbar::Image&);
+      
+      friend class QrCodeDetectorTest;
   };
 }  // namespace pandora_vision
 
