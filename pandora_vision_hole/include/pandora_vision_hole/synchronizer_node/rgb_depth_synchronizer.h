@@ -63,18 +63,17 @@ namespace pandora_vision
 
       // The ROS node handle
       ros::NodeHandle nodeHandle_;
-
    
-      // The subscriber to the point cloud topic
-    //  message_filters::Subscriber<sensor_msgs::PointCloud2>
-      //  *inputPointCloudSubscriber_;
+      // The subscriber to the Rgbd-T synchronizer node that aquires
+      // the pointcloud2
+      ros::Subscriber inputPointCloud2Subscriber_;
 
-      // The subscriber to the input thermal topic
-      //message_filters::Subscriber<sensor_msgs::Image>
-       // *inputThermalSubscriber_;
+      // The subscriber to the Rgbd-T synchronizer node that aquires
+      // the sensor_msgs thermal Image
+      ros::Subscriber inputThermalSubscriber_;
 
-      // The name of the topic from where the input point cloud is acquired
-      std::string inputPointCloudTopic_;
+      // The name of the topic from where the input pointcloud2 is acquired
+      std::string inputPointCloud2Topic_;
 
       // The name of the topic from where the Thermal info is acquired
       std::string inputThermalTopic_;
@@ -129,6 +128,10 @@ namespace pandora_vision
       // synchronized thermal images
       std::string synchronizedThermalImageTopic_;
 
+      // Here we copy the incoming messages from the Rgbd-T synchronizer node
+      PointCloudPtr copiedPc_; 
+      sensor_msgs::Image copiedThermal_;
+
       // A boolean indicating whether the node is publishing through the
       // above two publishers
       bool isLocked_;
@@ -141,6 +144,10 @@ namespace pandora_vision
 
       // Amount of synchronizer's invocations
       int ticks_;
+
+      // Check how many messages have been sent to synchronizer
+      // node from the Rgbd-T synch node. 
+      int messageNum_;
 
       /**
         @brief Variables regarding the point cloud are needed to be set in
@@ -172,7 +179,7 @@ namespace pandora_vision
         published directly to the hole fusion node.
         @param[in] pointCloudMessage [const PointCloudPtr&]
         The input point cloud
-        @param[in] thermalMessage [const UInt8MultiArray&]
+        @param[in] thermalMessage [const sensor_msgs::Image&]
         The input thermal info
         @return void
        **/
@@ -180,11 +187,36 @@ namespace pandora_vision
         const PointCloudPtr& pointCloudMessage,
         const sensor_msgs::Image& thermalMessage);
 
+  
+      /**
+        @brief The callback executed when the Synchronizer node aquires
+        the pointcloud2 from the Rgbd-T synchronizer node.
+        Here the number of messages sent from the Rgbd-T synchronizer node
+        are checked and if they are two synchronizer node publishes them 
+        further to each node that uses them. 
+        @param[in] pointCloud2Message [const sensor_msgs::PointCloud2&] 
+        the input pointcloud2 from Rgbd-T synchronizer node.
+        @return void
+       **/
+      void inputPointCloud2Callback(
+        const sensor_msgs::PointCloud2& pointCloud2Message);
 
+      /**
+        @brief The callback executed when the Synchronizer node aquires
+        the thermal info from the Rgbd-T synchronizer node.
+        Here the number of messages sent from the Rgbd-T synchronizer node
+        are checked and if they are two synchronizer node publishes them 
+        further to each node that uses them. 
+        @param[in] thermalMessage [const sensor_msgs::Image&]
+        the input thermal info from Rgbd-T synchronizer node.
+        @return void
+       **/
+      void inputThermalCallback(const sensor_msgs::Image& thermalMessage);
+      
       /**
         @brief The callback executed when the Hole Fusion node requests
         from the synchronizer node to leave its subscription to the
-        input point cloud topic and flir camera topic.
+        input pointcloud2 and flir topics.
         This happens when the state of the hole detector package is set
         to "off" so as to minimize processing resources.
         @param[in] msg [const std_msgs::Empty&] An empty message used to
@@ -196,7 +228,7 @@ namespace pandora_vision
 
       /**
         @brief The callback executed when the Hole Fusion node requests
-        from the synchronizer node to subscribe to the input point cloud and flir.
+        from the synchronizer node to subscribe to the input pointcloud2 and flir.
         This happens when the hole detector is in an "off" state, where the
         synchronizer node is not subscribed to the input point cloud(and flir) and
         transitions to an "on" state, where the synchronizer node needs to be

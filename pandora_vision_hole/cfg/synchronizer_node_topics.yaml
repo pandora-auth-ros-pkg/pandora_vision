@@ -1,14 +1,19 @@
 subscribed_topics:
+  # Topics in Rgbd-T synchronizer node
   input_topic: /kinect/depth_registered/points
   input_thermal_topic: /flir_raspberry/image
+  # Topics in synchronizer node
   unlock_topic: unlock_rgb_depth_synchronizer
   subscribe_to_input: subscribe_to_input
   leave_subscription_to_input: leave_subscription_to_input
   
 
 published_topics:
+  # Topics in synchronizer node
   point_cloud_internal_topic: synchronized/depth/points
   depth_image_topic: synchronized/depth/image
   rgb_image_topic: synchronized/rgb/image
+  thermal_info_topic: synchronized/thermal/image
+  # Topics in Rgbd-T synchronizer node
   thermal_image_topic: synchronized/thermal/info
   pointcloud2_topic: synchronized/pointcloud2/info

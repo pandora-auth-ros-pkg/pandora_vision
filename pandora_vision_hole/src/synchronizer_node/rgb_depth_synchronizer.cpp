@@ -53,6 +53,12 @@ namespace pandora_vision
     // hole fusion node to unlock him
     isLocked_ = true;
 
+    // Initialize the messageNum variable.
+    // It acts as a counter of the published messages from 
+    // Rgbd-T synchronizer node to the synchronizer node
+    // in each execution cyrcle.
+    messageNum_ = 0;
+
     // Acquire the names of topics which the synchronizer node will be having
     // transactionary affairs with
     getTopicNames();
@@ -61,14 +67,6 @@ namespace pandora_vision
     // acquired from the point cloud message.
     // The parameters concerned are needed only if in simulation mode
     getSimulationDimensions();
-
-    // The subscriber to the point cloud topic
-   // inputPointCloudSubscriber_ = new message_filters::Subscriber<sensor_msgs::PointCloud2>
-     // (nodeHandle_, inputPointCloudTopic_, 1);
-
-    // The subscriber to the input thermal topic
-    //inputThermalSubscriber_ = new message_filters::Subscriber
-     // <sensor_msgs::Image> (nodeHandle_, inputThermalTopic_, 1);
 
     // Subscribe to the hole_fusion lock/unlock topic
     unlockSubscriber_ = nodeHandle_.subscribe(unlockTopic_, 1,
@@ -179,33 +177,39 @@ namespace pandora_vision
     std::string ns = nodeHandle_.getNamespace();
 
     // Read the name of the topic from where the synchronizer node acquires the
-    // input point cloud
+    // input pointcloud2 from the Rgbd-T synchronizer node
     if (nodeHandle_.getParam(
-        ns + "/synchronizer_node/subscribed_topics/input_topic",
-        inputPointCloudTopic_ ))
+        ns + "/synchronizer_node/published_topics/pointcloud2_topic",
+        inputPointCloud2Topic_ ))
     {
+      // Make the topic's name absolute
+      inputPointCloud2Topic_ = ns + "/" + inputPointCloud2Topic_;
+
       ROS_INFO_NAMED(PKG_NAME,
-        "[Synchronizer Node] Subscribed to the input point cloud");
+        "[Synchronizer Node] Subscribed to the input pointcloud2");
     }
     else
     {
       ROS_ERROR_NAMED(PKG_NAME,
-        "[Synchronizer Node] Could not find topic input_topic");
+        "[Synchronizer Node] Could not find topic pointcloud2_topic");
     }
 
     // Read the name of the topic from where the synchronizer node acquires the
     // input thermal info
     if (nodeHandle_.getParam(
-        ns + "/synchronizer_node/subscribed_topics/input_thermal_topic",
+        ns + "/synchronizer_node/published_topics/thermal_image_topic",
         inputThermalTopic_ ))
     {
+      // Make the topic's name absolute
+      inputThermalTopic_ = ns + "/" + inputThermalTopic_;
+ 
       ROS_INFO_NAMED(PKG_NAME,
         "[Synchronizer Node] Subscribed to the input thermal info");
     }
     else
     {
       ROS_ERROR_NAMED(PKG_NAME,
-        "[Synchronizer Node] Could not find topic input_thermal_topic");
+        "[Synchronizer Node] Could not find topic thermal_image_topic");
     }
 
     // Read the name of the topic that the Hole Fusion node uses to unlock
@@ -351,9 +355,9 @@ namespace pandora_vision
     Then publishes these images and thermal info
     to their respective recipients. Finally, the input point cloud is
     published directly to the hole fusion node.
-    @param[in] pointCloudMessage [const PointCloudPtr&]
+    @param[in] pointCloudMessage [const PointCloud&]
     The input point cloud
-    @param[in] thermalMessage [const UInt8MultiArray&]
+    @param[in] thermalMessage [const sensor_msgs::Image&]
     the input thermal info
     @return void
    **/
@@ -461,9 +465,87 @@ namespace pandora_vision
 
 
   /**
+    @brief The callback executed when the Synchronizer node aquires
+    the pointcloud2 from the Rgbd-T synchronizer node.
+    Here the number of messages sent from the Rgbd-T synchronizer node
+    are checked and if they are two synchronizer node publishes them 
+    further to each node that uses them. 
+    @param[in] pointCloud2Message [const sensor_msgs::PointCloud2&] 
+    the input pointcloud2 from Rgbd-T synchronizer node.
+    @return void
+    **/
+   void RgbDepthSynchronizer::inputPointCloud2Callback(
+    const sensor_msgs::PointCloud2& pointCloud2Message)
+ 
+   {
+     ROS_INFO_NAMED(PKG_NAME,"PointCloud2Callback called");
+
+     // Increase the number of messages received from Rgbd-T synch node
+     messageNum_++;
+
+     // Convert PointCloud2 message to PointCloud<T> type.
+     pcl::PCLPointCloud2 pcl_pc;
+     pcl_conversions::toPCL(pointCloud2Message, pcl_pc);
+
+     PointCloud cloud;
+     pcl::fromPCLPointCloud2(pcl_pc, cloud);
+     
+     // Convert PointCloud<T> to PointCloud<T>::Ptr
+     PointCloudPtr m_ptrCloud(&cloud);
+
+     // Copy the incoming message
+     copiedPc_ = m_ptrCloud;
+
+     // If the two messages have arrived set messageNum to zero for
+     // the next cyrcle.
+     if(messageNum_ == 2)
+     {
+       messageNum_ = 0;      
+
+       // Call the function that processes all info
+       inputPointCloudThermalCallback(copiedPc_, copiedThermal_);
+     }
+
+   }
+
+
+  /**
+    @brief The callback executed when the Synchronizer node aquires
+    the thermal info from the Rgbd-T synchronizer node.
+    Here the number of messages sent from the Rgbd-T synchronizer node
+    are checked and if they are two synchronizer node publishes them 
+    further to each node that uses them. 
+    @param[in] thermalMessage [const sensor_msgs::Image&]
+    the input thermal info from Rgbd-T synchronizer node.
+    @return void
+    **/
+  void RgbDepthSynchronizer::inputThermalCallback(
+    const sensor_msgs::Image& thermalMessage)
+  {
+    ROS_INFO_NAMED(PKG_NAME,"ThermalCallback called");
+
+    // Increase the number of messages received from Rgbd-T synch node
+    messageNum_++;
+
+    // Copy the incoming message
+    copiedThermal_ = thermalMessage;
+
+    // If the two messages have arrived set messageNum to zero for
+    // the next cyrcle.
+    if(messageNum_ == 2)
+    {
+      messageNum_ = 0;
+
+      // Call the function that processes all info
+      inputPointCloudThermalCallback(copiedPc_, copiedThermal_);
+    }
+
+  } 
+
+  /**
     @brief The callback executed when the Hole Fusion node requests
     from the synchronizer node to leave its subscription to the
-    input point cloud topic.
+    input pointcloud2 and flir topics.
     This happens when the state of the hole detector package is set
     to "off" so as to minimize processing resources.
     @param[in] msg [const std_msgs::Empty&] An empty message used to
@@ -473,20 +555,20 @@ namespace pandora_vision
   void RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   {
-    // Shutdown the input point cloud subscriber
-    //inputPointCloudSubscriber_->unsubscribe();
+    // Shutdown the input pointcloud2 subscriber
+    inputPointCloud2Subscriber_.shutdown();
 
     // Shutdown the input thermal subscriber
-    //inputThermalSubscriber_->unsubscribe();
+    inputThermalSubscriber_.shutdown();
   }
 
 
 
   /**
     @brief The callback executed when the Hole Fusion node requests
-    from the synchronizer node to subscribe to the input point cloud and flir.
+    from the synchronizer node to subscribe to the input pointcloud2 and flir.
     This happens when the hole detector is in an "off" state, where the
-    synchronizer node is not subscribed to the input point cloud and
+    synchronizer node is not subscribed to the input point cloud(and flir) and
     transitions to an "on" state, where the synchronizer node needs to be
     subscribed to the input point cloud topic in order for the hole detector
     to function.
@@ -497,19 +579,13 @@ namespace pandora_vision
   void RgbDepthSynchronizer::subscribeToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   {
- 
-    // Subscribe to the input point cloud and thermal topic
-    // message_filters::Synchronizer<
-      // message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2,
-      // sensor_msgs::Image> >
-      // sync(message_filters::sync_policies::ApproximateTime<
-      // sensor_msgs::PointCloud2, sensor_msgs::Image>(10),
-      // *inputPointCloudSubscriber_,
-      // *inputThermalSubscriber_);
+    inputPointCloud2Subscriber_ = nodeHandle_.subscribe(
+      inputPointCloud2Topic_, 1, 
+      &RgbDepthSynchronizer::inputPointCloud2Callback, this);
 
-    // sync.registerCallback(boost::bind(
-      // &RgbDepthSynchronizer::inputPointCloudThermalCallback,
-      // _1, _2, this));
+    inputThermalSubscriber_ = nodeHandle_.subscribe(
+     inputThermalTopic_, 1,
+     &RgbDepthSynchronizer::inputThermalCallback, this);
 
   }
 
