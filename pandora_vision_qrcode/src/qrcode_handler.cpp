@@ -41,41 +41,17 @@
 
 namespace pandora_vision
 {
-  QrCodeHandler::QrCodeHandler(const std::string& ns) : VisionHandler(ns)
+  QrCodeHandler::QrCodeHandler(const std::string& ns) : 
+    VisionHandler<QrCodePreProcessor, QrCodeDetector, QrCodePostProcessor>(ns)
   {
-  }
-  
-  void QrCodeHandler::startTransition(int newState)
-  {
-    currentState_ = newState;
-    
-    bool previouslyOff = (previousState_ == state_manager_msgs::RobotModeMsg::MODE_OFF);
-    bool currentlyOn = (currentState_ != state_manager_msgs::RobotModeMsg::MODE_OFF);
-    
-    if (previouslyOff && currentlyOn)
-    {
-      preProcPtr_.reset(new QrCodePreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new QrCodeDetector("~/processor", this));
-      postProcPtr_.reset(new QrCodePostProcessor("~/postprocessor", this));
-    }
-    else if (!previouslyOff && !currentlyOn)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-    }
-    
-    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-      
-      ros::shutdown();
-      return;
-    }
-    previousState_ = currentState_;
-    transitionComplete(currentState_);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_START_AUTONOMOUS);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SEMI_AUTONOMOUS);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_TELEOPERATED_LOCOMOTION);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_MAPPING);
   }
   
   void QrCodeHandler::completeTransition()

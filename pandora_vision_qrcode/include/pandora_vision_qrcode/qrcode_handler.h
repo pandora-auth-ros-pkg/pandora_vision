@@ -48,14 +48,14 @@
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public VisionHandler
+  class QrCodeHandler : public VisionHandler<QrCodePreProcessor, QrCodeDetector, 
+    QrCodePostProcessor>
   {
     public:
       explicit QrCodeHandler(const std::string& ns);
       virtual ~QrCodeHandler() {}
 
     private:
-      virtual void startTransition(int newState);
       virtual void completeTransition();
   };
 }  // namespace pandora_vision

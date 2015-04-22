@@ -51,6 +51,7 @@
 
 namespace pandora_vision
 {
+  template <class PreProc, class Detector, class PostProc>
   class VisionHandler : public sensor_processor::Handler
   {
     public:
@@ -72,13 +73,53 @@ namespace pandora_vision
        * state is changed
        * @param newState [int] Robot's new state
        **/ 
-      virtual void startTransition(int newState) {}
+      virtual void startTransition(int newState) 
+      {
+        currentState_ = newState;
+        
+        bool previouslyOff = true; 
+        bool currentlyOn = false;
+        
+        for (int ii = 0; ii < activeStates_.size(); ii++)
+        {
+          previouslyOff = (previouslyOff && previousState_ != activeStates_[ii]);
+          currentlyOn = (currentlyOn || currentState_ == activeStates_[ii]);
+        }
+
+        if (previouslyOff && currentlyOn)
+        {
+          preProcPtr_.reset(new PreProc("~/preprocessor", this));
+          processorPtr_.reset(new Detector("~/processor", this));
+          postProcPtr_.reset(new PostProc("~/postprocessor", this));
+        }
+        else if (!previouslyOff && !currentlyOn)
+        {
+          preProcPtr_.reset();
+          processorPtr_.reset();
+          postProcPtr_.reset();
+        }
+        
+        if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
+        {
+          preProcPtr_.reset();
+          processorPtr_.reset();
+          postProcPtr_.reset();
+          
+          ros::shutdown();
+          return;
+        }
+        previousState_ = currentState_;
+        transitionComplete(currentState_);
+      }
       
       /**
        * @brief Function that is called after the transition from one state to
        * another is completed
        **/ 
       virtual void completeTransition() {}
+      
+      /// States in which node is active
+      std::vector<int> activeStates_;
   };
 }  // namespace pandora_vision
 
