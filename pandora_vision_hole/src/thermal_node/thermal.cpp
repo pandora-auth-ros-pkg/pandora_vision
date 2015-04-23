@@ -88,10 +88,11 @@ namespace pandora_vision
     in a cv::Mat image.
     Holes are then located inside this image and information about them,
     along with the denoised image, is then sent to the hole fusion node
-    @param msg [const std_msgs::UInt8MultiArray&] The thermal image message
+    @param msg [const sensor_msgs::Image&]
+    The thermal image message
     @return void
    **/
-  void Thermal::inputThermalImageCallback(const std_msgs::UInt8MultiArray&  msg)
+  void Thermal::inputThermalImageCallback(const sensor_msgs::Image&  msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputThermalImageCallback", "", true);
@@ -99,9 +100,13 @@ namespace pandora_vision
 
     ROS_INFO_NAMED(PKG_NAME, "Thermal node callback");
 
-    //Convert thermal raw data to cv::Mat
-    cv::Mat thermalImage = convertRawToMat(msg);
-    
+    // Obtain the depth image. Since the image is in a format of
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be CV_8UC1.
+
+    cv::Mat thermalImage;
+    MessageConversions::extractImageFromMessage(msg, &thermalImage, 
+      sensor_msgs::image_encodings::TYPE_8UC1);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
@@ -179,8 +184,8 @@ namespace pandora_vision
         thermalImageTopic_ ))
     {
     
-    // Make topic's name absolute  
-     // thermalImageTopic_ = ns + "/" + thermalImageTopic_;
+      // Make topic's name absolute  
+      thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Subscribed to the input thermal image");

@@ -90,10 +90,10 @@ namespace pandora_vision
         The thermal image message received by the thermal camera is unpacked
         in a cv::Mat image.
         Holes are then located inside this image.
-        @param msg [const std_msgs::UInt8MultiArray&] The thermal image message
+        @param msg [const sensor_msgs::Image&] The thermal image message
         @return void
        **/
-      void inputThermalImageCallback(const std_msgs::UInt8MultiArray& msg);
+      void inputThermalImageCallback(const sensor_msgs::Image& msg);
 
       /**
        @brief Obtain the Thermal image. Since the image is in a format of

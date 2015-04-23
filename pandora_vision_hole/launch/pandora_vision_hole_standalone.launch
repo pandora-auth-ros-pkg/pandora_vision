@@ -14,7 +14,7 @@
   <!-- ========================== Source selection ========================= -->
 
   <!-- Kinect: choose the openni driver -->
-  <arg name="openni" default="false" />
+  <arg name="openni" default="true" />
 
   <group if="$(arg openni)">
     <include file="$(find openni_launch)/launch/openni.launch">
@@ -26,7 +26,7 @@
 
 
   <!-- Xtion: choose the openni2 driver -->
-  <arg name="openni2" default="true" />
+  <arg name="openni2" default="false" />
 
   <group if="$(arg openni2)">
     <include file="$(find openni2_launch)/launch/openni2.launch">
@@ -119,6 +119,17 @@
               command="load" />
   </node>
 
+  <!-- =========================== Thermal node ============================ -->
+  <node
+    name="thermal_camera_node"
+    type="thermal_camera_node"
+    pkg="pandora_vision_hole"
+    respawn="False"
+    output="$(arg output)"
+    ns="$(arg namespace)">
+    <rosparam file="$(find pandora_vision_hole)/cfg/thermal_node_topics.yaml"
+    command="load" />
+  </node>
 
   <!-- ========================= Hole Fusion node ========================== -->
 

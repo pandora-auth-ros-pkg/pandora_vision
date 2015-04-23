@@ -478,7 +478,7 @@ namespace pandora_vision
     const sensor_msgs::PointCloud2& pointCloud2Message)
  
    {
-     ROS_INFO_NAMED(PKG_NAME,"PointCloud2Callback called");
+     ROS_INFO("[Synchronizer Node] PointCloud2Callback called");
 
      // Increase the number of messages received from Rgbd-T synch node
      messageNum_++;
@@ -522,7 +522,7 @@ namespace pandora_vision
   void RgbDepthSynchronizer::inputThermalCallback(
     const sensor_msgs::Image& thermalMessage)
   {
-    ROS_INFO_NAMED(PKG_NAME,"ThermalCallback called");
+    ROS_INFO("[Synchronizer Node] ThermalCallback called");
 
     // Increase the number of messages received from Rgbd-T synch node
     messageNum_++;
