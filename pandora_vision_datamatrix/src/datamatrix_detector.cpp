@@ -116,10 +116,10 @@ namespace pandora_vision
     //!< whenever a potential barcode region is found, or if the final
     //!< pixel location has been scanned.
     reg = dmtxRegionFindNext(dec, &timeout);
-    if(reg != NULL)
+    if (reg != NULL)
     {
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
-      if(msg != NULL)
+      if (msg != NULL)
       {
         detected_datamatrix->getContent().assign((const char*) msg->output, 
           msg->outputIdx);
@@ -218,4 +218,4 @@ namespace pandora_vision
     }
     return true;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

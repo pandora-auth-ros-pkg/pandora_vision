@@ -51,6 +51,8 @@ namespace pandora_vision
     public:
       //!< Constructor
       LandoltCDetector(const std::string& ns, sensor_processor::Handler* handler);
+      
+      LandoltCDetector();
 
       //!< Destructor
       virtual ~LandoltCDetector();

@@ -48,6 +48,8 @@ namespace pandora_vision
     _edges = 0;
     params.configLandoltC(*this->accessPublicNh());
   }
+  
+  LandoltCDetector::LandoltCDetector() : VisionProcessor() {}
 
   //!< Destructor
   LandoltCDetector::~LandoltCDetector()

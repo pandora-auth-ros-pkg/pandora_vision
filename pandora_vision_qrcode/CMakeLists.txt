@@ -97,7 +97,7 @@ target_link_libraries(${PROJECT_NAME}_node
 
 #~ To check lint : catkin_make roslint_pandora_vision_qrcode
 set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line,-build/include_what_you_use")
+    "--filter=-whitespace/end_of_line,-build/include_what_you_use, -runtime/references")
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}

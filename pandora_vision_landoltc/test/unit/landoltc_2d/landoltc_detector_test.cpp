@@ -81,18 +81,17 @@ namespace pandora_vision
     landoltCDetector.findCenters(input.rows, input.cols, gradXF, gradYF);
   }
 
-  //returns possible center
+  // returns possible center
   void LandoltcDetectorTest::getCenter(cv::Point *point, const int& index)
   {
     int vectorSize = landoltCDetector._centers.size();  
-    ASSERT_NE(0, static_cast<int>(vectorSize)); 
+    ASSERT_NE(0, static_cast<int>(vectorSize));
     ASSERT_GT(vectorSize, index);
     *point = landoltCDetector._centers[index];
     return;
   }
 
-
-  //y=column,i=row
+  // y=column,i=row
   int LandoltcDetectorTest::giveVotingData(cv::Point a, cv::Point b , int y ,
       int i)
   {
@@ -110,14 +109,13 @@ namespace pandora_vision
     return readVoting[columns * y + i];
   }
 
-
   /** test cases **/
 
   TEST_F(LandoltcDetectorTest, findCentersTest)
   {
     cv::Mat image;
-    image = cv::imread(packagePath+"/bold.jpg");
-    if ( !image.data)
+    image = cv::imread(packagePath + "/bold.jpg");
+    if (!image.data)
     {
       ROS_FATAL("Could not read test image!");
       ASSERT_EQ(1, 0);
@@ -139,30 +137,24 @@ namespace pandora_vision
     getCenter(&detectedCenters, 0);
     EXPECT_NEAR(point2.x, detectedCenters.x, 0.1);
     EXPECT_NEAR(point2.y, detectedCenters.y, 0.1);
-
   }
 
+  // TEST_F(LandoltcDetectorTest, rasterizeLineTest)
+  // {
+    // cv::Point a(1,1);
+    // cv::Point b(2,2);
+    // cv::Point c(4,5);
+    // cv::Point d(6,3);
+    // cv::Point e(2,4);
 
-  //TEST_F(LandoltcDetectorTest, rasterizeLineTest)
-  //{
-    //cv::Point a(1,1);
-    //cv::Point b(2,2);
-    //cv::Point c(4,5);
-    //cv::Point d(6,3);
-    //cv::Point e(2,4);
+    // EXPECT_EQ(1,giveVotingData(a, b, 1, 1));
+    // EXPECT_EQ(1,giveVotingData(b, c, 2, 2));
+    // EXPECT_EQ(1,giveVotingData(b, c, 3, 3));
+    // EXPECT_EQ(1,giveVotingData(b, c, 4, 3));
+    // EXPECT_EQ(1,giveVotingData(d, c, 5, 4));
+    // EXPECT_EQ(1,giveVotingData(d, c, 4, 5));
+    // EXPECT_EQ(1,giveVotingData(b, e, 2, 2));
+    // EXPECT_EQ(1,giveVotingData(b, e, 3, 2));
+  // }
 
-    //EXPECT_EQ(1,giveVotingData(a, b, 1, 1));
-    //EXPECT_EQ(1,giveVotingData(b, c, 2, 2));
-    //EXPECT_EQ(1,giveVotingData(b, c, 3, 3));
-    //EXPECT_EQ(1,giveVotingData(b, c, 4, 3));
-    //EXPECT_EQ(1,giveVotingData(d, c, 5, 4));
-    //EXPECT_EQ(1,giveVotingData(d, c, 4, 5));
-    //EXPECT_EQ(1,giveVotingData(b, e, 2, 2));
-    //EXPECT_EQ(1,giveVotingData(b, e, 3, 2));
-  //}
-
-
-
-
-} // namespace pandora_vision
-
+}  // namespace pandora_vision

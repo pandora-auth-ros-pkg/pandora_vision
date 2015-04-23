@@ -114,6 +114,6 @@ namespace pandora_vision
       
       //!< List of detected datamatrixes
       std::vector<POIPtr> datamatrix_list;  
-  };  
-}// namespace pandora_vision
+  };
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H

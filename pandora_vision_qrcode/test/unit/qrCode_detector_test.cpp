@@ -59,7 +59,7 @@ namespace pandora_vision
       std::vector<POIPtr> detectQrCode(cv::Mat frame);
       int* locateQrCode(cv::Point2f center);
 
-      void drawChessboard(int blocksNumberH, int blocksNumberV, const cv::Mat& image);
+      void drawChessboard(int blocksNumberH, int blocksNumberV, cv::Mat& image);
 
       int WIDTH;
       int HEIGHT;
@@ -89,7 +89,7 @@ namespace pandora_vision
     @return void
    **/
   void QrCodeDetectorTest::drawChessboard(int blocksNumberH, int blocksNumberV, 
-    const cv::Mat& image)
+    cv::Mat& image)
   {
     int imageSize = WIDTH * HEIGHT;
     int blockWidth = static_cast<int>(WIDTH / blocksNumberH);
