@@ -81,9 +81,15 @@ namespace pandora_vision
       @param file_name [std::string]: file name to save the extracted training matrix
       @return void
       **/
-      void constructFeaturesMatrix(
-          const boost::filesystem::path& directory,
-          cv::Mat* featuresMat, cv::Mat* labelsMat);
+      void constructFeaturesMatrix(const boost::filesystem::path& directory, 
+                                   const std::string& annotationsFile,
+                                   cv::Mat* featuresMat, cv::Mat* labelsMat);
+      /**
+       * @brief
+       * @param dataMat [cv::Mat*]
+       * @return void
+       */
+      void performPcaAnalysis(cv::Mat* dataMat);
 
       /**
       @brief Function that implements the training for the subsystems

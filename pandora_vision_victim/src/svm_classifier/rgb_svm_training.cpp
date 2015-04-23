@@ -81,6 +81,7 @@ namespace pandora_vision
     std::stringstream test_labels_mat_file_stream;
     std::stringstream svm_file_stream;
     std::stringstream results_file_stream;
+    std::stringstream annotations_file_stream;
     float prediction;
     double A, B;
 
@@ -94,7 +95,7 @@ namespace pandora_vision
     test_labels_mat_file_stream << package_path << "/data/" << "labels_" +test_matrix_file_path;
     svm_file_stream << package_path << "/data/" << "rgb_svm_classifier.xml";
     results_file_stream << package_path << "/data/" << results_file_path;
-
+    annotations_file_stream << package_path << "/data/" << "training_annotations.txt";
 
     std::stringstream trainingDatasetPath;
     trainingDatasetPath << path_to_samples << "/data/Training_Images";
@@ -123,8 +124,8 @@ namespace pandora_vision
     {
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
-      constructFeaturesMatrix(trainingDirectory,
-          &trainingFeaturesMat, &trainingLabelsMat);
+
+      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(), &trainingFeaturesMat, &trainingLabelsMat);
 
       std::vector<double> meanVector;
       std::vector<double> stdDevVector;
@@ -135,7 +136,7 @@ namespace pandora_vision
           cv::Mat(meanVector));
       file_utilities::saveToFile(normalizationParamTwoPath.str(), "std_dev",
           cv::Mat(stdDevVector));
-
+ 
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
 
@@ -155,8 +156,9 @@ namespace pandora_vision
     {
       std::cout << "Create necessary test matrix" << std::endl;
       std::string prefix = "test_";
-      constructFeaturesMatrix(testDirectory,
-          &testFeaturesMat, &testLabelsMat);
+      annotations_file_stream.str("");
+      annotations_file_stream << package_path << "/data/" << "test_annotations.txt";
+      constructFeaturesMatrix(testDirectory,annotations_file_stream.str(), &testFeaturesMat, &testLabelsMat);
 
       std::vector<double> meanVector = file_utilities::loadFiles(
           normalizationParamOnePath.str(), "mean");

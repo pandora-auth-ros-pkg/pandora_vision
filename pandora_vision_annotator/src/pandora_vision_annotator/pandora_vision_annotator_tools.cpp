@@ -50,7 +50,8 @@ namespace pandora_vision
     std::string line,x1,y1,x2,y2;
     inFile.open(filename.c_str());
   int  i = 0;
-    if (!inFile)
+  int length = frame.length();
+      if (!inFile)
     {
       ROS_ERROR("cannot load file");
       return;
@@ -63,8 +64,9 @@ namespace pandora_vision
         while(std::getline(inFile,line))
         {  
 
-          if(line.substr(0,6) == frame)
-          {
+          if(line.substr(0,length) == frame)
+          {ROS_INFO_STREAM("LENGTH"<<length<<" "<<line.substr(0,length));
+
             std::stringstream ss(line);
             ROS_INFO("stringstream %s",ss.str().c_str());
             getline (ss, ImgAnnotations::temp.imgName,',');

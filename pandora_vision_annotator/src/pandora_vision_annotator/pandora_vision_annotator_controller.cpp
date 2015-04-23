@@ -60,6 +60,7 @@ namespace pandora_vision
     argc_(argc),
     argv_(argv)
   {
+    PredatorNowOn == false;
   }
 
   /**
@@ -92,7 +93,11 @@ namespace pandora_vision
   
     QObject::connect(
       this,SIGNAL(updateImage()),
-      &connector_, SLOT(updateImage()));
+      &connector_, SLOT(updateImage())); 
+
+    annotationPublisher_ = n_.advertise<pandora_vision_msgs::AnnotationMsg>("/vision/annotator_output", 1000);
+    predatorSubscriber_ = n_.subscribe("/vision/predator_alert",1, &CController::predatorCallback, this );
+
   }
 
   void CController::offlineModeGiven(void)
@@ -101,6 +106,11 @@ namespace pandora_vision
      QObject::connect(
        &connector_,SIGNAL(rosTopicGiven()),
         this, SLOT(rosTopicGiven()));
+
+     QObject::connect(
+       &connector_,SIGNAL(predatorEnabled()),
+        this, SLOT(predatorEnabled()));
+
   }
 
   void CController::onlineModeGiven(void)
@@ -111,7 +121,73 @@ namespace pandora_vision
       this, SLOT(rosTopicGiven()));
   }
 
-  
+  void CController::predatorEnabled(void)
+  {
+    ROS_INFO("PREDATOR NOW ON");
+    cv::Mat temp;
+    PredatorNowOn == true;
+    pandora_vision_msgs::AnnotationMsg annotationMsg;
+    currentFrameNo_ = connector_.getFrameNumber();
+    connector_.getcurrentFrame(currentFrameNo_,&temp);
+    baseFrame = currentFrameNo_;
+    annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+    annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+    annotationMsg.x = ImgAnnotations::annotations[0].x1;
+    annotationMsg.y = ImgAnnotations::annotations[0].y1;
+    annotationMsg.width =  ImgAnnotations::annotations[0].x2 - ImgAnnotations::annotations[0].x1;
+    annotationMsg.height = ImgAnnotations::annotations[0].y2 - ImgAnnotations::annotations[0].y1;
+    /*annotationMsg.img.encoding = "bgr8"; //sensor_msgs::image_encodings::BGR8;
+    annotationMsg.img.height = 480;
+    annotationMsg.img.width = 640;
+    annotationMsg.img.step = 640 *3;
+    annotationMsg.img.is_bigendian = false;*/
+    cv_bridge::CvImage out_msg;
+    out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+    out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+    out_msg.encoding = "rgb8" ;     
+    out_msg.image = temp;
+    out_msg.toImageMsg(annotationMsg.img);
+    //annotationMsg.img = frames[currentFrameNo_].toImageMsg();
+    //ROS_INFO_STREAM("FRAMES" << frames[currentFrameNo_].size());
+    annotationPublisher_.publish(annotationMsg);
+    ROS_INFO_STREAM("send initial frame " << currentFrameNo_ 
+                    << " " << annotationMsg.header.frame_id
+                    << " " << annotationMsg.header.stamp 
+                    << " " << annotationMsg.x 
+                    << " " << annotationMsg.y 
+                    << " " << annotationMsg.width 
+                    << " " << annotationMsg.height);
+
+    currentFrameNo_++;
+    connector_.getcurrentFrame(currentFrameNo_,&temp);
+    annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+    annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+    annotationMsg.x = -1;
+    annotationMsg.y = -1;
+    annotationMsg.width =  -1;
+    annotationMsg.height = -1;
+/*annotationMsg.img.encoding = sensor_msgs::image_encodings::BGR8;
+    annotationMsg.img.height = 480;
+    annotationMsg.img.width = 640;
+    annotationMsg.img.step = 640 *3;
+    annotationMsg.img.is_bigendian = 0;
+*/
+    out_msg.header = msgHeader_[currentFrameNo_];
+    out_msg.encoding = "rgb8";
+    out_msg.image = temp;
+    out_msg.toImageMsg(annotationMsg.img);
+    annotationPublisher_.publish(annotationMsg);
+    connector_.setcurrentFrame(currentFrameNo_);
+    ROS_INFO_STREAM("send next frame " << currentFrameNo_ 
+                    << " " << annotationMsg.header.frame_id 
+                    << " " << annotationMsg.header.stamp 
+                    << " " << annotationMsg.x 
+                    << " " << annotationMsg.y 
+                    << " " << annotationMsg.width 
+                    << " " << annotationMsg.height);
+
+  }
+
   void CController::rosTopicGiven(void)
   {
     QString ros_topic = connector_.getRosTopic();
@@ -130,7 +206,7 @@ namespace pandora_vision
       std::string  package_path = ros::package::getPath("pandora_vision_annotator");
       std::stringstream bag_path;
       count = 0;
-      currentFrame = 0;
+      currentFrameNo_ = 0;
       bag_path << package_path << "/data/" <<bag_name.toStdString();
       loadBag(bag_path.str(),ros_topic.toStdString());
     }
@@ -142,24 +218,31 @@ namespace pandora_vision
     rosbag::Bag bag;
     bag.open(filename, rosbag::bagmode::Read);
     rosbag::View view(bag, rosbag::TopicQuery(topic));
-    // Load all messages into our stereo dataset
+    // Load all messages 
+    int count = 0;
     BOOST_FOREACH(rosbag::MessageInstance const m, view)
     {
       sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
       sensor_msgs::PointCloud2::ConstPtr pc =m.instantiate<sensor_msgs::PointCloud2>();
       if(img != NULL)
+      {
+     
        receiveImage(img);
+       count++;
+      }
       if (pc != NULL)
       {
         //sensor_msgs::Image image_;
         //pcl::toROSMsg (*pc, image_);
         //receiveImage(image_);
         receivePointCloud(pc);
+        count++;
       }
     }
 
     connector_.setFrames(frames);
-    connector_.setcurrentFrame();
+    frames.clear();
+    connector_.setcurrentFrame(0);
 
   }
 
@@ -184,8 +267,47 @@ namespace pandora_vision
       }
     } 
     frames.push_back(imageFrame);
-    connector_.setFrames(frames);
-    connector_.setcurrentFrame();
+  }
+
+  void CController::predatorCallback(const pandora_vision_msgs::PredatorMsg& msg)
+  { 
+    ROS_INFO_STREAM("PREDATOR CALLBACK " << msg.header.stamp << " " <<  msgHeader_[currentFrameNo_ ].stamp);
+ 
+    if(msg.header.stamp == msgHeader_[currentFrameNo_ ].stamp)
+    {
+       connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height);
+       ROS_INFO_STREAM("predator alert for frame " << currentFrameNo_+1);
+     
+    }
+      
+    if (currentFrameNo_ <= msgHeader_.size() )
+    { 
+      pandora_vision_msgs::AnnotationMsg annotationMsg;
+      cv::Mat temp;
+      currentFrameNo_++; 
+      connector_.getcurrentFrame(currentFrameNo_, &temp);
+      annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+      annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+      annotationMsg.x = -1;
+      annotationMsg.y = -1;
+      annotationMsg.width =  -1;
+      annotationMsg.height = -1;
+      cv_bridge::CvImage out_msg;
+      out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+      out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+      out_msg.encoding = "rgb8"; //sensor_msgs::image_encodings::BGR8;
+      out_msg.image = temp;
+      out_msg.toImageMsg(annotationMsg.img);
+      annotationPublisher_.publish(annotationMsg);
+      connector_.setcurrentFrame(currentFrameNo_);
+      ROS_INFO_STREAM("send next frame "<< currentFrameNo_ 
+                       << " " << annotationMsg.header.frame_id 
+                       << " " << annotationMsg.header.stamp 
+                       << " " << annotationMsg.x 
+                       << " " << annotationMsg.y 
+                       << " " << annotationMsg.width 
+                       << " " << annotationMsg.height);
+    }
   }
 
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
@@ -225,8 +347,10 @@ namespace pandora_vision
     if(!onlinemode)
     {
       count++;
-      qDebug("CALLBACK %d", count);
+      /*qDebug("CALLBACK %d", count);*/
       frames.push_back(temp);
+      //ROS_INFO_STREAM("FRAMES" << frames[0].size());
+      msgHeader_.push_back(msg->header);
     }
     else
     {
@@ -236,12 +360,18 @@ namespace pandora_vision
       connector_.msgTimeStamp(msg->header);
       Q_EMIT updateImage();
     }
+    /*if(PredatorNowOn)
+    {
+           connector_.setMsg(msg);
+    }*/
   }   
-
+ 
+ 
   /**
   @brief Initializes the ROS spin and Qt threads
   @return bool
   **/
+
   bool CController::init(void)
   {
     if ( ! ros::master::check() )

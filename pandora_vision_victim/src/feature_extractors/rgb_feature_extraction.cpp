@@ -108,11 +108,14 @@ namespace pandora_vision
   @return void
   **/
   void RgbFeatureExtraction::constructFeaturesMatrix(
-      const boost::filesystem::path& directory,
+      const boost::filesystem::path& directory, const std::string& annotationsFile,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
-    cv::Mat image;
-
+    cv::Mat image, imageROI;
+    std::vector<std::string> annotatedImages;
+    std::vector<cv::Rect> bbox;
+    std::vector<int> categories;
+    file_utilities::loadAnnotationsFromFile(annotationsFile, &bbox, &annotatedImages, &categories);
     int rowIndex = 0;
     for (boost::filesystem::recursive_directory_iterator iter(directory);
          iter != boost::filesystem::recursive_directory_iterator();
@@ -128,27 +131,45 @@ namespace pandora_vision
         std::cout << "Error reading file " << imageName << std::endl;
         continue;
       }
-
       // cv::Size size(640, 480);
       // cv::resize(image, image, size);
+      
+      //bool flag = false;
 
-      extractFeatures(image);
+      for (int ii = 0; ii < annotatedImages.size(); ii++)
+      {
+        if(annotatedImages[ii] == imageName)
+        {
+          imageROI = image(bbox[ii]);
+                    annotatedImages[ii].clear();
+          labelsMat->at<double>(rowIndex, 0) = categories[ii];
+          cv::imshow(annotatedImages[ii], imageROI);
+          cv::waitKey(0);
+          //flag = true;
+          /*ROS_INFO_STREAM("AnnotatedImage found: " << annotatedImages[ii]);*/
+          break;
+        }
+      }
+
+      /*if(flag)*/
+        extractFeatures(imageROI);
+      /*else
+        extractFeatures(image);*/
       std::cout << "Feature vector of image " << imageName << " "
                 << featureVector_.size() << std::endl;
       /// display feature vector
-      /*
-       *for (int kk = 0; kk < featureVector_.size(); kk++)
-       *  std::cout << featureVector_[kk] << " ";
-       */
+      /*for (int kk = 0; kk < featureVector_.size(); kk++)
+        std::cout << featureVector_[kk] << " ";*/
 
-      for (int jj = 0; jj < featureVector_.size(); jj++)
+      /*for (int jj = 0; jj < featureVector_.size(); jj++)
         featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
-
-      std::string checkIfPositive = "positive";
-      if (boost::algorithm::contains(imageName, checkIfPositive))
+*/
+     //std::string checkIfPositive = "positive";
+     
+      /*if (boost::algorithm::contains(imageName, checkIfPositive))
         labelsMat->at<double>(rowIndex, 0) = 1.0;
       else
-        labelsMat->at<double>(rowIndex, 0) = -1.0;
+        labelsMat->at<double>(rowIndex, 0) = -1.0;*/
 
       rowIndex += 1;
     }

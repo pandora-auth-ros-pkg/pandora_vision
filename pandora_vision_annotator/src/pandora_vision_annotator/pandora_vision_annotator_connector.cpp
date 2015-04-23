@@ -72,10 +72,7 @@ namespace pandora_vision
     QObject::connect(
       loader_.onlineRadioButton, SIGNAL(toggled(bool)),
       this,SLOT(onlineRadioButtonChecked()));
-    QObject::connect(
-      loader_.realTimeRadioButton, SIGNAL(toggled(bool)),
-      this,SLOT(realTimeRadioButtonChecked()));
-    
+       
 }
 void CConnector::offlineRadioButtonChecked(void)
 {   qDebug("offline checked");
@@ -106,10 +103,16 @@ void CConnector::offlineRadioButtonChecked(void)
     QObject::connect(
       loader_.previousFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(previousFramePushButtonTriggered()));
+QObject::connect(
+      loader_.predatorPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(predatorPushButtonTriggered()));
+QObject::connect(
+    loader_.framesListWidget,SIGNAL(itemClicked(QListWidgetItem*)),
+    this, SLOT(frameLabelTriggered(QListWidgetItem*)));
+
  Q_EMIT offlineModeGiven();
  state_= OFFLINE;
 }
-
 void CConnector::onlineRadioButtonChecked(void)
 {
   QObject::connect(
@@ -117,11 +120,6 @@ void CConnector::onlineRadioButtonChecked(void)
     this,SLOT(rosTopicPushButtonTriggered()));
      Q_EMIT onlineModeGiven();
     state_ = ONLINE;
-  
-}
-
-void CConnector::realTimeRadioButtonChecked(void)
-{
   
 }
 
@@ -133,6 +131,27 @@ void CConnector::realTimeRadioButtonChecked(void)
   {    Q_EMIT rosTopicGiven();
        
   }
+
+  /**
+  @brief Qt slot that is called when the rosTopicPushButton is pressed
+  @return void
+  **/
+  void CConnector::predatorPushButtonTriggered(void)
+  { 
+    if(ImgAnnotations::annotations.size() != 0)
+    {
+      Q_EMIT predatorEnabled();
+      state_ = PREDATOR; 
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      if(ImgAnnotations::is_file_exist(file.str().c_str()) )
+      {
+        remove(file.str().c_str());
+      } 
+      ImgAnnotations::writeToFile(file.str() );
+    }
+  }
+
 
   void CConnector::show(void)
   {
@@ -152,15 +171,31 @@ void CConnector::realTimeRadioButtonChecked(void)
   void CConnector::setFrames(const std::vector<cv::Mat>& x)
   {
       frames = x;
-      currFrame = 0;
+      QString label;
+      for(int i =0; i<frames.size(); i++)
+      {
+        label = QString("frame %1").arg(i);
+        loader_.framesListWidget->addItem(label);
+      }
   }
 
-  void CConnector::setcurrentFrame()
-  {
+  void CConnector::setcurrentFrame(int x)
+    {  
+      currFrame = x;
       QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols, frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
       setImage(dest);
       Q_EMIT updateImage();
+    } 
+
+  void CConnector:: getcurrentFrame(int x, cv::Mat* frame)
+  {
+    *frame = frames[currFrame];
+  }
+  
+  int CConnector::getFrameNumber()
+  {
+    return  currFrame;
   }
 
   void CConnector::setImage(QImage &img)
@@ -178,6 +213,11 @@ void CConnector::realTimeRadioButtonChecked(void)
     msgHeader = msg;
     //std::cout << msgHeader << std::endl;
   }
+
+  void CConnector::setMsg(const sensor_msgs::ImageConstPtr& msg)
+{
+  msg_ = *msg;
+}
 
   cv::Mat CConnector::QImage2Mat(QImage const& src)
   {
@@ -228,7 +268,7 @@ void CConnector::realTimeRadioButtonChecked(void)
             }
           }
       }
-      if(event->type() == QEvent::MouseButtonPress)
+      if(event->type() == QEvent::MouseButtonPress && state_ != PREDATOR )
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
         std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
@@ -370,7 +410,7 @@ void CConnector::realTimeRadioButtonChecked(void)
       loader_.statusLabel->clear();
       ImgAnnotations::annPerImage = 0;
       ImgAnnotations::annotations.clear();
-      setcurrentFrame();
+      setcurrentFrame(0);
       //setImage(backupImage_);
       //updateImage();
   }
@@ -381,12 +421,12 @@ void CConnector::realTimeRadioButtonChecked(void)
       std::stringstream file;
       file << package_path << "/data/annotations.txt";
       currFrame++;
-      std::string img_name = "frame" + boost::to_string(currFrame);
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
       loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
-      setcurrentFrame();
       drawBox();
     }
   }
@@ -397,20 +437,52 @@ void CConnector::realTimeRadioButtonChecked(void)
       std::stringstream file;
       file << package_path << "/data/annotations.txt";
       currFrame--;
-      std::string img_name = "frame" + boost::to_string(currFrame);
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
       loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
-      setcurrentFrame();
       drawBox();
     }
   }
+
+  void CConnector::frameLabelTriggered(QListWidgetItem* item)
+  {
+    QStringList temp = item->text().split(" ");
+    std::stringstream file;
+    file << package_path << "/data/annotations.txt";
+    currFrame = temp.at(1).toInt();
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      drawBox();
+
+
+  }
+
+
+  void CConnector::setPredatorValues(int x, int y, int width, int height)
+  {
+     ImgAnnotations::annotations.clear();
+     /*ImgAnnotations::annotations[0].x1 = 0;// x;
+     ImgAnnotations::annotations[0].y1 = 0;//y;
+     ImgAnnotations::annotations[0].x2 = 0;//x+width;
+     ImgAnnotations::annotations[0].y2 = 0;//y+height;*/
+     std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+     ImgAnnotations::setAnnotations(img_name, "1", x, y);
+     ImgAnnotations::setAnnotations(img_name, "1", x+width, y+height);
+     drawBox();  
+     std::stringstream file;
+     file << package_path << "/data/annotations.txt";
+     ImgAnnotations::writeToFile(file.str() );
+  }
+
   void CConnector::drawBox()
   {
-    //annImage_ = localImage_.copy();
-    //if(ImgAnnotations::annPerImage == 0)
-    //backupImage_=localImage_.copy();
     QPainter painter(&localImage_);
     painter.setRenderHint(QPainter::Antialiasing);
     QPen pen;
@@ -430,7 +502,7 @@ void CConnector::realTimeRadioButtonChecked(void)
               ImgAnnotations::annotations[i].y2);
       QRect r(p1,p2);
       painter.drawRect(r);
-      updateImage();
+      Q_EMIT updateImage();
     }
 
   }

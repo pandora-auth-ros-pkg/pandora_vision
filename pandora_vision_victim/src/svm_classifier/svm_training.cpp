@@ -96,10 +96,11 @@ namespace pandora_vision
    */
   void SvmTraining::constructFeaturesMatrix(
       const boost::filesystem::path& directory,
+      const std::string& annotationsFile,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
     featureExtraction_->constructFeaturesMatrix(directory,
-        featuresMat, labelsMat);
+        annotationsFile, featuresMat, labelsMat);
   }
 
   /**
@@ -283,5 +284,6 @@ namespace pandora_vision
     *A = Avector;
     *B = Bvector;
   }
+
 }// namespace pandora_vision
 
