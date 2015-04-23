@@ -175,6 +175,7 @@ namespace pandora_vision
         std::cout << dataMatFile << " was not loaded successfully."
                   << std::endl;
       }
+      return dataMat;
     }
 
     /**

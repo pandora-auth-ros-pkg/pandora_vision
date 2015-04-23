@@ -48,7 +48,7 @@ namespace pandora_vision
       SvmTraining(ns, _num_feat, datasetPath)
   {
     doPcaAnalysis_ = false;
-    typeOfNormalization_ = 0;
+    typeOfNormalization_ = 2;
     imageType_ = "rgb_";
     featureExtraction_ = new RgbFeatureExtraction();
     std::cout << "Created RGB SVM Training Instance" << std::endl;
@@ -111,6 +111,13 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, num_feat, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
+    std::string normalizationParamOne = "mean_values.xml";
+    std::stringstream normalizationParamOnePath;
+    normalizationParamOnePath << package_path << "/data/" << normalizationParamOne;
+    std::string normalizationParamTwo = "standard_deviation_values.xml";
+    std::stringstream normalizationParamTwoPath;
+    normalizationParamTwoPath << package_path << "/data/" << normalizationParamTwo;
+
     if (file_utilities::exist(in_file_stream.str().c_str()) == false ||
         doFeatureExtraction_)
     {
@@ -118,6 +125,16 @@ namespace pandora_vision
       std::string prefix = "training_";
       constructFeaturesMatrix(trainingDirectory,
           &trainingFeaturesMat, &trainingLabelsMat);
+
+      std::vector<double> meanVector;
+      std::vector<double> stdDevVector;
+      featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,
+          &meanVector, &stdDevVector);
+
+      file_utilities::saveToFile(normalizationParamOnePath.str(), "mean",
+          cv::Mat(meanVector));
+      file_utilities::saveToFile(normalizationParamTwoPath.str(), "std_dev",
+          cv::Mat(stdDevVector));
 
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
@@ -140,6 +157,13 @@ namespace pandora_vision
       std::string prefix = "test_";
       constructFeaturesMatrix(testDirectory,
           &testFeaturesMat, &testLabelsMat);
+
+      std::vector<double> meanVector = file_utilities::loadFiles(
+          normalizationParamOnePath.str(), "mean");
+      std::vector<double> stdDevVector = file_utilities::loadFiles(
+          normalizationParamTwoPath.str(), "std_dev");
+      featureExtractionUtilities_->performZScoreNormalization(
+          &testFeaturesMat, meanVector, stdDevVector);
 
       testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
       testLabelsMat.convertTo(testLabelsMat, CV_32FC1);

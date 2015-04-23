@@ -72,6 +72,7 @@ namespace pandora_vision
     ROS_INFO("[victim_node] : Created Svm training instance");
 
     doFeatureExtraction_ = true;
+    featureExtractionUtilities_ = new FeatureExtractionUtilities();
     featureExtraction_ = new FeatureExtraction();
   }
 
@@ -83,11 +84,29 @@ namespace pandora_vision
     ROS_DEBUG("[victim_node] : Destroying Svm training instance");
   }
 
+  /**
+   * @brief This function constructs the features matrix, i.e. the feature
+   * vectors of a set of images.
+   * @param directory [const boost::filesystem::path&] The directory that
+   * contains the set of images for the feature extraction.
+   * @param featuresMat [cv::Mat*] The features matrix.
+   * @param labelsMat [cv::Mat*] The matrix that contains the class attributes
+   * for the processed set of images.
+   * @return void
+   */
+  void SvmTraining::constructFeaturesMatrix(
+      const boost::filesystem::path& directory,
+      cv::Mat* featuresMat, cv::Mat* labelsMat)
+  {
+    featureExtraction_->constructFeaturesMatrix(directory,
+        featuresMat, labelsMat);
+  }
 
   /**
-   * @brief Function that evaluates the training
-   * @param predicted [const cv::Mat&] the predicted results
-   * @param actual [const cv::Mat&] the actual results
+   * @brief This function evaluates the classifier model, based on the predicted
+   * and the actual class attributes.
+   * @param predicted [const cv::Mat&] The predicted class attributes.
+   * @param actual [const cv::Mat&] The actual class attributes.
    * @return void
    */
   void SvmTraining::evaluate(const cv::Mat& predicted, const cv::Mat& actual)
@@ -263,14 +282,6 @@ namespace pandora_vision
     free(t);
     *A = Avector;
     *B = Bvector;
-  }
-
-  void SvmTraining::constructFeaturesMatrix(
-      const boost::filesystem::path& directory,
-      cv::Mat* featuresMat, cv::Mat* labelsMat)
-  {
-    featureExtraction_->constructFeaturesMatrix(directory,
-        featuresMat, labelsMat);
   }
 }// namespace pandora_vision
 

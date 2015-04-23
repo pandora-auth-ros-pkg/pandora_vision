@@ -71,9 +71,22 @@ namespace pandora_vision
        * @param maxVec [std::vector<double>*]
        * @return void
        */
-      void minMaxNormalization(double newMax, double newMin,
+      void findMinMaxParameters(double newMax, double newMin,
           cv::Mat* image, std::vector<double>* minVec,
           std::vector<double>* maxVec);
+
+      /**
+       * @brief
+       * @param newMax [double]
+       * @param newMin [double]
+       * @param image [cv::Mat*]
+       * @param minVec [std::vector<double>&]
+       * @param maxVec [std::vector<double>&]
+       * @return void
+       */
+      void performMinMaxNormalization(double newMax, double newMin,
+          cv::Mat* image, std::vector<double>& minVec,
+          std::vector<double>& maxVec);
 
       /**
        * @brief
@@ -82,8 +95,19 @@ namespace pandora_vision
        * @param stdDevVec [std::vector<double>*]
        * @return void
        */
-      void zScoreNormalization(cv::Mat* image,
+      void findZScoreParameters(cv::Mat* image,
           std::vector<double>* meanVec, std::vector<double>* stdDevVec);
+
+      /**
+       * @brief
+       * @param image [cv::Mat*]
+       * @param meanVec [std::vector<double>&]
+       * @param stdDevVec [std::vector<double>&]
+       * @return void
+       */
+      void performZScoreNormalization(cv::Mat* image,
+          const std::vector<double>& meanVec,
+          const std::vector<double>& stdDevVec);
 
       /**
        * @brief This function performs PCA analysis to reduce the feature

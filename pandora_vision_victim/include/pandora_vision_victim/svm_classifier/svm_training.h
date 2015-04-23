@@ -161,7 +161,7 @@ namespace pandora_vision
       FeatureExtraction* featureExtraction_;
       /// Feature Extraction Utilities used to perform feature normalization
       /// and/or feature selection.
-      FeatureExtractionUtilities featureExtractionUtilities_;
+      FeatureExtractionUtilities* featureExtractionUtilities_;
       /// Set up SVM's parameters
       CvSVMParams params;
       CvParamGrid CvParamGrid_gamma, CvParamGrid_C;

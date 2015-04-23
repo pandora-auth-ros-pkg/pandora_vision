@@ -66,7 +66,7 @@ namespace pandora_vision
    * @param maxVec [std::vector<double>*]
    * @return void
    */
-  void FeatureExtractionUtilities::minMaxNormalization(double newMax,
+  void FeatureExtractionUtilities::findMinMaxParameters(double newMax,
       double newMin, cv::Mat* image, std::vector<double>* minVec,
       std::vector<double>* maxVec)
   {
@@ -79,13 +79,31 @@ namespace pandora_vision
     for (int ii = 0; ii < image->cols; ii++)
     {
       cv::minMaxLoc(image->col(ii), &minVal, &maxVal);
-      subtract(image->col(ii), minVal, image->col(ii));
-      divide(image->col(ii), maxVal - minVal, image->col(ii));
-      multiply(image->col(ii), newMax - newMin, image->col(ii));
-      add(image->col(ii), newMin, image->col(ii));
-
       minVec->push_back(minVal);
       minVec->push_back(maxVal);
+    }
+    performMinMaxNormalization(newMax, newMin, image, *minVec, *maxVec);
+  }
+
+  /**
+   * @brief
+   * @param newMax [double]
+   * @param newMin [double]
+   * @param image [cv::Mat*]
+   * @param minVec [std::vector<double>&]
+   * @param maxVec [std::vector<double>&]
+   * @return void
+   */
+  void FeatureExtractionUtilities::performMinMaxNormalization(double newMax,
+      double newMin, cv::Mat* image, std::vector<double>& minVec,
+      std::vector<double>& maxVec)
+  {
+    for (int ii = 0; ii < image->cols; ii++)
+    {
+      subtract(image->col(ii), minVec.at(ii), image->col(ii));
+      divide(image->col(ii), maxVec.at(ii) - minVec.at(ii), image->col(ii));
+      multiply(image->col(ii), newMax - newMin, image->col(ii));
+      add(image->col(ii), newMin, image->col(ii));
     }
   }
 
@@ -96,7 +114,7 @@ namespace pandora_vision
    * @param stdDevVec [std::vector<double>*]
    * @return void
    */
-  void FeatureExtractionUtilities::zScoreNormalization(cv::Mat* image,
+  void FeatureExtractionUtilities::findZScoreParameters(cv::Mat* image,
       std::vector<double>* meanVec, std::vector<double>* stdDevVec)
   {
     cv::Scalar mu, sigma;
@@ -108,12 +126,21 @@ namespace pandora_vision
     for (int ii = 0; ii < image->cols; ii++)
     {
       meanStdDev(image->col(ii), mu, sigma);
-      subtract(image->col(ii), mu.val[0], image->col(ii));
-      if (sigma.val[0] != 0.0)
-        divide(image->col(ii), sigma.val[0], image->col(ii));
-
       meanVec->push_back(mu.val[0]);
       stdDevVec->push_back(sigma.val[0]);
+    }
+    performZScoreNormalization(image, *meanVec, *stdDevVec);
+  }
+
+  void FeatureExtractionUtilities::performZScoreNormalization(cv::Mat* image,
+      const std::vector<double>& meanVec,
+      const std::vector<double>& stdDevVec)
+  {
+    for (int ii = 0; ii < image->cols; ii++)
+    {
+      subtract(image->col(ii), meanVec.at(ii), image->col(ii));
+      if (stdDevVec.at(ii) != 0.0)
+        divide(image->col(ii), stdDevVec.at(ii), image->col(ii));
     }
   }
 
