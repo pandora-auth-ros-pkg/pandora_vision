@@ -60,6 +60,7 @@ namespace pandora_vision
       typedef boost::shared_ptr<QrCodePOI> QrCodePOIPtr;
 
       QrCodeDetector(const std::string& ns, sensor_processor::Handler* handler);
+      QrCodeDetector();
       virtual ~QrCodeDetector() {}
 
       virtual bool

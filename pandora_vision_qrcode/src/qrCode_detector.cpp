@@ -57,9 +57,9 @@ namespace pandora_vision
       ROS_DEBUG_STREAM("debugQrCode : " << debugQrcode_);
     }
 
-    if(debugQrcode_)
+    if (debugQrcode_)
     {
-      //! Advertise topics for debugging if we are in debug mode
+      //!< Advertise topics for debugging if we are in debug mode
       if (this->accessPublicNh()->getParam("debug_qrcode_topic", debugTopic))
       {
         debugPublisher_ = image_transport::ImageTransport(
@@ -71,6 +71,8 @@ namespace pandora_vision
       }
     }
   }
+  
+  QrCodeDetector::QrCodeDetector() : VisionProcessor() {}
 
   /**
     @brief Creates view for debugging purposes.

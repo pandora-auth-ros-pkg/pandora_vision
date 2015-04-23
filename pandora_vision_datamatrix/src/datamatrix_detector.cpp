@@ -95,13 +95,14 @@ namespace pandora_vision
     dec = NULL;
     reg = NULL;
     msg = NULL;
+    
     //!< creates and initializes a new DmtxImage structure using pixel
     //!< data provided  by  the calling application.
     img = dmtxImageCreate(image.data, image.cols, image.rows,
         DmtxPack24bppBGR);
     ROS_ASSERT(img != NULL);
 
-    //!< creates  and  initializes a new DmtxDecode struct, which
+    //!< creates and initializes a new DmtxDecode struct, which
     //!< designates the image to be scanned and initializes the scan
     //!< grid pattern.
     dec = dmtxDecodeCreate(img, 1);
@@ -110,9 +111,9 @@ namespace pandora_vision
     //!< add msecs to timeout
     timeout = dmtxTimeAdd(dmtxTimeNow(), 1000);
 
-    //!< searches  every  pixel location in a grid pattern looking
+    //!< searches every pixel location in a grid pattern looking
     //!< for potential barcode regions. A DmtxRegion is returned
-    //!< whenever a potential  barcode region  is found, or if the final
+    //!< whenever a potential barcode region is found, or if the final
     //!< pixel location has been scanned.
     reg = dmtxRegionFindNext(dec, &timeout);
     if(reg != NULL)
@@ -120,7 +121,9 @@ namespace pandora_vision
       msg = dmtxDecodeMatrixRegion(dec, reg, DmtxUndefined);
       if(msg != NULL)
       {
-        detected_datamatrix->getContent().assign((const char*) msg->output, msg->outputIdx);
+        detected_datamatrix->getContent().assign((const char*) msg->output, 
+          msg->outputIdx);
+        
         //!< Find datamatrixe's center exact position
         locate_datamatrix(image);
         datamatrix_list.push_back(detected_datamatrix);

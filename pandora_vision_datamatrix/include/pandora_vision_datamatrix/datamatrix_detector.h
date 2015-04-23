@@ -60,7 +60,6 @@ namespace pandora_vision
   class DatamatrixDetector : public VisionProcessor
   {
     public:
-      image_transport::Publisher _datamatrixPublisher;
       /**
         @brief Default Constructor
         @return void
@@ -108,6 +107,8 @@ namespace pandora_vision
       
       cv::Mat datamatrix_frame;
       cv::Mat debug_frame;
+      
+      image_transport::Publisher _datamatrixPublisher;
       
       DataMatrixPOIPtr detected_datamatrix;
       

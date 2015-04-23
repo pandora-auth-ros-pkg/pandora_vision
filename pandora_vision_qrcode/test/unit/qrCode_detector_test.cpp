@@ -48,8 +48,7 @@ namespace pandora_vision
   class QrCodeDetectorTest : public ::testing::Test
   {
     public:
-      QrCodeDetectorTest() : qrCodeDetector_("test", 
-        new sensor_processor::Handler("test")) {}
+      QrCodeDetectorTest() : qrCodeDetector_() {}
 
       virtual void SetUp()
       {
@@ -60,7 +59,7 @@ namespace pandora_vision
       std::vector<POIPtr> detectQrCode(cv::Mat frame);
       int* locateQrCode(cv::Point2f center);
 
-      void drawChessboard (int blocksNumberH, int blocksNumberV, cv::Mat &image);
+      void drawChessboard(int blocksNumberH, int blocksNumberV, const cv::Mat& image);
 
       int WIDTH;
       int HEIGHT;
@@ -89,7 +88,8 @@ namespace pandora_vision
     @param image [cv::Mat&] The final chessboard image
     @return void
    **/
-  void QrCodeDetectorTest::drawChessboard(int blocksNumberH, int blocksNumberV, cv::Mat &image)
+  void QrCodeDetectorTest::drawChessboard(int blocksNumberH, int blocksNumberV, 
+    const cv::Mat& image)
   {
     int imageSize = WIDTH * HEIGHT;
     int blockWidth = static_cast<int>(WIDTH / blocksNumberH);
@@ -102,13 +102,14 @@ namespace pandora_vision
       {
         cv::Mat ROI = chessBoard(cv::Rect(i, j, blockWidth, blockHeight));
         ROI.setTo(cv::Scalar::all(color));
-        color = abs(color-255);
+        color = abs(color - 255);
       }
     }
     chessBoard.copyTo(image);
   }
-  //! Tests QrCodeDetector::detectQrCode
-  TEST_F (QrCodeDetectorTest, detectQrCodeBlackImage)
+  
+  //!< Tests QrCodeDetector::detectQrCode
+  TEST_F(QrCodeDetectorTest, detectQrCodeBlackImage)
   {
     cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     std::vector<POIPtr> qrcode_list = detectQrCode(blackFrame);
@@ -120,7 +121,7 @@ namespace pandora_vision
     EXPECT_EQ(0, qrcode_list.size());
   }
 
-  TEST_F (QrCodeDetectorTest, detectQrCodeWhiteImage)
+  TEST_F(QrCodeDetectorTest, detectQrCodeWhiteImage)
   {
     cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
     whiteFrame.setTo(cv::Scalar(255, 255, 255));
@@ -129,7 +130,7 @@ namespace pandora_vision
     EXPECT_EQ(0, qrcode_list.size());
   }
 
-  TEST_F (QrCodeDetectorTest, detectQrCodeWhiteBlackMixImage)
+  TEST_F(QrCodeDetectorTest, detectQrCodeWhiteBlackMixImage)
   {
     // Vertically concatenated
     cv::Mat blackFrame = cv::Mat::zeros(HEIGHT / 2, WIDTH / 2, CV_8UC3);
@@ -145,25 +146,25 @@ namespace pandora_vision
     EXPECT_EQ(0, qrcode_list.size());
   }
 
-  TEST_F (QrCodeDetectorTest, detectQrCodeRandomChessboardImage)
+  TEST_F(QrCodeDetectorTest, detectQrCodeRandomChessboardImage)
   {
     cv::Mat frame;
     int blocksNumberH = 10;
     int blocksNumberV = 10;
-    drawChessboard( blocksNumberH, blocksNumberV, frame);
+    drawChessboard(blocksNumberH, blocksNumberV, frame);
     std::vector<POIPtr> qrcode_list = detectQrCode(frame);
     // there shouldn't be any qrcodes
     EXPECT_EQ(0, qrcode_list.size());
     blocksNumberH = 100;
     blocksNumberV = 100;
-    drawChessboard( blocksNumberH, blocksNumberV, frame);
+    drawChessboard(blocksNumberH, blocksNumberV, frame);
     qrcode_list = detectQrCode(frame);
     // there shouldn't be any qrcodes
     EXPECT_EQ(0, qrcode_list.size());
   }
 
-  //TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
-  //{
+  // TEST_F (QrCodeDetectorTest, locateQrCodeInImage)
+  // {
   //    std::stringstream fileName;
   //    std::vector<QrCode> qrcode_list;
   //    cv::Mat inputFrame;
@@ -206,5 +207,5 @@ namespace pandora_vision
   //        fileName.str("");
   //    }
   //    fclose(fpr);
-  //}
+  // }
 }  // namespace pandora_vision
