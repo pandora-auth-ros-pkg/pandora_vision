@@ -67,6 +67,11 @@ namespace pandora_vision
       DatamatrixDetector(const std::string& ns, sensor_processor::Handler* handler);
       
       /**
+        @brief Constructor
+      **/
+      DatamatrixDetector();
+      
+      /**
         @brief Default Destructor
         @return void
       **/

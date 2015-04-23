@@ -8,15 +8,11 @@ link_directories(${catkin_LIBRARY_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
 ################# Unit Tests #################
-catkin_add_gtest(datamatrix_detector_test
+catkin_add_gtest(${PROJECT_NAME}_detector_test
   unit/datamatrix_detector_test.cpp
 )
-find_package(PkgConfig)
-find_package(DMTX REQUIRED)
-
-target_link_libraries(datamatrix_detector_test
+target_link_libraries(${PROJECT_NAME}_detector_test
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_datamatrix_node
+  ${PROJECT_NAME}_detector
   gtest_main
-  ${DMTX_LIBRARIES}
 )

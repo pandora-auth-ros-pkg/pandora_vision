@@ -65,7 +65,12 @@ namespace pandora_vision
     detected_datamatrix->setContent("");
     ROS_INFO("[Datamatrix_node] : Datamatrix_Detector instance created");
   }
-
+  
+  /**
+    @brief Constructor
+  **/
+  DatamatrixDetector::DatamatrixDetector() : VisionProcessor() {}
+  
   /**
     @brief Destructor
    */

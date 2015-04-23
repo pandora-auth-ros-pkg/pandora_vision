@@ -57,7 +57,7 @@ namespace pandora_vision
           HEIGHT = 480;
         }
 
-        std::vector<DataMatrixQode> detectDatamatrix(cv::Mat frame);
+        std::vector<POIPtr> detectDatamatrix(cv::Mat frame);
         int* locateDatamatrix(cv::Point2f center);
 
         void drawChessboard (
@@ -73,10 +73,9 @@ namespace pandora_vision
         DatamatrixDetector datamatrixDetector_;
     };
 
-    std::vector<DataMatrixQode> DatamatrixDetectorTest::detectDatamatrix(cv::Mat frame)
+    std::vector<POIPtr> DatamatrixDetectorTest::detectDatamatrix(cv::Mat frame)
     {
-      datamatrixDetector_.detect_datamatrix(frame);
-      return datamatrixDetector_.get_detected_datamatrix();
+      return datamatrixDetector_.detect_datamatrix(frame);
     }
 
     int* DatamatrixDetectorTest::locateDatamatrix(cv::Point2f datamatrix_center)
@@ -120,7 +119,7 @@ namespace pandora_vision
     TEST_F (DatamatrixDetectorTest, detect_datamatrixBlackImage)
     {
       cv::Mat blackFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(blackFrame);
+      std::vector<POIPtr> datamatrix_list = detectDatamatrix(blackFrame);
       // there shouldn't be any datamatrices
       EXPECT_EQ(0, datamatrix_list.size());
       // neither when 3 channels are used
@@ -133,7 +132,7 @@ namespace pandora_vision
     {
       cv::Mat whiteFrame = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC1);
       whiteFrame.setTo(cv::Scalar(255, 255, 255));
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(whiteFrame);
+      std::vector<POIPtr> datamatrix_list = detectDatamatrix(whiteFrame);
       // there shouldn't be any datamatrices
       EXPECT_EQ(0, datamatrix_list.size());
     }
@@ -147,7 +146,7 @@ namespace pandora_vision
       cv::Mat H, V;
       cv::hconcat(blackFrame, whiteFrame, H);
       cv::vconcat(blackFrame, whiteFrame, V);
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(H);
+      std::vector<POIPtr> datamatrix_list = detectDatamatrix(H);
       // there shouldn't be any datamatrices
       EXPECT_EQ(0, datamatrix_list.size());
       datamatrix_list = detectDatamatrix(V);
@@ -161,7 +160,7 @@ namespace pandora_vision
       int blocksNumberH = 10;
       int blocksNumberV = 10;
       drawChessboard( blocksNumberH, blocksNumberV, frame);
-      std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(frame);
+      std::vector<POIPtr> datamatrix_list = detectDatamatrix(frame);
       // there shouldn't be any qrcodes
       EXPECT_EQ(0, datamatrix_list.size());
       blocksNumberH = 100;
@@ -177,7 +176,7 @@ namespace pandora_vision
     //  cv::Mat inputFrame;
     //  inputFrame = cv::imread("/home/v/Documents/PANDORA/Vision/Qr_Datamatrix_Testing/datamatrix1.jpg");
     //  //cv::resize(inputFrame, inputFrame, cv::Size(WIDTH, HEIGHT));
-    //  std::vector<DataMatrixQode> datamatrix_list = detectDatamatrix(inputFrame);
+    //  std::vector<POIPtr> datamatrix_list = detectDatamatrix(inputFrame);
     //  // there should be one datamatrix
     //  ASSERT_EQ(1, datamatrix_list.size());
     //  int* center = locateDatamatrix(datamatrix_list[0].datamatrix_center);
