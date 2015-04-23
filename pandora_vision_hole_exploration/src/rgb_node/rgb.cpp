@@ -650,6 +650,8 @@ namespace pandora_vision
     for(int ci = 0; ci < contours.size(); ci ++)
     {
       if((*realContours)[ci])
+        (*contourHeight)[ci] = boundRect[ci].height; 
+        (*contourWidth)[ci] = boundRect[ci].width; 
 
         if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge && cv::contourArea(contours[ci]) > Parameters::Rgb::huge_contour_thresh))
         {

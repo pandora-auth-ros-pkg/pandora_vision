@@ -109,7 +109,6 @@
     name="hole_fusion_node"
     type="hole_fusion_node"
     pkg="pandora_vision_hole_exploration"
-    launch-prefix="gdb -ex run --args"
     respawn="False"
     output="$(arg output)"
     ns="$(arg namespace)">

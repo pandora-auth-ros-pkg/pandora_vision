@@ -40,7 +40,7 @@ generate_dynamic_reconfigure_options(
   cfg/hole_fusion_node_cfg/debug_cfg.cfg
   #cfg/hole_fusion_node_cfg/filters_priority_cfg.cfg
   #cfg/hole_fusion_node_cfg/filters_thresholds_cfg.cfg
-  #cfg/hole_fusion_node_cfg/general_cfg.cfg
+  cfg/hole_fusion_node_cfg/general_cfg.cfg
   cfg/rgb_node_cfg/rgb_cfg.cfg
   )
 

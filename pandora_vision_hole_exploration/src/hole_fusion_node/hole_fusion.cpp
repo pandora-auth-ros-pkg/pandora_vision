@@ -46,16 +46,16 @@ namespace pandora_vision
   /**
     @brief The HoleFusion constructor
    **/
-  HoleFusion::HoleFusion(void)// :
+  HoleFusion::HoleFusion(void):
     //pointCloud_(new PointCloud),
-    //nodeHandle_("")//,
-    //generalNodeHandle_("~/general"),
-    //debugNodeHandle_("~/debug"),
-    //validityNodeHandle_("~/validation"),
-    //serverDebug(debugNodeHandle_),
-    //serverGeneral(generalNodeHandle_),
-    //serverValidity(validityNodeHandle_),
-    //imageTransport_(nodeHandle_)
+    nodeHandle_(""),
+    generalNodeHandle_("~/general"),
+    debugNodeHandle_("~/debug"),
+    validityNodeHandle_("~/validation"),
+    serverDebug(debugNodeHandle_),
+    serverGeneral(generalNodeHandle_),
+    serverValidity(validityNodeHandle_),
+    imageTransport_(nodeHandle_)
   {
     // Initialize the parent frame_id to an empty string
     //parent_frame_id_ = "";
@@ -85,16 +85,16 @@ namespace pandora_vision
     // Command line usage:
     // image_view /pandora_vision/hole_detector/debug_valid_holes_image
     // _image_transport:=compressed
-    //debugValidHolesPublisher_ = imageTransport_.advertise
-    //  (debugValidHolesTopic_, 1, true);
+    debugValidHolesPublisher_ = imageTransport_.advertise
+      (debugValidHolesTopic_, 1, true);
 
     // Advertise the topic that information about holes found by the Depth
     // and RGB nodes will be published to
     // Command line usage:
     // image_view /pandora_vision/hole_detector/debug_respective_holes_image
     // _image_transport:=compressed
-    //debugRespectiveHolesPublisher_ = imageTransport_.advertise
-    //  (debugRespectiveHolesTopic_, 1, true);
+    debugRespectiveHolesPublisher_ = imageTransport_.advertise
+      (debugRespectiveHolesTopic_, 1, true);
 
     // Advertise the topic that the image of the final holes,
     // will be published to
@@ -151,10 +151,10 @@ namespace pandora_vision
     //  boost::bind(&HoleFusion::parametersCallbackFiltersThresholds,
     //    this, _1, _2));
 
-    //// The dynamic reconfigure server for general parameters
-    //serverGeneral.setCallback(
-    //  boost::bind(&HoleFusion::parametersCallbackGeneral,
-    //    this, _1, _2));
+    // The dynamic reconfigure server for general parameters
+    serverGeneral.setCallback(
+        boost::bind(&HoleFusion::parametersCallbackGeneral,
+          this, _1, _2));
 
     // The dynamic reconfigure server for parameters pertaining to
     // the validity of holes
@@ -517,7 +517,7 @@ namespace pandora_vision
   //  @return void
   // **/
   void HoleFusion::parametersCallbackDebug(
-      const pandora_vision_hole::debug_cfgConfig &config,
+      const pandora_vision_hole_exploration::debug_cfgConfig &config,
       const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
@@ -531,16 +531,16 @@ namespace pandora_vision
 
     //  // Show all valid holes, from either the Depth or RGB source, or
     //  // the merges between them
-    //  Parameters::Debug::show_valid_holes =
-    //   config.show_valid_holes;
+    Parameters::Debug::show_valid_holes =
+      config.show_valid_holes;
 
     //  // The product of this package: unique, valid holes
     //  Parameters::Debug::show_final_holes =
     //   config.show_final_holes;
 
     //  // In the terminal's window, show the probabilities of candidate holes
-    //  Parameters::Debug::show_probabilities =
-    //    config.show_probabilities;
+    Parameters::Debug::show_probabilities =
+      config.show_probabilities;
 
     //  // Show the texture's watersheded backprojection
     //  Parameters::Debug::show_texture =
@@ -584,141 +584,141 @@ namespace pandora_vision
     @param[in] level [const uint32_t]
     @return void
    **/
-  //void HoleFusion::parametersCallbackGeneral(
-  //  const pandora_vision_hole::general_cfgConfig &config,
-  //  const uint32_t& level)
-  //{
-  //  ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+  void HoleFusion::parametersCallbackGeneral(
+      const pandora_vision_hole_exploration::general_cfgConfig &config,
+      const uint32_t& level)
+  {
+    //  ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
 
-  //  // Threshold parameters
-  //  Parameters::Edge::denoised_edges_threshold =
-  //    config.denoised_edges_threshold;
+    //  // Threshold parameters
+    //  Parameters::Edge::denoised_edges_threshold =
+    //    config.denoised_edges_threshold;
 
-  //  // Histogram parameters
-  //  Parameters::Histogram::number_of_hue_bins =
-  //    config.number_of_hue_bins;
-  //  Parameters::Histogram::number_of_saturation_bins =
-  //    config.number_of_saturation_bins;
-  //  Parameters::Histogram::number_of_value_bins =
-  //    config.number_of_value_bins;
-  //  Parameters::Histogram::secondary_channel =
-  //    config.secondary_channel;
-
-
-  //  // Backprojection parameters
-  //  Parameters::Rgb::backprojection_threshold =
-  //    config.backprojection_threshold;
+    //  // Histogram parameters
+    //  Parameters::Histogram::number_of_hue_bins =
+    //    config.number_of_hue_bins;
+    //  Parameters::Histogram::number_of_saturation_bins =
+    //    config.number_of_saturation_bins;
+    //  Parameters::Histogram::number_of_value_bins =
+    //    config.number_of_value_bins;
+    //  Parameters::Histogram::secondary_channel =
+    //    config.secondary_channel;
 
 
-  //  // The inflation size of the bounding box's vertices
-  //  Parameters::HoleFusion::rectangle_inflation_size =
-  //    config.rectangle_inflation_size;
-
-  //  // Depth diff parameters
-
-  //  // 0 for binary probability assignment on positive depth difference
-  //  // 1 for gaussian probability assignment on positive depth difference
-  //  Parameters::Filters::DepthDiff::probability_assignment_method =
-  //    config.depth_difference_probability_assignment_method;
-
-  //  // The mean expected difference in distance between a hole's keypoint
-  //  // and the mean distance of its bounding box's vertices
-  //  // from the depth sensor
-  //  Parameters::Filters::DepthDiff::gaussian_mean=
-  //    config.gaussian_mean;
-
-  //  // The standard deviation expected
-  //  Parameters::Filters::DepthDiff::gaussian_stddev=
-  //    config.gaussian_stddev;
-
-  //  // Min difference in depth between the inside and the outside of a hole
-  //  Parameters::Filters::DepthDiff::min_depth_cutoff =
-  //    config.depth_diff_min_depth_cutoff;
-
-  //  // Max difference in depth between the inside and the outside of a hole
-  //  Parameters::Filters::DepthDiff::max_depth_cutoff =
-  //    config.depth_diff_max_depth_cutoff;
+    //  // Backprojection parameters
+    //  Parameters::Rgb::backprojection_threshold =
+    //    config.backprojection_threshold;
 
 
-  //  // Plane detection parameters
-  //  Parameters::HoleFusion::Planes::filter_leaf_size =
-  //    config.filter_leaf_size;
-  //  Parameters::HoleFusion::Planes::max_iterations =
-  //    config.max_iterations;
-  //  Parameters::HoleFusion::Planes::num_points_to_exclude =
-  //    config.num_points_to_exclude;
-  //  Parameters::HoleFusion::Planes::point_to_plane_distance_threshold =
-  //    config.point_to_plane_distance_threshold;
+    //  // The inflation size of the bounding box's vertices
+    //  Parameters::HoleFusion::rectangle_inflation_size =
+    //    config.rectangle_inflation_size;
+
+    //  // Depth diff parameters
+
+    //  // 0 for binary probability assignment on positive depth difference
+    //  // 1 for gaussian probability assignment on positive depth difference
+    //  Parameters::Filters::DepthDiff::probability_assignment_method =
+    //    config.depth_difference_probability_assignment_method;
+
+    //  // The mean expected difference in distance between a hole's keypoint
+    //  // and the mean distance of its bounding box's vertices
+    //  // from the depth sensor
+    //  Parameters::Filters::DepthDiff::gaussian_mean=
+    //    config.gaussian_mean;
+
+    //  // The standard deviation expected
+    //  Parameters::Filters::DepthDiff::gaussian_stddev=
+    //    config.gaussian_stddev;
+
+    //  // Min difference in depth between the inside and the outside of a hole
+    //  Parameters::Filters::DepthDiff::min_depth_cutoff =
+    //    config.depth_diff_min_depth_cutoff;
+
+    //  // Max difference in depth between the inside and the outside of a hole
+    //  Parameters::Filters::DepthDiff::max_depth_cutoff =
+    //    config.depth_diff_max_depth_cutoff;
 
 
-  //  //--------------------------- Merger parameters ----------------------------
-
-  //  // Option to enable or disable the merging of holes
-  //  Parameters::HoleFusion::Merger::merge_holes =
-  //    config.merge_holes;
-
-  //  // Holes connection - merger parameters
-  //  Parameters::HoleFusion::Merger::connect_holes_min_distance =
-  //    config.connect_holes_min_distance;
-  //  Parameters::HoleFusion::Merger::connect_holes_max_distance =
-  //    config.connect_holes_max_distance;
-
-  //  Parameters::HoleFusion::Merger::depth_diff_threshold =
-  //    config.merger_depth_diff_threshold;
-  //  Parameters::HoleFusion::Merger::depth_area_threshold =
-  //    config.merger_depth_area_threshold;
+    //  // Plane detection parameters
+    //  Parameters::HoleFusion::Planes::filter_leaf_size =
+    //    config.filter_leaf_size;
+    //  Parameters::HoleFusion::Planes::max_iterations =
+    //    config.max_iterations;
+    //  Parameters::HoleFusion::Planes::num_points_to_exclude =
+    //    config.num_points_to_exclude;
+    //  Parameters::HoleFusion::Planes::point_to_plane_distance_threshold =
+    //    config.point_to_plane_distance_threshold;
 
 
-  //  //--------------------------- Texture parameters ---------------------------
+    //  //--------------------------- Merger parameters ----------------------------
 
-  //  // The threshold for texture matching
-  //  Parameters::Filters::TextureDiff::match_texture_threshold =
-  //    config.match_texture_threshold;
+    //  // Option to enable or disable the merging of holes
+    //  Parameters::HoleFusion::Merger::merge_holes =
+    //    config.merge_holes;
 
-  //  // The threshold for texture mismatching
-  //  Parameters::Filters::TextureDiff::mismatch_texture_threshold =
-  //    config.mismatch_texture_threshold;
+    //  // Holes connection - merger parameters
+    //  Parameters::HoleFusion::Merger::connect_holes_min_distance =
+    //    config.connect_holes_min_distance;
+    //  Parameters::HoleFusion::Merger::connect_holes_max_distance =
+    //    config.connect_holes_max_distance;
 
-
-
-  //  // Method to scale the CV_32FC1 image to CV_8UC1
-  //  Parameters::Image::scale_method =
-  //    config.scale_method;
-
-
-  //  //----------------- Outline discovery specific parameters ------------------
-
-  //  // The detection method used to obtain the outline of a blob
-  //  // 0 for detecting by means of brushfire
-  //  // 1 for detecting by means of raycasting
-  //  Parameters::Outline::outline_detection_method =
-  //    config.outline_detection_method;
-
-  //  // When using raycast instead of brushfire to find the (approximate here)
-  //  // outline of blobs, raycast_keypoint_partitions dictates the number of
-  //  // rays, or equivalently, the number of partitions in which the blob is
-  //  // partitioned in search of the blob's borders
-  //  Parameters::Outline::raycast_keypoint_partitions =
-  //    config.raycast_keypoint_partitions;
+    //  Parameters::HoleFusion::Merger::depth_diff_threshold =
+    //    config.merger_depth_diff_threshold;
+    //  Parameters::HoleFusion::Merger::depth_area_threshold =
+    //    config.merger_depth_area_threshold;
 
 
-  //  //------------ RGB image edges via backprojection parameters ---------------
+    //  //--------------------------- Texture parameters ---------------------------
 
-  //  // Backprojection parameters
-  //  Parameters::Rgb::backprojection_threshold =
-  //    config.backprojection_threshold;
+    //  // The threshold for texture matching
+    //  Parameters::Filters::TextureDiff::match_texture_threshold =
+    //    config.match_texture_threshold;
 
-  //  // Watershed-specific parameters
-  //  Parameters::Rgb::watershed_foreground_dilation_factor =
-  //    config.watershed_foreground_dilation_factor;
-  //  Parameters::Rgb::watershed_foreground_erosion_factor =
-  //    config.watershed_foreground_erosion_factor;
-  //  Parameters::Rgb::watershed_background_dilation_factor =
-  //    config.watershed_background_dilation_factor;
-  //  Parameters::Rgb::watershed_background_erosion_factor =
-  //    config.watershed_background_erosion_factor;
+    //  // The threshold for texture mismatching
+    //  Parameters::Filters::TextureDiff::mismatch_texture_threshold =
+    //    config.mismatch_texture_threshold;
 
-  //}
+
+
+    //  // Method to scale the CV_32FC1 image to CV_8UC1
+    //  Parameters::Image::scale_method =
+    //    config.scale_method;
+
+
+    //  //----------------- Outline discovery specific parameters ------------------
+
+    //  // The detection method used to obtain the outline of a blob
+    //  // 0 for detecting by means of brushfire
+    //  // 1 for detecting by means of raycasting
+    //  Parameters::Outline::outline_detection_method =
+    //    config.outline_detection_method;
+
+    //  // When using raycast instead of brushfire to find the (approximate here)
+    //  // outline of blobs, raycast_keypoint_partitions dictates the number of
+    //  // rays, or equivalently, the number of partitions in which the blob is
+    //  // partitioned in search of the blob's borders
+    //  Parameters::Outline::raycast_keypoint_partitions =
+    //    config.raycast_keypoint_partitions;
+
+
+    //  //------------ RGB image edges via backprojection parameters ---------------
+
+    //  // Backprojection parameters
+    //  Parameters::Rgb::backprojection_threshold =
+    //    config.backprojection_threshold;
+
+    //  // Watershed-specific parameters
+    //  Parameters::Rgb::watershed_foreground_dilation_factor =
+    //    config.watershed_foreground_dilation_factor;
+    //  Parameters::Rgb::watershed_foreground_erosion_factor =
+    //    config.watershed_foreground_erosion_factor;
+    //  Parameters::Rgb::watershed_background_dilation_factor =
+    //    config.watershed_background_dilation_factor;
+    //  Parameters::Rgb::watershed_background_erosion_factor =
+    //    config.watershed_background_erosion_factor;
+
+  }
 
 
   /**
@@ -744,6 +744,8 @@ namespace pandora_vision
       config.max_depth_to_test_small_thresh;
     Parameters::HoleFusion::small_rect_thresh =
       config.small_rect_thresh;
+    Parameters::HoleFusion::rgb_distance_variance_thresh = 
+      config.rgb_distance_variance_thresh;
 
   }
 
@@ -928,10 +930,47 @@ namespace pandora_vision
       Visualization::multipleShow("Respective keypoints", imgs, titles, 1280, 1);
     }
 #endif
+    double min, max;
+    cv::minMaxLoc(interpolatedDepthImage_, &min, &max);
 
     mergeHoles(&rgbHolesConveyor_, &depthHolesConveyor_, interpolatedDepthImage_, pointCloud_);
-    int counter = 0;
+    //valid holes till this point
+    //HolesConveyor preValidatedHoles;
+    //for(int i = 0; i < rgbHolesConveyor_.rectangle.size(); i++)
+    //{
+    //  preValidatedHoles.rectangle.push_back(rgbHolesConveyor_.rectangle[i]);
+    //  preValidatedHoles.keypoint.push_back(rgbHolesConveyor_.keypoint[i]);
+    //}
+    //for(int i = 0; i < depthHolesConveyor_.rectangle.size(); i++)
+    //{
+    //  preValidatedHoles.rectangle.push_back(depthHolesConveyor_.rectangle[i]);
+    //  preValidatedHoles.keypoint.push_back(depthHolesConveyor_.keypoint[i]);
+    //}
+    //std::vector<float> probabilitiesVector(preValidatedHoles.rectangle.size(), 0.0);
+
+    //for(int i = 0; i < preValidatedHoles.rectangle.size(); i ++)
+    //{
+    //  probabilitiesVector[i] = 1.0;
+    //}
+    //#ifdef DEBUG_SHOW
+    //    if (Parameters::Debug::show_probabilities)
+    //    {
+    //      for(int i = 0; i < preValidatedHoles.rectangle.size(); i++)
+    //      {
+    //        ROS_INFO_NAMED(PKG_NAME, "--------------------------------");
+    //        ROS_INFO_NAMED(PKG_NAME, "Keypoint [%f %f]",
+    //            preValidatedHoles.keypoint[i].x,
+    //            preValidatedHoles.keypoint[i].y);
+    //
+    //        ROS_INFO_STREAM_NAMED(PKG_NAME,
+    //            "hole i = " << i << ": " <<probabilitiesVector[i]);
+    //      }
+    //    }
+    //#endif
+
+    HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
+    // merge overlapping contours
     std::vector<bool> rgbSoloValid(rgbHolesConveyor_.rectangle.size(), true);
     for(int i = 0; i < depthHolesConveyor_.rectangle.size(); i ++)
     {
@@ -943,25 +982,72 @@ namespace pandora_vision
           overlapFlag = true;
           break;
         }
-      counter ++;
+      preValidatedHoles.rectangle.push_back(depthHolesConveyor_.rectangle[i]);
+      preValidatedHoles.keypoint.push_back(depthHolesConveyor_.keypoint[i]);
       if(overlapFlag)
-        validHolesMap[counter] = Parameters::HoleFusion::valid_strong_probability;
+        validHolesMap[i] = Parameters::HoleFusion::valid_strong_probability;
       else
-        validHolesMap[counter] = Parameters::HoleFusion::valid_medium_probability;
+        validHolesMap[i] = Parameters::HoleFusion::valid_medium_probability;
     }
+
+    // Assign probabilities to RGB holes that do not overlap with depth
+    int counter = depthHolesConveyor_.rectangle.size();
     for(int j = 0; j < rgbHolesConveyor_.rectangle.size(); j ++)
       if(rgbSoloValid.at(j))
       {
-        counter ++;
+        preValidatedHoles.rectangle.push_back(rgbHolesConveyor_.rectangle[j]);
+        preValidatedHoles.keypoint.push_back(rgbHolesConveyor_.keypoint[j]);
         validHolesMap[counter] = Parameters::HoleFusion::valid_light_probability;
+        counter ++;
       }
 
 
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_valid_holes && validHolesMap.size() > 0)
+    {
+      // A vector containing images, one per valid hole found.
+      std::vector<cv::Mat> holesImages;
+
+      // A vector of validity probabilities per valid hole found.
+      std::vector<std::string> msgs;
+
+      // Iterate over the map of valid holes to their validity probabilities
+      for (std::map<int, float>::iterator it = validHolesMap.begin();
+          it != validHolesMap.end(); it++)
+      {
+        // A vector containing one entry: the validity probability of the
+        // it->first-th hole
+        std::vector<std::string> msg;
+
+        msg.push_back(TOSTR(it->second));
+
+        msgs.push_back(TOSTR(it->second));
+        HolesConveyor temp;
+        temp.rectangle.push_back(preValidatedHoles.rectangle[it -> first]);
+        temp.keypoint.push_back(preValidatedHoles.keypoint[it -> first]);
+
+        // Project this valid hole onto the rgb image
+        holesImages.push_back(
+            Visualization::showHoles("",
+              rgbImage_,
+              temp,
+              -1,
+              msg));
+      }
+
+      // Show all valid holes in one window
+      //cv::imshow("imgs", holesImages[0]);
+      //cv::waitKey();
+      Visualization::multipleShow("Valid Holes", holesImages, msgs, 1280, 1);
+    }
+#endif
+
+
     // If there are valid holes, publish them
-    //if (validHolesMap.size() > 0)
-    //{
-    //  publishValidHoles(uniqueValidHoles, &validHolesMap);
-    //}
+    if (validHolesMap.size() > 0)
+    {
+      publishValidHoles(preValidatedHoles, &validHolesMap);
+    }
 
     //// Publish the enhanced holes message
     //// regardless of the amount of valid holes
@@ -1019,7 +1105,7 @@ namespace pandora_vision
 
   /**
     @brief Publishes the valid holes' information.
-    @param[in] conveyor [const HolesConveyor&] The overall unique holes
+    @param[in] conveyor [const HolesConveyor&] The overall valid and merged holes
     found by the depth and RGB nodes.
     @param[in] map [std::map<int, float>*] A map containing the indices
     of valid holes inside the conveyor and their respective
@@ -1080,28 +1166,27 @@ namespace pandora_vision
     // Publish an image with the valid holes found
 
     // The holes conveyor containing only the valid holes
-    //HolesConveyor validHolesConveyor;
+    HolesConveyor validHolesConveyor;
 
-    //// Contains the validity probability for each hole considered valid
-    //std::vector<std::string> msgs;
+    // Contains the validity probability for each hole considered valid
+    std::vector<std::string> msgs;
 
-    //for (std::map<int, float>::iterator it = map->begin();
-    //  it != map->end(); it++)
-    //{
-    //  HolesConveyorUtils::append(
-    //    HolesConveyorUtils::getHole(conveyor, it->first),
-    //    &validHolesConveyor);
+    for (std::map<int, float>::iterator it = map->begin();
+        it != map->end(); it++)
+    {
+      validHolesConveyor.rectangle.push_back(conveyor.rectangle[it -> first]);
+      validHolesConveyor.keypoint.push_back(conveyor.keypoint[it -> first]);
 
-    //  msgs.push_back(TOSTR(it->second));
-    //}
+      msgs.push_back(TOSTR(it->second));
+    }
 
     // Valid holes on top of the RGB image
     cv::Mat rgbValidHolesImage; //=
-    // Visualization::showHoles("Valid Holes",
-    //   rgbImage_,
-    //   validHolesConveyor,
-    //   -1,
-    //   msgs);
+    Visualization::showHoles("Valid Holes",
+        rgbImage_,
+        validHolesConveyor,
+        -1,
+        msgs);
 
     // Convert the image into a message
     cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
@@ -1201,9 +1286,22 @@ namespace pandora_vision
     std::vector<bool> realRgbContours(rgbHolesConveyor -> rectangle.size(), true);
     std::vector<bool> realDepthContours(depthHolesConveyor -> rectangle.size() ,true);
     // Small contours at a small distance are not valid
+    distanceValidation(interpolatedDepthImage_, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
+    distanceValidation(interpolatedDepthImage_, &(*depthHolesConveyor), &realDepthContours, pointCloud);
 
-    distanceValidation(image, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
-    distanceValidation(image, &(*depthHolesConveyor), &realDepthContours, pointCloud);
+    // eliminate small RGB contours with big distance variance
+    for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+      if(realRgbContours[i])
+      {
+        cv::Scalar mean;
+        cv::Scalar stddev;
+        cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
+        cv::meanStdDev (image, mean, stddev);
+        float distanceVariance = static_cast<float>(stddev.val[0]); 
+        if(distanceVariance > Parameters::HoleFusion::rgb_distance_variance_thresh)
+          realRgbContours[i] = false;
+      }
+    // keep only the valid contours till this point in a temporary conveyor
     HolesConveyor conveyorTemp;
 
     for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
@@ -1228,15 +1326,41 @@ namespace pandora_vision
     (*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
     conveyorTemp.rectangle.clear();
     conveyorTemp.keypoint.clear();
+    return;
 
     // If there are no candidate holes from both RGB and Depth,
     // there is no meaning to this operation
     if (rgbHolesConveyor -> rectangle.size() == 0 || depthHolesConveyor -> rectangle.size() == 0)
     {
+      HolesConveyor conveyorTemp;
+
+      for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+        if(realRgbContours[i])
+        {
+          conveyorTemp.keypoint.push_back((*rgbHolesConveyor).keypoint[i]);
+          conveyorTemp.rectangle.push_back((*rgbHolesConveyor).rectangle[i]);
+        }
+      // Replace RGB conveyor with the valid holes
+      (*rgbHolesConveyor).rectangle = conveyorTemp.rectangle;
+      (*rgbHolesConveyor).keypoint = conveyorTemp.keypoint;
+      conveyorTemp.rectangle.clear();
+      conveyorTemp.keypoint.clear();
+      for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+        if(realDepthContours[i])
+        {
+          conveyorTemp.keypoint.push_back((*depthHolesConveyor).keypoint[i]);
+          conveyorTemp.rectangle.push_back((*depthHolesConveyor).rectangle[i]);
+        }
+      // Replace Depth conveyor with the valid holes
+      (*depthHolesConveyor).rectangle = conveyorTemp.rectangle;
+      (*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
+      conveyorTemp.rectangle.clear();
+      conveyorTemp.keypoint.clear();
       return;
     }
-    // eliminate small contours in small average distance
-    // eliminate small RGB contours with low distance homogenity
+
+
+
     //   float connectorOutlinePointX = pointCloud->points[
     //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
     //     + pointCloud->width *
@@ -1247,7 +1371,6 @@ namespace pandora_vision
     //     + pointCloud->width *
     //     static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].y;
 
-    // merge based on overlapping
 
     // merge based on distance and homogenity in RGB
     //    for(int i = 0; i < rgbHolesConveyor -> size(); i ++)
@@ -1285,10 +1408,10 @@ namespace pandora_vision
       for(int col = upperX; col < lowerX; col ++ )
         for(int row = upperY; row < lowerY; row ++)
         {
-          sumDepths += static_cast<int>(image.at<uchar>(col, row));
+          sumDepths += static_cast<int>(image.at<uchar>(row, col));
         }
       float avgDepth = sumDepths / (holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height);
-      if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height <  Parameters::HoleFusion::small_rect_thresh  && avgDepth < Parameters::HoleFusion::max_depth_to_test_small_thresh);
+      if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height <  Parameters::HoleFusion::small_rect_thresh  && avgDepth < Parameters::HoleFusion::max_depth_to_test_small_thresh)
       {
         (*realContours)[i] = false;
       }

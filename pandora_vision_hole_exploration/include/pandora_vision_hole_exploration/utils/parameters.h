@@ -47,7 +47,7 @@
 #include <pandora_vision_hole_exploration/debug_cfgConfig.h>
 //#include <pandora_vision_hole/filters_priority_cfgConfig.h>
 //#include <pandora_vision_hole/filters_thresholds_cfgConfig.h>
-//#include <pandora_vision_hole/general_cfgConfig.h>
+#include <pandora_vision_hole_exploration/general_cfgConfig.h>
 #include <pandora_vision_hole_exploration/validity_cfgConfig.h>
 
 /**
@@ -97,15 +97,15 @@ namespace pandora_vision
       // hole fusion node, on top of their respective origin images
       static bool show_respective_holes;
       //
-      //      // Show all valid holes, from either the Depth or RGB source, or
-      //      // the merges between them
-      //      static bool show_valid_holes;
+      // Show all valid holes, from either the Depth or RGB source, or
+      // the merges between them
+      static bool show_valid_holes;
       //
       //      // The product of this package: unique, valid holes
       //      static bool show_final_holes;
       //
-      //      // In the terminal's window, show the probabilities of candidate holes
-      //      static bool show_probabilities;
+      // In the terminal's window, show the probabilities of candidate holes
+      static bool show_probabilities;
       //
       //      // Show the texture's watersheded backprojection
       //      static bool show_texture;
@@ -363,6 +363,7 @@ namespace pandora_vision
       static float valid_light_probability;
       static float max_depth_to_test_small_thresh;
       static int small_rect_thresh;
+      static float rgb_distance_variance_thresh;
     };
     //
     //

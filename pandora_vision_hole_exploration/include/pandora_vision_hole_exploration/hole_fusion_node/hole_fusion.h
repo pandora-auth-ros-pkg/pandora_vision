@@ -74,11 +74,11 @@ namespace pandora_vision
       // The main ROS nodehandle
       ros::NodeHandle nodeHandle_;
 
-      //// The ROS nodehandle needed by the general_cfg
-      //ros::NodeHandle generalNodeHandle_;
+      // The ROS nodehandle needed by the general_cfg
+      ros::NodeHandle generalNodeHandle_;
 
-      //// The ROS nodehandle needed by the debug_cfg
-      //ros::NodeHandle debugNodeHandle_;
+      // The ROS nodehandle needed by the debug_cfg
+      ros::NodeHandle debugNodeHandle_;
 
       //// The ROS nodehandle needed by the filters_priority_cfg
       //ros::NodeHandle filtersPriorityNodeHandle_;
@@ -86,11 +86,11 @@ namespace pandora_vision
       //// The ROS nodehandle needed by the filters_thresholds_cfg
       //ros::NodeHandle filtersThresholdsNodeHandle_;
 
-      //// The ROS nodehandle needed by the validity_cfg
-      //ros::NodeHandle validityNodeHandle_;
+      // The ROS nodehandle needed by the validity_cfg
+      ros::NodeHandle validityNodeHandle_;
 
       // The image_transport nodehandle
-      //image_transport::ImageTransport imageTransport_;
+      image_transport::ImageTransport imageTransport_;
 
       // The ROS publisher that will be used for unlocking the
       // synchronizer_node
@@ -221,11 +221,11 @@ namespace pandora_vision
 
 
       // The dynamic reconfigure server for debugging parameters
-      dynamic_reconfigure::Server<pandora_vision_hole::
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
         debug_cfgConfig> serverDebug;
 
       // The dynamic reconfigure callback type for the above server
-      dynamic_reconfigure::Server<pandora_vision_hole::
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
         debug_cfgConfig>::CallbackType f_debug;
 
 
@@ -249,13 +249,13 @@ namespace pandora_vision
       //  filters_thresholds_cfgConfig>::CallbackType f_filters_thresholds;
 
 
-      //// The dynamic reconfigure server for general parameters
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  general_cfgConfig> serverGeneral;
+      // The dynamic reconfigure server for general parameters
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
+        general_cfgConfig> serverGeneral;
 
-      //// The dynamic reconfigure callback type for the above server
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  general_cfgConfig>::CallbackType f_general;
+      // The dynamic reconfigure callback type for the above server
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::
+        general_cfgConfig>::CallbackType f_general;
 
 
       // The dynamic reconfigure server for parameters pertaining to
@@ -376,7 +376,7 @@ namespace pandora_vision
         @return void
        **/
       void parametersCallbackDebug(
-          const pandora_vision_hole::debug_cfgConfig& config,
+          const pandora_vision_hole_exploration::debug_cfgConfig& config,
           const uint32_t& level);
 
 
@@ -387,9 +387,9 @@ namespace pandora_vision
         @param[in] level [const uint32_t]
         @return void
        **/
-      //void parametersCallbackGeneral(
-      //  const pandora_vision_hole::general_cfgConfig& config,
-      //  const uint32_t& level);
+      void parametersCallbackGeneral(
+        const pandora_vision_hole_exploration::general_cfgConfig& config,
+        const uint32_t& level);
 
       /**
         @brief The function called when a validity parameter is changed
@@ -466,8 +466,7 @@ namespace pandora_vision
 
       /**
         @brief Publishes the valid holes' information.
-        @param[in] conveyor [const HolesConveyor&] The overall unique holes
-        found by the depth and RGB nodes.
+        @param[in] conveyor [const HolesConveyor&] The overall valid and merged holes found by the depth and RGB nodes.
         @param[in] map [std::map<int, float>*] A map containing the indices
         of valid holes inside the conveyor and their respective
         probabilities of validity

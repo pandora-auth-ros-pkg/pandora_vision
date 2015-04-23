@@ -73,15 +73,15 @@ namespace pandora_vision
   // hole fusion node, on top of their respective origin images
   bool Parameters::Debug::show_respective_holes = false;
   //
-  //  // Show all valid holes, from either the Depth or RGB source, or
-  //  // the merges between them
-  //  bool Parameters::Debug::show_valid_holes = false;
+  // Show all valid holes, from either the Depth or RGB source, or
+  // the merges between them
+  bool Parameters::Debug::show_valid_holes = false;
   //
   //  // The product of this package: unique, valid holes
   //  bool Parameters::Debug::show_final_holes = false;
   //
-  //  // In the terminal's window, show the probabilities of candidate holes
-  //  bool Parameters::Debug::show_probabilities = false;
+  // In the terminal's window, show the probabilities of candidate holes
+  bool Parameters::Debug::show_probabilities = false;
   //
   //  // Show the texture's watersheded backprojection
   //  bool Parameters::Debug::show_texture = false;
@@ -278,8 +278,9 @@ namespace pandora_vision
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
-  float Parameters::HoleFusion::max_depth_to_test_small_thresh = 0.2;
+  float Parameters::HoleFusion::max_depth_to_test_small_thresh = 1.0;
   int Parameters::HoleFusion::small_rect_thresh = 900;
+  float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
   //
   //
   //
