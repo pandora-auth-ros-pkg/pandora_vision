@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 #include <urdf_parser/urdf_parser.h>
 
 #include "sensor_processor/postprocessor.h"
-#include "sensor_processor/abstract_handler.h"
 #include "pandora_common_msgs/GeneralAlertInfoVector.h"
 #include "pandora_common_msgs/GeneralAlertInfo.h"
 
@@ -57,42 +56,97 @@
 namespace pandora_vision
 {
   template <class VisionAlertMsg>
-  class VisionPostProcessor : public PostProcessor<POIsStamped, VisionAlertMsg>
+  class VisionPostProcessor : public sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>
   {
   private:
     typedef boost::shared_ptr<VisionAlertMsg> VisionAlertMsgPtr;
 
   public:
-    VisionPostProcessor(const std::string& ns, AbstractHandler* handler);
+    /**
+     * @brief Constructor
+     * @param ns [const std::string&] The namespace of this postprocessor's nodeHandle
+     * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
+     * handles this postprocessor
+     **/ 
+    VisionPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
+    
+    /**
+     * @brief Virtual Destructor
+     **/ 
     virtual
       ~VisionPostProcessor() {}
-
+    
+    /**
+     * @brief Function that gets the Points of Interest with their timestamp and converts them 
+     * to a ROS message type in order to be published by a vision node
+     * @param input [const POIsStampedConstPtr&] A constant reference to a constant shared pointer 
+     * of a POI with timestamp
+     * @param output [const VisionAlertMsgPtr&] A constant reference to a shared pointer of a 
+     * template class that signifies the output ROS message type of each vision node
+     * @return [bool] whether postprocessing finished
+     **/ 
     virtual bool
-      postProcess(const POIsStampedConstPtr& input, const std_msgs::Int32Ptr& output);
+      postProcess(const POIsStampedConstPtr& input, const VisionAlertMsgPtr& output) = 0;
 
   protected:
+    /**
+     * @brief Function that calculates parameters yaw and pitch for every POI, given its 
+     * coordinates, and puts them in a structure with POI's probability and timestamp 
+     * @param result [const POIsStampedConstPtr&] A constant reference to a constant shared 
+     * pointer of a POI with timestamp
+     * @return [pandora_common_msgs::GeneralAlertInfoVector] ROS message type that contains
+     * yaw, pitch and probability of every POI in the processed frame and the frame's header
+     **/
     pandora_common_msgs::GeneralAlertInfoVector
       getGeneralAlertInfo(const POIsStampedConstPtr& result);
 
   private:
+    /**
+     * @brief Function that finds in a dictionary a parameter of type T with the frame id
+     * as key. If the parameter is not found there, external files (yaml files, launchers) 
+     * are searched and, when found, the parameter is inserted to the dictionary
+     * @param dict [std::map<std::string, T>*] Pointer to the dictionary to be searched and
+     * possibly altered
+     * @param key [const std::string&] The key used to search in the dictionary
+     * @return [T] The parameter that is found
+     **/
     template <class T>
       T
       findParam(std::map<std::string, T>* dict, const std::string& key);
+      
+    /**
+     * @brief Function that finds in a dictionary the parent frame id with the frame id
+     * as key. If the parameter is not found there, the robot model is searched and when 
+     * the connection to the frame id is found, it is inserted to the dictionary
+     * @param dict [std::map<std::string, std::string>*] Pointer to the dictionary to be 
+     * searched and possibly altered
+     * @param key [std::string&] The key used to search in the dictionary
+     * @param model_param_name [std::string&] The model parameter name
+     * @return [std::string] The parent frame id
+     **/ 
     std::string
       findParentFrameId(std::map<std::string, std::string>* dict,
         const std::string& key,
         const std::string& model_param_name);
 
   protected:
+    /// A dictionary that includes every parent frame id that the node uses 
+    /// with frame id as key
     std::map<std::string, std::string> parentFrameDict_;
-    std::map<std::string, float> hfovDict_;
-    std::map<std::string, float> vfovDict_;
+    
+    /// A dictionary that includes Horizontal Fields Of View for every camera
+    /// with frame id as key
+    std::map<std::string, double> hfovDict_;
+    
+    /// A dictionary that includes Vertical Fields Of View for every camera
+    /// with frame id as key
+    std::map<std::string, double> vfovDict_;
   };
 
   template <class VisionAlertMsg>
     VisionPostProcessor<VisionAlertMsg>::
-    VisionPostProcessor(const std::string& ns, AbstractHandler* handler) :
-      PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
+    VisionPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+      sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
     {
     }
 
@@ -105,8 +159,8 @@ namespace pandora_vision
 
       float x = 0, y = 0;
       // fov are in radians
-      float hfov = findParam<float>(&hfovDict_, result->header.frame_id);
-      float vfov = findParam<float>(&vfovDict_, result->header.frame_id);
+      float hfov = findParam<double>(&hfovDict_, result->header.frame_id + "/hfov");
+      float vfov = findParam<double>(&vfovDict_, result->header.frame_id + "/vfov");
       std::string parentFrameId = findParentFrameId(&parentFrameDict_,
           result->header.frame_id, "/robot_description");
 
@@ -115,16 +169,16 @@ namespace pandora_vision
 
       for (int i = 0; i < result->pois.size(); ++i)
       {
-        const POI poi = result->pois[i];
+        const POIPtr poiPtr = result->pois[i];
         pandora_common_msgs::GeneralAlertInfo info;
-        x = poi->getPoint().x
+        x = poiPtr->getPoint().x
           - static_cast<float>(result->frameWidth) / 2;
         y = static_cast<float>(result->frameHeight) / 2
-          - poi->getPoint().y;
+          - poiPtr->getPoint().y;
 
         info.yaw = atan(2 * x / result->frameWidth * tan(hfov / 2));
         info.pitch = atan(2 * y / result->frameHeight * tan(vfov / 2));
-        info.probability = poi.getProbability();
+        info.probability = poiPtr->getProbability();
 
         generalAlertInfos.generalAlerts.push_back(info);
       }
@@ -132,25 +186,25 @@ namespace pandora_vision
       return generalAlertInfos;
     }
 
-  template <class T>
-    template <class VisionAlertMsg>
+  template <class VisionAlertMsg>
+    template <class T>
       T
       VisionPostProcessor<VisionAlertMsg>::
       findParam(std::map<std::string, T>* dict, const std::string& key)
       {
-        std::map<std::string, T>::iterator iter;
+        typename std::map<std::string, T>::iterator iter;
         if ((iter = dict->find(key)) != dict->end())
         {
-          return *iter;
+          return iter->second;
         }
         else
         {
-          std::string param;
+          T param;
 
           if (!this->accessPublicNh()->getParam(key, param))
           {
             ROS_ERROR_NAMED(this->getName(),
-                "Params couldn't be retrieved for %s", key);
+                "Params couldn't be retrieved for %s", key.c_str());
             throw vision_config_error(key + " : not found");
           }
 
@@ -166,10 +220,10 @@ namespace pandora_vision
         const std::string& key,
         const std::string& model_param_name)
     {
-      std::map<std::string, std::string>::iterator iter;
+      typename std::map<std::string, std::string>::iterator iter;
       if ((iter = dict->find(key)) != dict->end())
       {
-        return *iter;
+        return iter->second;
       }
       else
       {

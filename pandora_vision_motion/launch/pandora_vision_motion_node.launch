@@ -1,5 +1,5 @@
 <launch>
-  <node name="motion_node" type="motion_node" pkg="pandora_vision_motion"
+  <node name="motion_node" type="pandora_vision_motion_node" pkg="pandora_vision_motion"
     respawn="False" output = "screen"/>
   
   <rosparam file="$(find pandora_vision_motion)/config/motion_topics.yaml"

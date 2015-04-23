@@ -135,17 +135,10 @@ namespace pandora_vision
 
       //!< parameters referring to the view and frame characteristics
       static std::string packagePath;
-      static std::string victimAlertTopic;
       static std::string victimDebugImg;
       static std::string interpolatedDepthImg;
-      static std::string enhancedHolesTopic;
-      static std::string cameraName;
-      static int frameHeight;
-      static int frameWidth;
       static int modelImageHeight;
       static int modelImageWidth;
-      static double hfov;
-      static double vfov;
 
       //!< parameters referring to the face detection algorithm
       static std::string cascade_path;

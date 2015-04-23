@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   sensor_msgs
-  pandora_common_msgs
+  actionlib_msgs
 )
 
 add_message_files(
@@ -44,5 +44,4 @@ catkin_package(
     std_msgs
     geometry_msgs
     sensor_msgs
-    pandora_common_msgs
   )

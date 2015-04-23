@@ -80,4 +80,3 @@ target_link_libraries(image_signature_test
 
 # add_rostest(benchmark/hazmat_kinect_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_480p)
 # add_rostest(benchmark/hazmat_web_camera_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_720p)
-

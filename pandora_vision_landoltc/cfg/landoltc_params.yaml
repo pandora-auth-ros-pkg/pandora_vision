@@ -1,5 +1,6 @@
-camera_name: kinect
-hfov: 58.0
-vfov: 45.0
-image_width: 640
-image_height: 480
+gradientThreshold: 60
+centerThreshold: 90
+huMomentsPrec: 0.3
+adaptiveThresholdSubtractSize: 2
+visualization: false
+timerThreshold: 0.16

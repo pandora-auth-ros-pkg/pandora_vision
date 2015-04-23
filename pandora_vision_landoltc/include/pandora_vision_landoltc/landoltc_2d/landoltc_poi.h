@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,80 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Miltiadis-Alexios Papadopoulos
+ * Authors:
+ *   Tsirigotis Christos <tsirif@gmail.com>
+ *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_qrcode/qrCode_detection.h"
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H
 
-/**
-  @brief Main function of the kinect node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+#include <string>
+#include "pandora_vision_common/poi.h"
+
+namespace pandora_vision
 {
-  ros::init(argc,argv,"QrCode_node");
-  pandora_vision::QrCodeDetection QrCodeDetection("qrcode");
-  ros::spin();
-  return 0;
-}
+  class LandoltCPOI : public POI
+  {
+    public:
+      typedef boost::shared_ptr<LandoltCPOI> Ptr;
+      
+      virtual ~LandoltCPOI() {}
+    
+    public:
+      std::vector<float> angles; 
+      std::vector<cv::Scalar> color;
+      std::vector<cv::Rect> bbox;
+      int count;
+      
+    public:
+      void setAngles(const std::vector<float>& angles)
+      {
+        this->angles = angles;
+      }
+      void setColor(const std::vector<cv::Scalar>& color)
+      {
+        this->color = color;
+      }
+      void setBox(const std::vector<cv::Rect>& box)
+      {
+        bbox = box;
+      }
+      void setCount(const int& count)
+      {
+        this->count = count;
+      }
+      
+      std::vector<float> getAngles() const
+      {
+        return angles;
+      }
+      
+      std::vector<cv::Scalar> getColorVector() const
+      {
+        return color;
+      }
+      cv::Scalar getColor(int pos) const
+      {
+        return color[pos];
+      }
+      
+      std::vector<cv::Rect> getBoxVector() const
+      {
+        return bbox;
+      }
+      cv::Rect getBox(int pos) const
+      {
+        return bbox[pos];
+      }
+      
+      int getCount() const
+      {
+        return count;
+      }
+  };
+  
+  typedef LandoltCPOI::Ptr LandoltCPOIPtr;
+}  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H

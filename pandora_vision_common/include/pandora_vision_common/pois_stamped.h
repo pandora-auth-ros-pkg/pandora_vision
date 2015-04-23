@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,16 @@ namespace pandora_vision
       typedef boost::shared_ptr<POIsStamped const> ConstPtr;
 
     public:
+      /// Message Header referring to the Points of Interest in a frame
       std_msgs::Header header;
+
+      /// Vector containing shared pointers to Point of Interest structure
       std::vector<POIPtr> pois;
 
+      /// Frame's Width
       int frameWidth;
+
+      /// Frame's Height
       int frameHeight;
   };
 
@@ -63,8 +69,3 @@ namespace pandora_vision
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_COMMON_POIS_STAMPED_H
-
-
-
-
-
