@@ -109,8 +109,6 @@ namespace pandora_vision
   **/
   void RgbFeatureExtraction::constructFeaturesMatrix(
       const boost::filesystem::path& directory, const std::string& annotationsFile,
-      const std::string& prefix,
-      const std::string& fileName,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
     cv::Mat image, imageROI;

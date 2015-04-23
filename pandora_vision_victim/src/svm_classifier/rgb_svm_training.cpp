@@ -125,8 +125,7 @@ namespace pandora_vision
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
 
-      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(), prefix,
-          training_matrix_file_path, &trainingFeaturesMat, &trainingLabelsMat);
+      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(), &trainingFeaturesMat, &trainingLabelsMat);
 
       std::vector<double> meanVector;
       std::vector<double> stdDevVector;
@@ -159,7 +158,7 @@ namespace pandora_vision
       std::string prefix = "test_";
       annotations_file_stream.str("");
       annotations_file_stream << package_path << "/data/" << "test_annotations.txt";
-      constructFeaturesMatrix(testDirectory,annotations_file_stream.str(), prefix, test_matrix_file_path, &testFeaturesMat, &testLabelsMat);
+      constructFeaturesMatrix(testDirectory,annotations_file_stream.str(), &testFeaturesMat, &testLabelsMat);
 
       std::vector<double> meanVector = file_utilities::loadFiles(
           normalizationParamOnePath.str(), "mean");

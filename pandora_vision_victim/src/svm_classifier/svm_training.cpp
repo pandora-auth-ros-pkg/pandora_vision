@@ -96,10 +96,11 @@ namespace pandora_vision
    */
   void SvmTraining::constructFeaturesMatrix(
       const boost::filesystem::path& directory,
+      const std::string& annotationsFile,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
     featureExtraction_->constructFeaturesMatrix(directory,
-        featuresMat, labelsMat);
+        annotationsFile, featuresMat, labelsMat);
   }
 
   /**
@@ -284,14 +285,5 @@ namespace pandora_vision
     *B = Bvector;
   }
 
-  void SvmTraining::constructFeaturesMatrix(
-      const boost::filesystem::path& directory, const std::string& annotationsFile,
-const std::string& prefix,
-      const std::string& fileName,
-      cv::Mat* featuresMat, cv::Mat* labelsMat)
-  {
-    featureExtraction_->constructFeaturesMatrix(directory, annotationsFile,  prefix, fileName,
-        featuresMat, labelsMat);
-  }
 }// namespace pandora_vision
 

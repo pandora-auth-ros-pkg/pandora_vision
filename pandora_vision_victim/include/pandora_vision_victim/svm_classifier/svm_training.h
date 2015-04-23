@@ -82,10 +82,8 @@ namespace pandora_vision
       @return void
       **/
       void constructFeaturesMatrix(const boost::filesystem::path& directory, 
-                                    const std::string& annotationsFile,
-                                    const std::string& prefix,
-                                    const std::string& fileName,
-                                    cv::Mat* featuresMat, cv::Mat* labelsMat);
+                                   const std::string& annotationsFile,
+                                   cv::Mat* featuresMat, cv::Mat* labelsMat);
       /**
        * @brief
        * @param dataMat [cv::Mat*]

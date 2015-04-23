@@ -79,8 +79,6 @@ namespace pandora_vision
        */
       virtual void constructFeaturesMatrix(
           const boost::filesystem::path& directory, const std::string& annotationsFile,
-          const std::string& prefix,
-          const std::string& fileName,
           cv::Mat* featuresMat, cv::Mat* labelsMat);
   };
 }// namespace pandora_vision
