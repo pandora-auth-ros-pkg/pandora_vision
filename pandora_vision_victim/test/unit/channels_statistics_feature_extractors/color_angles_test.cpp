@@ -35,88 +35,57 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/dominant_color.h"
+#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles_extractor.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
 {
   /**
-    @class DominantColorExtractorTest 
-    @brief Tests the integrity of methods of class DominantColorExtractor
+    @class ColorAnglesExtractorTest
+    @brief Tests the integrity of methods of class ColorAnglesExtractor
    **/
-  class DominantColorExtractorTest : public ::testing::Test
+  class ColorAnglesExtractorTest : public ::testing::Test
   {
     protected:
-      
+      ColorAnglesExtractorTest () {}
 
-      DominantColorExtractorTest () {}
-
-      
-       //! Sets up images needed for testing
-       virtual void SetUp()
+      //! Sets up images needed for testing
+      virtual void SetUp()
       {
+        HEIGHT = 480;
+        WIDTH = 640;
 
-       bins = 256;
-       HEIGHT = 480;
-       WIDTH = 640;
-
-        // Construct a black histogramm
-        black = cv::Mat::zeros(bins, 1, CV_32FC1);
-        // Construct a white histogramm
-        white = cv::Mat::zeros( bins, 1, CV_32FC1);
-	cv::Rect rect(0, 0, bins, 1);
-	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
-        
-        // Construct an ascending histogramm 
-       ascending = cv::Mat::zeros( bins, 1, CV_32FC1);
-       for (int rows = 0; rows < ascending.rows; rows++)
-	       ascending.at<float>(rows) = rows;
-       
-       // Construct a descending histogramm 
-       descending = cv::Mat::zeros( bins, 1, CV_32FC1);
-       int i=255;
-       for (int rows = 0;  rows < descending.rows; rows++)
-       {
-	       descending.at<float>(rows) = i;
-       	       i--;
-       }
-
+        // Construct a blue image
+        blue = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255,255,255));
+        // Construct a green image
+        green = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,255,0));
+        // Construct a red image
+        red = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,0,255));
       }
-      //The histogramms bins
-      int bins;
-      
-      //Image Dimensions
+
+      cv::Mat blue, green, red;
       int HEIGHT, WIDTH;
-      // Images that will be used for testing
-      cv::Mat black, white, ascending, descending;
-  
   };
-  
-  
-  //! Tests DominantColorExtractor::extract
-  TEST_F ( DominantColorExtractorTest, extractDominantColor )
+
+  //! Tests ColorAnglesExtractor::extract
+  TEST_F(ColorAnglesExtractorTest, extractColorAngles)
   {
     // The output vector
     std::vector<double>  out;
-    DominantColorExtractor d1(&black), d2(&white), d3(&ascending), d4(&descending);
-    out = d1.extract();
+    ColorAnglesExtractor c1(&blue);//, c2(&green), c3(&red);
+    out = c1.extract();
     EXPECT_EQ ( 0 , out[0] );
     EXPECT_EQ ( 0 , out[1] );
+    EXPECT_EQ ( 0 , out[2] );
+    EXPECT_EQ ( 0 , out[3] );
 
-    out = d2.extract();
-    EXPECT_EQ ( 0 , out[0] );
-    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
+    //out = c2.extract();
+    //EXPECT_EQ ( 255 , out[0] );
+    //EXPECT_EQ ( 0 , out[1] );
 
-    out = d3.extract();
-    EXPECT_EQ ( 255 , out[0] );
-    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
-
-    out = d4.extract();
-    EXPECT_EQ ( 0 , out[0] );
-    EXPECT_EQ ( 255.0/(HEIGHT * WIDTH) , out[1] );
-
+    //out = c3.extract();
+    //EXPECT_EQ ( 127.5 , out[0] );
+    //EXPECT_EQ ( 127.5 , out[1] );
   }
-    
-    
-  
-} // namespace pandora_vision
+}// namespace pandora_vision
+

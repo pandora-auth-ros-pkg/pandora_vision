@@ -41,7 +41,8 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_rgb_svm_training_node");
 
-  // numFiles = 9500 and rgb_num_feat = 121 depth_num_feat=103
+  // Number of features for RGB Training = 121
+  // Number of features for Depth Training = 103
   int numFeatures;
   std::cout << "Add total number of features required for your subsystem:" << std::endl;
   std::cin >> numFeatures;

@@ -65,8 +65,8 @@ namespace pandora_vision
   {
     std::vector<double> dominantColor;
 
-    double maxVal = 0;
-    double indexVal = 0;
+    double maxVal = -1.0;
+    double indexVal = 0.0;
     int size = cv::Size(img_->size()).height;
     /*/
     ROS_INFO_STREAM("HIST SIZE" <<img_->size());
@@ -86,7 +86,10 @@ namespace pandora_vision
 
     dominantColor.push_back(indexVal);
     cv::Scalar histSum = cv::sum(*img_);
-    dominantColor.push_back(maxVal / histSum.val[0]);
+    if (histSum.val[0])
+      dominantColor.push_back(maxVal / histSum.val[0]);
+    else
+      dominantColor.push_back(0.0);
 
     return dominantColor;
   }

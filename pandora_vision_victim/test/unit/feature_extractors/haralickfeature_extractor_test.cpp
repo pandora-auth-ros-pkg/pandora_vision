@@ -33,9 +33,9 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Author: Marios Protopapas
-********************************************************************zz*/
+*********************************************************************/
 
-#include "pandora_vision_victim/utilities/haralickfeature_extractor.h"
+#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
@@ -47,17 +47,13 @@ namespace pandora_vision
   class HaralickFeaturesExtractorTest : public ::testing::Test
   {
     protected:
-
-
       HaralickFeaturesExtractorTest () {}
 
-
-       //! Sets up images needed for testing
-       virtual void SetUp()
+      //! Sets up images needed for testing
+      virtual void SetUp()
       {
-
-       HEIGHT = 4;
-       WIDTH = 4;
+        HEIGHT = 4;
+        WIDTH = 4;
 
         // Construct a black image
         black = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
@@ -69,14 +65,12 @@ namespace pandora_vision
         cv::Scalar totalSum = cv::sum(blackGLCM);
         blackGLCM.at<double>(0, 0) = occurence/totalSum[0];
 
-
         //std::cout << "blackGLCM= " << std::endl << " " << blackGLCM << std::endl << std::endl;
 
-
-       	// Construct a white image
+        // Construct a white image
         white = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
         cv::Rect rect(0, 0, WIDTH, HEIGHT);
-	cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+        cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
 
         //std::cout << "white= " << std::endl << " " << white << std::endl << std::endl;
 
@@ -89,76 +83,66 @@ namespace pandora_vision
 
         //std::cout << "whiteGLCM= " << std::endl << " " << whiteGLCM << std::endl << std::endl;
 
-
-	// Construct a horizontal edge image
+        // Construct a horizontal edge image
         horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect1(0, 0, WIDTH, HEIGHT/2);
-	cv::rectangle(horizontal, rect1, cv::Scalar(255,0,0), -1);
+        cv::rectangle(horizontal, rect1, cv::Scalar(255,0,0), -1);
 
-	// Construct a vertical edge image
+        // Construct a vertical edge image
         vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect2(0, 0, WIDTH/2, HEIGHT);
-	cv::rectangle(vertical, rect2, cv::Scalar(255,0,0), -1);
-
-       }
+        cv::rectangle(vertical, rect2, cv::Scalar(255,0,0), -1);
+      }
 
       //Image Dimensions
       int HEIGHT, WIDTH;
 
       // Images that will be used for testing
       cv::Mat black,blackGLCM, white, whiteGLCM, horizontal, vertical, diagonal45, diagonal135, circle, noisy;
-
-  };
-
+    };
 
   //! Tests HaralickFeaturesExtractor::calculateGLCM()
-
-  TEST_F ( HaralickFeaturesExtractorTest, calculateGLCMwhite)
+  TEST_F(HaralickFeaturesExtractorTest, calculateGLCMwhite)
   {
     // The output image
     cv::Mat out;
-    out = HaralickFeaturesExtractor::calculateGLCM(white);
-    ASSERT_EQ ( 256, out.rows );
-    ASSERT_EQ ( 256, out.cols );
+    out = HaralickFeaturesExtractor::calculateGLCM(0, 1, white);
+    ASSERT_EQ(256, out.rows);
+    ASSERT_EQ(256, out.cols);
 
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
       for (int jj = 0; jj< out.cols; jj++)
-
-	    if(out.at<double>(ii,jj) != whiteGLCM.at<double>(ii,jj))
-		    equal= false;
+        if(out.at<double>(ii,jj) != whiteGLCM.at<double>(ii,jj))
+          equal= false;
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
-
-    EXPECT_EQ ( true , equal );
+    EXPECT_EQ(true, equal);
   }
 
-  TEST_F ( HaralickFeaturesExtractorTest, calculateGLCMblack)
+  TEST_F(HaralickFeaturesExtractorTest, calculateGLCMblack)
   {
     // The output image
     cv::Mat out;
-    out = HaralickFeaturesExtractor::calculateGLCM(black);
-    ASSERT_EQ ( 256, out.rows );
-    ASSERT_EQ ( 256, out.cols );
+    out = HaralickFeaturesExtractor::calculateGLCM(0, 1, black);
+    ASSERT_EQ(256, out.rows);
+    ASSERT_EQ(256, out.cols);
 
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
       for (int jj = 0; jj < out.cols; jj++)
-
-	    if(out.at<double>(ii, jj) != blackGLCM.at<double>(ii,jj))
-		    equal= false;
+        if(out.at<double>(ii, jj) != blackGLCM.at<double>(ii,jj))
+          equal= false;
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
-
-    EXPECT_EQ ( true , equal );
-
+    EXPECT_EQ(true , equal);
   }
-  TEST_F ( HaralickFeaturesExtractorTest, AngularSecondMoment)
+
+  TEST_F(HaralickFeaturesExtractorTest, AngularSecondMoment)
   {
     // The output feature
     double out;
     out = HaralickFeaturesExtractor::getAngularSecondMoment(blackGLCM);
-
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
     //compute angular second moment
@@ -167,16 +151,14 @@ namespace pandora_vision
       for (int jj = 0; jj < blackGLCM.cols; jj++)
         ang += pow(blackGLCM.at<double>(ii, jj), 2.0);
 
-    EXPECT_EQ ( ang  , out );
-
+    EXPECT_EQ(ang, out);
   }
 
-  TEST_F ( HaralickFeaturesExtractorTest, Contrast)
+  TEST_F(HaralickFeaturesExtractorTest, Contrast)
   {
     // The output feature
     double out;
     out = HaralickFeaturesExtractor::getContrast(blackGLCM);
-
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
     //compute angular second moment
@@ -185,8 +167,6 @@ namespace pandora_vision
       for (int jj = 0; jj<blackGLCM.cols; jj++)
         sum+=pow((ii-jj), 2.0) * blackGLCM.at<double>(ii,jj);
 
-    EXPECT_EQ ( sum  , out );
-
+    EXPECT_EQ(sum, out);
   }
-
 } // namespace pandora_vision
