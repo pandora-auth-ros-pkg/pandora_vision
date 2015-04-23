@@ -116,7 +116,7 @@ namespace pandora_vision
       outFile.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
       if (!outFile)
       {
-        std::cout << "Error! Cannot load file!" << std::endl;
+        std::cout << "Error! Cannot load  CSV file!" << std::endl;
         return;
       }
       else
@@ -202,6 +202,56 @@ namespace pandora_vision
               boost::lambda::bind(&boost::filesystem::directory_entry::path,
                 boost::lambda::_1)));
       return numFiles;
+    }
+
+    void loadAnnotationsFromFile(const std::string& filename, 
+                                 std::vector<cv::Rect>* bbox,
+                                 std::vector<std::string>* annotatedImages,
+                                 std::vector<int>* categories)
+                                                  
+    { std::ifstream inFile;
+      std::string line,imgName,temp,x1,y1,x2,y2;
+      cv::Rect rect;
+      int i,category;
+      i = 0;
+      
+      inFile.open(filename.c_str());
+      if(!inFile)
+      {
+        ROS_ERROR("Cannot load Annotations file");
+      }
+      else
+      {
+        if(inFile.is_open())
+        {
+          while(std::getline(inFile,line))
+          {
+            std::stringstream ss(line);
+            getline(ss,imgName,',');
+            getline(ss,temp,',');
+            getline(ss,x1,',');
+            getline(ss,y1,',');
+            getline(ss,x2,',');
+            getline(ss,y2);
+
+            rect.x = atoi(x1.c_str());
+            rect.y = atoi(y1.c_str());
+            rect.width = atoi(x2.c_str()) - atoi(x1.c_str());
+            rect.height = atoi(y2.c_str()) - atoi(y1.c_str());
+            category = atoi(temp.c_str());
+            ROS_INFO_STREAM("Loading Annotation no: " << i+1 <<" for "<< imgName << "\n");
+              /*ROS_INFO_STREAM(rect.x << "," <<
+                            rect.y<< "," <<
+                            rect.width << "," <<
+                            rect.height << "\n" );*/
+            annotatedImages->push_back(imgName);
+            bbox->push_back(rect);
+            categories->push_back(category);
+            i++;
+          }
+        } 
+      }
+      inFile.close();
     }
   }// namespace file_utilities
 }// namespace pandora_vision

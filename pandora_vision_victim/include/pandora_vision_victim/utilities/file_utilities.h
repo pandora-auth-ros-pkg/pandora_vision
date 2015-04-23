@@ -37,6 +37,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <vector>
 
 #include <boost/lambda/bind.hpp>
 #include <boost/algorithm/string.hpp>
@@ -105,6 +107,9 @@ namespace pandora_vision
     bool exist(const char* fileName);
 
     int countFilesInDirectory(const boost::filesystem::path& directory);
-
+       void loadAnnotationsFromFile(const std::string& filename, 
+                                 std::vector<cv::Rect>* bbox,
+                                 std::vector<std::string>* annotatedImages,
+                                 std::vector<int>* categories);
   }// namespace file_utilities
 }// namespace pandora_vision
