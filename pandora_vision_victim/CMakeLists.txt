@@ -41,9 +41,10 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-############################ File Utilities Library ############################
+############################### Utilities Library ##############################
 add_library(${PROJECT_NAME}_utilities
-            src/utilities/file_utilities.cpp)
+            src/utilities/file_utilities.cpp
+            src/utilities/feature_extraction_utilities.cpp)
 target_link_libraries(${PROJECT_NAME}_utilities ${catkin_LIBRARIES})
 
 ########################## Victim_Parameters library ###############################

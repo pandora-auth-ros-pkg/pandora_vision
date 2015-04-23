@@ -88,8 +88,7 @@ namespace pandora_vision
        * @brief
        */
       virtual void constructFeaturesMatrix(
-          const boost::filesystem::path& directory, const std::string& prefix,
-          const std::string& fileName,
+          const boost::filesystem::path& directory,
           cv::Mat* featuresMat, cv::Mat* labelsMat)
       {
       }
@@ -117,9 +116,6 @@ namespace pandora_vision
       //! Matrix containing the feature vectors extracted from a set of images.
       std::vector<std::vector<double> > featureMatrix_;
 
-      //! String containing the type of the images used in the feature
-      //! extraction process.
-      std::string imageType_;
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H

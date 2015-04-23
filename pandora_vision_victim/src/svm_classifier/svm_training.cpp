@@ -71,6 +71,7 @@ namespace pandora_vision
     package_path = ros::package::getPath("pandora_vision_victim");
     ROS_INFO("[victim_node] : Created Svm training instance");
 
+    doFeatureExtraction_ = true;
     featureExtraction_ = new FeatureExtraction();
   }
 
@@ -82,68 +83,6 @@ namespace pandora_vision
     ROS_DEBUG("[victim_node] : Destroying Svm training instance");
   }
 
-  /**
-   * @brief
-   * @param newMax [double]
-   * @param newMin [double]
-   * @param image [cv::Mat*]
-   * @param minVec [std::vector<double>*]
-   * @param maxVec [std::vector<double>*]
-   * @return void
-   */
-  void SvmTraining::minMaxNormalization(double newMax,
-                                        double newMin,
-                                        cv::Mat* image,
-                                        std::vector<double>* minVec,
-                                        std::vector<double>* maxVec)
-  {
-    double minVal, maxVal;
-    if (!minVec->empty())
-      minVec->clear();
-    if (!maxVec->empty())
-      maxVec->clear();
-
-    for (int ii = 0; ii < image->cols; ii++)
-    {
-      cv::minMaxLoc(image->col(ii), &minVal, &maxVal);
-      subtract(image->col(ii), minVal, image->col(ii));
-      divide(image->col(ii), maxVal - minVal, image->col(ii));
-      multiply(image->col(ii), newMax - newMin, image->col(ii));
-      add(image->col(ii), newMin, image->col(ii));
-
-      minVec->push_back(minVal);
-      minVec->push_back(maxVal);
-    }
-  }
-
-  /**
-   * @brief
-   * @param image [cv::Mat*]
-   * @param meanVec [std::vector<double>*]
-   * @param stdDevVec [std::vector<double>*]
-   * @return void
-   */
-  void SvmTraining::zScoreNormalization(cv::Mat* image,
-                                        std::vector<double>* meanVec,
-                                        std::vector<double>* stdDevVec)
-  {
-    cv::Scalar mu, sigma;
-    if (!meanVec->empty())
-      meanVec->clear();
-    if (!stdDevVec->empty())
-      stdDevVec->clear();
-
-    for (int ii = 0; ii < image->cols; ii++)
-    {
-      meanStdDev(image->col(ii), mu, sigma);
-      subtract(image->col(ii), mu.val[0], image->col(ii));
-      if (sigma.val[0] != 0.0)
-        divide(image->col(ii), sigma.val[0], image->col(ii));
-
-      meanVec->push_back(mu.val[0]);
-      stdDevVec->push_back(sigma.val[0]);
-    }
-  }
 
   /**
    * @brief Function that evaluates the training
@@ -327,11 +266,10 @@ namespace pandora_vision
   }
 
   void SvmTraining::constructFeaturesMatrix(
-      const boost::filesystem::path& directory, const std::string& prefix,
-      const std::string& fileName,
+      const boost::filesystem::path& directory,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
-    featureExtraction_->constructFeaturesMatrix(directory, prefix, fileName,
+    featureExtraction_->constructFeaturesMatrix(directory,
         featuresMat, labelsMat);
   }
 }// namespace pandora_vision

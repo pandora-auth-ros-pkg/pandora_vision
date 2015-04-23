@@ -47,6 +47,9 @@ namespace pandora_vision
   RgbSvmTraining::RgbSvmTraining(const std::string& ns, int _num_feat, const std::string& datasetPath) :
       SvmTraining(ns, _num_feat, datasetPath)
   {
+    doPcaAnalysis_ = false;
+    typeOfNormalization_ = 0;
+    imageType_ = "rgb_";
     featureExtraction_ = new RgbFeatureExtraction();
     std::cout << "Created RGB SVM Training Instance" << std::endl;
   }
@@ -78,7 +81,6 @@ namespace pandora_vision
     std::stringstream test_labels_mat_file_stream;
     std::stringstream svm_file_stream;
     std::stringstream results_file_stream;
-    cv::Mat results = cv::Mat::zeros(test_num_files, 1, CV_64FC1);
     float prediction;
     double A, B;
 
@@ -109,16 +111,19 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, num_feat, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    //if(file_utilities::exist(in_file_stream.str().c_str()) == false)
-    if (true)
+    if (file_utilities::exist(in_file_stream.str().c_str()) == false ||
+        doFeatureExtraction_)
     {
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
-      constructFeaturesMatrix(trainingDirectory, prefix,
-          training_matrix_file_path, &trainingFeaturesMat, &trainingLabelsMat);
+      constructFeaturesMatrix(trainingDirectory,
+          &trainingFeaturesMat, &trainingLabelsMat);
 
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
+
+      file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
+          prefix, training_matrix_file_path, imageType_);
     }
     else
     {
@@ -128,16 +133,19 @@ namespace pandora_vision
           labels_mat_file_stream.str(), "training_labels_mat");
     }
 
-    //if(file_utilities::exist(in_test_file_stream.str().c_str()) == false)
-    if (true)
+    if (file_utilities::exist(in_test_file_stream.str().c_str()) == false ||
+        doFeatureExtraction_)
     {
       std::cout << "Create necessary test matrix" << std::endl;
       std::string prefix = "test_";
-      constructFeaturesMatrix(testDirectory, prefix, test_matrix_file_path,
+      constructFeaturesMatrix(testDirectory,
           &testFeaturesMat, &testLabelsMat);
 
       testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
       testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
+
+      file_utilities::saveFeaturesInFile(testFeaturesMat, testLabelsMat,
+          prefix, test_matrix_file_path, imageType_);
     }
     else
     {
@@ -193,6 +201,7 @@ namespace pandora_vision
      //~ for (int jj = 0; jj < results.cols; jj++)
       //~ if(results.at<float>(ii, jj) == 0)
           //~ results.at<float>(ii, jj) = -1;
+    cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
     SVM.predict(testFeaturesMat, results);
     //std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
     file_utilities::saveToFile(results_file_stream.str(), "results", results);

@@ -32,7 +32,9 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *********************************************************************/
 
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
@@ -48,7 +50,6 @@ namespace pandora_vision
    */
   RgbFeatureExtraction::RgbFeatureExtraction() : FeatureExtraction()
   {
-    imageType_ = "rgb_";
   }
 
   /**
@@ -107,8 +108,7 @@ namespace pandora_vision
   @return void
   **/
   void RgbFeatureExtraction::constructFeaturesMatrix(
-      const boost::filesystem::path& directory, const std::string& prefix,
-      const std::string& fileName,
+      const boost::filesystem::path& directory,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
     cv::Mat image;
@@ -152,12 +152,5 @@ namespace pandora_vision
 
       rowIndex += 1;
     }
-    /// Normalize the training matrix
-    // zScoreNormalization(featuresMat);
-
-    /// Perform PCA to reduce the dimensions of the features
-    // performPcaAnalysis(featuresMat);
-    file_utilities::saveFeaturesInFile(*featuresMat, *labelsMat, prefix,
-        fileName, imageType_);
   }
 }// namespace pandora_vision

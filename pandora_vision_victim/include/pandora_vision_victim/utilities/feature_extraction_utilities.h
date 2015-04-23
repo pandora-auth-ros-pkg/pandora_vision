@@ -35,13 +35,8 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
-#define PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
-
-#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
-#include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
-#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
-#include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
+#include <vector>
+#include <opencv2/opencv.hpp>
 
 /**
  * @namespace pandora_vision
@@ -50,36 +45,54 @@
 namespace pandora_vision
 {
   /**
-   * @class RgbFeatureExtraction
-   * @brief This class extracts features from RGB images.
+   * @class FeatureExtractionUtilities
+   * @brief This class provides utilities for feature extraction, feature
+   * selection and feature normalization.
    */
-  class RgbFeatureExtraction : public FeatureExtraction
+  class FeatureExtractionUtilities
   {
     public:
       /**
-       * @brief Default Constructor
+       * @brief Constructor
        */
-      RgbFeatureExtraction();
+      FeatureExtractionUtilities();
 
       /**
-       * @brief Default Destructor
+       * @brief Destructor
        */
-      virtual ~RgbFeatureExtraction();
-
-      /**
-       * @brief This function extracts features from RGB images according to
-       * a predefined set of feature extraction algorithms.
-       * @param inImage [const cv::Mat&] RGB frame to extract features from.
-       * @return void
-       */
-      virtual void extractFeatures(const cv::Mat& inImage);
+      ~FeatureExtractionUtilities();
 
       /**
        * @brief
+       * @param newMax [double]
+       * @param newMin [double]
+       * @param image [cv::Mat*]
+       * @param minVec [std::vector<double>*]
+       * @param maxVec [std::vector<double>*]
+       * @return void
        */
-      virtual void constructFeaturesMatrix(
-          const boost::filesystem::path& directory,
-          cv::Mat* featuresMat, cv::Mat* labelsMat);
+      void minMaxNormalization(double newMax, double newMin,
+          cv::Mat* image, std::vector<double>* minVec,
+          std::vector<double>* maxVec);
+
+      /**
+       * @brief
+       * @param image [cv::Mat*]
+       * @param meanVec [std::vector<double>*]
+       * @param stdDevVec [std::vector<double>*]
+       * @return void
+       */
+      void zScoreNormalization(cv::Mat* image,
+          std::vector<double>* meanVec, std::vector<double>* stdDevVec);
+
+      /**
+       * @brief This function performs PCA analysis to reduce the feature
+       * dimensions.
+       * @param featuresMat [cv::Mat*] Feature matrix to be used in the PCA
+       * analysis.
+       * @return void
+       */
+      cv::Mat performPcaAnalysis(const cv::Mat& featuresMat, int nEigens);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
+

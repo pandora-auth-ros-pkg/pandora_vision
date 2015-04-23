@@ -56,6 +56,7 @@
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
+#include "pandora_vision_victim/utilities/feature_extraction_utilities.h"
 
 #define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
 
@@ -81,15 +82,8 @@ namespace pandora_vision
       @return void
       **/
       void constructFeaturesMatrix(
-          const boost::filesystem::path& directory, const std::string& prefix,
-          const std::string& fileName,
+          const boost::filesystem::path& directory,
           cv::Mat* featuresMat, cv::Mat* labelsMat);
-      /**
-       * @brief
-       * @param dataMat [cv::Mat*]
-       * @return void
-       */
-      void performPcaAnalysis(cv::Mat* dataMat);
 
       /**
       @brief Function that implements the training for the subsystems
@@ -100,16 +94,6 @@ namespace pandora_vision
       virtual void trainSubSystem()
       {
       }
-
-      void minMaxNormalization(double newMax,
-                               double newMin,
-                               cv::Mat* image,
-                               std::vector<double>* minVec,
-                               std::vector<double>* maxVec);
-
-      void zScoreNormalization(cv::Mat* image,
-                               std::vector<double>* meanVec,
-                               std::vector<double>* stdDevVec);
 
       /**
       @brief Function that evaluates the training
@@ -137,20 +121,31 @@ namespace pandora_vision
       ros::NodeHandle _nh;
 
       VictimParameters vparams;
-      ///Feature vector for rgb features
-      std::vector<double> _rgbFeatureVector;
 
-      ///Feature vector for depth features
-      std::vector<double> _depthFeatureVector;
+      //! String containing the type of the images used in the feature
+      //! extraction process.
+      std::string imageType_;
 
       //! Variable used for State Managing
       bool trainingNowON;
 
+      //! Variable used to decide whether to perform the feature extraction or
+      //! to read features from a file.
+      bool doFeatureExtraction_;
+
+      //! Variable used to decide whether to perform PCA analysis on the
+      //! features or not.
+      bool doPcaAnalysis_;
+
+      //! Variable used to decide whether to perform feature normalization or
+      //! not and what type of normalization should be chosen. 0 stands for no
+      //! normalization, 1 stands for min-max normalization and 2 stands for
+      //! z-Score normalization.
+      int typeOfNormalization_;
+
       std::string path_to_samples;
       std::string package_path;
 
-      int num_files;
-      int test_num_files;
       int num_feat;
       float accuracy_;
       float precision_;
@@ -164,6 +159,9 @@ namespace pandora_vision
 
       /// Feature Extractor
       FeatureExtraction* featureExtraction_;
+      /// Feature Extraction Utilities used to perform feature normalization
+      /// and/or feature selection.
+      FeatureExtractionUtilities featureExtractionUtilities_;
       /// Set up SVM's parameters
       CvSVMParams params;
       CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
