@@ -33,7 +33,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
@@ -41,8 +41,6 @@
 #define PANDORA_VISION_VICTIM_SVM_TRAINING_H
 
 #include <cmath>
-#include <iostream>
-#include <fstream>
 
 #include <opencv2/opencv.hpp>
 
@@ -68,7 +66,8 @@ namespace pandora_vision
       /**
        * @brief The Constructor
        */
-      SvmTraining(const std::string& ns, int _num_feat, const std::string& datasetPath);
+      SvmTraining(const std::string& ns, int numFeatures,
+                  const std::string& datasetPath);
 
       /**
        * @brief The Destructor
@@ -76,55 +75,58 @@ namespace pandora_vision
       virtual ~SvmTraining();
 
       /**
-      @brief This method constructs the training matrix
-      to be used for the training
-      @param file_name [std::string]: file name to save the extracted training matrix
-      @return void
-      **/
+       * @brief This function constructs the features matrix, i.e. the feature
+       * vectors of a set of images.
+       * @param directory [const boost::filesystem::path&] The directory that
+       * contains the set of images for the feature extraction.
+       * @param annotationsFile [const std::string&] The name of the file that
+       * contains the class attributes of the images to be processed.
+       * @param featuresMat [cv::Mat*] The features matrix.
+       * @param labelsMat [cv::Mat*] The matrix that contains the class
+       * attributes for the processed set of images.
+       * @return void
+       */
       void constructFeaturesMatrix(const boost::filesystem::path& directory,
                                    const std::string& annotationsFile,
                                    cv::Mat* featuresMat, cv::Mat* labelsMat);
-      /**
-       * @brief
-       * @param dataMat [cv::Mat*]
-       * @return void
-       */
-      void performPcaAnalysis(cv::Mat* dataMat);
 
       /**
-      @brief Function that implements the training for the subsystems
-      according to the given training sets. It applies svm and extracts
-      a suitable model
-      @return void
-      **/
+       * @brief Function that implements the training for the subsystems
+       * according to the given training sets. It applies SVM and extracts
+       * a suitable model.
+       * @return void
+       */
       virtual void trainSubSystem()
       {
       }
 
       /**
-      @brief Function that evaluates the training
-      @param [cv::Mat&] predicted the predicted results
-      @param [cv::Mat&] the actual results
-      @return void
-      **/
+       * @brief This function evaluates the classifier model, based on the
+       * predicted and the actual class attributes.
+       * @param predicted [const cv::Mat&] The predicted class attributes.
+       * @param actual [const cv::Mat&] The actual class attributes.
+       * @return void
+       */
       void evaluate(const cv::Mat& predicted, const cv::Mat& actual);
 
+      // Platt's binary SVM Probablistic Output: an improvement from Lin et al.
       /**
-      @brief Function that computes the vectors A,B necessary for the computation
-      of the probablistic output of the svm bases on platt's binary svm
-      probablistic Output
-      @param dec_values [cv::Mat]: the distance from the hyperplane of the
-      predicted results of the given test dataset
-      @param labels [cv::Mat]: the true labels of the dataset
-      @param A [double&]:, the vector A to be computed
-      @param B [double&]: the vector B to be computed
-      @return void
-      **/
-      void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A, double* B);
+       * @brief Function that computes the vectors A,B necessary for the
+       * computation of the probablistic output of the SVM bases on Platt's
+       * binary SVM probablistic Output
+       * @param dec_values [cv::Mat] the distance from the hyperplane of the
+       * predicted results of the given test dataset
+       * @param labels [cv::Mat] the true labels of the dataset
+       * @param A [double*] the vector A to be computed
+       * @param B [double*] the vector B to be computed
+       * @return void
+       */
+      void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A,
+                         double* B);
 
     protected:
       //! The NodeHandle
-      ros::NodeHandle _nh;
+      ros::NodeHandle nh_;
 
       VictimParameters vparams;
 
@@ -152,7 +154,7 @@ namespace pandora_vision
       std::string path_to_samples;
       std::string package_path;
 
-      int num_feat;
+      int numFeatures_;
       float accuracy_;
       float precision_;
       float recall_;

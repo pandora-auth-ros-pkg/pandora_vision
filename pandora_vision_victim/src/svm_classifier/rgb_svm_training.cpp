@@ -44,8 +44,8 @@ namespace pandora_vision
   /**
    * @brief Constructor
    */
-  RgbSvmTraining::RgbSvmTraining(const std::string& ns, int _num_feat, const std::string& datasetPath) :
-      SvmTraining(ns, _num_feat, datasetPath)
+  RgbSvmTraining::RgbSvmTraining(const std::string& ns, int numFeatures, const std::string& datasetPath) :
+      SvmTraining(ns, numFeatures, datasetPath)
   {
     doPcaAnalysis_ = false;
     typeOfNormalization_ = 2;
@@ -107,9 +107,9 @@ namespace pandora_vision
     boost::filesystem::path testDirectory(testDatasetPath.str());
     int numTestFiles = file_utilities::countFilesInDirectory(testDirectory);
 
-    cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, num_feat, CV_64FC1);
+    cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, numFeatures_, CV_64FC1);
     cv::Mat trainingLabelsMat = cv::Mat::zeros(numTrainingFiles, 1, CV_64FC1);
-    cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, num_feat, CV_64FC1);
+    cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
     std::string normalizationParamOne = "mean_values.xml";
