@@ -1,4 +1,3 @@
-Header header
 # Center of blob at x
 float32 x
 # Center of blob at y

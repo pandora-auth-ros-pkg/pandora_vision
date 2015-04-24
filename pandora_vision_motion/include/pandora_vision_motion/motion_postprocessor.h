@@ -42,21 +42,21 @@
 
 #include <string>
 #include "pandora_common_msgs/GeneralAlertInfo.h"
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
+#include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
 
 namespace pandora_vision
 {
-  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertInfoVector>
+  class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertVector>
   {
     public:
-      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertInfoVector> GeneralAlertInfoVectorPtr;
+      typedef boost::shared_ptr<pandora_common_msgs::GeneralAlertVector> GeneralAlertVectorPtr;
 
       MotionPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~MotionPostProcessor();
 
       virtual bool
-        postProcess(const POIsStampedConstPtr& input, const GeneralAlertInfoVectorPtr& output);
+        postProcess(const POIsStampedConstPtr& input, const GeneralAlertVectorPtr& output);
   };
 }  // namespace pandora_vision
 

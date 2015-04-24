@@ -37,13 +37,14 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_qrcode/qrcode_postprocessor.h"
 
 namespace pandora_vision
 {
 
   QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>(ns, handler)
+    VisionPostProcessor<pandora_vision_msgs::QRAlertVector>(ns, handler)
   {
   }
 
@@ -51,17 +52,18 @@ namespace pandora_vision
   {
   }
 
-  bool QrCodePostProcessor::postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output)
+  bool QrCodePostProcessor::postProcess(const POIsStampedConstPtr& input, const QRAlertVectorPtr& output)
   {
-    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      pandora_vision_msgs::QRAlertMsg qrAlert;
+      pandora_vision_msgs::QRAlert qrAlert;
 
       qrAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
       qrAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
+      qrAlert.info.probability = 1;
 
       boost::shared_ptr<QrCodePOI> qrCodePOI(boost::dynamic_pointer_cast<QrCodePOI>(input->pois[ii]));
       qrAlert.QRcontent = qrCodePOI->getContent();

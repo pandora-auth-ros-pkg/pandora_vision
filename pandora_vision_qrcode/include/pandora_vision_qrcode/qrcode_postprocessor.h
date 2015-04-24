@@ -41,24 +41,23 @@
 #define PANDORA_VISION_QRCODE_QRCODE_POSTPROCESSOR_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_msgs/QRAlertMsg.h"
-#include "pandora_vision_msgs/QRAlertsVectorMsg.h"
+#include "pandora_vision_msgs/QRAlert.h"
+#include "pandora_vision_msgs/QRAlertVector.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
 #include "pandora_vision_qrcode/qrcode_poi.h"
 
 namespace pandora_vision
 {
-  class QrCodePostProcessor : public VisionPostProcessor<pandora_vision_msgs::QRAlertsVectorMsg>
+  class QrCodePostProcessor : public VisionPostProcessor<pandora_vision_msgs::QRAlertVector>
   {
     public:
-      typedef boost::shared_ptr<pandora_vision_msgs::QRAlertsVectorMsg> QRAlertsVectorMsgPtr;
+      typedef boost::shared_ptr<pandora_vision_msgs::QRAlertVector> QRAlertVectorPtr;
 
       QrCodePostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~QrCodePostProcessor();
-      
+
     virtual bool
-      postProcess(const POIsStampedConstPtr& input, const QRAlertsVectorMsgPtr& output);
+      postProcess(const POIsStampedConstPtr& input, const QRAlertVectorPtr& output);
   };
 }  // namespace pandora_vision
 

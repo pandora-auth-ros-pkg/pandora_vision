@@ -41,32 +41,33 @@
 
 namespace pandora_vision
 {
-  
+
   LandoltCPostProcessor::LandoltCPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionPostProcessor<pandora_vision_msgs::LandoltcAlertsVectorMsg>(ns, handler)
+    VisionPostProcessor<pandora_vision_msgs::LandoltcAlertVector>(ns, handler)
   {
   }
-  
+
   LandoltCPostProcessor::~LandoltCPostProcessor()
   {
   }
-  
-  bool LandoltCPostProcessor::postProcess(const POIsStampedConstPtr& input, const LandoltcAlertsVectorMsgPtr& output)
+
+  bool LandoltCPostProcessor::postProcess(const POIsStampedConstPtr& input, const LandoltcAlertVectorPtr& output)
   {
-    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
-    
+
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      pandora_vision_msgs::LandoltcAlertMsg landoltcAlert;
-      
+      pandora_vision_msgs::LandoltcAlert landoltcAlert;
+
       landoltcAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
       landoltcAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
-      
+      landoltcAlert.info.probability = alertVector.generalAlerts[ii].probability;
+
       boost::shared_ptr<LandoltCPOI> landoltCPOI(boost::dynamic_pointer_cast<LandoltCPOI>(input->pois[ii]));
       landoltcAlert.angles = landoltCPOI->getAngles();
       landoltcAlert.posterior = landoltCPOI->getProbability();
-      
+
       output->landoltcAlerts.push_back(landoltcAlert);
     }
     return true;

@@ -1,4 +1,3 @@
-Header header
 # Blob's bounding rectangle
 AreaOfInterest areaOfInterest
 # blob's outline points X coordinate

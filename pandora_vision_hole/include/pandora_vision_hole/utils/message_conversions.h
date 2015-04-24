@@ -41,7 +41,7 @@
 #include "utils/defines.h"
 #include "utils/outline_discovery.h"
 #include "utils/holes_conveyor.h"
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
+#include "pandora_vision_msgs/BlobVector.h"
 
 /**
   @namespace pandora_vision
@@ -95,7 +95,7 @@ namespace pandora_vision
        **/
       static void createCandidateHolesVector(
         const HolesConveyor& conveyor,
-        std::vector<pandora_vision_msgs::CandidateHoleMsg>*
+        std::vector<pandora_vision_msgs::Blob>*
         candidateHolesVector);
 
       /**
@@ -115,7 +115,7 @@ namespace pandora_vision
       static void createCandidateHolesVectorMessage(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
-        pandora_vision_msgs::CandidateHolesVectorMsg* candidateHolesVectorMsg,
+        pandora_vision_msgs::BlobVector* candidateHolesVectorMsg,
         const std::string& encoding,
         const sensor_msgs::Image& msg);
 
@@ -141,7 +141,7 @@ namespace pandora_vision
         @return void
        **/
       static void extractImageFromMessageContainer(
-        const pandora_vision_msgs::CandidateHolesVectorMsg& msg,
+        const pandora_vision_msgs::BlobVector& msg,
         cv::Mat* image, const std::string& encoding);
 
       /**
@@ -163,7 +163,7 @@ namespace pandora_vision
         @return void
        **/
       static void fromCandidateHoleMsgToConveyor(
-        const std::vector<pandora_vision_msgs::CandidateHoleMsg>&
+        const std::vector<pandora_vision_msgs::Blob>&
         candidateHolesVector,
         HolesConveyor* conveyor,
         const cv::Mat& inImage,
@@ -189,7 +189,7 @@ namespace pandora_vision
         @return void
        **/
       static void unpackMessage(
-        const pandora_vision_msgs::CandidateHolesVectorMsg& holesMsg,
+        const pandora_vision_msgs::BlobVector& holesMsg,
         HolesConveyor* conveyor,
         cv::Mat* image,
         const int& representationMethod,

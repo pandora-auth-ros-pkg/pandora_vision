@@ -41,23 +41,23 @@
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_POSTPROCESSOR_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
-#include "pandora_vision_msgs/LandoltcAlertsVectorMsg.h"
+#include "pandora_common_msgs/GeneralAlertVector.h"
+#include "pandora_vision_msgs/LandoltcAlertVector.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
 #include "pandora_vision_landoltc/landoltc_2d/landoltc_poi.h"
 
 namespace pandora_vision
 {
-  class LandoltCPostProcessor : public VisionPostProcessor<pandora_vision_msgs::LandoltcAlertsVectorMsg>
+  class LandoltCPostProcessor : public VisionPostProcessor<pandora_vision_msgs::LandoltcAlertVector>
   {
     public:
-      typedef boost::shared_ptr<pandora_vision_msgs::LandoltcAlertsVectorMsg> LandoltcAlertsVectorMsgPtr;
-      
+      typedef boost::shared_ptr<pandora_vision_msgs::LandoltcAlertVector> LandoltcAlertVectorPtr;
+
       LandoltCPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~LandoltCPostProcessor();
-      
+
       virtual bool
-        postProcess(const POIsStampedConstPtr& input, const LandoltcAlertsVectorMsgPtr& output);
+        postProcess(const POIsStampedConstPtr& input, const LandoltcAlertVectorPtr& output);
   };
 }  // namespace pandora_vision
 
