@@ -115,7 +115,7 @@ namespace pandora_vision
                    const cv::Mat& labelsMat)
     {
       std::ofstream outFile;
-      outFile.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
+      outFile.open(fileName.c_str(), std::ofstream::out | std::ofstream::trunc);
       if (!outFile)
       {
         std::cout << "Error! Cannot load CSV file!" << std::endl;
