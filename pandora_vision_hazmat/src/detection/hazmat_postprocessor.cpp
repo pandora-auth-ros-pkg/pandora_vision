@@ -52,7 +52,7 @@ namespace pandora_vision
 
   bool HazmatPostProcessor::postProcess(const POIsStampedConstPtr& input, const HazmatAlertsVectorMsgPtr& output)
   {
-    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)

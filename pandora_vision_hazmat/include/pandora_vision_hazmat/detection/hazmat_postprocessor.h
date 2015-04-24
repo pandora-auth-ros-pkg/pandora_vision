@@ -41,7 +41,7 @@
 #define PANDORA_VISION_HAZMAT_HAZMAT_POSTPROCESSOR_H
 
 #include <string>
-#include "pandora_common_msgs/GeneralAlertInfoVector.h"
+#include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/HazmatAlertMsg.h"
 #include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"

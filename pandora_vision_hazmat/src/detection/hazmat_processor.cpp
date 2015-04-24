@@ -116,12 +116,17 @@ namespace pandora_vision
     {
       output->header = input->header;
       
-      std::stringstream ss;  // ?
-      const clock_t begin_time = clock();  // ?
+      std::stringstream ss;
+      const clock_t begin_time = clock();
       PlanarObjectDetector::setDims(input->image);
-      bool found = detector_->detect(input->image, &output->pois);  // change detect()
+      
+      ROS_INFO("Detecting...");
+      
+      bool found = detector_->detect(input->image, &output->pois);
+      
+      ROS_INFO("Detection done!!");
       double execTime = ( clock () - begin_time ) /  
-        static_cast<double>(CLOCKS_PER_SEC );  // ?
+        static_cast<double>(CLOCKS_PER_SEC );
         
       // Check if the debug message printing is enabled.
       if (found && debugMsgFlag_)
