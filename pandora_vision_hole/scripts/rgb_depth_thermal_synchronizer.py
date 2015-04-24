@@ -51,7 +51,7 @@ def callback(pointCloud, image):
     # if yes pass it to the variable
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/pointcloud2_topic")):
         pc2_synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/pointcloud2_topic")
-       # rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", pc2_synch_topic)
+        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", pc2_synch_topic)
     else:
         rospy.logerr( "No synchronized point_cloud2 topic found")
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
@@ -59,7 +59,7 @@ def callback(pointCloud, image):
     # Check if topic for Image has been given properly if yes pass it to the variable
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/thermal_image_topic")):
         thermal_synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/thermal_image_topic")
-        #rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", thermal_synch_topic)
+        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", thermal_synch_topic)
     else:
         rospy.logerr( "No synchronized thermal topic found")
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
@@ -103,7 +103,7 @@ if __name__=='__main__':
     flir_subscriber = message_filters.Subscriber(flir_topic, Image)
 
     # Synchronize kinect and flir topics
-    sync = approxsync.ApproximateSynchronizer(0.02, [kinect_subscriber, flir_subscriber], 10)
+    sync = approxsync.ApproximateSynchronizer(0.5, [kinect_subscriber, flir_subscriber], 10)
     sync.registerCallback(callback)
 
     rospy.spin()

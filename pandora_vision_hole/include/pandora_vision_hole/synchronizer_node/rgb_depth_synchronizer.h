@@ -129,8 +129,8 @@ namespace pandora_vision
       std::string synchronizedThermalImageTopic_;
 
       // Here we copy the incoming messages from the Rgbd-T synchronizer node
-      PointCloudPtr copiedPc_; 
       sensor_msgs::Image copiedThermal_;
+      PointCloudPtr copiedPc_;
 
       // A boolean indicating whether the node is publishing through the
       // above two publishers

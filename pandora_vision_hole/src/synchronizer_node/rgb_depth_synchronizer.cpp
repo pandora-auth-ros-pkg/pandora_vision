@@ -53,6 +53,7 @@ namespace pandora_vision
     // hole fusion node to unlock him
     isLocked_ = true;
 
+    copiedPc_.reset(new PointCloud);
     // Initialize the messageNum variable.
     // It acts as a counter of the published messages from 
     // Rgbd-T synchronizer node to the synchronizer node
@@ -365,6 +366,8 @@ namespace pandora_vision
     const PointCloudPtr& pointCloudMessage,
     const sensor_msgs::Image& thermalMessage)
   {
+    ROS_INFO_STREAM("pointcloud dimensions " << pointCloudMessage->height <<" "<< pointCloudMessage->width);
+
     if (!isLocked_)
     {
       // Lock the rgb_depth_thermal_synchronizer node; aka prevent
@@ -389,7 +392,7 @@ namespace pandora_vision
       if (ticks_ > 1)
       {
         meanProcessingTime_ += t;
-      }
+      
 
       ROS_INFO_NAMED(PKG_NAME,
         "Mean processing time :                  %fs",
@@ -397,18 +400,20 @@ namespace pandora_vision
 
       ROS_INFO_NAMED(PKG_NAME,
         "=================================================");
-
+      }
       invocationTime_ = ros::Time::now().toSec();
 
       Timer::start("synchronizedCallback", "", true);
       #endif
-
+      ROS_ERROR("COPY PC");
+      ROS_INFO_STREAM("pointcloud dimensions " << pointCloudMessage->height << " " <<pointCloudMessage->width);
       // For simulation purposes, the width and height parameters of the
       // point cloud must be set. Copy the input point cloud message to another
       // one so that these can be set manually if and when needed
       PointCloudPtr pointCloud(new PointCloud);
       pcl::copyPointCloud(*pointCloudMessage, *pointCloud);
-
+      
+      ROS_ERROR("POINTCLOUD COPIED");
       // The input point cloud is unorganized, in other words,
       // simulation is running. Variables are needed to be set in order for
       // the point cloud to be functionally exploitable.
@@ -455,7 +460,7 @@ namespace pandora_vision
      
       // Publish the synchronized point cloud
       synchronizedPointCloudPublisher_.publish(pointCloud);
-
+      ROS_ERROR("ALL PUBLISHED TO THEIR NODES");
       #ifdef DEBUG_TIME
       Timer::tick("synchronizedCallback");
       Timer::printAllMeansTree();
@@ -478,24 +483,29 @@ namespace pandora_vision
     const sensor_msgs::PointCloud2& pointCloud2Message)
  
    {
+     // Force pointcloud callback to start after thermal callback
+     if(!isLocked_ && messageNum_ > 0 && messageNum_ < 2)
+     {  
      ROS_INFO("[Synchronizer Node] PointCloud2Callback called");
+
+     // Shutdown the input pointcloud2 subscriber
+     //inputPointCloud2Subscriber_.shutdown();
 
      // Increase the number of messages received from Rgbd-T synch node
      messageNum_++;
-
+     
+     ROS_ERROR("POINTCLOUD CALLBACK 2:%d",messageNum_);
      // Convert PointCloud2 message to PointCloud<T> type.
      pcl::PCLPointCloud2 pcl_pc;
      pcl_conversions::toPCL(pointCloud2Message, pcl_pc);
 
-     PointCloud cloud;
-     pcl::fromPCLPointCloud2(pcl_pc, cloud);
-     
+     pcl::fromPCLPointCloud2(pcl_pc, *copiedPc_);
+
      // Convert PointCloud<T> to PointCloud<T>::Ptr
-     PointCloudPtr m_ptrCloud(&cloud);
 
      // Copy the incoming message
-     copiedPc_ = m_ptrCloud;
 
+      ROS_INFO_STREAM("pointcloud dimensions " << copiedPc_->height << copiedPc_->width);
      // If the two messages have arrived set messageNum to zero for
      // the next cyrcle.
      if(messageNum_ == 2)
@@ -503,9 +513,9 @@ namespace pandora_vision
        messageNum_ = 0;      
 
        // Call the function that processes all info
-       inputPointCloudThermalCallback(copiedPc_, copiedThermal_);
+       inputPointCloudThermalCallback( copiedPc_, copiedThermal_);
      }
-
+     }
    }
 
 
@@ -522,24 +532,32 @@ namespace pandora_vision
   void RgbDepthSynchronizer::inputThermalCallback(
     const sensor_msgs::Image& thermalMessage)
   {
+    // Force thermal callback to start before pointcloud callback
+    if(!isLocked_ && messageNum_ < 1 )
+    {
     ROS_INFO("[Synchronizer Node] ThermalCallback called");
+
+    // Shutdown the input thermal subscriber
+    //inputThermalSubscriber_.shutdown();
 
     // Increase the number of messages received from Rgbd-T synch node
     messageNum_++;
 
+    ROS_ERROR(" CALLBACK THERMAL 1:%d",messageNum_);
     // Copy the incoming message
     copiedThermal_ = thermalMessage;
 
     // If the two messages have arrived set messageNum to zero for
     // the next cyrcle.
-    if(messageNum_ == 2)
+    /*if(messageNum_ == 2)
     {
       messageNum_ = 0;
 
+      ROS_INFO_STREAM("THERMAL dimensions " << copiedPc_->height << copiedPc_->width);
       // Call the function that processes all info
       inputPointCloudThermalCallback(copiedPc_, copiedThermal_);
+    }*/
     }
-
   } 
 
   /**
@@ -554,7 +572,7 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback(
     const std_msgs::Empty& msg)
-  {
+  { ROS_INFO("SHUTDOWN SUBSCRIBERS");
     // Shutdown the input pointcloud2 subscriber
     inputPointCloud2Subscriber_.shutdown();
 
@@ -611,6 +629,7 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
   {
+    ROS_ERROR("SYNCHRONIZER NODE UNLOCKED");
     isLocked_ = false;
   }
 
