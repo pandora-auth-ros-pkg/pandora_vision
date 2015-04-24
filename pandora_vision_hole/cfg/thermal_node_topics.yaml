@@ -1,2 +1,5 @@
 subscribed_topics:
-  thermal_image_topic: /synchronized/thermal/image
+  thermal_image_topic: synchronized/thermal/image
+
+published_topics:
+  candidate_holes_topic: thermal/candidate_holes

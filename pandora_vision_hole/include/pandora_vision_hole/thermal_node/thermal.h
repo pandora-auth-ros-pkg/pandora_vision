@@ -69,12 +69,12 @@ namespace pandora_vision
       // The name of the topic where the thermal image is acquired from
       std::string thermalImageTopic_;
 
-      // ROS publisher for the candidate holes
-      //ros::Publisher candidateHolesPublisher_;
+      // ros publisher for the candidate holes
+      ros::Publisher candidateHolesPublisher_;
 
       // The name of the topic where the candidate holes that the thermal node
       // locates are published to
-      //std::string candidateHolesTopic_;
+      std::string candidateHolesTopic_;
 
       // The dynamic reconfigure (thermal) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>

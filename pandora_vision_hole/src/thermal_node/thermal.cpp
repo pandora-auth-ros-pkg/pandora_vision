@@ -57,10 +57,10 @@ namespace pandora_vision
     thermalImageSubscriber_ = nodeHandle_.subscribe(thermalImageTopic_, 1,
       &Thermal::inputThermalImageCallback, this);
 
-    // Advertise the candidate holes found by the depth node
-    //candidateHolesPublisher_ = nodeHandle_.advertise
-      //<pandora_vision_msgs::CandidateHolesVectorMsg>(
-      //candidateHolesTopic_, 1000);
+    // Advertise the candidate holes found by the thermal node
+    candidateHolesPublisher_ = nodeHandle_.advertise
+      <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
@@ -119,19 +119,19 @@ namespace pandora_vision
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
     // Create the candidate holes message
-    //pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
+    pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.
     // This message will be published to and received by the hole fusion node
-    //MessageConversions::createCandidateHolesVectorMessage(holes,
-      //interpolatedDepthImageSent,
-      //&depthCandidateHolesMsg,
-      //sensor_msgs::image_encodings::TYPE_32FC1,
-      //msg);
+    MessageConversions::createCandidateHolesVectorMessage(holes,
+      thermalImage,
+      &thermalCandidateHolesMsg,
+      sensor_msgs::image_encodings::TYPE_8UC1,
+      msg);
 
     // Publish the candidate holes message
-    //candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+    candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
     Timer::tick("inputThermalImageCallback");
@@ -199,21 +199,21 @@ namespace pandora_vision
     // Read the name of the topic to which the thermal node will be publishing
     // information about the candidate holes found and store it in a private
     // member variable
-    //if (nodeHandle_.getParam(
-        //ns + "/thermal_node/published_topics/candidate_holes_topic",
-        //candidateHolesTopic_))
-    //{
+    if (nodeHandle_.getParam(
+        ns + "/thermal_camera_node/published_topics/candidate_holes_topic",
+        candidateHolesTopic_))
+    {
       // Make the topic's name absolute
-      //candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
+      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
 
-      //ROS_INFO_NAMED(PKG_NAME,
-        //"[Thermal Node] Advertising to the candidate holes topic");
-    //}
-    //else
-    //{
-      //ROS_ERROR_NAMED(PKG_NAME,
-        //"[Thermal Node] Could not find topic candidate_holes_topic");
-    //}
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Thermal Node] Advertising to the candidate holes topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Thermal Node] Could not find topic candidate_holes_topic");
+    }
   }
 
 
