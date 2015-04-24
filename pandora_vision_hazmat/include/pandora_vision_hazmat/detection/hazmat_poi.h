@@ -52,15 +52,25 @@ namespace pandora_vision
 
     public:
       unsigned int patternType;
+      std::string hazmatName;  // keep??
 
     public:
       void setPattern(const int& type)
       {
         patternType = type;
       }
+      void setName(const std::string& name)
+      {
+        hazmatName = name;
+      }
+
       int getPattern() const
       {
         return patternType;
+      }
+      std::string getName() const
+      {
+        return hazmatName;
       }
   };
 }  // namespace pandora_vision

@@ -56,7 +56,7 @@ namespace pandora_vision
      * @return bool : True if an object has been detected,false otherwise.
      */
     bool PlanarObjectDetector::detect(const cv::Mat &frame,
-        std::vector<Object>* detectedObjects) 
+        std::vector<POIPtr>* detectedObjects) 
     {
       // Check if the frame is not an empty matrix.
       if ( !frame.data )
@@ -225,9 +225,12 @@ namespace pandora_vision
 
             //continue;
             //}
-
-            detectedObjects->push_back(Object((*patterns_)[i].name,
-                  cv::Point2f(x, y ), i + 1));
+            boost::shared_ptr<HazmatPOI> hazmatPOIPtr(new HazmatPOI);
+            hazmatPOIPtr->setName((*patterns_)[i].name);
+            hazmatPOIPtr->setPoint(cv::Point2f(x, y ));
+            hazmatPOIPtr->setPattern(i + 1);
+            
+            detectedObjects->push_back(hazmatPOIPtr);
           }
 
         }

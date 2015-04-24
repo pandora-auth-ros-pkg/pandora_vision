@@ -37,11 +37,10 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_hazmat/hazmat_postprocessor.h"
+#include "pandora_vision_hazmat/detection/hazmat_postprocessor.h"
 
 namespace pandora_vision
 {
-
   HazmatPostProcessor::HazmatPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_vision_msgs::HazmatAlertsVectorMsg>(ns, handler)
   {

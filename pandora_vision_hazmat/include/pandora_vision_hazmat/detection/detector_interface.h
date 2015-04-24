@@ -40,6 +40,7 @@
 #define PANDORA_VISION_HAZMAT_DETECTION_DETECTOR_INTERFACE_H
 
 #include "pandora_vision_hazmat/detection/utilities.h"
+#include "pandora_vision_hazmat/detection/hazmat_poi.h"
 
 namespace pandora_vision
 {
@@ -62,7 +63,7 @@ namespace pandora_vision
          * all the objects detected in the scene.
          * @return bool : True if an object has been detected,false otherwise.
          */
-        bool virtual detect(const cv::Mat &frame , std::vector<Object>*
+        bool virtual detect(const cv::Mat &frame , std::vector<POIPtr>*
             detectedObjects ) = 0;
 
         /**

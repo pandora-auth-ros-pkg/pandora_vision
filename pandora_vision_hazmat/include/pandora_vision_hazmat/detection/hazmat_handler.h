@@ -42,14 +42,14 @@
 
 #include <string>
 #include "pandora_vision_common/vision_handler.h"
-#include "pandora_vision_hazmat/hazmat_preprocessor.h"
-#include "pandora_vision_hazmat/hazmat_postprocessor.h"
-#include "pandora_vision_hazmat/hazmat_detector.h"  // TO FIX
+#include "pandora_vision_hazmat/detection/hazmat_preprocessor.h"
+#include "pandora_vision_hazmat/detection/hazmat_postprocessor.h"
+#include "pandora_vision_hazmat/detection/hazmat_processor.h"
 
 namespace pandora_vision
 {
-  class QrCodeHandler : public VisionHandler<HazmatPreProcessor, HazmatDetector,  // TO FIX
-    HazmatPostProcessor>
+  class HazmatHandler : public VisionHandler<HazmatPreProcessor, 
+    pandora_vision_hazmat::HazmatProcessor, HazmatPostProcessor>
   {
     public:
       explicit HazmatHandler(const std::string& ns);

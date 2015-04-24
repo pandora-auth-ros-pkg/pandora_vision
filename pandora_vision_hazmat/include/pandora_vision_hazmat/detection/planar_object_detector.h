@@ -62,7 +62,7 @@ namespace pandora_vision
          * all the objects detected in the scene.
          * @return bool : True if an object has been detected,false otherwise.
          */
-        bool virtual detect(const cv::Mat &frame , std::vector<Object>* 
+        bool virtual detect(const cv::Mat &frame , std::vector<POIPtr>* 
             detectedObjects);
 
         /**

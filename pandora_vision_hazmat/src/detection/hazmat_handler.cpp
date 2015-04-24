@@ -37,12 +37,13 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_hazmat/hazmat_handler.h"
+#include "pandora_vision_hazmat/detection/hazmat_handler.h"
 
 namespace pandora_vision
 {
   HazmatHandler::HazmatHandler(const std::string& ns) : 
-    VisionHandler<HazmatPreProcessor, HazmatDetector, HazmatPostProcessor>(ns)  // TO FIX
+    VisionHandler<HazmatPreProcessor, pandora_vision_hazmat::HazmatProcessor, 
+      HazmatPostProcessor>(ns)
   {
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);

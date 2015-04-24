@@ -45,7 +45,7 @@
 #include "pandora_vision_msgs/HazmatAlertMsg.h"
 #include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
-#include "pandora_vision_hazmat/hazmat_poi.h"
+#include "pandora_vision_hazmat/detection/hazmat_poi.h"
 
 namespace pandora_vision
 {

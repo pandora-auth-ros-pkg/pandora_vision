@@ -35,37 +35,39 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
-#define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
+#ifndef PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
+#define PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
 
 #include <dynamic_reconfigure/server.h>
+#include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_hazmat/DisplayConfig.h"
 #include "pandora_vision_hazmat/detection/detector_factory.h"
-#include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
+#include "pandora_vision_hazmat/detection/hazmat_poi.h"
 
 namespace pandora_vision
 {
   namespace pandora_vision_hazmat
   {
-    class HazmatDetectionNode
+    class HazmatProcessor : public VisionProcessor
     {
       public:
-
         /*
          * @brief : Default Constructor that initiliazes the hazmat detector
          * and the necessary ROS objects for communication.
          */
-        HazmatDetectionNode();
-
+        HazmatProcessor(const std::string& ns, sensor_processor::Handler* handler);
+        
+        /*
+         * @brief : Constructor used for testing.
+         */
+        HazmatProcessor();
+        
         /*
          * @brief : Class destructor that destroys the current detector. 
          */
-        ~HazmatDetectionNode()
-        {
-          ROS_INFO("Destroying the detector object!");
-          delete detector_;
-        }
-
+        virtual ~HazmatProcessor();
+        
         /*
          * @brief : Class method that is used by the dynamic reconfigure
          * server to change object parameters.
@@ -78,41 +80,28 @@ namespace pandora_vision
         void dynamicReconfigCallback(
             const ::pandora_vision_hazmat::DisplayConfig& config, 
             uint32_t level);
-
+            
         /*
-         * @brief : Receives an image message and detects the patterns on the 
-         * image, if any are present.
-         * @param imageMsg[const sensor_msgs::Image&] : The image message. 
+         * @brief
          */
-        void imageCallback(const sensor_msgs::Image& imageMsg);
-
-      private:
-        ros::NodeHandle nodeHandle_; //<! The node handle object for the node.
-
-        ros::Subscriber imageSubscriber_; //<! Camera Subscriber 
-
-        ros::Publisher hazmatPublisher_; //<! The publisher of hazmat alerts.
-
-        dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig> 
+        virtual bool process(const CVMatStampedConstPtr& input, 
+          const POIsStampedPtr& output);
+        
+        private:
+          dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig> 
           dynamicReconfServer_; //<! Reconfigure server for 
                                 //<! changing object params
 
-        bool execTimerFlag_; //<! Flag that toggles the execution time
-                             //<! printing.
+          bool execTimerFlag_; //<! Flag that toggles the execution time
+                               //<! printing.
 
-        bool debugMsgFlag_; //<! Flag that toggles debug messages that contain
-        //<! for the detected patterns.
+          bool debugMsgFlag_; //<! Flag that toggles debug messages that contain
+          //<! for the detected patterns.
+          
+          DetectorFactory factory_; //<! The factory that produces the detectors.
 
-        std::string imageTopic_; //<! Image topic variable. 
-
-        std::string hazmatTopic_; //<! Alert topic variable. 
-
-        DetectorFactory factory_; //<! The factory that produces the detectors.
-
-        PlanarObjectDetector *detector_; //<! Pointer to the detector used.
+          PlanarObjectDetector* detector_; //<! Pointer to the detector used.
     };
-
-} // namespace pandora_vision_hazmat
-} // namespace pandora_vision
-
-#endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_DETECTION_H
+  }  // pandora_vision_hazmat
+}  // namspace pandora_vision
+#endif  // PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
