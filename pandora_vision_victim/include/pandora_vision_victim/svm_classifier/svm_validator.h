@@ -105,6 +105,8 @@ namespace pandora_vision
       float predictionToProbability(float prediction);
 
     protected:
+      /// The path to this node's package.
+      std::string packagePath_;
       /// Feature vector
       std::vector<double> featureVector_;
 
@@ -128,6 +130,15 @@ namespace pandora_vision
       /// Feature Extraction Utilities used to perform feature normalization
       /// and/or feature selection.
       FeatureExtractionUtilities* featureExtractionUtilities_;
+
+      /// Vector used for normalization. If z-score normalization is used, this
+      /// vector contains mean values. If min-max normalization is used, this
+      /// vector contains min values.
+      std::vector<double> normalizationParamOneVec_;
+      /// Vector used for normalization. If z-score normalization is used, this
+      /// vector contains standard values. If min-max normalization is used,
+      /// this vector contains max values.
+      std::vector<double> normalizationParamTwoVec_;
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_VALIDATOR_H

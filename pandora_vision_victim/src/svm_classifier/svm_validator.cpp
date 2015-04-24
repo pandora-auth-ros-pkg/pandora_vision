@@ -40,6 +40,7 @@
 #include <ros/console.h>
 
 #include "pandora_vision_victim/svm_classifier/svm_validator.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
  * @namespace pandora_vision
@@ -63,6 +64,20 @@ namespace pandora_vision
         10000, 1e-6);
     /// Load classifier model path.
     svmValidator_.load(classifierPath.c_str());
+
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
+
+    std::string normalizationParamOne = "mean_values.xml";
+    std::stringstream normalizationParamOnePath;
+    normalizationParamOnePath << packagePath_ << "/data/" << normalizationParamOne;
+    std::string normalizationParamTwo = "standard_deviation_values.xml";
+    std::stringstream normalizationParamTwoPath;
+    normalizationParamTwoPath << packagePath_ << "/data/" << normalizationParamTwo;
+
+    normalizationParamOneVec_ = file_utilities::loadFiles(
+        normalizationParamOnePath.str(), "mean");
+    normalizationParamTwoVec_ = file_utilities::loadFiles(
+        normalizationParamTwoPath.str(), "std_dev");
 
     featureExtraction_ = new FeatureExtraction();
     featureExtractionUtilities_ = new FeatureExtractionUtilities();
@@ -109,8 +124,10 @@ namespace pandora_vision
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
     transpose(featuresMat, featuresMat);
-    ///Normalize the data from [-1,1]
-    //cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);
+    ///Normalize the data
+    featureExtractionUtilities_->performZScoreNormalization(
+        &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+
     ROS_INFO_STREAM("SVM class label: " <<
                     svmValidator_.predict(featuresMat, false));
     return svmValidator_.predict(featuresMat, true);
