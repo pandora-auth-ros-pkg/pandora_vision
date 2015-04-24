@@ -1,9 +1,9 @@
 Header header
-# keypoint.pt.x
-float32 keypointX
-# keypoint.pt.y
-float32 keypointY
+# Center of blob at x
+float32 x
+# Center of blob at y
+float32 y
 # The blob's bounding rectangle vertices X coordinate
-float32[] verticesX
+float32 width
 # The blob's bounding rectangle vertices Y coordinate
-float32[] verticesY
+float32 height
