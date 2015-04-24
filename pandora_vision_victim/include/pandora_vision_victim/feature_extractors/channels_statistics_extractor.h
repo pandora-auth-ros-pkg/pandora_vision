@@ -36,8 +36,8 @@
 *   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H
 
 #include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev_extractor.h"
 #include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
@@ -72,4 +72,4 @@ namespace pandora_vision
           std::vector<double>* depthStatisticsVector);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H

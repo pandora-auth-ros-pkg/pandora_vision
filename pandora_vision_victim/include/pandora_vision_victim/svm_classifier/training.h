@@ -35,8 +35,8 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_TRAINING_H
-#define PANDORA_VISION_VICTIM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_H
+#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_H
 
 #include <iostream>
 #include <fstream>
@@ -143,7 +143,7 @@ namespace pandora_vision
       @return void
       **/
       void saveToFile(std::string file_name, std::string var_name, cv::Mat var);
-      
+
       /**
       @brief Function that saves a variable to a file
       @param file_name [std::string] : name of the file to be created
@@ -230,4 +230,4 @@ namespace pandora_vision
       CvSVM SVM;
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_TRAINING_H
+#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_H

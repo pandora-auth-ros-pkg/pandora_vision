@@ -90,7 +90,7 @@ namespace pandora_vision
     /*/
     for (int ii = 0; ii < img_->rows; ii++)
       for (int jj = 0; jj < img_->cols; jj++)
-        ROS_INFO_STREAM(b0.at<double>(ii,jj));
+        ROS_INFO_STREAM(b0.at<double>(ii, jj));
     //*/
 
     //! Compute the dot product of the RGB color components

@@ -35,6 +35,9 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#ifndef PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
+#define PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
+
 #include <vector>
 #include <opencv2/opencv.hpp>
 
@@ -85,8 +88,8 @@ namespace pandora_vision
        * @return void
        */
       void performMinMaxNormalization(double newMax, double newMin,
-          cv::Mat* image, std::vector<double>& minVec,
-          std::vector<double>& maxVec);
+          cv::Mat* image, const std::vector<double>& minVec,
+          const std::vector<double>& maxVec);
 
       /**
        * @brief
@@ -119,4 +122,4 @@ namespace pandora_vision
       cv::Mat performPcaAnalysis(const cv::Mat& featuresMat, int nEigens);
   };
 }// namespace pandora_vision
-
+#endif  // PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H

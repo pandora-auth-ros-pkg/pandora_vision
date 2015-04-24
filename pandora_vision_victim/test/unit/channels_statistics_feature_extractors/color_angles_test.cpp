@@ -56,11 +56,11 @@ namespace pandora_vision
         WIDTH = 640;
 
         // Construct a blue image
-        blue = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255,255,255));
+        blue = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255, 255, 255));
         // Construct a green image
-        green = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,255,0));
+        green = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0, 255, 0));
         // Construct a red image
-        red = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0,0,255));
+        red = cv::Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(0, 0, 255));
       }
 
       cv::Mat blue, green, red;

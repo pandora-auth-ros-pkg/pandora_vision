@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou, Marios Protopapas
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_TRAINING_PARAMETERS_H
-#define PANDORA_VISION_VICTIM_TRAINING_PARAMETERS_H
+#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_PARAMETERS_H
+#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_PARAMETERS_H
 
 #include <dynamic_reconfigure/server.h>
 
@@ -53,5 +53,5 @@ namespace pandora_vision
     
   };
 } // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_TRAINING_PARAMETERS_H
+#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_TRAINING_PARAMETERS_H
 

@@ -33,37 +33,43 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
-
-#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
-
+#include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
+#include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
+/**
+ * @namespace pandora_vision
+ * @brief The main namespace for PANDORA vision
+ */
 namespace pandora_vision
 {
-  class DFTCoeffsExtractor : public ChannelsStatisticsFeatureExtractor
+  /**
+   * @brief Constructor. Initializes SVM classifier parameters and loads
+   * classifier model. The classifier is to be used with Depth images.
+   * @param classifierPath [const std::string&] The path to the classifier
+   * model.
+   */
+  DepthSvmValidator::DepthSvmValidator(const std::string& classifierPath)
+    : SvmValidator(classifierPath)
   {
-    public:
-      /**
-       * @brief Constructor
-       */
-      explicit DFTCoeffsExtractor(cv::Mat* img);
+    probabilityScaling_ = VictimParameters::depth_svm_prob_scaling;
+    probabilityTranslation_ = VictimParameters::depth_svm_prob_translation;
 
-      /**
-       * @brief Destructor
-       */
-      virtual ~DFTCoeffsExtractor();
+    svmParams_.C = VictimParameters::depth_svm_C;
+    svmParams_.gamma = VictimParameters::depth_svm_gamma;
 
-      /**
-       * @brief This function extracts the 6 first DFT coefficients, using
-       * zigzag scanning.
-       * @return [std::vector<double>] The vector of DFT coefficients.
-       */
-      virtual std::vector<double> extract(void);
-  };
+    featureExtraction_ = new DepthFeatureExtraction();
+  }
+
+  /**
+   * @brief Default Destructor.
+   */
+  DepthSvmValidator::~DepthSvmValidator()
+  {
+  }
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
+
 

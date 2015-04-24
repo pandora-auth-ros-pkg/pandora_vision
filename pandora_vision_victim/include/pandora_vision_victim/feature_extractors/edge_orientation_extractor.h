@@ -34,8 +34,8 @@
 *
 * Author: Marios Protopapas <protopapas_marios@hotmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H
 
 #include "pandora_vision_victim/victim_parameters.h"
 
@@ -106,4 +106,4 @@ namespace pandora_vision
 
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_EDGE_ORIENTATION_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H

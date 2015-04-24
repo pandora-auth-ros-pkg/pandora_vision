@@ -17,8 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  config/victim_dyn_reconf.config
-  )
+    config/victim_dyn_reconf.config
+)
 
 catkin_package(
     #DEPENDS
@@ -107,8 +107,9 @@ target_link_libraries(${PROJECT_NAME}_svm_classifier
 add_executable(victim_node
     src/victim_node.cpp
     src/victim_detection.cpp
-    src/svm_classifier/rgb_system_validator.cpp
-    src/svm_classifier/depth_system_validator.cpp
+    src/svm_classifier/svm_validator.cpp
+    src/svm_classifier/rgb_svm_validator.cpp
+    src/svm_classifier/depth_svm_validator.cpp
     src/victim_vj_detector.cpp
 )
 
@@ -162,7 +163,10 @@ download_extra_data(
 
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string")
+    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use")
+
+## Additional lint filters - Not Needed ##
+# -whitespace/braces, -whitespace/newline, -readability/multiline_string
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}

@@ -35,13 +35,13 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
-#define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H 
+#ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
+#define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 
 #include "pandora_vision_victim/victim_vj_detector.h"
 //#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/svm_classifier/rgb_system_validator.h"
-#include "pandora_vision_victim/svm_classifier/depth_system_validator.h"
+#include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
+#include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
 
 
 namespace pandora_vision
@@ -58,7 +58,7 @@ namespace pandora_vision
 
       /// The topic subscribed to for the camera
       std::string cameraFrameId;
-       
+
       /// Publishers for FaceDetector result messages
       ros::Publisher _victimDirectionPublisher;
 
@@ -72,10 +72,15 @@ namespace pandora_vision
       int prevState;
 
       std::vector<cv::Mat> _rgbdImages;
-      
+
       /// Instance of class face_detector
       VictimVJDetector _rgbViolaJonesDetector;
       //~ VictimVJDetector _victimDetector;
+
+      /// Instance of RGB SVM Validator
+      RgbSvmValidator rgbSvmValidator_;
+      /// Instance of Depth SVM Validator
+      DepthSvmValidator depthSvmValidator_;
 
       /**
       @brief This method check in which state we are, according to

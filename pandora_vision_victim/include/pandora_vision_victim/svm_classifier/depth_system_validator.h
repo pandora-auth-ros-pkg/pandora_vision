@@ -34,8 +34,8 @@
 *
 * Author: Despoina Paschalidou
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H 
-#define PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H 
+#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SYSTEM_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SYSTEM_VALIDATOR_H
 
 #include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
 #include "pandora_vision_victim/feature_extractors/haralickfeature_extractor.h"
@@ -101,4 +101,4 @@ namespace pandora_vision
     
   };
 }// namespace pandora_vision 
-#endif  // PANDORA_VISION_VICTIM_DEPTH_SYSTEM_VALIDATOR_H
+#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SYSTEM_VALIDATOR_H

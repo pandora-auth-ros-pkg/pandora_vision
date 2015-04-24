@@ -441,7 +441,8 @@ namespace pandora_vision
     float prediction;
     double A, B;
 
-    switch(type){
+    switch(type)
+    {
       case 1:
         /// Train only rgb subsystem
         training_matrix_file_path = "rgb_training_matrix.xml";

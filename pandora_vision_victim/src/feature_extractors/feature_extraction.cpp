@@ -66,7 +66,7 @@ namespace pandora_vision
    * @brief This function extracts features according to the predefined
    * feature extraction algorithms.
    * @param inImage [const cv::Mat&] Frame to extract features from.
-   * @ return void
+   * @return void
    */
   void FeatureExtraction::extractFeatures(const cv::Mat& inImage)
   {

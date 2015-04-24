@@ -61,7 +61,7 @@ namespace pandora_vision
         // Construct a white histogram
         white = cv::Mat::zeros(bins, 1, CV_32FC1);
         cv::Rect rect(0, 0, bins, 1);
-        cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+        cv::rectangle(white, rect, cv::Scalar(255, 0, 0), -1);
 
         // Construct an ascending histogram
         ascending = cv::Mat::zeros(bins, 1, CV_32FC1);

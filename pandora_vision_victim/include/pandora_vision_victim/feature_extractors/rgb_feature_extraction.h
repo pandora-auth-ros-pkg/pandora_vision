@@ -35,8 +35,8 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
-#define PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_RGB_FEATURE_EXTRACTION_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_RGB_FEATURE_EXTRACTION_H
 
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
@@ -75,4 +75,4 @@ namespace pandora_vision
       virtual void extractFeatures(const cv::Mat& inImage);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_RGB_FEATURE_EXTRACTION_H

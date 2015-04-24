@@ -56,7 +56,7 @@ namespace pandora_vision
         WIDTH = 4;
 
         // Construct a black image
-        black = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
+        black = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
 
         //set the blackGLCM matrix
         blackGLCM = cv::Mat::zeros(256, 256, CV_64FC1);
@@ -68,9 +68,9 @@ namespace pandora_vision
         //std::cout << "blackGLCM= " << std::endl << " " << blackGLCM << std::endl << std::endl;
 
         // Construct a white image
-        white = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
+        white = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::Rect rect(0, 0, WIDTH, HEIGHT);
-        cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+        cv::rectangle(white, rect, cv::Scalar(255, 0, 0), -1);
 
         //std::cout << "white= " << std::endl << " " << white << std::endl << std::endl;
 
@@ -86,20 +86,20 @@ namespace pandora_vision
         // Construct a horizontal edge image
         horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect1(0, 0, WIDTH, HEIGHT/2);
-        cv::rectangle(horizontal, rect1, cv::Scalar(255,0,0), -1);
+        cv::rectangle(horizontal, rect1, cv::Scalar(255, 0, 0), -1);
 
         // Construct a vertical edge image
         vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect2(0, 0, WIDTH/2, HEIGHT);
-        cv::rectangle(vertical, rect2, cv::Scalar(255,0,0), -1);
+        cv::rectangle(vertical, rect2, cv::Scalar(255, 0, 0), -1);
       }
 
       //Image Dimensions
       int HEIGHT, WIDTH;
 
       // Images that will be used for testing
-      cv::Mat black,blackGLCM, white, whiteGLCM, horizontal, vertical, diagonal45, diagonal135, circle, noisy;
-    };
+      cv::Mat black, blackGLCM, white, whiteGLCM, horizontal, vertical, diagonal45, diagonal135, circle, noisy;
+  };
 
   //! Tests HaralickFeaturesExtractor::calculateGLCM()
   TEST_F(HaralickFeaturesExtractorTest, calculateGLCMwhite)
@@ -113,7 +113,7 @@ namespace pandora_vision
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
       for (int jj = 0; jj< out.cols; jj++)
-        if(out.at<double>(ii,jj) != whiteGLCM.at<double>(ii,jj))
+        if(out.at<double>(ii, jj) != whiteGLCM.at<double>(ii, jj))
           equal= false;
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
@@ -131,7 +131,7 @@ namespace pandora_vision
     bool equal = true;
     for (int ii = 0; ii < out.rows; ii++)
       for (int jj = 0; jj < out.cols; jj++)
-        if(out.at<double>(ii, jj) != blackGLCM.at<double>(ii,jj))
+        if(out.at<double>(ii, jj) != blackGLCM.at<double>(ii, jj))
           equal= false;
 
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
@@ -163,9 +163,9 @@ namespace pandora_vision
     //std::cout << "out= " << std::endl << " " << out << std::endl << std::endl;
     //compute angular second moment
     double sum = 0;
-    for (int ii = 0; ii<blackGLCM.rows; ii++)
-      for (int jj = 0; jj<blackGLCM.cols; jj++)
-        sum+=pow((ii-jj), 2.0) * blackGLCM.at<double>(ii,jj);
+    for (int ii = 0; ii < blackGLCM.rows; ii++)
+      for (int jj = 0; jj < blackGLCM.cols; jj++)
+        sum += pow((ii - jj), 2.0) * blackGLCM.at<double>(ii, jj);
 
     EXPECT_EQ(sum, out);
   }

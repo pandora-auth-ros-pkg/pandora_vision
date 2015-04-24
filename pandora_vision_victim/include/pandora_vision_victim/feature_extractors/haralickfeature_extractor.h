@@ -36,8 +36,8 @@
 *   Victor Daropoulos
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H
 
 #include "pandora_vision_victim/victim_parameters.h"
 
@@ -184,4 +184,4 @@ namespace pandora_vision
       static void findHaralickFeatures(const cv::Mat& image, std::vector<double>* haralickFeatures);
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_HARALICKFEATURE_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H

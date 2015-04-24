@@ -58,22 +58,22 @@ namespace pandora_vision
         WIDTH = 640;
 
         // Construct a black image
-        black = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
+        black = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
 
         // Construct a white image
-        white = cv::Mat::zeros(HEIGHT,WIDTH, CV_8U);
+        white = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::Rect rect(0, 0, WIDTH, HEIGHT);
-        cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+        cv::rectangle(white, rect, cv::Scalar(255, 0, 0), -1);
 
         // Construct a horizontal edge image
-        horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U); 
+        horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect1(0, 0, WIDTH, HEIGHT/2);
-        cv::rectangle(horizontal, rect1, cv::Scalar(255,0,0), -1);
+        cv::rectangle(horizontal, rect1, cv::Scalar(255, 0, 0), -1);
 
         // Construct a vertical edge image
-        vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U); 
+        vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
         cv::Rect rect2(0, 0, WIDTH/2, HEIGHT);
-        cv::rectangle(vertical, rect2, cv::Scalar(255,0,0), -1);
+        cv::rectangle(vertical, rect2, cv::Scalar(255, 0, 0), -1);
 
         // Construct a 135-degree diagonal edge image
         diagonal45 = cv::Mat::zeros( 480, 480, CV_8U); 
@@ -96,8 +96,8 @@ namespace pandora_vision
 
         //Construct an image with a circle
         circle = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
-        cv::Point center = cv::Point(WIDTH/2,HEIGHT/2);
-        cv::circle(circle, center, 100, cv::Scalar(255,255,255), -1, 8);
+        cv::Point center = cv::Point(WIDTH / 2, HEIGHT / 2);
+        cv::circle(circle, center, 100, cv::Scalar(255, 255, 255), -1, 8);
 
         //Construct a noisy image
         noisy = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);

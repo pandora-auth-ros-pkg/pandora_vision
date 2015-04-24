@@ -35,8 +35,8 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H
-#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H
 
 #include <string>
 #include <vector>
@@ -109,4 +109,4 @@ namespace pandora_vision
       std::vector<std::vector<double> > featureMatrix_;
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTION_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H

@@ -47,7 +47,9 @@
 #include "ros/ros.h"
 #include <ros/package.h>
 
-static void read_csv(const std::string& filename, std::vector<cv::Mat>& images, std::vector<int>& labels, char separator = ';')
+static void read_csv(const std::string& filename,
+    const std::vector<cv::Mat>& images, const std::vector<int>& labels,
+    char separator = ';')
 {
   boost::filesystem::path filePath(filename);
   std::ifstream file(filename.c_str(), std::ifstream::in);

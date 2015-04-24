@@ -95,8 +95,8 @@ namespace pandora_vision
    * @return void
    */
   void FeatureExtractionUtilities::performMinMaxNormalization(double newMax,
-      double newMin, cv::Mat* image, std::vector<double>& minVec,
-      std::vector<double>& maxVec)
+      double newMin, cv::Mat* image, const std::vector<double>& minVec,
+      const std::vector<double>& maxVec)
   {
     for (int ii = 0; ii < image->cols; ii++)
     {

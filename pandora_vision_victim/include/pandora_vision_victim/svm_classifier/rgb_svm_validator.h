@@ -33,37 +33,42 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_RGB_SVM_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_RGB_SVM_VALIDATOR_H
 
-#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
+#include <string>
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
+#include "pandora_vision_victim/svm_classifier/svm_validator.h"
 
+/**
+ * @namespace pandora_vision
+ * @brief The main namespace for PANDORA vision
+ */
 namespace pandora_vision
 {
-  class DFTCoeffsExtractor : public ChannelsStatisticsFeatureExtractor
+  /**
+   * @class RgbSvmValidator
+   * @brief This class classifies RGB images using an SVM classifier model.
+   */
+  class RgbSvmValidator : public SvmValidator
   {
     public:
       /**
-       * @brief Constructor
+       * @brief Constructor. Initializes SVM classifier parameters and loads
+       * classifier model. The classifier is to be used with RGB images.
+       * @param classifierPath [const std::string&] The path to the classifier
+       * model.
        */
-      explicit DFTCoeffsExtractor(cv::Mat* img);
+      explicit RgbSvmValidator(const std::string& classifierPath);
 
       /**
-       * @brief Destructor
+       * @brief Default Destructor.
        */
-      virtual ~DFTCoeffsExtractor();
-
-      /**
-       * @brief This function extracts the 6 first DFT coefficients, using
-       * zigzag scanning.
-       * @return [std::vector<double>] The vector of DFT coefficients.
-       */
-      virtual std::vector<double> extract(void);
+      virtual ~RgbSvmValidator();
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_DFT_COEFFS_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_RGB_SVM_VALIDATOR_H
 

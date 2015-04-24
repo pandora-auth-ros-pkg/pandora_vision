@@ -37,8 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_SVM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_TRAINING_H
+#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_TRAINING_H
 
 #include <cmath>
 
@@ -178,4 +178,4 @@ namespace pandora_vision
       CvSVM SVM;
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_SVM_TRAINING_H
+#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_TRAINING_H

@@ -37,6 +37,9 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#ifndef PANDORA_VISION_VICTIM_UTILITIES_FILE_UTILITIES_H
+#define PANDORA_VISION_VICTIM_UTILITIES_FILE_UTILITIES_H
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -57,68 +60,69 @@
  */
 namespace pandora_vision
 {
+/**
+ * @namespace file_utilities
+ * @brief The namespace for a set of file utilities functions.
+ */
+namespace file_utilities
+{
+  void saveFeaturesInFile(const cv::Mat& featuresMat,
+                          const cv::Mat& labelsMat,
+                          const std::string& prefix,
+                          const std::string& fileName,
+                          const std::string& imageType);
+
   /**
-   * @namespace file_utilities
-   * @brief The namespace for a set of file utilities functions.
+  @brief Function that saves a variable to a file
+  @param file_name [std::string] : name of the file to be created
+  @param var_name [std::string] : name of the variable to be saved to the file
+  @param var [cv::Mat] : variable to be saved to the file
+  @return void
+  **/
+  void saveToFile(const std::string& fileName,
+                  const std::string& varName,
+                  const cv::Mat& src);
+
+  /**
+  @brief Function that saves a variable to a file
+  @param file_name [std::string] : name of the file to be created
+  @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
+  @param labels_mat [cv::Mat] : name of the mat of labels to be saved to the file
+  @return void
+  **/
+  void saveToCSV(const std::string& fileName,
+                 const cv::Mat& featuresMat,
+                 const cv::Mat& labelsMat);
+
+  /**
+  @brief Function that loads the necessary files for the training
+  @param [std::string] training_mat_file, name of the file that contains the training data
+  @param [std::string] labels_mat_file, name of the file that contains the labels of each class
+  of the training data
+  @return void
+  **/
+  cv::Mat loadFiles(const std::string& dataMatFile,
+                    const std::string& nameTag);
+
+  /**
+  @brief Function that checks if a file exists
+  @param [const char*] name, Name of file to check if exists
+  @return true if the file was found, and false if not
+  **/
+  bool exist(const char* fileName);
+
+  /**
+   * @brief
    */
-  namespace file_utilities
-  {
-    void saveFeaturesInFile(const cv::Mat& featuresMat,
-                            const cv::Mat& labelsMat,
-                            const std::string& prefix,
-                            const std::string& fileName,
-                            const std::string& imageType);
+  int countFilesInDirectory(const boost::filesystem::path& directory);
 
-    /**
-    @brief Function that saves a variable to a file
-    @param file_name [std::string] : name of the file to be created
-    @param var_name [std::string] : name of the variable to be saved to the file
-    @param var [cv::Mat] : variable to be saved to the file
-    @return void
-    **/
-    void saveToFile(const std::string& fileName,
-                    const std::string& varName,
-                    const cv::Mat& src);
-
-    /**
-    @brief Function that saves a variable to a file
-    @param file_name [std::string] : name of the file to be created
-    @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
-    @param labels_mat [cv::Mat] : name of the mat of labels to be saved to the file
-    @return void
-    **/
-    void saveToCSV(const std::string& fileName,
-                   const cv::Mat& featuresMat,
-                   const cv::Mat& labelsMat);
-
-    /**
-    @brief Function that loads the necessary files for the training
-    @param [std::string] training_mat_file, name of the file that contains the training data
-    @param [std::string] labels_mat_file, name of the file that contains the labels of each class
-    of the training data
-    @return void
-    **/
-    cv::Mat loadFiles(const std::string& dataMatFile,
-                      const std::string& nameTag);
-
-    /**
-    @brief Function that checks if a file exists
-    @param [const char*] name, Name of file to check if exists
-    @return true if the file was found, and false if not
-    **/
-    bool exist(const char* fileName);
-
-    /**
-     * @brief
-     */
-    int countFilesInDirectory(const boost::filesystem::path& directory);
-
-    /**
-     * @brief
-     */
-    bool loadAnnotationsFromFile(const std::string& filename,
-                                 std::vector<cv::Rect>* boundingBox,
-                                 std::vector<std::string>* annotatedImages,
-                                 std::vector<int>* classAttributes);
-  }// namespace file_utilities
+  /**
+   * @brief
+   */
+  bool loadAnnotationsFromFile(const std::string& filename,
+                               std::vector<cv::Rect>* boundingBox,
+                               std::vector<std::string>* annotatedImages,
+                               std::vector<int>* classAttributes);
+}// namespace file_utilities
 }// namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_UTILITIES_FILE_UTILITIES_H

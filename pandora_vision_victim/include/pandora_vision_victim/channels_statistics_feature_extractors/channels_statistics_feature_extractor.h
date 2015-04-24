@@ -37,8 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
-#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
+#ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 
 #include "pandora_vision_victim/victim_parameters.h"
 
@@ -50,7 +50,7 @@ namespace pandora_vision
       /**
        * @brief Constructor
        */
-      ChannelsStatisticsFeatureExtractor(cv::Mat* img)
+      explicit ChannelsStatisticsFeatureExtractor(cv::Mat* img)
       {
         img_ = img;
       }
@@ -76,5 +76,5 @@ namespace pandora_vision
       cv::Mat* img_;
   };
 }// namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
+#endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 

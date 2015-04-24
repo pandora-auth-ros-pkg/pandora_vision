@@ -63,12 +63,12 @@ namespace pandora_vision
         // Construct a white image
         white = cv::Mat::zeros(HEIGHT, WIDTH, CV_64FC1);
         cv::Rect rect(0, 0, HEIGHT, WIDTH);
-        cv::rectangle(white, rect, cv::Scalar(255,0,0), -1);
+        cv::rectangle(white, rect, cv::Scalar(255, 0, 0), -1);
 
         // Construct a half black - half white image
         blackWhite = cv::Mat::zeros(HEIGHT, WIDTH, CV_64FC1);
         cv::Rect rect1(0, 0, HEIGHT / 2, WIDTH);
-        cv::rectangle(blackWhite, rect1, cv::Scalar(255,0,0), -1);
+        cv::rectangle(blackWhite, rect1, cv::Scalar(255, 0, 0), -1);
       }
 
       //! The image dimensions
@@ -76,7 +76,7 @@ namespace pandora_vision
       int WIDTH;
 
       //! Images that will be used for testing
-      cv::Mat black,white,blackWhite;
+      cv::Mat black, white, blackWhite;
   };
 
   //! Tests MeanStdDevExtractor::extract
