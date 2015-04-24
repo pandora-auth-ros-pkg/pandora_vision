@@ -284,6 +284,5 @@ namespace pandora_vision
     *A = Avector;
     *B = Bvector;
   }
-
 }// namespace pandora_vision
 

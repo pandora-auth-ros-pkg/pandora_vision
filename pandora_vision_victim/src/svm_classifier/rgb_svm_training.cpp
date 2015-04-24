@@ -125,7 +125,8 @@ namespace pandora_vision
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
 
-      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(), &trainingFeaturesMat, &trainingLabelsMat);
+      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(),
+          &trainingFeaturesMat, &trainingLabelsMat);
 
       std::vector<double> meanVector;
       std::vector<double> stdDevVector;
@@ -136,7 +137,7 @@ namespace pandora_vision
           cv::Mat(meanVector));
       file_utilities::saveToFile(normalizationParamTwoPath.str(), "std_dev",
           cv::Mat(stdDevVector));
- 
+
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
 
@@ -157,8 +158,10 @@ namespace pandora_vision
       std::cout << "Create necessary test matrix" << std::endl;
       std::string prefix = "test_";
       annotations_file_stream.str("");
-      annotations_file_stream << package_path << "/data/" << "test_annotations.txt";
-      constructFeaturesMatrix(testDirectory,annotations_file_stream.str(), &testFeaturesMat, &testLabelsMat);
+      annotations_file_stream << package_path << "/data/"
+                              << "test_annotations.txt";
+      constructFeaturesMatrix(testDirectory, annotations_file_stream.str(),
+          &testFeaturesMat, &testLabelsMat);
 
       std::vector<double> meanVector = file_utilities::loadFiles(
           normalizationParamOnePath.str(), "mean");

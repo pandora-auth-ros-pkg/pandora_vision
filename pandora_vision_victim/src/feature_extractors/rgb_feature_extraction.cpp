@@ -108,14 +108,17 @@ namespace pandora_vision
   @return void
   **/
   void RgbFeatureExtraction::constructFeaturesMatrix(
-      const boost::filesystem::path& directory, const std::string& annotationsFile,
+      const boost::filesystem::path& directory,
+      const std::string& annotationsFile,
       cv::Mat* featuresMat, cv::Mat* labelsMat)
   {
     cv::Mat image, imageROI;
     std::vector<std::string> annotatedImages;
-    std::vector<cv::Rect> bbox;
-    std::vector<int> categories;
-    file_utilities::loadAnnotationsFromFile(annotationsFile, &bbox, &annotatedImages, &categories);
+    std::vector<cv::Rect> boundingBox;
+    std::vector<int> classAttributes;
+
+    bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
+        annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
     int rowIndex = 0;
     for (boost::filesystem::recursive_directory_iterator iter(directory);
          iter != boost::filesystem::recursive_directory_iterator();
@@ -133,43 +136,39 @@ namespace pandora_vision
       }
       // cv::Size size(640, 480);
       // cv::resize(image, image, size);
-      
-      //bool flag = false;
 
-      for (int ii = 0; ii < annotatedImages.size(); ii++)
+      if (successfulFileLoad)
       {
-        if(annotatedImages[ii] == imageName)
+        std::cout << "Read class attribute from annotation file." << std::endl;
+        for (int ii = 0; ii < annotatedImages.size(); ii++)
         {
-          imageROI = image(bbox[ii]);
-                    annotatedImages[ii].clear();
-          labelsMat->at<double>(rowIndex, 0) = categories[ii];
-          cv::imshow(annotatedImages[ii], imageROI);
-          cv::waitKey(0);
-          //flag = true;
-          /*ROS_INFO_STREAM("AnnotatedImage found: " << annotatedImages[ii]);*/
-          break;
+          if(annotatedImages[ii] == imageName)
+          {
+            imageROI = image(boundingBox[ii]);
+                      annotatedImages[ii].clear();
+            labelsMat->at<double>(rowIndex, 0) = classAttributes[ii];
+            break;
+          }
         }
+        extractFeatures(imageROI);
+      }
+      else
+      {
+        std::cout << "Find class attrbitute from image name." << std::endl;
+        extractFeatures(image);
+
+        std::string checkIfPositive = "positive";
+        if (boost::algorithm::contains(imageName, checkIfPositive))
+          labelsMat->at<double>(rowIndex, 0) = 1.0;
+        else
+          labelsMat->at<double>(rowIndex, 0) = -1.0;
       }
 
-      /*if(flag)*/
-        extractFeatures(imageROI);
-      /*else
-        extractFeatures(image);*/
       std::cout << "Feature vector of image " << imageName << " "
                 << featureVector_.size() << std::endl;
-      /// display feature vector
-      /*for (int kk = 0; kk < featureVector_.size(); kk++)
-        std::cout << featureVector_[kk] << " ";*/
 
-      /*for (int jj = 0; jj < featureVector_.size(); jj++)
+      for (int jj = 0; jj < featureVector_.size(); jj++)
         featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
-*/
-     //std::string checkIfPositive = "positive";
-     
-      /*if (boost::algorithm::contains(imageName, checkIfPositive))
-        labelsMat->at<double>(rowIndex, 0) = 1.0;
-      else
-        labelsMat->at<double>(rowIndex, 0) = -1.0;*/
 
       rowIndex += 1;
     }

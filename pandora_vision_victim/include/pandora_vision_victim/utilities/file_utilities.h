@@ -32,7 +32,9 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
 #include <iostream>
@@ -77,7 +79,7 @@ namespace pandora_vision
     void saveToFile(const std::string& fileName,
                     const std::string& varName,
                     const cv::Mat& src);
-    
+
     /**
     @brief Function that saves a variable to a file
     @param file_name [std::string] : name of the file to be created
@@ -106,10 +108,17 @@ namespace pandora_vision
     **/
     bool exist(const char* fileName);
 
+    /**
+     * @brief
+     */
     int countFilesInDirectory(const boost::filesystem::path& directory);
-       void loadAnnotationsFromFile(const std::string& filename, 
-                                 std::vector<cv::Rect>* bbox,
+
+    /**
+     * @brief
+     */
+    bool loadAnnotationsFromFile(const std::string& filename,
+                                 std::vector<cv::Rect>* boundingBox,
                                  std::vector<std::string>* annotatedImages,
-                                 std::vector<int>* categories);
+                                 std::vector<int>* classAttributes);
   }// namespace file_utilities
 }// namespace pandora_vision

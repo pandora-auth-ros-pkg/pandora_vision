@@ -32,7 +32,9 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
@@ -116,27 +118,27 @@ namespace pandora_vision
       outFile.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
       if (!outFile)
       {
-        std::cout << "Error! Cannot load  CSV file!" << std::endl;
+        std::cout << "Error! Cannot load CSV file!" << std::endl;
         return;
       }
       else
       {
         if (outFile.is_open())
         {
-          for (int kk = 0; kk < featuresMat.cols; kk++)
+          for (int kk = 0; kk <= featuresMat.cols; kk++)
           {
-            outFile << "a" << kk;
-            if (kk < featuresMat.cols - 1)
+            outFile << "attr" << kk;
+            if (kk < featuresMat.cols)
                outFile << ",";
             else
               outFile << std::endl;
           }
           for (int ii = 0; ii < featuresMat.rows; ii++)
           {
-            outFile << labelsMat.at<double>(ii) << ",";
+            outFile << labelsMat.at<float>(ii) << ",";
             for (int jj = 0; jj < featuresMat.cols; jj++)
             {
-              outFile << featuresMat.at<double>(ii, jj);
+              outFile << featuresMat.at<float>(ii, jj);
               if (jj < featuresMat.cols - 1)
                 outFile << ",";
               else
@@ -192,6 +194,9 @@ namespace pandora_vision
         return true; //the file was found
     }
 
+    /**
+     * @brief
+     */
     int countFilesInDirectory(const boost::filesystem::path& directory)
     {
       int numFiles = std::count_if(
@@ -204,54 +209,62 @@ namespace pandora_vision
       return numFiles;
     }
 
-    void loadAnnotationsFromFile(const std::string& filename, 
-                                 std::vector<cv::Rect>* bbox,
+    /**
+     * @brief
+     */
+    bool loadAnnotationsFromFile(const std::string& filename,
+                                 std::vector<cv::Rect>* boundingBox,
                                  std::vector<std::string>* annotatedImages,
-                                 std::vector<int>* categories)
-                                                  
-    { std::ifstream inFile;
-      std::string line,imgName,temp,x1,y1,x2,y2;
+                                 std::vector<int>* classAttributes)
+    {
+      std::ifstream inFile;
+      std::string line, imgName, temp, x1, y1, x2, y2;
       cv::Rect rect;
-      int i,category;
-      i = 0;
-      
+      int category;
+      int ii = 0;
+
       inFile.open(filename.c_str());
       if(!inFile)
       {
         ROS_ERROR("Cannot load Annotations file");
+        return false;
       }
       else
       {
         if(inFile.is_open())
         {
-          while(std::getline(inFile,line))
+          while(std::getline(inFile, line))
           {
             std::stringstream ss(line);
-            getline(ss,imgName,',');
-            getline(ss,temp,',');
-            getline(ss,x1,',');
-            getline(ss,y1,',');
-            getline(ss,x2,',');
-            getline(ss,y2);
+            getline(ss, imgName, ',');
+            getline(ss, temp, ',');
+            getline(ss, x1, ',');
+            getline(ss, y1, ',');
+            getline(ss, x2, ',');
+            getline(ss, y2);
 
             rect.x = atoi(x1.c_str());
             rect.y = atoi(y1.c_str());
             rect.width = atoi(x2.c_str()) - atoi(x1.c_str());
             rect.height = atoi(y2.c_str()) - atoi(y1.c_str());
             category = atoi(temp.c_str());
-            ROS_INFO_STREAM("Loading Annotation no: " << i+1 <<" for "<< imgName << "\n");
-              /*ROS_INFO_STREAM(rect.x << "," <<
-                            rect.y<< "," <<
+            ROS_INFO_STREAM("Loading Annotation no: " << ii + 1 << " for "
+                            << imgName);
+            /*/
+            ROS_INFO_STREAM(rect.x << "," <<
+                            rect.y << "," <<
                             rect.width << "," <<
-                            rect.height << "\n" );*/
+                            rect.height);
+            //*/
             annotatedImages->push_back(imgName);
-            bbox->push_back(rect);
-            categories->push_back(category);
-            i++;
+            boundingBox->push_back(rect);
+            classAttributes->push_back(category);
+            ii++;
           }
-        } 
+        }
       }
       inFile.close();
+      return true;
     }
   }// namespace file_utilities
 }// namespace pandora_vision
