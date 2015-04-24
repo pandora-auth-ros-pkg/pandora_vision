@@ -129,6 +129,10 @@ namespace pandora_vision
   int Parameters::Depth::neighbor_value_thresh = 30;
   int Parameters::Depth::depth_similarity_rect_dims_thresh = 50;
   float Parameters::Depth::merge_thresh = 50.0;
+  int Parameters::Depth::canny_low_threshold = 50;
+  int Parameters::Depth::canny_ratio = 3;
+  int Parameters::Depth::canny_kernel_size = 3;
+  int Parameters::Depth::filtering_type = 1;
   //
   //
   //  ///////////////////// Edge detection specific parameters /////////////////////

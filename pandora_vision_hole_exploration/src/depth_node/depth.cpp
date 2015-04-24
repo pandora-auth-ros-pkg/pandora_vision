@@ -108,7 +108,7 @@ namespace pandora_vision
 #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_depth_image)
     {
-      Visualization::show("Depth image", depthImage, 1);
+      Visualization::showScaled("Depth image", depthImage, 1);
     }
 #endif
 
@@ -474,6 +474,14 @@ namespace pandora_vision
       config.depth_similarity_rect_dims_thresh;
     Parameters::Depth::merge_thresh =
       config.merge_thresh;
+    Parameters::Depth::canny_low_threshold =
+      config.canny_low_threshold;
+    Parameters::Depth::canny_ratio =
+      config.canny_ratio;
+    Parameters::Depth::canny_kernel_size =
+      config.canny_kernel_size;
+    Parameters::Depth::filtering_type =
+      config.filtering_type;
   }
 
 
@@ -500,6 +508,31 @@ namespace pandora_vision
     std::vector<std::string> msgs;
 #endif
 
+
+    //cv::Mat temp;
+    //if (depthImage.type() != CV_8UC1 || depthImage.type() != CV_8UC3)
+    //{
+    //  double min;
+    //  double max;
+    //  cv::minMaxIdx(depthImage, &min, &max);
+    //  if (max != min)
+    //  {
+    //    temp = (depthImage - min) * 255 / (max - min);
+    //    temp = cv::abs(temp);
+    //    temp.convertTo(temp, CV_8UC1);
+    //  }
+    //  else
+    //  {
+    //    cv::convertScaleAbs(depthImage, temp, 255 / max);
+    //  }
+    //}
+    //else 
+    //  depthImage.copyTo(temp);
+
+    //temp.copyTo(depthImage);
+
+
+
 #ifdef DEBUG_SHOW
     if(Parameters::Debug::show_find_holes) // Debug
     {
@@ -508,13 +541,11 @@ namespace pandora_vision
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Initial depth image";
       msgs.push_back(msg);
+      tmp = Visualization::scaleImageForVisualization(
+          depthImage, 0);
       imgs.push_back(tmp);
     }
 #endif
-
-
-    if(depthImage.channels() >= 3)
-      cv::cvtColor(depthImage, depthImage, CV_BGR2GRAY);
     // Initial filtering of contours variant from the background
     cv::Mat filteredImage;
     filterImage(
@@ -607,13 +638,26 @@ namespace pandora_vision
 
   void Depth::filterImage(const cv::Mat& depthImage, cv::Mat* filteredImage)
   {
-    cv::threshold(depthImage, (*filteredImage), Parameters::Depth::intensity_threshold, 1.0, CV_THRESH_BINARY);
-    int morphologyKernel = Parameters::Depth::morphology_open_kernel_size;
-    cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
-    cv::morphologyEx( (*filteredImage), (*filteredImage), cv::MORPH_OPEN, structuringElement );
-    morphologyKernel = Parameters::Depth::morphology_close_kernel_size;
-    structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
-    cv::morphologyEx((*filteredImage), (*filteredImage), cv::MORPH_CLOSE, structuringElement);
+    // The input depth image, in CV_8UC1 format
+    cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
+        depthImage, 0);
+    if(Parameters::Depth::filtering_type == 0)
+    {
+      cv::threshold(visualizableDepthImage, (*filteredImage), Parameters::Depth::intensity_threshold, 1.0, CV_THRESH_BINARY);
+      int morphologyKernel = Parameters::Depth::morphology_open_kernel_size;
+      cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
+      cv::morphologyEx( (*filteredImage), (*filteredImage), cv::MORPH_OPEN, structuringElement );
+      morphologyKernel = Parameters::Depth::morphology_close_kernel_size;
+      structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
+      cv::morphologyEx((*filteredImage), (*filteredImage), cv::MORPH_CLOSE, structuringElement);
+    }
+    else
+    {
+      cv::Mat temp; 
+      cv::Canny(visualizableDepthImage, temp, Parameters::Depth::canny_low_threshold, Parameters::Depth::canny_low_threshold * Parameters::Depth::canny_ratio, Parameters::Depth::canny_kernel_size);
+      //apply canny mask
+      visualizableDepthImage.copyTo((*filteredImage), temp);
+    }
     for(int i = 0; i < Parameters::Depth::border_thresh; i ++)
       for(int j = 0; j < (*filteredImage).cols; j ++)
         (*filteredImage).at<uchar>(i, j) = 0;
@@ -636,9 +680,12 @@ namespace pandora_vision
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(dilationKernel, dilationKernel));
     cv::dilate(filteredImage, filteredImage, structuringElement);
     cv::vector<cv::Vec4i> hierarchy;
-    cv::Mat temp1;
-    filteredImage.convertTo(temp1, CV_8UC1);
-    findContours(temp1, (*contours), hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    //cv::Mat temp1;
+    //if (filteredImage.type() != CV_8UC1 && filteredImage.type() != CV_8UC3)
+    //  filteredImage.convertTo(temp1, CV_8UC1);
+    //else
+    //  filteredImage.copyTo(temp1);
+    findContours(filteredImage, (*contours), hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
   }
 
 

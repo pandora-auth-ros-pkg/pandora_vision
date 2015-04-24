@@ -976,12 +976,14 @@ namespace pandora_vision
     {
       bool overlapFlag = false;
       for(int j = 0; j < rgbHolesConveyor_.rectangle.size(); j ++)
+      {
         if(std::abs(depthHolesConveyor_.keypoint[i].x - rgbHolesConveyor_.keypoint[i].x) < Parameters::HoleFusion::keypoint_overlap_threshold && std::abs(depthHolesConveyor_.keypoint[i].y - rgbHolesConveyor_.keypoint[i].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
         {
           rgbSoloValid[j] = false;
           overlapFlag = true;
           break;
         }
+      }
       preValidatedHoles.rectangle.push_back(depthHolesConveyor_.rectangle[i]);
       preValidatedHoles.keypoint.push_back(depthHolesConveyor_.keypoint[i]);
       if(overlapFlag)
@@ -993,7 +995,7 @@ namespace pandora_vision
     // Assign probabilities to RGB holes that do not overlap with depth
     int counter = depthHolesConveyor_.rectangle.size();
     for(int j = 0; j < rgbHolesConveyor_.rectangle.size(); j ++)
-      if(rgbSoloValid.at(j))
+      if(rgbSoloValid[j])
       {
         preValidatedHoles.rectangle.push_back(rgbHolesConveyor_.rectangle[j]);
         preValidatedHoles.keypoint.push_back(rgbHolesConveyor_.keypoint[j]);

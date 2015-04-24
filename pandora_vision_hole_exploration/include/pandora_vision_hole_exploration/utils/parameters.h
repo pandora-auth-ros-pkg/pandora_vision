@@ -157,6 +157,10 @@ namespace pandora_vision
       static int neighbor_value_thresh;
       static int depth_similarity_rect_dims_thresh;
       static float merge_thresh;
+      static int canny_low_threshold;
+      static int canny_ratio;
+      static int canny_kernel_size;
+      static int filtering_type;
     };
     //
     //
