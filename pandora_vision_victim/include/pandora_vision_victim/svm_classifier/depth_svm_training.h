@@ -33,12 +33,12 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_RGB_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_RGB_SVM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_DEPTH_SVM_TRAINING_H
+#define PANDORA_VISION_VICTIM_DEPTH_SVM_TRAINING_H
 
 #include <iostream>
 #include <fstream>
@@ -51,7 +51,7 @@
 #include "pandora_vision_victim/svm_classifier/svm_training.h"
 #include "pandora_vision_victim/svm_classifier/training_parameters.h"
 #include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
@@ -59,18 +59,19 @@
 
 namespace pandora_vision
 {
-  class RgbSvmTraining : public SvmTraining
+  class DepthSvmTraining : public SvmTraining
   {
     public:
       /**
        * @brief The Constructor
        */
-      RgbSvmTraining(const std::string& ns, int _num_feat, const std::string& datasetPath);
+      DepthSvmTraining(const std::string& ns, int numFeatures,
+          const std::string& datasetPath);
 
       /**
        * @brief The Destructor
        */
-      virtual ~RgbSvmTraining();
+      virtual ~DepthSvmTraining();
 
       /**
        * @brief Function that implements the training for the subsystems
@@ -82,4 +83,5 @@ namespace pandora_vision
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_RGB_SVM_TRAINING_H
+
 

@@ -37,27 +37,28 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_victim/svm_classifier/rgb_svm_training.h"
+#include "pandora_vision_victim/svm_classifier/depth_svm_training.h"
 
 namespace pandora_vision
 {
   /**
    * @brief Constructor
    */
-  RgbSvmTraining::RgbSvmTraining(const std::string& ns, int numFeatures, const std::string& datasetPath) :
+  DepthSvmTraining::DepthSvmTraining(const std::string& ns,
+      int numFeatures, const std::string& datasetPath) :
       SvmTraining(ns, numFeatures, datasetPath)
   {
     doPcaAnalysis_ = false;
     typeOfNormalization_ = 2;
-    imageType_ = "rgb_";
-    featureExtraction_ = new RgbFeatureExtraction();
-    std::cout << "Created RGB SVM Training Instance" << std::endl;
+    imageType_ = "depth_";
+    featureExtraction_ = new DepthFeatureExtraction();
+    std::cout << "Created Depth SVM Training Instance" << std::endl;
   }
 
   /**
    * @brief Destructor
    */
-  RgbSvmTraining::~RgbSvmTraining()
+  DepthSvmTraining::~DepthSvmTraining()
   {
   }
 
@@ -67,7 +68,7 @@ namespace pandora_vision
    * a suitable model.
    * @return void
    */
-  void RgbSvmTraining::trainSubSystem()
+  void DepthSvmTraining::trainSubSystem()
   {
     std::string training_matrix_file_path;
     std::string test_matrix_file_path;
@@ -80,18 +81,16 @@ namespace pandora_vision
     std::stringstream svm_file_stream;
     std::stringstream results_file_stream;
     std::stringstream annotations_file_stream;
-    float prediction;
-    double A, B;
 
-    training_matrix_file_path = "rgb_training_matrix.xml";
-    test_matrix_file_path = "rgb_test_matrix.xml";
-    results_file_path = "rgb_results.xml";
+    training_matrix_file_path = "depth_training_matrix.xml";
+    test_matrix_file_path = "depth_test_matrix.xml";
+    results_file_path = "depth_results.xml";
 
     in_file_stream << package_path << "/data/" << training_matrix_file_path;
     in_test_file_stream << package_path << "/data/" << test_matrix_file_path;
     labels_mat_file_stream << package_path << "/data/" << "labels_" +training_matrix_file_path;
     test_labels_mat_file_stream << package_path << "/data/" << "labels_" +test_matrix_file_path;
-    svm_file_stream << package_path << "/data/" << "rgb_svm_classifier.xml";
+    svm_file_stream << package_path << "/data/" << "depth_svm_classifier.xml";
     results_file_stream << package_path << "/data/" << results_file_path;
     annotations_file_stream << package_path << "/data/" << "training_annotations.txt";
 
@@ -110,10 +109,10 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    std::string normalizationParamOne = "mean_values.xml";
+    std::string normalizationParamOne = "depth_mean_values.xml";
     std::stringstream normalizationParamOnePath;
     normalizationParamOnePath << package_path << "/data/" << normalizationParamOne;
-    std::string normalizationParamTwo = "standard_deviation_values.xml";
+    std::string normalizationParamTwo = "depth_standard_deviation_values.xml";
     std::stringstream normalizationParamTwoPath;
     normalizationParamTwoPath << package_path << "/data/" << normalizationParamTwo;
 
@@ -213,6 +212,8 @@ namespace pandora_vision
     SVM.save(svm_file_stream.str().c_str());
     std::cout << "Finished training process" << std::endl;
 
+    float prediction;
+    double A, B;
     ///uncomment to produce the platt probability
     //~ for (int ii = 0; ii < testFeaturesMat.rows; ii++)
     //~ {
@@ -235,5 +236,6 @@ namespace pandora_vision
     evaluate(results, testLabelsMat);
   }
 }// namespace pandora_vision
+
 
 

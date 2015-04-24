@@ -59,20 +59,12 @@ namespace pandora_vision
       /**
        * @brief Default Constructor
        */
-      FeatureExtraction()
-      {
-        if (!featureVector_.empty())
-          featureVector_.clear();
-        if (!featureMatrix_.empty())
-          featureMatrix_.clear();
-      }
+      FeatureExtraction();
 
       /**
        * @brief Default Destructor
        */
-      virtual ~FeatureExtraction()
-      {
-      }
+      virtual ~FeatureExtraction();
 
       /**
        * @brief This function extracts features according to the predefined
@@ -80,35 +72,34 @@ namespace pandora_vision
        * @param inImage [const cv::Mat&] Frame to extract features from.
        * @ return void
        */
-      virtual void extractFeatures(const cv::Mat& inImage)
-      {
-      }
+      virtual void extractFeatures(const cv::Mat& inImage);
 
       /**
-       * @brief
+       * @brief This function constructs the features matrix, i.e. the feature
+       * vectors of a set of images.
+       * @param directory [const boost::filesystem::path&] The directory that
+       * contains the set of images for the feature extraction.
+       * @param annotationsFile [const std::string&] The name of the file that
+       * contains the class attributes of the images to be processed.
+       * @param featuresMat [cv::Mat*] The features matrix.
+       * @param labelsMat [cv::Mat*] The matrix that contains the class
+       * attributes for the processed set of images.
+       * @return void
        */
-      virtual void constructFeaturesMatrix(
+      void constructFeaturesMatrix(
           const boost::filesystem::path& directory,
           const std::string& annotationsFile,
-          cv::Mat* featuresMat, cv::Mat* labelsMat)
-      {
-      }
+          cv::Mat* featuresMat, cv::Mat* labelsMat);
 
       /**
        * @brief
        */
-      std::vector<double> getFeatureVector() const
-      {
-        return featureVector_;
-      }
+      std::vector<double> getFeatureVector() const;
 
       /**
        * @brief
        */
-      std::vector<std::vector<double> > getFeatureMatrix() const
-      {
-        return featureMatrix_;
-      }
+      std::vector<std::vector<double> > getFeatureMatrix() const;
 
     protected:
       //! Vector containing the features extracted from a single image.

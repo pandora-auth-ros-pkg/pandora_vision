@@ -32,10 +32,13 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
  * @namespace pandora_vision

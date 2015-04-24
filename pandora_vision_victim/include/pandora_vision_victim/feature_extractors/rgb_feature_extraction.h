@@ -73,14 +73,6 @@ namespace pandora_vision
        * @return void
        */
       virtual void extractFeatures(const cv::Mat& inImage);
-
-      /**
-       * @brief
-       */
-      virtual void constructFeaturesMatrix(
-          const boost::filesystem::path& directory,
-          const std::string& annotationsFile,
-          cv::Mat* featuresMat, cv::Mat* labelsMat);
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_RGB_FEATURE_EXTRACTION_H
