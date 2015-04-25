@@ -75,44 +75,45 @@ namespace pandora_vision
        
 }
 void CConnector::offlineRadioButtonChecked(void)
-{   qDebug("offline checked");
-    QObject::connect(
+{  
+  ROS_INFO("offline checked");
+  QObject::connect(
     loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
     this,SLOT(rosTopicPushButtonTriggered()));
   QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.hazmatPushButton,SIGNAL(clicked(bool)),
       this,SLOT(hazmatPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.landoltcPushButton,SIGNAL(clicked(bool)),
       this,SLOT(landoltcPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.qrPushButton,SIGNAL(clicked(bool)),
       this,SLOT(qrPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.submitPushButton,SIGNAL(clicked(bool)),
       this,SLOT(submitPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.clearPushButton,SIGNAL(clicked(bool)),
       this,SLOT(clearPushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.nextFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(nextFramePushButtonTriggered()));
-    QObject::connect(
+  QObject::connect(
       loader_.previousFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(previousFramePushButtonTriggered()));
-QObject::connect(
+  QObject::connect(
       loader_.predatorPushButton,SIGNAL(clicked(bool)),
       this,SLOT(predatorPushButtonTriggered()));
-QObject::connect(
-    loader_.framesListWidget,SIGNAL(itemClicked(QListWidgetItem*)),
-    this, SLOT(frameLabelTriggered(QListWidgetItem*)));
-
- Q_EMIT offlineModeGiven();
- state_= OFFLINE;
+  QObject::connect(
+      loader_.framesListWidget,SIGNAL(itemClicked(QListWidgetItem*)),
+      this, SLOT(frameLabelTriggered(QListWidgetItem*)));
+  Q_EMIT offlineModeGiven();
+  state_= OFFLINE;
 }
+
 void CConnector::onlineRadioButtonChecked(void)
 {
   QObject::connect(
@@ -120,7 +121,6 @@ void CConnector::onlineRadioButtonChecked(void)
     this,SLOT(rosTopicPushButtonTriggered()));
      Q_EMIT onlineModeGiven();
     state_ = ONLINE;
-  
 }
 
   /**
@@ -180,13 +180,13 @@ void CConnector::onlineRadioButtonChecked(void)
   }
 
   void CConnector::setcurrentFrame(int x)
-    {  
+  {  
       currFrame = x;
       QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols, frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
       setImage(dest);
       Q_EMIT updateImage();
-    } 
+  } 
 
   void CConnector:: getcurrentFrame(int x, cv::Mat* frame)
   {
@@ -211,13 +211,12 @@ void CConnector::onlineRadioButtonChecked(void)
   void CConnector::msgTimeStamp(const std_msgs::Header& msg)
   {
     msgHeader = msg;
-    //std::cout << msgHeader << std::endl;
   }
 
   void CConnector::setMsg(const sensor_msgs::ImageConstPtr& msg)
-{
+  {
   msg_ = *msg;
-}
+  }
 
   cv::Mat CConnector::QImage2Mat(QImage const& src)
   {
@@ -263,7 +262,9 @@ void CConnector::onlineRadioButtonChecked(void)
             {
               std::stringstream img_name;
               img_name << package_path  << "/data/frame" << currFrame << ".png";
-              cv::imwrite(img_name.str(), frames[currFrame]);
+              cv::Mat temp;
+              cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
+              cv::imwrite(img_name.str(), temp);
               loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
             }
           }
@@ -272,7 +273,6 @@ void CConnector::onlineRadioButtonChecked(void)
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
         std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
-        //qDebug() << "load Image" << img_name;
         const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );
         QPoint p = me->pos();
@@ -281,9 +281,6 @@ void CConnector::onlineRadioButtonChecked(void)
         int container_height = loader_.imageLabel->height();
         int img_height = localImage_.height();
         int diff = (container_height - img_height) / 2;
-        /*qDebug("container_width x height %d %d",container_width, container_height);*/
-        /*qDebug("imgheight %d %d %d" ,localImage_.width(), img_height, diff);*/
-
 
         if(me->button() == Qt::LeftButton)
         {
@@ -396,12 +393,17 @@ void CConnector::onlineRadioButtonChecked(void)
 
     }
     ImgAnnotations::writeToFile(file.str() );
-
+    std::stringstream img_name;
+    img_name << package_path  << "/data/frame" << currFrame << ".png";
+    cv::Mat temp;
+    cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
+    cv::imwrite(img_name.str(), temp);
+    loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
   }
 
   void CConnector::clearPushButtonTriggered(void)
   {
-      img_state_=IDLE;
+      img_state_= IDLE;
       bbox_ready.clear();
       loader_.landoltcCoordsLabel->clear();
       loader_.qrCoordsLabel->clear();
@@ -410,10 +412,9 @@ void CConnector::onlineRadioButtonChecked(void)
       loader_.statusLabel->clear();
       ImgAnnotations::annPerImage = 0;
       ImgAnnotations::annotations.clear();
-      setcurrentFrame(0);
-      //setImage(backupImage_);
-      //updateImage();
+      setcurrentFrame(currFrame);
   }
+
   void CConnector::nextFramePushButtonTriggered(void)
   {
     if(currFrame != frames.size()-1)
@@ -468,10 +469,6 @@ void CConnector::onlineRadioButtonChecked(void)
   void CConnector::setPredatorValues(int x, int y, int width, int height)
   {
      ImgAnnotations::annotations.clear();
-     /*ImgAnnotations::annotations[0].x1 = 0;// x;
-     ImgAnnotations::annotations[0].y1 = 0;//y;
-     ImgAnnotations::annotations[0].x2 = 0;//x+width;
-     ImgAnnotations::annotations[0].y2 = 0;//y+height;*/
      std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
      ImgAnnotations::setAnnotations(img_name, "1", x, y);
      ImgAnnotations::setAnnotations(img_name, "1", x+width, y+height);
@@ -479,6 +476,13 @@ void CConnector::onlineRadioButtonChecked(void)
      std::stringstream file;
      file << package_path << "/data/annotations.txt";
      ImgAnnotations::writeToFile(file.str() );
+     std::stringstream imgName;
+     imgName << package_path  << "/data/frame" << currFrame << ".png";
+     cv::Mat temp;
+     cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
+     cv::imwrite(imgName.str(), temp);
+     loader_.statusLabel->setText("Save current Frame as:" + QString(imgName.str().c_str() )); 
+
   }
 
   void CConnector::drawBox()

@@ -380,25 +380,26 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 **/
 
 void Predator::annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg)
-{
-  ROS_INFO("ENTER ANNOTATION CALLBACK");
+{  
   if(!predatorNowON)
   {
     return;
   }
-      
-  double start = static_cast<double>(cv::getTickCount());
+
+  if(msg.header.frame_id == "close") 
+  {
+    ROS_INFO_STREAM("Shutting down Predator node");
+    ros::shutdown(); 
+  }
+
   framecounter++;
   double fps;
-  bool reuseFrameOnce = false;
-  bool skipProcessingOnce = false;
-
   
   char LearningString[10]="";
   char mystring[128];
   
   if(!semaphore_locked)
-  { //ROS_INFO_STREAM("SEMAPHORE"<< semaphore_locked);
+  {
     cv_bridge::CvImagePtr in_msg;
     in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
     PredatorFrame = in_msg -> image.clone();
@@ -407,8 +408,7 @@ void Predator::annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg)
     
     if(_frame_id.c_str()[0] == '/')
       _frame_id = _frame_id.substr(1);
-      
-      
+        
     if ( PredatorFrame.empty() )
     {
       ROS_ERROR("[predator_node] : No more Frames");
@@ -429,158 +429,52 @@ void Predator::annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg)
     tld->detectorCascade->imgWidth = grey.cols;
     tld->detectorCascade->imgHeight = grey.rows;
     tld->detectorCascade->imgWidthStep = grey.step; 
-    if( msg.x != -1 && msg.y != -1 &&  msg.width != -1 && msg.height!= -1)
+
+    if(msg.x != -1 && msg.y != -1 &&  msg.width != -1 && msg.height !=-1) 
     {
-      initialbbox = cv::Rect(msg.x, msg.y, msg.width, msg.height);
-      ROS_INFO_STREAM("Starting at "<< initialbbox.x << " "<< initialbbox.y << " "
-                                    << initialbbox.width << " "<< initialbbox.height );
-      tld->selectObject(grey, &initialbbox);
-      skipProcessingOnce = true;
-      reuseFrameOnce = true;
-
-    }
-
-    //tld->selectObject(grey, &bbox);
-    else
-    {ROS_INFO("ENTER HERE");
-    tld->processImage(PredatorFrame);
-    tld->learningEnabled = true;
-
-        
-    double end = (cvGetTickCount() - start) / cvGetTickFrequency();
-
-    end = end / 1000000;
-
-    fps = 1 / end;
-    
-    if(tld->learning)
-    {
-      snprintf(LearningString, sizeof(LearningString), "Learning");
-    }
-   ROS_INFO_STREAM("tld currBB " << tld->currBB->x << " " <<  tld->currBB->y
-                  <<" " <<  tld->currBB->width << " " << tld->currBB->height);
-    if(tld->currBB != NULL)
-    {
-      cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
-      cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
+      ROS_INFO_STREAM("Starting at: " << msg.x <<" " <<msg.y << " " << msg.width << " " << msg.height);
+      bbox = cv::Rect(msg.x,msg.y,msg.width,msg.height);
+      tld->selectObject(grey, &bbox); 
+      tld->learningEnabled = true;
       sendAnnotation(*tld->currBB, tld->currConf);
+      cv::imshow("tld", PredatorFrame);
+      cv::waitKey(20);
     }
+      
     else
-    {
-      /*cv::Rect temp = cv::Rect(0, 0, 0, 0);
-      sendAnnotation(temp, 0 );*/
-    }
+    { 
+      double start = static_cast<double>(cv::getTickCount());
+      tld->processImage(PredatorFrame);
+      double end = (cvGetTickCount() - start) / cvGetTickFrequency();
+      end = end / 1000000;
+      fps = 1 / end;
     
-  }
-  
-  snprintf(mystring, sizeof(mystring), "#%d, Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
-  framecounter, tld->currConf, fps, tld->detectorCascade->numWindows, LearningString);
-  cv::rectangle(PredatorFrame, cv::Point(0, 0), cv::Point(PredatorFrame.cols, 50), CV_RGB(0, 0, 0), CV_FILLED, 8, 0);
-  cv::putText(PredatorFrame, mystring, cv::Point(25, 25), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255, 255, 255));
- 
-  //ROS_INFO_STREAM("show_debug_image"<<Predator::show_debug_image);
-
-  if(Predator::show_debug_image)
-  {    cv::imshow("tld", PredatorFrame);
-  
-       cv::waitKey(20);
-  }
+      if(tld->learning)
+      {
+        snprintf(LearningString, sizeof(LearningString), "Learning");
+      }
     
-    //switch (keyCode)
-    //{
-      
-      // draw bounding box
-      //case 'r':
+      if(tld->currBB != NULL)
+      {
+        cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
+        cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
+        sendAnnotation(*tld->currBB, tld->currConf);
+      } 
 
-      //ROS_INFO("Draw Bounding Box and Press Enter.");
-
-     // semaphore_locked = true;
-      //bbox = cv::Rect(-1, -1, -1, -1);
-      /*if (bbox.x == -1 || bbox.y == -1 || bbox.width == -1 || bbox.height == -1)
-      {tld->learningEnabled = true; ROS_INFO("Initiating Hunt.");
-}
       else
-      {
-
-
-      bbox = cv::Rect(msg.x, msg.y, msg.width, msg.height);
-      //cv::setMouseCallback("tld", mouseHandler, &PredatorFrame);
-      cv::rectangle(PredatorFrame, bbox , CV_RGB(255, 0, 0), 3, 8, 0);
-    
-      if(Predator::show_debug_image)
-      {
-        cv::imshow("tld", PredatorFrame);
-        cv::waitKey(20);
-      }*/
-
-      //break;
-      // end drawing bounding box (Enter)
-      
-      //case '\n':
-      
-      //if (semaphore_locked == false) break;
-      //ROS_INFO("Initiating Hunt.");
-      //semaphore_locked = false;
-      /*if (bbox.x == -1 || bbox.y == -1 || bbox.width == -1 || bbox.height == -1)
-      {
-        ROS_INFO("Invalid bounding box given.");
-        break;
-      }*/
-      //tld->selectObject(grey, &bbox);
-      //break;
-     // }
-      
-      /*case 'l':
-      
-      tld->learningEnabled = !tld->learningEnabled;
-      ROS_INFO("LearningEnabled: %d\n", tld->learningEnabled);
-      break;
-      
-      case 'a':
-      
-      tld->alternating = !tld->alternating;
-      ROS_INFO("alternating: %d\n", tld->alternating);
-      break;
-      
-      case 'e':
-      
-      ROS_INFO("Saving model...");
-      tld->writeToFile(modelExportFile);
-      break;
-      
-      case 'c':
-      
-      ROS_INFO("Clearing Model");
-      tld->release();
-      break;
-      
-      case 'q':
-      
-      ROS_INFO("Shutdown Request by User. Quitting...");
-      ros::shutdown();  
-      break; 
-      
-      case 'i':
-      const char* modelPath = patternPath.c_str();
-      tld->release();
-      ROS_INFO("Importing Model");
-      tld->readFromFile(modelPath);
-      break;*/
-
-      
-    //}
+      { 
+        cv::Rect temp = cv::Rect(0, 0, 0, 0);
+        sendAnnotation(temp, 0);
+      }
+  
+      snprintf(mystring, sizeof(mystring), "#%d, Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
+      framecounter, tld->currConf, fps, tld->detectorCascade->numWindows, LearningString);
+      cv::rectangle(PredatorFrame, cv::Point(0, 0), cv::Point(PredatorFrame.cols, 50), CV_RGB(0, 0, 0), CV_FILLED, 8, 0);
+      cv::putText(PredatorFrame, mystring, cv::Point(25, 25), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255, 255, 255));
+      cv::imshow("tld", PredatorFrame);
+      cv::waitKey(20);
+    }
   }
-  /*
-  if(modelLoaded)
-  {
-    const char* modelPath = patternPath.c_str();
-    tld->release();
-    ROS_INFO("Importing Model");
-    tld->readFromFile(modelPath);
-    ROS_INFO("Initiating Hunt");
-    modelLoaded = false;
-  } */
-
 }
 
 /**
@@ -882,10 +776,9 @@ void Predator::getGeneralParams()
 **/
   
 void Predator::sendAnnotation(const cv::Rect& rec, const float& posterior) 
-    //const sensor_msgs::Image& frame)
 {
-    if( operation_state == true){
-    
+  if( operation_state == true)
+  {
     pandora_vision_msgs::PredatorMsg predatorMsg;
     predatorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
     predatorMsg.header.stamp = PredatorFrameTimeStamp;
@@ -894,36 +787,12 @@ void Predator::sendAnnotation(const cv::Rect& rec, const float& posterior)
     predatorMsg.width = rec.width;
     predatorMsg.height = rec.height;
     predatorMsg.posterior = posterior;
-    //predatorMsg.img = frame;
-   ROS_INFO_STREAM("send predator alert " << predatorMsg.header.frame_id << " " 
+    
+    ROS_INFO_STREAM("send predator alert " << predatorMsg.header.frame_id << " " 
                   << predatorMsg.header.stamp << " "  << predatorMsg.x << " " 
                   << predatorMsg.y << " "<< predatorMsg.width << " "
                   << predatorMsg.height <<  " " << predatorMsg.posterior);
     _predatorPublisher.publish(predatorMsg);  
-  }
-  else{
-    
-    pandora_common_msgs::GeneralAlertMsg predatorAlertMsg;
-    
-    if(posterior != 0){
-      predatorAlertMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
-      predatorAlertMsg.header.stamp = PredatorFrameTimeStamp;
-      predatorAlertMsg.probability = posterior;
-      int center_x = rec.x + rec.width/2;
-      int center_y = rec.y + rec.height/2;
-      
-      // Predator's center's coordinates relative to the center of the frame
-      float x = center_x
-        - static_cast<float>(frameWidth) / 2;
-      float y = static_cast<float>(frameHeight) / 2
-        - center_y;
-
-      //Predator center's yaw and pitch
-      predatorAlertMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-      predatorAlertMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
-          
-      _predatorPublisher.publish(predatorAlertMsg);
-    }  
   }
 }
 
