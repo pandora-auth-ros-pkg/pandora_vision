@@ -495,15 +495,13 @@ namespace pandora_vision
      messageNum_++;
      
      ROS_ERROR("POINTCLOUD CALLBACK 2:%d",messageNum_);
-     // Convert PointCloud2 message to PointCloud<T> type.
+     // Convert PointCloud2 message to PointCloud<T>::Ptr type.
      pcl::PCLPointCloud2 pcl_pc;
      pcl_conversions::toPCL(pointCloud2Message, pcl_pc);
 
+
      pcl::fromPCLPointCloud2(pcl_pc, *copiedPc_);
 
-     // Convert PointCloud<T> to PointCloud<T>::Ptr
-
-     // Copy the incoming message
 
       ROS_INFO_STREAM("pointcloud dimensions " << copiedPc_->height << copiedPc_->width);
      // If the two messages have arrived set messageNum to zero for
@@ -629,7 +627,7 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
   {
-    ROS_ERROR("SYNCHRONIZER NODE UNLOCKED");
+    ROS_ERROR("SYNCHRONIZER NODE UNLOCKED%d:", messageNum_);
     isLocked_ = false;
   }
 
