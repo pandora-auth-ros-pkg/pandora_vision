@@ -56,6 +56,7 @@ namespace pandora_vision
    */
   SvmValidator::SvmValidator(const std::string& classifierPath)
   {
+    ROS_INFO("Enter SVM Validator");
     classifierPath_ = classifierPath;
 
     svmParams_.svm_type = CvSVM::C_SVC;
@@ -63,21 +64,9 @@ namespace pandora_vision
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
         10000, 1e-6);
     /// Load classifier model path.
+    ROS_INFO_STREAM(classifierPath.c_str());
     svmValidator_.load(classifierPath.c_str());
 
-    packagePath_ = ros::package::getPath("pandora_vision_victim");
-
-    std::string normalizationParamOne = "mean_values.xml";
-    std::stringstream normalizationParamOnePath;
-    normalizationParamOnePath << packagePath_ << "/data/" << normalizationParamOne;
-    std::string normalizationParamTwo = "standard_deviation_values.xml";
-    std::stringstream normalizationParamTwoPath;
-    normalizationParamTwoPath << packagePath_ << "/data/" << normalizationParamTwo;
-
-    normalizationParamOneVec_ = file_utilities::loadFiles(
-        normalizationParamOnePath.str(), "mean");
-    normalizationParamTwoVec_ = file_utilities::loadFiles(
-        normalizationParamTwoPath.str(), "std_dev");
 
     featureExtraction_ = new FeatureExtraction();
     featureExtractionUtilities_ = new FeatureExtractionUtilities();

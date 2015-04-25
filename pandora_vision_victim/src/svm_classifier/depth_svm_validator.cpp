@@ -37,9 +37,13 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <ros/console.h>
+
 #include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
+
 /**
  * @namespace pandora_vision
  * @brief The main namespace for PANDORA vision
@@ -61,7 +65,22 @@ namespace pandora_vision
     svmParams_.C = VictimParameters::depth_svm_C;
     svmParams_.gamma = VictimParameters::depth_svm_gamma;
 
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
+
+    std::string normalizationParamOne = "depth_mean_values.xml";
+    std::stringstream normalizationParamOnePath;
+    normalizationParamOnePath << packagePath_ << "/data/" << normalizationParamOne;
+    std::string normalizationParamTwo = "depth_standard_deviation_values.xml";
+    std::stringstream normalizationParamTwoPath;
+    normalizationParamTwoPath << packagePath_ << "/data/" << normalizationParamTwo;
+
+    normalizationParamOneVec_ = file_utilities::loadFiles(
+        normalizationParamOnePath.str(), "mean");
+    normalizationParamTwoVec_ = file_utilities::loadFiles(
+        normalizationParamTwoPath.str(), "std_dev");
+
     featureExtraction_ = new DepthFeatureExtraction();
+    ROS_INFO("Initialized Depth SVM Validator");
   }
 
   /**

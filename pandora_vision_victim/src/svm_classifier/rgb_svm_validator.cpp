@@ -37,9 +37,12 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <ros/console.h>
+
 #include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
  * @namespace pandora_vision
@@ -62,7 +65,22 @@ namespace pandora_vision
     svmParams_.C = VictimParameters::rgb_svm_C;
     svmParams_.gamma = VictimParameters::rgb_svm_gamma;
 
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
+
+    std::string normalizationParamOne = "rgb_mean_values.xml";
+    std::stringstream normalizationParamOnePath;
+    normalizationParamOnePath << packagePath_ << "/data/" << normalizationParamOne;
+    std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
+    std::stringstream normalizationParamTwoPath;
+    normalizationParamTwoPath << packagePath_ << "/data/" << normalizationParamTwo;
+
+    normalizationParamOneVec_ = file_utilities::loadFiles(
+        normalizationParamOnePath.str(), "mean");
+    normalizationParamTwoVec_ = file_utilities::loadFiles(
+        normalizationParamTwoPath.str(), "std_dev");
+
     featureExtraction_ = new RgbFeatureExtraction();
+    ROS_INFO("Initialized RGB SVM Validator");
   }
 
   /**

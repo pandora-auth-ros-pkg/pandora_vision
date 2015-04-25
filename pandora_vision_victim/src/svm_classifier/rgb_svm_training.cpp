@@ -110,10 +110,10 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    std::string normalizationParamOne = "mean_values.xml";
+    std::string normalizationParamOne = "rgb_mean_values.xml";
     std::stringstream normalizationParamOnePath;
     normalizationParamOnePath << package_path << "/data/" << normalizationParamOne;
-    std::string normalizationParamTwo = "standard_deviation_values.xml";
+    std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
     std::stringstream normalizationParamTwoPath;
     normalizationParamTwoPath << package_path << "/data/" << normalizationParamTwo;
 
