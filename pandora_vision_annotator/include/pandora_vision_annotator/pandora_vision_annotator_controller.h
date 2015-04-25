@@ -66,6 +66,15 @@ namespace pandora_vision
       //!< ROS subscriber for the image topic
       ros::Subscriber img_subscriber_;
 
+
+      //!< ROS subscriber for the predator alert
+      ros::Subscriber predatorSubscriber_;
+      
+
+      //!< ROS publisher for the predator 
+      ros::Publisher annotationPublisher_;
+
+
       //!< The ROS node handle
       ros::NodeHandle n_;
       //!< QImage created one time, containing the frame from the input topic
@@ -77,10 +86,17 @@ namespace pandora_vision
       //!< Vector of frames
       std::vector<cv::Mat> frames;
 
-      //sensors_msgs::Image::ConstPtr imgs;
+      std::vector<std_msgs::Header> msgHeader_;
+     //sensors_msgs::Image::ConstPtr imgs;
       int count,prevcount;
 
-      int currentFrame;
+      int currentFrameNo_;
+
+      int baseFrame;
+
+      bool onlinemode;
+
+      bool PredatorNowOn;
 
     //------------------------------------------------------------------------//
     public:
@@ -113,15 +129,20 @@ namespace pandora_vision
 
       void receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg);
       void receiveImage(const sensor_msgs::ImageConstPtr& msg);
-      void connectFrame();
       void loadBag(const std::string& filename, const std::string& topic);
+      void predatorCallback(const pandora_vision_msgs::PredatorMsg& msg);
+      cv::Mat getFrame(int x);
+
 
 
          //------------------------------------------------------------------------//
     public Q_SLOTS:
 
       void rosTopicGiven(void);
-
+      void predatorEnabled(void);
+      void onlineModeGiven(void);
+      void offlineModeGiven(void);
+    
     //------------------------------------------------------------------------//
     Q_SIGNALS:
       void updateImage();

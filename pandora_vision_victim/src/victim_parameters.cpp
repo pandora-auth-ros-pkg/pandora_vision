@@ -266,7 +266,8 @@ namespace pandora_vision
       VictimParameters::model_url = str_param;
       ROS_INFO_STREAM("[victim_node]: modelURL : " << str_param);
     }
-    else{
+    else
+    {
       VictimParameters::model_url = 
         "https://pandora.ee.auth.gr/vision/model.xml";
       ROS_INFO_STREAM("[victim_node]: modelURL : " << 

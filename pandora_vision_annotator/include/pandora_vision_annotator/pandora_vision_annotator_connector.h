@@ -56,6 +56,13 @@ namespace pandora_vision
     LANDOLTC_CLICK
   };
 
+  enum States
+  {
+    OFFLINE,
+    ONLINE,
+    PREDATOR
+  };
+
   /**
   @class CConnector
   @brief Serves the Qt events of the main GUI window. Inherits from QObject
@@ -78,6 +85,13 @@ namespace pandora_vision
 
       int currFrame;
 
+      int totalFrames_;
+
+      std::string package_path;
+
+      std_msgs::Header msgHeader;
+
+      sensor_msgs::Image msg_;
       //!< The loader of main GUI QWidget
       CLoader loader_;
 
@@ -87,7 +101,11 @@ namespace pandora_vision
 
       ImageStates img_state_;
 
+      States state_;
+
       bool eventFilter( QObject* watched, QEvent* event );
+
+      cv::Mat QImage2Mat(QImage const& src);
 
     //------------------------------------------------------------------------//
     public:
@@ -104,11 +122,25 @@ namespace pandora_vision
 
       QString getRosTopic(void);
 
+      QString getBagName(void);
+
+      void msgTimeStamp(const std_msgs::Header& msg);
+
+      void setMsg(const sensor_msgs::ImageConstPtr& msg);
+
+      void setPredatorValues(int x, int y, int width, int height);
+
       void setImage(QImage &img);
 
       void setFrames(const std::vector<cv::Mat>& x);
 
-      void setcurrentFrame();
+      void setcurrentFrame(int x);
+
+      void getcurrentFrame(int x, cv::Mat* frame);
+
+      int getFrameNumber();
+
+      void sendAnnotation();
 
       void drawBox();
 
@@ -120,6 +152,8 @@ namespace pandora_vision
 
       void updateImage();
 
+      void onlineRadioButtonChecked(void);
+      void offlineRadioButtonChecked(void);
       void victimPushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
@@ -128,11 +162,18 @@ namespace pandora_vision
       void clearPushButtonTriggered(void);
       void nextFramePushButtonTriggered(void);
       void previousFramePushButtonTriggered(void);
+      void predatorPushButtonTriggered(void);
+      void frameLabelTriggered(QListWidgetItem* item);
+  
+
 
     //------------------------------------------------------------------------//
     Q_SIGNALS:
 
       void rosTopicGiven(void);
+      void predatorEnabled(void);
+      void onlineModeGiven(void);
+      void offlineModeGiven(void);
   };
 }
 

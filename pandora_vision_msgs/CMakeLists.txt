@@ -27,6 +27,8 @@ add_message_files(
   LandoltcPredator.msg
   QRAlert.msg
   QRAlertVector.msg
+  PredatorMsg.msg
+  AnnotationMsg.msg
   )
 
 generate_messages(

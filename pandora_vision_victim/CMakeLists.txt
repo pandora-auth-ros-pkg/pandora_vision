@@ -17,8 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  config/victim_dyn_reconf.config
-  )
+    config/victim_dyn_reconf.config
+)
 
 catkin_package(
     #DEPENDS
@@ -38,88 +38,122 @@ catkin_package(
 )
 
 include_directories(include
-  ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
-########################## Victim_Parameters library ###############################
-
-add_library(${PROJECT_NAME}_victim_parameters src/victim_parameters.cpp)
-target_link_libraries(${PROJECT_NAME}_victim_parameters ${catkin_LIBRARIES})
-
-################################ Feature Extractors library #################################
-add_library(${PROJECT_NAME}_feature_extractors
-	    src/feature_extractors/mean_std_dev.cpp
-            src/feature_extractors/dominant_color.cpp
-            src/feature_extractors/dft_coeffs.cpp
-            src/feature_extractors/color_angles.cpp
-	   )
-
-target_link_libraries(${PROJECT_NAME}_feature_extractors ${catkin_LIBRARIES} ${PROJECT_NAME}_victim_parameters)
-
-################################ Utilities library #################################
+############################### Utilities Library ##############################
 add_library(${PROJECT_NAME}_utilities
-            src/utilities/channels_statistics_extractor.cpp
-            src/utilities/edge_orientation_extractor.cpp
-            src/utilities/haralickfeature_extractor.cpp
-	   )
+    src/utilities/file_utilities.cpp
+    src/utilities/feature_extraction_utilities.cpp
+)
+target_link_libraries(${PROJECT_NAME}_utilities
+    ${catkin_LIBRARIES}
+)
 
+######################## Victim_Parameters library #############################
 
-target_link_libraries(${PROJECT_NAME}_utilities ${catkin_LIBRARIES} ${PROJECT_NAME}_feature_extractors
-${PROJECT_NAME}_victim_parameters)
+add_library(${PROJECT_NAME}_victim_parameters
+    src/victim_parameters.cpp
+)
+target_link_libraries(${PROJECT_NAME}_victim_parameters
+    ${catkin_LIBRARIES}
+)
 
+################ Channels Statistics Feature Extractors library ################
+add_library(${PROJECT_NAME}_channels_statistics_feature_extractors
+    src/channels_statistics_feature_extractors/mean_std_dev_extractor.cpp
+    src/channels_statistics_feature_extractors/dominant_color_extractor.cpp
+    src/channels_statistics_feature_extractors/dft_coeffs_extractor.cpp
+    src/channels_statistics_feature_extractors/color_angles_extractor.cpp
+)
 
-#############################  victim node ##################################################
+target_link_libraries(${PROJECT_NAME}_channels_statistics_feature_extractors
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_victim_parameters
+)
 
+########################## Feature Extractors library ##########################
+add_library(${PROJECT_NAME}_feature_extractors
+    src/feature_extractors/channels_statistics_extractor.cpp
+    src/feature_extractors/edge_orientation_extractor.cpp
+    src/feature_extractors/haralickfeature_extractor.cpp
+    src/feature_extractors/feature_extraction.cpp
+    src/feature_extractors/depth_feature_extraction.cpp
+    src/feature_extractors/rgb_feature_extraction.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_feature_extractors
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_channels_statistics_feature_extractors
+    ${PROJECT_NAME}_victim_parameters
+    ${PROJECT_NAME}_utilities
+)
+
+########################## SVM Classifier Library ##############################
+add_library(${PROJECT_NAME}_svm_classifier
+    src/svm_classifier/svm_training.cpp
+    src/svm_classifier/rgb_svm_training.cpp
+    src/svm_classifier/depth_svm_training.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_svm_classifier
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_feature_extractors
+    ${PROJECT_NAME}_victim_parameters
+    ${PROJECT_NAME}_utilities
+)
+
+############################# Victim Node ######################################
 add_executable(victim_node
     src/victim_node.cpp
     src/victim_detection.cpp
-    src/rgb_system_validator.cpp
-    src/depth_system_validator.cpp
+    src/svm_classifier/svm_validator.cpp
+    src/svm_classifier/rgb_svm_validator.cpp
+    src/svm_classifier/depth_svm_validator.cpp
     src/victim_vj_detector.cpp
-
 )
 
-
-target_link_libraries(victim_node ${catkin_LIBRARIES}
-                      ${PROJECT_NAME}_utilities
-                      ${PROJECT_NAME}_feature_extractors
-                      ${PROJECT_NAME}_victim_parameters)
+target_link_libraries(victim_node
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_feature_extractors
+    ${PROJECT_NAME}_channels_statistics_feature_extractors
+    ${PROJECT_NAME}_victim_parameters
+)
 
 add_dependencies(victim_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 
-########################### victimTrainer ############################
+############################## Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)
 
+  add_executable(victim_rgb_svm_training_node
+      src/victim_rgb_svm_training_node.cpp
+  )
 
+  target_link_libraries(victim_rgb_svm_training_node
+      ${catkin_LIBRARIES}
+      ${PROJECT_NAME}_svm_classifier
+      ${PROJECT_NAME}_feature_extractors
+      ${PROJECT_NAME}_channels_statistics_feature_extractors
+      ${PROJECT_NAME}_victim_parameters
+  )
 
-  add_executable(victim_train_node
-                  src/training.cpp
-                  #src/rgb_system_validator.cpp
-                  #src/depth_system_validator.cpp
-                  src/training_parameters.cpp
-  		)
-
-
-  target_link_libraries(victim_train_node ${catkin_LIBRARIES}
-                      ${PROJECT_NAME}_utilities
-                      ${PROJECT_NAME}_feature_extractors
-                      ${PROJECT_NAME}_victim_parameters)
-
-  add_dependencies(victim_train_node
-    ${catkin_EXPORTED_TARGETS}
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  add_dependencies(victim_rgb_svm_training_node
+      ${catkin_EXPORTED_TARGETS}
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
   )
 endif()
 
-########################### modelTRainer ############################
+################################ Model Trainer #################################
 if(MODEL_ENABLE_TRAIN)
   add_executable(model_train
-                  src/model_trainer.cpp
+      src/model_trainer.cpp
   )
-  target_link_libraries(model_train ${catkin_LIBRARIES} )
+  target_link_libraries(model_train
+      ${catkin_LIBRARIES}
+  )
 endif()
 
 download_extra_data(
@@ -129,54 +163,17 @@ download_extra_data(
 
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string")
+    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use")
+
+## Additional lint filters - Not Needed ##
+# -whitespace/braces, -whitespace/newline, -readability/multiline_string
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  ## victim_node ##
-
-  include/victim_detection.h
-  include/victim_vj_detector.h
-  include/rgb_system_validator.h
-  include/depth_system_validator.h
-  include/training.h
-  include/training_parameters.h
-  include/victim_parameters.h
-
-  src/victim_detection.cpp
-  src/victim_vj_detector.cpp
-  src/rgb_system_validator.cpp
-  src/depth_system_validator.cpp
-  src/training.cpp
-  src/training_parameters.cpp
-  src/victim_parameters.cpp
-
-  ## utilities ##
-
-  include/utilities/channels_statistics_extractor.h
-  include/utilities/edge_orientation_extractor.h
-  include/utilities/haralickfeature_extractor.h
-
-
-
-  src/utilities/channels_statistics_extractor.cpp
-  src/utilities/edge_orientation_extractor.cpp
-  src/utilities/haralickfeature_extractor.cpp
-
-
-  ## feature_extractors ##
-
-  include/feature_extractors/mean_std_dev.cpp
-  include/feature_extractors/dominant_color.cpp
-  include/feature_extractors/dft_coeffs.cpp
-  include/feature_extractors/color_angles.cpp
-
-  src/feature_extractors/mean_std_dev.cpp
-  src/feature_extractors/dominant_color.cpp
-  src/feature_extractors/dft_coeffs.cpp
-  src/feature_extractors/color_angles.cpp
-
+  include/*.h
+  src/*.cpp
+  test/*.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

@@ -43,9 +43,11 @@ namespace pandora_vision
     @brief Constructor
   **/
   VictimDetection::VictimDetection(const std::string& ns) :
-    _nh(ns),
-    params(ns),
-    imageTransport_(_nh)
+      _nh(ns),
+      params(ns),
+      imageTransport_(_nh),
+      rgbSvmValidator_(VictimParameters::rgb_classifier_path),
+      depthSvmValidator_(VictimParameters::depth_classifier_path)
   {
      //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
@@ -74,12 +76,6 @@ namespace pandora_vision
     _rgbViolaJonesDetector = VictimVJDetector(
       VictimParameters::cascade_path,
       VictimParameters::model_path);
-
-    RgbSystemValidator::initialize(
-      VictimParameters::rgb_classifier_path);
-
-    DepthSystemValidator::initialize(
-      VictimParameters::depth_classifier_path);
 
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
@@ -118,8 +114,7 @@ namespace pandora_vision
 
     if(!res || !_nh.getParam(model_param_name, robot_description))
     {
-      ROS_ERROR("[Motion_node]:Robot description couldn't be \
-        retrieved from the parameter server.");
+      ROS_ERROR("[Motion_node]:Robot description couldn't be retrieved from the parameter server.");
       return false;
     }
 
@@ -128,7 +123,8 @@ namespace pandora_vision
 
     // Get current link and its parent
     boost::shared_ptr<const urdf::Link> currentLink = model->getLink(_frame_id);
-    if(currentLink){
+    if(currentLink)
+    {
       boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
       // Set the parent frame_id to the parent of the frame_id
       _parent_frame_id = parentLink->name;
@@ -211,7 +207,8 @@ namespace pandora_vision
       _frame_id = _frame_id.substr(1);
 
 
-    if (rgbImage.empty()){
+    if (rgbImage.empty())
+    {
       ROS_FATAL("[victim_node] : No more frames ");
       ROS_BREAK();
     }
@@ -886,8 +883,8 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
-        temp.probability = RgbSystemValidator::calculateSvmRgbProbability(
-          imgs.rgbMasks.at(i).img);
+        temp.probability = rgbSvmValidator_.calculatePredictionProbability(
+            imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
         temp.source = RGB_SVM;
         temp.boundingBox = imgs.rgbMasks[i].bounding_box;
@@ -898,8 +895,8 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
-        temp.probability = DepthSystemValidator::calculateSvmDepthProbability(
-          imgs.depthMasks.at(i).img);
+        temp.probability = depthSvmValidator_.calculatePredictionProbability(
+            imgs.depthMasks.at(i).img);
         temp.keypoint = imgs.depthMasks[i].keypoint;
         temp.source = DEPTH_RGB_SVM;
         temp.boundingBox = imgs.depthMasks[i].bounding_box;

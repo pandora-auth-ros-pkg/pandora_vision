@@ -43,12 +43,6 @@ target_link_libraries(image_signature_test
 #                               Functional Tests                             #
 ##############################################################################
 
-#download_extra_data(
-#  ${PROJECT_NAME}_hazmat_test_images
-#  EXTRA_FILES test/functional/images/extra_files.yaml
-#)
-#add_dependencies(${PROJECT_NAME}_hazmat_test_images tests)
-
 # download_extra_data(
   # ${PROJECT_NAME}_hazmat_test_images
   # EXTRA_FILES test/functional/images/extra_files.yaml

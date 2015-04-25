@@ -48,11 +48,11 @@ Predator::Predator(const std::string& ns):
   model_path_stream << packagePath << "/model";
 
   patternPath = model_path_stream.str();
-  if(is_file_exist(patternPath))
+  /*if(is_file_exist(patternPath))
     modelLoaded = true;
   else
-    ROS_INFO("Model not found!Waiting... <3 ");
-
+    ROS_INFO("Model not found!Waiting... <3 ");*/
+    
   //!<Get Model Export Path
   exportPath = model_path_stream.str();
 
@@ -89,8 +89,14 @@ Predator::Predator(const std::string& ns):
   detectorCascade->nnClassifier->thetaTP = detectorCascadeParams.theta_TP;
   detectorCascade->nnClassifier->thetaFP = detectorCascadeParams.theta_FP;
 
+  if(annotations)
+  {
+  _inputImageSubscriber = _nh.subscribe(annotator_topic_name, 1, &Predator::annotationCallback, this);
+  }
+  else
+  {
   _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
-
+  }
   //!< initialize states - robot starts in STATE_OFF
   curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
   prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
@@ -113,6 +119,7 @@ Predator::~Predator(void)
 static int drag = 0;
 static cv::Point point;
 static cv::Rect bbox;
+static cv::Rect initialbbox;
 
 /**
   @brief Function for capturing mouse events
@@ -173,7 +180,7 @@ bool Predator::getParentFrameId()
 
   if(!res || !_nh.getParam(model_param_name, robot_description))
   {
-    ROS_ERROR("[Motion_node]:Robot description couldn't be retrieved from the parameter server.");
+    ROS_ERROR("[Predator_node]:Robot description couldn't be retrieved from the parameter server.");
     return false;
   }
 
@@ -193,7 +200,6 @@ bool Predator::getParentFrameId()
 
   return false;
 }
-
 /**
     @brief Callback for the RGB Image
     @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
@@ -368,6 +374,216 @@ void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 }
 
 /**
+    @brief Callback for the RGB Image
+    @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
+    @return void
+**/
+
+void Predator::annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg)
+{
+  ROS_INFO("ENTER ANNOTATION CALLBACK");
+  if(!predatorNowON)
+  {
+    return;
+  }
+      
+  double start = static_cast<double>(cv::getTickCount());
+  framecounter++;
+  double fps;
+  bool reuseFrameOnce = false;
+  bool skipProcessingOnce = false;
+
+  
+  char LearningString[10]="";
+  char mystring[128];
+  
+  if(!semaphore_locked)
+  { //ROS_INFO_STREAM("SEMAPHORE"<< semaphore_locked);
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
+    PredatorFrame = in_msg -> image.clone();
+    PredatorFrameTimeStamp = msg.header.stamp;
+    _frame_id = msg.header.frame_id;
+    
+    if(_frame_id.c_str()[0] == '/')
+      _frame_id = _frame_id.substr(1);
+      
+      
+    if ( PredatorFrame.empty() )
+    {
+      ROS_ERROR("[predator_node] : No more Frames");
+      return;
+    }
+    
+    std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
+      
+    if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) 
+    {
+      bool _indicator = getParentFrameId();      
+      _frame_ids_map.insert( it , std::pair<std::string, std::string>(
+      _frame_id, _parent_frame_id));
+    } 
+    
+    cvtColor(PredatorFrame, grey, CV_BGR2GRAY);
+    
+    tld->detectorCascade->imgWidth = grey.cols;
+    tld->detectorCascade->imgHeight = grey.rows;
+    tld->detectorCascade->imgWidthStep = grey.step; 
+    if( msg.x != -1 && msg.y != -1 &&  msg.width != -1 && msg.height!= -1)
+    {
+      initialbbox = cv::Rect(msg.x, msg.y, msg.width, msg.height);
+      ROS_INFO_STREAM("Starting at "<< initialbbox.x << " "<< initialbbox.y << " "
+                                    << initialbbox.width << " "<< initialbbox.height );
+      tld->selectObject(grey, &initialbbox);
+      skipProcessingOnce = true;
+      reuseFrameOnce = true;
+
+    }
+
+    //tld->selectObject(grey, &bbox);
+    else
+    {ROS_INFO("ENTER HERE");
+    tld->processImage(PredatorFrame);
+    tld->learningEnabled = true;
+
+        
+    double end = (cvGetTickCount() - start) / cvGetTickFrequency();
+
+    end = end / 1000000;
+
+    fps = 1 / end;
+    
+    if(tld->learning)
+    {
+      snprintf(LearningString, sizeof(LearningString), "Learning");
+    }
+   ROS_INFO_STREAM("tld currBB " << tld->currBB->x << " " <<  tld->currBB->y
+                  <<" " <<  tld->currBB->width << " " << tld->currBB->height);
+    if(tld->currBB != NULL)
+    {
+      cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
+      cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
+      sendAnnotation(*tld->currBB, tld->currConf);
+    }
+    else
+    {
+      /*cv::Rect temp = cv::Rect(0, 0, 0, 0);
+      sendAnnotation(temp, 0 );*/
+    }
+    
+  }
+  
+  snprintf(mystring, sizeof(mystring), "#%d, Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
+  framecounter, tld->currConf, fps, tld->detectorCascade->numWindows, LearningString);
+  cv::rectangle(PredatorFrame, cv::Point(0, 0), cv::Point(PredatorFrame.cols, 50), CV_RGB(0, 0, 0), CV_FILLED, 8, 0);
+  cv::putText(PredatorFrame, mystring, cv::Point(25, 25), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255, 255, 255));
+ 
+  //ROS_INFO_STREAM("show_debug_image"<<Predator::show_debug_image);
+
+  if(Predator::show_debug_image)
+  {    cv::imshow("tld", PredatorFrame);
+  
+       cv::waitKey(20);
+  }
+    
+    //switch (keyCode)
+    //{
+      
+      // draw bounding box
+      //case 'r':
+
+      //ROS_INFO("Draw Bounding Box and Press Enter.");
+
+     // semaphore_locked = true;
+      //bbox = cv::Rect(-1, -1, -1, -1);
+      /*if (bbox.x == -1 || bbox.y == -1 || bbox.width == -1 || bbox.height == -1)
+      {tld->learningEnabled = true; ROS_INFO("Initiating Hunt.");
+}
+      else
+      {
+
+
+      bbox = cv::Rect(msg.x, msg.y, msg.width, msg.height);
+      //cv::setMouseCallback("tld", mouseHandler, &PredatorFrame);
+      cv::rectangle(PredatorFrame, bbox , CV_RGB(255, 0, 0), 3, 8, 0);
+    
+      if(Predator::show_debug_image)
+      {
+        cv::imshow("tld", PredatorFrame);
+        cv::waitKey(20);
+      }*/
+
+      //break;
+      // end drawing bounding box (Enter)
+      
+      //case '\n':
+      
+      //if (semaphore_locked == false) break;
+      //ROS_INFO("Initiating Hunt.");
+      //semaphore_locked = false;
+      /*if (bbox.x == -1 || bbox.y == -1 || bbox.width == -1 || bbox.height == -1)
+      {
+        ROS_INFO("Invalid bounding box given.");
+        break;
+      }*/
+      //tld->selectObject(grey, &bbox);
+      //break;
+     // }
+      
+      /*case 'l':
+      
+      tld->learningEnabled = !tld->learningEnabled;
+      ROS_INFO("LearningEnabled: %d\n", tld->learningEnabled);
+      break;
+      
+      case 'a':
+      
+      tld->alternating = !tld->alternating;
+      ROS_INFO("alternating: %d\n", tld->alternating);
+      break;
+      
+      case 'e':
+      
+      ROS_INFO("Saving model...");
+      tld->writeToFile(modelExportFile);
+      break;
+      
+      case 'c':
+      
+      ROS_INFO("Clearing Model");
+      tld->release();
+      break;
+      
+      case 'q':
+      
+      ROS_INFO("Shutdown Request by User. Quitting...");
+      ros::shutdown();  
+      break; 
+      
+      case 'i':
+      const char* modelPath = patternPath.c_str();
+      tld->release();
+      ROS_INFO("Importing Model");
+      tld->readFromFile(modelPath);
+      break;*/
+
+      
+    //}
+  }
+  /*
+  if(modelLoaded)
+  {
+    const char* modelPath = patternPath.c_str();
+    tld->release();
+    ROS_INFO("Importing Model");
+    tld->readFromFile(modelPath);
+    ROS_INFO("Initiating Hunt");
+    modelLoaded = false;
+  } */
+
+}
+
+/**
   @brief Checks for file existence
   @return [bool]
 **/
@@ -387,15 +603,33 @@ void Predator::getGeneralParams()
 {
 
   packagePath = ros::package::getPath("pandora_vision_predator");
+   
+  //!< Get value of annotations state
+  if( _nh.getParam("annotations", annotations))
+    ROS_INFO("annotations state is loaded");
+  else
+  {
+     annotations= false;
+    ROS_INFO("Unable to load annotations state from launcher");
+  }
 
   //! Publishers
 
   //! Declare publisher and advertise topic
-  //! where algorithm results are posted if it works alone
+  //! where algorithm results are posted if it works alone or with annotator
   if (_nh.getParam("published_topic_names/predator_alert", param))
   {
-    _predatorPublisher =
-      _nh.advertise<pandora_common_msgs::GeneralAlert>(param, 1000);
+    if(annotations)
+    {
+       _predatorPublisher = 
+        _nh.advertise<pandora_vision_msgs::PredatorMsg>(param, 1000);
+    }
+    else
+    {
+      _predatorPublisher = 
+        _nh.advertise<pandora_common_msgs::GeneralAlert>(param, 1000);
+
+    }
   }
   else
   {
@@ -413,6 +647,16 @@ void Predator::getGeneralParams()
   else
   {
     ROS_FATAL("Predator to landoltc alert topic name not found");
+    ROS_BREAK();
+  }
+  
+  //! Declare subscriber
+  //! if it works with annotator
+  if (_nh.getParam("subscribed_topic_names/annotator_topic_name", annotator_topic_name))
+    ROS_INFO("[predator_node] : Loaded topic name to use with annotator");
+  else
+  {
+    ROS_FATAL("[predator_node] : annotator topic name not found");
     ROS_BREAK();
   }
 
@@ -624,6 +868,58 @@ void Predator::getGeneralParams()
   {
     ROS_WARN("[predator_node] : theta_FP param not found");
     detectorCascadeParams.theta_FP = 0.5;
+  }
+}
+/**
+  @brief Sends message of tracked object
+  @param rec [const cv::Rect&] The Bounding Box
+  @param posterior [const float&] Confidence
+  @return void
+**/
+  
+void Predator::sendAnnotation(const cv::Rect& rec, const float& posterior) 
+    //const sensor_msgs::Image& frame)
+{
+    if( operation_state == true){
+    
+    pandora_vision_msgs::PredatorMsg predatorMsg;
+    predatorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+    predatorMsg.header.stamp = PredatorFrameTimeStamp;
+    predatorMsg.x = rec.x;
+    predatorMsg.y = rec.y;
+    predatorMsg.width = rec.width;
+    predatorMsg.height = rec.height;
+    predatorMsg.posterior = posterior;
+    //predatorMsg.img = frame;
+   ROS_INFO_STREAM("send predator alert " << predatorMsg.header.frame_id << " " 
+                  << predatorMsg.header.stamp << " "  << predatorMsg.x << " " 
+                  << predatorMsg.y << " "<< predatorMsg.width << " "
+                  << predatorMsg.height <<  " " << predatorMsg.posterior);
+    _predatorPublisher.publish(predatorMsg);  
+  }
+  else{
+    
+    pandora_common_msgs::GeneralAlertMsg predatorAlertMsg;
+    
+    if(posterior != 0){
+      predatorAlertMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
+      predatorAlertMsg.header.stamp = PredatorFrameTimeStamp;
+      predatorAlertMsg.probability = posterior;
+      int center_x = rec.x + rec.width/2;
+      int center_y = rec.y + rec.height/2;
+      
+      // Predator's center's coordinates relative to the center of the frame
+      float x = center_x
+        - static_cast<float>(frameWidth) / 2;
+      float y = static_cast<float>(frameHeight) / 2
+        - center_y;
+
+      //Predator center's yaw and pitch
+      predatorAlertMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+      predatorAlertMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+          
+      _predatorPublisher.publish(predatorAlertMsg);
+    }  
   }
 }
 

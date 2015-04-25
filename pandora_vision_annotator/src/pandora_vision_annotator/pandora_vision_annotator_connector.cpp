@@ -9,7 +9,8 @@
 *  modification, are permitted provided that the following conditions
 *  are met:
 *
-*   * Redistributions of source code must retain the above copyright
+tamp(const sensor_msgs::header& msg);
+
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
 *     copyright notice, this list of conditions and the following
@@ -59,16 +60,26 @@ namespace pandora_vision
     for (int i = 0; i<4; i++)
     {
         bbox_ready.push_back(0);
-        qDebug("%d" , bbox_ready[i]);
     }
 
     img_state_ = IDLE;
 
+    package_path = ros::package::getPath("pandora_vision_annotator");
+    
     QObject::connect(
-      loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
-      this,SLOT(rosTopicPushButtonTriggered()));
-
+      loader_.offlineRadioButton, SIGNAL(toggled(bool)),
+      this,SLOT(offlineRadioButtonChecked()));
     QObject::connect(
+      loader_.onlineRadioButton, SIGNAL(toggled(bool)),
+      this,SLOT(onlineRadioButtonChecked()));
+       
+}
+void CConnector::offlineRadioButtonChecked(void)
+{   qDebug("offline checked");
+    QObject::connect(
+    loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
+    this,SLOT(rosTopicPushButtonTriggered()));
+  QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
     QObject::connect(
@@ -92,9 +103,25 @@ namespace pandora_vision
     QObject::connect(
       loader_.previousFramePushButton,SIGNAL(clicked(bool)),
       this,SLOT(previousFramePushButtonTriggered()));
+QObject::connect(
+      loader_.predatorPushButton,SIGNAL(clicked(bool)),
+      this,SLOT(predatorPushButtonTriggered()));
+QObject::connect(
+    loader_.framesListWidget,SIGNAL(itemClicked(QListWidgetItem*)),
+    this, SLOT(frameLabelTriggered(QListWidgetItem*)));
 
-
-  }
+ Q_EMIT offlineModeGiven();
+ state_= OFFLINE;
+}
+void CConnector::onlineRadioButtonChecked(void)
+{
+  QObject::connect(
+    loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
+    this,SLOT(rosTopicPushButtonTriggered()));
+     Q_EMIT onlineModeGiven();
+    state_ = ONLINE;
+  
+}
 
   /**
   @brief Qt slot that is called when the rosTopicPushButton is pressed
@@ -102,7 +129,29 @@ namespace pandora_vision
   **/
   void CConnector::rosTopicPushButtonTriggered(void)
   {    Q_EMIT rosTopicGiven();
+       
   }
+
+  /**
+  @brief Qt slot that is called when the rosTopicPushButton is pressed
+  @return void
+  **/
+  void CConnector::predatorPushButtonTriggered(void)
+  { 
+    if(ImgAnnotations::annotations.size() != 0)
+    {
+      Q_EMIT predatorEnabled();
+      state_ = PREDATOR; 
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      if(ImgAnnotations::is_file_exist(file.str().c_str()) )
+      {
+        remove(file.str().c_str());
+      } 
+      ImgAnnotations::writeToFile(file.str() );
+    }
+  }
+
 
   void CConnector::show(void)
   {
@@ -113,18 +162,40 @@ namespace pandora_vision
   {
     return loader_.rosTopicLineEdit->text();
   }
+  
+  QString CConnector::getBagName(void)
+  {
+    return loader_.bagLineEdit->text();
+  }
+
   void CConnector::setFrames(const std::vector<cv::Mat>& x)
   {
       frames = x;
-      currFrame = 0;
+      QString label;
+      for(int i =0; i<frames.size(); i++)
+      {
+        label = QString("frame %1").arg(i);
+        loader_.framesListWidget->addItem(label);
+      }
   }
 
-  void CConnector::setcurrentFrame()
-  {
+  void CConnector::setcurrentFrame(int x)
+    {  
+      currFrame = x;
       QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols, frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
       setImage(dest);
       Q_EMIT updateImage();
+    } 
+
+  void CConnector:: getcurrentFrame(int x, cv::Mat* frame)
+  {
+    *frame = frames[currFrame];
+  }
+  
+  int CConnector::getFrameNumber()
+  {
+    return  currFrame;
   }
 
   void CConnector::setImage(QImage &img)
@@ -135,6 +206,25 @@ namespace pandora_vision
   void CConnector::updateImage()
   {
     loader_.imageLabel->setPixmap(QPixmap().fromImage(localImage_));
+  }
+  
+  void CConnector::msgTimeStamp(const std_msgs::Header& msg)
+  {
+    msgHeader = msg;
+    //std::cout << msgHeader << std::endl;
+  }
+
+  void CConnector::setMsg(const sensor_msgs::ImageConstPtr& msg)
+{
+  msg_ = *msg;
+}
+
+  cv::Mat CConnector::QImage2Mat(QImage const& src)
+  {
+     cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
+     cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
+     cvtColor(tmp, result,CV_BGR2RGB);
+     return result;
   }
 
   /**
@@ -152,16 +242,36 @@ namespace pandora_vision
           QKeyEvent*  me = static_cast<QKeyEvent*> (event);
           if(me->key() == Qt::Key_S)
           {
-            qDebug("Save current Frame as: frame%04d.png",currFrame);
-            std::string img_name = "/home/marios/frame000" + boost::to_string(currFrame) + ".png";
-            cv::imwrite(img_name, frames[currFrame]);
+            //qDebug("Save current Frame as: frame%d.png",currFrame);
+            if(state_== ONLINE)
+            {
+              //do
+              //{
+              std::stringstream img_name, file;
+              img_name << package_path << "/data/frame" << msgHeader.seq <<".png";
+              //cv::Mat temp = QImage2Mat(localImage_);
+              //cv::imwrite(img_name.str(),temp);
+              //loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
+              file << package_path << "/data/onlineAnnotations.txt";
+              
+              ImgAnnotations::writeToFile(file.str(),msgHeader);
+              loader_.statusLabel->setText("Writing to file"+QString(file.str().c_str()));
+              //}while(me->key() != Qt::Key_D);
+
+            }
+            if(state_ == OFFLINE)
+            {
+              std::stringstream img_name;
+              img_name << package_path  << "/data/frame" << currFrame << ".png";
+              cv::imwrite(img_name.str(), frames[currFrame]);
+              loader_.statusLabel->setText("Save current Frame as:" + QString(img_name.str().c_str() )); 
+            }
           }
       }
-
-      if(event->type() == QEvent::MouseButtonPress)
+      if(event->type() == QEvent::MouseButtonPress && state_ != PREDATOR )
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
-        std::string img_name = "frame000" + boost::to_string(currFrame) + ".png";
+        std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
         //qDebug() << "load Image" << img_name;
         const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );
@@ -189,7 +299,7 @@ namespace pandora_vision
                     loader_.victimCoordsLabel->setText(
                      loader_.victimCoordsLabel->text() + QString("[") +
                      QString().setNum(p.x()) + QString(",") +
-                     QString().setNum(p.y() /*- diff*/) + QString("]"));
+                     QString().setNum(p.y() - diff) + QString("]"));
                      ImgAnnotations::setAnnotations(img_name,"Victim", p.x(), p.y()-diff);
                     bbox_ready[0]++;
                     if(bbox_ready[0] == 2)
@@ -219,10 +329,11 @@ namespace pandora_vision
                case HAZMAT_CLICK:
                   {
                     loader_.hazmatCoordsLabel->setText(
-                     loader_.hazmatCoordsLabel->text() + QString("[") +
+                    loader_.hazmatCoordsLabel->text() + QString("[") +
                      QString().setNum(p.x()) + QString(",") +
                      QString().setNum(p.y() - diff) + QString("]"));
-                    ImgAnnotations::setAnnotations(img_name,"Hazmat", p.x(), p.y()-diff);
+                    std::string type =loader_.hazmatInfoLineEdit->text().toStdString();
+                    ImgAnnotations::setAnnotations(img_name,"Hazmat", p.x(), p.y()-diff,type);
                     bbox_ready[2]++;
                     if(bbox_ready[2] == 2)
                     {
@@ -276,12 +387,15 @@ namespace pandora_vision
   }
 
   void CConnector::submitPushButtonTriggered(void)
-  { if(ImgAnnotations::is_file_exist("/home/marios/annotations.txt"))
+  { 
+    std::stringstream file;
+    file << package_path << "/data/annotations.txt";
+    if(ImgAnnotations::is_file_exist(file.str().c_str()) && currFrame == 0)
     {
-      remove("/home/marios/annotations.txt");
+      remove(file.str().c_str());
 
     }
-    ImgAnnotations::writeToFile("/home/marios/annotations.txt");
+    ImgAnnotations::writeToFile(file.str() );
 
   }
 
@@ -293,9 +407,10 @@ namespace pandora_vision
       loader_.qrCoordsLabel->clear();
       loader_.hazmatCoordsLabel->clear();
       loader_.victimCoordsLabel->clear();
+      loader_.statusLabel->clear();
       ImgAnnotations::annPerImage = 0;
       ImgAnnotations::annotations.clear();
-      setcurrentFrame();
+      setcurrentFrame(0);
       //setImage(backupImage_);
       //updateImage();
   }
@@ -303,44 +418,92 @@ namespace pandora_vision
   {
     if(currFrame != frames.size()-1)
     {
-    currFrame++;
-    setcurrentFrame();
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      currFrame++;
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      drawBox();
     }
   }
   void CConnector::previousFramePushButtonTriggered(void)
   {
     if(currFrame != 0)
     {
-     currFrame--;
-     setcurrentFrame();
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      currFrame--;
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      drawBox();
     }
   }
+
+  void CConnector::frameLabelTriggered(QListWidgetItem* item)
+  {
+    QStringList temp = item->text().split(" ");
+    std::stringstream file;
+    file << package_path << "/data/annotations.txt";
+    currFrame = temp.at(1).toInt();
+      setcurrentFrame(currFrame);
+      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(file.str(),img_name);
+      ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
+      loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      drawBox();
+
+
+  }
+
+
+  void CConnector::setPredatorValues(int x, int y, int width, int height)
+  {
+     ImgAnnotations::annotations.clear();
+     /*ImgAnnotations::annotations[0].x1 = 0;// x;
+     ImgAnnotations::annotations[0].y1 = 0;//y;
+     ImgAnnotations::annotations[0].x2 = 0;//x+width;
+     ImgAnnotations::annotations[0].y2 = 0;//y+height;*/
+     std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+     ImgAnnotations::setAnnotations(img_name, "1", x, y);
+     ImgAnnotations::setAnnotations(img_name, "1", x+width, y+height);
+     drawBox();  
+     std::stringstream file;
+     file << package_path << "/data/annotations.txt";
+     ImgAnnotations::writeToFile(file.str() );
+  }
+
   void CConnector::drawBox()
   {
-    //annImage_ = localImage_.copy();
-    if(ImgAnnotations::annPerImage == 0)
-    backupImage_=localImage_.copy();
     QPainter painter(&localImage_);
     painter.setRenderHint(QPainter::Antialiasing);
     QPen pen;
     pen.setWidth( 3 );
     pen.setBrush(Qt::green);
     painter.setPen(pen);
-    for (int i = 0; i < bbox_ready.size(); i++)
-        qDebug("%d", bbox_ready[i]);
-    qDebug("drawing %d annotation", ImgAnnotations::annPerImage);
-               qDebug("%d %d %d %d\n",
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2,
-                      ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2);
-    QPoint p1(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x1,
-              ImgAnnotations::annotations[ImgAnnotations::annPerImage].y1);
-    QPoint p2(ImgAnnotations::annotations[ImgAnnotations::annPerImage].x2,
-              ImgAnnotations::annotations[ImgAnnotations::annPerImage].y2);
-    QRect r(p1,p2);
-    painter.drawRect(r);
-    updateImage();
- }
+    for (int i = 0; i < ImgAnnotations::annotations.size(); i++)
+    {
+      loader_.statusLabel->setText("drawing "+ QString().setNum(i+1)+" annotation\n"
+                                 +QString().setNum(ImgAnnotations::annotations[i].x1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[i].y1)+"," 
+                                 +QString().setNum(ImgAnnotations::annotations[i].x2)+","
+                                 +QString().setNum(ImgAnnotations::annotations[i].y2));
+      QPoint p1(ImgAnnotations::annotations[i].x1,
+              ImgAnnotations::annotations[i].y1);
+      QPoint p2(ImgAnnotations::annotations[i].x2,
+              ImgAnnotations::annotations[i].y2);
+      QRect r(p1,p2);
+      painter.drawRect(r);
+      Q_EMIT updateImage();
+    }
 
+  }
 }
