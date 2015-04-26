@@ -56,30 +56,29 @@ namespace file_utilities
   void saveFeaturesInFile(const cv::Mat& featuresMat,
                           const cv::Mat& labelsMat,
                           const std::string& prefix,
-                          const std::string& fileName,
+                          const std::string& featuresFileName,
+                          const std::string& labelsFileName,
                           const std::string& imageType)
   {
-    std::stringstream featuresMatFileStream;
-    featuresMatFileStream << packagePath << "/data/" << fileName;
-    std::string varName = prefix + "features_mat";
-    saveToFile(featuresMatFileStream.str(), varName, featuresMat);
+    std::string filesDirectory = packagePath + "/data/";
 
-    std::cout << featuresMatFileStream.str() << std::endl;
+    std::string featuresMatFilePath = filesDirectory + featuresFileName;
+    std::string varName = prefix + "features_mat";
+    saveToFile(featuresMatFilePath, varName, featuresMat);
+
+    std::cout << featuresMatFilePath << std::endl;
     std::cout << "Size = " << featuresMat.size() << std::endl;
 
-    std::stringstream labelsMatFileStream;
-    labelsMatFileStream << packagePath << "/data/labels_" << fileName;
+    std::string labelsMatFilePath = filesDirectory + labelsFileName;
     varName = prefix + "labels_mat";
-    saveToFile(labelsMatFileStream.str(), varName, labelsMat);
+    saveToFile(labelsMatFilePath, varName, labelsMat);
 
-    std::cout << labelsMatFileStream.str() << std::endl;
+    std::cout << labelsMatFilePath << std::endl;
     std::cout << "Size = " << labelsMat.size() << std::endl;
 
-    std::string featuresMatrixCsvFile;
-    featuresMatrixCsvFile = prefix + imageType + "matrix.csv";
-    featuresMatFileStream.str("");
-    featuresMatFileStream << packagePath << "/data/" << featuresMatrixCsvFile;
-    saveToCSV(featuresMatFileStream.str(), featuresMat, labelsMat);
+    std::string featuresMatrixCsvFile = prefix + imageType + "matrix.csv";
+    std::string featuresMatCsvFilePath = filesDirectory + featuresMatrixCsvFile;
+    saveToCSV(featuresMatCsvFilePath, featuresMat, labelsMat);
   }
 
   /**

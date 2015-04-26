@@ -44,7 +44,8 @@ namespace pandora_vision
   /**
    * @brief Constructor
    */
-  RgbSvmTraining::RgbSvmTraining(const std::string& ns, int numFeatures, const std::string& datasetPath) :
+  RgbSvmTraining::RgbSvmTraining(const std::string& ns,
+      int numFeatures, const std::string& datasetPath) :
       SvmTraining(ns, numFeatures, datasetPath)
   {
     doPcaAnalysis_ = false;
@@ -69,40 +70,34 @@ namespace pandora_vision
    */
   void RgbSvmTraining::trainSubSystem()
   {
-    std::string training_matrix_file_path;
-    std::string test_matrix_file_path;
-    std::string labels_matrix_file_path;
-    std::string results_file_path;
+    const std::string trainingFeaturesMatrixFile = imageType_ + "training_features_matrix.xml";
+    const std::string testFeaturesMatrixFile = imageType_ + "test_features_matrix.xml";
+    const std::string trainingLabelsMatrixFile = imageType_ + "training_labels_matrix.xml";
+    const std::string testLabelsMatrixFile = imageType_ + "test_labels_matrix.xml";
+    const std::string resultsFile = imageType_ + "results.xml";
+    const std::string svmClassifierFile = imageType_ + "svm_classifier.xml";
+    const std::string filesDirectory = package_path + "/data/";
+
     std::stringstream in_file_stream;
     std::stringstream in_test_file_stream;
     std::stringstream labels_mat_file_stream;
     std::stringstream test_labels_mat_file_stream;
     std::stringstream svm_file_stream;
     std::stringstream results_file_stream;
-    std::stringstream annotations_file_stream;
-    float prediction;
-    double A, B;
 
-    training_matrix_file_path = "rgb_training_matrix.xml";
-    test_matrix_file_path = "rgb_test_matrix.xml";
-    results_file_path = "rgb_results.xml";
+    in_file_stream << filesDirectory << trainingFeaturesMatrixFile;
+    in_test_file_stream << filesDirectory << testFeaturesMatrixFile;
+    labels_mat_file_stream << filesDirectory << trainingLabelsMatrixFile;
+    test_labels_mat_file_stream << filesDirectory << testLabelsMatrixFile;
+    svm_file_stream << filesDirectory << svmClassifierFile;
+    results_file_stream << filesDirectory << resultsFile;
 
-    in_file_stream << package_path << "/data/" << training_matrix_file_path;
-    in_test_file_stream << package_path << "/data/" << test_matrix_file_path;
-    labels_mat_file_stream << package_path << "/data/" << "labels_" +training_matrix_file_path;
-    test_labels_mat_file_stream << package_path << "/data/" << "labels_" +test_matrix_file_path;
-    svm_file_stream << package_path << "/data/" << "rgb_svm_classifier.xml";
-    results_file_stream << package_path << "/data/" << results_file_path;
-    annotations_file_stream << package_path << "/data/" << "training_annotations.txt";
-
-    std::stringstream trainingDatasetPath;
-    trainingDatasetPath << path_to_samples << "/data/Training_Images";
-    boost::filesystem::path trainingDirectory(trainingDatasetPath.str());
+    const std::string trainingDatasetPath = path_to_samples + "/data/Training_Images";
+    boost::filesystem::path trainingDirectory(trainingDatasetPath);
     int numTrainingFiles = file_utilities::countFilesInDirectory(trainingDirectory);
 
-    std::stringstream testDatasetPath;
-    testDatasetPath << path_to_samples << "/data/Test_Images";
-    boost::filesystem::path testDirectory(testDatasetPath.str());
+    const std::string testDatasetPath = path_to_samples + "/data/Test_Images";
+    boost::filesystem::path testDirectory(testDatasetPath);
     int numTestFiles = file_utilities::countFilesInDirectory(testDirectory);
 
     cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, numFeatures_, CV_64FC1);
@@ -110,12 +105,10 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    std::string normalizationParamOne = "rgb_mean_values.xml";
-    std::stringstream normalizationParamOnePath;
-    normalizationParamOnePath << package_path << "/data/" << normalizationParamOne;
-    std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
-    std::stringstream normalizationParamTwoPath;
-    normalizationParamTwoPath << package_path << "/data/" << normalizationParamTwo;
+    std::string normalizationParamOne = imageType_ + "mean_values.xml";
+    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
 
     if (file_utilities::exist(in_file_stream.str().c_str()) == false ||
         doFeatureExtraction_)
@@ -123,7 +116,10 @@ namespace pandora_vision
       std::cout << "Create necessary training matrix" << std::endl;
       std::string prefix = "training_";
 
-      constructFeaturesMatrix(trainingDirectory, annotations_file_stream.str(),
+      const std::string trainingAnnotationsFile = imageType_ + "training_annotations.txt";
+      const std::string trainingAnnotationsFilePath = filesDirectory + trainingAnnotationsFile;
+
+      constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
           &trainingFeaturesMat, &trainingLabelsMat);
 
       std::vector<double> meanVector;
@@ -131,16 +127,17 @@ namespace pandora_vision
       featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,
           &meanVector, &stdDevVector);
 
-      file_utilities::saveToFile(normalizationParamOnePath.str(), "mean",
+      file_utilities::saveToFile(normalizationParamOnePath, "mean",
           cv::Mat(meanVector));
-      file_utilities::saveToFile(normalizationParamTwoPath.str(), "std_dev",
+      file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
           cv::Mat(stdDevVector));
 
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
 
       file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
-          prefix, training_matrix_file_path, imageType_);
+          prefix, trainingFeaturesMatrixFile, trainingLabelsMatrixFile,
+          imageType_);
     }
     else
     {
@@ -155,16 +152,17 @@ namespace pandora_vision
     {
       std::cout << "Create necessary test matrix" << std::endl;
       std::string prefix = "test_";
-      annotations_file_stream.str("");
-      annotations_file_stream << package_path << "/data/"
-                              << "test_annotations.txt";
-      constructFeaturesMatrix(testDirectory, annotations_file_stream.str(),
+
+      const std::string testAnnotationsFile = imageType_ + "test_annotations.txt";
+      const std::string testAnnotationsFilePath = filesDirectory + testAnnotationsFile;
+
+      constructFeaturesMatrix(testDirectory, testAnnotationsFilePath,
           &testFeaturesMat, &testLabelsMat);
 
       std::vector<double> meanVector = file_utilities::loadFiles(
-          normalizationParamOnePath.str(), "mean");
+          normalizationParamOnePath, "mean");
       std::vector<double> stdDevVector = file_utilities::loadFiles(
-          normalizationParamTwoPath.str(), "std_dev");
+          normalizationParamTwoPath, "std_dev");
       featureExtractionUtilities_->performZScoreNormalization(
           &testFeaturesMat, meanVector, stdDevVector);
 
@@ -172,7 +170,7 @@ namespace pandora_vision
       testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
 
       file_utilities::saveFeaturesInFile(testFeaturesMat, testLabelsMat,
-          prefix, test_matrix_file_path, imageType_);
+          prefix, testFeaturesMatrixFile, testLabelsMatrixFile, imageType_);
     }
     else
     {
@@ -214,6 +212,8 @@ namespace pandora_vision
     std::cout << "Finished training process" << std::endl;
 
     ///uncomment to produce the platt probability
+    //~ float prediction;
+    //~ double A, B;
     //~ for (int ii = 0; ii < testFeaturesMat.rows; ii++)
     //~ {
       //~ prediction = SVM.predict(testFeaturesMat.row(ii), true);

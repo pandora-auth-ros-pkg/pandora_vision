@@ -129,7 +129,7 @@ add_dependencies(victim_node
 if(VICTIM_ENABLE_TRAIN)
 
   add_executable(victim_rgb_svm_training_node
-      src/victim_rgb_svm_training_node.cpp
+      src/svm_classifier/victim_rgb_svm_training_node.cpp
   )
 
   target_link_libraries(victim_rgb_svm_training_node
@@ -141,6 +141,23 @@ if(VICTIM_ENABLE_TRAIN)
   )
 
   add_dependencies(victim_rgb_svm_training_node
+      ${catkin_EXPORTED_TARGETS}
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  )
+
+  add_executable(victim_depth_svm_training_node
+      src/svm_classifier/victim_depth_svm_training_node.cpp
+  )
+
+  target_link_libraries(victim_depth_svm_training_node
+      ${catkin_LIBRARIES}
+      ${PROJECT_NAME}_svm_classifier
+      ${PROJECT_NAME}_feature_extractors
+      ${PROJECT_NAME}_channels_statistics_feature_extractors
+      ${PROJECT_NAME}_victim_parameters
+  )
+
+  add_dependencies(victim_depth_svm_training_node
       ${catkin_EXPORTED_TARGETS}
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
   )

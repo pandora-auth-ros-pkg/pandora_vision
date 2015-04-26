@@ -69,7 +69,8 @@ namespace file_utilities
   void saveFeaturesInFile(const cv::Mat& featuresMat,
                           const cv::Mat& labelsMat,
                           const std::string& prefix,
-                          const std::string& fileName,
+                          const std::string& featuresFileName,
+                          const std::string& labelsFileName,
                           const std::string& imageType);
 
   /**
