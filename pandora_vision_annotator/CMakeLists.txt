@@ -83,5 +83,7 @@ target_link_libraries(pandora_vision_annotator_node
 )
 install(PROGRAMS scripts/images_to_bag
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(PROGRAMS scripts/split_bag
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 

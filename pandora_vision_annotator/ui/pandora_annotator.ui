@@ -36,9 +36,16 @@
      </size>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="4" column="0">
+     <item row="3" column="0">
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="9" column="0">
+       <item row="23" column="0">
+        <widget class="QPushButton" name="previousFramePushButton">
+         <property name="text">
+          <string>Previous Frame</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QCheckBox" name="hazmatCheckBox">
@@ -56,10 +63,10 @@
          </item>
         </layout>
        </item>
-       <item row="14" column="0">
+       <item row="18" column="0">
         <widget class="QLineEdit" name="landoltcInfoLineEdit"/>
        </item>
-       <item row="15" column="0">
+       <item row="19" column="0">
         <widget class="QLabel" name="landoltcCoordsLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -75,7 +82,7 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="11" column="0">
         <widget class="QLabel" name="qrCoordsLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -94,28 +101,28 @@
        <item row="2" column="0">
         <widget class="QLineEdit" name="victimInfoLineEdit"/>
        </item>
-       <item row="8" column="0">
+       <item row="12" column="0">
         <widget class="Line" name="line_3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="16" column="0">
+       <item row="20" column="0">
         <widget class="QPushButton" name="submitPushButton">
          <property name="text">
           <string>Submit</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="8" column="0">
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
+       <item row="14" column="0">
         <widget class="QLineEdit" name="hazmatInfoLineEdit">
          <property name="text">
           <string>Hazmat types [1-13]</string>
@@ -127,7 +134,7 @@
          <item>
           <widget class="QCheckBox" name="victimCheckBox">
            <property name="text">
-            <string>Hole / Victim</string>
+            <string>Victim</string>
            </property>
           </widget>
          </item>
@@ -140,7 +147,7 @@
          </item>
         </layout>
        </item>
-       <item row="5" column="0">
+       <item row="9" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QCheckBox" name="qrCheckBox">
@@ -158,28 +165,21 @@
          </item>
         </layout>
        </item>
-       <item row="19" column="0">
-        <widget class="QPushButton" name="previousFramePushButton">
-         <property name="text">
-          <string>Previous Frame</string>
-         </property>
-        </widget>
-       </item>
-       <item row="12" column="0">
-        <widget class="Line" name="line_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="17" column="0">
+       <item row="21" column="0">
         <widget class="QPushButton" name="clearPushButton">
          <property name="text">
           <string>Clear Annotations</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="0">
+       <item row="16" column="0">
+        <widget class="Line" name="line_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="0">
         <widget class="QLabel" name="hazmatCoordsLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -195,7 +195,7 @@
          </property>
         </widget>
        </item>
-       <item row="13" column="0">
+       <item row="17" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QCheckBox" name="landoltcCheckBox">
@@ -213,19 +213,37 @@
          </item>
         </layout>
        </item>
-       <item row="6" column="0">
+       <item row="22" column="0">
+        <widget class="QPushButton" name="nextFramePushButton">
+         <property name="text">
+          <string>Next Frame</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
         <widget class="QLineEdit" name="qrInfoLineEdit">
          <property name="text">
           <string>QR Message here</string>
          </property>
         </widget>
        </item>
-       <item row="18" column="0">
-        <widget class="QPushButton" name="nextFramePushButton">
-         <property name="text">
-          <string>Next Frame</string>
-         </property>
-        </widget>
+       <item row="5" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QCheckBox" name="holeCheckBox">
+           <property name="text">
+            <string>Hole </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="holePushButton">
+           <property name="text">
+            <string>Set Coords</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="victimCoordsLabel">
@@ -243,14 +261,26 @@
          </property>
         </widget>
        </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="holeCoordsLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLineEdit" name="holeInfoLineEdit"/>
+       </item>
       </layout>
-     </item>
-     <item row="3" column="0">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
      </item>
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -307,9 +337,9 @@
    <widget class="QLabel" name="imageLabel">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>20</y>
-      <width>640</width>
+      <x>310</x>
+      <y>30</y>
+      <width>651</width>
       <height>631</height>
      </rect>
     </property>
