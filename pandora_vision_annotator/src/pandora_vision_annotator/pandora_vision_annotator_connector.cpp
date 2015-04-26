@@ -83,6 +83,9 @@ void CConnector::offlineRadioButtonChecked(void)
   QObject::connect(
       loader_.victimPushButton,SIGNAL(clicked(bool)),
       this,SLOT(victimPushButtonTriggered()));
+ QObject::connect(
+      loader_.holePushButton,SIGNAL(clicked(bool)),
+      this,SLOT(holePushButtonTriggered()));
   QObject::connect(
       loader_.hazmatPushButton,SIGNAL(clicked(bool)),
       this,SLOT(hazmatPushButtonTriggered()));
@@ -307,6 +310,23 @@ void CConnector::onlineRadioButtonChecked(void)
                     }
                     break;
                   }
+              case HOLE_CLICK:
+                  {
+                    loader_.holeCoordsLabel->setText(
+                     loader_.holeCoordsLabel->text() + QString("[") +
+                     QString().setNum(p.x()) + QString(",") +
+                     QString().setNum(p.y() - diff) + QString("]"));
+                     ImgAnnotations::setAnnotations(img_name,"Hole", p.x(), p.y()-diff);
+                    bbox_ready[0]++;
+                    if(bbox_ready[0] == 2)
+                    {
+                        drawBox();
+                        bbox_ready[0] = 0;
+                        ImgAnnotations::annPerImage++;
+                    }
+                    break;
+                  }
+
               case QR_CLICK:
                   {
                     loader_.qrCoordsLabel->setText(
@@ -367,6 +387,12 @@ void CConnector::onlineRadioButtonChecked(void)
   { if(bbox_ready[0]== 0)
     img_state_ = VICTIM_CLICK;
   }
+  
+  void CConnector::holePushButtonTriggered(void)
+  { if(bbox_ready[0]== 0)
+    img_state_ = HOLE_CLICK;
+  }
+
   void CConnector::qrPushButtonTriggered(void)
   {
     if(bbox_ready[1]== 0)

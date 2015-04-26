@@ -51,6 +51,7 @@ namespace pandora_vision
   {
     IDLE,
     VICTIM_CLICK,
+    HOLE_CLICK,
     QR_CLICK,
     HAZMAT_CLICK,
     LANDOLTC_CLICK
@@ -155,6 +156,7 @@ namespace pandora_vision
       void onlineRadioButtonChecked(void);
       void offlineRadioButtonChecked(void);
       void victimPushButtonTriggered(void);
+      void holePushButtonTriggered(void);
       void qrPushButtonTriggered(void);
       void landoltcPushButtonTriggered(void);
       void hazmatPushButtonTriggered(void);
