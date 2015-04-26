@@ -34,13 +34,13 @@ target_link_libraries(visualization_test
 
 
 ################################ depth node ####################################
-#catkin_add_gtest(depth_hole_detector_test
-#  unit/depth_node/hole_detector_test.cpp)
-#
-#target_link_libraries(depth_hole_detector_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_depth
-#  gtest_main)
+catkin_add_gtest(depth_test
+  unit/depth_node/depth_test.cpp)
+
+target_link_libraries(depth_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_depth
+  gtest_main)
 
 
 ################################# rgb node #####################################

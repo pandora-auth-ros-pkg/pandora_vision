@@ -120,13 +120,13 @@ namespace pandora_vision
   int Parameters::Depth::morphology_open_kernel_size = 2;
   int Parameters::Depth::morphology_close_kernel_size = 24;
   int Parameters::Depth::border_thresh = 20;
-  int Parameters::Depth::dilation_kernel_size = 24;
+  int Parameters::Depth::dilation_kernel_size = 12;
   int Parameters::Depth::rect_diff_thresh = 3;
   int Parameters::Depth::huge_contour_thresh = 20000;
   int Parameters::Depth::tiny_contour_thresh = 800;
   int Parameters::Depth::small_contour_thresh = 2500;
   int Parameters::Depth::neighbor_thresh = 100;
-  int Parameters::Depth::neighbor_value_thresh = 30;
+  int Parameters::Depth::neighbor_value_thresh = 70;
   int Parameters::Depth::depth_similarity_rect_dims_thresh = 50;
   float Parameters::Depth::merge_thresh = 50.0;
   int Parameters::Depth::canny_low_threshold = 50;

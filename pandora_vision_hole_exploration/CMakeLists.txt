@@ -204,8 +204,8 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   #test/unit/utils/outline_discovery_test.cpp
   #test/unit/utils/wavelets_test.cpp
 
-  ################### depth node ###################
-  #test/unit/depth_node/hole_detector_test.cpp
+  #################### depth node ###################
+  test/unit/depth_node/depth_test.cpp
 
   #################### rgb node ####################
   test/unit/rgb_node/rgb_test.cpp

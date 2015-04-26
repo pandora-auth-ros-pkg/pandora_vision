@@ -586,7 +586,8 @@ namespace pandora_vision
       if(realContours.at(i))
       {
         keypoints.push_back(mc[i]);
-        rectangles.push_back(boundRect[i]);
+        cv::Rect temp(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
+        rectangles.push_back(temp);
       }
 
     conveyor.keypoint = keypoints;
@@ -708,7 +709,7 @@ namespace pandora_vision
 
   void Depth::validateContours(const cv::Mat& image, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::vector<bool>* realContours, std::vector<cv::Rect>& boundRect)
   {
-    std::vector<int> numLabels(contours.size());
+    std::vector<int> numLabels(contours.size(), 0);
     // for merging, contour index, other contour index, possibility
     std::map<std::pair<int, int>, float> contourLabel;
     for(int i = 0; i < contours.size(); i ++)
@@ -716,16 +717,19 @@ namespace pandora_vision
       (*contourHeight)[i] = boundRect[i].height;
       (*contourWidth)[i] = boundRect[i].width;
       numLabels[i] = 0;
-      (*realContours).push_back(validateContour(image, i, mc, contourHeight, contourWidth, &contourLabel, &numLabels, boundRect, contours, realContours));
-      if((*realContours).at(i))
-        if((*contourWidth)[i] > Parameters::Depth::rect_diff_thresh * (*contourHeight)[i] || (*contourHeight)[i] > Parameters::Depth::rect_diff_thresh * (*contourWidth)[i])
-          (*realContours)[i] = false;
-    }
-    for( int i = 0; i < contours.size(); i++ )
-    {
       if((*realContours)[i])
+      {
         (*realContours)[i] = validateContour(image, i, mc, contourHeight, contourWidth, &contourLabel, &numLabels, boundRect, contours, realContours);
+        if((*realContours).at(i))
+          if((*contourWidth)[i] > Parameters::Depth::rect_diff_thresh * (*contourHeight)[i] || (*contourHeight)[i] > Parameters::Depth::rect_diff_thresh * (*contourWidth)[i])
+            (*realContours)[i] = false;
+      }
     }
+    //for( int i = 0; i < contours.size(); i++ )
+    //{
+    //  if((*realContours)[i])
+    //    (*realContours)[i] = validateContour(image, i, mc, contourHeight, contourWidth, &contourLabel, &numLabels, boundRect, contours, realContours);
+    //}
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i] && numLabels[i] > 0)
@@ -812,74 +816,71 @@ namespace pandora_vision
     }
     else
     {
-      if(cv::contourArea(contours[ci]) > Parameters::Depth::small_contour_thresh)
+      for(int i = 0; i < contours.size(); i ++)
       {
-        for(int i = 0; i < contours.size(); i ++)
+        if(i != ci)
         {
-          if(i != ci)
+          if((*realContours)[i] && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) && (std::abs((int)image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x) - (int)image.at<uchar>((*mcv)[i].y, (*mcv)[i].x)) < Parameters::Depth::neighbor_value_thresh))
           {
-            if((*realContours).at(i) && (abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) && (abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) && (std::abs((int)image.at<uchar>((*mcv)[ci].x, (*mcv)[ci].y) - (int)image.at<uchar>((*mcv)[i].x, (*mcv)[i].y)) < Parameters::Depth::neighbor_value_thresh))
+            int upperX;
+            int upperY;
+            int lowerX;
+            int lowerY;
+            if((*mcv)[ci].x > (*mcv)[i].x)
+              upperX = (*mcv)[i].x;
+            else
+              upperX = (*mcv)[ci].x;
+            if((*mcv)[ci].y> (*mcv)[i].y)
+              upperY = (*mcv)[i].y;
+            else
+              upperY = (*mcv)[ci].y;
+            if((*mcv)[ci].x > (*mcv)[i].x)
+              lowerX = (*mcv)[ci].x;
+            else
+              lowerX = (*mcv)[i].x;
+            if((*mcv)[ci].y > (*mcv)[i].y)
+              lowerY = (*mcv)[ci].y;
+            else
+              lowerY = (*mcv)[i].y;
+            cv::Mat ROI = image(boundRect[i]);
+            cv::Scalar otherAvg = cv::mean(ROI);
+            int homogRectWidth = std::abs(lowerX - upperX);
+            if(homogRectWidth < Parameters::Depth::depth_similarity_rect_dims_thresh)
+              homogRectWidth = Parameters::Depth::depth_similarity_rect_dims_thresh;
+            int homogRectHeight = std::abs(lowerY - upperY);
+            if(homogRectHeight < Parameters::Depth::depth_similarity_rect_dims_thresh)
+              homogRectHeight = Parameters::Depth::depth_similarity_rect_dims_thresh;
+            if(upperX + homogRectWidth > image.cols)
+              homogRectWidth = image.cols - upperX - 1;
+            if(upperY + homogRectHeight > image.rows)
+              homogRectHeight = image.rows - upperY - 1;
+            if(upperX < 0)
+              upperX = 0;
+            if(upperY < 0)
+              upperY = 0;                                                                                                                              
+            if(lowerX > image.cols)
+              lowerX = image.cols;
+            if(lowerY > image.rows)
+              lowerY = image.rows;
+            //cout << upperX << ", " << upperY << ", " << homogRectWidth << ", " << homogRectHeight << "\n";
+            ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
+            int sumBlacks = 0;
+            for(int r = 0; r < ROI.rows; r ++)
+              for(int c = 0; c < ROI.cols; c ++)
+                if((int)image.at<uchar>(r, c) == 0)
+                  sumBlacks ++;
+            float euclideanDistance = 1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
+            // TODO Toda Vez! ignore double registration same contours with other label. Maybe OK.
+            float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
+            //std::cout << mergeProbability << "\n";
+            if(mergeProbability > Parameters::Depth::merge_thresh)
             {
-              int upperX;                                                                                                                                                      int upperY;
-              int lowerX;
-              int lowerY;
-              if((*mcv)[ci].x > (*mcv)[i].x)
-                upperX = (*mcv)[i].x;
-              else
-                upperX = (*mcv)[ci].x;
-              if((*mcv)[ci].y> (*mcv)[i].y)
-                upperY = (*mcv)[i].y;
-              else
-                upperY = (*mcv)[ci].y;
-              if((*mcv)[ci].x > (*mcv)[i].x)
-                lowerX = (*mcv)[ci].x;
-              else
-                lowerX = (*mcv)[i].x;
-              if((*mcv)[ci].y > (*mcv)[i].y)
-                lowerY = (*mcv)[ci].y;
-              else
-                lowerY = (*mcv)[i].y + (boundRect[i].height / 2);
-              cv::Mat ROI = image(boundRect[i]);
-              cv::Scalar otherAvg = cv::mean(ROI);
-              int homogRectWidth = std::abs(lowerX - upperX);
-              if(homogRectWidth < Parameters::Depth::depth_similarity_rect_dims_thresh)
-                homogRectWidth = Parameters::Depth::depth_similarity_rect_dims_thresh;
-              int homogRectHeight = std::abs(lowerY - upperY);
-              if(homogRectHeight < Parameters::Depth::depth_similarity_rect_dims_thresh)
-                homogRectHeight = Parameters::Depth::depth_similarity_rect_dims_thresh;
-              if(upperX + homogRectWidth > image.cols)
-                homogRectWidth = image.cols - upperX - 1;
-              if(upperY + homogRectHeight > image.rows)
-                homogRectHeight = image.rows - upperY - 1;
-              if(upperX < 0)
-                upperX = 0;
-              if(upperY < 0)
-                upperY = 0;                                                                                                                              
-              if(lowerX > image.cols)
-                lowerX = image.cols;
-              if(lowerY > image.rows)
-                lowerY = image.rows;
-              //cout << upperX << ", " << upperY << ", " << homogRectWidth << ", " << homogRectHeight << "\n";
-              ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
-              int sumBlacks = 0;
-              for(int r = 0; r < ROI.rows; r ++)
-                for(int c = 0; c < ROI.cols; c ++)
-                  if((int)image.at<uchar>(c, r) == 0)
-                    sumBlacks ++;
-              float euclideanDistance = 1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
-              // TODO Toda Vez! ignore double registration same contours with other label. Maybe OK.
-              float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
-              //std::cout << mergeProbability << "\n";
-              if(mergeProbability > Parameters::Depth::merge_thresh)
+              if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
               {
-                if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
-                {
-                  (*contourLabel)[std::make_pair(ci, i)] = mergeProbability;
-                  (*numLabels)[ci] ++;
-                  (*numLabels)[i] ++;
-                }
+                (*contourLabel)[std::make_pair(ci, i)] = mergeProbability;
+                (*numLabels)[ci] ++;
+                (*numLabels)[i] ++;
               }
-
             }
           }
         }
@@ -900,6 +901,7 @@ namespace pandora_vision
     for(int i = 0; i < (*contourLabel).size(); i++)
     {
       for(int j = 0; j < contours.size(); j ++)
+      {
         if((*realContours).at(j) && j != ci)
           if((*contourLabel).find(std::make_pair(ci, j)) != (*contourLabel).end() || (*contourLabel).find(std::make_pair(j, ci)) != (*contourLabel).end())
           {
@@ -930,6 +932,7 @@ namespace pandora_vision
                     sumY += (*mcv)[l].y;
                   }
           }
+      }
     }
     (*mcv)[ci].x = sumX / sum;
     (*mcv)[ci].y = sumY / sum;
