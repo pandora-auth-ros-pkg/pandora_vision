@@ -67,7 +67,6 @@ namespace pandora_vision
     ROS_INFO_STREAM(classifierPath.c_str());
     svmValidator_.load(classifierPath.c_str());
 
-
     featureExtraction_ = new FeatureExtraction();
     featureExtractionUtilities_ = new FeatureExtractionUtilities();
   }
@@ -99,6 +98,8 @@ namespace pandora_vision
   float SvmValidator::calculatePredictionProbability(const cv::Mat& inImage)
   {
     extractFeatures(inImage);
+    if (!featureVector_.empty())
+      featureVector_.clear();
     featureVector_ = featureExtraction_->getFeatureVector();
     return predictionToProbability(predict());
   }
@@ -116,6 +117,7 @@ namespace pandora_vision
     ///Normalize the data
     featureExtractionUtilities_->performZScoreNormalization(
         &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    featuresMat.convertTo(featuresMat, CV_32FC1);
 
     ROS_INFO_STREAM("SVM class label: " <<
                     svmValidator_.predict(featuresMat, false));
