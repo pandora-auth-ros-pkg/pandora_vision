@@ -41,47 +41,12 @@
 
 namespace pandora_vision
 {
-  VictimHandler::VictimHandler(const std::string& ns) : sensor_processor::
-    Handler<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped, POIsStamped, 
-    pandora_common_msgs::GeneralAlertInfoVector>(ns)
+  VictimHandler::VictimHandler(const std::string& ns) : 
+    VisionHandler<VictimProcessor, VictimProcessor, VictimPostProcessor>(ns)
   {
-  }
-  
-  void VictimHandler::startTransition(int newState)
-  {
-    currentState_ = newState;
-    
-    bool previouslyOff = (previousState_ == state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
-      || previousState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
-      || previousState_ == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    bool currentlyOn = (currentState_ != state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
-      && currentState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
-      && currentState_ != state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-    
-    if (previouslyOff && currentlyOn)
-    {
-      preProcPtr_.reset(new VictimPreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new VictimDetector("~/processor", this));
-      postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
-    }
-    else if (!previouslyOff && !currentlyOn)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-    }
-    
-    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
-    {
-      preProcPtr_.reset();
-      processorPtr_.reset();
-      postProcPtr_.reset();
-      
-      ros::shutdown();
-      return;
-    }
-    previousState_ = currentState_;
-    transitionComplete(currentState_);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
   }
   
   void VictimHandler::completeTransition()

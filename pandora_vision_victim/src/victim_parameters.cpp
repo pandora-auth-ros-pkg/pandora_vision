@@ -41,47 +41,25 @@ namespace pandora_vision
 {
   //----------------------------Parameters----------------------------//
   //!< Dynamic reconfigure parameters
-  double VictimParameters::rgb_vj_weight = 0.2;
-  double VictimParameters::depth_vj_weight = 0;
-  double VictimParameters::rgb_svm_weight = 0.9;
-  double VictimParameters::depth_svm_weight = 0;
+  double rgb_vj_weight = 0.2;
+  double depth_vj_weight = 0;
+  double rgb_svm_weight = 0.9;
+  double depth_svm_weight = 0;
   
-  bool VictimParameters::debug_img = false;
-  bool VictimParameters::debug_img_publisher = false;
+  bool debug_img = false;
+  bool debug_img_publisher = false;
   
-  //!< Static parameters
-  std::string VictimParameters::packagePath = "";
-  std::string VictimParameters::victimDebugImg = "";
-  std::string VictimParameters::interpolatedDepthImg = "";
-  int VictimParameters::modelImageHeight = 0;
-  int VictimParameters::modelImageWidth = 0;
-  
-  std::string VictimParameters::cascade_path = "";
-  std::string VictimParameters::model_url = "";
-  std::string VictimParameters::model_path = "";
-  std::string VictimParameters::rgb_classifier_path = "";
-  std::string VictimParameters::depth_classifier_path = "";
-  
-  double VictimParameters::rgb_svm_C = 312.5;
-  double VictimParameters::rgb_svm_gamma = 0.50625;
-  double VictimParameters::rgb_svm_prob_scaling = 0.5;
-  double VictimParameters::rgb_svm_prob_translation = 7.0;
-  double VictimParameters::depth_svm_C = 312.5;
-  double VictimParameters::depth_svm_gamma = 0.50625;
-  double VictimParameters::depth_svm_prob_scaling = 0.5;
-  double VictimParameters::depth_svm_prob_translation = 7.0;
+  double rgb_svm_prob_scaling = 0.5;
+  double rgb_svm_prob_translation = 7.0;
+
   
   //----------------------------Methods----------------------------//
   
-  VictimParameters::VictimParameters(const std::string& ns):
-    _nh(ns)
+  VictimParameters::VictimParameters()
   {
     //!< The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&VictimParameters::parametersCallback,
         this, _1, _2));
-        
-    getGeneralParams();
-    getVictimDetectorParameters();
   }
   
   /**
@@ -94,232 +72,82 @@ namespace pandora_vision
     const pandora_vision_victim::victim_dyn_reconfConfig& config,
     const uint32_t& level)
   {
-    VictimParameters::rgb_vj_weight = config.rgb_vj_weight;
-    VictimParameters::depth_vj_weight = config.depth_vj_weight;
-    VictimParameters::rgb_svm_weight = config.rgb_svm_weight;
-    VictimParameters::depth_svm_weight = config.depth_svm_weight;
-    VictimParameters::debug_img = config.debug_img;
-    VictimParameters::debug_img_publisher = config.debug_img_publisher;
-    VictimParameters::rgb_svm_prob_scaling = config.rgb_svm_prob_scaling;
-    VictimParameters::rgb_svm_prob_translation = 
+    rgb_vj_weight = config.rgb_vj_weight;
+    depth_vj_weight = config.depth_vj_weight;
+    rgb_svm_weight = config.rgb_svm_weight;
+    depth_svm_weight = config.depth_svm_weight;
+    debug_img = config.debug_img;
+    debug_img_publisher = config.debug_img_publisher;
+    rgb_svm_prob_scaling = config.rgb_svm_prob_scaling;
+    rgb_svm_prob_translation = 
       config.rgb_svm_prob_translation;
   }
   
-  /**
-  @brief Get parameters referring to the view and
-  frame characteristics
-  @return void
-  **/
-  void VictimParameters::getGeneralParams(void)
+  void VictimParameters::configVictim(const ros::NodeHandle& nh)
   {
-
-    VictimParameters::packagePath =  
+    packagePath =  
       ros::package::getPath("pandora_vision_victim");
-    
-    std::string str_param;
-    int int_param;
-    double double_param;
-    
-    if (_nh.getParam("victim_debug_img_topic", str_param))
+
+    if (!nh.getParam("/victim_interpolated_depth_img", interpolatedDepthImg))
     {
-      VictimParameters::victimDebugImg = str_param;
-    }
-    else
-    {
-      ROS_FATAL("[victim_node] : victimDebugImg name param not found");
-      ROS_BREAK();
-    }
-    
-    if (_nh.getParam("victim_interpolated_depth_img_topic", 
-      str_param))
-    {
-      VictimParameters::interpolatedDepthImg = str_param;
-    }
-    else
-    {
+      interpolatedDepthImg = "";
       ROS_FATAL("[victim_node] : interpolatedDepthImg name param not found");
       ROS_BREAK();
     }
-
-    //! Get the Height parameter if available;
-    if (_nh.getParam("model_image_height", int_param)) 
+    
+    if (!nh.getParam("/victim_debug_img_topic", victimDebugImg))
     {
-      VictimParameters::modelImageHeight = int_param;
-      ROS_DEBUG_STREAM("model image height : " << int_param);
-    }
-    else 
-    {
-      ROS_FATAL
-        ("[victim_node] : Parameter modelImageHeight not found. Using Default");
+      victimDebugImg = "";
+      ROS_FATAL("[victim_node] : victimDebugImg name param not found");
       ROS_BREAK();
     }
+
+    nh.param("/model_image_height", modelImageHeight, 0);
+    nh.param("/model_image_width", modelImageWidth, 0);
+    nh.param("/rgb_svm_C", rgb_svm_C, 312.5);
+    nh.param("/rgb_svm_gamma", rgb_svm_gamma, 0.50625);
+    nh.param("/depth_svm_C", depth_svm_C, 312.5);
+    nh.param("/depth_svm_gamma", depth_svm_gamma, 0.50625);
+    nh.param("/depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5);
+    nh.param("/depth_svm_prob_translation", depth_svm_prob_translation, 7.);
     
-    //! Get the Width parameter if available;
-    if ( _nh.getParam("model_image_width", int_param)) 
+    if (!nh.getParam("/cascade_path", cascade_path))
     {
-      VictimParameters::modelImageWidth = int_param;
-      ROS_DEBUG_STREAM("model image width : " << int_param);
-    }
-    else 
-    {
-      ROS_FATAL
-        ("[victim_node] : Parameter modelImageWidth not found. Using Default");
+      cascade_path = "/data/haarcascade_frontalface_alt_tree.xml";
+      ROS_FATAL("[victim_node] : cascade_path name param not found");
       ROS_BREAK();
     }
+    cascade_path = packagePath + cascade_path;
     
-    if (_nh.getParam("rgb_svm_C", double_param))
-    { 
-      VictimParameters::rgb_svm_C = double_param;
-      ROS_DEBUG_STREAM("rgb_svm_C : " << double_param);
-    }
-    else 
+    if (!nh.getParam("/model_path", model_path))
     {
-     ROS_FATAL("[victim_node]: rgb_svm_C not found");
-     ROS_BREAK();
-    } 
-     
-    if (_nh.getParam("rgb_svm_gamma", double_param))
-    { 
-      VictimParameters::rgb_svm_gamma = double_param;
-      ROS_DEBUG_STREAM("rgb_svm_gamma : " << double_param);
+      model_path = "/data/model.xml";
+      ROS_FATAL("[victim_node] : model_path name param not found");
+      ROS_BREAK();
     }
-    else 
-    {
-     ROS_FATAL("[victim_node]: rgb_svm_gamma not found");
-     ROS_BREAK();
-    }  
+    model_path = packagePath + model_path;
     
-    if (_nh.getParam("depth_svm_C", double_param))
-    { 
-      VictimParameters::depth_svm_C = double_param;
-      ROS_DEBUG_STREAM("depth_svm_C : " << double_param);
-    }
-    else 
+    if (!nh.getParam("/rgb_classifier_path", rgb_classifier_path))
     {
-     ROS_FATAL("[victim_node]: depth_svm_C not found");
-     ROS_BREAK();
-    } 
-     
-    if (_nh.getParam("depth_svm_gamma", double_param))
-    { 
-      VictimParameters::depth_svm_gamma = double_param;
-      ROS_DEBUG_STREAM("depth_svm_gamma : " << double_param);
+      rgb_classifier_path = "data/rgb_svm_classifier.xml";
+      ROS_FATAL("[victim_node] : rgb_classifier_path name param not found");
+      ROS_BREAK();
     }
-    else 
-    {
-     ROS_FATAL("[victim_node]: depth_svm_gamma not found");
-     ROS_BREAK();
-    }  
+    rgb_classifier_path = packagePath + rgb_classifier_path;
     
-    if (_nh.getParam("depth_svm_prob_scaling", double_param))
-    { 
-      VictimParameters::depth_svm_prob_scaling = double_param;
-      ROS_DEBUG_STREAM("depth_svm_prob_scaling : " << double_param);
-    }
-    else 
+    if (!nh.getParam("/depth_classifier_path", depth_classifier_path))
     {
-     ROS_FATAL("[victim_node]: depth_svm_prob_scaling not found");
-     ROS_BREAK();
-    }  
-    if (_nh.getParam("depth_svm_prob_translation", double_param))
-    { 
-      VictimParameters::depth_svm_prob_translation = double_param;
-      ROS_DEBUG_STREAM("depth_svm_prob_translation : " << double_param);
+      depth_classifier_path = "/data/depth_svm_classifier.xml";
+      ROS_FATAL("[victim_node] : depth_classifier_path name param not found");
+      ROS_BREAK();
     }
-    else 
+    depth_classifier_path = packagePath + depth_classifier_path;
+    
+    if (!nh.getParam("/model_url", model_url))
     {
-     ROS_FATAL("[victim_node]: depth_svm_prob_translation not found");
-     ROS_BREAK();
-    }  
+      model_url = "https://pandora.ee.auth.gr/vision/model.xml";
+      ROS_FATAL("[victim_node] : model_url name param not found");
+      ROS_BREAK();
+    }
   }
-  
-
-  /**
-  @brief Get parameters referring to the face detection algorithm
-  @return void
-  **/
-  void VictimParameters::getVictimDetectorParameters(void)
-  {
-    
-    std::string str_param;
-    bool bool_param;
-    int int_param;
-    
-    //!< Get the path of haar_cascade xml file if available;
-    if ( _nh.getParam("cascade_path", str_param))
-    {
-      VictimParameters::cascade_path = VictimParameters::packagePath + 
-        str_param;
-      ROS_INFO_STREAM("[victim_node]: cascade_path : " << str_param);
-    }
-    else
-    {
-      VictimParameters::cascade_path = VictimParameters::packagePath + 
-        "/data/haarcascade_frontalface_alt_tree.xml";
-      ROS_INFO_STREAM("[victim_node]: cascade_path : " << 
-        VictimParameters::cascade_path);
-    }
-
-    //!< Get the model.xml url;
-    if (_nh.getParam("model_url", str_param))
-    {
-      VictimParameters::model_url = str_param;
-      ROS_INFO_STREAM("[victim_node]: modelURL : " << str_param);
-    }
-    else
-    {
-      VictimParameters::model_url = 
-        "https://pandora.ee.auth.gr/vision/model.xml";
-      ROS_INFO_STREAM("[victim_node]: modelURL : " << 
-        VictimParameters::model_url);
-    }
-
-    //!< Get the path of model_path xml file to be loaded
-    if (_nh.getParam("model_path",  str_param))
-    {
-      VictimParameters::model_path = 
-        VictimParameters::packagePath + str_param;
-      ROS_INFO_STREAM("[victim_node]: model_path : " <<  str_param);
-    }
-    else
-    {
-      VictimParameters::model_path = VictimParameters::packagePath + 
-        "/data/model.xml";
-      ROS_INFO_STREAM("[victim_node]: model_path : " <<  
-        VictimParameters::model_path);
-    }
-    
-    //!< Get the path of rgb classifier
-    if (_nh.getParam("rgb_classifier_path",  str_param))
-    {
-      VictimParameters::rgb_classifier_path = VictimParameters::packagePath + 
-        str_param;
-      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
-        <<  str_param);
-    }
-    else
-    {
-      VictimParameters::rgb_classifier_path = 
-        VictimParameters::packagePath + "/data/rgb_svm_classifier.xml";
-      ROS_INFO_STREAM("[victim_node]: rgb_training_path classifier  : " 
-        <<  VictimParameters::rgb_classifier_path);
-    }
-    
-    //!< Get the path of depth classifier
-    if (_nh.getParam("depth_classifier_path",  str_param))
-    {
-      VictimParameters::depth_classifier_path = VictimParameters::packagePath + 
-        str_param;
-      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
-        <<  str_param);
-    }
-    else
-    {
-      VictimParameters::depth_classifier_path = VictimParameters::packagePath +
-        "/data/depth_svm_classifier.xml";
-      ROS_INFO_STREAM("[victim_node]: depth_training_path classifier  : " 
-        <<  VictimParameters::depth_classifier_path);
-    }
-
-  }
-}// namespace pandora_vision
+}  // namespace pandora_vision

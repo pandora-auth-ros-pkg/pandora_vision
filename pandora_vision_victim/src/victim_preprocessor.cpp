@@ -41,48 +41,53 @@
 
 namespace pandora_vision
 {
-  VictimPreProcessor::VictimPreProcessor(const std::string& ns, sensor_processor::AbstractHandler* handler) :
-    PreProcessor<pandora_vision_msgs::EnhancedHolesVectorMsg, VictimCVMatStamped>(ns, handler)
+  VictimPreProcessor::VictimPreProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) :
+    sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
+    EnhancedImageStamped>(ns, handler)
   {
-    interpolatedDepthPublisher_ = imageTransport_.advertise(VictimParameters::interpolatedDepthImg, 1, true);
+    params_.configVictim(*this->accessPublicNh());
+    interpolatedDepthPublisher_ = image_transport::ImageTransport(
+      *this->accessProcessorNh()).advertise(
+      params_.interpolatedDepthImg, 1, true);
   }
   
   VictimPreProcessor::~VictimPreProcessor()
   {
   }
   
-  bool VictimPreProcessor::preProcess(const EnhancedHolesVectorMsgConstPtr& input, const VictimCVMatStampedPtr& output)
+  bool VictimPreProcessor::preProcess(const EnhancedImageConstPtr& input, 
+    const EnhancedImageStampedPtr& output)
   {
+    output->setHeader(input->header);
+
     cv_bridge::CvImagePtr inMsg;
     inMsg = cv_bridge::toCvCopy(input->rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
-    output->image = inMsg->image.clone();
-    output->header = input->header;
+    output->setRgbImage(inMsg->image.clone());
     
-    // PUBLISH DEPTH IMAGE TO PROCESSOR???
-    cv_bridge::CvImagePtr inMsgD = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
-    cv::Mat depthImage = inMsgD->image.clone();
+    inMsg = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
+    cv::Mat depthImage = inMsg->image.clone();
+    output->setDepthImage(depthImage);
     
-    // output->... = .... according to VictimCVMatStamped
-
-    //! Interpolated depth image publishing
-    {  // BLOCK MBY DELETED
-      // Convert the image into a message
-      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-      msgPtr->header = input->header;
-      msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
-      depthImage.copyTo(msgPtr->image);
-
-      // Publish the image message
-      interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
-    }
-    
-    if (output->image.empty())
+    output->setDepth(input->isDepth);
+    for (int ii = 0; ii < input->areasOfInterest.size(); ii++)
     {
-      ROS_ERROR("[Node] No more Frames or something went wrong with bag file");
-      // ros::shutdown();
-      return false;
+      Rect2f rect(input->areasOfInterest[ii].x, input->areasOfInterest[ii].y, 
+        input->areasOfInterest[ii].width, input->areasOfInterest[ii].height);
+      output->setArea(ii, rect);
     }
+    
+    //! Interpolated depth image publishing
+    // Convert the image into a message
+    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+    msgPtr->header = input->header;
+    msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
+    depthImage.copyTo(msgPtr->image);
+
+    // Publish the image message
+    interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
+    
     return true;
   }
 }  // namespace pandora_vision

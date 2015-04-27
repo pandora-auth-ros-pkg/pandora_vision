@@ -5,6 +5,8 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
     pandora_vision_msgs
+    pandora_vision_common
+    sensor_processor
     state_manager
     state_manager_msgs
     pandora_cmake_tools
@@ -26,6 +28,8 @@ catkin_package(
       roscpp
       pandora_common_msgs
       pandora_vision_msgs
+      pandora_vision_common
+      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge
@@ -54,6 +58,10 @@ target_link_libraries(${PROJECT_NAME}_utilities
 
 add_library(${PROJECT_NAME}_victim_parameters
     src/victim_parameters.cpp
+)
+add_dependencies(${PROJECT_NAME}_victim_parameters
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 target_link_libraries(${PROJECT_NAME}_victim_parameters
     ${catkin_LIBRARIES}
@@ -103,27 +111,61 @@ target_link_libraries(${PROJECT_NAME}_svm_classifier
     ${PROJECT_NAME}_utilities
 )
 
-############################# Victim Node ######################################
-add_executable(victim_node
-    src/victim_node.cpp
-    src/victim_detection.cpp
-    src/svm_classifier/svm_validator.cpp
-    src/svm_classifier/rgb_svm_validator.cpp
-    src/svm_classifier/depth_svm_validator.cpp
-    src/victim_vj_detector.cpp
+
+################# victim processor #################
+add_library(${PROJECT_NAME}_processor
+  src/victim_processor.cpp
+  src/svm_classifier/svm_validator.cpp
+  src/svm_classifier/rgb_svm_validator.cpp
+  src/svm_classifier/depth_svm_validator.cpp
+)
+target_link_libraries(${PROJECT_NAME}_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_victim_parameters
+  ${PROJECT_NAME}_feature_extractors
 )
 
-target_link_libraries(victim_node
-    ${catkin_LIBRARIES}
-    ${PROJECT_NAME}_feature_extractors
-    ${PROJECT_NAME}_channels_statistics_feature_extractors
-    ${PROJECT_NAME}_victim_parameters
+################# victim preprocessor #################
+add_library(${PROJECT_NAME}_preprocessor
+  src/victim_preprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_preprocessor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_victim_parameters
 )
 
-add_dependencies(victim_node
-    ${catkin_EXPORTED_TARGETS}
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+################# victim postprocessor #################
+add_library(${PROJECT_NAME}_postprocessor
+  src/victim_postprocessor.cpp
 )
+target_link_libraries(${PROJECT_NAME}_postprocessor
+  ${catkin_LIBRARIES}
+)
+
+################# victim handler #################
+add_library(${PROJECT_NAME}_handler
+  src/victim_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_processor
+  ${PROJECT_NAME}_preprocessor
+  ${PROJECT_NAME}_postprocessor
+)
+
+################# victim node #################
+add_executable(${PROJECT_NAME}_node
+  src/victim_node.cpp
+)
+add_dependencies(${PROJECT_NAME}_node
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_node 
+  ${catkin_LIBRARIES} 
+  ${PROJECT_NAME}_handler
+)
+
 
 ############################## Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)

@@ -41,38 +41,36 @@
 #define PANDORA_VISION_VICTIM_VICTIM_POI_H
 
 #include <string>
-#include "pandora_vision_common/poi.h"
+#include "pandora_vision_common/bbox_poi.h"
 
 namespace pandora_vision
 {
-  class VictimPOI : public POI
+  class VictimPOI : public BBoxPOI
   {
+    public:
+      typedef boost::shared_ptr<VictimPOI> Ptr;
+      typedef boost::shared_ptr<VictimPOI const> ConstPtr;
+    
     public:
       virtual ~VictimPOI() {}
 
     public:
-      int height;
-      int width;
+      int source;
 
     public:
-      void setHeight(const int& height)
+      void setSource(int sourceArg)
       {
-        this->height = height;
+        source = sourceArg;
       }
-      void setWidth(const int& width)
+      int getSource() const
       {
-        this->width = width;
-      }
-      
-      int getHeight() const
-      {
-        return height;
-      }
-      int getWidth() const
-      {
-        return width;
+        return source;
       }
   };
+  
+  typedef VictimPOI::Ptr VictimPOIPtr;
+  typedef VictimPOI::ConstPtr VictimPOIConstPtr;
+  
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_VICTIM_VICTIM_POI_H

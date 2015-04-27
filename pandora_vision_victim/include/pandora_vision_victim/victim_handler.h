@@ -41,22 +41,21 @@
 #define PANDORA_VISION_VICTIM_VICTIM_HANDLER_H
 
 #include <string>
-#include "sensor_processor/handler.h"
+#include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_victim/victim_preprocessor.h"
 #include "pandora_vision_victim/victim_postprocessor.h"
-#include "pandora_vision_victim/victim_vj_detector.h"
+#include "pandora_vision_victim/victim_processor.h"
 
 namespace pandora_vision
 {
-  class VictimHandler : public sensor_processor::Handler<pandora_vision_msgs::EnhancedHolesVectorMsg, CVMatStamped, 
-    POIsStamped, pandora_common_msgs::GeneralAlertInfoVector>
+  class VictimHandler : public VisionHandler<VictimPreProcessor, VictimProcessor,
+    VictimPostProcessor>
   {
     public:
       explicit VictimHandler(const std::string& ns);
       virtual ~VictimHandler() {}
 
     private:
-      virtual void startTransition(int newState);
       virtual void completeTransition();
   };
 }  // namespace pandora_vision

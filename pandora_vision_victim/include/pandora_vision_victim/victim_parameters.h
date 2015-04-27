@@ -76,14 +76,6 @@ namespace pandora_vision
     DEPTH_RGB_SVM
   };
 
-  struct DetectedVictim
-  {
-    cv::Point2f keypoint;
-    float probability;
-    cv::Rect boundingBox;
-    VictimSource source;
-  };
-
   enum DetectionMode
   {
     GOT_RGB = 1,
@@ -98,11 +90,11 @@ namespace pandora_vision
     cv::Rect bounding_box;
     cv::Point2f keypoint;
   };
-
+  
   struct DetectionImages
   {
-    EnhancedMat rgb;
-    EnhancedMat depth;
+    //~ EnhancedMat rgb;
+    //~ EnhancedMat depth;
     std::vector<EnhancedMat> rgbMasks;
     std::vector<EnhancedMat> depthMasks;
   };
@@ -115,58 +107,16 @@ namespace pandora_vision
 
   class VictimParameters
   {
-    private:
-
-      ros::NodeHandle _nh;
-
-      void getGeneralParams(void);
-      void getVictimDetectorParameters(void);
-
     public:
-      //!< Weight parameters for the victim subsystems
-      static double rgb_vj_weight;
-      static double depth_vj_weight;
-      static double rgb_svm_weight;
-      static double depth_svm_weight;
+      //!< Default contructor
+      VictimParameters();
 
-      //!< Parameters for debug purposes
-      static bool debug_img;
-      static bool debug_img_publisher;
-
-      //!< parameters referring to the view and frame characteristics
-      static std::string packagePath;
-      static std::string victimDebugImg;
-      static std::string interpolatedDepthImg;
-      static int modelImageHeight;
-      static int modelImageWidth;
-
-      //!< parameters referring to the face detection algorithm
-      static std::string cascade_path;
-      static std::string model_url;
-      static std::string model_path;
-      static std::string rgb_classifier_path;
-      static std::string depth_classifier_path;
-
-      //! parameters for svms
-      static double rgb_svm_C;
-      static double rgb_svm_gamma;
-      static double rgb_svm_prob_scaling;
-      static double rgb_svm_prob_translation;
-      static double depth_svm_C;
-      static double depth_svm_gamma;
-      static double depth_svm_prob_scaling;
-      static double depth_svm_prob_translation;
-
-      //----------------------------------------------------------------------//
       //!< The dynamic reconfigure (motion's) parameters' server
       dynamic_reconfigure::Server
         <pandora_vision_victim::victim_dyn_reconfConfig>server;
       //!< The dynamic reconfigure (depth) parameters' callback
       dynamic_reconfigure::Server
         <pandora_vision_victim::victim_dyn_reconfConfig>::CallbackType f;
-
-      //!< Default contructor
-      explicit VictimParameters(const std::string& ns);
 
       /**
         @brief The function called when a parameter is changed
@@ -177,6 +127,43 @@ namespace pandora_vision
       void parametersCallback(
         const pandora_vision_victim::victim_dyn_reconfConfig& config,
         const uint32_t& level);
+        
+      void configVictim(const ros::NodeHandle& nh);
+    
+    public:  
+      //!< Weight parameters for the victim subsystems
+      double rgb_vj_weight;
+      double depth_vj_weight;
+      double rgb_svm_weight;
+      double depth_svm_weight;
+
+      //!< Parameters for debug purposes
+      bool debug_img;
+      bool debug_img_publisher;
+
+      //!< parameters referring to the view and frame characteristics
+      std::string packagePath;
+      std::string victimDebugImg;
+      std::string interpolatedDepthImg;
+      int modelImageHeight;
+      int modelImageWidth;
+
+      //!< parameters referring to the face detection algorithm
+      std::string cascade_path;
+      std::string model_url;
+      std::string model_path;
+      std::string rgb_classifier_path;
+      std::string depth_classifier_path;
+
+      //! parameters for svms
+      double rgb_svm_C;
+      double rgb_svm_gamma;
+      double rgb_svm_prob_scaling;
+      double rgb_svm_prob_translation;
+      double depth_svm_C;
+      double depth_svm_gamma;
+      double depth_svm_prob_scaling;
+      double depth_svm_prob_translation;
   };
 
 } // namespace pandora_vision

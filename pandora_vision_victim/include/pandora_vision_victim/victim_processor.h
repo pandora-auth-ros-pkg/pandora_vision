@@ -37,37 +37,70 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_PROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_PROCESSOR_H
 
-#include <string>
-#include <image_transport/image_transport.h>
-#include "sensor_processor/handler.h"
-#include "sensor_processor/preprocessor.h"
-#include "pandora_vision_msgs/EnhancedImage.h"
+#include "sensor_processor/processor.h"
+#include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_victim/enhanced_image_stamped.h"
+#include "pandora_vision_victim/victim_poi.h"
 #include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
+#include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
 
 namespace pandora_vision
 {
-  class VictimPreProcessor : public sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
-    EnhancedImageStamped>
+  class VictimProcessor : public sensor_processor::Processor<EnhancedImageStamped, POIsStamped>
   {
-    protected:
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage> EnhancedImagePtr;
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage const> EnhancedImageConstPtr;
-      
     public:
-      VictimPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~VictimPreProcessor();
+      VictimProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      VictimProcessor();
       
-      virtual bool
-        preProcess(const EnhancedImageConstPtr& input, const EnhancedImageStampedPtr& output);
-        
+      virtual ~VictimProcessor();
+      
+      virtual bool process(const EnhancedImageStampedConstPtr& input, 
+        const POIsStampedPtr& output);
+    
     private:
+      /**
+      @brief This method check in which state we are, according to
+      the information sent from hole_detector_node
+      @return void
+      **/
+      void detectVictims(const EnhancedImageStampedConstPtr& input);
+      
+      /**
+      @brief Function that enables suitable subsystems, according
+      to the current State 
+      @param [std::vector<cv::Mat>] vector of images to be processed. Size of
+      vector can be either 2 or 1, if we have both rgbd information or not
+      @return void
+      **/ 
+      std::vector<VictimPOIPtr> victimFusion(DetectionImages imgs, 
+        DetectionMode detectionMode);
+      
+      std::vector<cv::Mat> _rgbdImages;
+
+      /// Instance of RGB SVM Validator
+      RgbSvmValidator rgbSvmValidator_;
+      /// Instance of Depth SVM Validator
+      DepthSvmValidator depthSvmValidator_;
+      
       VictimParameters params_;
-      image_transport::Publisher interpolatedDepthPublisher_;
+      
+      //! Debug purposes
+      image_transport::Publisher _debugVictimsPublisher;
+      cv::Mat debugImage;
+      std::vector<cv::KeyPoint> rgb_svm_keypoints;
+      std::vector<cv::KeyPoint> depth_svm_keypoints;
+      std::vector<cv::Rect> rgb_svm_bounding_boxes;
+      std::vector<cv::Rect> depth_svm_bounding_boxes;
+      std::vector<cv::Rect> holes_bounding_boxes;
+      std::vector<float> rgb_svm_p;
+      std::vector<float> depth_svm_p;
+
+      DetectionImages dImages;
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_PREPROCESSOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_PROCESSOR_H
