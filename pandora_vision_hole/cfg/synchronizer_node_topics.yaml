@@ -15,5 +15,4 @@ published_topics:
   rgb_image_topic: synchronized/rgb/image
   thermal_info_topic: synchronized/thermal/image
   # Topics in Rgbd-T synchronizer node
-  thermal_image_topic: synchronized/thermal/info
-  pointcloud2_topic: synchronized/pointcloud2/info
+  synchronized_topic: synchronized/message/info

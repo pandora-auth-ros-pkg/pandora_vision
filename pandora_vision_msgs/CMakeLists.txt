@@ -30,6 +30,7 @@ add_message_files(
   QRAlertVector.msg
   RegionOfInterest.msg
   RegionOfInterestVector.msg
+  SynchronizedMsg.msg
   )
 
 generate_messages(

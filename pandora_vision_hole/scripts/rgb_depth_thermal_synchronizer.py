@@ -36,43 +36,39 @@ __author__ = "Triantafyllidis Angelos"
 __maintainer__ = "Triantafyllidis Angelos"
 __email__ = "aggelostriadafillidis@gmail.com"
 
+PKG  =  'pandora_vision_hole'
+NAME  =  'rgb_depth_thermal_synchronizer'
 
 import message_filters
 from camera_calibration import approxsync
 from sensor_msgs.msg import Image, PointCloud2
 import rospy
+from pandora_vision_msgs.msg import SynchronizedMsg
 
 # Here the synchronized messages from kinect and flir are sent
-# to the synchronizer node
+# to the synchronizer node as one united message.
 def callback(pointCloud, image):
 
     ns = rospy.get_namespace()
-    # Check if topic for PointCloud2 message has been given properly
-    # if yes pass it to the variable
-    if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/pointcloud2_topic")):
-        pc2_synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/pointcloud2_topic")
-        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", pc2_synch_topic)
+
+    # Check if topic for synchronized message has been given properly if yes pass it to the variable
+    if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")):
+        synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")
+        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", synch_topic)
     else:
-        rospy.logerr( "No synchronized point_cloud2 topic found")
+        rospy.logerr( "No synchronized topic found")
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
 
-    # Check if topic for Image has been given properly if yes pass it to the variable
-    if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/thermal_image_topic")):
-        thermal_synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/thermal_image_topic")
-        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", thermal_synch_topic)
-    else:
-        rospy.logerr( "No synchronized thermal topic found")
-        rospy.signal_shutdown("shutdown RGBDT synchronizer")
+    # Publisher of PointCloud2 and Image messages
+    synch_pub = rospy.Publisher(synch_topic, SynchronizedMsg)
 
-    # Publishers of PointCloud2 and Image messages
-    pc2_pub = rospy.Publisher(pc2_synch_topic, PointCloud2)
-    image_pub = rospy.Publisher(thermal_synch_topic, Image)
+    # Pack the message to be sent.
+    msg = SynchronizedMsg()
+    msg.pc = pointCloud
+    msg.thermalInfo = image
 
-
-    #rospy.loginfo("The synchronized Thermal and Rgb-D info have been sent to synchronizer node")
-    # Publish the two messages to the synchronizer node
-    pc2_pub.publish(pointCloud)
-    image_pub.publish(image)
+    # Publish the message to the synchronizer node
+    synch_pub.publish(msg)
 
 
 if __name__=='__main__':

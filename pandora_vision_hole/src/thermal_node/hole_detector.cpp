@@ -60,8 +60,6 @@ namespace pandora_vision
     Timer::start("findHoles", "inputThermalImageCallback");
     #endif
 
-    ROS_ERROR("Type: %d", thermalImage.type());
-
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;

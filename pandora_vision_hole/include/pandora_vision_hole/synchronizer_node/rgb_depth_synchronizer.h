@@ -44,7 +44,7 @@
 #include <std_msgs/Empty.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include "pandora_vision_msgs/SynchronizedMsg.h"
 
 /**
   @namespace pandora_vision
@@ -65,18 +65,12 @@ namespace pandora_vision
       ros::NodeHandle nodeHandle_;
    
       // The subscriber to the Rgbd-T synchronizer node that aquires
-      // the pointcloud2
-      ros::Subscriber inputPointCloud2Subscriber_;
+      // the SynchronizedMsg (pointcloud and thermal synchronized info)
+      ros::Subscriber inputSynchronizedSubscriber_;
 
-      // The subscriber to the Rgbd-T synchronizer node that aquires
-      // the sensor_msgs thermal Image
-      ros::Subscriber inputThermalSubscriber_;
-
-      // The name of the topic from where the input pointcloud2 is acquired
-      std::string inputPointCloud2Topic_;
-
-      // The name of the topic from where the Thermal info is acquired
-      std::string inputThermalTopic_;
+      // The name of the topic from where the Thermal
+      // and pointcloud info is acquired
+      std::string inputSynchronizedTopic_;
 
       // The subscriber to the topic where the hole_fusion node publishes
       // lock/unlock messages concerning the rgb_depth_synchronizer's
@@ -129,7 +123,6 @@ namespace pandora_vision
       std::string synchronizedThermalImageTopic_;
 
       // Here we copy the incoming messages from the Rgbd-T synchronizer node
-      sensor_msgs::Image copiedThermal_;
       PointCloudPtr copiedPc_;
 
       // A boolean indicating whether the node is publishing through the
@@ -145,9 +138,6 @@ namespace pandora_vision
       // Amount of synchronizer's invocations
       int ticks_;
 
-      // Check how many messages have been sent to synchronizer
-      // node from the Rgbd-T synch node. 
-      int messageNum_;
 
       /**
         @brief Variables regarding the point cloud are needed to be set in
@@ -184,35 +174,8 @@ namespace pandora_vision
         @return void
        **/
       void inputPointCloudThermalCallback(
-        const PointCloudPtr& pointCloudMessage,
-        const sensor_msgs::Image& thermalMessage);
+        const pandora_vision_msgs::SynchronizedMsg& SynchronizedMessage);
 
-  
-      /**
-        @brief The callback executed when the Synchronizer node aquires
-        the pointcloud2 from the Rgbd-T synchronizer node.
-        Here the number of messages sent from the Rgbd-T synchronizer node
-        are checked and if they are two synchronizer node publishes them 
-        further to each node that uses them. 
-        @param[in] pointCloud2Message [const sensor_msgs::PointCloud2&] 
-        the input pointcloud2 from Rgbd-T synchronizer node.
-        @return void
-       **/
-      void inputPointCloud2Callback(
-        const sensor_msgs::PointCloud2& pointCloud2Message);
-
-      /**
-        @brief The callback executed when the Synchronizer node aquires
-        the thermal info from the Rgbd-T synchronizer node.
-        Here the number of messages sent from the Rgbd-T synchronizer node
-        are checked and if they are two synchronizer node publishes them 
-        further to each node that uses them. 
-        @param[in] thermalMessage [const sensor_msgs::Image&]
-        the input thermal info from Rgbd-T synchronizer node.
-        @return void
-       **/
-      void inputThermalCallback(const sensor_msgs::Image& thermalMessage);
-      
       /**
         @brief The callback executed when the Hole Fusion node requests
         from the synchronizer node to leave its subscription to the
