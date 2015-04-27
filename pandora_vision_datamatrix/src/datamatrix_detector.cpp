@@ -214,8 +214,11 @@ namespace pandora_vision
    **/ 
   bool DatamatrixDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
-    output->header = input->header;
-    output->pois = detect_datamatrix(input->image);
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
+    
+    output->pois = detect_datamatrix(input->getImage());
 
     if (output->pois.empty())
     {

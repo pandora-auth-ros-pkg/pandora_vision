@@ -203,9 +203,12 @@ namespace pandora_vision
 
   bool QrCodeDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
-    output->header = input->header;
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
+    
     getQrCodeParams();
-    output->pois = detectQrCode(input->image);
+    output->pois = detectQrCode(input->getImage());
 
     if (debugQrcode_)
     {

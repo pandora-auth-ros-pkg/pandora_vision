@@ -114,15 +114,17 @@ namespace pandora_vision
     bool HazmatProcessor::process(const CVMatStampedConstPtr& input, 
       const POIsStampedPtr& output)
     {
-      output->header = input->header;
+      output->header = input->getHeader();
+      output->frameWidth = input->getImage().cols;
+      output->frameHeight = input->getImage().rows;
       
       std::stringstream ss;
       const clock_t begin_time = clock();
-      PlanarObjectDetector::setDims(input->image);
+      PlanarObjectDetector::setDims(input->getImage());
       
       ROS_INFO("Detecting...");
       
-      bool found = detector_->detect(input->image, &output->pois);
+      bool found = detector_->detect(input->getImage(), &output->pois);
       
       ROS_INFO("Detection done!!");
       double execTime = ( clock () - begin_time ) /  
@@ -153,7 +155,7 @@ namespace pandora_vision
           //~ CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0 , 0 , 255), 3);
 
       // TO DO : Add visualization flag
-      cv::imshow("Input Image", input->image);
+      cv::imshow("Input Image", input->getImage());
       char key = cv::waitKey(10);
       if ( key == 27)
       {

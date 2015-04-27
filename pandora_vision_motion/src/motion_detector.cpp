@@ -281,10 +281,10 @@ namespace pandora_vision
    **/
   bool MotionDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
-    output->header = input->header;
-    findMotionParameters(input->image);
-    output->frameWidth = input->image.cols;
-    output->frameHeight = input->image.rows;
+    output->header = input->getHeader();
+    findMotionParameters(input->getImage());
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
     if (bounding_box_->getProbability() > 0.1)
     {
       output->pois.push_back(bounding_box_);

@@ -220,8 +220,8 @@ namespace pandora_vision
 
   void LandoltCDetector::find8Neights(unsigned int index, const cv::Mat& in)
   {
-    unsigned int y = index/in.cols;
-    unsigned int x = index%in.cols;
+    unsigned int y = index / in.cols;
+    unsigned int x = index % in.cols;
 
     unsigned char p1 = in.at<unsigned char>(y - 1, x);
     unsigned char p2 = in.at<unsigned char>(y - 1, x + 1);
@@ -449,7 +449,8 @@ namespace pandora_vision
     @param ref [std::vector<cv::Point>] Vector containing contour points of reference image
     @return void
   **/
-  void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int cols, std::vector<cv::Point> ref)
+  void LandoltCDetector::findLandoltContours(const cv::Mat& inImage, int rows, int cols, 
+    std::vector<cv::Point> ref)
   {
     cv::RNG rng(12345);
 
@@ -699,9 +700,12 @@ namespace pandora_vision
    **/
   bool LandoltCDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
-    output->header = input->header;
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
+    
     initializeReferenceImage();
-    output->pois = begin(input->image);
+    output->pois = begin(input->getImage());
     
     if (output->pois.empty())
     {
