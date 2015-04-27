@@ -130,9 +130,9 @@ namespace pandora_vision
     cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 
     RgbTest::generateRgbRectangle
-      ( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
-        100,
-        100,
+      ( cv::Point2f ( WIDTH - 200, HEIGHT - 200 ),
+        50,
+        50,
         100,
         &lowerRightSquare );
 
@@ -152,8 +152,8 @@ namespace pandora_vision
     // Construct the upperLeft image
     RgbTest::generateRgbRectangle
       ( cv::Point2f ( 100, 100 ),
-        100,
-        100,
+        50,
+        50,
         100,
         &upperLeftSquare );
 
@@ -162,18 +162,18 @@ namespace pandora_vision
 
     // Construct the mergable1 image
     RgbTest::generateRgbRectangle
-      ( cv::Point2f ( 300, 300 ),
+      ( cv::Point2f ( 200, 200 ),
         50,
         50,
         100,
         &mergable1Square );
 
-    // Construct the mergable1 square
+    // Construct the mergable2 square
     cv::Mat mergable2Square = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
     // Construct the mergable2 image
     RgbTest::generateRgbRectangle
-      ( cv::Point2f ( 360, 360 ),
+      ( cv::Point2f ( 280, 280 ),
         40,
         40,
         100,
@@ -184,14 +184,13 @@ namespace pandora_vision
 
     // Construct the nonMergable image
     RgbTest::generateRgbRectangle
-      ( cv::Point2f ( 250, 250 ),
+      ( cv::Point2f ( 130, 130 ),
         40,
         40,
         200,
         &nonMergableSquare );
 
-    // Synthesize the final squares_ image
-    squares_ = lowerRightSquare + upperRightSquare + upperLeftSquare;
+    squares_ = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 
     // Construct the squares_ image. The entire image is at a colour of
     // value approximate the the colour value of the images of walls
@@ -207,6 +206,9 @@ namespace pandora_vision
         }
       }
     }
+    // Synthesize the final squares_ image
+    squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
+
     // Run Rgb::findHoles
     HolesConveyor conveyor =
       Rgb::findHoles ( squares_ );
@@ -233,8 +235,81 @@ namespace pandora_vision
       //EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
       // Rectangle's perimeter must be near 10000
-      EXPECT_NEAR ( 10000, conveyor.rectangle[k].width * conveyor.rectangle[0].height, 2000  );
+      EXPECT_NEAR ( 2500, conveyor.rectangle[k].width * conveyor.rectangle[k].height, 2000  );
     }
+
+    squares_ = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+
+    // Construct the squares_ image. The entire image is at a colour of
+    // value approximate the the colour value of the images of walls
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( squares_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          squares_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+          squares_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+          squares_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
+        }
+      }
+    }
+    // Synthesize the final squares_ image with the mergable contours
+    squares_ += mergable1Square + mergable2Square + nonMergableSquare;
+
+    // Run Rgb::findHoles
+    conveyor =
+      Rgb::findHoles ( squares_ );
+
+    // The number of keypoints found
+    size = conveyor.keypoint.size();
+
+    // There should be two keypoints; the merged contour's and the nonmergable's
+    ASSERT_EQ ( 2, size );
+
+    // See if the merge was right
+    squares_ = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+
+    // Construct the squares_ image. The entire image is at a colour of
+    // value approximate the the colour value of the images of walls
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( squares_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          squares_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+          squares_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+          squares_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
+        }
+      }
+    }
+    // Synthesize the final squares_ image with the mergable contours
+    squares_ += mergable1Square + mergable2Square;
+
+    // Run Rgb::findHoles
+    conveyor =
+      Rgb::findHoles ( squares_ );
+
+    // The number of keypoints found
+    size = conveyor.keypoint.size();
+
+    // There should be one keypoint
+    ASSERT_EQ ( 1, size );
+    // For this keypoint, make assertions and expectations
+      // The location of the keypoint should near the center of the square
+      // in which it lies
+      EXPECT_NEAR ( conveyor.keypoint[0].x,
+          conveyor.rectangle[0].x + conveyor.rectangle[0].width / 2, 25 );
+      EXPECT_NEAR ( conveyor.keypoint[0].y,
+          conveyor.rectangle[0].y + conveyor.rectangle[0].height / 2, 25 );
+
+      // The hole should have exactly four vertices
+      //EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
+
+      // Rectangle's perimeter must be near 28900 due to the merge. Due to dilations it could be an offset up to 20 pixels at each of the two directions (needs to fix)
+      EXPECT_NEAR ( 28900, conveyor.rectangle[0].width * conveyor.rectangle[0].height, 7000  );
+
 
   }
 

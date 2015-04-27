@@ -514,6 +514,11 @@ namespace pandora_vision
     // True contour sizes after possible merging
     std::vector<int> contourWidth(contours.size());
     std::vector<int> contourHeight(contours.size());
+    for(int i = 0; i < contours.size(); i++)
+    {
+        contourHeight[i] = boundRect[i].height; 
+        contourWidth[i] = boundRect[i].width; 
+    }
     // Validate contours found. The product is a vector with a flag for each contour.
     validateContours(rgbImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
     // The final vectors of keypoints, and rectangles.
@@ -524,6 +529,7 @@ namespace pandora_vision
     {
       if(realContours.at(i))
       {
+        boundRect[i] = cv::Rect(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
         keypoints.push_back(mc[i]);
         rectangles.push_back(boundRect[i]);
       }
@@ -650,8 +656,6 @@ namespace pandora_vision
     for(int ci = 0; ci < contours.size(); ci ++)
     {
       if((*realContours)[ci])
-        (*contourHeight)[ci] = boundRect[ci].height; 
-        (*contourWidth)[ci] = boundRect[ci].width; 
 
         if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge && cv::contourArea(contours[ci]) > Parameters::Rgb::huge_contour_thresh))
         {
@@ -660,16 +664,15 @@ namespace pandora_vision
         }
         else if(cv::contourArea(contours[ci]) < Parameters::Rgb::tiny_contour_thresh)
         {
-          //if((*mc)[ci].x < Parameters::Rgb::border_thresh || (*mc)[ci].y < Parameters::Rgb::border_thresh || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
-          //{
+          if((*mc)[ci].x < Parameters::Rgb::border_thresh || (*mc)[ci].y < Parameters::Rgb::border_thresh || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
+          {
             (*realContours)[ci] = false;
             continue;
-          //}
+          }
         }
         else
         {
-          if(cv::contourArea(contours[ci]) > Parameters::Rgb::small_contour_thresh)
-          {
+
             cv::Mat ROI = image(boundRect[ci]);
             cv::Scalar curAvg = cv::mean(ROI);
             for(int i = 0; i < contours.size(); i ++)
@@ -728,8 +731,8 @@ namespace pandora_vision
                     {
                       (*mc)[i].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
                       (*mc)[i].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].y;
-                      (*contourHeight)[i] = (*contourHeight)[i] + (*contourHeight)[ci] + std::abs((*mc)[ci].y - (*mc)[i].y);
-                      (*contourWidth)[i] = (*contourWidth)[i] + (*contourWidth)[ci] + std::abs((*mc)[ci].x - (*mc)[i].x);
+                      (*contourHeight)[i] = (*contourHeight)[i] + (*contourHeight)[ci] + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
+                      (*contourWidth)[i] = (*contourWidth)[i] + (*contourWidth)[ci] + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
                       (*realContours)[ci] = false;
                       continue;
                     }
@@ -737,15 +740,15 @@ namespace pandora_vision
                     {
                       (*mc)[ci].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
                       (*mc)[ci].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].x;
-                      (*contourHeight)[ci] = (*contourHeight)[ci] + (*contourHeight)[i] + std::abs((*mc)[ci].y - (*mc)[i].y);
-                      (*contourWidth)[ci] = (*contourWidth)[ci] + (*contourWidth)[i] + std::abs((*mc)[ci].x - (*mc)[i].x);
+                      (*contourHeight)[ci] = (*contourHeight)[ci] + (*contourHeight)[i] + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
+                      (*contourWidth)[ci] = (*contourWidth)[ci] + (*contourWidth)[i] + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
                       (*realContours)[i] = false;
                     }
                   }
                 }
               }
             }
-          }
+          
         }
     }
     for( int i = 0; i < contours.size(); i++ )
