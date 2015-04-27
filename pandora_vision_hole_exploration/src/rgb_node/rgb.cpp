@@ -660,11 +660,11 @@ namespace pandora_vision
         }
         else if(cv::contourArea(contours[ci]) < Parameters::Rgb::tiny_contour_thresh)
         {
-          if((*mc)[ci].x < Parameters::Rgb::border_thresh || (*mc)[ci].y < Parameters::Rgb::border_thresh || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
-          {
+          //if((*mc)[ci].x < Parameters::Rgb::border_thresh || (*mc)[ci].y < Parameters::Rgb::border_thresh || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
+          //{
             (*realContours)[ci] = false;
             continue;
-          }
+          //}
         }
         else
         {

@@ -53,80 +53,13 @@ target_link_libraries(rgb_test
   gtest_main)
 
 ############################# hole fusion node #################################
+catkin_add_gtest(hole_fusion_test
+  unit/hole_fusion_node/hole_fusion_test.cpp)
 
-###### depth_filters_test.cpp ######
-#catkin_add_gtest(depth_filters_test
-#  unit/hole_fusion_node/depth_filters_test.cpp)
+target_link_libraries(hole_fusion_test
+ ${PROJECT_NAME}_hole_fusion
+ gtest_main)
 
-#target_link_libraries(depth_filters_test
-#  ${PROJECT_NAME}_filters
-#  gtest_main)
-
-###### hole_merger_test.cpp ######
-#catkin_add_gtest(hole_merger_test
-#  unit/hole_fusion_node/hole_merger_test.cpp)
-#
-#target_link_libraries(hole_merger_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_filters
-#  ${PROJECT_NAME}_hole_fusion
-#  gtest_main)
-#
-#
-####### filters_test.cpp ######
-#catkin_add_gtest(filters_test
-#  unit/hole_fusion_node/filters_test.cpp)
-#
-#target_link_libraries(filters_test
-# ${PROJECT_NAME}_filters
-# gtest_main)
-#
-#
-####### filters_resources_test.cpp ######
-#catkin_add_gtest(filters_resources_test
-#  unit/hole_fusion_node/filters_resources_test.cpp)
-#
-#target_link_libraries(filters_resources_test
-# ${PROJECT_NAME}_filters
-# gtest_main)
-#
-#
-####### hole_validation_test.cpp ######
-#catkin_add_gtest(hole_validation_test
-#  unit/hole_fusion_node/hole_validation_test.cpp)
-#
-#target_link_libraries(hole_validation_test
-#  ${PROJECT_NAME}_hole_fusion
-#  gtest_main)
-#
-#
-####### hole_uniqueness_test.cpp ######
-#catkin_add_gtest(hole_uniqueness_test
-#  unit/hole_fusion_node/hole_uniqueness_test.cpp)
-#
-#target_link_libraries(hole_uniqueness_test
-#  ${PROJECT_NAME}_hole_fusion
-#  gtest_main)
-#
-#
-####### planes_detection_test.cpp ######
-#catkin_add_gtest(planes_detection_test
-#  unit/hole_fusion_node/planes_detection_test.cpp)
-#
-#target_link_libraries(planes_detection_test
-#  ${PROJECT_NAME}_filters
-#  gtest_main)
-#
-#
-####### rgb_filters_test.cpp ######
-#catkin_add_gtest(rgb_filters_test
-#  unit/hole_fusion_node/rgb_filters_test.cpp)
-#
-#target_link_libraries(rgb_filters_test
-#  ${PROJECT_NAME}_filters
-#  gtest_main)
-#
-#
 ############### Functional Tests ###############
 #
 #find_package(rostest REQUIRED)

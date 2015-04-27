@@ -932,8 +932,10 @@ namespace pandora_vision
 #endif
     double min, max;
     cv::minMaxLoc(interpolatedDepthImage_, &min, &max);
+    HolesConveyor preValidatedHoles;
+    std::map<int, float> validHolesMap;
 
-    mergeHoles(&rgbHolesConveyor_, &depthHolesConveyor_, interpolatedDepthImage_, pointCloud_);
+    mergeHoles(&rgbHolesConveyor_, &depthHolesConveyor_, interpolatedDepthImage_, pointCloud_, &preValidatedHoles, &validHolesMap);
     //valid holes till this point
     //HolesConveyor preValidatedHoles;
     //for(int i = 0; i < rgbHolesConveyor_.rectangle.size(); i++)
@@ -968,40 +970,6 @@ namespace pandora_vision
     //    }
     //#endif
 
-    HolesConveyor preValidatedHoles;
-    std::map<int, float> validHolesMap;
-    // merge overlapping contours
-    std::vector<bool> rgbSoloValid(rgbHolesConveyor_.rectangle.size(), true);
-    for(int i = 0; i < depthHolesConveyor_.rectangle.size(); i ++)
-    {
-      bool overlapFlag = false;
-      for(int j = 0; j < rgbHolesConveyor_.rectangle.size(); j ++)
-      {
-        if(std::abs(depthHolesConveyor_.keypoint[i].x - rgbHolesConveyor_.keypoint[i].x) < Parameters::HoleFusion::keypoint_overlap_threshold && std::abs(depthHolesConveyor_.keypoint[i].y - rgbHolesConveyor_.keypoint[i].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
-        {
-          rgbSoloValid[j] = false;
-          overlapFlag = true;
-          break;
-        }
-      }
-      preValidatedHoles.rectangle.push_back(depthHolesConveyor_.rectangle[i]);
-      preValidatedHoles.keypoint.push_back(depthHolesConveyor_.keypoint[i]);
-      if(overlapFlag)
-        validHolesMap[i] = Parameters::HoleFusion::valid_strong_probability;
-      else
-        validHolesMap[i] = Parameters::HoleFusion::valid_medium_probability;
-    }
-
-    // Assign probabilities to RGB holes that do not overlap with depth
-    int counter = depthHolesConveyor_.rectangle.size();
-    for(int j = 0; j < rgbHolesConveyor_.rectangle.size(); j ++)
-      if(rgbSoloValid[j])
-      {
-        preValidatedHoles.rectangle.push_back(rgbHolesConveyor_.rectangle[j]);
-        preValidatedHoles.keypoint.push_back(rgbHolesConveyor_.keypoint[j]);
-        validHolesMap[counter] = Parameters::HoleFusion::valid_light_probability;
-        counter ++;
-      }
 
 
 #ifdef DEBUG_SHOW
@@ -1280,29 +1248,34 @@ namespace pandora_vision
       HolesConveyor* rgbHolesConveyor,
       HolesConveyor* depthHolesConveyor,
       const cv::Mat& image,
-      const PointCloudPtr& pointCloud)
+      const PointCloudPtr& pointCloud, 
+      HolesConveyor* preValidatedHoles,
+      std::map<int, float>* validHolesMap)
   {
 #ifdef DEBUG_TIME
     Timer::start("applyMergeOperation", "mergeHoles");
 #endif
     std::vector<bool> realRgbContours(rgbHolesConveyor -> rectangle.size(), true);
-    std::vector<bool> realDepthContours(depthHolesConveyor -> rectangle.size() ,true);
+    std::vector<bool> realDepthContours(depthHolesConveyor -> rectangle.size(), true);
     // Small contours at a small distance are not valid
-    distanceValidation(interpolatedDepthImage_, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
-    distanceValidation(interpolatedDepthImage_, &(*depthHolesConveyor), &realDepthContours, pointCloud);
+    distanceValidation(image, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
+    distanceValidation(image, &(*depthHolesConveyor), &realDepthContours, pointCloud);
 
-    // eliminate small RGB contours with big distance variance
+    // eliminate RGB contours with small distance variance
     for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+    {
       if(realRgbContours[i])
       {
         cv::Scalar mean;
         cv::Scalar stddev;
         cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
-        cv::meanStdDev (image, mean, stddev);
+        cv::meanStdDev (ROI, mean, stddev);
         float distanceVariance = static_cast<float>(stddev.val[0]); 
-        if(distanceVariance > Parameters::HoleFusion::rgb_distance_variance_thresh)
+        if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh)
           realRgbContours[i] = false;
+
       }
+    }
     // keep only the valid contours till this point in a temporary conveyor
     HolesConveyor conveyorTemp;
 
@@ -1317,6 +1290,9 @@ namespace pandora_vision
     (*rgbHolesConveyor).keypoint = conveyorTemp.keypoint;
     conveyorTemp.rectangle.clear();
     conveyorTemp.keypoint.clear();
+    realRgbContours.clear();
+    for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+      realRgbContours.push_back(true);
     for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
       if(realDepthContours[i])
       {
@@ -1328,7 +1304,9 @@ namespace pandora_vision
     (*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
     conveyorTemp.rectangle.clear();
     conveyorTemp.keypoint.clear();
-    return;
+    realDepthContours.clear();
+    for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      realDepthContours.push_back(true);
 
     // If there are no candidate holes from both RGB and Depth,
     // there is no meaning to this operation
@@ -1362,6 +1340,39 @@ namespace pandora_vision
     }
 
 
+    // merge overlapping contours
+    std::vector<bool> rgbSoloValid((*rgbHolesConveyor).rectangle.size(), true);
+    for(int i = 0; i < (*depthHolesConveyor).rectangle.size(); i ++)
+    {
+      bool overlapFlag = false;
+      for(int j = 0; j < (*rgbHolesConveyor).rectangle.size(); j ++)
+      {
+        if(std::abs((*depthHolesConveyor).keypoint[i].x - (*rgbHolesConveyor).keypoint[i].x) < Parameters::HoleFusion::keypoint_overlap_threshold && std::abs((*depthHolesConveyor).keypoint[i].y - (*rgbHolesConveyor).keypoint[i].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
+        {
+          rgbSoloValid[j] = false;
+          overlapFlag = true;
+          //break;
+        }
+      }
+      (*preValidatedHoles).rectangle.push_back((*depthHolesConveyor).rectangle[i]);
+      (*preValidatedHoles).keypoint.push_back((*depthHolesConveyor).keypoint[i]);
+      if(overlapFlag)
+        (*validHolesMap)[i] = Parameters::HoleFusion::valid_strong_probability;
+      else
+        (*validHolesMap)[i] = Parameters::HoleFusion::valid_medium_probability;
+    }
+
+    // Assign probabilities to RGB holes that do not overlap with depth
+    int counter = (*depthHolesConveyor).rectangle.size();
+    for(int j = 0; j < (*rgbHolesConveyor).rectangle.size(); j ++)
+      if(rgbSoloValid[j])
+      {
+        (*preValidatedHoles).rectangle.push_back((*rgbHolesConveyor).rectangle[j]);
+        (*preValidatedHoles).keypoint.push_back((*rgbHolesConveyor).keypoint[j]);
+        (*validHolesMap)[counter] = Parameters::HoleFusion::valid_light_probability;
+        counter ++;
+      }
+
 
     //   float connectorOutlinePointX = pointCloud->points[
     //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
@@ -1394,7 +1405,7 @@ namespace pandora_vision
   {
     for(int i = 0; i < holesConveyor -> rectangle.size(); i ++)
     {
-      int sumDepths = 0;
+      float sumDepths = 0.0;
       int upperX = static_cast<int>(holesConveyor -> keypoint[i].x - holesConveyor -> rectangle[i].width / 2);
       int upperY = static_cast<int>(holesConveyor -> keypoint[i].y - holesConveyor -> rectangle[i].height / 2);
       int lowerX = static_cast<int>(holesConveyor -> keypoint[i].x + holesConveyor -> rectangle[i].width / 2);
@@ -1410,9 +1421,9 @@ namespace pandora_vision
       for(int col = upperX; col < lowerX; col ++ )
         for(int row = upperY; row < lowerY; row ++)
         {
-          sumDepths += static_cast<int>(image.at<uchar>(row, col));
+          sumDepths += image.at<float>(row, col);
         }
-      float avgDepth = sumDepths / (holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height);
+      float avgDepth = sumDepths / ((lowerX - upperX) * (lowerY - upperY));
       if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height <  Parameters::HoleFusion::small_rect_thresh  && avgDepth < Parameters::HoleFusion::max_depth_to_test_small_thresh)
       {
         (*realContours)[i] = false;

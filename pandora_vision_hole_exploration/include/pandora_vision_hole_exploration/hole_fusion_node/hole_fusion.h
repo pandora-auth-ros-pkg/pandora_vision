@@ -287,21 +287,6 @@ namespace pandora_vision
           const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
           depthCandidateHolesVector);
 
-      /**
-        @brief Runs candidate holes through selected filters.
-        Probabilities for each candidate hole and filter
-        are printed in the console, with an order specified by the
-        hole_fusion_cfg of the dynamic reconfigure utility
-        @param[in] conveyor [const HolesConveyor&] The conveyor
-        containing candidate holes that are to be checked against selected
-        filters
-        @return [std::vector<std::vector<float> >]
-        A two dimensional vector containing the probabilities of
-        validity of each candidate hole. Each row of it pertains to a specific
-        filter applied, each column to a particular hole
-       **/
-      std::vector<std::vector<float> > filterHoles(
-          const HolesConveyor& conveyor);
 
       /**
         @brief Recreates the HolesConveyor struct for the
@@ -348,27 +333,6 @@ namespace pandora_vision
       bool isHoleDetectorOn(const int& state);
 
       /**
-        @brief Takes as input a container of holes and a map of indices
-        of holes referring to the container to validity probabilities.
-        It outputs the most probable unique valid holes and a map
-        adjusted to fit the altered container of holes.
-
-        Inside the allHoles container, reside holes that have originated
-        from the Depth and RGB nodes, plus any merges between them. Having
-        acquired the validity probability of each one of them, this method
-        locates valid holes that refer to the same physical hole in space
-        inside the allHoles container and picks the one with the largest
-        validity probability.
-        @param[in,out] allHoles [HolesConveyor*] The conveyor of holes.
-        @param[in,out] validHolesMap [std::map<int, float>*] The std::map
-        that maps holes inside the allHoles conveyor to their validity
-        probability
-        @return void
-       **/
-      void makeValidHolesUnique(HolesConveyor* allHoles,
-          std::map<int, float>* validHolesMap);
-
-      /**
         @brief The function called when a debugging parameter is changed
         @param[in] config
         [const pandora_vision_hole::debug_cfgConfig&]
@@ -388,8 +352,8 @@ namespace pandora_vision
         @return void
        **/
       void parametersCallbackGeneral(
-        const pandora_vision_hole_exploration::general_cfgConfig& config,
-        const uint32_t& level);
+          const pandora_vision_hole_exploration::general_cfgConfig& config,
+          const uint32_t& level);
 
       /**
         @brief The function called when a validity parameter is changed
@@ -418,6 +382,7 @@ namespace pandora_vision
         @return void
        **/
       void pointCloudCallback(const PointCloudPtr& msg);
+    public:
 
       /**
         @brief Implements a strategy to combine information from both
@@ -440,21 +405,6 @@ namespace pandora_vision
        **/
       void processCandidateHoles();
 
-      void produceDataset(
-          const HolesConveyor& conveyor,
-          const std::vector<std::vector<float> >& probabilities);
-
-      /**
-        @brief Publishes the holes' enhanced information.
-        @param[in] conveyor [const HolesConveyor&]
-        The overall valid holes found by the depth and RGB nodes.
-        @param[in] validHolesMap [std::map<int, float>*]
-        A map containing the indices of the valid holes inside the conveyor
-        and their respective validity probabilities
-        @return void
-       **/
-      void publishEnhancedHoles (const HolesConveyor& conveyor,
-          std::map<int, float>* validHolesMap);
 
       /**
         @brief Publishes an image showing holes found from the Depth node
@@ -511,13 +461,15 @@ namespace pandora_vision
         2 for connecting
         @return void
        **/
-      void mergeHoles(
+      static void mergeHoles(
           HolesConveyor* rgbHolesConveyor,
           HolesConveyor* depthHolesConveyor,
           const cv::Mat& image,
-          const PointCloudPtr& pointCloud);
+          const PointCloudPtr& pointCloud,
+          HolesConveyor* preValidatedHoles,
+          std::map<int, float>* validHolesMap);
 
-      void distanceValidation(
+      static void distanceValidation(
           const cv::Mat& image,
           HolesConveyor* holesConveyor,
           std::vector<bool>* realContours,
@@ -567,7 +519,6 @@ namespace pandora_vision
           const std::string& encoding);
 
 
-    public:
 
       /**
         @brief The HoleFusion constructor

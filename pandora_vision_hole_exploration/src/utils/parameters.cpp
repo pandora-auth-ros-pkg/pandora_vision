@@ -282,7 +282,7 @@ namespace pandora_vision
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
-  float Parameters::HoleFusion::max_depth_to_test_small_thresh = 1.0;
+  float Parameters::HoleFusion::max_depth_to_test_small_thresh = 2.5;
   int Parameters::HoleFusion::small_rect_thresh = 900;
   float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
   //
@@ -365,13 +365,13 @@ namespace pandora_vision
   //  int Parameters::Rgb::watershed_background_erosion_factor = 1;
 
   int Parameters::Rgb::original_image_gaussian_blur = 4;
-  int Parameters::Rgb::std_variance_kernel_size = 3;
+  int Parameters::Rgb::std_variance_kernel_size = 5;
   int Parameters::Rgb::std_variance_threshold = 48;
   int Parameters::Rgb::std_variance_morphology_close_size = 8; 
   int Parameters::Rgb::std_variance_morphology_open_size = 8;
   int Parameters::Rgb::contour_erode_kernel_size = 4;
-  int Parameters::Rgb::lower_contour_number_to_test_huge = 4;
-  int Parameters::Rgb::huge_contour_thresh = 16000;
+  int Parameters::Rgb::lower_contour_number_to_test_huge = 2;
+  int Parameters::Rgb::huge_contour_thresh = 8000;
   int Parameters::Rgb::tiny_contour_thresh = 500;
   int Parameters::Rgb::border_thresh = 100;
   int Parameters::Rgb::small_contour_thresh = 100; 
