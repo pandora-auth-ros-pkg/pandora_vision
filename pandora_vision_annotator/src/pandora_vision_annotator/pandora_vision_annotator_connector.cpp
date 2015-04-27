@@ -171,11 +171,13 @@ void CConnector::onlineRadioButtonChecked(void)
     return loader_.bagLineEdit->text();
   }
 
-  void CConnector::setFrames(const std::vector<cv::Mat>& x)
+  void CConnector::setFrames(const std::vector<cv::Mat>& x, int offset)
   {
       frames = x;
+      std::cout << frames.size();
+      offset_ = offset;
       QString label;
-      for(int i =0; i<frames.size(); i++)
+      for(int i = offset_; i < frames.size()+offset_; i++)
       {
         label = QString("frame %1").arg(i);
         loader_.framesListWidget->addItem(label);
@@ -184,7 +186,7 @@ void CConnector::onlineRadioButtonChecked(void)
 
   void CConnector::setcurrentFrame(int x)
   {  
-      currFrame = x;
+      currFrame = x ;
       QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols, frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
       setImage(dest);
@@ -264,7 +266,7 @@ void CConnector::onlineRadioButtonChecked(void)
             if(state_ == OFFLINE)
             {
               std::stringstream img_name;
-              img_name << package_path  << "/data/frame" << currFrame << ".png";
+              img_name << package_path  << "/data/frame" << currFrame + offset_ << ".png";
               cv::Mat temp;
               cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
               cv::imwrite(img_name.str(), temp);
@@ -275,7 +277,7 @@ void CConnector::onlineRadioButtonChecked(void)
       if(event->type() == QEvent::MouseButtonPress && state_ != PREDATOR )
       {
         loader_.imageLabel->setFocus(Qt::MouseFocusReason);
-        std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+        std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
         const QMouseEvent* const me =
           static_cast<const QMouseEvent*>( event );
         QPoint p = me->pos();
@@ -413,14 +415,14 @@ void CConnector::onlineRadioButtonChecked(void)
   { 
     std::stringstream file;
     file << package_path << "/data/annotations.txt";
-    if(ImgAnnotations::is_file_exist(file.str().c_str()) && currFrame == 0)
+    if(ImgAnnotations::is_file_exist(file.str().c_str()) && currFrame == offset_)
     {
       remove(file.str().c_str());
 
     }
     ImgAnnotations::writeToFile(file.str() );
     std::stringstream img_name;
-    img_name << package_path  << "/data/frame" << currFrame << ".png";
+    img_name << package_path  << "/data/frame" << currFrame + offset_<< ".png";
     cv::Mat temp;
     cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
     cv::imwrite(img_name.str(), temp);
@@ -449,27 +451,29 @@ void CConnector::onlineRadioButtonChecked(void)
       file << package_path << "/data/annotations.txt";
       currFrame++;
       setcurrentFrame(currFrame);
-      std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+      std::string img_name = "frame" + boost::to_string(currFrame+offset_) + ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
       loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      if(ImgAnnotations::annPerImage !=0)
       drawBox();
     }
   }
   void CConnector::previousFramePushButtonTriggered(void)
   {
-    if(currFrame != 0)
+    if(currFrame  != 0)
     {
       std::stringstream file;
       file << package_path << "/data/annotations.txt";
       currFrame--;
       setcurrentFrame(currFrame);
-      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
+      std::string img_name = "frame" + boost::to_string(currFrame + offset_)+ ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
       loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      if(ImgAnnotations::annPerImage !=0)
       drawBox();
     }
   }
@@ -479,13 +483,14 @@ void CConnector::onlineRadioButtonChecked(void)
     QStringList temp = item->text().split(" ");
     std::stringstream file;
     file << package_path << "/data/annotations.txt";
-    currFrame = temp.at(1).toInt();
+    currFrame = temp.at(1).toInt() - offset_;
       setcurrentFrame(currFrame);
-      std::string img_name = "frame" + boost::to_string(currFrame)+ ".png";
+      std::string img_name = "frame" + boost::to_string(currFrame + offset_ )+ ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
       loader_.statusLabel->setText("Loading " +QString().setNum(ImgAnnotations::annPerImage) + " for " + QString(img_name.c_str()));
+      if(ImgAnnotations::annPerImage !=0)
       drawBox();
 
 
@@ -495,7 +500,7 @@ void CConnector::onlineRadioButtonChecked(void)
   void CConnector::setPredatorValues(int x, int y, int width, int height)
   {
      ImgAnnotations::annotations.clear();
-     std::string img_name = "frame" + boost::to_string(currFrame) + ".png";
+     std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
      ImgAnnotations::setAnnotations(img_name, "1", x, y);
      ImgAnnotations::setAnnotations(img_name, "1", x+width, y+height);
      drawBox();  
@@ -503,7 +508,7 @@ void CConnector::onlineRadioButtonChecked(void)
      file << package_path << "/data/annotations.txt";
      ImgAnnotations::writeToFile(file.str() );
      std::stringstream imgName;
-     imgName << package_path  << "/data/frame" << currFrame << ".png";
+     imgName << package_path  << "/data/frame" << currFrame+offset_ << ".png";
      cv::Mat temp;
      cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
      cv::imwrite(imgName.str(), temp);

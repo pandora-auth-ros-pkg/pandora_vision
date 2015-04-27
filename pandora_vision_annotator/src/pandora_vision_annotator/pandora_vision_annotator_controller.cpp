@@ -111,6 +111,20 @@ namespace pandora_vision
        &connector_,SIGNAL(predatorEnabled()),
         this, SLOT(predatorEnabled()));
 
+    ROS_INFO("Do you want to add an offset to frames numbering y/n?");
+    char ans;
+    std::cin >>ans;
+    if(ans == 'y')
+    {
+      ROS_INFO("Give offset");
+      std::cin >> offset;
+    }
+
+    else
+    {
+      offset=0;
+    }
+
   }
 
   void CController::onlineModeGiven(void)
@@ -202,10 +216,9 @@ namespace pandora_vision
         count++;
       }
     }
-
-    connector_.setFrames(frames);
-    frames.clear();
+    connector_.setFrames(frames,offset);
     connector_.setcurrentFrame(0);
+    frames.clear();
   }
 
   void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)

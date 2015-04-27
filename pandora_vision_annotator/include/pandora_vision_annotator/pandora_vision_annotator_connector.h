@@ -88,6 +88,8 @@ namespace pandora_vision
 
       int totalFrames_;
 
+      int offset_;
+
       std::string package_path;
 
       std_msgs::Header msgHeader;
@@ -133,7 +135,7 @@ namespace pandora_vision
 
       void setImage(QImage &img);
 
-      void setFrames(const std::vector<cv::Mat>& x);
+      void setFrames(const std::vector<cv::Mat>& x, int offset);
 
       void setcurrentFrame(int x);
 

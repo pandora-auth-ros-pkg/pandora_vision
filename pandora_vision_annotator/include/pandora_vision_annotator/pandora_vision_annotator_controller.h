@@ -94,9 +94,12 @@ namespace pandora_vision
 
       int baseFrame;
 
+      int offset;
+
       bool onlinemode;
 
       bool PredatorNowOn;
+
 
     //------------------------------------------------------------------------//
     public:
