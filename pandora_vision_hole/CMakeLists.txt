@@ -106,6 +106,7 @@ add_library(${PROJECT_NAME}_utils
   src/utils/timer.cpp
   src/utils/visualization.cpp
   src/utils/wavelets.cpp
+  src/utils/image_matching.cpp
   )
 
 target_link_libraries(${PROJECT_NAME}_utils

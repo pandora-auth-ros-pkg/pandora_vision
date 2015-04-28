@@ -84,7 +84,6 @@
         output="$(arg output)"
         ns="$(arg namespace)">
         
-
     <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
               command="load" />
 
@@ -127,11 +126,16 @@
     respawn="False"
     output="$(arg output)"
     ns="$(arg namespace)">
+
     <rosparam file="$(find pandora_vision_hole)/cfg/thermal_node_topics.yaml"
     command="load" />
+
+    <rosparam file="$(find pandora_vision_hole)/cfg/thermal_node_matching_variables.yaml"
+    command="load" />    
+
   </node>
 
-  <!-- ========================= Hole Fusion node ========================== -->
+  <!-- ========================= Hole Fusion node ========================== -->   
 
   <node
     name="hole_fusion_node"
@@ -143,6 +147,6 @@
 
     <rosparam file="$(find pandora_vision_hole)/cfg/hole_fusion_node_topics.yaml"
               command="load" />
-  </node>
-
+  </node> 
+        
 </launch>

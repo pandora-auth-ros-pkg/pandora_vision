@@ -42,9 +42,8 @@
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/wavelets.h"
+#include "utils/image_matching.h"
 #include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
-#include "std_msgs/UInt8MultiArray.h"
-
 
 /**
   @namespace pandora_vision
@@ -76,6 +75,13 @@ namespace pandora_vision
       // locates are published to
       std::string candidateHolesTopic_;
 
+      // The variables used to match the holeConveyor information to the
+      // Rgb and Depth images.
+      double xThermal_;
+      double yThermal_;
+      double cX_;
+      double cY_;
+
       // The dynamic reconfigure (thermal) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
         server;
@@ -94,15 +100,6 @@ namespace pandora_vision
         @return void
        **/
       void inputThermalImageCallback(const sensor_msgs::Image& msg);
-
-      /**
-       @brief Obtain the Thermal image. Since the image is in a format of
-       std_msgs::Uint8MultiArray, it has to be transformed into a cv format in order
-       to be processed. Its cv format will be CV_8UC1.
-       @param msg[const std_msgs::UInt8MultiArray&] 
-       @return cv::Mat
-      **/
-      cv::Mat convertRawToMat(const std_msgs::UInt8MultiArray& msg); 
 
       /**
         @brief Acquires topics' names needed to be subscribed by the thermal node.

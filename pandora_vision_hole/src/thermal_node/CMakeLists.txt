@@ -1,7 +1,6 @@
 add_library(${PROJECT_NAME}_thermal
   thermal.cpp
   hole_detector.cpp
-  #thermal_preprocessor.cpp
   )
 target_link_libraries(${PROJECT_NAME}_thermal
   ${PROJECT_NAME}_utils

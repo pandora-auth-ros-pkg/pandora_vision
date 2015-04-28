@@ -53,6 +53,9 @@ namespace pandora_vision
     // transactionary affairs with
     getTopicNames();
 
+    // Get the values of the variables used to match the final holeConveyors
+    ImageMatching::variableSetUp(nodeHandle_, &xThermal_, &yThermal_, &cX_, &cY_);
+
     // Subscribe to the thermal image published by raspberry
     thermalImageSubscriber_ = nodeHandle_.subscribe(thermalImageTopic_, 1,
       &Thermal::inputThermalImageCallback, this);
@@ -118,6 +121,10 @@ namespace pandora_vision
     // Locate potential holes in the thermal image
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
+    // Convert the conveyors information so it can match with the
+    //  Rgb and Depth images
+    ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_);
+
     // Create the candidate holes message
     pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
@@ -140,31 +147,6 @@ namespace pandora_vision
 
     return;
   }
-
-  /**
-    @brief Obtain the Thermal image. Since the image is in a format of
-    std_msgs::Uint8MultiArray, it has to be transformed into a cv format in order
-    to be processed. Its cv format will be CV_8UC1.
-    @param msg[const std_msgs::UInt8MultiArray&] 
-    @return cv::Mat
-   */
-  cv::Mat Thermal::convertRawToMat(const std_msgs::UInt8MultiArray& msg)
-  {
-    int width = msg.layout.dim[1].size;
-    int height = msg.layout.dim[0].size;
-
-    cv::Mat thermalImage=cv::Mat::zeros(width, height, CV_8UC1);
-
-    for(int i = 0; i<width; i++)
-    {
-      for(int j = 0; j<height; j++)
-      {
-        thermalImage.at<unsigned char>(i, j)= msg.data[i * height + j];
-      }
-    }
-    return thermalImage;
-  }
-
 
   /**
     @brief Acquires topics' names needed to be subscribed to and advertise
