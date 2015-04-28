@@ -431,6 +431,9 @@ void CConnector::onlineRadioButtonChecked(void)
 
   void CConnector::clearPushButtonTriggered(void)
   {
+      std::stringstream file;
+      file << package_path << "/data/annotations.txt";
+      std::string img_name = "frame" + boost::to_string(currFrame+offset_) + ".png";
       img_state_= IDLE;
       bbox_ready.clear();
       loader_.landoltcCoordsLabel->clear();
@@ -440,6 +443,8 @@ void CConnector::onlineRadioButtonChecked(void)
       loader_.statusLabel->clear();
       ImgAnnotations::annPerImage = 0;
       ImgAnnotations::annotations.clear();
+      ImgAnnotations::deleteFromFile(file.str(), img_name);
+      loader_.statusLabel->setText("Delete Annotations from " +  QString(img_name.c_str()));
       setcurrentFrame(currFrame);
   }
 
@@ -452,6 +457,7 @@ void CConnector::onlineRadioButtonChecked(void)
       currFrame++;
       setcurrentFrame(currFrame);
       std::string img_name = "frame" + boost::to_string(currFrame+offset_) + ".png";
+      loader_.statusLabel->setText(QString(img_name.c_str()));
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(),img_name);
       ImgAnnotations::annPerImage = ImgAnnotations::annotations.size();
@@ -501,8 +507,13 @@ void CConnector::onlineRadioButtonChecked(void)
   {
      ImgAnnotations::annotations.clear();
      std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
-     ImgAnnotations::setAnnotations(img_name, "1", x, y);
-     ImgAnnotations::setAnnotations(img_name, "1", x+width, y+height);
+     std::string category;
+     if(img_state_ == VICTIM_CLICK)
+       category = "1";
+     if(img_state_ == HOLE_CLICK)
+       category = "-1";
+     ImgAnnotations::setAnnotations(img_name, category, x, y);
+     ImgAnnotations::setAnnotations(img_name, category, x+width, y+height);
      drawBox();  
      std::stringstream file;
      file << package_path << "/data/annotations.txt";

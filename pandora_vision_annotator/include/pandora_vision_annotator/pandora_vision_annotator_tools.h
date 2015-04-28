@@ -141,6 +141,8 @@ namespace pandora_vision
     static bool is_file_exist(const char *fileName);
     static void writeToFile(const std::string& filename,const std_msgs::Header& msg );
     static void readFromFile(const std::string& filename, const std::string& frame);
+    static void deleteFromFile(const::std::string&filename, const std::string& frame);
+
 
   };
 

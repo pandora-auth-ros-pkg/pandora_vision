@@ -45,6 +45,45 @@ namespace pandora_vision
   std::ofstream ImgAnnotations::outFile;
   std::ifstream ImgAnnotations::inFile;
   annotation ImgAnnotations::temp;
+
+  void ImgAnnotations::deleteFromFile(const::std::string&filename, const std::string& frame)
+  {
+    std::string line;
+    std::string package_path = ros::package::getPath("pandora_vision_annotator");
+    std::stringstream tempFile;
+    tempFile << package_path << "/data/temp.txt";
+    bool deleted = false;
+    int length = frame.length();
+    inFile.open(filename.c_str());
+    outFile.open(tempFile.str().c_str());
+    if(!inFile)
+    {
+      ROS_ERROR("cannot load file");
+    }
+    while(std::getline(inFile,line))
+    {
+
+      if(line.substr(0,length) != frame)
+      {
+        outFile << line << std::endl;
+        ROS_INFO_STREAM(line);
+      }
+
+      else
+        deleted = true;
+
+      if(deleted)
+      {
+        ROS_INFO_STREAM("Annotation for " << frame <<" deleted from file");
+      }
+    }
+
+      inFile.close();
+      outFile.close();
+      remove(filename.c_str());
+      rename(tempFile.str().c_str(), filename.c_str());
+  }
+
   void ImgAnnotations::readFromFile(const std::string& filename, const std::string& frame)
   {
     std::string line,x1,y1,x2,y2;
