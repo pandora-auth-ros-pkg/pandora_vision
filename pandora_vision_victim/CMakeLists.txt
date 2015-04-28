@@ -206,16 +206,22 @@ download_extra_data(
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
     "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use")
-
+    
 ## Additional lint filters - Not Needed ##
 # -whitespace/braces, -whitespace/newline, -readability/multiline_string
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  include/*.h
-  src/*.cpp
-  test/*.cpp
+  #~ include/*.h
+  #~ src/*.cpp
+  #~ test/*.cpp
+  include/victim_p*.h
+  include/victim_h*.h
+  include/e*.h
+  src/victim_p*.cpp
+  src/victim_h*.cpp
+  src/victim_node.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

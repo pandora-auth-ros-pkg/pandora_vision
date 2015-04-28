@@ -50,8 +50,8 @@ namespace pandora_vision
     _debugVictimsPublisher = image_transport::ImageTransport(
       *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
     
-    rgbSvmValidator_ = RgbSvmValidator(params_.rgb_classifier_path);
-    depthSvmValidator_ = DepthSvmValidator(params_.depth_classifier_path);
+    rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
+    depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
     
     ROS_INFO("[victim_node] : Created Victim Processor instance");
   }
@@ -69,11 +69,12 @@ namespace pandora_vision
   the information sent from hole_detector_node
   @return void
   **/
-  void VictimProcessor::detectVictims(const EnhancedImageConstPtr& input)
+  std::vector<VictimPOIPtr> VictimProcessor::detectVictims(
+    const EnhancedImageStampedConstPtr& input)
   {
     if (params_.debug_img || params_.debug_img_publisher)
     {
-      rgbImage.copyTo(debugImage);
+      input->getRgbImage().copyTo(debugImage);
       rgb_svm_keypoints.clear();
       depth_svm_keypoints.clear();
       rgb_svm_bounding_boxes.clear();
@@ -85,14 +86,6 @@ namespace pandora_vision
 
     DetectionImages imgs;
     int stateIndicator = 2 * input->getDepth() + (input->getAreas().size() > 0) + 1;
-
-    {
-      EnhancedMat emat;
-      rgbImage.copyTo(emat.img);
-      imgs.rgb = emat;
-      imgs.rgb.bounding_box = cv::Rect(0, 0, 0, 0);
-      imgs.rgb.keypoint = cv::Point2f(0, 0);
-    }
 
     DetectionMode detectionMode;
     switch (stateIndicator)
@@ -119,19 +112,16 @@ namespace pandora_vision
       holes_bounding_boxes.push_back(rect);
 
       EnhancedMat emat;
-      emat.img = rgbImage(rect);
-      cv::resize(emat.img, emat.img,
-        cv::Size(params_.frameWidth, params_.frameHeight));
+      emat.img = input->getRgbImage()(rect);
+      // cv::resize(emat.img, emat.img,
+        // cv::Size(params_.frameWidth, params_.frameHeight));
       emat.bounding_box = rect;
-      emat.keypoint = cv::Point2f(
-        msg.enhancedHoles[i].keypointX,
-        msg.enhancedHoles[i].keypointY
-      );
+      emat.keypoint = cv::Point2f(input->getArea(i).x, input->getArea(i).y);
       imgs.rgbMasks.push_back(emat);
 
-      if(GOT_HOLES_AND_DEPTH || GOT_DEPTH)
+      if (GOT_HOLES_AND_DEPTH || GOT_DEPTH)
       {
-        emat.img = depthImage(rect);
+        emat.img = input->getDepthImage()(rect);
         imgs.depthMasks.push_back(emat);
       }
     }
@@ -145,8 +135,8 @@ namespace pandora_vision
       if (params_.debug_img || params_.debug_img_publisher)
       {
         cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
-        cv::Rect re(final_victims[i]->getPoint(), final_victims[i]->getWidth(), 
-          final_victims[i]->getHeight());
+        cv::Rect re(final_victims[i]->getPoint(), cv::Size(final_victims[i]->getWidth(), 
+          final_victims[i]->getHeight()));
         switch (final_victims[i]->getSource())
         {
           case RGB_SVM:
@@ -163,7 +153,7 @@ namespace pandora_vision
       }
     }
 
-    //! Debug image
+    /// Debug image
     if (params_.debug_img || params_.debug_img_publisher)
     {
       cv::drawKeypoints(debugImage, rgb_svm_keypoints, debugImage,
@@ -219,7 +209,7 @@ namespace pandora_vision
       }
       {
         std::ostringstream convert;
-        convert << "Holes got : "<< msg.enhancedHoles.size();
+        convert << "Holes got : "<< input->getAreas().size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 100),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 0, 0), 1, CV_AA);
@@ -231,7 +221,7 @@ namespace pandora_vision
       // Convert the image into a message
       cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
 
-      msgPtr->header = msg.header;
+      msgPtr->header = input->getHeader();
       msgPtr->encoding = sensor_msgs::image_encodings::BGR8;
       msgPtr->image = debugImage;
       // Publish the image message
@@ -243,6 +233,7 @@ namespace pandora_vision
       cv::imshow("Victim processor", debugImage);
       cv::waitKey(30);
     }
+    return final_victims;
   }
   
   
@@ -267,7 +258,7 @@ namespace pandora_vision
     {
       for (int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
-        temp->setProbability(rgbSvmValidator_.calculatePredictionProbability(
+        temp->setProbability(rgbSvmValidatorPtr_->calculatePredictionProbability(
             imgs.rgbMasks.at(i).img));
         temp->setPoint(imgs.rgbMasks[i].keypoint);
         temp->setSource(RGB_SVM);
@@ -281,7 +272,7 @@ namespace pandora_vision
     {
       for (int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
-        temp.setProbability(depthSvmValidator_.calculatePredictionProbability(
+        temp->setProbability(depthSvmValidatorPtr_->calculatePredictionProbability(
             imgs.depthMasks.at(i).img));
         temp->setPoint(imgs.depthMasks[i].keypoint);
         temp->setSource(DEPTH_RGB_SVM);
@@ -337,12 +328,18 @@ namespace pandora_vision
   bool VictimProcessor::process(const EnhancedImageStampedConstPtr& input, 
     const POIsStampedPtr& output)
   {
-    output->setHeader(input->getHeader());
-    detectVictims(input);
+    output->header = input->getHeader();
+    output->frameWidth = input->getRgbImage().cols;
+    output->frameHeight = input->getRgbImage().rows;
     
-    if (final_victims[i]->getProbability() > 0.0001)
+    std::vector<VictimPOIPtr> victims = detectVictims(input);
+    
+    for (int ii = 0; ii < victims.size(); ii++)
     {
-      output->pois = final_victims;
+      if (victims[ii]->getProbability() > 0.0001)
+      {
+        output->pois[ii] = victims[ii];
+      }
     }
     
     if (output->pois.empty())
@@ -351,4 +348,4 @@ namespace pandora_vision
     }
     return true;
   }
-}
+}  // namespace pandora_vision

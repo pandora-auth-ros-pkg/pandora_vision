@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   VictimHandler::VictimHandler(const std::string& ns) : 
-    VisionHandler<VictimProcessor, VictimProcessor, VictimPostProcessor>(ns)
+    VisionHandler<VictimPreProcessor, VictimProcessor, VictimPostProcessor>(ns)
   {
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);

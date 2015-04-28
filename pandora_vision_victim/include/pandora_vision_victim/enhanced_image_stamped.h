@@ -65,7 +65,7 @@ namespace pandora_vision
       void setHeader(const std_msgs::Header&);
       const std_msgs::Header& getHeader() const;
 
-      void setDepth(bool);
+      void setDepth(bool depth);
       bool getDepth() const;
 
       void setRgbImage(const cv::Mat&);
@@ -78,7 +78,7 @@ namespace pandora_vision
       std::vector<Rect2f> getAreas() const;
       
       void setArea(int , const Rect2f&);
-      Rect2f getArea(int) const;
+      Rect2f getArea(int it) const;
   };
   
   void EnhancedImageStamped::setHeader(const std_msgs::Header& headerArg)

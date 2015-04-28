@@ -93,8 +93,8 @@ namespace pandora_vision
   
   struct DetectionImages
   {
-    //~ EnhancedMat rgb;
-    //~ EnhancedMat depth;
+    // EnhancedMat rgb;
+    // EnhancedMat depth;
     std::vector<EnhancedMat> rgbMasks;
     std::vector<EnhancedMat> depthMasks;
   };
@@ -155,7 +155,7 @@ namespace pandora_vision
       std::string rgb_classifier_path;
       std::string depth_classifier_path;
 
-      //! parameters for svms
+      /// parameters for svms
       double rgb_svm_C;
       double rgb_svm_gamma;
       double rgb_svm_prob_scaling;
@@ -166,5 +166,5 @@ namespace pandora_vision
       double depth_svm_prob_translation;
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H

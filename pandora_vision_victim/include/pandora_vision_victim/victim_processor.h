@@ -67,7 +67,7 @@ namespace pandora_vision
       the information sent from hole_detector_node
       @return void
       **/
-      void detectVictims(const EnhancedImageStampedConstPtr& input);
+      std::vector<VictimPOIPtr> detectVictims(const EnhancedImageStampedConstPtr& input);
       
       /**
       @brief Function that enables suitable subsystems, according
@@ -82,13 +82,13 @@ namespace pandora_vision
       std::vector<cv::Mat> _rgbdImages;
 
       /// Instance of RGB SVM Validator
-      RgbSvmValidator rgbSvmValidator_;
+      boost::shared_ptr<RgbSvmValidator> rgbSvmValidatorPtr_;
       /// Instance of Depth SVM Validator
-      DepthSvmValidator depthSvmValidator_;
+      boost::shared_ptr<DepthSvmValidator> depthSvmValidatorPtr_;
       
       VictimParameters params_;
       
-      //! Debug purposes
+      /// Debug purposes
       image_transport::Publisher _debugVictimsPublisher;
       cv::Mat debugImage;
       std::vector<cv::KeyPoint> rgb_svm_keypoints;

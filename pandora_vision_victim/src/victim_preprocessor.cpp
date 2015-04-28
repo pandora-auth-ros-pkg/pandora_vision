@@ -77,7 +77,7 @@ namespace pandora_vision
       output->setArea(ii, rect);
     }
     
-    //! Interpolated depth image publishing
+    /// Interpolated depth image publishing
     // Convert the image into a message
     cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
 

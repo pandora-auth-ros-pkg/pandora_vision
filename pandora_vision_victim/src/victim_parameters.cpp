@@ -51,7 +51,6 @@ namespace pandora_vision
   
   double rgb_svm_prob_scaling = 0.5;
   double rgb_svm_prob_translation = 7.0;
-
   
   //----------------------------Methods----------------------------//
   

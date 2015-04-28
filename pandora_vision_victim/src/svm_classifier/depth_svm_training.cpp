@@ -181,7 +181,7 @@ namespace pandora_vision
           test_labels_mat_file_stream.str(), "test_labels_mat");
     }
 
-    //calcMinDistance();
+    // calcMinDistance();
 
     std::cout << "Starting training process for the rgb images" << std::endl;
     if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
@@ -235,7 +235,4 @@ namespace pandora_vision
     file_utilities::saveToFile(results_file_stream.str(), "results", results);
     evaluate(results, testLabelsMat);
   }
-}// namespace pandora_vision
-
-
-
+}  // namespace pandora_vision

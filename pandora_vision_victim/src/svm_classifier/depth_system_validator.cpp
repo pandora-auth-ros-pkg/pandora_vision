@@ -53,7 +53,7 @@ namespace pandora_vision
   {
     _depth_classifier_path = depth_classifier_path;
 
-    ///Load classifier path for depth subsystem
+    /// Load classifier path for depth subsystem
     _depthSvm.load(depth_classifier_path.c_str());
 
     _params.svm_type = CvSVM::C_SVC;
@@ -72,36 +72,36 @@ namespace pandora_vision
   **/
   float DepthSystemValidator::calculateSvmDepthProbability(const cv::Mat& inImage)
   {
-    ///Extract color and statistics oriented features
-    ///for depth image
+    /// Extract color and statistics oriented features
+    /// for depth image
 
     std::vector<double> channelsStatictisFeatureVector;
     ChannelsStatisticsExtractor::findDepthChannelsStatisticsFeatures(inImage, &channelsStatictisFeatureVector);
 
-    ///Extract edge orientation features for depth image
+    /// Extract edge orientation features for depth image
 
     std::vector<double> edgeOrientationFeatureVector;
     EdgeOrientationExtractor::findEdgeFeatures(inImage, &edgeOrientationFeatureVector);
 
-    ///Extract haralick features for depth image
+    /// Extract haralick features for depth image
 
     std::vector<double> haralickFeatureVector;
     HaralickFeaturesExtractor::findHaralickFeatures(inImage, &haralickFeatureVector);
 
-    if(!_depthFeatureVector.empty())
+    if (!_depthFeatureVector.empty())
       _depthFeatureVector.clear();
 
-    ///Append to depthFeatureVector features according to color
-    ///histogramms and other statistics
-    for(int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
+    /// Append to depthFeatureVector features according to color
+    /// histogramms and other statistics
+    for (int ii = 0; ii < channelsStatictisFeatureVector.size(); ii++ )
           _depthFeatureVector.push_back(channelsStatictisFeatureVector[ii]);
 
-    ///Append to depthFeatureVector features according to edge orientation
-    for(int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
+    /// Append to depthFeatureVector features according to edge orientation
+    for (int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++ )
           _depthFeatureVector.push_back(edgeOrientationFeatureVector[ii]);
 
-    ///Append to depthFeatureVector features according to haralick features
-    for(int ii = 0; ii < haralickFeatureVector.size(); ii++ )
+    /// Append to depthFeatureVector features according to haralick features
+    for (int ii = 0; ii < haralickFeatureVector.size(); ii++ )
           _depthFeatureVector.push_back(haralickFeatureVector[ii]);
 
     return predictionToProbability(predict());
@@ -127,7 +127,7 @@ namespace pandora_vision
   {
     cv::Mat samples_mat = vectorToMat(_depthFeatureVector);
 
-    ///Normalize the data from [-1,1]
+    /// Normalize the data from [-1,1]
     cv::normalize(samples_mat, samples_mat, -1.0, 1.0, cv::NORM_MINMAX, -1);
     ROS_INFO_STREAM("DEPTH_SVM class label :" << _depthSvm.predict(samples_mat, false));
     float prediction = _depthSvm.predict(samples_mat, true);
@@ -145,9 +145,9 @@ namespace pandora_vision
   {
     int size = data.size();
     cv::Mat mat(size, 1, CV_32F);
-    for(int i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
-        mat.at<float>(i, 0) = data[i];
+      mat.at<float>(i, 0) = data[i];
     }
     return mat;
   }
@@ -159,14 +159,14 @@ namespace pandora_vision
   float DepthSystemValidator::predictionToProbability(float prediction)
   {
     float probability;
-    //~ Normalize probability to [-1,1]
+    /// Normalize probability to [-1,1]
     probability = tanh(VictimParameters::depth_svm_prob_scaling
       * (prediction - VictimParameters::depth_svm_prob_translation) );
-    //~ Normalize probability to [0,1]
+    /// Normalize probability to [0,1]
     probability = (1 + probability) / 2.0;
-    if(probability > 0)
+    if (probability > 0)
       ROS_INFO_STREAM("SVM DEPTH pred/prob :" << prediction << " " <<probability);
     return probability;
   }
 
-}// namespace pandora_vision
+}  // namespace pandora_vision

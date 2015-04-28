@@ -79,7 +79,7 @@ static void read_csv(const std::string& filename,
       system(cmd.c_str());
     }
 
-    if(!path.empty() && !classlabel.empty())
+    if (!path.empty() && !classlabel.empty())
     {
       images.push_back(cv::imread(abs.string(), 0));
       labels.push_back(atoi(classlabel.c_str()));
@@ -131,5 +131,4 @@ int main()
   std::cout << "Saving model to " << outFile << std::endl;
 
   model->save(outFile);
-
 }
