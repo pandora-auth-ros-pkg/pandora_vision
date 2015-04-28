@@ -1347,7 +1347,7 @@ namespace pandora_vision
       bool overlapFlag = false;
       for(int j = 0; j < (*rgbHolesConveyor).rectangle.size(); j ++)
       {
-        if(std::abs((*depthHolesConveyor).keypoint[i].x - (*rgbHolesConveyor).keypoint[i].x) < Parameters::HoleFusion::keypoint_overlap_threshold && std::abs((*depthHolesConveyor).keypoint[i].y - (*rgbHolesConveyor).keypoint[i].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
+        if(std::abs((*depthHolesConveyor).keypoint[i].x - (*rgbHolesConveyor).keypoint[j].x) < Parameters::HoleFusion::keypoint_overlap_threshold && std::abs((*depthHolesConveyor).keypoint[i].y - (*rgbHolesConveyor).keypoint[j].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
         {
           rgbSoloValid[j] = false;
           overlapFlag = true;

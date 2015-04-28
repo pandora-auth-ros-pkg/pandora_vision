@@ -126,7 +126,7 @@ namespace pandora_vision
   int Parameters::Depth::tiny_contour_thresh = 800;
   int Parameters::Depth::small_contour_thresh = 2500;
   int Parameters::Depth::neighbor_thresh = 100;
-  int Parameters::Depth::neighbor_value_thresh = 70;
+  int Parameters::Depth::neighbor_value_thresh = 30;
   int Parameters::Depth::depth_similarity_rect_dims_thresh = 50;
   float Parameters::Depth::merge_thresh = 50.0;
   int Parameters::Depth::canny_low_threshold = 50;
@@ -364,7 +364,7 @@ namespace pandora_vision
   //  int Parameters::Rgb::watershed_background_dilation_factor = 1;
   //  int Parameters::Rgb::watershed_background_erosion_factor = 1;
 
-  int Parameters::Rgb::original_image_gaussian_blur = 4;
+  int Parameters::Rgb::original_image_gaussian_blur = 3;
   int Parameters::Rgb::std_variance_kernel_size = 5;
   int Parameters::Rgb::std_variance_threshold = 48;
   int Parameters::Rgb::std_variance_morphology_close_size = 8; 
