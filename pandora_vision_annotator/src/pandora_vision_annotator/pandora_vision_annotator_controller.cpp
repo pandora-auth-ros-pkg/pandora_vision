@@ -110,21 +110,12 @@ namespace pandora_vision
      QObject::connect(
        &connector_,SIGNAL(predatorEnabled()),
         this, SLOT(predatorEnabled()));
-
-    ROS_INFO("Do you want to add an offset to frames numbering y/n?");
-    char ans;
-    std::cin >>ans;
-    if(ans == 'y')
-    {
-      ROS_INFO("Give offset");
-      std::cin >> offset;
-    }
-
-    else
-    {
-      offset=0;
-    }
-
+     std::string package_path = ros::package::getPath("pandora_vision_annotator");
+     std::stringstream filename;
+     filename << package_path << "/data/annotations.txt";
+     ImgAnnotations::getLastFrameIndex(filename.str(),offset);
+     offset += 1;
+     ROS_INFO_STREAM("Frame indexing starting at: " << offset);
   }
 
   void CController::onlineModeGiven(void)

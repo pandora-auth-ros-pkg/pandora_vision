@@ -84,17 +84,61 @@ namespace pandora_vision
       rename(tempFile.str().c_str(), filename.c_str());
   }
 
+  void ImgAnnotations::getLastFrameIndex(const::std::string& filename, int& index)
+  {
+    inFile.open(filename.c_str(), std::ios_base::ate);
+    std::string line;
+    int length = 0;
+    char c ='\0';
+
+    if (!inFile)
+    {
+      ROS_ERROR("cannot load file");
+      return;
+    } 
+
+    length = inFile.tellg();
+    if(length == 0)
+    {
+      index = -1;
+    }
+
+    else
+    {
+
+      for(int ii = length-2; ii > 0; ii--)
+      {
+        inFile.seekg(ii);
+        c = inFile.get();
+        if( c =='\r' || c == '\n' )
+          break;
+      }
+      std::getline(inFile,line);
+      std::string package_path = ros::package::getPath("pandora_vision_annotator");
+      std::stringstream temp;
+      temp << line;
+      std::string imName;
+      getline (temp, imName,',');
+      unsigned s = imName.find_last_of(".");
+      imName = imName.substr(0,s);
+      s=imName.find_last_of("e");
+      imName=imName.substr(s+1);
+      index= atoi(imName.c_str());
+    }
+  }
+
   void ImgAnnotations::readFromFile(const std::string& filename, const std::string& frame)
   {
     std::string line,x1,y1,x2,y2;
     inFile.open(filename.c_str());
-  int  i = 0;
-  int length = frame.length();
-      if (!inFile)
+    int  i = 0;
+    int length = frame.length();
+    if (!inFile)
     {
       ROS_ERROR("cannot load file");
       return;
     }
+
     else
     {
       if(inFile.is_open())
