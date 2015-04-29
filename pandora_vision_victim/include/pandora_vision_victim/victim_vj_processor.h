@@ -33,71 +33,38 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
-#define PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H
 
-#include <boost/shared_ptr.hpp>
-#include <opencv2/opencv.hpp>
+#include "sensor_processor/processor.h"
+#include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_victim/images_stamped.h"
+#include "pandora_vision_victim/victim_poi.h"
+#include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
 {
-  class EnhancedImageStamped : public ImagesStamped
+  class VictimVJProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
   {
     public:
-      typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
-      typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
-      typedef cv::Rect_<float> Rect2f;
+      VictimVJProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      VictimVJProcessor();
       
-    public:
-      bool isDepth;
-      std::vector<Rect2f> areasOfInterest;
+      virtual ~VictimVJProcessor();
       
-    public:
-      void setDepth(bool depth);
-      bool getDepth() const;
-
-      void setAreas(const std::vector<Rect2f>&);
-      std::vector<Rect2f> getAreas() const;
+      virtual bool process(const ImagesStampedConstPtr& input, const POIsStampedPtr& output);
+    
+    private:
+      /// Instance of class face_detector
+      VictimVJDetector _rgbViolaJonesDetector;
       
-      void setArea(int , const Rect2f&);
-      Rect2f getArea(int it) const;
+      VictimParameters params_;
+      // ................
   };
-
-  void EnhancedImageStamped::setDepth(bool depth)
-  {
-    isDepth = depth;
-  }
-  bool EnhancedImageStamped::getDepth() const
-  {
-    return isDepth;
-  }
-
-  void EnhancedImageStamped::setAreas(const std::vector<EnhancedImageStamped::Rect2f>& areas)
-  {
-    areasOfInterest = areas;
-  }
-  std::vector<EnhancedImageStamped::Rect2f> EnhancedImageStamped::getAreas() const
-  {
-    return areasOfInterest;
-  }
-  
-  void EnhancedImageStamped::setArea(int it, const Rect2f& area)
-  {
-    areasOfInterest[it] = area;
-  }
-  EnhancedImageStamped::Rect2f EnhancedImageStamped::getArea(int it) const
-  {
-    return areasOfInterest[it];
-  }
-  
-  typedef EnhancedImageStamped::Rect2f Rect2f;
-  typedef EnhancedImageStamped::Ptr EnhancedImageStampedPtr;
-  typedef EnhancedImageStamped::ConstPtr EnhancedImageStampedConstPtr;
-  
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_SVM_PROCESSOR_H

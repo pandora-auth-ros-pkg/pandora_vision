@@ -42,11 +42,17 @@
 namespace pandora_vision
 {
   VictimVJPreProcessor::VictimVJPreProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler)
-  {
-  }
+    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2, 
+    ImagesStamped>(ns, handler) {}
   
-  VictimVJPreProcessor::~VictimVJPreProcessor()
+  VictimVJPreProcessor::~VictimVJPreProcessor() {}
+  
+  bool VictimVJPreProcessor::preProcess(const PointCloud2ConstPtr& input, 
+    const ImagesStampedPtr& output)
   {
+    output->setHeader(input->header);
+    
+    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(input, CV_8UC3);
+    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(input, CV_32FC1);
   }
 }  // namespace pandora_vision

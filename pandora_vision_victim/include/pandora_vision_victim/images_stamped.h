@@ -36,68 +36,68 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
-#define PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
+#ifndef PANDORA_VISION_VICTIM_IMAGES_STAMPED_H
+#define PANDORA_VISION_VICTIM_IMAGES_STAMPED_H
 
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
-#include "pandora_vision_victim/images_stamped.h"
+#include "std_msgs/Header.h"
 
 namespace pandora_vision
 {
-  class EnhancedImageStamped : public ImagesStamped
+  class ImagesStamped
   {
     public:
-      typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
-      typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
-      typedef cv::Rect_<float> Rect2f;
+      typedef boost::shared_ptr<ImagesStamped> Ptr;
+      typedef boost::shared_ptr<ImagesStamped const> ConstPtr;
       
     public:
-      bool isDepth;
-      std::vector<Rect2f> areasOfInterest;
-      
-    public:
-      void setDepth(bool depth);
-      bool getDepth() const;
+      std_msgs::Header header;
 
-      void setAreas(const std::vector<Rect2f>&);
-      std::vector<Rect2f> getAreas() const;
+      cv::Mat depthImage;
+      cv::Mat rgbImage;
       
-      void setArea(int , const Rect2f&);
-      Rect2f getArea(int it) const;
+    public:
+      void setHeader(const std_msgs::Header&);
+      const std_msgs::Header& getHeader() const;
+
+      void setRgbImage(const cv::Mat&);
+      cv::Mat getRgbImage() const;
+      
+      void setDepthImage(const cv::Mat&);
+      cv::Mat getDepthImage() const;
   };
-
-  void EnhancedImageStamped::setDepth(bool depth)
+  
+  void ImagesStamped::setHeader(const std_msgs::Header& headerArg)
   {
-    isDepth = depth;
+    header = headerArg;
   }
-  bool EnhancedImageStamped::getDepth() const
+  const std_msgs::Header& ImagesStamped::getHeader() const
   {
-    return isDepth;
-  }
-
-  void EnhancedImageStamped::setAreas(const std::vector<EnhancedImageStamped::Rect2f>& areas)
-  {
-    areasOfInterest = areas;
-  }
-  std::vector<EnhancedImageStamped::Rect2f> EnhancedImageStamped::getAreas() const
-  {
-    return areasOfInterest;
+    return header;
   }
   
-  void EnhancedImageStamped::setArea(int it, const Rect2f& area)
+  void ImagesStamped::setRgbImage(const cv::Mat& imageArg)
   {
-    areasOfInterest[it] = area;
+    rgbImage = imageArg;
   }
-  EnhancedImageStamped::Rect2f EnhancedImageStamped::getArea(int it) const
+  cv::Mat ImagesStamped::getRgbImage() const
   {
-    return areasOfInterest[it];
+    return rgbImage;
   }
   
-  typedef EnhancedImageStamped::Rect2f Rect2f;
-  typedef EnhancedImageStamped::Ptr EnhancedImageStampedPtr;
-  typedef EnhancedImageStamped::ConstPtr EnhancedImageStampedConstPtr;
+  void ImagesStamped::setDepthImage(const cv::Mat& imageArg)
+  {
+    depthImage = imageArg;
+  }
+  cv::Mat ImagesStamped::getDepthImage() const
+  {
+    return depthImage;
+  }
+  
+  typedef ImagesStamped::Ptr ImagesStampedPtr;
+  typedef ImagesStamped::ConstPtr ImagesStampedConstPtr;
   
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
+#endif  // PANDORA_VISION_VICTIM_IMAGES_STAMPED_H

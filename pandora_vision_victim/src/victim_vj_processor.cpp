@@ -33,71 +33,62 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
+ *   Tsirigotis Christos <tsirif@gmail.com>
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
-#define PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H
-
-#include <boost/shared_ptr.hpp>
-#include <opencv2/opencv.hpp>
-#include "pandora_vision_victim/images_stamped.h"
+#include "pandora_vision_victim/victim_vj_processor.h"
 
 namespace pandora_vision
 {
-  class EnhancedImageStamped : public ImagesStamped
+  VictimVJProcessor::VictimVJProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
   {
-    public:
-      typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
-      typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
-      typedef cv::Rect_<float> Rect2f;
-      
-    public:
-      bool isDepth;
-      std::vector<Rect2f> areasOfInterest;
-      
-    public:
-      void setDepth(bool depth);
-      bool getDepth() const;
+    params_.configVictim(*this->accessPublicNh());
 
-      void setAreas(const std::vector<Rect2f>&);
-      std::vector<Rect2f> getAreas() const;
-      
-      void setArea(int , const Rect2f&);
-      Rect2f getArea(int it) const;
-  };
-
-  void EnhancedImageStamped::setDepth(bool depth)
-  {
-    isDepth = depth;
-  }
-  bool EnhancedImageStamped::getDepth() const
-  {
-    return isDepth;
-  }
-
-  void EnhancedImageStamped::setAreas(const std::vector<EnhancedImageStamped::Rect2f>& areas)
-  {
-    areasOfInterest = areas;
-  }
-  std::vector<EnhancedImageStamped::Rect2f> EnhancedImageStamped::getAreas() const
-  {
-    return areasOfInterest;
+    /// Initialize the face detector classifiers
+    _rgbViolaJonesDetector = VictimVJDetector(params_.cascade_path,
+      params_.model_path);
+    
+    ROS_INFO("[victim_node] : Created Victim VJ Processor instance");
   }
   
-  void EnhancedImageStamped::setArea(int it, const Rect2f& area)
+  VictimVJProcessor::VictimVJProcessor() : VisionProcessor() {}
+  
+  VictimVJProcessor::~VictimVJProcessor()
   {
-    areasOfInterest[it] = area;
-  }
-  EnhancedImageStamped::Rect2f EnhancedImageStamped::getArea(int it) const
-  {
-    return areasOfInterest[it];
+    ROS_DEBUG("[victim_node] : Destroying Victim VJ Processor instance");
   }
   
-  typedef EnhancedImageStamped::Rect2f Rect2f;
-  typedef EnhancedImageStamped::Ptr EnhancedImageStampedPtr;
-  typedef EnhancedImageStamped::ConstPtr EnhancedImageStampedConstPtr;
   
+  // .........
+  
+  
+  
+  /**
+   * @brief
+   **/
+  bool VictimVJProcessor::process(const ImagesStampedConstPtr& input, 
+    const POIsStampedPtr& output)
+  {
+    output->header = input->getHeader();
+    output->frameWidth = input->getRgbImage().cols;
+    output->frameHeight = input->getRgbImage().rows;
+    
+    std::vector<VictimPOIPtr> victims = detectVictims(input);
+    
+    for (int ii = 0; ii < victims.size(); ii++)
+    {
+      if (victims[ii]->getProbability() > 0.0001)
+      {
+        output->pois[ii] = victims[ii];
+      }
+    }
+    
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
+  }
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_VICTIM_ENHANCED_IMAGE_STAMPED_H

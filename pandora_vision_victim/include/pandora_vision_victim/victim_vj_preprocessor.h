@@ -41,15 +41,26 @@
 #define PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
 
 #include <string>
-#include "pandora_vision_common/pandora_vision_interface/vision_preprocessor.h"
+#include <sensor_msgs/PointCloud2.h>
+#include "sensor_processor/handler.h"
+#include "sensor_processor/preprocessor.h"
+#include "pandora_vision_hole/utils/message_conversions.h"
+#include "pandora_vision_victim/images_stamped.h"
 
 namespace pandora_vision
 {
-  class VictimVJPreProcessor : public VisionPreProcessor
+  class VictimVJPreProcessor : public sensor_processor::PreProcessor<
+    sensor_msgs::PointCloud2, ImagesStamped>
   {
+    protected:
+      boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+      boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
+    
     public:
       VictimVJPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~VictimVJPreProcessor();
+      
+      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
   };
 }  // namespace pandora_vision
 
