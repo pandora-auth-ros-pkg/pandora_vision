@@ -83,6 +83,6 @@ download_extra_data(
   )
 add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
 
-add_rostest(benchmark/hole_benchmark_test.launch)
+add_rostest(benchmark/hole_exploration_benchmark_test.launch)
 # add_rostest(benchmark/hole_benchmark_test.launch DEPENDENCIES
             # ${PROJECT_NAME}_benchmark_images_bags_pcl)

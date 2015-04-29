@@ -78,7 +78,7 @@
   <param name="dataset_camera" value="kinect"/>
   <param name="dataset_path" value="/test/benchmark/images/bags_pcl"/>
   
-  <test test-name="HoleBenchmarkTest" pkg="pandora_vision_hole_exploration"
-    type="hole_benchmark_test.py" time-limit="1000.0"/>
+  <test test-name="HoleExplorationBenchmarkTest" pkg="pandora_vision_hole_exploration"
+    type="hole_exploration_benchmark_test.py" time-limit="1000.0"/>
   
 </launch>

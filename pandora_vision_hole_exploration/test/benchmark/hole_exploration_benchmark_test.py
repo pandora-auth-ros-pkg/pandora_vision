@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 PKG = "pandora_vision_hole_exploration"
-NAME = "hole_benchmark_test"
+NAME = "hole_exploration_benchmark_test"
 import os
 import sys
 import roslib; roslib.load_manifest(PKG)
