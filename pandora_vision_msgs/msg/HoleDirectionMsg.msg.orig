@@ -1,0 +1,10 @@
+<<<<<<< HEAD
+pandora_common_msgs/GeneralAlertInfo info
+||||||| merged common ancestors
+float32 yaw
+float32 pitch
+float32 probability
+=======
+pandora_common_msgs/GeneralAlertMsg info
+>>>>>>> adds benchmark test and not working functional test [ci skip]
+uint64 holeId

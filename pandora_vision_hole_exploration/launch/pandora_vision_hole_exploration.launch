@@ -2,14 +2,14 @@
 
   <!-- =========================== The namespace =========================== -->
 
-  <arg name="namespace" default="hole_detector" />
+  <arg name="namespace" default="hole_exploration" />
 
 
   <!-- ========================= Synchronizer node ========================= -->
 
   <node name="synchronizer_node"
         type="synchronizer_node"
-        pkg="pandora_vision_hole"
+        pkg="pandora_vision_hole_exploration"
         respawn="False"
         ns="$(arg namespace)">
 

@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(pandora_vision_msgs)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+<<<<<<< HEAD
+  actionlib_msgs
+  pandora_common_msgs
+||||||| merged common ancestors
+=======
+  pandora_common_msgs
+>>>>>>> adds benchmark test and not working functional test [ci skip]
+)
+
+add_message_files(
+  FILES
+  CandidateHoleMsg.msg
+  CandidateHolesVectorMsg.msg
+  ExplorerCandidateHoleMsg.msg
+  ExplorerCandidateHolesVectorMsg.msg
+  HoleDirectionMsg.msg
+  HolesDirectionsVectorMsg.msg
+  FaceDirectionMsg.msg
+  HolePositionMsg.msg
+  HolesPositionsVectorMsg.msg
+  EnhancedHoleMsg.msg
+  EnhancedHolesVectorMsg.msg
+  HazmatAlertMsg.msg
+  HazmatAlertsVectorMsg.msg
+  QRAlertMsg.msg
+  QRAlertsVectorMsg.msg
+  DataMatrixAlertMsg.msg
+  DataMatrixAlertsVectorMsg.msg
+  LandoltcAlertMsg.msg
+  LandoltcAlertsVectorMsg.msg
+  LandoltcPredatorMsg.msg
+  SynchronizedMsg.msg
+  )
+
+generate_messages(
+  DEPENDENCIES
+    std_msgs
+    geometry_msgs
+    sensor_msgs
+    pandora_common_msgs
+  )
+
+catkin_package(
+  CATKIN_DEPENDS
+    message_runtime
+    std_msgs
+    geometry_msgs
+    sensor_msgs
+    pandora_common_msgs
+  )
