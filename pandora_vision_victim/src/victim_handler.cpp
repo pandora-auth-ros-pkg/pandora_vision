@@ -42,11 +42,67 @@
 namespace pandora_vision
 {
   VictimHandler::VictimHandler(const std::string& ns) : 
-    VisionHandler<VictimPreProcessor, VictimProcessor, VictimPostProcessor>(ns)
+    sensor_processor::Handler(ns)
   {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    
+    vjActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+  }
+  
+  void VictimHandler::startTransition(int newState)
+  {
+    currentState_ = newState;
+    
+    bool svmPreviouslyOff = true;
+    bool vjPreviouslyOff = true;
+    
+    bool svmCurrentlyOn = false;
+    bool vjCurrentlyOn = false;
+    
+    for (int ii = 0; ii < svmActiveStates_.size(); ii++)
+    {
+      svmPreviouslyOff = (svmPreviouslyOff && previousState_ != svmActiveStates_[ii]);
+      svmCurrentlyOn = (svmCurrentlyOn || currentState_ == svmActiveStates_[ii]);
+    }
+    
+    for (int ii = 0; ii < vjActiveStates_.size(); ii++)
+    {
+      vjPreviouslyOff = (vjPreviouslyOff && previousState_ != vjActiveStates_[ii]);
+      vjCurrentlyOn = (vjCurrentlyOn || currentState_ == vjActiveStates_[ii]);
+    }
+   
+    if (svmPreviouslyOff && svmCurrentlyOn)
+    {
+      preProcPtr_.reset(new VictimSvmPreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new VictimSvmProcessor("~/processor", this));
+      postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
+    }
+    else if (vjPreviouslyOff && vjCurrentlyOn)
+    {
+      preProcPtr_.reset(new VictimVJPreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new VictimVJDetector("~/processor", this));
+      postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
+    }
+    else if ((!svmPreviouslyOff || !vjPreviouslyOff) && (!svmCurrentlyOn && !vjCurrentlyOn))
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+    }
+    
+    if (currentState_ == state_manager_msgs::RobotModeMsg::MODE_TERMINATING)
+    {
+      preProcPtr_.reset();
+      processorPtr_.reset();
+      postProcPtr_.reset();
+      
+      ros::shutdown();
+      return;
+    }
+    previousState_ = currentState_;
+    transitionComplete(currentState_);
   }
   
   void VictimHandler::completeTransition()

@@ -37,33 +37,20 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_HANDLER_H
-#define PANDORA_VISION_VICTIM_VICTIM_HANDLER_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
 
 #include <string>
-#include "sensor_processor/handler.h"
-#include "pandora_vision_victim/victim_vj_preprocessor.h"
-#include "pandora_vision_victim/victim_svm_preprocessor.h"
-#include "pandora_vision_victim/victim_vj_detector.h"
-#include "pandora_vision_victim/victim_svm_processor.h"
-#include "pandora_vision_victim/victim_postprocessor.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_preprocessor.h"
 
 namespace pandora_vision
 {
-  class VictimHandler : public sensor_processor::Handler
+  class VictimVJPreProcessor : public VisionPreProcessor
   {
     public:
-      explicit VictimHandler(const std::string& ns);
-      virtual ~VictimHandler() {}
-
-    private:
-      virtual void startTransition(int newState);
-      virtual void completeTransition();
-      
-    private:
-      std::vector<int> svmActiveStates_;
-      std::vector<int> vjActiveStates_;
+      VictimVJPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~VictimVJPreProcessor();
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_HANDLER_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H

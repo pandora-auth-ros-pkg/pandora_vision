@@ -37,57 +37,16 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_victim/victim_preprocessor.h"
+#include "pandora_vision_victim/victim_vj_preprocessor.h"
 
 namespace pandora_vision
 {
-  VictimPreProcessor::VictimPreProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) :
-    sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
-    EnhancedImageStamped>(ns, handler)
-  {
-    params_.configVictim(*this->accessPublicNh());
-    interpolatedDepthPublisher_ = image_transport::ImageTransport(
-      *this->accessProcessorNh()).advertise(
-      params_.interpolatedDepthImg, 1, true);
-  }
-  
-  VictimPreProcessor::~VictimPreProcessor()
+  VictimVJPreProcessor::VictimVJPreProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler)
   {
   }
   
-  bool VictimPreProcessor::preProcess(const EnhancedImageConstPtr& input, 
-    const EnhancedImageStampedPtr& output)
+  VictimVJPreProcessor::~VictimVJPreProcessor()
   {
-    output->setHeader(input->header);
-
-    cv_bridge::CvImagePtr inMsg;
-    inMsg = cv_bridge::toCvCopy(input->rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
-    output->setRgbImage(inMsg->image.clone());
-    
-    inMsg = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
-    cv::Mat depthImage = inMsg->image.clone();
-    output->setDepthImage(depthImage);
-    
-    output->setDepth(input->isDepth);
-    for (int ii = 0; ii < input->areasOfInterest.size(); ii++)
-    {
-      Rect2f rect(input->areasOfInterest[ii].x, input->areasOfInterest[ii].y, 
-        input->areasOfInterest[ii].width, input->areasOfInterest[ii].height);
-      output->setArea(ii, rect);
-    }
-    
-    /// Interpolated depth image publishing
-    // Convert the image into a message
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-    msgPtr->header = input->header;
-    msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
-    depthImage.copyTo(msgPtr->image);
-
-    // Publish the image message
-    interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
-    
-    return true;
   }
 }  // namespace pandora_vision

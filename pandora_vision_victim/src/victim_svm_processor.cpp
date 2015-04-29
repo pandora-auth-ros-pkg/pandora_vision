@@ -37,11 +37,11 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_victim/victim_processor.h"
+#include "pandora_vision_victim/victim_svm_processor.h"
 
 namespace pandora_vision
 {
-  VictimProcessor::VictimProcessor(const std::string& ns, 
+  VictimSvmProcessor::VictimSvmProcessor(const std::string& ns, 
     sensor_processor::Handler* handler) : sensor_processor::Processor<EnhancedImageStamped, 
       POIsStamped>(ns, handler)
   {
@@ -53,15 +53,15 @@ namespace pandora_vision
     rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
     depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
     
-    ROS_INFO("[victim_node] : Created Victim Processor instance");
+    ROS_INFO("[victim_node] : Created Victim Svm Processor instance");
   }
   
-  VictimProcessor::VictimProcessor() : sensor_processor::Processor<EnhancedImageStamped, 
+  VictimSvmProcessor::VictimSvmProcessor() : sensor_processor::Processor<EnhancedImageStamped, 
     POIsStamped>() {}
   
-  VictimProcessor::~VictimProcessor()
+  VictimSvmProcessor::~VictimSvmProcessor()
   {
-    ROS_DEBUG("[victim_node] : Destroying Victim Processor instance");
+    ROS_DEBUG("[victim_node] : Destroying Victim Svm Processor instance");
   }
   
   /**
@@ -69,7 +69,7 @@ namespace pandora_vision
   the information sent from hole_detector_node
   @return void
   **/
-  std::vector<VictimPOIPtr> VictimProcessor::detectVictims(
+  std::vector<VictimPOIPtr> VictimSvmProcessor::detectVictims(
     const EnhancedImageStampedConstPtr& input)
   {
     if (params_.debug_img || params_.debug_img_publisher)
@@ -230,7 +230,7 @@ namespace pandora_vision
     
     if (params_.debug_img)
     {
-      cv::imshow("Victim processor", debugImage);
+      cv::imshow("Victim Svm processor", debugImage);
       cv::waitKey(30);
     }
     return final_victims;
@@ -244,7 +244,7 @@ namespace pandora_vision
   vector can be either 2 or 1, if we have both rgbd information or not
   @return void
   **/
-  std::vector<VictimPOIPtr> VictimProcessor::victimFusion(DetectionImages imgs, 
+  std::vector<VictimPOIPtr> VictimSvmProcessor::victimFusion(DetectionImages imgs, 
     DetectionMode detectionMode)
   {
     std::vector<VictimPOIPtr> final_probabilities;
@@ -325,7 +325,7 @@ namespace pandora_vision
   /**
    * @brief
    **/
-  bool VictimProcessor::process(const EnhancedImageStampedConstPtr& input, 
+  bool VictimSvmProcessor::process(const EnhancedImageStampedConstPtr& input, 
     const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
