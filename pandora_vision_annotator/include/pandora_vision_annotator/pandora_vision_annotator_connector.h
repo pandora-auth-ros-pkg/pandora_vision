@@ -157,6 +157,7 @@ namespace pandora_vision
 
       void onlineRadioButtonChecked(void);
       void offlineRadioButtonChecked(void);
+      void appendCheckBoxChecked(void);
       void victimPushButtonTriggered(void);
       void holePushButtonTriggered(void);
       void qrPushButtonTriggered(void);
@@ -167,6 +168,7 @@ namespace pandora_vision
       void nextFramePushButtonTriggered(void);
       void previousFramePushButtonTriggered(void);
       void predatorPushButtonTriggered(void);
+      void removeFilePushButtonTriggered(void);
       void frameLabelTriggered(QListWidgetItem* item);
   
 
@@ -178,6 +180,8 @@ namespace pandora_vision
       void predatorEnabled(void);
       void onlineModeGiven(void);
       void offlineModeGiven(void);
+      void appendToFile(void);
+      void removeFile(void);
   };
 }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1138</width>
-    <height>825</height>
+    <height>845</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>300</width>
-      <height>652</height>
+      <height>711</height>
      </rect>
     </property>
     <property name="minimumSize">
@@ -317,6 +317,20 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="appendCheckBox">
+         <property name="text">
+          <string>Append annotations to current file</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="removeFilePushButton">
+         <property name="text">
+          <string>Remove Annotations File</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="rosTopicPushButton">
          <property name="text">
           <string>Connect</string>
@@ -357,7 +371,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>660</y>
+      <y>740</y>
       <width>901</width>
       <height>51</height>
      </rect>

@@ -61,6 +61,7 @@ namespace pandora_vision
     argv_(argv)
   {
     PredatorNowOn == false;
+    offset = 0;
   }
 
   /**
@@ -94,7 +95,8 @@ namespace pandora_vision
     QObject::connect(
       this,SIGNAL(updateImage()),
       &connector_, SLOT(updateImage())); 
-
+    
+   
     annotationPublisher_ = n_.advertise<pandora_vision_msgs::AnnotationMsg>("/vision/annotator_output", 1000);
     predatorSubscriber_ = n_.subscribe("/vision/predator_alert",1, &CController::predatorCallback, this );
 
@@ -110,13 +112,15 @@ namespace pandora_vision
      QObject::connect(
        &connector_,SIGNAL(predatorEnabled()),
         this, SLOT(predatorEnabled()));
-     std::string package_path = ros::package::getPath("pandora_vision_annotator");
-     std::stringstream filename;
-     filename << package_path << "/data/annotations.txt";
-     ImgAnnotations::getLastFrameIndex(filename.str(),offset);
-     offset += 1;
-     ROS_INFO_STREAM("Frame indexing starting at: " << offset);
-  }
+
+     QObject::connect(
+        &connector_,SIGNAL(appendToFile()),
+        this, SLOT(appendToFile()));
+
+    QObject::connect(
+        &connector_,SIGNAL(removeFile()),
+        this, SLOT(removeFile()));
+  }      
 
   void CController::onlineModeGiven(void)
   {
@@ -124,6 +128,23 @@ namespace pandora_vision
     QObject::connect(
       &connector_,SIGNAL(rosTopicGiven()),
       this, SLOT(rosTopicGiven()));
+  }
+
+  void CController::removeFile(void)
+  {
+    std::string package_path = ros::package::getPath("pandora_vision_annotator");
+    std::stringstream filename;
+    filename << package_path << "/data/annotations.txt";
+    ImgAnnotations::removeFile(filename.str());
+  }
+  void CController::appendToFile(void)
+  {
+    std::string package_path = ros::package::getPath("pandora_vision_annotator");
+    std::stringstream filename;
+    filename << package_path << "/data/annotations.txt";
+    ImgAnnotations::getLastFrameIndex(filename.str(),offset);
+    offset += 1;
+    ROS_INFO_STREAM("Frame indexing starting at: " << offset);
   }
 
   void CController::predatorEnabled(void)

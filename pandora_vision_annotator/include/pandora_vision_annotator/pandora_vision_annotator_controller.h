@@ -145,6 +145,8 @@ namespace pandora_vision
       void predatorEnabled(void);
       void onlineModeGiven(void);
       void offlineModeGiven(void);
+      void appendToFile(void);
+      void removeFile();
     
     //------------------------------------------------------------------------//
     Q_SIGNALS:

@@ -78,6 +78,12 @@ void CConnector::offlineRadioButtonChecked(void)
 {  
   ROS_INFO("offline checked");
   QObject::connect(
+      loader_.appendCheckBox, SIGNAL(toggled(bool)),
+      this, SLOT(appendCheckBoxChecked()));
+ QObject::connect(
+      loader_.removeFilePushButton, SIGNAL(clicked(bool)),
+      this, SLOT(removeFilePushButtonTriggered()));
+  QObject::connect(
     loader_.rosTopicPushButton,SIGNAL(clicked(bool)),
     this,SLOT(rosTopicPushButtonTriggered()));
   QObject::connect(
@@ -126,6 +132,12 @@ void CConnector::onlineRadioButtonChecked(void)
     state_ = ONLINE;
 }
 
+void CConnector::appendCheckBoxChecked(void)
+{
+  ROS_INFO("APPEND CHECKED");
+  Q_EMIT appendToFile();
+}
+
   /**
   @brief Qt slot that is called when the rosTopicPushButton is pressed
   @return void
@@ -134,6 +146,12 @@ void CConnector::onlineRadioButtonChecked(void)
   {    Q_EMIT rosTopicGiven();
        
   }
+
+   void CConnector::removeFilePushButtonTriggered(void)
+  {    Q_EMIT removeFile();
+       
+  }
+
 
   /**
   @brief Qt slot that is called when the rosTopicPushButton is pressed
