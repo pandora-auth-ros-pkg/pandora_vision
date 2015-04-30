@@ -54,6 +54,8 @@ def callback(pointCloud, image):
     # Check if topic for synchronized message has been given properly if yes pass it to the variable
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")):
         synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")
+
+        synch_topic = ns + synch_topic
         rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", synch_topic)
     else:
         rospy.logerr( "No synchronized topic found")
