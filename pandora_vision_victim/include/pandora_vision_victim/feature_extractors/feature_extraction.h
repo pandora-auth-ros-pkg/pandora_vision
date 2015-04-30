@@ -75,6 +75,11 @@ namespace pandora_vision
       virtual void extractFeatures(const cv::Mat& inImage);
 
       /**
+       *
+       */
+      virtual void addDescriptorsToBagOfWords(const cv::Mat& inImage);
+
+      /**
        * @brief This function constructs the features matrix, i.e. the feature
        * vectors of a set of images.
        * @param directory [const boost::filesystem::path&] The directory that
@@ -102,11 +107,11 @@ namespace pandora_vision
       std::vector<std::vector<double> > getFeatureMatrix() const;
 
     protected:
-      //! Vector containing the features extracted from a single image.
+      /// Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;
 
-      //! Matrix containing the feature vectors extracted from a set of images.
+      /// Matrix containing the feature vectors extracted from a set of images.
       std::vector<std::vector<double> > featureMatrix_;
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H

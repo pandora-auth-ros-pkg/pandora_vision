@@ -69,7 +69,7 @@ namespace pandora_vision
        */
       virtual ~DepthSvmValidator();
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_VALIDATOR_H
 
 

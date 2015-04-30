@@ -39,6 +39,8 @@
 #ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev_extractor.h"
 #include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
 #include "pandora_vision_victim/channels_statistics_feature_extractors/dft_coeffs_extractor.h"
@@ -71,5 +73,5 @@ namespace pandora_vision
       static void findDepthChannelsStatisticsFeatures(const cv::Mat& src,
           std::vector<double>* depthStatisticsVector);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_EXTRACTOR_H

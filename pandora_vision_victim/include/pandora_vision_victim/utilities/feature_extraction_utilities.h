@@ -121,5 +121,5 @@ namespace pandora_vision
        */
       cv::Mat performPcaAnalysis(const cv::Mat& featuresMat, int nEigens);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H

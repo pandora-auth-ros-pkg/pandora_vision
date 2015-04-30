@@ -49,7 +49,6 @@ namespace pandora_vision
   class VictimDetection : public StateClient
   {
     private:
-
       /// The NodeHandle
       ros::NodeHandle _nh;
 
@@ -88,27 +87,27 @@ namespace pandora_vision
       @return void
       **/
       void detectVictims(
-        bool depthEnabled, 
+        bool depthEnabled,
         bool holesEnabled,
         const cv::Mat& rgbImage,
         const cv::Mat& depthImage,
         const pandora_vision_msgs::EnhancedHolesVectorMsg& msg
       );
-      
+
       /**
       @brief This method check in which state we are, according to
       the information sent from hole_detector_node
       @return void
       **/
       void dummyDetectVictims(bool depthEnabled, const cv::Mat& rgbImage, const sensor_msgs::Image& msg);
-      
+
       /**
       @brief Function called when new ROS message appears, for camera
       @param msg [const sensor_msgs::Image&] The message
       @return void
       **/
       void dummyimageCallback(const sensor_msgs::Image& msg);
-      
+
       /**
       Function called when new message appears from hole_detector_node
       @param msg [pandora_vision_msgs::EnhancedHolesVectorMsg&] The message
@@ -119,17 +118,17 @@ namespace pandora_vision
 
       /**
       @brief Function that retrieves the parent to the frame_id
-      @return bool Returns true is frame_id found or false if not 
-      **/ 
+      @return bool Returns true is frame_id found or false if not
+      **/
       bool getParentFrameId();
-      
+
       std::map<std::string, std::string> _frame_ids_map;
-      
+
       std::string _frame_id;
       std::string _parent_frame_id;
-      
+
       VictimParameters params;
-      
+
       //! Debug purposes
       // The image_transport nodehandle
       image_transport::ImageTransport imageTransport_;
@@ -149,7 +148,7 @@ namespace pandora_vision
       std::vector<float> rgb_svm_p;
       std::vector<float> depth_vj_p;
       std::vector<float> depth_svm_p;
-      
+
       //----------------------------------------------------------------------//
       DetectionImages dImages;
 
@@ -160,13 +159,12 @@ namespace pandora_vision
       vector can be either 2 or 1, if we have both rgbd information or not
       @return void
       **/ 
-      std::vector<DetectedVictim> victimFusion( 
-        DetectionImages imgs, 
-        DetectionMode detectionMode 
+      std::vector<DetectedVictim> victimFusion(
+        DetectionImages imgs,
+        DetectionMode detectionMode
       );
-       
-    public:
 
+    public:
       //!< The Constructor
       explicit VictimDetection(const std::string& ns);
 
@@ -177,7 +175,7 @@ namespace pandora_vision
       @brief Node's state manager
       @param newState [int] The robot's new state
       @return void
-     * */
+      **/
       void startTransition(int newState);
 
       /**
@@ -185,7 +183,6 @@ namespace pandora_vision
       @return void
       **/
       void completeTransition(void);
-
   };
 }// namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_VICTIM_DETECTION_H

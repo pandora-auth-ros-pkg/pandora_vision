@@ -37,6 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/feature_extractors/channels_statistics_extractor.h"
 
 namespace pandora_vision
@@ -54,7 +56,7 @@ namespace pandora_vision
   {
     cv::Mat rgbFrame = src.clone();
     cv::Mat hsvFrame;
-    //! Transform it to HSV
+    /// Transform it to HSV
     cvtColor(rgbFrame, hsvFrame, CV_BGR2HSV);
 
     /// Preprocess current image to find histograms in HSV planes.
@@ -149,7 +151,7 @@ namespace pandora_vision
   {
     cv::Mat inFrame = src.clone();
 
-    if(inFrame.channels() != 1)
+    if (inFrame.channels() != 1)
     cv::cvtColor(inFrame, inFrame, CV_BGR2GRAY);
 
     int grayscaleBins = 256;
@@ -182,10 +184,10 @@ namespace pandora_vision
     depthStatisticsVector->insert(depthStatisticsVector->end(),
                                   dft.begin(), dft.end());
 
-    if(depthStatisticsVector->size() != 10)
+    if (depthStatisticsVector->size() != 10)
     {
       ROS_FATAL("Clean the vector");
       ROS_INFO_STREAM("vector's size = " << depthStatisticsVector->size());
     }
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

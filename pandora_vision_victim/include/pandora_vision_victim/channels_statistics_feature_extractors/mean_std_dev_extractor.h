@@ -40,6 +40,8 @@
 #ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_MEAN_STD_DEV_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_MEAN_STD_DEV_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
@@ -47,7 +49,6 @@ namespace pandora_vision
   class MeanStdDevExtractor : public ChannelsStatisticsFeatureExtractor
   {
     public:
-
       /**
        * @brief Constructor
        */
@@ -65,6 +66,6 @@ namespace pandora_vision
        */
       virtual std::vector<double> extract(void);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_MEAN_STD_DEV_EXTRACTOR_H
 

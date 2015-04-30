@@ -37,6 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
 
 namespace pandora_vision
@@ -71,13 +73,13 @@ namespace pandora_vision
     /*/
     ROS_INFO_STREAM("HIST SIZE" <<img_->size());
     ROS_INFO_STREAM("HEIGHT" << size);
-    //*/
+    // */
 
     /// Image contains the image histogram, not the actual image.
-    for(int ii = 0; ii < size; ii++)
+    for (int ii = 0; ii < size; ii++)
     {
       double binVal = static_cast<double>(img_->at<float>(ii));
-      if(binVal > maxVal)
+      if (binVal > maxVal)
       {
         maxVal = binVal;
         indexVal = ii;
@@ -93,6 +95,6 @@ namespace pandora_vision
 
     return dominantColor;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 
 

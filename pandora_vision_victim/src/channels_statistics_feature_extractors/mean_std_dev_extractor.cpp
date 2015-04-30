@@ -37,6 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/mean_std_dev_extractor.h"
 
 namespace pandora_vision
@@ -66,12 +68,12 @@ namespace pandora_vision
     std::vector<double> meanStdDevVector;
     cv::Scalar mu, sigma;
     cv::meanStdDev(*img_, mu, sigma);
-    for(unsigned int ii = 0; ii < img_->channels(); ii++)
+    for (unsigned int ii = 0; ii < img_->channels(); ii++)
     {
       meanStdDevVector.push_back(mu.val[ii]);
       meanStdDevVector.push_back(sigma.val[ii]);
     }
     return meanStdDevVector;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

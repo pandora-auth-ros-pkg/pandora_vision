@@ -35,8 +35,11 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
+#include <vector>
+
 #include "gtest/gtest.h"
+
+#include "pandora_vision_victim/channels_statistics_feature_extractors/dominant_color_extractor.h"
 
 namespace pandora_vision
 {
@@ -47,9 +50,9 @@ namespace pandora_vision
   class DominantColorExtractorTest : public ::testing::Test
   {
     protected:
-      DominantColorExtractorTest () {}
+      DominantColorExtractorTest() {}
 
-      //! Sets up images needed for testing
+      /// Sets up images needed for testing
       virtual void SetUp()
       {
         bins = 256;
@@ -78,16 +81,16 @@ namespace pandora_vision
         }
       }
 
-      //! The histograms bins
+      /// The histograms bins
       int bins;
 
-      //! Image Dimensions
+      /// Image Dimensions
       int HEIGHT, WIDTH;
-      //! Images that will be used for testing
+      /// Images that will be used for testing
       cv::Mat black, white, ascending, descending;
   };
 
-  //! Tests DominantColorExtractor::extract
+  /// Tests DominantColorExtractor::extract
   TEST_F(DominantColorExtractorTest, extractDominantColor)
   {
     // The output vector
@@ -109,4 +112,4 @@ namespace pandora_vision
     EXPECT_EQ(0 , out[0]);
     EXPECT_EQ(255.0 / cv::sum(descending).val[0], out[1]);
   }
-} // namespace pandora_vision
+}  // namespace pandora_vision

@@ -37,6 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles_extractor.h"
 
 namespace pandora_vision
@@ -64,16 +66,16 @@ namespace pandora_vision
   {
     std::vector<double> colorAnglesAndStd;
 
-    //! Separate the image in 3 matrices, one for each of the R, G, B channels
+    /// Separate the image in 3 matrices, one for each of the R, G, B channels
     std::vector<cv::Mat> rgbPlanes;
     split(*img_, rgbPlanes);
-    //! Compute the average pixel value of each r,g,b color component
+    /// Compute the average pixel value of each r,g,b color component
     cv::Scalar bMean = mean(rgbPlanes[0]);
     cv::Scalar gMean = mean(rgbPlanes[1]);
     cv::Scalar rMean = mean(rgbPlanes[2]);
 
-    //! Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
-    //! corresponding average pixel value of each original color vector
+    /// Obtain zero-mean colour vectors r0, g0 and b0 by subtracting the
+    /// corresponding average pixel value of each original color vector
     cv::Mat r0 = cv::Mat::zeros(img_->rows, img_->cols, CV_64FC1);
     cv::Mat b0 = cv::Mat::zeros(img_->rows, img_->cols, CV_64FC1);
     cv::Mat g0 = cv::Mat::zeros(img_->rows, img_->cols, CV_64FC1);
@@ -91,9 +93,9 @@ namespace pandora_vision
     for (int ii = 0; ii < img_->rows; ii++)
       for (int jj = 0; jj < img_->cols; jj++)
         ROS_INFO_STREAM(b0.at<double>(ii, jj));
-    //*/
+    // */
 
-    //! Compute the dot product of the RGB color components
+    /// Compute the dot product of the RGB color components
     double rgDot = r0.dot(g0);
     double gbDot = g0.dot(b0);
     double rbDot = r0.dot(b0);
@@ -102,12 +104,12 @@ namespace pandora_vision
     ROS_INFO_STREAM("rgDot = " << rgDot);
     ROS_INFO_STREAM("gbDot = " << gbDot);
     ROS_INFO_STREAM("rbDot = " << rbDot);
-    //*/
+    // */
 
-    //! Compute the lengh of the color angle vector
+    /// Compute the lengh of the color angle vector
     for (int ii = 0; ii < r0.rows; ii++)
     {
-      for(int jj = 0; jj < r0.cols; jj++)
+      for (int jj = 0; jj < r0.cols; jj++)
       {
          rSum+= pow(r0.at<double>(ii, jj), 2);
          gSum+= pow(g0.at<double>(ii, jj), 2);
@@ -118,7 +120,7 @@ namespace pandora_vision
     ROS_INFO_STREAM("rSum = " << rSum);
     ROS_INFO_STREAM("gSum = " << gSum);
     ROS_INFO_STREAM("bSum = " << bSum);
-    //*/
+    // */
 
     double rLength = sqrt(rSum);
     double gLength = sqrt(gSum);
@@ -127,7 +129,7 @@ namespace pandora_vision
     ROS_INFO_STREAM("rLength= " << rLength);
     ROS_INFO_STREAM("gLength= " << gLength);
     ROS_INFO_STREAM("bLength= " << bLength);
-    //*/
+    // */
 
     rgDot /= (rLength * gLength);
     gbDot /= (gLength * bLength);
@@ -136,9 +138,9 @@ namespace pandora_vision
     ROS_INFO_STREAM("rgDot = " << rgDot);
     ROS_INFO_STREAM("gbDot = " << gbDot);
     ROS_INFO_STREAM("rbDot = " << rbDot);
-    //*/
+    // */
 
-    //! Compute the color angles
+    /// Compute the color angles
     double rgAngle = acos(rgDot);
     double gbAngle = acos(gbDot);
     double rbAngle = acos(rbDot);
@@ -146,29 +148,29 @@ namespace pandora_vision
     ROS_INFO_STREAM("rgAngle = " << rgAngle);
     ROS_INFO_STREAM("gbAngle = " << gbAngle);
     ROS_INFO_STREAM("rbAngle = " << rbAngle);
-    //*/
+    // */
 
     cv::Mat gray;
-    //! Normalised intensity standard deviation
-    //! Transform the src image to grayscale
+    /// Normalised intensity standard deviation
+    /// Transform the src image to grayscale
     cvtColor(*img_, gray, CV_BGR2GRAY);
 
-    //! Compute the mean intensity value
+    /// Compute the mean intensity value
     cv::Scalar meanI = mean(gray);
 
-    //! Find the maximum intensity value
+    /// Find the maximum intensity value
     double maxVal, stdDev, sum = 0;
     cv::minMaxLoc(gray, NULL, &maxVal);
 
-    for(int ii = 0; ii < gray.rows; ii++)
-      for(int jj = 0; jj < gray.cols; jj++)
+    for (int ii = 0; ii < gray.rows; ii++)
+      for (int jj = 0; jj < gray.cols; jj++)
       {
         sum += pow((gray.at<uchar>(ii, jj) - meanI.val[0]), 2);
       }
 
     stdDev = 2.0 / (maxVal * gray.cols * gray.rows) * sqrt(sum);
 
-    //! Construct the final feature vector
+    /// Construct the final feature vector
     colorAnglesAndStd.push_back(rgAngle);
     colorAnglesAndStd.push_back(gbAngle);
     colorAnglesAndStd.push_back(rbAngle);
@@ -176,5 +178,5 @@ namespace pandora_vision
 
     return colorAnglesAndStd;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

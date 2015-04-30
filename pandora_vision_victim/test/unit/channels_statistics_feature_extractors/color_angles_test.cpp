@@ -35,8 +35,11 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles_extractor.h"
+#include <vector>
+
 #include "gtest/gtest.h"
+
+#include "pandora_vision_victim/channels_statistics_feature_extractors/color_angles_extractor.h"
 
 namespace pandora_vision
 {
@@ -47,9 +50,9 @@ namespace pandora_vision
   class ColorAnglesExtractorTest : public ::testing::Test
   {
     protected:
-      ColorAnglesExtractorTest () {}
+      ColorAnglesExtractorTest() {}
 
-      //! Sets up images needed for testing
+      /// Sets up images needed for testing
       virtual void SetUp()
       {
         HEIGHT = 480;
@@ -67,25 +70,25 @@ namespace pandora_vision
       int HEIGHT, WIDTH;
   };
 
-  //! Tests ColorAnglesExtractor::extract
+  /// Tests ColorAnglesExtractor::extract
   TEST_F(ColorAnglesExtractorTest, extractColorAngles)
   {
     // The output vector
-    std::vector<double>  out;
-    ColorAnglesExtractor c1(&blue);//, c2(&green), c3(&red);
+    std::vector<double> out;
+    ColorAnglesExtractor c1(&blue);  // , c2(&green), c3(&red);
     out = c1.extract();
-    EXPECT_EQ ( 0 , out[0] );
-    EXPECT_EQ ( 0 , out[1] );
-    EXPECT_EQ ( 0 , out[2] );
-    EXPECT_EQ ( 0 , out[3] );
+    EXPECT_EQ(0, out[0]);
+    EXPECT_EQ(0, out[1]);
+    EXPECT_EQ(0, out[2]);
+    EXPECT_EQ(0, out[3]);
 
-    //out = c2.extract();
-    //EXPECT_EQ ( 255 , out[0] );
-    //EXPECT_EQ ( 0 , out[1] );
+    // out = c2.extract();
+    // EXPECT_EQ(255, out[0]);
+    // EXPECT_EQ(0, out[1]);
 
-    //out = c3.extract();
-    //EXPECT_EQ ( 127.5 , out[0] );
-    //EXPECT_EQ ( 127.5 , out[1] );
+    // out = c3.extract();
+    // EXPECT_EQ(127.5, out[0]);
+    // EXPECT_EQ(127.5, out[1]);
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

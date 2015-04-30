@@ -74,5 +74,5 @@ namespace pandora_vision
        */
       virtual void extractFeatures(const cv::Mat& inImage);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_RGB_FEATURE_EXTRACTION_H

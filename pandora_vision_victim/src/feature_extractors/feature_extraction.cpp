@@ -35,6 +35,9 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+#include <string>
+
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
@@ -69,6 +72,13 @@ namespace pandora_vision
    * @return void
    */
   void FeatureExtraction::extractFeatures(const cv::Mat& inImage)
+  {
+  }
+
+  /**
+   * @brief
+   */
+  void FeatureExtraction::addDescriptorsToBagOfWords(const cv::Mat& inImage)
   {
   }
 
@@ -119,7 +129,7 @@ namespace pandora_vision
         std::cout << "Read class attribute from annotation file." << std::endl;
         for (int ii = 0; ii < annotatedImages.size(); ii++)
         {
-          if(annotatedImages[ii] == imageName)
+          if (annotatedImages[ii] == imageName)
           {
             imageROI = image(boundingBox[ii]);
                       annotatedImages[ii].clear();
@@ -128,17 +138,20 @@ namespace pandora_vision
           }
         }
         extractFeatures(imageROI);
+        addDescriptorsToBagOfWords(imageROI);
       }
       else
       {
         std::cout << "Find class attrbitute from image name." << std::endl;
-        extractFeatures(image);
 
         std::string checkIfPositive = "positive";
         if (boost::algorithm::contains(imageName, checkIfPositive))
           labelsMat->at<double>(rowIndex, 0) = 1.0;
         else
           labelsMat->at<double>(rowIndex, 0) = -1.0;
+
+        extractFeatures(image);
+        addDescriptorsToBagOfWords(image);
       }
 
       std::cout << "Feature vector of image " << imageName << " "
@@ -166,4 +179,4 @@ namespace pandora_vision
   {
     return featureMatrix_;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

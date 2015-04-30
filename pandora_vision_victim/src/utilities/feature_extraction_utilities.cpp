@@ -35,6 +35,8 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/utilities/feature_extraction_utilities.h"
 
 /**
@@ -164,5 +166,5 @@ namespace pandora_vision
     pca.project(featuresMat, projectedFeaturesMat);
     return projectedFeaturesMat;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

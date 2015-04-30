@@ -37,6 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <string>
+
 #include "pandora_vision_victim/svm_classifier/svm_training.h"
 
 namespace pandora_vision
@@ -52,18 +54,18 @@ namespace pandora_vision
     path_to_samples = datasetPath;
     numFeatures_ = numFeatures;
     params.svm_type = CvSVM::C_SVC;
-    params.kernel_type = CvSVM::RBF; //!< CvSVM::RBF, CvSVM::LINEAR ...
-    params.degree = 1; //!< for poly
-    params.gamma = 5.0625000000000009e-01; //!< for poly/rbf/sigmoid
-    params.coef0 = 0; //!< for poly/sigmoid
-    //~ CvParamGrid CvParamGrid_C(pow(2.0,-5), pow(2.0,15), pow(2.0,2));
-    //~ CvParamGrid CvParamGrid_gamma(pow(2.0,-20), pow(2.0,3), pow(2.0,2));
-    //~ if (!CvParamGrid_C.check() || !CvParamGrid_gamma.check())
-      //~ std::cout << "The grid is NOT VALID." << std::endl;
-    params.C = 3.1250000000000000e+02; //!< for CV_SVM_C_SVC, CV_SVM_EPS_SVR and CV_SVM_NU_SVR
-    params.nu = 0.3; //!< for CV_SVM_NU_SVC, CV_SVM_ONE_CLASS, and CV_SVM_NU_SVR
-    params.p = 0.0; //!< for CV_SVM_EPS_SVR
-    params.class_weights = NULL; //!< for CV_SVM_C_SVC
+    params.kernel_type = CvSVM::RBF;  //!< CvSVM::RBF, CvSVM::LINEAR ...
+    params.degree = 1;  //!< for poly
+    params.gamma = 5.0625000000000009e-01;  //!< for poly/rbf/sigmoid
+    params.coef0 = 0;  //!< for poly/sigmoid
+    // CvParamGrid CvParamGrid_C(pow(2.0,-5), pow(2.0,15), pow(2.0,2));
+    // CvParamGrid CvParamGrid_gamma(pow(2.0,-20), pow(2.0,3), pow(2.0,2));
+    // if (!CvParamGrid_C.check() || !CvParamGrid_gamma.check())
+      // std::cout << "The grid is NOT VALID." << std::endl;
+    params.C = 3.1250000000000000e+02;  //!< for CV_SVM_C_SVC, CV_SVM_EPS_SVR and CV_SVM_NU_SVR
+    params.nu = 0.3;  //!< for CV_SVM_NU_SVC, CV_SVM_ONE_CLASS, and CV_SVM_NU_SVR
+    params.p = 0.0;  //!< for CV_SVM_EPS_SVR
+    params.class_weights = NULL;  //!< for CV_SVM_C_SVC
     params.term_crit.type = CV_TERMCRIT_ITER+CV_TERMCRIT_EPS;
     params.term_crit.max_iter = 10000;
     params.term_crit.epsilon = 1e-6;
@@ -176,9 +178,9 @@ namespace pandora_vision
       else
         prior0+= 1;
 
-    int max_iter = 100;// Maximal number of iterations
-    double min_step = 1e-10;// Minimal step taken in line search
-    double sigma = 1e-12;// For numerically strict PD of Hessian
+    int max_iter = 100;  // Maximal number of iterations
+    double min_step = 1e-10;  // Minimal step taken in line search
+    double sigma = 1e-12;  // For numerically strict PD of Hessian
     double eps = 1e-5;
     double hiTarget = (prior1 + 1.0) / (prior1 + 2.0);
     double loTarget = 1 / (prior0 + 2.0);
@@ -207,7 +209,7 @@ namespace pandora_vision
     for (iter = 0; iter < max_iter; iter++)
     {
       // Update Gradient and Hessian (use H' = H + sigma I)
-      h11 = sigma; // numerically ensures strict PD
+      h11 = sigma;  // numerically ensures strict PD
       h22 = sigma;
       h21 = 0.0;
       g1 = 0.0;
@@ -245,7 +247,7 @@ namespace pandora_vision
       gd = g1 * dA + g2 * dB;
 
 
-      stepsize = 1;// Line Search
+      stepsize = 1;  // Line Search
       while (stepsize >= min_step)
       {
         newA = Avector + stepsize * dA;
@@ -286,5 +288,5 @@ namespace pandora_vision
     *A = Avector;
     *B = Bvector;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

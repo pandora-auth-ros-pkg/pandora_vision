@@ -37,22 +37,24 @@
 #ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/victim_parameters.h"
 
-//~ #define SHOW_DEBUG_IMAGE
+// #define SHOW_DEBUG_IMAGE
 
 namespace pandora_vision
 {
   enum ConvolutionType
   {
-    //! Return the full convolution, including border
+    /// Return the full convolution, including border
     CONVOLUTION_FULL,
 
-    //! Return only the part that corresponds to the original image
+    /// Return only the part that corresponds to the original image
     CONVOLUTION_SAME,
 
-    //! Return only the submatrix containing elements that were not influenced
-    //! by the border
+    /// Return only the submatrix containing elements that were not influenced
+    /// by the border
     CONVOLUTION_VALID
   };
 
@@ -67,9 +69,9 @@ namespace pandora_vision
       @param colsBlockSize [int] the cols size of the subblock.
       @param rowsBlockSize [int] the rows size of the subblock.
       @return [std::vector<double>] the computed  80 edgeFeatures vector.
-      **/ 
-      static void partition(const cv::Mat& currFrame, int colsBlockSize, 
-                                    int rowsBlockSize, std::vector<double>* localEdgeFeatures);
+      **/
+      static void partition(const cv::Mat& currFrame, int colsBlockSize,
+          int rowsBlockSize, std::vector<double>* localEdgeFeatures);
 
       /**
       @brief This is the function which  computes the edge histogram 
@@ -77,7 +79,8 @@ namespace pandora_vision
       @param currFrame [cv::Mat] the current subblock.
       @return [std::vector<double>] the computed 1x5 edgeFeatures vector
       **/
-      static void findLocalEdgeFeatures(const cv::Mat& currFrame, std::vector<double>* localEdgeFeatures);
+      static void findLocalEdgeFeatures(const cv::Mat& currFrame,
+          std::vector<double>* localEdgeFeatures);
 
       /**
       @brief This function applies the sobel filters on the src image
@@ -86,8 +89,8 @@ namespace pandora_vision
       @param type [ConvolutionType] the type of convolution.
       @return dest [cv::Mat&] the convoluted image.
       **/
-      static void conv2(const cv::Mat &img, const cv::Mat& kernel, ConvolutionType type,
-            cv::Mat* dest);
+      static void conv2(const cv::Mat &img, const cv::Mat& kernel,
+          ConvolutionType type, cv::Mat* dest);
 
       /**
       @brief This function displays the calculated histogram to the screen.
@@ -95,7 +98,7 @@ namespace pandora_vision
       @param hist [cv::Mat] the calculated histogram.
       @param colorComp [const char*] the name of the window.
       **/ 
-     static void show_histogramm (int bins, cv::Mat hist, const char* colorComp);
+     static void show_histogramm(int bins, cv::Mat hist, const char* colorComp);
 
       /**
       @brief This is the main function which calls all the others and
@@ -103,7 +106,6 @@ namespace pandora_vision
       @param src [cv::Mat] the current image.
       **/
      static void findEdgeFeatures(const cv::Mat& inImage, std::vector<double>* edgeFeatures);
-
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_EDGE_ORIENTATION_EXTRACTOR_H

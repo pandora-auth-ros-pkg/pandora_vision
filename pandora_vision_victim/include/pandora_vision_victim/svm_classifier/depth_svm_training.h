@@ -40,9 +40,12 @@
 #ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
 #define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
 
+#include <math.h>
+
 #include <iostream>
 #include <fstream>
-#include <math.h>
+#include <string>
+
 #include <opencv2/opencv.hpp>
 #include <boost/filesystem.hpp>
 #include <ros/ros.h>
@@ -81,7 +84,6 @@ namespace pandora_vision
        */
       virtual void trainSubSystem();
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
-
 

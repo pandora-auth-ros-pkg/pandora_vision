@@ -37,6 +37,9 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <vector>
+#include <string>
+
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
@@ -187,10 +190,10 @@ namespace file_utilities
   bool exist(const char* fileName)
   {
     std::ifstream file(fileName);
-    if (!file) //if the file was not found, then file is 0, i.e. !file=1 or true
-      return false; //the file was not found
-    else //if the file was found, then file is non-0
-      return true; //the file was found
+    if (!file)  // if the file was not found, then file is 0, i.e. !file=1 or true
+      return false;  // the file was not found
+    else  // if the file was found, then file is non-0
+      return true;  // the file was found
   }
 
   /**
@@ -223,16 +226,16 @@ namespace file_utilities
     int ii = 0;
 
     inFile.open(filename.c_str());
-    if(!inFile)
+    if (!inFile)
     {
       ROS_ERROR("Cannot load Annotations file");
       return false;
     }
     else
     {
-      if(inFile.is_open())
+      if (inFile.is_open())
       {
-        while(std::getline(inFile, line))
+        while (std::getline(inFile, line))
         {
           std::stringstream ss(line);
           getline(ss, imgName, ',');
@@ -254,7 +257,7 @@ namespace file_utilities
                           rect.y << "," <<
                           rect.width << "," <<
                           rect.height);
-          //*/
+          // */
           annotatedImages->push_back(imgName);
           boundingBox->push_back(rect);
           classAttributes->push_back(category);
@@ -265,5 +268,5 @@ namespace file_utilities
     inFile.close();
     return true;
   }
-}// namespace file_utilities
-}// namespace pandora_vision
+}  // namespace file_utilities
+}  // namespace pandora_vision

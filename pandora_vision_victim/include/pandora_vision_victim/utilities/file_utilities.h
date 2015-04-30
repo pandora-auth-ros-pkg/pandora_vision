@@ -44,6 +44,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <string>
 
 #include <boost/lambda/bind.hpp>
 #include <boost/algorithm/string.hpp>
@@ -124,6 +125,6 @@ namespace file_utilities
                                std::vector<cv::Rect>* boundingBox,
                                std::vector<std::string>* annotatedImages,
                                std::vector<int>* classAttributes);
-}// namespace file_utilities
-}// namespace pandora_vision
+}  // namespace file_utilities
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_UTILITIES_FILE_UTILITIES_H

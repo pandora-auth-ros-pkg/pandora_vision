@@ -69,6 +69,6 @@ namespace pandora_vision
        */
       virtual ~RgbSvmValidator();
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_RGB_SVM_VALIDATOR_H
 

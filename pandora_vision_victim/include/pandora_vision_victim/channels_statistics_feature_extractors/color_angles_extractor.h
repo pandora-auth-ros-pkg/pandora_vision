@@ -40,6 +40,8 @@
 #ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_COLOR_ANGLES_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_COLOR_ANGLES_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/channels_statistics_feature_extractors/channels_statistics_feature_extractor.h"
 
 namespace pandora_vision
@@ -63,6 +65,6 @@ namespace pandora_vision
        */
       virtual std::vector<double> extract(void);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_COLOR_ANGLES_EXTRACTOR_H
 

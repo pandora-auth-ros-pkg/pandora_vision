@@ -35,6 +35,9 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <string>
+#include <iostream>
+
 #include "pandora_vision_victim/svm_classifier/depth_svm_training.h"
 
 int main(int argc, char** argv)

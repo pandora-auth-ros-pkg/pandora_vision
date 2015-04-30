@@ -39,6 +39,8 @@
 #ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
@@ -183,5 +185,5 @@ namespace pandora_vision
        */
       static void findHaralickFeatures(const cv::Mat& image, std::vector<double>* haralickFeatures);
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HARALICKFEATURE_EXTRACTOR_H

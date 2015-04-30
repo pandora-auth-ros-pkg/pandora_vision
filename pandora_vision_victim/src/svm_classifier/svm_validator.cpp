@@ -37,6 +37,8 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <string>
+
 #include <ros/console.h>
 
 #include "pandora_vision_victim/svm_classifier/svm_validator.h"
@@ -114,7 +116,7 @@ namespace pandora_vision
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
     transpose(featuresMat, featuresMat);
-    ///Normalize the data
+    /// Normalize the data
     featureExtractionUtilities_->performZScoreNormalization(
         &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
     featuresMat.convertTo(featuresMat, CV_32FC1);
@@ -132,7 +134,7 @@ namespace pandora_vision
    */
   float SvmValidator::predictionToProbability(float prediction)
   {
-    if(prediction < 0)
+    if (prediction < 0)
       prediction = fabs(prediction);
 
     // Normalize probability to [-1,1]
@@ -144,4 +146,4 @@ namespace pandora_vision
     ROS_INFO_STREAM("SVM probability: " << probability);
     return probability;
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

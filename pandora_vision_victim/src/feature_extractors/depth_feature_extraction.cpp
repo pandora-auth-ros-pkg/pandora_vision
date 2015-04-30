@@ -37,6 +37,8 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <vector>
+
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
@@ -99,4 +101,4 @@ namespace pandora_vision
     for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
       featureVector_.push_back(haralickFeatureVector[ii]);
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision

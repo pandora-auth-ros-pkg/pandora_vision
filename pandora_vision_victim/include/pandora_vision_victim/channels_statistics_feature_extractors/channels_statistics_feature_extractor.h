@@ -40,6 +40,8 @@
 #ifndef PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 #define PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 
+#include <vector>
+
 #include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
@@ -69,12 +71,12 @@ namespace pandora_vision
       virtual std::vector<double> extract(void) = 0;
 
     protected:
-      //! In case the extractor is not purely functional, multiple
-      //! sub-extractors exist
+      /// In case the extractor is not purely functional, multiple
+      /// sub-extractors exist
       std::vector<ChannelsStatisticsFeatureExtractor*> extractors;
 
       cv::Mat* img_;
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CHANNELS_STATISTICS_FEATURE_EXTRACTORS_CHANNELS_STATISTICS_FEATURE_EXTRACTOR_H
 

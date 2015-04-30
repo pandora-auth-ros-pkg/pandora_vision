@@ -41,6 +41,7 @@
 #define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_TRAINING_H
 
 #include <cmath>
+#include <string>
 
 #include <opencv2/opencv.hpp>
 
@@ -125,30 +126,30 @@ namespace pandora_vision
                          double* B);
 
     protected:
-      //! The NodeHandle
+      /// The NodeHandle
       ros::NodeHandle nh_;
 
       VictimParameters vparams;
 
-      //! String containing the type of the images used in the feature
-      //! extraction process.
+      /// String containing the type of the images used in the feature
+      /// extraction process.
       std::string imageType_;
 
-      //! Variable used for State Managing
+      /// Variable used for State Managing
       bool trainingNowON;
 
-      //! Variable used to decide whether to perform the feature extraction or
-      //! to read features from a file.
+      /// Variable used to decide whether to perform the feature extraction or
+      /// to read features from a file.
       bool doFeatureExtraction_;
 
-      //! Variable used to decide whether to perform PCA analysis on the
-      //! features or not.
+      /// Variable used to decide whether to perform PCA analysis on the
+      /// features or not.
       bool doPcaAnalysis_;
 
-      //! Variable used to decide whether to perform feature normalization or
-      //! not and what type of normalization should be chosen. 0 stands for no
-      //! normalization, 1 stands for min-max normalization and 2 stands for
-      //! z-Score normalization.
+      /// Variable used to decide whether to perform feature normalization or
+      /// not and what type of normalization should be chosen. 0 stands for no
+      /// normalization, 1 stands for min-max normalization and 2 stands for
+      /// z-Score normalization.
       int typeOfNormalization_;
 
       std::string path_to_samples;
@@ -177,5 +178,5 @@ namespace pandora_vision
       /// Train the SVM
       CvSVM SVM;
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_TRAINING_H

@@ -140,5 +140,5 @@ namespace pandora_vision
       /// this vector contains max values.
       std::vector<double> normalizationParamTwoVec_;
   };
-}// namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_VALIDATOR_H

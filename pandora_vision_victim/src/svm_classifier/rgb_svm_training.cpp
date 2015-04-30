@@ -37,6 +37,9 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+#include <string>
+
 #include "pandora_vision_victim/svm_classifier/rgb_svm_training.h"
 
 namespace pandora_vision
@@ -180,7 +183,7 @@ namespace pandora_vision
           test_labels_mat_file_stream.str(), "test_labels_mat");
     }
 
-    //calcMinDistance();
+    // calcMinDistance();
 
     std::cout << "Starting training process for the rgb images" << std::endl;
     if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
@@ -211,29 +214,29 @@ namespace pandora_vision
     SVM.save(svm_file_stream.str().c_str());
     std::cout << "Finished training process" << std::endl;
 
-    ///uncomment to produce the platt probability
-    //~ float prediction;
-    //~ double A, B;
-    //~ for (int ii = 0; ii < testFeaturesMat.rows; ii++)
-    //~ {
-      //~ prediction = SVM.predict(testFeaturesMat.row(ii), true);
-      //~ results.at<double>(ii, 0)= prediction;
-    //~ }
-    //~ sigmoid_train(results, testLabelsMat, &A, &B);
-    //~ std::cout << "A=" << A << std::endl;
-    //~ std::cout << "B=" << B << std::endl;
+    // uncomment to produce the platt probability
+    // float prediction;
+    // double A, B;
+    // for (int ii = 0; ii < testFeaturesMat.rows; ii++)
+    // {
+      // prediction = SVM.predict(testFeaturesMat.row(ii), true);
+      // results.at<double>(ii, 0)= prediction;
+    // }
+    // sigmoid_train(results, testLabelsMat, &A, &B);
+    // std::cout << "A=" << A << std::endl;
+    // std::cout << "B=" << B << std::endl;
 
-    ///uncomment for ONE_CLASS SVM
-    //~ for (int ii = 0; ii < results.rows; ii++)
-     //~ for (int jj = 0; jj < results.cols; jj++)
-      //~ if(results.at<float>(ii, jj) == 0)
-          //~ results.at<float>(ii, jj) = -1;
+    // uncomment for ONE_CLASS SVM
+    // for (int ii = 0; ii < results.rows; ii++)
+     // for (int jj = 0; jj < results.cols; jj++)
+      // if(results.at<float>(ii, jj) == 0)
+          // results.at<float>(ii, jj) = -1;
     cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
     SVM.predict(testFeaturesMat, results);
-    //std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
+    // std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
     file_utilities::saveToFile(results_file_stream.str(), "results", results);
     evaluate(results, testLabelsMat);
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 
 

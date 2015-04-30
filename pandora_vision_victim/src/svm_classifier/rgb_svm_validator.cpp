@@ -37,6 +37,8 @@
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
+#include <string>
+
 #include <ros/console.h>
 
 #include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
@@ -89,5 +91,5 @@ namespace pandora_vision
   RgbSvmValidator::~RgbSvmValidator()
   {
   }
-}// namespace pandora_vision
+}  // namespace pandora_vision
 

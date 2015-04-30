@@ -35,23 +35,26 @@
 * Author: Marios Protopapas
 *********************************************************************/
 
-#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
+#include <vector>
+
 #include "gtest/gtest.h"
+
+#include "pandora_vision_victim/feature_extractors/edge_orientation_extractor.h"
 
 namespace pandora_vision
 {
   /**
-    @class EdgeOrientationExtractorTest 
+    @class EdgeOrientationExtractorTest
     @brief Tests the integrity of methods of class EdgeOrientationExtractor
    **/
   class EdgeOrientationExtractorTest : public ::testing::Test
   {
     protected:
-      EdgeOrientationExtractorTest ()
+      EdgeOrientationExtractorTest()
       {
       }
 
-      //! Sets up images needed for testing
+      /// Sets up images needed for testing
       virtual void SetUp()
       {
         HEIGHT = 480;
@@ -66,64 +69,64 @@ namespace pandora_vision
         cv::rectangle(white, rect, cv::Scalar(255, 0, 0), -1);
 
         // Construct a horizontal edge image
-        horizontal = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
+        horizontal = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::Rect rect1(0, 0, WIDTH, HEIGHT/2);
         cv::rectangle(horizontal, rect1, cv::Scalar(255, 0, 0), -1);
 
         // Construct a vertical edge image
-        vertical = cv::Mat::zeros( HEIGHT, WIDTH, CV_8U);
+        vertical = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::Rect rect2(0, 0, WIDTH/2, HEIGHT);
         cv::rectangle(vertical, rect2, cv::Scalar(255, 0, 0), -1);
 
         // Construct a 135-degree diagonal edge image
-        diagonal45 = cv::Mat::zeros( 480, 480, CV_8U); 
+        diagonal45 = cv::Mat::zeros(480, 480, CV_8U);
         cv::Point triangle_points[1][3];
         triangle_points[0][0] = cv::Point(0, 0);
         triangle_points[0][1] = cv::Point(479, 0);
         triangle_points[0][2] = cv::Point(0, 479);
         const cv::Point* ppt[1] = { triangle_points[0] };
         int npt[] = { 3 };
-        cv::fillPoly(diagonal45, ppt, npt, 1, cv::Scalar(255, 255, 255), 8); 
+        cv::fillPoly(diagonal45, ppt, npt, 1, cv::Scalar(255, 255, 255), 8);
 
 
         // Construct a 45-degree diagonal edge image
-        diagonal135 = cv::Mat::zeros( 480, 480, CV_8U); 
+        diagonal135 = cv::Mat::zeros(480, 480, CV_8U);
         triangle_points[0][0] = cv::Point(0, 0);
         triangle_points[0][1] = cv::Point(479, 0);
         triangle_points[0][2] = cv::Point(479, 479);
         const cv::Point* ppt2[1] = { triangle_points[0] };
-        cv::fillPoly(diagonal135, ppt2, npt, 1, cv::Scalar(255, 255, 255), 8); 
+        cv::fillPoly(diagonal135, ppt2, npt, 1, cv::Scalar(255, 255, 255), 8);
 
-        //Construct an image with a circle
+        // Construct an image with a circle
         circle = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::Point center = cv::Point(WIDTH / 2, HEIGHT / 2);
         cv::circle(circle, center, 100, cv::Scalar(255, 255, 255), -1, 8);
 
-        //Construct a noisy image
+        // Construct a noisy image
         noisy = cv::Mat::zeros(HEIGHT, WIDTH, CV_8U);
         cv::randn(noisy, 128, 30);
         /*        cv::imshow("noisy", noisy);*/
         /*cv::waitKey(0);*/
       }
 
-      //! Image Dimensions
+      /// Image Dimensions
       int HEIGHT, WIDTH;
 
-      //! Images that will be used for testing
+      /// Images that will be used for testing
       cv::Mat black, white, horizontal, vertical, diagonal45, diagonal135, circle, noisy;
   };
 
-  //! Tests EdgeOrientationExtractor::findEdgeFeatures
+  /// Tests EdgeOrientationExtractor::findEdgeFeatures
   TEST_F(EdgeOrientationExtractorTest, NoEdgesEmptyImage)
   {
     // The output vector
     std::vector<double> out;
     EdgeOrientationExtractor::findEdgeFeatures(black, &out);
-    ASSERT_EQ ( 80, out.size() );
+    ASSERT_EQ(80, out.size());
 
     bool flag = true;
     for (int ii = 0; ii < out.size(); ii++)
-      if(out[ii] != 0)
+      if (out[ii] != 0)
         flag = false;
     /*
      *ROS_INFO_STREAM("EdgeFeatures= ");
@@ -139,14 +142,14 @@ namespace pandora_vision
     // The output vector
     std::vector<double> out;
     EdgeOrientationExtractor::findEdgeFeatures(white, &out);
-    ASSERT_EQ ( 80, out.size() );
+    ASSERT_EQ(80, out.size());
 
     bool flag = true;
     for (int ii = 0; ii < out.size(); ii++)
-      if(out[ii] != 0)
+      if (out[ii] != 0)
         flag = false;
 
-    //uncomment to visualize
+    // uncomment to visualize
     /*
      *    cv::imshow("white", white);
      *    cv::waitKey(0);
@@ -163,11 +166,11 @@ namespace pandora_vision
     // The output vector
     std::vector<double> out;
     EdgeOrientationExtractor::findLocalEdgeFeatures(horizontal, &out);
-    ASSERT_EQ ( 5, out.size() );
+    ASSERT_EQ(5, out.size());
 
     double normalizedEdges = (WIDTH - 2.0) / (HEIGHT * WIDTH);
 
-    //uncomment to visualize
+    // uncomment to visualize
     /*
      *cv::imshow("horizontal", horizontal);
      *cv::waitKey(0);
@@ -179,9 +182,9 @@ namespace pandora_vision
 
     EXPECT_EQ(normalizedEdges , out[0]);
     EXPECT_EQ(0, out[1]);
-    EXPECT_NEAR (0, out[2], 0.00001);
-    EXPECT_NEAR (0, out[3], 0.000010);
-    EXPECT_EQ (0, out[4] );
+    EXPECT_NEAR(0, out[2], 0.00001);
+    EXPECT_NEAR(0, out[3], 0.000010);
+    EXPECT_EQ(0, out[4]);
   }
 
   TEST_F(EdgeOrientationExtractorTest, VerticalEdge)
@@ -189,11 +192,11 @@ namespace pandora_vision
     // The output vector
     std::vector<double> out;
     EdgeOrientationExtractor::findLocalEdgeFeatures(vertical, &out);
-    ASSERT_EQ ( 5, out.size() );
+    ASSERT_EQ(5, out.size());
 
     double normalizedEdges = (HEIGHT - 2.0) / (HEIGHT * WIDTH);
 
-    //uncomment to visualize
+    // uncomment to visualize
     /*
      *cv::imshow("vertical",vertical);
      *cv::waitKey(0);
@@ -205,9 +208,9 @@ namespace pandora_vision
 
     EXPECT_EQ(0 , out[0]);
     EXPECT_EQ(normalizedEdges, out[1]);
-    EXPECT_NEAR (0, out[2], 0.00001);
-    EXPECT_NEAR (0, out[3], 0.000010);
-    EXPECT_EQ (0, out[4]);
+    EXPECT_NEAR(0, out[2], 0.00001);
+    EXPECT_NEAR(0, out[3], 0.000010);
+    EXPECT_EQ(0, out[4]);
   }
 
   TEST_F(EdgeOrientationExtractorTest, Diagonal45Edge)
@@ -215,11 +218,11 @@ namespace pandora_vision
     // The output vector
     std::vector<double> out;
     EdgeOrientationExtractor::findLocalEdgeFeatures(diagonal45, &out);
-    ASSERT_EQ ( 5, out.size() );
+    ASSERT_EQ(5, out.size());
 
     double normalizedEdges = (HEIGHT - 2.0) / (HEIGHT * WIDTH);
 
-    //uncomment to visualize
+    // uncomment to visualize
     /*
      *    cv::imshow("diagonal45",diagonal45);
      *    cv::waitKey(0);
@@ -239,12 +242,12 @@ namespace pandora_vision
   TEST_F(EdgeOrientationExtractorTest, Diagonal135Edge)
   {
     // The output vector
-    std::vector<double>  out;
+    std::vector<double> out;
     EdgeOrientationExtractor::findLocalEdgeFeatures(diagonal135, &out);
-    ASSERT_EQ ( 5, out.size() );
+    ASSERT_EQ(5, out.size());
 
     double normalizedEdges = (HEIGHT - 2.0) / (HEIGHT * WIDTH);
-    //uncomment to visualize
+    // uncomment to visualize
     /*
      *cv::imshow("diagonal135",diagonal135);
      *cv::waitKey(0);
@@ -312,4 +315,4 @@ namespace pandora_vision
     EXPECT_EQ ( 0 , out[4] );
   }
   */
-} // namespace pandora_vision
+}  // namespace pandora_vision
