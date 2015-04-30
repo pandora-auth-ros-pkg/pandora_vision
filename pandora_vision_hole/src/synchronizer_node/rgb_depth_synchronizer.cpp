@@ -182,7 +182,6 @@ namespace pandora_vision
       // Make the topic's name absolute
       inputSynchronizedTopic_ = ns + "/" + inputSynchronizedTopic_;
 
-      ROS_ERROR("INPUTSYNCHTOPIC:%s", inputSynchronizedTopic_.c_str()); 
       ROS_INFO_NAMED(PKG_NAME,
         "[Synchronizer Node] Subscribed to the input synchronized info");
     }
@@ -344,10 +343,8 @@ namespace pandora_vision
   void RgbDepthSynchronizer::inputPointCloudThermalCallback(
     const pandora_vision_msgs::SynchronizedMsg& synchronizedMessage)
   {
-    ROS_ERROR("CALLBACK CALLED BUT NOTHING");
     if (!isLocked_)
     {
-      ROS_ERROR("CALLBACK CALLED AND IN THE GAME");
       // Lock the rgb_depth_thermal_synchronizer node; aka prevent
       // the execution of this if-block without the explicit request
       // of the hole fusion node
@@ -465,7 +462,6 @@ namespace pandora_vision
   void RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   { 
-    ROS_ERROR("SHUTDOWN SUBSCRIBERS");
     // Shutdown the input thermal subscriber
     inputSynchronizedSubscriber_.shutdown();
   }
@@ -487,7 +483,6 @@ namespace pandora_vision
   void RgbDepthSynchronizer::subscribeToInputPointCloudCallback(
     const std_msgs::Empty& msg)
   {
-    ROS_ERROR("SUBSCRIBERS ARE ON");
     inputSynchronizedSubscriber_ = nodeHandle_.subscribe(
      inputSynchronizedTopic_, 1,
      &RgbDepthSynchronizer::inputPointCloudThermalCallback, this);
@@ -516,7 +511,6 @@ namespace pandora_vision
    **/
   void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
   {
-    ROS_ERROR("SYNCHRONIZER UNLOCKED");
     isLocked_ = false;
   }
 

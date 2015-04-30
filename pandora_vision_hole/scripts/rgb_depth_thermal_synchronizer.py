@@ -55,8 +55,9 @@ def callback(pointCloud, image):
     if (rospy.has_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")):
         synch_topic = rospy.get_param(ns + "/rgb_depth_thermal_synchronizer_node/published_topics/synchronized_topic")
 
+        # Make topic's name absolute
         synch_topic = ns + synch_topic
-        rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", synch_topic)
+        #rospy.loginfo("[Rgbdt_synchronizer] is publishing to: %s", synch_topic)
     else:
         rospy.logerr( "No synchronized topic found")
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
@@ -101,7 +102,7 @@ if __name__=='__main__':
     flir_subscriber = message_filters.Subscriber(flir_topic, Image)
 
     # Synchronize kinect and flir topics
-    sync = approxsync.ApproximateSynchronizer(0.5, [kinect_subscriber, flir_subscriber], 10)
+    sync = approxsync.ApproximateSynchronizer(0.5, [kinect_subscriber, flir_subscriber], 5000)
     sync.registerCallback(callback)
 
     rospy.spin()
