@@ -366,8 +366,13 @@ namespace pandora_vision
       static float valid_medium_probability;
       static float valid_light_probability;
       static float max_depth_to_test_small_thresh;
+      static float min_depth_to_test_big_thresh;
       static int small_rect_thresh;
+      static int big_rect_thresh;
       static float rgb_distance_variance_thresh;
+      static int hole_border_thresh;
+      static float depth_difference_thresh;
+      static int remove_unstuffed_holes;
     };
     //
     //

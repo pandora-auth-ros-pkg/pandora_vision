@@ -118,7 +118,7 @@ namespace pandora_vision
   //  int Parameters::Depth::interpolation_method = 0;
   float Parameters::Depth::intensity_threshold = 0.1;
   int Parameters::Depth::morphology_open_kernel_size = 2;
-  int Parameters::Depth::morphology_close_kernel_size = 24;
+  int Parameters::Depth::morphology_close_kernel_size = 12;
   int Parameters::Depth::border_thresh = 20;
   int Parameters::Depth::dilation_kernel_size = 12;
   int Parameters::Depth::rect_diff_thresh = 3;
@@ -283,8 +283,13 @@ namespace pandora_vision
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
   float Parameters::HoleFusion::max_depth_to_test_small_thresh = 2.5;
+  float Parameters::HoleFusion::min_depth_to_test_big_thresh = 2.6;
   int Parameters::HoleFusion::small_rect_thresh = 900;
+  int Parameters::HoleFusion::big_rect_thresh = 6400;
   float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
+  int Parameters::HoleFusion::hole_border_thresh = 10;
+  float Parameters::HoleFusion::depth_difference_thresh = 1.2;
+  int Parameters::HoleFusion::remove_unstuffed_holes = 1;
   //
   //
   //

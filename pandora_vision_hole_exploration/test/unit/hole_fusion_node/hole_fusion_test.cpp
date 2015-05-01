@@ -298,7 +298,7 @@ namespace pandora_vision
 
     ///////////// Construct the depth image ////////////
 
-    // The image upon which the big depth val area and the small depth val area will be inprinted
+    // The image upon which the small depth val area and the big depth val area will be inprinted
     depthSquares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the depthSquares_ image
@@ -312,67 +312,94 @@ namespace pandora_vision
       }
     }
 
-    // Construct the big depth value square area
+    // Construct the small depth value square area
     cv::Mat depthBigValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
     HoleFusionTest::generateDepthRectangle
-      ( cv::Point2f ( WIDTH - 200, HEIGHT - 200 ),
-        200,
-        200,
-        3.1,
+      ( cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
+        150,
+        150,
+        1.0,
         &depthBigValSquare );
 
 
-    // Construct the small depth value square area
+    // Construct the big depth value square area
     cv::Mat depthSmallValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
     HoleFusionTest::generateDepthRectangle
       ( cv::Point2f ( 50, 50 ),
-        200,
-        200,
-        1.2,
+        100,
+        100,
+        2.55,
         &depthSmallValSquare );
+
+    // Construct the big depth value square area for the very big rgb square 
+    cv::Mat depthBigBigValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    HoleFusionTest::generateDepthRectangle
+      ( cv::Point2f ( 200, 200),
+        100,
+        100,
+        3.1,
+        &depthBigBigValSquare );
 
     // Compose the final depthSquares_ image
     depthSquares_ +=
       depthBigValSquare +
-      depthSmallValSquare;
+      depthSmallValSquare +
+      depthBigBigValSquare;
 
     /////////////////////// Construct the rgb image ////////////////////////
 
-    // Construct the square inside the big depth val area
+    // Construct the square inside the small depth val area
     cv::Mat rgbInsideBigDepthValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
     HoleFusionTest::generateRgbRectangle
-      ( cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
+      ( cv::Point2f ( WIDTH - 125, HEIGHT - 125 ),
         10,
         10,
         140,
         &rgbInsideBigDepthValSquare );
 
 
-    // Construct the square inside the small depth val area
+    // Construct the square inside the big depth val area
     cv::Mat rgbInsideSmallDepthValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
     HoleFusionTest::generateRgbRectangle
       ( cv::Point2f ( 100, 100 ),
-        5,
-        5,
+        25,
+        25,
         140,
         &rgbInsideSmallDepthValSquare );
+
+    // Construct the big square inside the big depth val area
+    cv::Mat rgbInsideBigBigDepthValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+
+    HoleFusionTest::generateRgbRectangle
+      ( cv::Point2f ( 210, 210 ),
+        85,
+        85,
+        140,
+        &rgbInsideBigBigDepthValSquare );
 
     std::vector<bool> realContours(2, true);
     HolesConveyor conveyorTemp;
     conveyorTemp = getConveyor(
-        cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
+        cv::Point2f ( WIDTH - 125, HEIGHT - 125 ),
         10,
         10 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
     conveyorTemp = getConveyor(
         cv::Point2f ( 100, 100 ),
-        5,
-        5 );
+        25,
+        25 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 210, 210 ),
+        85,
+        85 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
     HoleFusion::distanceValidation(depthSquares_, &conveyor, &realContours, pointCloud_);
@@ -385,7 +412,7 @@ namespace pandora_vision
         counter ++;
     }
 
-    // Expected that the small hole on the big depth val area will be eliminated
+    // Expected that the small hole on the small depth val area and the big hole on the big depth val area  will be eliminated
     EXPECT_EQ ( 1, counter);
   }
 
@@ -495,11 +522,21 @@ namespace pandora_vision
         &depthSmallVarSquare );
 
 
+    // Construct the medium depth variance square area
+    cv::Mat depthMedVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    HoleFusionTest::generateNonHomogeneousDepthRectangle( 
+        cv::Point2f ( 80, 80 ),
+        70,
+        70,
+        3,
+        &depthMedVarSquare );
+
     // Construct the big depth variance square area
     cv::Mat depthBigVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
     HoleFusionTest::generateNonHomogeneousDepthRectangle( 
-        cv::Point2f ( 80, 80 ),
+        cv::Point2f ( 200, 200 ),
         70,
         70,
         10,
@@ -508,19 +545,20 @@ namespace pandora_vision
     // Compose the final depthSquares_ image
     depthSquares_ +=
       depthBigVarSquare +
-      depthSmallVarSquare;
+      depthSmallVarSquare +
+      depthMedVarSquare;
 
     /////////////////////// Construct the rgb image ////////////////////////
 
-    // Construct the square inside the big depth variance area
-    cv::Mat rgbInsideBigDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+    // Construct the square inside the medium depth variance area
+    cv::Mat rgbInsideMedDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
     HoleFusionTest::generateRgbRectangle
       ( cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
         40,
         40,
         140,
-        &rgbInsideBigDepthVarSquare );
+        &rgbInsideMedDepthVarSquare );
 
 
     // Construct the square inside the small depth variance area
@@ -532,6 +570,16 @@ namespace pandora_vision
         40,
         140,
         &rgbInsideSmallDepthVarSquare );
+
+    // Construct the square inside the big depth variance area
+    cv::Mat rgbInsideBigDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+
+    HoleFusionTest::generateRgbRectangle
+      ( cv::Point2f ( 220, 220),
+        40,
+        40,
+        140,
+        &rgbInsideBigDepthVarSquare );
 
     //std::vector<bool> realContours(4, true);
     conveyorTemp = getConveyor(
@@ -546,12 +594,18 @@ namespace pandora_vision
         40 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 220, 220 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
     HolesConveyor depthConveyor;
     HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
     HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
 
-    // Expected that the small hole on the small depth val area will be eliminated, and also the two holes inside the small depth variance area
+    // Expected that the small hole on the small depth val area and the big hole on the big depth val area will be eliminated, and also the two holes inside the small depth variance area and the hole on the big depth variance area
     EXPECT_EQ ( 1, conveyor.rectangle.size());
 
     // Construct the overlapping depth hole with the last rgb hole left

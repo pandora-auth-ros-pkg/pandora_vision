@@ -742,10 +742,20 @@ namespace pandora_vision
       config.valid_light_probability;
     Parameters::HoleFusion::max_depth_to_test_small_thresh =
       config.max_depth_to_test_small_thresh;
+    Parameters::HoleFusion::min_depth_to_test_big_thresh =
+      config.min_depth_to_test_big_thresh;
     Parameters::HoleFusion::small_rect_thresh =
       config.small_rect_thresh;
+    Parameters::HoleFusion::big_rect_thresh =
+      config.big_rect_thresh;
     Parameters::HoleFusion::rgb_distance_variance_thresh = 
       config.rgb_distance_variance_thresh;
+    Parameters::HoleFusion::hole_border_thresh = 
+      config.hole_border_thresh;
+    Parameters::HoleFusion::depth_difference_thresh = 
+      config.depth_difference_thresh;
+    Parameters::HoleFusion::remove_unstuffed_holes = 
+      config.remove_unstuffed_holes;
 
   }
 
@@ -1257,11 +1267,11 @@ namespace pandora_vision
 #endif
     std::vector<bool> realRgbContours(rgbHolesConveyor -> rectangle.size(), true);
     std::vector<bool> realDepthContours(depthHolesConveyor -> rectangle.size(), true);
-    // Small contours at a small distance are not valid
+    // Small contours at a small distance are not valid. Moreover, big contours at a big distance are not valid.
     distanceValidation(image, &(*rgbHolesConveyor), &realRgbContours, pointCloud);
     distanceValidation(image, &(*depthHolesConveyor), &realDepthContours, pointCloud);
 
-    // eliminate RGB contours with small distance variance
+    // eliminate RGB contours with small distance variance or very big distance variance (considering them as unstuffed)
     for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
     {
       if(realRgbContours[i])
@@ -1271,7 +1281,7 @@ namespace pandora_vision
         cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
         cv::meanStdDev (ROI, mean, stddev);
         float distanceVariance = static_cast<float>(stddev.val[0]); 
-        if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh)
+        if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh || (Parameters::HoleFusion::remove_unstuffed_holes && distanceVariance > Parameters::HoleFusion::depth_difference_thresh))
           realRgbContours[i] = false;
 
       }
@@ -1293,6 +1303,81 @@ namespace pandora_vision
     realRgbContours.clear();
     for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
       realRgbContours.push_back(true);
+
+    // eliminate unstuffed depth holes
+    if(Parameters::HoleFusion::remove_unstuffed_holes)
+    {
+      for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      {
+        if(realRgbContours[i])
+        {
+          cv::Scalar mean;
+          cv::Scalar stddev;
+          cv::Mat ROI = image(depthHolesConveyor -> rectangle[i]);
+          cv::meanStdDev (ROI, mean, stddev);
+          float distanceVariance = static_cast<float>(stddev.val[0]); 
+          if(distanceVariance > Parameters::HoleFusion::depth_difference_thresh)
+            realDepthContours[i] = false;
+
+        }
+      }
+      //for(int i = 0; i < (*depthHolesConveyor).rectangle.size(); i ++)
+      //{
+      //  if(realDepthContours[i])
+      //  {
+      //    int sum = 0;
+      //    int sumPixels = 0; 
+      //    // upper border
+      //    for(int row = (*depthHolesConveyor).rectangle[i].y; row < ((*depthHolesConveyor).rectangle[i].y + Parameters::HoleFusion::hole_border_thresh); row ++)
+      //      for(int col = (*depthHolesConveyor).rectangle[i].x; col < ((*depthHolesConveyor).rectangle[i].x + (*depthHolesConveyor).rectangle[i].width); col ++)
+      //      {
+      //        sum += static_cast<int>(image.at<uchar>(row, col));
+      //        sumPixels ++;
+      //      }
+      //    // right border
+      //    for(int row = (*depthHolesConveyor).rectangle[i].y; row < ((*depthHolesConveyor).rectangle[i].y + (*depthHolesConveyor).rectangle[i].height); row ++)
+      //      for(int col = ((*depthHolesConveyor).rectangle[i].x + (*depthHolesConveyor).rectangle[i].width - Parameters::HoleFusion::hole_border_thresh); col < ((*depthHolesConveyor).rectangle[i].x + (*depthHolesConveyor).rectangle[i].width); col ++)
+      //      {
+      //        sum += static_cast<int>(image.at<uchar>(row, col));
+      //        sumPixels ++;
+      //      }
+      //    // down border
+      //    for(int row = ((*depthHolesConveyor).rectangle[i].y + (*depthHolesConveyor).rectangle[i].height - Parameters::HoleFusion::hole_border_thresh); row < ((*depthHolesConveyor).rectangle[i].y + (*depthHolesConveyor).rectangle[i].height); row ++)
+      //      for(int col = (*depthHolesConveyor).rectangle[i].x; col < ((*depthHolesConveyor).rectangle[i].x + (*depthHolesConveyor).rectangle[i].width); col ++)
+      //      {
+      //        sum += static_cast<int>(image.at<uchar>(row, col));
+      //        sumPixels ++;
+      //      }
+      //    // left border
+      //    for(int row = (*depthHolesConveyor).rectangle[i].y; row < ((*depthHolesConveyor).rectangle[i].y + (*depthHolesConveyor).rectangle[i].height); row ++)
+      //      for(int col = (*depthHolesConveyor).rectangle[i].x; col < ((*depthHolesConveyor).rectangle[i].x + Parameters::HoleFusion::hole_border_thresh); col ++)
+      //      {
+      //        sum += static_cast<int>(image.at<uchar>(row, col));
+      //        sumPixels ++;
+      //      }
+      //    if(sumPixels > 0)
+      //    {
+      //      float avgDepthBorder = sum / sumPixels;
+      //      sum = 0;
+      //      sumPixels = 0;
+      //      // internal
+      //      for(int row = ((*depthHolesConveyor).rectangle[i].y + Parameters::HoleFusion::hole_border_thresh); row < ((*depthHolesConveyor).rectangle[i].y + (*depthHolesConveyor).rectangle[i].height - Parameters::HoleFusion::hole_border_thresh); row ++)
+      //        for(int col = ((*depthHolesConveyor).rectangle[i].x + Parameters::HoleFusion::hole_border_thresh); col < ((*depthHolesConveyor).rectangle[i].x + (*depthHolesConveyor).rectangle[i].width - Parameters::HoleFusion::hole_border_thresh); col ++)
+      //        {
+      //          sum += static_cast<int>(image.at<uchar>(row, col));
+      //          sumPixels ++;
+      //        }
+      //      if(sumPixels > 0)
+      //      {
+      //        float avgDepthInternal = sum / sumPixels;
+      //        if(std::abs(avgDepthBorder - avgDepthInternal) > Parameters::HoleFusion::depth_difference_thresh)
+      //          realDepthContours[i] = false;
+      //      }
+      //    }
+      //  }
+      //}
+    }
+
     for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
       if(realDepthContours[i])
       {
@@ -1312,32 +1397,37 @@ namespace pandora_vision
     // there is no meaning to this operation
     if (rgbHolesConveyor -> rectangle.size() == 0 || depthHolesConveyor -> rectangle.size() == 0)
     {
-      HolesConveyor conveyorTemp;
+      //HolesConveyor conveyorTemp;
 
-      for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
-        if(realRgbContours[i])
-        {
-          conveyorTemp.keypoint.push_back((*rgbHolesConveyor).keypoint[i]);
-          conveyorTemp.rectangle.push_back((*rgbHolesConveyor).rectangle[i]);
-        }
-      // Replace RGB conveyor with the valid holes
-      (*rgbHolesConveyor).rectangle = conveyorTemp.rectangle;
-      (*rgbHolesConveyor).keypoint = conveyorTemp.keypoint;
-      conveyorTemp.rectangle.clear();
-      conveyorTemp.keypoint.clear();
-      for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
-        if(realDepthContours[i])
-        {
-          conveyorTemp.keypoint.push_back((*depthHolesConveyor).keypoint[i]);
-          conveyorTemp.rectangle.push_back((*depthHolesConveyor).rectangle[i]);
-        }
-      // Replace Depth conveyor with the valid holes
-      (*depthHolesConveyor).rectangle = conveyorTemp.rectangle;
-      (*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
-      conveyorTemp.rectangle.clear();
-      conveyorTemp.keypoint.clear();
-      return;
+      //for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+      //  if(realRgbContours[i])
+      //  {
+      //    conveyorTemp.keypoint.push_back((*rgbHolesConveyor).keypoint[i]);
+      //    conveyorTemp.rectangle.push_back((*rgbHolesConveyor).rectangle[i]);
+      //  }
+      //// Replace RGB conveyor with the valid holes
+      //(*rgbHolesConveyor).rectangle = conveyorTemp.rectangle;
+      //(*rgbHolesConveyor).keypoint = conveyorTemp.keypoint;
+      //conveyorTemp.rectangle.clear();
+      //conveyorTemp.keypoint.clear();
+      //for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+      //  realRgbContours.push_back(true);
+      //for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      //  if(realDepthContours[i])
+      //  {
+      //    conveyorTemp.keypoint.push_back((*depthHolesConveyor).keypoint[i]);
+      //    conveyorTemp.rectangle.push_back((*depthHolesConveyor).rectangle[i]);
+      //  }
+      //// Replace Depth conveyor with the valid holes
+      //(*depthHolesConveyor).rectangle = conveyorTemp.rectangle;
+      //(*depthHolesConveyor).keypoint = conveyorTemp.keypoint;
+      //conveyorTemp.rectangle.clear();
+      //conveyorTemp.keypoint.clear();
+      //for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      //  realDepthContours.push_back(true);
+      //return;
     }
+
 
 
     // merge overlapping contours
@@ -1425,6 +1515,10 @@ namespace pandora_vision
         }
       float avgDepth = sumDepths / ((lowerX - upperX) * (lowerY - upperY));
       if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height <  Parameters::HoleFusion::small_rect_thresh  && avgDepth < Parameters::HoleFusion::max_depth_to_test_small_thresh)
+      {
+        (*realContours)[i] = false;
+      }
+      else if(holesConveyor -> rectangle[i].width * holesConveyor -> rectangle[i].height >  Parameters::HoleFusion::big_rect_thresh  && avgDepth > Parameters::HoleFusion::min_depth_to_test_big_thresh)
       {
         (*realContours)[i] = false;
       }
