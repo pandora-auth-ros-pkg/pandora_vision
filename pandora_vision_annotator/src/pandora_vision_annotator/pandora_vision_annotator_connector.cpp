@@ -169,7 +169,7 @@ void CConnector::appendCheckBoxChecked(void)
       {
         remove(file.str().c_str());
       } 
-      ImgAnnotations::writeToFile(file.str() );
+      //ImgAnnotations::writeToFile(file.str() );
     }
   }
 

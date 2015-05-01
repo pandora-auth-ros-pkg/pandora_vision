@@ -100,6 +100,8 @@ namespace pandora_vision
 
       bool PredatorNowOn;
 
+      bool enableBackwardTracking;
+
 
     //------------------------------------------------------------------------//
     public:
@@ -134,6 +136,9 @@ namespace pandora_vision
       void receiveImage(const sensor_msgs::ImageConstPtr& msg);
       void loadBag(const std::string& filename, const std::string& topic);
       void predatorCallback(const pandora_vision_msgs::PredatorMsg& msg);
+      void sendInitialFrame(const int &initialFrame);
+      void sendNextFrame(bool enableBackward);
+      void sendFinalFrame();
       cv::Mat getFrame(int x);
 
 

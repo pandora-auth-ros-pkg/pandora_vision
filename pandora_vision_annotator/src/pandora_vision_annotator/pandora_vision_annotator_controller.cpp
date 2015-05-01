@@ -152,10 +152,16 @@ namespace pandora_vision
     ROS_INFO("PREDATOR NOW ON");
     cv::Mat temp;
     PredatorNowOn == true;
-    pandora_vision_msgs::AnnotationMsg annotationMsg;
+    baseFrame = connector_.getFrameNumber();
+    sendInitialFrame(baseFrame);
+    enableBackwardTracking = false;
+
+    /*pandora_vision_msgs::AnnotationMsg annotationMsg;
     currentFrameNo_ = connector_.getFrameNumber();
     connector_.getcurrentFrame(currentFrameNo_,&temp);
     baseFrame = currentFrameNo_;
+    if(baseFrame > 0)
+      enableBackwardTracking = true;
     annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
     annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
     annotationMsg.x = ImgAnnotations::annotations[0].x1;
@@ -175,7 +181,7 @@ namespace pandora_vision
                     << " " << annotationMsg.x 
                     << " " << annotationMsg.y 
                     << " " << annotationMsg.width 
-                    << " " << annotationMsg.height);
+                    << " " << annotationMsg.height);*/
   }
 
   void CController::rosTopicGiven(void)
@@ -266,41 +272,82 @@ namespace pandora_vision
        ROS_INFO_STREAM("predator alert for frame " << currentFrameNo_);
      
     }
-
-    if(currentFrameNo_ == msgHeader_.size()-1)
+    bool x;
+    if(currentFrameNo_ < msgHeader_.size()-1 && !enableBackwardTracking )
     {
+      x= false;
+      ROS_INFO("SENDING NEXT FRAME ++");
+      sendNextFrame(x);
+    }
+    
+    if(currentFrameNo_ == msgHeader_.size()-1 )
+    {
+      if(baseFrame == 0)
+      {
+        sendFinalFrame();
+      } 
+      else
+      {
+      sendInitialFrame(baseFrame);
+      ROS_INFO_STREAM("ENABLE BACKWARD REINITIALIZING");
+      enableBackwardTracking = true;
+      }
+    }
+    
+    if(currentFrameNo_ > 0 && enableBackwardTracking)
+    {
+      x= true;
+      ROS_INFO("SEND NEXT FRAME --");
+      sendNextFrame(x);
+    }
+
+    if(currentFrameNo_ == 0  && enableBackwardTracking)
+    {
+      ROS_INFO_STREAM("SEND FINAL FRAME");
+      sendFinalFrame();
+    }
+
+
+
+    
+  }
+
+  void CController::sendInitialFrame(const int& initialFrame)
+  {
       pandora_vision_msgs::AnnotationMsg annotationMsg;
       cv::Mat temp;
-      currentFrameNo_= 0 ; 
+      currentFrameNo_= initialFrame ; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
-      annotationMsg.header.frame_id = "close";
+      annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-      annotationMsg.x = 2;
-      annotationMsg.y = 2;
-      annotationMsg.width =  2;
-      annotationMsg.height = 2;
+      annotationMsg.x = ImgAnnotations::annotations[0].x1;
+      annotationMsg.y = ImgAnnotations::annotations[0].y1;
+      annotationMsg.width =  ImgAnnotations::annotations[0].x2 - ImgAnnotations::annotations[0].x1;
+      annotationMsg.height = ImgAnnotations::annotations[0].y2 - ImgAnnotations::annotations[0].y1;
       cv_bridge::CvImage out_msg;
       out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-      out_msg.encoding = "rgb8"; 
+      out_msg.encoding = "rgb8" ;     
       out_msg.image = temp;
       out_msg.toImageMsg(annotationMsg.img);
       annotationPublisher_.publish(annotationMsg);
-      connector_.setcurrentFrame(currentFrameNo_);
-      ROS_INFO_STREAM("send 'closing' frame " << currentFrameNo_ 
-                       << " " << annotationMsg.header.frame_id 
-                       << " " << annotationMsg.header.stamp 
-                       << " " << annotationMsg.x 
-                       << " " << annotationMsg.y 
-                       << " " << annotationMsg.width 
-                       << " " << annotationMsg.height);
-    }
-      
-    else
-    { 
+      ROS_INFO_STREAM("send initial frame" << currentFrameNo_ 
+                    << " " << annotationMsg.header.frame_id
+                    << " " << annotationMsg.header.stamp 
+                    << " " << annotationMsg.x 
+                    << " " << annotationMsg.y 
+                    << " " << annotationMsg.width 
+                    << " " << annotationMsg.height);
+
+  }
+  void CController::sendNextFrame(bool enableBackward)
+  {  
       pandora_vision_msgs::AnnotationMsg annotationMsg;
       cv::Mat temp;
-      currentFrameNo_++; 
+      if(enableBackward)
+        currentFrameNo_--;
+      else
+        currentFrameNo_+= 1; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
       annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
@@ -323,9 +370,38 @@ namespace pandora_vision
                        << " " << annotationMsg.y 
                        << " " << annotationMsg.width 
                        << " " << annotationMsg.height);
-    }
+
   }
 
+  void CController::sendFinalFrame()
+  {
+    pandora_vision_msgs::AnnotationMsg annotationMsg;
+    cv::Mat temp;
+    currentFrameNo_= 0 ; 
+    connector_.getcurrentFrame(currentFrameNo_, &temp);
+    annotationMsg.header.frame_id = "close";
+    annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+    annotationMsg.x = 2;
+    annotationMsg.y = 2;
+    annotationMsg.width =  2;
+    annotationMsg.height = 2;
+    cv_bridge::CvImage out_msg;
+    out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
+    out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
+    out_msg.encoding = "rgb8"; 
+    out_msg.image = temp;
+    out_msg.toImageMsg(annotationMsg.img);
+    annotationPublisher_.publish(annotationMsg);
+    connector_.setcurrentFrame(currentFrameNo_);
+    ROS_INFO_STREAM("send 'closing' frame " << currentFrameNo_ 
+                     << " " << annotationMsg.header.frame_id 
+                     << " " << annotationMsg.header.stamp 
+                     << " " << annotationMsg.x 
+                     << " " << annotationMsg.y 
+                     << " " << annotationMsg.width 
+                     << " " << annotationMsg.height);
+
+  }
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImageConstPtr in_msg;
