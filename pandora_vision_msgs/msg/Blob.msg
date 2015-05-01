@@ -1,6 +1,4 @@
 # Blob's bounding rectangle
-AreaOfInterest areaOfInterest
-# blob's outline points X coordinate
-float32[] outlineX
-# blob's outline points X coordinate
-float32[] outlineY
+pandora_vision_msgs/AreaOfInterest areaOfInterest
+# blob's outline points
+pandora_vision_msgs/Keypoint[] outline
