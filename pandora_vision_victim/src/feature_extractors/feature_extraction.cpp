@@ -56,6 +56,8 @@ namespace pandora_vision
       featureVector_.clear();
     if (!featureMatrix_.empty())
       featureMatrix_.clear();
+    if (!chosenFeatureTypesMap_.empty())
+      chosenFeatureTypesMap_.clear();
   }
 
   /**
@@ -80,6 +82,12 @@ namespace pandora_vision
    */
   void FeatureExtraction::addDescriptorsToBagOfWords(const cv::Mat& inImage)
   {
+    if (chosenFeatureTypesMap_["sift"] == true)
+    {
+      cv::Mat descriptors;
+      featureFactory_->extractFeatures(inImage, &descriptors);
+      bowTrainer_->addDescriptors(descriptors);
+    }
   }
 
   /**
@@ -107,6 +115,7 @@ namespace pandora_vision
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
     int rowIndex = 0;
+    std::cout << "Iterate over dataset images" << std::endl;
     for (boost::filesystem::recursive_directory_iterator iter(directory);
          iter != boost::filesystem::recursive_directory_iterator();
          iter++)
@@ -132,17 +141,16 @@ namespace pandora_vision
           if (annotatedImages[ii] == imageName)
           {
             imageROI = image(boundingBox[ii]);
-                      annotatedImages[ii].clear();
+                annotatedImages[ii].clear();
             labelsMat->at<double>(rowIndex, 0) = classAttributes[ii];
             break;
           }
         }
         extractFeatures(imageROI);
-        addDescriptorsToBagOfWords(imageROI);
       }
       else
       {
-        std::cout << "Find class attrbitute from image name." << std::endl;
+        std::cout << "Find class attribute from image name." << std::endl;
 
         std::string checkIfPositive = "positive";
         if (boost::algorithm::contains(imageName, checkIfPositive))
@@ -151,7 +159,6 @@ namespace pandora_vision
           labelsMat->at<double>(rowIndex, 0) = -1.0;
 
         extractFeatures(image);
-        addDescriptorsToBagOfWords(image);
       }
 
       std::cout << "Feature vector of image " << imageName << " "
@@ -162,6 +169,69 @@ namespace pandora_vision
 
       rowIndex += 1;
     }
+  }
+
+  /**
+   * @brief This function constructs a Bag of Words vocabulary.
+   * @param directory [const boost::filesystem::path&] The directory that
+   * contains the set of images for the creation of the vocabulary.
+   * @param annotationsFile [const std::string&] The name of the file that
+   * contains the class attributes and the regions of interest of the
+   * images to be processed.
+   * @return void
+   */
+  void FeatureExtraction::constructBagOfWordsVocabulary(
+      const boost::filesystem::path& directory,
+      const std::string& annotationsFile)
+  {
+    if (!chosenFeatureTypesMap_["sift"])
+      return;
+    std::cout << "Constructing Bag Of Words Vocabulary" << std::endl;
+
+    cv::Mat image, imageROI;
+    std::vector<std::string> annotatedImages;
+    std::vector<cv::Rect> boundingBox;
+    std::vector<int> classAttributes;
+
+    bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
+        annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
+    int rowIndex = 0;
+    for (boost::filesystem::recursive_directory_iterator iter(directory);
+         iter != boost::filesystem::recursive_directory_iterator();
+         iter++)
+    {
+      if (is_directory(iter->status()))
+        continue;
+      std::string imageAbsolutePath = iter->path().string();
+      std::string imageName = iter->path().filename().string();
+      image = cv::imread(imageAbsolutePath);
+      if (!image.data)
+      {
+        std::cout << "Error reading file " << imageName << std::endl;
+        continue;
+      }
+
+      if (successfulFileLoad)
+      {
+        for (int ii = 0; ii < annotatedImages.size(); ii++)
+        {
+          if (annotatedImages[ii] == imageName)
+          {
+            imageROI = image(boundingBox[ii]);
+                annotatedImages[ii].clear();
+            break;
+          }
+        }
+        addDescriptorsToBagOfWords(imageROI);
+      }
+      else
+      {
+        addDescriptorsToBagOfWords(image);
+      }
+      rowIndex += 1;
+    }
+    std::cout << "Create Vocabulary" << std::endl;
+    bowTrainer_->createVocabulary();
   }
 
   /**
@@ -178,5 +248,13 @@ namespace pandora_vision
   std::vector<std::vector<double> > FeatureExtraction::getFeatureMatrix() const
   {
     return featureMatrix_;
+  }
+
+  /**
+   * @brief
+   */
+  cv::Mat FeatureExtraction::getBagOfWordsVocabulary() const
+  {
+    return bowTrainer_->getVocabulary();
   }
 }  // namespace pandora_vision

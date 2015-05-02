@@ -40,8 +40,15 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
+
 #include <opencv2/opencv.hpp>
+
+#include "pandora_vision_victim/utilities/bag_of_words_trainer.h"
+#include "pandora_vision_victim/feature_extractors/feature_extractor_factory.h"
 
 /**
  * @namespace pandora_vision
@@ -75,9 +82,9 @@ namespace pandora_vision
       virtual void extractFeatures(const cv::Mat& inImage);
 
       /**
-       *
+       * @brief
        */
-      virtual void addDescriptorsToBagOfWords(const cv::Mat& inImage);
+      void addDescriptorsToBagOfWords(const cv::Mat& inImage);
 
       /**
        * @brief This function constructs the features matrix, i.e. the feature
@@ -97,6 +104,19 @@ namespace pandora_vision
           cv::Mat* featuresMat, cv::Mat* labelsMat);
 
       /**
+       * @brief This function constructs a Bag of Words vocabulary.
+       * @param directory [const boost::filesystem::path&] The directory that
+       * contains the set of images for the creation of the vocabulary.
+       * @param annotationsFile [const std::string&] The name of the file that
+       * contains the class attributes and the regions of interest of the
+       * images to be processed.
+       * @return void
+       */
+      void constructBagOfWordsVocabulary(
+          const boost::filesystem::path& directory,
+          const std::string& annotationsFile);
+
+      /**
        * @brief
        */
       std::vector<double> getFeatureVector() const;
@@ -106,12 +126,27 @@ namespace pandora_vision
        */
       std::vector<std::vector<double> > getFeatureMatrix() const;
 
+      /**
+       * @brief
+       */
+      cv::Mat getBagOfWordsVocabulary() const;
+
     protected:
       /// Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;
 
       /// Matrix containing the feature vectors extracted from a set of images.
       std::vector<std::vector<double> > featureMatrix_;
+
+      /// Vector containing the feature types to be extracted from a set of
+      /// images.
+      std::map<std::string, bool> chosenFeatureTypesMap_;
+
+      ///
+      boost::shared_ptr<FeatureExtractorFactory> featureFactory_;
+
+      ///
+      boost::shared_ptr<BagOfWordsTrainer> bowTrainer_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H

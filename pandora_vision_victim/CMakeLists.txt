@@ -45,6 +45,7 @@ include_directories(include
 add_library(${PROJECT_NAME}_utilities
     src/utilities/file_utilities.cpp
     src/utilities/feature_extraction_utilities.cpp
+    src/utilities/bag_of_words_trainer.cpp
 )
 target_link_libraries(${PROJECT_NAME}_utilities
     ${catkin_LIBRARIES}
@@ -77,6 +78,7 @@ add_library(${PROJECT_NAME}_feature_extractors
     src/feature_extractors/channels_statistics_extractor.cpp
     src/feature_extractors/edge_orientation_extractor.cpp
     src/feature_extractors/haralickfeature_extractor.cpp
+    src/feature_extractors/sift_extractor.cpp
     src/feature_extractors/feature_extraction.cpp
     src/feature_extractors/depth_feature_extraction.cpp
     src/feature_extractors/rgb_feature_extraction.cpp
@@ -135,9 +137,6 @@ if(VICTIM_ENABLE_TRAIN)
   target_link_libraries(victim_rgb_svm_training_node
       ${catkin_LIBRARIES}
       ${PROJECT_NAME}_svm_classifier
-      ${PROJECT_NAME}_feature_extractors
-      ${PROJECT_NAME}_channels_statistics_feature_extractors
-      ${PROJECT_NAME}_victim_parameters
   )
 
   add_dependencies(victim_rgb_svm_training_node
@@ -152,9 +151,6 @@ if(VICTIM_ENABLE_TRAIN)
   target_link_libraries(victim_depth_svm_training_node
       ${catkin_LIBRARIES}
       ${PROJECT_NAME}_svm_classifier
-      ${PROJECT_NAME}_feature_extractors
-      ${PROJECT_NAME}_channels_statistics_feature_extractors
-      ${PROJECT_NAME}_victim_parameters
   )
 
   add_dependencies(victim_depth_svm_training_node

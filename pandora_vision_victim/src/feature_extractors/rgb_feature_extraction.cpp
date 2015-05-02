@@ -39,8 +39,14 @@
 
 #include <vector>
 
-#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include <boost/shared_ptr.hpp>
+
 #include "pandora_vision_victim/utilities/file_utilities.h"
+#include "pandora_vision_victim/utilities/bag_of_words_trainer.h"
+
+#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/sift_extractor.h"
+
 /**
  * @namespace pandora_vision
  * @brief The main namespace for PANDORA vision
@@ -52,6 +58,23 @@ namespace pandora_vision
    */
   RgbFeatureExtraction::RgbFeatureExtraction() : FeatureExtraction()
   {
+    bool extractChannelsStatisticsFeatures = false;
+    bool extractEdgeOrientationFeatures = false;
+    bool extractHaralickFeatures = false;
+    bool extractSiftFeatures = true;
+
+    chosenFeatureTypesMap_["channels_statistics"] =
+        extractChannelsStatisticsFeatures;
+    chosenFeatureTypesMap_["edge_orientation"] =
+        extractEdgeOrientationFeatures;
+    chosenFeatureTypesMap_["haralick"] = extractHaralickFeatures;
+    chosenFeatureTypesMap_["sift"] = extractSiftFeatures;
+
+    if (chosenFeatureTypesMap_["sift"] == true)
+    {
+      featureFactory_.reset(new SiftExtractor());
+      bowTrainer_.reset(new BagOfWordsTrainer());
+    }
   }
 
   /**
@@ -69,35 +92,52 @@ namespace pandora_vision
    */
   void RgbFeatureExtraction::extractFeatures(const cv::Mat& inImage)
   {
-    /// Extract Color Statistics features from RGB image
-    std::vector<double> channelsStatisticsFeatureVector;
-    ChannelsStatisticsExtractor::findColorChannelsStatisticsFeatures(inImage,
-        &channelsStatisticsFeatureVector);
-
-    /// Extract Edge Orientation features from RGB image
-    std::vector<double> edgeOrientationFeatureVector;
-    EdgeOrientationExtractor::findEdgeFeatures(inImage,
-        &edgeOrientationFeatureVector);
-
-    /// Extract Haralick features from RGB image
-    std::vector<double> haralickFeatureVector;
-    HaralickFeaturesExtractor::findHaralickFeatures(inImage,
-        &haralickFeatureVector);
-
     /// Clear feature vector
     if (!featureVector_.empty())
       featureVector_.clear();
+    if (chosenFeatureTypesMap_["channels_statistics"] == true)
+    {
+      /// Extract Color Statistics features from RGB image
+      std::vector<double> channelsStatisticsFeatureVector;
+      ChannelsStatisticsExtractor::findColorChannelsStatisticsFeatures(inImage,
+          &channelsStatisticsFeatureVector);
+      /// Append Color Statistics features to RGB feature vector.
+      for (int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++)
+        featureVector_.push_back(channelsStatisticsFeatureVector[ii]);
+    }
 
-    /// Append Color Statistics features to RGB feature vector.
-    for (int ii = 0; ii < channelsStatisticsFeatureVector.size(); ii++)
-      featureVector_.push_back(channelsStatisticsFeatureVector[ii]);
+    if (chosenFeatureTypesMap_["edge_orientation"] == true)
+    {
+      /// Extract Edge Orientation features from RGB image
+      std::vector<double> edgeOrientationFeatureVector;
+      EdgeOrientationExtractor::findEdgeFeatures(inImage,
+          &edgeOrientationFeatureVector);
+      /// Append Edge Orientation features to RGB feature vector.
+      for (int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++)
+        featureVector_.push_back(edgeOrientationFeatureVector[ii]);
+    }
 
-    /// Append Edge Orientation features to RGB feature vector.
-    for (int ii = 0; ii < edgeOrientationFeatureVector.size(); ii++)
-      featureVector_.push_back(edgeOrientationFeatureVector[ii]);
+    if (chosenFeatureTypesMap_["haralick"] == true)
+    {
+      /// Extract Haralick features from RGB image
+      std::vector<double> haralickFeatureVector;
+      HaralickFeaturesExtractor::findHaralickFeatures(inImage,
+          &haralickFeatureVector);
+      /// Append Haralick features to RGB feature vector.
+      for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
+        featureVector_.push_back(haralickFeatureVector[ii]);
+    }
 
-    /// Append Haralick features to RGB feature vector.
-    for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
-      featureVector_.push_back(haralickFeatureVector[ii]);
+    if (chosenFeatureTypesMap_["sift"] == true)
+    {
+      /// Extract SIFT features from RGB image
+      cv::Mat siftDescriptors;
+      bowTrainer_->createBowRepresentation(inImage, &siftDescriptors);
+      /// Append SIFT features to RGB feature vector.
+      for (int ii = 0; ii < siftDescriptors.cols; ii++)
+      {
+        featureVector_.push_back(siftDescriptors.at<float>(ii));
+      }
+    }
   }
 }  // namespace pandora_vision

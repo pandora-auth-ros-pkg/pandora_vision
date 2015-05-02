@@ -76,6 +76,13 @@ namespace pandora_vision
       virtual ~SvmTraining();
 
       /**
+       * @brief
+       */
+      void constructBagOfWordsVocabulary(
+          const boost::filesystem::path& directory,
+          const std::string& annotationsFile);
+
+      /**
        * @brief This function constructs the features matrix, i.e. the feature
        * vectors of a set of images.
        * @param directory [const boost::filesystem::path&] The directory that
