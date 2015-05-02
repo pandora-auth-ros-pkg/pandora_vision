@@ -268,7 +268,10 @@ namespace pandora_vision
     if(msg.header.stamp == msgHeader_[currentFrameNo_ ].stamp && msg.x != 0 && msg.y != 0 
       && msg.width != 0 && msg.height != 0 )
     {
-       connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height);
+      if(currentFrameNo_ == baseFrame)
+       connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height, true);
+      else
+        connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height, false);
        ROS_INFO_STREAM("predator alert for frame " << currentFrameNo_);
      
     }
@@ -285,12 +288,12 @@ namespace pandora_vision
       if(baseFrame == 0)
       {
         sendFinalFrame();
-      } 
+      }
       else
       {
-      sendInitialFrame(baseFrame);
-      ROS_INFO_STREAM("ENABLE BACKWARD REINITIALIZING");
-      enableBackwardTracking = true;
+        enableBackwardTracking = true;
+        sendInitialFrame(baseFrame);
+        ROS_INFO_STREAM("ENABLE BACKWARD REINITIALIZING");
       }
     }
     
@@ -318,6 +321,18 @@ namespace pandora_vision
       cv::Mat temp;
       currentFrameNo_= initialFrame ; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
+      if(enableBackwardTracking)
+      {
+      std::stringstream filename;
+      std::string package_path = ros::package::getPath("pandora_vision_annotator");
+      filename << package_path << "/data/annotations.txt";
+      std::string img_name = "frame" + boost::to_string(currentFrameNo_) + ".png";
+      //loader_.statusLabel->setText(QString(img_name.c_str()));
+      ImgAnnotations::annotations.clear();
+      ImgAnnotations::readFromFile(filename.str(),img_name);
+      ROS_INFO_STREAM("READING FROM FILE" << img_name);
+      }
+      
       annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
       annotationMsg.x = ImgAnnotations::annotations[0].x1;
@@ -400,6 +415,8 @@ namespace pandora_vision
                      << " " << annotationMsg.y 
                      << " " << annotationMsg.width 
                      << " " << annotationMsg.height);
+
+      predatorSubscriber_.shutdown();
 
   }
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)

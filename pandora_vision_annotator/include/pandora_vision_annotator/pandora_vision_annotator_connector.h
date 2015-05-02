@@ -131,7 +131,7 @@ namespace pandora_vision
 
       void setMsg(const sensor_msgs::ImageConstPtr& msg);
 
-      void setPredatorValues(int x, int y, int width, int height);
+      void setPredatorValues(int x, int y, int width, int height, bool initial);
 
       void setImage(QImage &img);
 

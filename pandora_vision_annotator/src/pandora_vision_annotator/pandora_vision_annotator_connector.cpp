@@ -162,14 +162,9 @@ void CConnector::appendCheckBoxChecked(void)
     if(ImgAnnotations::annotations.size() != 0)
     {
       Q_EMIT predatorEnabled();
-      state_ = PREDATOR; 
+      state_ = PREDATOR;
       std::stringstream file;
       file << package_path << "/data/annotations.txt";
-      if(ImgAnnotations::is_file_exist(file.str().c_str()) )
-      {
-        remove(file.str().c_str());
-      } 
-      //ImgAnnotations::writeToFile(file.str() );
     }
   }
 
@@ -521,29 +516,37 @@ void CConnector::appendCheckBoxChecked(void)
   }
 
 
-  void CConnector::setPredatorValues(int x, int y, int width, int height)
+  void CConnector::setPredatorValues(int x, int y, int width, int height, bool initial )
   {
-     ImgAnnotations::annotations.clear();
-     std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
-     std::string category;
-     if(img_state_ == VICTIM_CLICK)
-       category = "1";
-     if(img_state_ == HOLE_CLICK)
-       category = "-1";
-     ImgAnnotations::setAnnotations(img_name, category, x, y);
-     ImgAnnotations::setAnnotations(img_name, category, x+width, y+height);
-     drawBox();  
-     std::stringstream file;
-     file << package_path << "/data/annotations.txt";
-     ImgAnnotations::writeToFile(file.str() );
-     std::stringstream imgName;
-     imgName << package_path  << "/data/frame" << currFrame+offset_ << ".png";
-     cv::Mat temp;
-     cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
-     cv::imwrite(imgName.str(), temp);
-     loader_.statusLabel->setText("Save current Frame as:" + QString(imgName.str().c_str() )); 
-
+     if(ImgAnnotations::annotations[0].x1 == x && ImgAnnotations::annotations[0].y1 == y &&
+        ImgAnnotations::annotations[0].x2 == x + width && ImgAnnotations::annotations[0].y2 == y + height && !initial)
+     {
+       ROS_INFO_STREAM("SAME ANNOTATION AS PREVIOUS FRAME");
+     }
+     else
+     {
+       ImgAnnotations::annotations.clear();
+       std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
+       std::string category;
+       if(img_state_ == VICTIM_CLICK)
+         category = "1";
+       if(img_state_ == HOLE_CLICK)
+         category = "-1";
+       ImgAnnotations::setAnnotations(img_name, category, x, y);
+       ImgAnnotations::setAnnotations(img_name, category, x+width, y+height);
+       drawBox();  
+       std::stringstream file;
+       file << package_path << "/data/annotations.txt";
+       ImgAnnotations::writeToFile(file.str() );
+       std::stringstream imgName;
+       imgName << package_path  << "/data/frame" << currFrame + offset_ << ".png";
+       cv::Mat temp;
+       cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
+       cv::imwrite(imgName.str(), temp);
+       loader_.statusLabel->setText("Save current Frame as:" + QString(imgName.str().c_str() )); 
+    }
   }
+
 
   void CConnector::drawBox()
   {
