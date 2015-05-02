@@ -89,11 +89,11 @@ namespace pandora_vision
   /**
    * @brief
    */
-  void SvmTraining::constructBagOfWordsVocabulary(
+  bool SvmTraining::constructBagOfWordsVocabulary(
       const boost::filesystem::path& directory,
       const std::string& annotationsFile)
   {
-    featureExtraction_->constructBagOfWordsVocabulary(directory,
+    return featureExtraction_->constructBagOfWordsVocabulary(directory,
         annotationsFile);
   }
 

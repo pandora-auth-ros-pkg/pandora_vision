@@ -178,14 +178,15 @@ namespace pandora_vision
    * @param annotationsFile [const std::string&] The name of the file that
    * contains the class attributes and the regions of interest of the
    * images to be processed.
-   * @return void
+   * @return [bool] Variable declaring whether a bag of words vocabulary is
+   * needed and thus constructed or not.
    */
-  void FeatureExtraction::constructBagOfWordsVocabulary(
+  bool FeatureExtraction::constructBagOfWordsVocabulary(
       const boost::filesystem::path& directory,
       const std::string& annotationsFile)
   {
     if (!chosenFeatureTypesMap_["sift"])
-      return;
+      return false;
     std::cout << "Constructing Bag Of Words Vocabulary" << std::endl;
 
     cv::Mat image, imageROI;
@@ -232,6 +233,7 @@ namespace pandora_vision
     }
     std::cout << "Create Vocabulary" << std::endl;
     bowTrainer_->createVocabulary();
+    return true;
   }
 
   /**

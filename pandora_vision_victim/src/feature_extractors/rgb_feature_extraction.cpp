@@ -106,6 +106,7 @@ namespace pandora_vision
         featureVector_.push_back(channelsStatisticsFeatureVector[ii]);
     }
 
+
     if (chosenFeatureTypesMap_["edge_orientation"] == true)
     {
       /// Extract Edge Orientation features from RGB image
@@ -135,9 +136,7 @@ namespace pandora_vision
       bowTrainer_->createBowRepresentation(inImage, &siftDescriptors);
       /// Append SIFT features to RGB feature vector.
       for (int ii = 0; ii < siftDescriptors.cols; ii++)
-      {
         featureVector_.push_back(siftDescriptors.at<float>(ii));
-      }
     }
   }
 }  // namespace pandora_vision

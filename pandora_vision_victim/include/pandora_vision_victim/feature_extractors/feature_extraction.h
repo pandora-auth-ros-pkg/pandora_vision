@@ -110,9 +110,10 @@ namespace pandora_vision
        * @param annotationsFile [const std::string&] The name of the file that
        * contains the class attributes and the regions of interest of the
        * images to be processed.
-       * @return void
+       * @return [bool] Variable declaring whether a bag of words vocabulary is
+       * needed and thus constructed or not.
        */
-      void constructBagOfWordsVocabulary(
+      bool constructBagOfWordsVocabulary(
           const boost::filesystem::path& directory,
           const std::string& annotationsFile);
 

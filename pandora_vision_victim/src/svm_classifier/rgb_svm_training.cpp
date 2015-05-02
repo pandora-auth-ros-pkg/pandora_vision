@@ -122,7 +122,7 @@ namespace pandora_vision
       const std::string trainingAnnotationsFile = imageType_ + "training_annotations.txt";
       const std::string trainingAnnotationsFilePath = filesDirectory + trainingAnnotationsFile;
 
-      constructBagOfWordsVocabulary(trainingDirectory,
+      bool vocabularyNeeded = constructBagOfWordsVocabulary(trainingDirectory,
           trainingAnnotationsFilePath);
       constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
           &trainingFeaturesMat, &trainingLabelsMat);
@@ -140,14 +140,17 @@ namespace pandora_vision
       trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
       trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
 
-      const std::string bagOfWordsFile = imageType_ + "bag_of_words.xml";
-      const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
-      file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
-          featureExtraction_->getBagOfWordsVocabulary());
-
       file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
           prefix, trainingFeaturesMatrixFile, trainingLabelsMatrixFile,
           imageType_);
+
+      if (vocabularyNeeded)
+      {
+        const std::string bagOfWordsFile = imageType_ + "bag_of_words.xml";
+        const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
+        file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
+            featureExtraction_->getBagOfWordsVocabulary());
+      }
     }
     else
     {

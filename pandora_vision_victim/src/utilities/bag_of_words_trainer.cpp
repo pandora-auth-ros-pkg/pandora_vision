@@ -56,9 +56,9 @@ namespace pandora_vision
    */
   BagOfWordsTrainer::BagOfWordsTrainer()
   {
-    featureDetectorType_ = "SIFT";
+    featureDetectorType_ = "Dense";
     descriptorExtractorType_ = "SIFT";
-    descriptorMatcherType_ = "BruteForce";
+    descriptorMatcherType_ = "FlannBased";
 
     featureDetector_ = cv::FeatureDetector::create(featureDetectorType_);
     descriptorExtractor_ = cv::DescriptorExtractor::create(

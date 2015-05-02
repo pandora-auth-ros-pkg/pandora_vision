@@ -49,7 +49,7 @@ namespace pandora_vision
   /**
    * @brief Default Constructor
    */
-  SiftExtractor::SiftExtractor() : featureDetectorType_("SIFT"),
+  SiftExtractor::SiftExtractor() : featureDetectorType_("Dense"),
       descriptorExtractorType_("SIFT")
   {
     cv::initModule_nonfree();

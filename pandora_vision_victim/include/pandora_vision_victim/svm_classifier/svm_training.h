@@ -78,7 +78,7 @@ namespace pandora_vision
       /**
        * @brief
        */
-      void constructBagOfWordsVocabulary(
+      bool constructBagOfWordsVocabulary(
           const boost::filesystem::path& directory,
           const std::string& annotationsFile);
 
