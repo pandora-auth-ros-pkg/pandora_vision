@@ -39,7 +39,7 @@
 #define UTILS_VISUALIZATION_H
 
 #include "utils/parameters.h"
-#include "utils/holes_conveyor.h"
+#include "utils/blob_vector.h"
 
 /**
   @namespace pandora_vision
@@ -95,10 +95,10 @@ namespace pandora_vision
         const int& ms);
 
       /**
-        @brief Depicts the contents of a HolesConveyor on an image
+        @brief Depicts the contents of a BlobVector on an image
         @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
-        @param[in] conveyor [const HolesConveyor&] The holes conveyor
+        @param[in] blobVec [const BlobVector&] The blob vector
         @param[in] ms [const int&] How many ms the showing lasts
         @param[in] msgs [const std::vector<std::string>&] Message to show to
         each keypoint
@@ -108,7 +108,7 @@ namespace pandora_vision
       static cv::Mat showHoles(
         const std::string& windowTitle,
         const cv::Mat& inImage,
-        const HolesConveyor& conveyor,
+        const BlobVector& blobVec,
         const int& ms,
         const std::vector<std::string>& msgs,
         const float& hz = -1);

@@ -42,7 +42,7 @@
 #include "utils/edge_detection.h"
 #include "utils/outline_discovery.h"
 #include "utils/bounding_box_detection.h"
-#include "utils/holes_conveyor.h"
+#include "utils/blob_vector.h"
 #include <math.h>
 
 /**
@@ -58,7 +58,6 @@ namespace pandora_vision
   class HoleFilters
   {
     public:
-
       /**
         @brief Given a set of keypoints and an edges image, this function
         returns the valid keypoints and for each one, its respective, least
@@ -71,15 +70,15 @@ namespace pandora_vision
         outline of a blob is obtained.
         0 means by means of brushfire,
         1 by means of raycasting
-        @param[in,out] conveyor [HolesConveyor*] A struct that contains
-        the final valid candidate holes
+        @param[in,out] blobVec [BlobVector*] A class that contains
+        the final valid blobs
         @return void
        **/
       static void validateBlobs(
         const std::vector<cv::KeyPoint>& keyPoints,
         cv::Mat* denoisedDepthImageEdges,
         const int& detectionMethod,
-        HolesConveyor* conveyor);
+        BlobVector* blobVec);
 
       /**
         @brief This functions takes as input arguments a keypoints vector of
@@ -98,7 +97,7 @@ namespace pandora_vision
         rectangle
         @param[in] inContours [const std::vector<std::vector<cv::Point2f> >&]
         The outline of each blob found
-        @param[out] conveyor [HolesConveyor*] The container of vector of blobs'
+        @param[out] blobVec [BlobVector*] The container of vector of blobs'
         keypoints, outlines and areas
         @return void
        **/
@@ -107,7 +106,7 @@ namespace pandora_vision
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
         const std::vector<float>& inRectanglesArea,
         const std::vector<std::vector<cv::Point2f> >& inContours,
-        HolesConveyor* conveyor);
+        BlobVector* blobVec);
 
   };
 
