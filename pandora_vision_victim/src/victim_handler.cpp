@@ -48,7 +48,7 @@ namespace pandora_vision
     svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
     svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
     
-    vjActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+    //~ vjActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
   }
   
   void VictimHandler::startTransition(int newState)
@@ -67,11 +67,11 @@ namespace pandora_vision
       svmCurrentlyOn = (svmCurrentlyOn || currentState_ == svmActiveStates_[ii]);
     }
     
-    for (int ii = 0; ii < vjActiveStates_.size(); ii++)
-    {
-      vjPreviouslyOff = (vjPreviouslyOff && previousState_ != vjActiveStates_[ii]);
-      vjCurrentlyOn = (vjCurrentlyOn || currentState_ == vjActiveStates_[ii]);
-    }
+    //~ for (int ii = 0; ii < vjActiveStates_.size(); ii++)
+    //~ {
+      //~ vjPreviouslyOff = (vjPreviouslyOff && previousState_ != vjActiveStates_[ii]);
+      //~ vjCurrentlyOn = (vjCurrentlyOn || currentState_ == vjActiveStates_[ii]);
+    //~ }
    
     if (svmPreviouslyOff && svmCurrentlyOn)
     {
@@ -79,12 +79,12 @@ namespace pandora_vision
       processorPtr_.reset(new VictimSvmProcessor("~/processor", this));
       postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
     }
-    else if (vjPreviouslyOff && vjCurrentlyOn)
-    {
-      preProcPtr_.reset(new VictimVJPreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new VictimVJDetector("~/processor", this));
-      postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
-    }
+    //~ else if (vjPreviouslyOff && vjCurrentlyOn)
+    //~ {
+      //~ preProcPtr_.reset(new VictimVJPreProcessor("~/preprocessor", this));
+      //~ processorPtr_.reset(new VictimVJProcessor("~/processor", this));
+      //~ postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
+    //~ }
     else if ((!svmPreviouslyOff || !vjPreviouslyOff) && (!svmCurrentlyOn && !vjCurrentlyOn))
     {
       preProcPtr_.reset();

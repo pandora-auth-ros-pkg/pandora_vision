@@ -135,21 +135,21 @@ target_link_libraries(${PROJECT_NAME}_svm_preprocessor
 )
 
 ################# victim vj detector #################
-add_library(${PROJECT_NAME}_vj_detector
-  src/victim_vj_detector.cpp
-)
-target_link_libraries(${PROJECT_NAME}_vj_detector
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_victim_parameters
-)
+#~ add_library(${PROJECT_NAME}_vj_detector
+  #~ src/victim_vj_detector.cpp
+#~ )
+#~ target_link_libraries(${PROJECT_NAME}_vj_detector
+  #~ ${catkin_LIBRARIES}
+  #~ ${PROJECT_NAME}_victim_parameters
+#~ )
 
 ################# victim vj preprocessor #################
-add_library(${PROJECT_NAME}_vj_preprocessor
-  src/victim_vj_preprocessor.cpp
-)
-target_link_libraries(${PROJECT_NAME}_vj_preprocessor
-  ${catkin_LIBRARIES}
-)
+#~ add_library(${PROJECT_NAME}_vj_preprocessor
+  #~ src/victim_vj_preprocessor.cpp
+#~ )
+#~ target_link_libraries(${PROJECT_NAME}_vj_preprocessor
+  #~ ${catkin_LIBRARIES}
+#~ )
 
 ################# victim postprocessor #################
 add_library(${PROJECT_NAME}_postprocessor
@@ -167,8 +167,8 @@ target_link_libraries(${PROJECT_NAME}_handler
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_svm_processor
   ${PROJECT_NAME}_svm_preprocessor
-  ${PROJECT_NAME}_vj_detector
-  ${PROJECT_NAME}_vj_preprocessor
+  #~ ${PROJECT_NAME}_vj_detector
+  #~ ${PROJECT_NAME}_vj_preprocessor
   ${PROJECT_NAME}_postprocessor
 )
 
