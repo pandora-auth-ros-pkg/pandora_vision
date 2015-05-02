@@ -1,12 +1,11 @@
 <launch>
     
-    <node name="hazmat_node" type="pandora_vision_hazmat_node" pkg="pandora_vision_hazmat" respawn="False" output="screen"/>
-    <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
-    
-   
+  <node name="hazmat_node" type="pandora_vision_hazmat_node" pkg="pandora_vision_hazmat" respawn="False" output="screen" />
+  <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+  
   <rosparam file="$(find pandora_vision_support)/config/camera_params.yaml" 
-    command="load" ns="pandora_vision_hazmat"/>
+    command="load" ns="hazmat"/>
   <rosparam file="$(find pandora_vision_hazmat)/config/pandora_vision_hazmat/hazmat_params.yaml"
-    command="load" ns="/"/>
+    command="load" ns="hazmat"/> 
 
 </launch>

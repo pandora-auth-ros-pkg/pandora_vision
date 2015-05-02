@@ -39,7 +39,7 @@
 #define PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
 
 #include <dynamic_reconfigure/server.h>
-#include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
+//#include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_hazmat/DisplayConfig.h"
 #include "pandora_vision_hazmat/detection/detector_factory.h"

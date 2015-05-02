@@ -42,23 +42,23 @@
 
 #include <string>
 #include "pandora_common_msgs/GeneralAlertVector.h"
-#include "pandora_vision_msgs/HazmatAlertMsg.h"
-#include "pandora_vision_msgs/HazmatAlertsVectorMsg.h"
+#include "pandora_vision_msgs/HazmatAlert.h"
+#include "pandora_vision_msgs/HazmatAlertVector.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
 #include "pandora_vision_hazmat/detection/hazmat_poi.h"
 
 namespace pandora_vision
 {
-  class HazmatPostProcessor : public VisionPostProcessor<pandora_vision_msgs::HazmatAlertsVectorMsg>
+  class HazmatPostProcessor : public VisionPostProcessor<pandora_vision_msgs::HazmatAlertVector>
   {
     public:
-      typedef boost::shared_ptr<pandora_vision_msgs::HazmatAlertsVectorMsg> HazmatAlertsVectorMsgPtr;
+      typedef boost::shared_ptr<pandora_vision_msgs::HazmatAlertVector> HazmatAlertVectorPtr;
 
       HazmatPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~HazmatPostProcessor();
       
     virtual bool
-      postProcess(const POIsStampedConstPtr& input, const HazmatAlertsVectorMsgPtr& output);
+      postProcess(const POIsStampedConstPtr& input, const HazmatAlertVectorPtr& output);
   };
 }  // namespace pandora_vision
 

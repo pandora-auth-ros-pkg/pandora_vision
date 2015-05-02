@@ -1,4 +1,4 @@
-feature_type: SIFT 
-
-subscribed_topics: [/kinect/rgb/image_raw]
+subscribed_topics: 
+  [/kinect/rgb/image_raw]
 published_topics: /vision/hazmat_alert
+feature_type: SIFT

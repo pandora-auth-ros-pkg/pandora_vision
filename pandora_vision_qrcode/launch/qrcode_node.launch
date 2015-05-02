@@ -1,6 +1,6 @@
 <launch>
 
-  <node name="qrcode_node" type="pandora_vision_qrcode_node" pkg="pandora_vision_qrcode" respawn="False" />
+  <node name="qrcode_node" type="pandora_vision_qrcode_node" pkg="pandora_vision_qrcode" respawn="False" output="screen"/>
     <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 
   <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"

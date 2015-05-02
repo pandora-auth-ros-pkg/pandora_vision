@@ -42,7 +42,7 @@
 namespace pandora_vision
 {
   HazmatPostProcessor::HazmatPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionPostProcessor<pandora_vision_msgs::HazmatAlertsVectorMsg>(ns, handler)
+    VisionPostProcessor<pandora_vision_msgs::HazmatAlertVector>(ns, handler)
   {
   }
 
@@ -50,14 +50,14 @@ namespace pandora_vision
   {
   }
 
-  bool HazmatPostProcessor::postProcess(const POIsStampedConstPtr& input, const HazmatAlertsVectorMsgPtr& output)
+  bool HazmatPostProcessor::postProcess(const POIsStampedConstPtr& input, const HazmatAlertVectorPtr& output)
   {
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      pandora_vision_msgs::HazmatAlertMsg hazmatAlert;
+      pandora_vision_msgs::HazmatAlert hazmatAlert;
 
       hazmatAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
       hazmatAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
