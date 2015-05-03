@@ -191,9 +191,9 @@ namespace pandora_vision
 
     // Construct the square_ image
     DepthTest::generateDepthRectangle
-      ( cv::Point2f ( 200, 150 ),
-        40,
-        40,
+      ( cv::Point2f ( 195, 150 ),
+        20,
+        20,
         1.8,
         &mergable1Square );
 
@@ -202,10 +202,10 @@ namespace pandora_vision
 
     // Construct the mergable2 square
     DepthTest::generateDepthRectangle
-      ( cv::Point2f ( 280, 240),
+      ( cv::Point2f ( 225, 180),
         40,
         40,
-        1.5,
+        1.7,
         &mergable2Square );
 
     cv::Mat cleanSquares_;
@@ -281,6 +281,28 @@ namespace pandora_vision
       // Rectangle's perimeter must be near 10000
       EXPECT_NEAR ( 6400, conveyor.rectangle[k].width * conveyor.rectangle[k].height, 5000  );
     }
+
+    // Finally check that for small depth value there are no holes found
+    
+    // Set the depth for each point of the squares_ image to 0.5
+    for ( int rows = 0; rows < squares_.rows; rows++ )
+    {
+      for ( int cols = 0; cols < squares_.cols; cols++ )
+      {
+        squares_.at< float >( rows, cols ) = 0.5;
+      }
+    }
+    squares_ += mergable1Square + mergable2Square;
+    
+
+    // Run Depth::findHoles
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+    conveyor = Depth::findHoles ( squares_ );
+    // The number of keypoints found
+    size = conveyor.keypoint.size();
+    // There should be no keypoints: the hole depth node procedure is ignored
+    ASSERT_EQ ( 0, size );
 
   }
 

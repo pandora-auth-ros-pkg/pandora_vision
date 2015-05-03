@@ -161,6 +161,7 @@ namespace pandora_vision
       static int canny_ratio;
       static int canny_kernel_size;
       static int filtering_type;
+      static float min_valid_depth;
     };
     //
     //
@@ -370,6 +371,7 @@ namespace pandora_vision
       static int small_rect_thresh;
       static int big_rect_thresh;
       static float rgb_distance_variance_thresh;
+      static float rgb_small_distance_variance_thresh;
       static int hole_border_thresh;
       static float depth_difference_thresh;
       static int remove_unstuffed_holes;

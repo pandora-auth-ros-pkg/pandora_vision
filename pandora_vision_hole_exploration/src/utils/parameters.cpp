@@ -125,7 +125,7 @@ namespace pandora_vision
   int Parameters::Depth::huge_contour_thresh = 20000;
   int Parameters::Depth::tiny_contour_thresh = 800;
   int Parameters::Depth::small_contour_thresh = 2500;
-  int Parameters::Depth::neighbor_thresh = 100;
+  int Parameters::Depth::neighbor_thresh = 50;
   int Parameters::Depth::neighbor_value_thresh = 30;
   int Parameters::Depth::depth_similarity_rect_dims_thresh = 50;
   float Parameters::Depth::merge_thresh = 50.0;
@@ -133,6 +133,7 @@ namespace pandora_vision
   int Parameters::Depth::canny_ratio = 3;
   int Parameters::Depth::canny_kernel_size = 3;
   int Parameters::Depth::filtering_type = 1;
+  float Parameters::Depth::min_valid_depth = 1.0;
   //
   //
   //  ///////////////////// Edge detection specific parameters /////////////////////
@@ -287,6 +288,7 @@ namespace pandora_vision
   int Parameters::HoleFusion::small_rect_thresh = 900;
   int Parameters::HoleFusion::big_rect_thresh = 6400;
   float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
+  float Parameters::HoleFusion::rgb_small_distance_variance_thresh = 0.2;
   int Parameters::HoleFusion::hole_border_thresh = 10;
   float Parameters::HoleFusion::depth_difference_thresh = 1.2;
   int Parameters::HoleFusion::remove_unstuffed_holes = 1;

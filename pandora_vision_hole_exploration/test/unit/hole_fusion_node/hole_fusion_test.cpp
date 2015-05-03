@@ -542,6 +542,16 @@ namespace pandora_vision
         10,
         &depthBigVarSquare );
 
+    // Construct the very small depth variance square area
+    cv::Mat depthSmallSmallVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    HoleFusionTest::generateNonHomogeneousDepthRectangle( 
+        cv::Point2f ( 200, 200 ),
+        70,
+        70,
+        1,
+        &depthSmallSmallVarSquare );
+
     // Compose the final depthSquares_ image
     depthSquares_ +=
       depthBigVarSquare +
@@ -634,6 +644,95 @@ namespace pandora_vision
     // It is expected that there is only one hole with probability 1.0
     EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
     EXPECT_EQ ( 1.0, validHolesMap[0]);
+
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+
+    // Test that for very small depth, the small variance threshold is used to eliminate RGB contours (thus just a small variance inside the hole's bounding box does not mean invalid RGB hole)
+    
+    // Set the depth for each point of the depthSquares_ image to 0.3
+    for ( int rows = 0; rows < depthSquares_.rows; rows++ )
+    {
+      for ( int cols = 0; cols < depthSquares_.cols; cols++ )
+      {
+        depthSquares_.at< float >( rows, cols ) = 0.3;
+      }
+    }
+    // Compose the final depthSquares_ image
+    depthSquares_ +=
+      depthBigVarSquare +
+      depthSmallVarSquare +
+      depthMedVarSquare;
+    conveyorTemp = getConveyor(
+        cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 90, 90 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 220, 220 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    preValidatedHoles.keypoint.clear();
+    preValidatedHoles.rectangle.clear();
+    validHolesMap.clear();
+    depthConveyor.keypoint.clear();
+    depthConveyor.rectangle.clear();
+
+    HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    // It is expected that there are two valid holes those inside small and medium depth variance
+    EXPECT_EQ ( 2, preValidatedHoles.rectangle.size());
+
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+    // Set the depth for each point of the depthSquares_ image to 0.3
+    for ( int rows = 0; rows < depthSquares_.rows; rows++ )
+    {
+      for ( int cols = 0; cols < depthSquares_.cols; cols++ )
+      {
+        depthSquares_.at< float >( rows, cols ) = 0.3;
+      }
+    }
+    // Compose the final depthSquares_ image
+    depthSquares_ +=
+      depthBigVarSquare +
+      depthSmallSmallVarSquare +
+      depthMedVarSquare;
+    conveyorTemp = getConveyor(
+        cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 90, 90 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 220, 220 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    preValidatedHoles.keypoint.clear();
+    preValidatedHoles.rectangle.clear();
+    validHolesMap.clear();
+    depthConveyor.keypoint.clear();
+    depthConveyor.rectangle.clear();
+
+    HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    // It is expected that there is one valid hole the onee inside the medium variance square
+    EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();

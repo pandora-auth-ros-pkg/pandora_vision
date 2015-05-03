@@ -750,6 +750,8 @@ namespace pandora_vision
       config.big_rect_thresh;
     Parameters::HoleFusion::rgb_distance_variance_thresh = 
       config.rgb_distance_variance_thresh;
+    Parameters::HoleFusion::rgb_small_distance_variance_thresh = 
+      config.rgb_small_distance_variance_thresh;
     Parameters::HoleFusion::hole_border_thresh = 
       config.hole_border_thresh;
     Parameters::HoleFusion::depth_difference_thresh = 
@@ -1272,6 +1274,13 @@ namespace pandora_vision
     distanceValidation(image, &(*depthHolesConveyor), &realDepthContours, pointCloud);
 
     // eliminate RGB contours with small distance variance or very big distance variance (considering them as unstuffed)
+    // Do not bother for small depth variance if the holes are too close to the sensor
+    float sum = 0;
+    for(int row = 0; row < image.rows; row ++)
+      for(int col = 0; col < image.cols; col ++)
+        sum += image.at<float>(row, col);
+    float avg = sum / (image.rows * image.cols);
+
     for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
     {
       if(realRgbContours[i])
@@ -1281,8 +1290,14 @@ namespace pandora_vision
         cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
         cv::meanStdDev (ROI, mean, stddev);
         float distanceVariance = static_cast<float>(stddev.val[0]); 
-        if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh || (Parameters::HoleFusion::remove_unstuffed_holes && distanceVariance > Parameters::HoleFusion::depth_difference_thresh))
-          realRgbContours[i] = false;
+        if(avg > Parameters::Depth::min_valid_depth)
+        {
+          if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh || (Parameters::HoleFusion::remove_unstuffed_holes && distanceVariance > Parameters::HoleFusion::depth_difference_thresh))
+            realRgbContours[i] = false;
+        }
+        else
+          if(distanceVariance < Parameters::HoleFusion::rgb_small_distance_variance_thresh || (Parameters::HoleFusion::remove_unstuffed_holes && distanceVariance > Parameters::HoleFusion::depth_difference_thresh))
+            realRgbContours[i] = false;
 
       }
     }

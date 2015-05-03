@@ -482,6 +482,8 @@ namespace pandora_vision
       config.canny_kernel_size;
     Parameters::Depth::filtering_type =
       config.filtering_type;
+    Parameters::Depth::min_valid_depth =
+      config.min_valid_depth;
   }
 
 
@@ -546,88 +548,106 @@ namespace pandora_vision
       imgs.push_back(tmp);
     }
 #endif
-    // Initial filtering of contours variant from the background
-    cv::Mat filteredImage;
-    filterImage(
-        depthImage,
-        &filteredImage);
 
-#ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
-    {
-      cv::Mat tmp;
-      filteredImage.copyTo(tmp);
-      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += STR(" : Edges after filtering");
-      msgs.push_back(msg);
-      imgs.push_back(tmp);
-    }
-#endif
-
-    std::vector<std::vector<cv::Point> > contours;
-    // Find contours in the variance image.
-    detectContours(filteredImage, &contours);
-    // center of mass of each contour
-    std::vector<cv::Point2f> mc(contours.size());
-    std::vector<cv::Rect> boundRect(contours.size());
-    // Get center of mass and bounding box of each contour.
-    getContourInfo(contours ,&mc, &boundRect);
-    std::vector<bool> realContours(contours.size(), true);
-    // True contour sizes after possible merging
-    std::vector<int> contourWidth(contours.size());
-    std::vector<int> contourHeight(contours.size());
-    // Validate contours found. The product is a vector with a flag for each contour.
-    validateContours(depthImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
-    // The final vectors of keypoints, and rectangles.
     HolesConveyor conveyor;
-    std::vector<cv::Point2f> keypoints;
-    std::vector<cv::Rect> rectangles;
-    for(int i = 0; i < contours.size(); i++)
-      if(realContours.at(i))
+    // do not even try to find holes if the distance is too small or equivalently the frame is too noisy
+    float sum = 0;
+    for(int row = 0; row < depthImage.rows; row ++)
+      for(int col = 0; col < depthImage.cols; col ++)
       {
-        keypoints.push_back(mc[i]);
-        cv::Rect temp(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
-        rectangles.push_back(temp);
+        sum += depthImage.at<float>(row, col);
       }
+    float avg = sum / (depthImage.rows * depthImage.cols);
+    if(avg > Parameters::Depth::min_valid_depth)
+    {
 
-    conveyor.keypoint = keypoints;
-    conveyor.rectangle = rectangles;
+      // Initial filtering of contours variant from the background
+      cv::Mat filteredImage;
+      filterImage(
+          depthImage,
+          &filteredImage);
 
 #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
-    {
-      std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += STR(" : Initial keypoints");
-      msgs.push_back(msg);
-      imgs.push_back(Visualization::showKeypoints(msg, filteredImage, -1, mc));
-    }
+      if(Parameters::Debug::show_find_holes) // Debug
+      {
+        cv::Mat tmp;
+        filteredImage.copyTo(tmp);
+        std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += STR(" : Edges after filtering");
+        msgs.push_back(msg);
+        imgs.push_back(tmp);
+      }
+#endif
+
+      std::vector<std::vector<cv::Point> > contours;
+      // Find contours in the variance image.
+      detectContours(filteredImage, &contours);
+      // center of mass of each contour
+      std::vector<cv::Point2f> mc(contours.size());
+      std::vector<cv::Rect> boundRect(contours.size());
+      // Get center of mass and bounding box of each contour.
+      getContourInfo(contours ,&mc, &boundRect);
+      std::vector<bool> realContours(contours.size(), true);
+      // True contour sizes after possible merging
+      std::vector<int> contourWidth(contours.size());
+      std::vector<int> contourHeight(contours.size());
+      // Validate contours found. The product is a vector with a flag for each contour.
+      validateContours(depthImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
+      // The final vectors of keypoints, and rectangles.
+      std::vector<cv::Point2f> keypoints;
+      std::vector<cv::Rect> rectangles;
+      for(int i = 0; i < contours.size(); i++)
+        if(realContours.at(i))
+        {
+          keypoints.push_back(mc[i]);
+          cv::Rect temp(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
+          rectangles.push_back(temp);
+        }
+
+      conveyor.keypoint = keypoints;
+      conveyor.rectangle = rectangles;
+
+#ifdef DEBUG_SHOW
+      if(Parameters::Debug::show_find_holes) // Debug
+      {
+        std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += STR(" : Initial keypoints");
+        msgs.push_back(msg);
+        imgs.push_back(Visualization::showKeypoints(msg, filteredImage, -1, mc));
+      }
 #endif
 
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)
-    {
-      msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
-      msg += STR(" : Blobs");
-      msgs.push_back(msg);
-      imgs.push_back(
-          Visualization::showHoles(
-            msg,
-            depthImage,
-            conveyor,
-            -1,
-            std::vector<std::string>())
-          );
-    }
+      if (Parameters::Debug::show_find_holes)
+      {
+        msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
+        msg += STR(" : Blobs");
+        msgs.push_back(msg);
+        imgs.push_back(
+            Visualization::showHoles(
+              msg,
+              depthImage,
+              conveyor,
+              -1,
+              std::vector<std::string>())
+            );
+      }
 #endif
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)
-    {
-      Visualization::multipleShow("Depth node", imgs, msgs,
-          Parameters::Debug::show_find_holes_size, 1);
-    }
+      if (Parameters::Debug::show_find_holes)
+      {
+        Visualization::multipleShow("Depth node", imgs, msgs,
+            Parameters::Debug::show_find_holes_size, 1);
+      }
 #endif
+    }
+    else 
+    {
+      conveyor.rectangle.clear();
+      conveyor.keypoint.clear();
+    }
     //
     //#ifdef DEBUG_TIME
     //    Timer::tick("findHoles");
