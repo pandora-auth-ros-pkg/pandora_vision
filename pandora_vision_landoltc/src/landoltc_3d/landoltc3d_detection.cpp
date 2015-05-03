@@ -288,7 +288,7 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 }
 
 void LandoltC3dDetection::predatorCallback(
-    const pandora_vision_msgs::LandoltcPredator& msg)
+    const pandora_vision_msgs::Predator& msg)
 {
   cv_bridge::CvImagePtr in_msg;
   in_msg = cv_bridge::toCvCopy(msg.image, sensor_msgs::image_encodings::BGR8);
@@ -305,8 +305,9 @@ void LandoltC3dDetection::predatorCallback(
        _frame_id, _parent_frame_id));
   }
 
-  cv::Rect bounding_box = cv::Rect(msg.areaOfInterest.x, msg.areaOfInterest.y,
-      msg.areaOfInterest.width, msg.areaOfInterest.height);
+  cv::Rect bounding_box = cv::Rect(msg.areaOfInterest.center.x, 
+      msg.areaOfInterest.center.y, msg.areaOfInterest.width,
+      msg.areaOfInterest.height);
   float posterior = msg.posterior;
   //ROS_INFO("Getting Frame From Predator");
   _landoltc3dDetector.setPredatorValues(bounding_box, posterior);

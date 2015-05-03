@@ -36,9 +36,7 @@
 #include <sys/stat.h>
 
 #include "pandora_common_msgs/GeneralAlert.h"
-#include "pandora_vision_msgs/LandoltcPredator.h"
-#include "pandora_vision_msgs/PredatorMsg.h"
-#include "pandora_vision_msgs/AnnotationMsg.h"
+#include "pandora_vision_msgs/Predator.h"
 
 #include <tld/TLD.h>
 #include <urdf_parser/urdf_parser.h>
@@ -172,7 +170,7 @@ class Predator : public StateClient
     @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
     @return void
     **/
-    void annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg);
+    void annotationCallback(const pandora_vision_msgs::Predator& msg);
 
     /**
     @brief Function that retrieves the parent to the frame_id
@@ -266,7 +264,7 @@ class Predator : public StateClient
     int prevState;
 
 };
-} // namespace pandora_vision
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_PREDATOR_PREDATOR_NODE_H
 
 

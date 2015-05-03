@@ -25,11 +25,9 @@ add_message_files(
   Keypoint.msg
   LandoltcAlert.msg
   LandoltcAlertVector.msg
-  LandoltcPredator.msg
   QRAlert.msg
   QRAlertVector.msg
-  PredatorMsg.msg
-  AnnotationMsg.msg
+  Predator.msg
   )
 
 generate_messages(
