@@ -138,13 +138,6 @@ namespace pandora_vision
       copy(const BlobVector& src);
 
     /**
-     * @brief Returns the number of blobs inside BlobVector message
-     * @return The size of vector blobs
-     */
-    int
-      getSize();
-
-    /**
      * @brief Extracts the specified hole from a BlobVector into a new
      * BlobVector struct that is returned
      * @param[in] index [int] The index of the hole inside the conveyor

@@ -124,8 +124,7 @@ namespace pandora_vision
       // points that are drawn will be the hole's outline points
       int imageWidth = blobVector_.image.width;
       int imageHeight = blobVector_.image.height;
-      int imageSize = imageWidth * imageHeight;
-      cv::Mat canvas = cv::Mat::zeros(imageSize, CV_8UC1);
+      cv::Mat canvas = cv::Mat::zeros(imageHeight, imageWidth, CV_8UC1);
       unsigned char* ptr = canvas.ptr();
 
       for (unsigned int a = 0; a < blobOutlineVector.size(); a++) {
@@ -140,16 +139,16 @@ namespace pandora_vision
       blobOutlineVector.clear();
       float area = 0.0;
       OutlineDiscovery::raycastKeypoint(
-          MessageConversions::msgToCv(blob.areaOfInterest.center),
+          MessageConversions::msgToKeypoint(blob.areaOfInterest.center),
           &canvas,
           raycastKeypointPartitions,
           false,
           &blobOutlineVector,
           &area);
 
-      for (unsigned int j = 0; j < blobsOutlineVector.size(); j++) {
+      for (unsigned int j = 0; j < blobOutlineVector.size(); j++) {
         blob.outline.push_back(
-            MessageConversions::cvToMsg(blobsOutlineVector[j]));
+            MessageConversions::cvToMsg(blobOutlineVector[j]));
       }
 
       // Push hole back into the conveyor
@@ -161,7 +160,7 @@ namespace pandora_vision
 
   int
   BlobVector::
-  size()
+  size() const
   {
     return this->blobVector_.blobs.size();
   }
@@ -241,16 +240,9 @@ namespace pandora_vision
     this->blobVector_ = src.blobVector_;
   }
 
-  int
-  BlobVector::
-  getSize()
-  {
-    return blobVector_.blobs.size();
-  }
-
   pandora_vision_msgs::Blob
   BlobVector::
-  getBlob(int index)
+  getBlob(int index) const
   {
     return this->blobVector_.blobs[index];
   }
@@ -366,7 +358,7 @@ namespace pandora_vision
 
     // The vector of holes' indices
     std::vector<int> indices;
-    for (int i = 0; i < temp.getSize(); i++)
+    for (int i = 0; i < temp.size(); i++)
     {
       indices.push_back(i);
     }
