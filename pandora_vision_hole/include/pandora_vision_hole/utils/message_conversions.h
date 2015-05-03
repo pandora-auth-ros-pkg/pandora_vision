@@ -81,6 +81,7 @@ namespace pandora_vision
       static cv::Mat convertPointCloudMessageToImage(
         const PointCloudPtr& pointCloud, const int& encoding);
 
+      // TODO
       /**
         @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
         message
@@ -98,6 +99,7 @@ namespace pandora_vision
         std::vector<pandora_vision_msgs::Blob>*
         candidateHolesVector);
 
+      // TODO
       /**
         @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
         message
@@ -144,6 +146,7 @@ namespace pandora_vision
         const pandora_vision_msgs::BlobVector& msg,
         cv::Mat* image, const std::string& encoding);
 
+      // TODO
       /**
         @brief Recreates the HolesConveyor struct for the candidate holes
         from the pandora_vision_msgs::CandidateHolerMsg message
@@ -170,6 +173,7 @@ namespace pandora_vision
         const int& representationMethod,
         const int& raycastKeypointPartitions);
 
+      // TODO
       /**
         @brief Unpacks the the HolesConveyor struct for the
         candidate holes, the interpolated depth image or the RGB image
@@ -195,6 +199,12 @@ namespace pandora_vision
         const int& representationMethod,
         const std::string& encoding,
         const int& raycastKeypointPartitions);
+
+    static pandora_vision_msgs::Keypoint
+      cvToMsg(const cv::Point2f& point);
+    static cv::Point2f
+      msgToCv(const pandora_vision_msgs::Keypoint& point);
+
 
   };
 

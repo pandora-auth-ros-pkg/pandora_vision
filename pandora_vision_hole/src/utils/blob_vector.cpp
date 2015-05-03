@@ -40,6 +40,7 @@
 #include "pandora_vision_msgs/Blob.h"
 #include "pandora_vision_msgs/Keypoint.h"
 
+#include "utils/message_conversions.h"
 #include "utils/blob_vector.h"
 
 /**
@@ -57,6 +58,13 @@ namespace pandora_vision
   }
   BlobVector::
   ~BlobVector() {}
+
+  int
+  BlobVector::
+  size()
+  {
+    return this->blobVector_.blobs.size();
+  }
 
   void
   BlobVector::
@@ -272,10 +280,10 @@ namespace pandora_vision
 
     if (intent == 0) {
       // Push them back into the vector
-      rectangleVertices.push_back(cvToMsg(vertex_1));
-      rectangleVertices.push_back(cvToMsg(vertex_2));
-      rectangleVertices.push_back(cvToMsg(vertex_3));
-      rectangleVertices.push_back(cvToMsg(vertex_4));
+      rectangleVertices.push_back(MessageConversions::cvToMsg(vertex_1));
+      rectangleVertices.push_back(MessageConversions::cvToMsg(vertex_2));
+      rectangleVertices.push_back(MessageConversions::cvToMsg(vertex_3));
+      rectangleVertices.push_back(MessageConversions::cvToMsg(vertex_4));
     }
     else {
       cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
@@ -293,30 +301,13 @@ namespace pandora_vision
         {
           if (canvas.at<unsigned char>(i, j) != 0)
           {
-            rectangleVertices.push_back(cvToMsg(cv::Point2f(j, i)));
+            rectangleVertices.push_back(
+                MessageConversions::cvToMsg(cv::Point2f(j, i)));
           }
         }
       }
     }
     return rectangleVertices;
-  }
-
-  pandora_vision_msgs::Keypoint
-  BlobVector::
-  cvToMsg(const cv::Point2f& point)
-  {
-    pandora_vision_msgs::Keypoint msg_point;
-    msg_point.x = point.x;
-    msg_point.y = point.y;
-    return msg_point;
-  }
-
-  cv::Point2f
-  BlobVector::
-  msgToCv(const pandora_vision_msgs::Keypoint& point)
-  {
-    cv::Point2f cv_point(point.x, point.y);
-    return cv_point;
   }
 
 }  // namespace pandora_vision

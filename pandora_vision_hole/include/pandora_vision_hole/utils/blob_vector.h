@@ -63,6 +63,9 @@ namespace pandora_vision
     virtual
       ~BlobVector ();
 
+    int
+      size() const;
+
     /**
      * @brief Extends one BlobVector struct to another.
      * @param[in] src [const BlobVector&] The source conveyor
@@ -119,7 +122,7 @@ namespace pandora_vision
      * conveyor
      */
     pandora_vision_msgs::Blob
-      getBlob(int index);
+      getBlob(int index) const;
 
     /**
      * @brief Given two sources of struct BlobVector, this function
@@ -192,7 +195,7 @@ namespace pandora_vision
      * TODO
      */
     void
-      print(int id = -1);
+      print(int id = -1) const;
 
   private:
     /**
@@ -210,12 +213,6 @@ namespace pandora_vision
     std::vector<pandora_vision_msgs::Keypoint>
       generateRectangle(const cv::Point2f& upperLeft,
           int x, int y, int intent);
-
-    pandora_vision_msgs::Keypoint
-      cvToMsg(const cv::Point2f& point);
-
-    cv::Point2f
-      msgToCv(const pandora_vision_msgs::Keypoint& point);
 
   private:
     pandora_vision_msgs::BlobVector blobVector_;

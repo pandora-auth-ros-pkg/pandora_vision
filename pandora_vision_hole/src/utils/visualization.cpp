@@ -35,6 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
+#include "utils/message_conversions.h"
 #include "utils/visualization.h"
 
 /**
@@ -199,10 +200,10 @@ namespace pandora_vision
 
 
   /**
-    @brief Depicts the contents of a HolesConveyor on an image
+    @brief Depicts the contents of a BlobVector on an image
     @param[in] windowTitle [const std::string&] The window title
     @param[in] inImage [const cv::Mat&] The image to show
-    @param[in] conveyor [const HolesConveyor&] The holes conveyor
+    @param[in] blobVector [const BlobVector&] The holes conveyor
     @param[in] ms [const int&] How many ms the showing lasts
     @param[in] msgs [const std::vector<std::string>&] Message to show to
     each keypoint
@@ -212,7 +213,7 @@ namespace pandora_vision
   cv::Mat Visualization::showHoles(
     const std::string& windowTitle,
     const cv::Mat& inImage,
-    const HolesConveyor& conveyor,
+    const BlobVector& blobVector,
     const int& ms,
     const std::vector<std::string>& msgs,
     const float& hz)
@@ -232,40 +233,44 @@ namespace pandora_vision
     std::vector<cv::KeyPoint> keypointsVector;
     for (int i = 0; i < conveyor.size(); i++)
     {
-      keypointsVector.push_back(conveyor.holes[i].keypoint);
+      keypointsVector.push_back(MessageConversions::msgToCv(
+            blobVector.getBlob(i).areaOfInterest.center));
     }
 
     cv::drawKeypoints(img, keypointsVector, img, CV_RGB(0, 255, 0),
       cv::DrawMatchesFlags::DEFAULT);
 
-    for(unsigned int i = 0; i < conveyor.size(); i++)
+    for(unsigned int i = 0; i < blobVector.size(); i++)
     {
-      for(unsigned int j = 0; j < conveyor.holes[i].outline.size(); j++)
+      Blob blob = blobVector.getBlob(i);
+      // Draw outlines
+      for(unsigned int j = 0; j < blob.outline.size(); j++)
       {
-        img.at<unsigned char>(conveyor.holes[i].outline[j].y,
-          3 * conveyor.holes[i].outline[j].x + 2) = 0;
+        img.at<unsigned char>(blob.outline[j].y,
+          3 * blob.outline[j].x + 2) = 0;
 
-        img.at<unsigned char>(conveyor.holes[i].outline[j].y,
-          3 * conveyor.holes[i].outline[j].x + 1) = 255;
+        img.at<unsigned char>(blob.outline[j].y,
+          3 * blob.outline[j].x + 1) = 255;
 
-        img.at<unsigned char>(conveyor.holes[i].outline[j].y,
-          3 * conveyor.holes[i].outline[j].x + 0) = 0;
+        img.at<unsigned char>(blob.outline[j].y,
+          3 * blob.outline[j].x + 0) = 0;
       }
-    }
+      // Draw bounding boxes
+      AreaOfInterest area = blob.areaOfInterest;
+      cv::Point2f tl(area.center.x - area.width / 2, area.center.y - area.height / 2);
+      cv::Point2f bl(tl.x, tl.y + area.height);
+      cv::Point2f tr(tl.x + area.width, tl.y);
+      cv::Point2f br(tr.x, tr.y + area.height);
+      cv::line(img, tl, tr, CV_RGB(255, 0, 0), 1, 8);
+      cv::line(img, tr, br, CV_RGB(255, 0, 0), 1, 8);
+      cv::line(img, br, bl, CV_RGB(255, 0, 0), 1, 8);
+      cv::line(img, bl, tl, CV_RGB(255, 0, 0), 1, 8);
 
-    for (int i = 0; i < conveyor.size(); i++)
-    {
-      for(int j = 0; j < 4; j++)
-      {
-        cv::line(img, conveyor.holes[i].rectangle[j],
-          conveyor.holes[i].rectangle[(j + 1) % 4], CV_RGB(255, 0, 0), 1, 8);
-      }
-
-      if(msgs.size() == conveyor.size())
+      if (msgs.size() == blobVector.size())
       {
         cv::putText(img, msgs[i].c_str(),
-          cvPoint(conveyor.holes[i].keypoint.pt.x - 20,
-            conveyor.holes[i].keypoint.pt.y - 20),
+          cvPoint(blob.areaOfInterest.center.x - 20,
+            blob.areaOfInterest.center.y - 20),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255, 50, 50), 1, CV_AA);
       }
     }

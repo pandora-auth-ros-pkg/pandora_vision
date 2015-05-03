@@ -480,4 +480,22 @@ namespace pandora_vision
     #endif
   }
 
+  pandora_vision_msgs::Keypoint
+  MessageConversions::
+  cvToMsg(const cv::Point2f& point)
+  {
+    pandora_vision_msgs::Keypoint msg_point;
+    msg_point.x = point.x;
+    msg_point.y = point.y;
+    return msg_point;
+  }
+
+  cv::Point2f
+  MessageConversions::
+  msgToCv(const pandora_vision_msgs::Keypoint& point)
+  {
+    cv::Point2f cv_point(point.x, point.y);
+    return cv_point;
+  }
+
 } // namespace pandora_vision
