@@ -110,7 +110,7 @@ namespace pandora_vision
             rectangles,
             blobsArea,
             blobsOutlineVector,
-            blobVec);
+            conveyor);
           break;
         }
       // Locate the outline of blobs via raycasting
@@ -149,12 +149,12 @@ namespace pandora_vision
             rectangles,
             blobsArea,
             blobsOutlineVector,
-            blobVec);
+            conveyor);
           break;
         }
     }
 
-    // The end product here is a struct (blobVec) of keypoints,
+    // The end product here is a struct (conveyor) of keypoints,
     // a set of rectangles that enclose them  and the outline of
     // each blob found.
 
@@ -215,10 +215,10 @@ namespace pandora_vision
       if (keypointResidesInRectIds.size() == 1)
       {
         // A single hole
-        Blob hole;
+        pandora_vision_msgs::Blob hole;
 
         // Accumulate keypoint, rectangle and outline properties onto hole
-        hole.areaOfInterest.center = MessageConversions::cvToMsg(
+        hole.areaOfInterest.center = MessageConversions::keypointToMsg(
             inKeyPoints[keypointId]);
         hole.areaOfInterest.width = fabs(inRectangles[keypointResidesInRectIds[0]][0].x -
           inRectangles[keypointResidesInRectIds[0]][1].x);
@@ -226,11 +226,11 @@ namespace pandora_vision
           inRectangles[keypointResidesInRectIds[0]][3].y);
         hole.outline.clear();
         for (int i = 0; i < inContours[keypointId].size(); ++i) {
-          hole.outline.append(MessageConversions::cvToMsg(inContours[keypointId][i]));
+          hole.outline.push_back(MessageConversions::cvToMsg(inContours[keypointId][i]));
         }
 
         // Push hole back into the conveyor
-        conveyor->blobs.push_back(hole);
+        conveyor->append(hole);
       }
 
       // If the keypoint resides in multiple rectangles,
@@ -253,25 +253,22 @@ namespace pandora_vision
         }
 
         // A single hole
-        Blob hole;
+        pandora_vision_msgs::Blob hole;
 
         // Accumulate keypoint, rectangle and outline properties onto hole
-        hole.areaOfInterest.center = MessageConversions::cvToMsg(
+        hole.areaOfInterest.center = MessageConversions::keypointToMsg(
             inKeyPoints[keypointId]);
         hole.areaOfInterest.width = fabs(inRectangles[minAreaRectId][0].x -
-          inRectangles[keypointResidesInRectIds[0]][1].x);
+          inRectangles[minAreaRectId][1].x);
         hole.areaOfInterest.height = fabs(inRectangles[minAreaRectId][0].y -
-          inRectangles[keypointResidesInRectIds[0]][3].y);
+          inRectangles[minAreaRectId][3].y);
         hole.outline.clear();
         for (int i = 0; i < inContours[keypointId].size(); ++i) {
-          hole.outline.append(MessageConversions::cvToMsg(inContours[keypointId][i]));
+          hole.outline.push_back(MessageConversions::cvToMsg(inContours[keypointId][i]));
         }
-        hole.keypoint = inKeyPoints[keypointId];
-        hole.rectangle = inRectangles[minAreaRectId];
-        hole.outline = inContours[keypointId];
 
         // Push hole back into the conveyor
-        conveyor->blobs.push_back(hole);
+        conveyor->append(hole);
       }
       // If the keypoint has no rectangle attached to it,
       // do not insert the hole it corresponds to in struct hole
