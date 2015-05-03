@@ -22,6 +22,7 @@ add_message_files(
   HoleDirectionAlertVector.msg
   HolePositionAlert.msg
   HolePositionAlertVector.msg
+  Keypoint.msg
   LandoltcAlert.msg
   LandoltcAlertVector.msg
   LandoltcPredator.msg

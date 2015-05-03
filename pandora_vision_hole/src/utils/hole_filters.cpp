@@ -67,7 +67,7 @@ namespace pandora_vision
     const std::vector<cv::KeyPoint>& keyPoints,
     cv::Mat* denoisedDepthImageEdges,
     const int& detectionMethod,
-    BlobVector* conveyor);
+    BlobVector* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("validateBlobs", "findHoles");
@@ -110,8 +110,7 @@ namespace pandora_vision
             rectangles,
             blobsArea,
             blobsOutlineVector,
-            conveyor);
-
+            blobVec);
           break;
         }
       // Locate the outline of blobs via raycasting
@@ -150,13 +149,12 @@ namespace pandora_vision
             rectangles,
             blobsArea,
             blobsOutlineVector,
-            conveyor);
-
+            blobVec);
           break;
         }
     }
 
-    // The end product here is a struct (conveyor) of keypoints,
+    // The end product here is a struct (blobVec) of keypoints,
     // a set of rectangles that enclose them  and the outline of
     // each blob found.
 
@@ -212,7 +210,6 @@ namespace pandora_vision
           keypointResidesInRectIds.push_back(rectId);
         }
       }
-
 
       // If the keypoint resides in exactly one rectangle.
       if (keypointResidesInRectIds.size() == 1)
@@ -276,14 +273,12 @@ namespace pandora_vision
         // Push hole back into the conveyor
         conveyor->blobs.push_back(hole);
       }
-
       // If the keypoint has no rectangle attached to it,
       // do not insert the hole it corresponds to in struct hole
     }
-
     #ifdef DEBUG_TIME
     Timer::tick("validateKeypointsToRectangles");
     #endif
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

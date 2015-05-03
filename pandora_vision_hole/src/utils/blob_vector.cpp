@@ -70,16 +70,16 @@ namespace pandora_vision
   BlobVector::
   extend(const BlobVector& src)
   {
-    this->blobVector_.blobs.insert(blobs.end(),
-        src.blobVector_.blobs.first(), src.blobVector_.blobs.end());
+    this->blobVector_.blobs.insert(this->blobVector_.blobs.end(),
+        src.blobVector_.blobs.begin(), src.blobVector_.blobs.end());
   }
 
   void
   BlobVector::
   extend(const pandora_vision_msgs::BlobVector& src)
   {
-    this->blobVector_.blobs.insert(blobs.end(),
-        src.blobs.first(), src.blobs.end());
+    this->blobVector_.blobs.insert(this->blobVector_.blobs.end(),
+        src.blobs.begin(), src.blobs.end());
   }
 
   void
@@ -101,8 +101,8 @@ namespace pandora_vision
     // Assign area of interest
     blob.areaOfInterest.center.x = rectangleUpperLeft.x + rx / 2;
     blob.areaOfInterest.center.y = rectangleUpperLeft.y + ry / 2;
-    blob.areaOfInterest.width = k.rx;
-    blob.areaOfInterest.height = k.ry;
+    blob.areaOfInterest.width = rx;
+    blob.areaOfInterest.height = ry;
 
     // Assign the outline points
     blob.outline =
@@ -111,12 +111,20 @@ namespace pandora_vision
     // Append hole into conveyor
     append(blob);
   }
+  
+  void
+  BlobVector::
+  append(const std::vector<cv::Point2f>& rectanglePoints,
+      const std::vector<cv::Point2f>& outlinePoints)
+  {
+    
+  }
 
   void
   BlobVector::
   clear()
   {
-    this->blobVector_->blobs.clear();
+    this->blobVector_.blobs.clear();
   }
 
   void
@@ -132,7 +140,14 @@ namespace pandora_vision
   {
     this->blobVector_ = src.blobVector_;
   }
-
+  
+  int
+  BlobVector::
+  getSize()
+  {
+    return blobVector_.blobs.size();
+  }
+  
   pandora_vision_msgs::Blob
   BlobVector::
   getBlob(int index)
@@ -146,7 +161,7 @@ namespace pandora_vision
       const BlobVector& srcB)
   {
     // Clear the destination conveyor if not empty
-    if (size() > 0) clear();
+    if (this->blobVector_.blobs.size() > 0) clear();
     // Extend with the first source
     extend(srcA);
     // Extend with the second source
@@ -159,7 +174,7 @@ namespace pandora_vision
       const BlobVector& srcB)
   {
     // Clear the destination conveyor if not empty
-    if (size() > 0) clear();
+    if (this->blobVector_.blobs.size() > 0) clear();
     // Extend with the first source
     extend(srcA);
     // Extend with the second source
@@ -172,7 +187,7 @@ namespace pandora_vision
       const pandora_vision_msgs::BlobVector& srcB)
   {
     // Clear the destination conveyor if not empty
-    if (size() > 0) clear();
+    if (this->blobVector_.blobs.size() > 0) clear();
     // Extend with the first source
     extend(srcA);
     // Extend with the second source
@@ -185,7 +200,7 @@ namespace pandora_vision
       const pandora_vision_msgs::BlobVector& srcB)
   {
     // Clear the destination conveyor if not empty
-    if (size() > 0) clear();
+    if (this->blobVector_.blobs.size() > 0) clear();
     // Extend with the first source
     extend(srcA);
     // Extend with the second source
@@ -251,7 +266,7 @@ namespace pandora_vision
 
     // The vector of holes' indices
     std::vector<int> indices;
-    for (int i = 0; i < temp.size(); i++)
+    for (int i = 0; i < temp.getSize(); i++)
     {
       indices.push_back(i);
     }
@@ -262,7 +277,7 @@ namespace pandora_vision
     // Fill the src conveyor with the shuffled holes
     for (int i = 0; i < indices.size(); i++)
     {
-      append(temp.getHole(indices[i]));
+      append(temp.getBlob(indices[i]));
     }
   }
 
@@ -290,7 +305,7 @@ namespace pandora_vision
 
       cv::Mat canvas = cv::Mat::zeros(480, 640, CV_8UC1);
 
-      for(unsigned int j = 0; j < 4; j++)
+      for (unsigned int j = 0; j < 4; j++)
       {
         cv::line(canvas, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
       }

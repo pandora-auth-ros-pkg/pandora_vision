@@ -95,7 +95,7 @@ namespace pandora_vision
         const int& ms);
 
       /**
-        @brief Depicts the contents of a HolesConveyor on an image
+        @brief Depicts the contents of a BlobVector on an image
         @param[in] windowTitle [const std::string&] The window title
         @param[in] inImage [const cv::Mat&] The image to show
         @param[in] blobVector [const BlobVector&] The holes conveyor

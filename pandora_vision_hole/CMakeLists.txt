@@ -72,6 +72,7 @@ include_directories(
 add_library(${PROJECT_NAME}_utils
   src/utils/blob_vector.cpp
   src/utils/blob_detection.cpp
+  src/utils/blob_vector.cpp
   src/utils/bounding_box_detection.cpp
   src/utils/edge_detection.cpp
   src/utils/histogram.cpp
@@ -85,7 +86,6 @@ add_library(${PROJECT_NAME}_utils
   src/utils/visualization.cpp
   src/utils/wavelets.cpp
   )
-
 target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )

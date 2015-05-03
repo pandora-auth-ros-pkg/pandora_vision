@@ -58,7 +58,6 @@ namespace pandora_vision
   class HoleFilters
   {
     public:
-
       /**
         @brief Given a set of keypoints and an edges image, this function
         returns the valid keypoints and for each one, its respective, least
@@ -71,8 +70,8 @@ namespace pandora_vision
         outline of a blob is obtained.
         0 means by means of brushfire,
         1 by means of raycasting
-        @param[in,out] blob [BlobVector*] A struct that contains
-        the final valid candidate holes
+        @param[in,out] blobVec [BlobVector*] A class that contains
+        the final valid blobs
         @return void
        **/
       static void validateBlobs(

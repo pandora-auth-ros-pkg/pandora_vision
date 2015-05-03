@@ -76,16 +76,16 @@ namespace pandora_vision
     cv::Mat big(rows * imgs[0].rows, cols * imgs[0].cols, CV_8UC3);
 
     // Draw images
-    for(unsigned int im = 0 ; im < imgs.size() ; im++)
+    for (unsigned int im = 0 ; im < imgs.size() ; im++)
     {
       unsigned int startRow, startCol;
       startRow = im / cols * imgs[im].rows;
       startCol = im % cols * imgs[im].cols;
-      for(unsigned int i = 0 ; i < imgs[im].rows ; i++)
+      for (unsigned int i = 0 ; i < imgs[im].rows ; i++)
       {
-        for(unsigned int j = 0 ; j < imgs[im].cols ; j++)
+        for (unsigned int j = 0 ; j < imgs[im].cols ; j++)
         {
-          if(imgs[im].channels() == 1)
+          if (imgs[im].channels() == 1)
           {
             big.at<cv::Vec3b>(startRow + i, startCol + j)[0] =
               imgs[im].at<unsigned char>(i, j);
@@ -94,7 +94,7 @@ namespace pandora_vision
             big.at<cv::Vec3b>(startRow + i, startCol + j)[2] =
               imgs[im].at<unsigned char>(i, j);
           }
-          else if(imgs[im].channels() == 3)
+          else if (imgs[im].channels() == 3)
           {
             big.at<cv::Vec3b>(startRow + i, startCol + j) =
               imgs[im].at<cv::Vec3b>(i, j);
@@ -107,7 +107,7 @@ namespace pandora_vision
         cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 255, 0), 1, CV_AA);
     }
 
-    for(unsigned int i = 1 ; i <= rows - 1 ; i++)
+    for (unsigned int i = 1 ; i <= rows - 1 ; i++)
     {
       cv::line(big,
         cv::Point2f(0 , i * imgs[0].rows - 1),
@@ -115,7 +115,7 @@ namespace pandora_vision
         CV_RGB(255, 255, 255), 2, 8);
     }
 
-    for(unsigned int i = 1 ; i <= cols - 1 ; i++)
+    for (unsigned int i = 1 ; i <= cols - 1 ; i++)
     {
       cv::line(big,
         cv::Point2f(i * imgs[0].cols - 1 , 0),
@@ -208,7 +208,7 @@ namespace pandora_vision
     @param[in] msgs [const std::vector<std::string>&] Message to show to
     each keypoint
     @param[in] hz [const float&] If positive holds the Hz
-    @return void
+    @return [cv::Mat] The drawn image
    **/
   cv::Mat Visualization::showHoles(
     const std::string& windowTitle,
@@ -275,15 +275,15 @@ namespace pandora_vision
       }
     }
 
-    if(hz > 0)
+    if (hz > 0)
     {
       cv::putText(img,
-        (TOSTR(hz)+std::string("Hz")).c_str(),
+        (TOSTR(hz) + std::string("Hz")).c_str(),
         cvPoint(20, 20),
         cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 0, 255), 1, CV_AA);
     }
 
-    if(ms >= 0)
+    if (ms >= 0)
     {
       Visualization::show(windowTitle.c_str(), img, ms);
     }

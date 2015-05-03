@@ -97,6 +97,18 @@ namespace pandora_vision
           int rx, int ry, int ox, int oy);
 
     /**
+     * @brief Appends an element to the blob vector
+     * @param[in] rectanglePoints [const std::vector<cv::Point2f>&] The 
+     * vertices of the bounding rectangle
+     * @param[in] outlinePoints [std::vector<cv::Point2f>&] The vertices
+     * of the hole's outline
+     * @return void
+     **/ 
+    void
+      append(const std::vector<cv::Point2f>& rectanglePoints,
+        const std::vector<cv::Point2f>& outlinePoints);
+
+    /**
      * @brief Hollows a BlobVector struct, deleting every entry in it
      * @return void
      */
@@ -113,7 +125,14 @@ namespace pandora_vision
       copy(const pandora_vision_msgs::BlobVector& src);
     void
       copy(const BlobVector& src);
-
+    
+    /**
+     * @brief Returns the number of blobs inside BlobVector message
+     * @return The size of vector blobs
+     */
+    int
+      getSize();
+    
     /**
      * @brief Extracts the specified hole from a BlobVector into a new
      * BlobVector struct that is returned
