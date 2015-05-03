@@ -231,9 +231,9 @@ namespace pandora_vision
 
     // Construct a keypoints vector to feed into the cv::drawKeypoints method
     std::vector<cv::KeyPoint> keypointsVector;
-    for (int i = 0; i < conveyor.size(); i++)
+    for (int i = 0; i < blobVector.size(); i++)
     {
-      keypointsVector.push_back(MessageConversions::msgToCv(
+      keypointsVector.push_back(MessageConversions::msgToKeypoint(
             blobVector.getBlob(i).areaOfInterest.center));
     }
 

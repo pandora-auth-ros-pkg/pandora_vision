@@ -38,9 +38,12 @@
 #ifndef UTILS_MESSAGE_CONVERSIONS_H
 #define UTILS_MESSAGE_CONVERSIONS_H
 
+#include "std_msgs/Header.h"
+#include "sensor_msgs/Image.h"
+
 #include "utils/defines.h"
 #include "utils/outline_discovery.h"
-#include "utils/holes_conveyor.h"
+#include "utils/blob_vector.h"
 #include "pandora_vision_msgs/BlobVector.h"
 
 /**
@@ -62,13 +65,13 @@ namespace pandora_vision
         @brief Converts a cv::Mat image into a sensor_msgs::Image message
         @param[in] image [const cv::Mat&] The image
         @param[in] encoding [const std::string&] The image message's encoding
-        @param[in] msg [const sensor_msgs::Image&] A message needed for
-        setting the output message's header by extracting its header
+        @param[in] header [const std_msgs::Header&] header
         @return [sensor_msgs::Image] The output image message
        **/
-      static sensor_msgs::Image convertImageToMessage(
-        const cv::Mat& image, const std::string& encoding,
-        const sensor_msgs::Image& msg);
+      static sensor_msgs::Image
+        convertImageToMessage(
+            const cv::Mat& image, const std::string& encoding,
+            const std_msgs::Header& header);
 
       /**
         @brief Extracts an image from a point cloud message
@@ -78,48 +81,9 @@ namespace pandora_vision
         CV_32FC1 for depth image, CV_8UC3 for rgb image
         @return cv::Mat The output image
        **/
-      static cv::Mat convertPointCloudMessageToImage(
-        const PointCloudPtr& pointCloud, const int& encoding);
-
-      // TODO
-      /**
-        @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
-        message
-        @param[in] conveyor [HolesConveyor&] A struct containing
-        vectors of the holes' keypoints, bounding rectangles' vertices
-        and blobs' outlines
-        @param[out] candidateHolesVector
-        [std::vector<pandora_vision_msgs::CandidateHolesVectorMsg>*]
-        The vector containing the conveyor's holes in
-        pandora_vision_msgs::CandidateHolesVectorMsg format
-        @return void
-       **/
-      static void createCandidateHolesVector(
-        const HolesConveyor& conveyor,
-        std::vector<pandora_vision_msgs::Blob>*
-        candidateHolesVector);
-
-      // TODO
-      /**
-        @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
-        message
-        @param[in] conveyor [HolesConveyor&] A struct containing
-        vectors of the holes' keypoints, bounding rectangles' vertices
-        and blobs' outlines
-        @param[in] image [cv::Mat&] The image to be packed in the message
-        @param[out] candidateHolesVectorMsg
-        [pandora_vision_msgs::CandidateHolesVectorMsg*] The output message
-        @param[in] encoding [std::string&] The image's encoding
-        @param[in] msg [const sensor_msgs::Image&] Needed to extract
-        its header and place it as the header of the output message
-        @return void
-       **/
-      static void createCandidateHolesVectorMessage(
-        const HolesConveyor& conveyor,
-        const cv::Mat& image,
-        pandora_vision_msgs::BlobVector* candidateHolesVectorMsg,
-        const std::string& encoding,
-        const sensor_msgs::Image& msg);
+      static cv::Mat
+        convertPointCloudMessageToImage(
+            const PointCloudPtr& pointCloud, const int& encoding);
 
       /**
         @brief Extracts a cv::Mat image from a ROS image message
@@ -129,9 +93,10 @@ namespace pandora_vision
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
-      static void extractImageFromMessage(
-        const sensor_msgs::Image& msg, cv::Mat* image,
-        const std::string& encoding);
+      static void
+        extractImageFromMessage(
+            const sensor_msgs::Image& msg, cv::Mat* image,
+            const std::string& encoding);
 
       /**
         @brief Extracts a cv::Mat image from a custom ROS message  of type
@@ -142,11 +107,7 @@ namespace pandora_vision
         @param[in] encoding [const std::string&] The image encoding
         @return void
        **/
-      static void extractImageFromMessageContainer(
-        const pandora_vision_msgs::BlobVector& msg,
-        cv::Mat* image, const std::string& encoding);
 
-      // TODO
       /**
         @brief Recreates the HolesConveyor struct for the candidate holes
         from the pandora_vision_msgs::CandidateHolerMsg message
@@ -165,13 +126,6 @@ namespace pandora_vision
         blob's outline
         @return void
        **/
-      static void fromCandidateHoleMsgToConveyor(
-        const std::vector<pandora_vision_msgs::Blob>&
-        candidateHolesVector,
-        HolesConveyor* conveyor,
-        const cv::Mat& inImage,
-        const int& representationMethod,
-        const int& raycastKeypointPartitions);
 
       // TODO
       /**
@@ -192,19 +146,18 @@ namespace pandora_vision
         blob's outline
         @return void
        **/
-      static void unpackMessage(
-        const pandora_vision_msgs::BlobVector& holesMsg,
-        HolesConveyor* conveyor,
-        cv::Mat* image,
-        const int& representationMethod,
-        const std::string& encoding,
-        const int& raycastKeypointPartitions);
 
     static pandora_vision_msgs::Keypoint
       cvToMsg(const cv::Point2f& point);
+
     static cv::Point2f
       msgToCv(const pandora_vision_msgs::Keypoint& point);
 
+    static pandora_vision_msgs::Keypoint
+      keypointToMsg(const cv::KeyPoint& point);
+
+    static cv::KeyPoint
+      msgToKeypoint(const pandora_vision_msgs::Keypoint& point);
 
   };
 

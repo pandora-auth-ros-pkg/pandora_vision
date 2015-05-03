@@ -51,13 +51,113 @@ namespace pandora_vision
 {
   BlobVector::
   BlobVector() {}
+
   BlobVector::
   BlobVector(const pandora_vision_msgs::BlobVector& src)
   {
     this->blobVector_ = src;
   }
+
+  BlobVector::
+  BlobVector(const pandora_vision_msgs::BlobVector& src,
+      int raycastKeypointPartitions)
+  {
+    this->blobVector_ = src;
+    fromWavelets(raycastKeypointPartitions);
+  }
+
   BlobVector::
   ~BlobVector() {}
+
+  pandora_vision_msgs::BlobVector
+  BlobVector::
+  createMessage(
+      const cv::Mat& image, const std::string& encoding,
+      const std_msgs::Header& header)
+  {
+    this->blobVector_.image = MessageConversions::convertImageToMessage(
+        image, encoding, header);
+    this->blobVector_.header = header;
+    return this->blobVector_;
+  }
+
+  cv::Mat
+  BlobVector::
+  getCvImage(const std::string& encoding)
+  {
+    cv::Mat image;
+    MessageConversions::extractImageFromMessage(this->blobVector_.image,
+        &image, encoding);
+    return image;
+  }
+
+  void
+  BlobVector::
+  fromWavelets(int raycastKeypointPartitions)
+  {
+    std::vector<pandora_vision_msgs::Blob> blobs;
+
+    for (unsigned int i = 0; i < size(); i++) {
+
+      // A single hole
+      pandora_vision_msgs::Blob blob;
+
+      // Recreate conveyor.keypoints
+      blob.areaOfInterest.center.x = 2 * blobVector_.blobs[i].areaOfInterest.center.x;
+      blob.areaOfInterest.center.y = 2 * blobVector_.blobs[i].areaOfInterest.center.y;
+
+      // Recreate conveyor.rectangles
+      blob.areaOfInterest.width = 2 * blobVector_.blobs[i].areaOfInterest.width;
+      blob.areaOfInterest.height = 2 * blobVector_.blobs[i].areaOfInterest.height;
+
+      std::vector<cv::Point2f> blobOutlineVector;
+      // Recreate conveyor.outlines
+      for (unsigned int j = 0; j < blobVector_.blobs[i].outline.size(); j++) {
+        cv::Point2f keypoint;
+        keypoint.x = 2 * blobVector_.blobs[i].outline[j].x;
+        keypoint.y = 2 * blobVector_.blobs[i].outline[j].y;
+        blobOutlineVector.push_back(keypoint);
+      }
+
+      // Because the outline points do not constitute a coherent shape,
+      // we need to draw them, connect them linearly and then the
+      // points that are drawn will be the hole's outline points
+      int imageWidth = blobVector_.image.width;
+      int imageHeight = blobVector_.image.height;
+      int imageSize = imageWidth * imageHeight;
+      cv::Mat canvas = cv::Mat::zeros(imageSize, CV_8UC1);
+      unsigned char* ptr = canvas.ptr();
+
+      for (unsigned int a = 0; a < blobOutlineVector.size(); a++) {
+        unsigned int ind;
+        ind = blobOutlineVector[a].x + imageWidth * blobOutlineVector[a].y;
+        ptr[ind] = 255;
+      }
+
+      // The easiest and most efficient way to obtain the same result as
+      // if image_representation_method was 0 is to apply the raycast
+      // algorithm
+      blobOutlineVector.clear();
+      float area = 0.0;
+      OutlineDiscovery::raycastKeypoint(
+          MessageConversions::msgToCv(blob.areaOfInterest.center),
+          &canvas,
+          raycastKeypointPartitions,
+          false,
+          &blobOutlineVector,
+          &area);
+
+      for (unsigned int j = 0; j < blobsOutlineVector.size(); j++) {
+        blob.outline.push_back(
+            MessageConversions::cvToMsg(blobsOutlineVector[j]));
+      }
+
+      // Push hole back into the conveyor
+      blobs.push_back(blob);
+    }
+
+    blobVector_.blobs = blobs;
+  }
 
   int
   BlobVector::
@@ -111,13 +211,13 @@ namespace pandora_vision
     // Append hole into conveyor
     append(blob);
   }
-  
+
   void
   BlobVector::
   append(const std::vector<cv::Point2f>& rectanglePoints,
       const std::vector<cv::Point2f>& outlinePoints)
   {
-    
+
   }
 
   void
@@ -140,14 +240,14 @@ namespace pandora_vision
   {
     this->blobVector_ = src.blobVector_;
   }
-  
+
   int
   BlobVector::
   getSize()
   {
     return blobVector_.blobs.size();
   }
-  
+
   pandora_vision_msgs::Blob
   BlobVector::
   getBlob(int index)
