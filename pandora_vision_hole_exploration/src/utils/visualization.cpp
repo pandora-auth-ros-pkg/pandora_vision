@@ -238,12 +238,12 @@ namespace pandora_vision
     //cv::drawKeypoints(img, keypointsVector, img, CV_RGB(0, 255, 0),
     //    cv::DrawMatchesFlags::DEFAULT);
     for (int i = 0; i < keypointsVector.size(); i++)
-      cv::circle(img, cv::Point2f(keypointsVector[i].x, keypointsVector[i].y), 5, CV_RGB(0,255,0), -1);
+      cv::circle(img, cv::Point2f(keypointsVector[i].x, keypointsVector[i].y), 5, CV_RGB(0, 255, 0), -1);
     cv::RNG rng(12345);
 
     for (int i = 0; i < conveyor.rectangle.size(); i++)
     {
-      cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+      cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
       cv::rectangle(img, conveyor.rectangle[i].tl(), conveyor.rectangle[i].br(), color, 2, 8, 0);
 
       if(msgs.size() == conveyor.size())
@@ -298,7 +298,7 @@ namespace pandora_vision
     }
 
     for (int i = 0; i < keypoints.size(); i++)
-      cv::circle(img, cv::Point2f(keypoints[i].x, keypoints[i].y), 5, CV_RGB(0,255,0), -1);
+      cv::circle(img, cv::Point2f(keypoints[i].x, keypoints[i].y), 5, CV_RGB(0, 255, 0), -1);
 
     if(ms >= 0)
     {

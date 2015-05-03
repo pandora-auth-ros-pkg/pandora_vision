@@ -133,7 +133,7 @@ namespace pandora_vision
   int Parameters::Depth::canny_ratio = 3;
   int Parameters::Depth::canny_kernel_size = 3;
   int Parameters::Depth::filtering_type = 1;
-  float Parameters::Depth::min_valid_depth = 0.9;
+  float Parameters::Depth::min_valid_depth = 0.92;
   //
   //
   //  ///////////////////// Edge detection specific parameters /////////////////////

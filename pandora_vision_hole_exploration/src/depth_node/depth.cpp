@@ -510,31 +510,6 @@ namespace pandora_vision
     std::vector<std::string> msgs;
 #endif
 
-
-    //cv::Mat temp;
-    //if (depthImage.type() != CV_8UC1 || depthImage.type() != CV_8UC3)
-    //{
-    //  double min;
-    //  double max;
-    //  cv::minMaxIdx(depthImage, &min, &max);
-    //  if (max != min)
-    //  {
-    //    temp = (depthImage - min) * 255 / (max - min);
-    //    temp = cv::abs(temp);
-    //    temp.convertTo(temp, CV_8UC1);
-    //  }
-    //  else
-    //  {
-    //    cv::convertScaleAbs(depthImage, temp, 255 / max);
-    //  }
-    //}
-    //else 
-    //  depthImage.copyTo(temp);
-
-    //temp.copyTo(depthImage);
-
-
-
 #ifdef DEBUG_SHOW
     if(Parameters::Debug::show_find_holes) // Debug
     {
@@ -586,7 +561,7 @@ namespace pandora_vision
       std::vector<cv::Point2f> mc(contours.size());
       std::vector<cv::Rect> boundRect(contours.size());
       // Get center of mass and bounding box of each contour.
-      getContourInfo(contours ,&mc, &boundRect);
+      getContourInfo(contours , &mc, &boundRect);
       std::vector<bool> realContours(contours.size(), true);
       // True contour sizes after possible merging
       std::vector<int> contourWidth(contours.size());
@@ -600,7 +575,11 @@ namespace pandora_vision
         if(realContours.at(i))
         {
           keypoints.push_back(mc[i]);
-          cv::Rect temp(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
+          cv::Rect temp(
+              mc[i].x - contourWidth[i] / 2, 
+              mc[i].y - contourHeight[i] / 2, 
+              contourWidth[i], 
+              contourHeight[i]);
           rectangles.push_back(temp);
         }
 
@@ -648,7 +627,7 @@ namespace pandora_vision
       conveyor.rectangle.clear();
       conveyor.keypoint.clear();
     }
-    //
+
     //#ifdef DEBUG_TIME
     //    Timer::tick("findHoles");
     //#endif
@@ -657,17 +636,41 @@ namespace pandora_vision
   }
 
 
-  void Depth::filterImage(const cv::Mat& depthImage, cv::Mat* filteredImage)
+  /**
+    @brief The function called to filter the depth image
+    @details Based on filtering_type param applying simple thresholding at 0, simple morhology transformations and to eliminate (make dark) the region at borders or simple edge detection method.
+    @param[in] depthImage [const cv::Mat&] The Depth image to be processed,
+    in CV_8UC3 format
+    @param[in] filteredImage [cv::Mat* filteredImage] The output filtered binary image.
+    @return void
+   **/
+  void Depth::filterImage(
+      const cv::Mat& depthImage, 
+      cv::Mat* filteredImage)
   {
     // The input depth image, in CV_8UC1 format
-    cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
-        depthImage, 0);
+    cv::Mat visualizableDepthImage = 
+      Visualization::scaleImageForVisualization(
+          depthImage,
+          0);
     if(Parameters::Depth::filtering_type == 0)
     {
-      cv::threshold(visualizableDepthImage, (*filteredImage), Parameters::Depth::intensity_threshold, 1.0, CV_THRESH_BINARY);
+      cv::threshold(
+          visualizableDepthImage, 
+          (*filteredImage), 
+          Parameters::Depth::intensity_threshold, 
+          1.0, 
+          CV_THRESH_BINARY);
       int morphologyKernel = Parameters::Depth::morphology_open_kernel_size;
-      cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
-      cv::morphologyEx( (*filteredImage), (*filteredImage), cv::MORPH_OPEN, structuringElement );
+      cv::Mat structuringElement = 
+        cv::getStructuringElement(
+            cv::MORPH_ELLIPSE, 
+            cv::Size(morphologyKernel, morphologyKernel));
+      cv::morphologyEx( 
+          (*filteredImage), 
+          (*filteredImage), 
+          cv::MORPH_OPEN, 
+          structuringElement );
       morphologyKernel = Parameters::Depth::morphology_close_kernel_size;
       structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
       cv::morphologyEx((*filteredImage), (*filteredImage), cv::MORPH_CLOSE, structuringElement);
@@ -675,7 +678,12 @@ namespace pandora_vision
     else
     {
       cv::Mat temp; 
-      cv::Canny(visualizableDepthImage, temp, Parameters::Depth::canny_low_threshold, Parameters::Depth::canny_low_threshold * Parameters::Depth::canny_ratio, Parameters::Depth::canny_kernel_size);
+      cv::Canny(
+          visualizableDepthImage, 
+          temp, 
+          Parameters::Depth::canny_low_threshold, 
+          Parameters::Depth::canny_low_threshold * Parameters::Depth::canny_ratio, 
+          Parameters::Depth::canny_kernel_size);
       //apply canny mask
       visualizableDepthImage.copyTo((*filteredImage), temp);
     }
@@ -694,7 +702,15 @@ namespace pandora_vision
   }
 
 
-  void Depth::detectContours(const cv::Mat& filteredImage, std::vector<std::vector<cv::Point> >* contours)
+  /**
+    @brief The function called to extract contours that were not ignored by the initial filtering held in filterImage function.
+    @param[in] filteredImage [cv::Mat&] The filtered image represented as white edges where there was a small depth. Remember that there were only edges left, which were black at the original depth image and were not random black pixels.
+    @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
+    @return void
+   **/
+  void Depth::detectContours(
+      const cv::Mat& filteredImage, 
+      std::vector<std::vector<cv::Point> >* contours)
   {
     cv::Mat temp;
     int dilationKernel = Parameters::Depth::dilation_kernel_size;
@@ -710,7 +726,16 @@ namespace pandora_vision
   }
 
 
-  void Depth::getContourInfo(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<cv::Rect>* boundRect)
+  /**
+    @brief The function called to estimate center of mass for each contour found and bounding boxes.
+    @param[in] contours [std::vector<std::vector<cv::Point>>&] The contours found before.
+    @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
+    @return void
+   **/
+  void Depth::getContourInfo(
+      const std::vector<std::vector<cv::Point> >& contours, 
+      std::vector<cv::Point2f>* mc, 
+      std::vector<cv::Rect>* boundRect)
   {
     std::vector<std::vector<cv::Point> > contoursPoly(contours.size());
     std::vector<cv::Point2f> center(contours.size());
@@ -727,7 +752,25 @@ namespace pandora_vision
   }
 
 
-  void Depth::validateContours(const cv::Mat& image, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::vector<bool>* realContours, std::vector<cv::Rect>& boundRect)
+  /**
+    @brief The function called to make validation of found contours
+    @param[in] image [cv::Mat&] The original image. Used to extract some features to evaluate contour size, similarity etc.
+    @param[in] contours [std::vector<std::vector<cv::Point>>&] The contours found before.
+    @param[in] mc [std::vector<Point2f>*] A vector containing coordinates of the centers of mass of all the contours found 
+    @param[in] contourHeight [std::vector<int>*] A vector containing the overall contours' heights 
+    @param[in] contourWidth [std::vector<int>*] A vector containing the overall contours' widths 
+    @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. Calculated inside this function.
+    @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
+    @return void
+   **/
+  void Depth::validateContours(
+      const cv::Mat& image, 
+      const std::vector<std::vector<cv::Point> >& contours, 
+      std::vector<cv::Point2f>* mc, 
+      std::vector<int>* contourHeight, 
+      std::vector<int>* contourWidth, 
+      std::vector<bool>* realContours, 
+      const std::vector<cv::Rect>& boundRect)
   {
     std::vector<int> numLabels(contours.size(), 0);
     // for merging, contour index, other contour index, possibility
@@ -739,17 +782,24 @@ namespace pandora_vision
       numLabels[i] = 0;
       if((*realContours)[i])
       {
-        (*realContours)[i] = validateContour(image, i, mc, contourHeight, contourWidth, &contourLabel, &numLabels, boundRect, contours, realContours);
+        (*realContours)[i] = 
+          validateContour(
+              image, 
+              i, 
+              mc, 
+              contourHeight, 
+              contourWidth, 
+              &contourLabel, 
+              &numLabels, 
+              boundRect, 
+              contours, 
+              realContours);
         if((*realContours).at(i))
-          if((*contourWidth)[i] > Parameters::Depth::rect_diff_thresh * (*contourHeight)[i] || (*contourHeight)[i] > Parameters::Depth::rect_diff_thresh * (*contourWidth)[i])
+          if((*contourWidth)[i] > Parameters::Depth::rect_diff_thresh * (*contourHeight)[i] 
+              || (*contourHeight)[i] > Parameters::Depth::rect_diff_thresh * (*contourWidth)[i])
             (*realContours)[i] = false;
       }
     }
-    //for( int i = 0; i < contours.size(); i++ )
-    //{
-    //  if((*realContours)[i])
-    //    (*realContours)[i] = validateContour(image, i, mc, contourHeight, contourWidth, &contourLabel, &numLabels, boundRect, contours, realContours);
-    //}
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i] && numLabels[i] > 0)
@@ -758,89 +808,47 @@ namespace pandora_vision
   }
 
 
-  bool Depth::validateContour(const cv::Mat& image, int ci, std::vector<cv::Point2f>* mcv, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::map<std::pair<int, int>, float>* contourLabel, std::vector<int>* numLabels, std::vector<cv::Rect>& boundRect, std::vector<std::vector<cv::Point> >& contours, std::vector<bool>* realContours)
+  /**
+    @brief The function called by validateContours to make validation of a single contour
+    @param[in] image [const cv::Mat&] The depth image 
+    @param[in] ci [int] Current contour index in contours vector 
+    @param[in] mcv [std::vector<Point2f>*] A vector containing coordinates of the centers of mass of all the contours found 
+    @param[in] contourHeight [std::vector<int>*] A vector containing the overall contours' heights 
+    @param[in] contourWidth [std::vector<int>*] A vector containing the overall contours' widths 
+    @param[in] contourLabel [std::map<std::pair<int, int>, float>*] A map of contours relationship represented as current contour & some other contour as key and a probability of shame contour calculated via the values of some features between the two contours.
+    @param[in] numLabels [std::vector<int>*] For each contour a counter of how many times it appears in the abovementioned map. In the map are strored only pairs of contours whose merging probability is above some threshold.
+    @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
+    @param[in] contours [std::vector<std::vector<cv::Point> >&] All contours found. 
+    @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. 
+    @return void
+   **/
+  bool Depth::validateContour(
+      const cv::Mat& image, 
+      int ci, std::vector<cv::Point2f>* mcv, 
+      std::vector<int>* contourHeight, 
+      std::vector<int>* contourWidth, 
+      std::map<std::pair<int, int>, float>* contourLabel, 
+      std::vector<int>* numLabels, 
+      const std::vector<cv::Rect>& boundRect, 
+      const std::vector<std::vector<cv::Point> >& contours, 
+      std::vector<bool>* realContours)
   {
     int sumWhites = 0;
-    if(cv::contourArea(contours[ci]) > Parameters::Depth::huge_contour_thresh || cv::contourArea(contours[ci]) < Parameters::Depth::tiny_contour_thresh)
-    {
-      //    for(int i = (*mcv)[ci].y - validateThresh; i < (*mcv)[ci].y + validateThresh; i ++)
-      //        for(int j = (*mcv)[ci].x - validateThresh; j < (*mcv)[ci].x + validateThresh; j ++)
-      //            if(j >= 0 && j <= sigma.cols && i >= 0 && i <= sigma.rows )
-      //            {
-      //                if((int)sigma.at<uchar>(j, i) == 255)
-      //                {
-      //                    sumWhites ++;
-      //                }
-      //            }
-      //    bool horizontalSerie = true;
-      //    int horizontalMaxRay = 0;
-      //    for(int i = (*mcv)[ci].y - validateThresh; i < (*mcv)[ci].y + validateThresh; i ++)
-      //    {
-      //        int horizontalSum = 0;
-      //        horizontalSerie = true;
-      //        for(int j = (*mcv)[ci].x - validateThresh; j < (*mcv)[ci].x + validateThresh; j ++)
-      //        {
-      //            if(j >= 0 && j <= sigma.cols && i >= 0 && i <= sigma.rows )
-      //            {
-      //                horizontalSum ++;
-      //                if((int)sigma.at<uchar>(j, i) != 255)
-      //                {
-      //                    horizontalSerie = false;
-      //                    break;
-      //                }
-      //            }
-      //            else
-      //            {
-      //                horizontalSerie = false;
-      //            }
-      //        }
-      //        if(horizontalSum > horizontalMaxRay)
-      //            horizontalMaxRay = horizontalSum;
-      //        if(horizontalSerie)
-      //            break;
-      //    }
-      //    bool verticalSerie = true;
-      //    int verticalMaxRay = 0;
-      //    for(int i = (*mcv)[ci].x - validateThresh; i < (*mcv)[ci].x + validateThresh; i ++)
-      //    {
-      //        int verticalSum = 0;
-      //        verticalSerie = true;
-      //        for(int j = (*mcv)[ci].y - validateThresh; j < (*mcv)[ci].y + validateThresh; j ++)
-      //        {
-      //            if(j >= 0 && j <= sigma.cols && i >= 0 && i <= sigma.rows )
-      //            {
-      //                verticalSum ++;
-      //                if((int)sigma.at<uchar>(j, i) != 255)
-      //                {
-      //                    verticalSerie = false;
-      //                    break;
-      //                }
-      //            }
-      //            else
-      //            {
-      //                verticalSerie = false;
-      //            }
-      //        }
-      //        if(verticalSum > verticalMaxRay)
-      //            verticalMaxRay = verticalSum;
-      //        if(verticalSerie)
-      //            break;
-      //    }
-
-      //    //if(sumWhites > lowerWhitesThresh && sumWhites < higherWhitesThresh && ((!horizontalSerie && !verticalSerie) || abs(horizontalMaxRay - verticalMaxRay) < rayDiffThresh))
-      //    //    return true;
-      //    //else
-      //    //    return false;
-      //    return true;
+    if(cv::contourArea(contours[ci]) > Parameters::Depth::huge_contour_thresh 
+        || cv::contourArea(contours[ci]) < Parameters::Depth::tiny_contour_thresh)
       return false;
-    }
     else
     {
       for(int i = 0; i < contours.size(); i ++)
       {
         if(i != ci)
         {
-          if((*realContours)[i] && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) && (std::abs((int)image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x) - (int)image.at<uchar>((*mcv)[i].y, (*mcv)[i].x)) < Parameters::Depth::neighbor_value_thresh))
+          if((*realContours)[i] 
+              && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) 
+              && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) 
+              && (std::abs(static_cast<int>(image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x)) 
+                  - static_cast<int>(image.at<uchar>((*mcv)[i].y, (*mcv)[i].x))) 
+                < Parameters::Depth::neighbor_value_thresh))
           {
             int upperX;
             int upperY;
@@ -877,7 +885,7 @@ namespace pandora_vision
             if(upperX < 0)
               upperX = 0;
             if(upperY < 0)
-              upperY = 0;                                                                                                                              
+              upperY = 0;
             if(lowerX > image.cols)
               lowerX = image.cols;
             if(lowerY > image.rows)
@@ -887,10 +895,11 @@ namespace pandora_vision
             int sumBlacks = 0;
             for(int r = 0; r < ROI.rows; r ++)
               for(int c = 0; c < ROI.cols; c ++)
-                if((int)image.at<uchar>(r, c) == 0)
-                  sumBlacks ++;
-            float euclideanDistance = 1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
-            // TODO Toda Vez! ignore double registration same contours with other label. Maybe OK.
+                if(static_cast<int>(image.at<uchar>(r, c)) == 0)
+                  sumBlacks++;
+            float euclideanDistance = 
+              1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) 
+                    + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
             float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
             //std::cout << mergeProbability << "\n";
             if(mergeProbability > Parameters::Depth::merge_thresh)
@@ -898,8 +907,8 @@ namespace pandora_vision
               if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
               {
                 (*contourLabel)[std::make_pair(ci, i)] = mergeProbability;
-                (*numLabels)[ci] ++;
-                (*numLabels)[i] ++;
+                (*numLabels)[ci]++;
+                (*numLabels)[i]++;
               }
             }
           }
@@ -912,7 +921,26 @@ namespace pandora_vision
   }
 
 
-  void Depth::mergeContours(int ci, std::vector<cv::Point2f>* mcv, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::map<std::pair<int, int>, float>* contourLabel, std::vector<int>* numLabels, std::vector<bool>* realContours, std::vector<std::vector<cv::Point> >& contours)
+  /**
+    @brief The function called to make validation of found contours
+    @param[in] image [cv::Mat&] The original image. Used to extract some features to evaluate contour size, similarity etc.
+    @param[in] contours [std::vector<std::vector<cv::Point>>&] The contours found before.
+    @param[in] mc [std::vector<Point2f>*] A vector containing coordinates of the centers of mass of all the contours found 
+    @param[in] contourHeight [std::vector<int>*] A vector containing the overall contours' heights 
+    @param[in] contourWidth [std::vector<int>*] A vector containing the overall contours' widths 
+    @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. Calculated inside this function.
+    @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
+    @return void
+   **/
+  void Depth::mergeContours(
+      int ci, 
+      std::vector<cv::Point2f>* mcv, 
+      std::vector<int>* contourHeight, 
+      std::vector<int>* contourWidth, 
+      std::map<std::pair<int, int>, float>* contourLabel, 
+      std::vector<int>* numLabels, 
+      std::vector<bool>* realContours, 
+      const std::vector<std::vector<cv::Point> >& contours)
   {
     int maxProbability = 0;
     double sumX = (*mcv)[ci].x;
@@ -923,7 +951,10 @@ namespace pandora_vision
       for(int j = 0; j < contours.size(); j ++)
       {
         if((*realContours).at(j) && j != ci)
-          if((*contourLabel).find(std::make_pair(ci, j)) != (*contourLabel).end() || (*contourLabel).find(std::make_pair(j, ci)) != (*contourLabel).end())
+          if((*contourLabel).find(std::make_pair(ci, j)) != 
+              (*contourLabel).end() 
+              || (*contourLabel).find(std::make_pair(j, ci)) != 
+              (*contourLabel).end())
           {
             //if((*contourLabel)[ci][j] > max)
             //{
@@ -932,13 +963,16 @@ namespace pandora_vision
             (*realContours)[j] = false;
             (*contourWidth)[ci] += (*contourWidth)[j];
             (*contourHeight)[ci] += (*contourHeight)[j];
-            sum ++;
+            sum++;
             sumX += (*mcv)[j].x;
             sumY += (*mcv)[j].y;
             for(int k = 0; k < (*contourLabel).size(); k++)
               for(int l = 0; l < contours.size(); l ++)
                 if((*realContours)[l] && l != ci && l != j)
-                  if((*contourLabel).find(std::make_pair(j, l)) != (*contourLabel).end() || (*contourLabel).find(std::make_pair(l, j)) != (*contourLabel).end())
+                  if((*contourLabel).find(std::make_pair(j, l)) != 
+                      (*contourLabel).end() 
+                      || (*contourLabel).find(std::make_pair(l, j)) != 
+                      (*contourLabel).end())
                   {
                     //if((*contourLabel)[ci][j] > max)
                     //{
@@ -947,7 +981,7 @@ namespace pandora_vision
                     (*realContours)[l] = false;
                     (*contourWidth)[ci] += (*contourWidth)[l];
                     (*contourHeight)[ci] += (*contourHeight)[l];
-                    sum ++;
+                    sum++;
                     sumX += (*mcv)[l].x;
                     sumY += (*mcv)[l].y;
                   }

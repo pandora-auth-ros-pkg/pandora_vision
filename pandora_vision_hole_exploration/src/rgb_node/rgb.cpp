@@ -453,12 +453,10 @@ namespace pandora_vision
 
 
   /**
-    @brief Finds holes, provided a RGB image in CV_8UC3 format.
-
-    First apply a variance filter to extract only RsOI with big variance from background. After this validate them, find keypoints and bounding boxes.
+    @brief The function called to extract holes from RGB image
     @param[in] rgbImage [const cv::Mat&] The RGB image to be processed,
     in CV_8UC3 format
-    @return HolesConveyor The struct that contains the holes found
+    @return [HolesConveyor] A struct with useful info about each hole.
    **/
   HolesConveyor Rgb::findHoles(const cv::Mat& rgbImage) 
   {
@@ -509,15 +507,15 @@ namespace pandora_vision
     std::vector<cv::Point2f> mc(contours.size());
     std::vector<cv::Rect> boundRect(contours.size());
     // Get center of mass and bounding box of each contour.
-    getContourInfo(contours ,&mc, &boundRect);
+    getContourInfo(contours , &mc, &boundRect);
     std::vector<bool> realContours(contours.size(), true);
     // True contour sizes after possible merging
     std::vector<int> contourWidth(contours.size());
     std::vector<int> contourHeight(contours.size());
     for(int i = 0; i < contours.size(); i++)
     {
-        contourHeight[i] = boundRect[i].height; 
-        contourWidth[i] = boundRect[i].width; 
+      contourHeight[i] = boundRect[i].height; 
+      contourWidth[i] = boundRect[i].width; 
     }
     // Validate contours found. The product is a vector with a flag for each contour.
     validateContours(rgbImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
@@ -529,7 +527,12 @@ namespace pandora_vision
     {
       if(realContours.at(i))
       {
-        boundRect[i] = cv::Rect(mc[i].x - contourWidth[i] / 2, mc[i].y - contourHeight[i] / 2, contourWidth[i], contourHeight[i]);
+        boundRect[i] = 
+          cv::Rect(
+              mc[i].x - contourWidth[i] / 2, 
+              mc[i].y - contourHeight[i] / 2, 
+              contourWidth[i], 
+              contourHeight[i]);
         keypoints.push_back(mc[i]);
         rectangles.push_back(boundRect[i]);
       }
@@ -581,6 +584,13 @@ namespace pandora_vision
   }
 
 
+  /**
+    @brief The function called to calculate the variance in the RGB image, at overlapping windows of specific size.
+    @param[in] rgbImage [const cv::Mat&] The RGB image to be processed,
+    in CV_8UC3 format
+    @param[in] bigVarianceContours [cv::Mat* bigVarianceContours] The output binary image thresholded based on the variance of the RGB image.
+    @return void
+   **/
   void Rgb::computeVarianceImage(const cv::Mat& rgbImage, cv::Mat* bigVarianceContours)
   {
     cv::GaussianBlur(rgbImage, rgbImage, cv::Size(0, 0), Parameters::Rgb::original_image_gaussian_blur);
@@ -607,10 +617,18 @@ namespace pandora_vision
     cv::minMaxLoc((*bigVarianceContours), &minVal, &maxVal);
 
     // keep contours with the biggest variance, aka. the most white
-    cv::threshold((*bigVarianceContours), (*bigVarianceContours), Parameters::Rgb::std_variance_threshold, 255, CV_THRESH_BINARY);
+    cv::threshold(
+        (*bigVarianceContours), 
+        (*bigVarianceContours), 
+        Parameters::Rgb::std_variance_threshold, 
+        255, 
+        CV_THRESH_BINARY);
 
     int morphologyKernel = Parameters::Rgb::std_variance_morphology_close_size;
-    cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
+    cv::Mat structuringElement = 
+      cv::getStructuringElement(
+          cv::MORPH_ELLIPSE, 
+          cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx((*bigVarianceContours), (*bigVarianceContours), cv::MORPH_CLOSE, structuringElement);
     morphologyKernel = Parameters::Rgb::std_variance_morphology_open_size;
     structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
@@ -624,17 +642,38 @@ namespace pandora_vision
   }
 
 
+  /**
+    @brief The function called to extract contours that were not ignored by the initial filtering held in computeVarianceImage function.
+    @param[in] bigVarianceContours [cv::Mat& bigVarianceContours] The variance image represented as edges. Remember that there were only edges left, which represent big variance.
+    @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
+    @return void
+   **/
   void Rgb::detectContours(const cv::Mat& bigVarianceContours, std::vector<std::vector<cv::Point> >* contours)
   {
     int erodeKernel = Parameters::Rgb::contour_erode_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(erodeKernel, erodeKernel));
     cv::erode(bigVarianceContours, bigVarianceContours, structuringElement);
     cv::vector<cv::Vec4i> hierarchy;
-    findContours(bigVarianceContours, (*contours), hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    findContours(
+        bigVarianceContours, 
+        (*contours), 
+        hierarchy, 
+        CV_RETR_EXTERNAL, 
+        CV_CHAIN_APPROX_SIMPLE, 
+        cv::Point(0, 0));
   }
 
 
-  void Rgb::getContourInfo(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<cv::Rect>* boundRect)
+  /**
+    @brief The function called to estimate center of mass for each contour found and bounding boxes.
+    @param[in] contours [std::vector<std::vector<cv::Point>>&] The contours found before.
+    @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
+    @return void
+   **/
+  void Rgb::getContourInfo(
+      const std::vector<std::vector<cv::Point> >& contours, 
+      std::vector<cv::Point2f>* mc, 
+      std::vector<cv::Rect>* boundRect)
   {
     std::vector<std::vector<cv::Point> > contoursPoly(contours.size());
     std::vector<cv::Point2f> center(contours.size());
@@ -651,20 +690,42 @@ namespace pandora_vision
   }
 
 
-  void Rgb::validateContours(const cv::Mat& image, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::vector<bool>* realContours, std::vector<cv::Rect>& boundRect)
+  /**
+    @brief The function called to make validation of found contours
+    @param[in] image [cv::Mat&] The original image. Used to extract some features to evaluate contour similarity etc.
+    @param[in] contours [std::vector<std::vector<cv::Point>>&] The contours found before.
+    @param[in] mc [std::vector<Point2f>*] A vector containing coordinates of the centers of mass of all the contours found 
+    @param[in] contourHeight [std::vector<int>*] A vector containing the overall contours' heights 
+    @param[in] contourWidth [std::vector<int>*] A vector containing the overall contours' widths 
+    @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. Calculated inside this function.
+    @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
+    @return void
+   **/
+  void Rgb::validateContours(
+      const cv::Mat& image, 
+      const std::vector<std::vector<cv::Point> >& contours, 
+      std::vector<cv::Point2f>* mc, 
+      std::vector<int>* contourHeight, 
+      std::vector<int>* contourWidth, 
+      std::vector<bool>* realContours, 
+      const std::vector<cv::Rect>& boundRect)
   {
     for(int ci = 0; ci < contours.size(); ci ++)
     {
       if((*realContours)[ci])
 
-        if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge && cv::contourArea(contours[ci]) > Parameters::Rgb::huge_contour_thresh))
+        if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge 
+              && cv::contourArea(contours[ci]) > Parameters::Rgb::huge_contour_thresh))
         {
           (*realContours)[ci] = false;
           continue;
         }
         else if(cv::contourArea(contours[ci]) < Parameters::Rgb::tiny_contour_thresh)
         {
-          if((*mc)[ci].x < Parameters::Rgb::border_thresh || (*mc)[ci].y < Parameters::Rgb::border_thresh || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
+          if((*mc)[ci].x < Parameters::Rgb::border_thresh 
+              || (*mc)[ci].y < Parameters::Rgb::border_thresh 
+              || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh 
+              || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
           {
             (*realContours)[ci] = false;
             continue;
@@ -673,88 +734,107 @@ namespace pandora_vision
         else
         {
 
-            cv::Mat ROI = image(boundRect[ci]);
-            cv::Scalar curAvg = cv::mean(ROI);
-            for(int i = 0; i < contours.size(); i ++)
+          cv::Mat ROI = image(boundRect[ci]);
+          cv::Scalar curAvg = cv::mean(ROI);
+          for(int i = 0; i < contours.size(); i ++)
+          {
+            if(i != ci)
             {
-              if(i != ci)
+              if((*realContours)[i] 
+                  && (std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_thresh) 
+                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_thresh))
               {
-                if((*realContours)[i] && (std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_thresh) && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_thresh))
+                int upperX;
+                int upperY;
+                int lowerX;
+                int lowerY;
+                if((*mc)[ci].x - (boundRect[ci].width / 2) > (*mc)[i].x - (boundRect[i].width / 2))
+                  upperX = (*mc)[i].x - (boundRect[i].width / 2);
+                else
+                  upperX = (*mc)[ci].x - (boundRect[ci].width / 2);
+                if((*mc)[ci].y - (boundRect[ci].height / 2) > (*mc)[i].y - (boundRect[i].height / 2))
+                  upperY = (*mc)[i].y - (boundRect[i].height / 2);
+                else
+                  upperY = (*mc)[ci].y - (boundRect[ci].height / 2);
+                if((*mc)[ci].x + (boundRect[ci].width / 2) > (*mc)[i].x + (boundRect[i].width / 2))
+                  lowerX = (*mc)[ci].x + (boundRect[ci].width / 2);
+                else
+                  lowerX = (*mc)[i].x + (boundRect[i].width / 2);
+                if((*mc)[ci].y + (boundRect[ci].height / 2) > (*mc)[i].y + (boundRect[i].height / 2))
+                  lowerY = (*mc)[ci].y + (boundRect[ci].height / 2);
+                else
+                  lowerY = (*mc)[i].y + (boundRect[i].height / 2);
+                cv::Mat ROI = image(boundRect[i]);
+                cv::Scalar otherAvg = cv::mean(ROI);
+                int homogRectWidth = std::abs(lowerX - upperX);
+                if(homogRectWidth < Parameters::Rgb::homog_rect_dims_thresh)
+                  homogRectWidth = Parameters::Rgb::homog_rect_dims_thresh;
+                int homogRectHeight = abs(lowerY - upperY);
+                if(homogRectHeight < Parameters::Rgb::homog_rect_dims_thresh)
+                  homogRectHeight = Parameters::Rgb::homog_rect_dims_thresh;
+                if(upperX + homogRectWidth > image.cols)
+                  homogRectWidth = image.cols - upperX - 1;
+                if(upperY + homogRectHeight > image.rows)
+                  homogRectHeight = image.rows - upperY - 1;
+                if(upperX < 0)
+                  upperX = 0;
+                if(upperY < 0)
+                  upperY = 0;
+                if(lowerX > image.cols)
+                  lowerX = image.cols;
+                if(lowerY > image.rows)
+                  lowerY = image.rows;
+                ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
+                HaralickFeaturesExtractor haralickFeaturesDetector_;
+                haralickFeaturesDetector_.findHaralickFeatures(ROI);
+                std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
+                if((((std::abs(curAvg[0] - otherAvg[0]) < Parameters::Rgb::neighbor_value_thresh) 
+                        && haralickFeatures[0] > Parameters::Rgb::homogenity_thresh)) 
+                    || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_tiny_distance_thresh) 
+                        && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_tiny_distance_thresh)) 
+                      && false))
                 {
-                  int upperX;
-                  int upperY;
-                  int lowerX;
-                  int lowerY;
-                  if((*mc)[ci].x - (boundRect[ci].width / 2) > (*mc)[i].x - (boundRect[i].width / 2))
-                    upperX = (*mc)[i].x - (boundRect[i].width / 2);
-                  else
-                    upperX = (*mc)[ci].x - (boundRect[ci].width / 2);
-                  if((*mc)[ci].y - (boundRect[ci].height / 2) > (*mc)[i].y - (boundRect[i].height / 2))
-                    upperY = (*mc)[i].y - (boundRect[i].height / 2);
-                  else
-                    upperY = (*mc)[ci].y - (boundRect[ci].height / 2);
-                  if((*mc)[ci].x + (boundRect[ci].width / 2) > (*mc)[i].x + (boundRect[i].width / 2))
-                    lowerX = (*mc)[ci].x + (boundRect[ci].width / 2);
-                  else
-                    lowerX = (*mc)[i].x + (boundRect[i].width / 2);
-                  if((*mc)[ci].y + (boundRect[ci].height / 2) > (*mc)[i].y + (boundRect[i].height / 2))
-                    lowerY = (*mc)[ci].y + (boundRect[ci].height / 2);
-                  else
-                    lowerY = (*mc)[i].y + (boundRect[i].height / 2);
-                  cv::Mat ROI = image(boundRect[i]);
-                  cv::Scalar otherAvg = cv::mean(ROI);
-                  int homogRectWidth = std::abs(lowerX - upperX);
-                  if(homogRectWidth < Parameters::Rgb::homog_rect_dims_thresh)
-                    homogRectWidth = Parameters::Rgb::homog_rect_dims_thresh;
-                  int homogRectHeight = abs(lowerY - upperY);
-                  if(homogRectHeight < Parameters::Rgb::homog_rect_dims_thresh)
-                    homogRectHeight = Parameters::Rgb::homog_rect_dims_thresh;
-                  if(upperX + homogRectWidth > image.cols)
-                    homogRectWidth = image.cols - upperX - 1;
-                  if(upperY + homogRectHeight > image.rows)
-                    homogRectHeight = image.rows - upperY - 1;
-                  if(upperX < 0)
-                    upperX = 0;
-                  if(upperY < 0)
-                    upperY = 0;
-                  if(lowerX > image.cols)
-                    lowerX = image.cols;
-                  if(lowerY > image.rows)
-                    lowerY = image.rows;
-                  ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
-                  HaralickFeaturesExtractor haralickFeaturesDetector_;
-                  haralickFeaturesDetector_.findHaralickFeatures(ROI);
-                  std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
-                  if((((std::abs(curAvg[0] - otherAvg[0]) < Parameters::Rgb::neighbor_value_thresh) && haralickFeatures[0] > Parameters::Rgb::homogenity_thresh)) || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_tiny_distance_thresh) && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_tiny_distance_thresh)) && false))
+                  if(cv::contourArea(contours[i]) > cv::contourArea(contours[ci]))
                   {
-                    if(cv::contourArea(contours[i]) > cv::contourArea(contours[ci]))
-                    {
-                      (*mc)[i].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
-                      (*mc)[i].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].y;
-                      (*contourHeight)[i] = (*contourHeight)[i] + (*contourHeight)[ci] + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
-                      (*contourWidth)[i] = (*contourWidth)[i] + (*contourWidth)[ci] + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
-                      (*realContours)[ci] = false;
-                      continue;
-                    }
-                    else
-                    {
-                      (*mc)[ci].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
-                      (*mc)[ci].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].x;
-                      (*contourHeight)[ci] = (*contourHeight)[ci] + (*contourHeight)[i] + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
-                      (*contourWidth)[ci] = (*contourWidth)[ci] + (*contourWidth)[i] + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
-                      (*realContours)[i] = false;
-                    }
+                    (*mc)[i].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
+                    (*mc)[i].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].y;
+                    (*contourHeight)[i] = 
+                      (*contourHeight)[i] 
+                      + (*contourHeight)[ci] 
+                      + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
+                    (*contourWidth)[i] = 
+                      (*contourWidth)[i] 
+                      + (*contourWidth)[ci] 
+                      + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
+                    (*realContours)[ci] = false;
+                    continue;
+                  }
+                  else
+                  {
+                    (*mc)[ci].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
+                    (*mc)[ci].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].x;
+                    (*contourHeight)[ci] = 
+                      (*contourHeight)[ci] 
+                      + (*contourHeight)[i] 
+                      + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
+                    (*contourWidth)[ci] = 
+                      (*contourWidth)[ci] 
+                      + (*contourWidth)[i] 
+                      + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
+                    (*realContours)[i] = false;
                   }
                 }
               }
             }
-          
+          }
+
         }
     }
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i])
-        if((*contourWidth)[i] > Parameters::Rgb::rect_diff_thresh * (*contourHeight)[i] || (*contourHeight)[i] > Parameters::Rgb::rect_diff_thresh * (*contourWidth)[i])
+        if((*contourWidth)[i] > Parameters::Rgb::rect_diff_thresh * (*contourHeight)[i] 
+            || (*contourHeight)[i] > Parameters::Rgb::rect_diff_thresh * (*contourWidth)[i])
           (*realContours)[i] = false;
     }
   }

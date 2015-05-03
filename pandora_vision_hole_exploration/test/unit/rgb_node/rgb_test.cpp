@@ -307,7 +307,9 @@ namespace pandora_vision
       // The hole should have exactly four vertices
       //EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
-      // Rectangle's perimeter must be near 28900 due to the merge. Due to dilations it could be an offset up to 20 pixels at each of the two directions (needs to fix)
+      // Rectangle's perimeter must be near 28900 due to the merge. 
+      // Due to dilations it could be an offset up to 20 pixels 
+      // at each of the two directions (needs to fix)
       EXPECT_NEAR ( 28900, conveyor.rectangle[0].width * conveyor.rectangle[0].height, 8000  );
 
 

@@ -273,7 +273,7 @@ namespace pandora_vision
 
         This method sets the interpolated depth image and the
         candidate holes acquired from the depth node.
-        If the rgb and point cloud callback counterparts have done
+        If the rgb callback counterpart has done
         what must be, it resets the number of ready nodes, unlocks
         the synchronizer and calls for processing of the candidate
         holes.
@@ -286,27 +286,6 @@ namespace pandora_vision
       void depthCandidateHolesCallback(
           const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
           depthCandidateHolesVector);
-
-
-      /**
-        @brief Recreates the HolesConveyor struct for the
-        candidate holes from the
-        pandora_vision_msgs::CandidateHolerMsg message
-        @param[in]candidateHolesVector
-        [const std::vector<pandora_vision_msgs::CandidateHoleMsg>&]
-        The input candidate holes
-        @param[out] conveyor [HolesConveyor*] The output conveyor
-        struct
-        @param[in] inImage [const cv::Mat&] An image used for its size.
-        It is needed if the wavelet method is used in the keypoints' extraction,
-        in order to obtain the coherent shape of holes' outline points
-        @return void
-       **/
-      void fromCandidateHoleMsgToConveyor(
-          const std::vector<pandora_vision_msgs::ExplorerCandidateHoleMsg>&
-          candidateHolesVector,
-          HolesConveyor* conveyor,
-          const cv::Mat& inImage);
 
       /**
         @brief Retrieves the parent to the frame_id of the input point cloud,
@@ -389,30 +368,11 @@ namespace pandora_vision
         the depth and rgb image and holes sources in order to accurately
         find valid holes.
 
-        It first assimilates all the holes that can be assimilated into other
-        ones, amalgamates holes that can be amalgamated with others and
-        connectes nearby holes with each other. Then, it passes each of the
-        resulting holes through a series of depth-based (if depth analysis
-        is possible) filters and rgb-based filters in order to extract a series
-        of probabilities for each hole. Each probability is a measure of each
-        candidate hole's validity: the more a value of a probability, the more
-        a candidate hole is indeed a hole in space. Next, a selection regime
-        is implemented in order to assess a hole's validity in the totality
-        of the filters it has been through. Finally, information about the
-        valid holes is published, along with enhanced information about them.
+        Each probability is a measure of each candidate hole's validity: the more a value of a probability, the more a candidate hole is indeed a hole in space. Finally, information about the valid holes is published.
         @param void
         @return void
        **/
       void processCandidateHoles();
-
-
-      /**
-        @brief Publishes an image showing holes found from the Depth node
-        and the RGB node.
-        @param void
-        @return void
-       **/
-      void publishRespectiveHolesFound();
 
       /**
         @brief Publishes the valid holes' information.
@@ -430,7 +390,7 @@ namespace pandora_vision
 
         This method sets the RGB image and the candidate holes acquired
         from the rgb node.
-        If the depth and point cloud callback counterparts have done
+        If the depth callback counterpart has done
         what must be, it resets the number of ready nodes, unlocks
         the synchronizer and calls for processing of the candidate
         holes.
@@ -445,20 +405,18 @@ namespace pandora_vision
           rgbCandidateHolesVector);
 
       /**
-        @brief Applies a merging operation of @param operationId, until
-        every candidate hole, even as it changes through the various merges that
-        happen, has been merged with every candidate hole that can be merged
-        with it.
-        @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+        @brief Applies a validation and merging operation of holes
+        @details validate contours based on size and distance from image sensor, validate contours based on variance of depth, merge overlapping contours.
+        @param[in,out] rgbHolesConveyor [HolesConveyor*] The rgb
         candidate holes conveyor
-        @param[in] image [const cv::Mat&] An image used for filters' resources
-        creation and size usage
+        @param[in,out] depthHolesConveyor [HolesConveyor*] The depth
+        candidate holes conveyor
+        @param[in] image [const cv::Mat&] Depth Image used for validation purposes
         @param[in] pointCloud [const PointCloudPtr] An interpolated point
-        cloud used in the connection operation; it is used to obtain real world
+        cloud used in the connection operation; it maybe will be used to obtain real world
         distances between holes
-        @param[in] operationId [const int&] The identifier of the merging
-        process. Values: 0 for assimilation, 1 for amalgamation and
-        2 for connecting
+        @param[in,out] preValidatedHoles [HolesConveyor*] The valid and non double registered holes to publish
+        @param[in,out] validHolesMap [std::map<int, float>*] Holes indexes with probabilities
         @return void
        **/
       static void mergeHoles(
@@ -469,7 +427,17 @@ namespace pandora_vision
           HolesConveyor* preValidatedHoles,
           std::map<int, float>* validHolesMap);
 
-      static void distanceValidation(
+      /**
+        @brief Applies a validation based on size and distance 
+        @details Small contours in small distance or big contours at big distance are not valid
+        @param[in] image [const cv::Mat&] Depth Image used for validation purposes
+        @param[in,out] holesConveyor [HolesConveyor*] The rgb or depth conveyor 
+        @param[in,out] realContours [std::vector<bool>*] A vector which show for each hole if it is valid or not
+        @param[in] pointCloud [const PointCloudPtr] An interpolated point
+        cloud 
+        @return void
+       **/
+      static void validateDistance(
           const cv::Mat& image,
           HolesConveyor* holesConveyor,
           std::vector<bool>* realContours,
@@ -498,27 +466,6 @@ namespace pandora_vision
         @return void
        **/
       void unlockSynchronizer();
-
-      /**
-        @brief Unpacks the the HolesConveyor struct for the
-        candidate holes, the interpolated depth image and the point cloud
-        from the pandora_vision_msgs::CandidateHolesVectorMsg message
-        @param[in] holesMsg
-        [pandora_vision_msgs::CandidateHolesVectorMsg&] The input
-        candidate holes message obtained through the depth node
-        @param[out] conveyor [HolesConveyor*] The output conveyor
-        struct
-        @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
-        depth image
-        @return void
-       **/
-      void unpackMessage(
-          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg& holesMsg,
-          HolesConveyor* conveyor,
-          cv::Mat* image,
-          const std::string& encoding);
-
-
 
       /**
         @brief The HoleFusion constructor

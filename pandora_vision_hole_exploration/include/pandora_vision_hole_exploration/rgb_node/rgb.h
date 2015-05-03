@@ -134,7 +134,9 @@ namespace pandora_vision
         @param[in] bigVarianceContours [cv::Mat* bigVarianceContours] The output binary image thresholded based on the variance of the RGB image.
         @return void
        **/
-      static void computeVarianceImage(const cv::Mat& rgbImage, cv::Mat* bigVarianceContours);
+      static void computeVarianceImage(
+          const cv::Mat& rgbImage, 
+          cv::Mat* bigVarianceContours);
 
 
       /**
@@ -143,7 +145,9 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
         @return void
        **/
-      static void detectContours(const cv::Mat& bigVarianceContours, std::vector<std::vector<cv::Point> >* contours);
+      static void detectContours(
+          const cv::Mat& bigVarianceContours, 
+          std::vector<std::vector<cv::Point> >* contours);
 
 
       /**
@@ -152,7 +156,10 @@ namespace pandora_vision
         @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
         @return void
        **/
-      static void getContourInfo(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<cv::Rect>* boundRect);
+      static void getContourInfo(
+          const std::vector<std::vector<cv::Point> >& contours, 
+          std::vector<cv::Point2f>* mc, 
+          std::vector<cv::Rect>* boundRect);
 
       /**
         @brief The function called to make validation of found contours
@@ -165,7 +172,13 @@ namespace pandora_vision
         @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
         @return void
        **/
-      static void validateContours(const cv::Mat& image, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::vector<bool>* realContours, std::vector<cv::Rect>& boundRect);
+      static void validateContours(
+          const cv::Mat& image, 
+          const std::vector<std::vector<cv::Point> >& contours, 
+          std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, 
+          std::vector<int>* contourWidth, 
+          std::vector<bool>* realContours, 
+          const std::vector<cv::Rect>& boundRect);
 
 
       // The destructor

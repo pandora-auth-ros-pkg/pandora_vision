@@ -116,21 +116,29 @@ namespace pandora_vision
       Depth(void);
 
       /**
-        @brief The function called to extract holes from Depth image
-        @param[in] depthImage [const cv::Mat&] The Depth image to be processed,
-        in CV_32FC1 format
-        @return [HolesConveyor] A struct with useful info about each hole.
+        @brief Finds holes, provided a depth image in CV_32FC1 format.
+
+        1. some basic eroding and dilation to eliminate isolated noise pixels.
+        2. eliminate huge contours and tiny contours without filtering. There is no problem with the huge and no problem with the tiny for distances less than 2.5m (in any case, in such distances holes are not obvious at all).
+        3. Eliminate contours which have an over 4x bounding box height/ width fraction or the inverse. There was no TP loss by this progress, instead wall edges were eliminated.
+        4. Merge contours. Check only in small distance. Firstly label contours to merge together with a probability. The probability consists of a weighted sum of some features inside a box between the two contours' keypoints. Currently, features are the inverse of the euclidean distance between keypoints and the sum of blacks in the original image. 
+        5. The contours checked at each step are those that were not eliminated by previous steps.
+        @param[in] depthImage [const cv::Mat&] The depth image in CV_32FC1 format
+        @return HolesConveyor The struct that contains the holes found
        **/
       static HolesConveyor findHoles(const cv::Mat& depthImage);
 
       /**
-        @brief The function called to filter the depth image, by applying simple thresholding at 0, simple morhology transformations and to eliminate (make dark) the region at borders.
+        @brief The function called to filter the depth image
+        @details Based on filtering_type param applying simple thresholding at 0, simple morhology transformations and to eliminate (make dark) the region at borders or simple edge detection method.
         @param[in] depthImage [const cv::Mat&] The Depth image to be processed,
         in CV_8UC3 format
         @param[in] filteredImage [cv::Mat* filteredImage] The output filtered binary image.
         @return void
        **/
-      static void filterImage(const cv::Mat& depthImage, cv::Mat* filteredImage);
+      static void filterImage(
+          const cv::Mat& depthImage, 
+          cv::Mat* filteredImage);
 
 
       /**
@@ -139,7 +147,9 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
         @return void
        **/
-      static void detectContours(const cv::Mat& filteredImage, std::vector<std::vector<cv::Point> >* contours);
+      static void detectContours(
+          const cv::Mat& filteredImage, 
+          std::vector<std::vector<cv::Point> >* contours);
 
 
       /**
@@ -148,7 +158,10 @@ namespace pandora_vision
         @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
         @return void
        **/
-      static void getContourInfo(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<cv::Rect>* boundRect);
+      static void getContourInfo(
+          const std::vector<std::vector<cv::Point> >& contours, 
+          std::vector<cv::Point2f>* mc, 
+          std::vector<cv::Rect>* boundRect);
 
       /**
         @brief The function called to make validation of found contours
@@ -161,7 +174,14 @@ namespace pandora_vision
         @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
         @return void
        **/
-      static void validateContours(const cv::Mat& image, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::vector<bool>* realContours, std::vector<cv::Rect>& boundRect);
+      static void validateContours(
+          const cv::Mat& image, 
+          const std::vector<std::vector<cv::Point> >& contours,
+          std::vector<cv::Point2f>* mc, 
+          std::vector<int>* contourHeight, 
+          std::vector<int>* contourWidth, 
+          std::vector<bool>* realContours, 
+          const std::vector<cv::Rect>& boundRect);
 
       /**
         @brief The function called by validateContours to make validation of a single contour
@@ -177,7 +197,16 @@ namespace pandora_vision
         @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. 
         @return void
        **/
-      static bool validateContour(const cv::Mat& image, int ci, std::vector<cv::Point2f>* mcv, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::map<std::pair<int, int>, float>* contourLabel, std::vector<int>* numLabels, std::vector<cv::Rect>& boundRect, std::vector<std::vector<cv::Point> >& contours, std::vector<bool>* realContours);
+      static bool validateContour(
+          const cv::Mat& image, 
+          int ci, std::vector<cv::Point2f>* mcv, 
+          std::vector<int>* contourHeight, 
+          std::vector<int>* contourWidth, 
+          std::map<std::pair<int, int>, float>* contourLabel, 
+          std::vector<int>* numLabels, 
+          const std::vector<cv::Rect>& boundRect, 
+          const std::vector<std::vector<cv::Point> >& contours, 
+          std::vector<bool>* realContours);
 
       /**
         @brief The function called by validateContours to do the final merging after the probabilities for each pair were found in validateContour. New contourwidths and heights are calculated for merged contours. New coordinates for the merged contour as the average of all the contours that consist it are calculated.
@@ -191,10 +220,19 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point> >&] All contours found. 
         @return void
        **/
-      static void mergeContours(int ci, std::vector<cv::Point2f>* mcv, std::vector<int>* contourHeight, std::vector<int>* contourWidth, std::map<std::pair<int, int>, float>* contourLabel, std::vector<int>* numLabels, std::vector<bool>* realContours, std::vector<std::vector<cv::Point> >& contours);
+      static void mergeContours(
+          int ci, 
+          std::vector<cv::Point2f>* mcv, 
+          std::vector<int>* contourHeight, 
+          std::vector<int>* contourWidth, 
+          std::map<std::pair<int, int>, 
+          float>* contourLabel, 
+          std::vector<int>* numLabels, 
+          std::vector<bool>* realContours, 
+          const std::vector<std::vector<cv::Point> >& contours);
 
-        // The destructor
-        ~Depth(void);
+      // The destructor
+      ~Depth(void);
   };
 
 } //namespace pandora_vision

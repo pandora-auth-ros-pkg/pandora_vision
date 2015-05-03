@@ -292,8 +292,8 @@ namespace pandora_vision
 
 
 
-  //! Tests HoleFusion::distanceValidation
-  TEST_F ( HoleFusionTest, distanceValidationTest )
+  //! Tests HoleFusion::validateDistance
+  TEST_F ( HoleFusionTest, validateDistanceTest )
   {
 
     ///////////// Construct the depth image ////////////
@@ -402,17 +402,18 @@ namespace pandora_vision
         85 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    HoleFusion::distanceValidation(depthSquares_, &conveyor, &realContours, pointCloud_);
+    HoleFusion::validateDistance(depthSquares_, &conveyor, &realContours, pointCloud_);
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
     int counter = 0;
     for(int i = 0; i < 2; i ++)
     {
       if(realContours[i])
-        counter ++;
+        counter++;
     }
 
-    // Expected that the small hole on the small depth val area and the big hole on the big depth val area  will be eliminated
+    // Expected that the small hole on the small depth val area 
+    // and the big hole on the big depth val area  will be eliminated
     EXPECT_EQ ( 1, counter);
   }
 
@@ -423,7 +424,10 @@ namespace pandora_vision
 
     ///////////// Construct the depth image ////////////
 
-    // The image upon which the big depth val area, the small depth val area, the big depth variance area and the small depth variance will be inprinted
+    // The image upon which the big depth val area, 
+    // the small depth val area, 
+    // the big depth variance area and the small depth variance 
+    // will be inprinted
     depthSquares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the depthSquares_ image
@@ -500,12 +504,12 @@ namespace pandora_vision
         5 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    HoleFusion::distanceValidation(depthSquares_, &conveyor, &realContours, pointCloud_);
+    HoleFusion::validateDistance(depthSquares_, &conveyor, &realContours, pointCloud_);
     int counter = 0;
     for(int i = 0; i < 2; i ++)
     {
       if(realContours[i])
-        counter ++;
+        counter++;
     }
 
     // Expected that the small hole on the small depth val area will be eliminated
@@ -615,7 +619,10 @@ namespace pandora_vision
     std::map<int, float> validHolesMap;
     HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
 
-    // Expected that the small hole on the small depth val area and the big hole on the big depth val area will be eliminated, and also the two holes inside the small depth variance area and the hole on the big depth variance area
+    // Expected that the small hole on the small depth val area 
+    // and the big hole on the big depth val area will be eliminated, 
+    // and also the two holes inside the small depth variance area 
+    // and the hole on the big depth variance area
     EXPECT_EQ ( 1, conveyor.rectangle.size());
 
     // Construct the overlapping depth hole with the last rgb hole left
@@ -648,7 +655,10 @@ namespace pandora_vision
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
 
-    // Test that for very small depth, the small variance threshold is used to eliminate RGB contours (thus just a small variance inside the hole's bounding box does not mean invalid RGB hole)
+    // Test that for very small depth, 
+    // the small variance threshold is used to eliminate RGB contours 
+    // (thus just a small variance inside the hole's bounding box 
+    // does not mean invalid RGB hole)
     
     // Set the depth for each point of the depthSquares_ image to 0.3
     for ( int rows = 0; rows < depthSquares_.rows; rows++ )

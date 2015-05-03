@@ -157,8 +157,13 @@ namespace pandora_vision
       holeMsg.keypointY = conveyor.keypoint[i].y;
 
       // Push back the bounding rectangle's upper left vertice
-      holeMsg.verticeX = (conveyor.keypoint[i].x - (conveyor.rectangle[i].width / 2) >= 0) ? conveyor.keypoint[i].x - (conveyor.rectangle[i].width / 2) : 0;
-      holeMsg.verticeY = (conveyor.keypoint[i].y - (conveyor.rectangle[i].height / 2) > 0) ? conveyor.keypoint[i].y - (conveyor.rectangle[i].height / 2) : 0;
+      holeMsg.verticeX = 
+        (conveyor.keypoint[i].x - (conveyor.rectangle[i].width / 2) >= 0) ? 
+        conveyor.keypoint[i].x - (conveyor.rectangle[i].width / 2) : 
+        0;
+      holeMsg.verticeY = (conveyor.keypoint[i].y - (conveyor.rectangle[i].height / 2) > 0) 
+        ? conveyor.keypoint[i].y - (conveyor.rectangle[i].height / 2) 
+        : 0;
 
       //// Push back the blob's outline points
       //for (int o = 0; o < conveyor.holes[i].outline.size(); o++)
@@ -318,7 +323,17 @@ namespace pandora_vision
       cv::Point2f keypointTemp;
       keypointTemp.x = candidateHolesVector[i].keypointX;
       keypointTemp.y = candidateHolesVector[i].keypointY;
-      cv::Rect rectTemp(candidateHolesVector[i].verticeX, candidateHolesVector[i].verticeY, (candidateHolesVector[i].verticeX + 2 * (candidateHolesVector[i].keypointX - candidateHolesVector[i].verticeX) < inImage.cols) ? 2 * (candidateHolesVector[i].keypointX - candidateHolesVector[i].verticeX) : (inImage.cols - candidateHolesVector[i].verticeX), (candidateHolesVector[i].verticeY + 2 * (candidateHolesVector[i].keypointY - candidateHolesVector[i].verticeY) < inImage.rows) ? 2 * (candidateHolesVector[i].keypointY - candidateHolesVector[i].verticeY) : (inImage.rows - candidateHolesVector[i].verticeY));
+      cv::Rect rectTemp(
+          candidateHolesVector[i].verticeX, 
+          candidateHolesVector[i].verticeY, 
+          (candidateHolesVector[i].verticeX 
+           + 2 * (candidateHolesVector[i].keypointX - candidateHolesVector[i].verticeX) < inImage.cols) ? 
+          2 * (candidateHolesVector[i].keypointX - candidateHolesVector[i].verticeX) :
+          (inImage.cols - candidateHolesVector[i].verticeX),
+          (candidateHolesVector[i].verticeY 
+           + 2 * (candidateHolesVector[i].keypointY - candidateHolesVector[i].verticeY) < inImage.rows) ? 
+          2 * (candidateHolesVector[i].keypointY - candidateHolesVector[i].verticeY) : 
+          (inImage.rows - candidateHolesVector[i].verticeY));
       mc.push_back(keypointTemp);
       boundRect.push_back(rectTemp);
     }
