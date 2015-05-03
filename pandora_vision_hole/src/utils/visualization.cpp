@@ -242,7 +242,7 @@ namespace pandora_vision
 
     for(unsigned int i = 0; i < blobVector.size(); i++)
     {
-      Blob blob = blobVector.getBlob(i);
+      pandora_vision_msgs::Blob blob = blobVector.getBlob(i);
       // Draw outlines
       for(unsigned int j = 0; j < blob.outline.size(); j++)
       {
@@ -256,7 +256,7 @@ namespace pandora_vision
           3 * blob.outline[j].x + 0) = 0;
       }
       // Draw bounding boxes
-      AreaOfInterest area = blob.areaOfInterest;
+      pandora_vision_msgs::AreaOfInterest area = blob.areaOfInterest;
       cv::Point2f tl(area.center.x - area.width / 2, area.center.y - area.height / 2);
       cv::Point2f bl(tl.x, tl.y + area.height);
       cv::Point2f tr(tl.x + area.width, tl.y);
