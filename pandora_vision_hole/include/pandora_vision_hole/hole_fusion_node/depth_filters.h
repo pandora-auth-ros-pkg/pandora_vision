@@ -39,7 +39,7 @@
 #define HOLE_FUSION_NODE_DEPTH_FILTERS_H
 
 #include <math.h>
-#include "utils/holes_conveyor.h"
+#include "utils/blob_vector.h"
 #include "utils/outline_discovery.h"
 #include "utils/edge_detection.h"
 #include "utils/visualization.h"
@@ -59,10 +59,9 @@ namespace pandora_vision
   class DepthFilters
   {
     public:
-
       /**
         @brief Checks for valid holes by area / depth comparison
-        @param[in] conveyor [const HolesConveyor&] The candidate holes
+        @param[in] conveyor [const BlobVector&] The candidate holes
         @param[in] depthImage [const cv::Mat&] The depth image
         @param[in] holesMasksSetVector
         [const std::vector<std::set<unsigned int> >&]
@@ -79,7 +78,7 @@ namespace pandora_vision
         @return void
        **/
       static void checkHolesDepthArea(
-        const HolesConveyor& conveyor,
+        const BlobVector& conveyor,
         const cv::Mat& depthImage,
         const std::vector<std::set<unsigned int> >& holesMasksSetVector,
         std::vector<std::string>* msgs,
@@ -89,7 +88,7 @@ namespace pandora_vision
         @brief Checks for valid holes just by the depth difference between
         the keypoint of the blob and the edges of its bounding box
         @param[in] depthImage [const cv::Mat&] The depth image
-        @param[in] conveyor [const HolesConveyor&] The candidate holes
+        @param[in] conveyor [const BlobVector&] The candidate holes
         @param[in] inflatedRectanglesVector
         [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
         the vertices of the inflated rectangle that corresponds to a specific
@@ -110,7 +109,7 @@ namespace pandora_vision
        **/
       static void checkHolesDepthDiff(
         const cv::Mat& depthImage,
-        const HolesConveyor& conveyor,
+        const BlobVector& conveyor,
         const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
         const std::vector<int>& inflatedRectanglesIndices,
         std::vector<std::string>* msgs,
@@ -120,7 +119,7 @@ namespace pandora_vision
         @brief Checks the homogeneity of the gradient of an interpolated
         depth image in areas denoted by the points inside the
         holesMasksSetVector vector
-        @param[in] conveyor [const HolesConveyor&] The candidate holes
+        @param[in] conveyor [const BlobVector&] The candidate holes
         @param[in] interpolatedDepthImage [const cv::Mat&] The input
         interpolated depth image
         @param[in] holesMasksSetVector
@@ -137,7 +136,7 @@ namespace pandora_vision
         @return void
        **/
       static void checkHolesDepthHomogeneity(
-        const HolesConveyor& conveyor,
+        const BlobVector& conveyor,
         const cv::Mat& interpolatedDepthImage,
         const std::vector<std::set<unsigned int> >& holesMasksSetVector,
         std::vector<std::string>* msgs,
@@ -214,9 +213,8 @@ namespace pandora_vision
         const std::vector<int>& inflatedRectanglesIndices,
         std::vector<float>* probabilitiesVector,
         std::vector<std::string>* msgs);
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
 #endif  // HOLE_FUSION_NODE_DEPTH_FILTERS_H

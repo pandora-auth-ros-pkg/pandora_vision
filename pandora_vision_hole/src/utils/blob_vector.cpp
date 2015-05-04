@@ -240,6 +240,13 @@ namespace pandora_vision
     this->blobVector_ = src.blobVector_;
   }
 
+  pandora_vision_msgs::Blob&
+  BlobVector::
+  getBlob(int index)
+  {
+    return this->blobVector_.blobs[index];
+  }
+  
   pandora_vision_msgs::Blob
   BlobVector::
   getBlob(int index) const

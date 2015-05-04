@@ -46,16 +46,16 @@ namespace pandora_vision
   /**
     @brief Intended to use after the check of the
     isCapableOfAmalgamating function, this function modifies the
-    HolesConveyor conveyor[amalgamatorId] entry so that it
+    BlobVector conveyor[amalgamatorId] entry so that it
     has absorbed the amalgamatable hole (conveyor[amalgamatableId])
     in terms of keypoint location, outline unification and bounding
     rectangle inclusion of the amalgamatable's outline
-    @param[in,out] conveyor [HolesConveyor*] The holes conveyor
+    @param[in,out] conveyor [BlobVector*] The holes conveyor
     whose keypoint, outline and bounding rectangle entries
     will be modified. CAUTION: the amalgamatable is not deleted upon
     amalgamation, only the internals of the amalgamator are modified
     @param[in] amalgamatorId [const int&] The identifier of the
-    hole inside the HolesConveyor amalgamator struct
+    hole inside the BlobVector amalgamator struct
     @param[in,out] amalgamatorHoleMaskSet [std::set<unsigned int>*]
     A set that includes the indices of points inside the amalgamator's
     outline
@@ -66,7 +66,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleMerger::amalgamateOnce(
-    HolesConveyor* conveyor,
+    BlobVector* conveyor,
     const int& amalgamatorId,
     std::set<unsigned int>* amalgamatorHoleMaskSet,
     const std::set<unsigned int>& amalgamatableHoleMaskSet,
@@ -75,7 +75,6 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("amalgamateOnce", "applyMergeOperation");
     #endif
-
 
     // Now, we need to find the combined outline points
     // On an image, draw the holes' masks.
@@ -102,19 +101,17 @@ namespace pandora_vision
       amalgamatorHoleMaskSet->insert(*it);
     }
 
-
     // Locate the outline of the combined hole
     std::vector<cv::Point2f> newAmalgamatorOutline;
     OutlineDiscovery::getOutlineOfMask(canvas, &newAmalgamatorOutline);
 
     // Set the discovered outline as the outline of the combined hole
-    conveyor->holes[amalgamatorId].outline = newAmalgamatorOutline;
-
+    conveyor->getBlob(amalgamatorId).outline = MessageConversions::vecToMsg(newAmalgamatorOutline);
 
     // The amalgamator's new least area rotated bounding box will be the
     // one that encloses the new (merged) outline points
     cv::RotatedRect substituteRotatedRectangle =
-      cv::minAreaRect(conveyor->holes[amalgamatorId].outline);
+      cv::minAreaRect(conveyor->getBlob(amalgamatorId).outline);
 
     // Obtain the four vertices of the new rotated rectangle
     cv::Point2f substituteVerticesArray[4];
@@ -124,18 +121,14 @@ namespace pandora_vision
     std::vector<cv::Point2f> substituteVerticesVector;
 
     // Store the four vertices to the substituteVerticesVector
-    for(int v = 0; v < 4; v++)
+    for (int v = 0; v < 4; v++)
     {
       substituteVerticesVector.push_back(substituteVerticesArray[v]);
     }
 
     // Replace the amalgamator's vertices with the new vertices
-    conveyor->holes[amalgamatorId].rectangle.erase(
-      conveyor->holes[amalgamatorId].rectangle.begin(),
-      conveyor->holes[amalgamatorId].rectangle.end());
-
-    conveyor->holes[amalgamatorId].rectangle = substituteVerticesVector;
-
+    conveyor->getBlob(amalgamatorId).areaOfInterest = MessageConversions::vecToArea(
+      substituteVerticesVector);
 
     // Set the overall candidate hole's keypoint to the center of the
     // newly created bounding rectangle
@@ -143,26 +136,23 @@ namespace pandora_vision
     float y = 0;
     for (int k = 0; k < 4; k++)
     {
-      x += conveyor->holes[amalgamatorId].rectangle[k].x;
-      y += conveyor->holes[amalgamatorId].rectangle[k].y;
+      x += substituteVerticesVector[k].x;
+      y += substituteVerticesVector[k].y;
     }
-
-    conveyor->holes[amalgamatorId].keypoint.pt.x = x / 4;
-    conveyor->holes[amalgamatorId].keypoint.pt.y = y / 4;
+    conveyor->getBlob(amalgamatorId).areaOfInterest.center.x = x / 4;
+    conveyor->getBlob(amalgamatorId).areaOfInterest.center.y = y / 4;
 
     #ifdef DEBUG_TIME
     Timer::tick("amalgamateOnce");
     #endif
   }
 
-
-
   /**
     @brief Applies a merging operation of @param operationId, until
     every candidate hole, even as it changes through the various merges that
     happen, has been merged with every candidate hole that can be merged
     with it.
-    @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    @param[in,out] rgbdHolesConveyor [BlobVector*] The unified rgb-d
     candidate holes conveyor
     @param[in] image [const cv::Mat&] An image used for filters' resources
     creation and size usage
@@ -175,7 +165,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleMerger::applyMergeOperation(
-    HolesConveyor* rgbdHolesConveyor,
+    BlobVector* rgbdHolesConveyor,
     const cv::Mat& image,
     const PointCloudPtr& pointCloud,
     const int& operationId)
@@ -235,7 +225,6 @@ namespace pandora_vision
           &holesMasksSetVector);
       }
 
-
       if (operationId == ASSIMILATION)
       {
         // Is the activeId-th candidate hole able to assimilate the
@@ -266,15 +255,14 @@ namespace pandora_vision
           pointCloud);
       }
 
-
       if (isAble)
       {
         // Copy the original holes conveyor to a temp one.
         // The temp one will be tested through the hole filters
         // On success, temp will replace rgbdHolesConveyor,
         // on failure, rgbdHolesConveyor will remain unchanged
-        HolesConveyor tempHolesConveyor;
-        HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
+        BlobVector tempHolesConveyor;
+        tempHolesConveyor.copy(*rgbdHolesConveyor);
 
         // Copy the original holes masks set to a temp one.
         // If the temp conveyor is tested successfully through the hole
@@ -286,7 +274,7 @@ namespace pandora_vision
         if (operationId == ASSIMILATION)
         {
           // Delete the passiveId-th candidate hole
-          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
+          tempHolesConveyor.removeHole(passiveId);
         }
         else if (operationId == AMALGAMATION)
         {
@@ -299,7 +287,7 @@ namespace pandora_vision
             tempHolesMasksSetVector[passiveId],
             image);
 
-          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
+          tempHolesConveyor.removeHole(passiveId);
         }
         else if (operationId == CONNECTION)
         {
@@ -311,9 +299,8 @@ namespace pandora_vision
             &tempHolesMasksSetVector[activeId],
             image);
 
-          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
+          tempHolesConveyor.removeHole(passiveId);
         }
-
 
         // Since the {assimilator, amalgamator, connector} is able,
         // delete the assimilable's entries in the vectors needed
@@ -321,11 +308,10 @@ namespace pandora_vision
         tempHolesMasksSetVector.erase(
           tempHolesMasksSetVector.begin() + passiveId);
 
-
         // Obtain the activeId-th candidate hole in order for it
         // to be checked against the selected filters
-        HolesConveyor ithHole =
-          HolesConveyorUtils::getHole(tempHolesConveyor, activeId);
+        pandora_vision_msgs::Blob ithHole =
+          tempHolesConveyor.getBlob(activeId);
 
         // Create the necessary vectors for each hole checker and
         // merger used
@@ -334,12 +320,15 @@ namespace pandora_vision
         std::vector<std::vector<cv::Point2f> > rectanglesVector;
         std::vector<int> rectanglesIndices;
         std::vector<std::set<unsigned int> > intermediatePointsSetVector;
+        
+        BlobVector holeVec;
+        holeVec.append(ithHole);
 
         // The inflated rectangles vector is used in the
         // checkHolesDepthDiff and checkHolesRectangleEdgesPlaneConstitution
         // checkers
         FiltersResources::createInflatedRectanglesVector(
-          ithHole,
+          holeVec,
           image,
           Parameters::HoleFusion::rectangle_inflation_size,
           &rectanglesVector,
@@ -355,7 +344,7 @@ namespace pandora_vision
         // merged hole's keypoint
         DepthFilters::checkHolesDepthDiff(
           image,
-          ithHole,
+          holeVec,
           rectanglesVector,
           rectanglesIndices,
           &msgs,
@@ -364,10 +353,9 @@ namespace pandora_vision
         // The probability that the merged hole is valid by the above filter
         float dd = probabilitiesVector[0][0];
 
-
-        // Check the depth / area proportion for the ithHole
+        // Check the depth / area proportion for the holeVec
         DepthFilters::checkHolesDepthArea(
-          ithHole,
+          holeVec,
           image,
           tempHolesMasksSetVector,
           &msgs,
@@ -375,7 +363,6 @@ namespace pandora_vision
 
         // The probability that the merged hole is valid by the above filter
         float da = probabilitiesVector[1][0];
-
 
         // Probabilities threshold for merge acceptance.
         // In the assimilation operation, the temp conveyor unconditionally
@@ -385,7 +372,7 @@ namespace pandora_vision
         {
           // Since the tempHolesConveyor's ithHole has been positively tested,
           // the tempHolesConveyor is now the new rgbdHolesConveyor
-          HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
+          rgbdHolesConveyor->replace(tempHolesConveyor);
 
           // ..and the new holesMasksSetVector is the positively tested
           // temp one
@@ -425,12 +412,10 @@ namespace pandora_vision
         {
           // activeId-th hole candidate finished examining the rest of the
           // hole candidates. move it to the back of the rgbdHolesConveyor
-          HolesConveyorUtils::append(
-            HolesConveyorUtils::getHole(*rgbdHolesConveyor, activeId),
-            rgbdHolesConveyor);
+          rgbdHolesConveyor->append(rgbdHolesConveyor->getBlob(activeId));
 
           // Remove the activeId-th candidate hole from its former position
-          HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
+          rgbdHolesConveyor->removeHole(activeId);
 
           // Remove the activeId-th set from its position and append it
           holesMasksSetVector.push_back(holesMasksSetVector[activeId]);
@@ -481,8 +466,6 @@ namespace pandora_vision
     #endif
   }
 
-
-
   /**
     @brief Applies a merging operation of @param operationId, until
     every candidate hole, even as it changes through the various merges that
@@ -490,7 +473,7 @@ namespace pandora_vision
     with it. In contrast to the applyMergeOperation method, this method
     does not consult hole checkers to validate the newly merged holes.
     (Used when depth analysis is unattainable)
-    @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
+    @param[in,out] rgbdHolesConveyor [BlobVector*] The unified rgb-d
     candidate holes conveyor
     @param[in] image [const cv::Mat&] An image used for filters' resources
     creation and size usage
@@ -499,7 +482,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleMerger::applyMergeOperationWithoutValidation(
-    HolesConveyor* rgbdHolesConveyor,
+    BlobVector* rgbdHolesConveyor,
     const cv::Mat& image,
     const int& operationId)
   {
@@ -545,7 +528,6 @@ namespace pandora_vision
         image,
         &holesMasksSetVector);
 
-
       // Is the activeId-th candidate hole able to
       // {assimilate, amalgamate} the passiveId-th candidate hole?
       bool isAble = false;
@@ -573,8 +555,8 @@ namespace pandora_vision
         // The temp one will be tested through the hole filters
         // On success, temp will replace rgbdHolesConveyor,
         // on failure, rgbdHolesConveyor will remain unchanged
-        HolesConveyor tempHolesConveyor;
-        HolesConveyorUtils::copyTo(*rgbdHolesConveyor, &tempHolesConveyor);
+        BlobVector tempHolesConveyor;
+        tempHolesConveyor.copy(*rgbdHolesConveyor);
 
         // Copy the original holes masks set to a temp one.
         // If the temp conveyor is tested successfully through the hole
@@ -586,7 +568,7 @@ namespace pandora_vision
         if (operationId == ASSIMILATION)
         {
           // Delete the passiveId-th candidate hole
-          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
+          tempHolesConveyor.removeHole(passiveId);
         }
         else if (operationId == AMALGAMATION)
         {
@@ -599,7 +581,7 @@ namespace pandora_vision
             tempHolesMasksSetVector[passiveId],
             image);
 
-          HolesConveyorUtils::removeHole(&tempHolesConveyor, passiveId);
+          tempHolesConveyor.removeHole(passiveId);
         }
 
         // Since the {assimilator, amalgamator} is able,
@@ -610,7 +592,7 @@ namespace pandora_vision
 
         // Since the merge has been uncondionally happened,
         // the tempHolesConveyor is now the new rgbdHolesConveyor
-        HolesConveyorUtils::replace(tempHolesConveyor, rgbdHolesConveyor);
+        rgbdHolesConveyor->replace(tempHolesConveyor);
 
         // ..and the new holesMasksSetVector is the positively tested
         // temp one
@@ -624,7 +606,7 @@ namespace pandora_vision
         // candidate hole must re-examine all the other holes
         passiveId = 1;
       }
-      else // isAble == false
+      else  // isAble == false
       {
         // passiveId-th hole not merged. let's see about the next one
         passiveId++;
@@ -644,18 +626,14 @@ namespace pandora_vision
         {
           // activeId-th hole candidate finished examining the rest of the
           // hole candidates. move it to the back of the rgbdHolesConveyor
-          HolesConveyorUtils::append(
-            HolesConveyorUtils::getHole(*rgbdHolesConveyor, activeId),
-            rgbdHolesConveyor);
+          rgbdHolesConveyor->append(rgbdHolesConveyor->getBlob(activeId));
 
           // Remove the activeId-th candidate hole from its former position
-          HolesConveyorUtils::removeHole(rgbdHolesConveyor, activeId);
-
+          rgbdHolesConveyor->removeHole(activeId);
 
           // Remove the activeId-th set from its position and append it
           holesMasksSetVector.push_back(holesMasksSetVector[activeId]);
           holesMasksSetVector.erase(holesMasksSetVector.begin() + activeId);
-
 
           // Since the candidate hole was appended at the end of the
           // rgbdHolesConveyor, the finish vector needs to be shifted
@@ -702,22 +680,20 @@ namespace pandora_vision
     #endif
   }
 
-
-
   /**
     @brief Intended to use after the check of the
-    isCapableOfConnecting function, this method modifies the HolesConveyor
+    isCapableOfConnecting function, this method modifies the BlobVector
     connector struct entry so that it it has absorbed the connectable hole
     in terms of keypoint location, outline unification and bounding
     rectangle inclusion of the connectable's outline
-    @param[in,out] conveyor [HolesConveyor*] The holes conveyor
+    @param[in,out] conveyor [BlobVector*] The holes conveyor
     whose keypoint, outline and bounding rectangle entries
     will be modified. CAUTION: the connectable is not deleted upon
     connection, only the internals of the connector are modified
     @param[in] connectorId [const int&] The identifier of the hole inside
-    the HolesConveyor connectables struct
+    the BlobVector connectables struct
     @param[in] connectableId [const int&] The identifier of the hole inside
-    the HolesConveyor connectables struct
+    the BlobVector connectables struct
     @param[in] connectorHoleMaskSet [const std::set<unsigned int>&]
     A set that includes the indices of points inside the connector's
     outline
@@ -725,7 +701,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleMerger::connectOnce(
-    HolesConveyor* conveyor,
+    BlobVector* conveyor,
     const int& connectorId,
     const int& connectableId,
     std::set<unsigned int>* connectorHoleMaskSet,
@@ -742,18 +718,17 @@ namespace pandora_vision
     // are connected via a cv::line so that the overall connector's outline
     // is the overall shape's outline
 
-
     // The image on which the hole's outline connection will be drawn
     cv::Mat canvas = cv::Mat::zeros(image.size(), CV_8UC1);
     unsigned char* ptr = canvas.ptr();
 
-    for (int i = 0; i < conveyor->holes[connectorId].outline.size(); i++)
+    for (int i = 0; i < conveyor->getBlob(connectorId).outline.size(); i++)
     {
-      for (int j = 0; j < conveyor->holes[connectableId].outline.size(); j++)
+      for (int j = 0; j < conveyor->getBlob(connectableId).outline.size(); j++)
       {
         cv::line(canvas,
-          conveyor->holes[connectorId].outline[i],
-          conveyor->holes[connectableId].outline[j],
+          MessageConversions::msgToCv(conveyor->getBlob(connectorId).outline[i]),
+          MessageConversions::msgToCv(conveyor->getBlob(connectableId).outline[j]),
           cv::Scalar(255, 0, 0), 1, 8);
       }
     }
@@ -776,19 +751,17 @@ namespace pandora_vision
       }
     }
 
-
     // Locate the outline of the combined hole
     std::vector<cv::Point2f> newConnectorOutline;
     OutlineDiscovery::getOutlineOfMask(canvas, &newConnectorOutline);
 
     // Set the discovered outline as the outline of the combined hole
-    conveyor->holes[connectorId].outline = newConnectorOutline;
-
+    conveyor->getBlob(connectorId).outline = MessageConversions::vecToMsg(newConnectorOutline);
 
     // The connectable's new least area rotated bounding box will be the
     // one that encloses the new (merged) outline points
     cv::RotatedRect substituteRotatedRectangle =
-      cv::minAreaRect(conveyor->holes[connectorId].outline);
+      cv::minAreaRect(conveyor->getBlob(connectorId).outline);
 
     // Obtain the four vertices of the new rotated rectangle
     cv::Point2f substituteVerticesArray[4];
@@ -798,36 +771,29 @@ namespace pandora_vision
     std::vector<cv::Point2f> substituteVerticesVector;
 
     // Store the four vertices to the substituteVerticesVector
-    for(int v = 0; v < 4; v++)
+    for (int v = 0; v < 4; v++)
     {
       substituteVerticesVector.push_back(substituteVerticesArray[v]);
     }
 
     // Replace the connector's vertices with the new vertices
-    conveyor->holes[connectorId].rectangle.erase(
-      conveyor->holes[connectorId].rectangle.begin(),
-      conveyor->holes[connectorId].rectangle.end());
-
-    // Replace the connector's vertices with the new vertices
-    conveyor->holes[connectorId].rectangle = substituteVerticesVector;
-
+    conveyor->getBlob(connectorId).areaOfInterest = MessageConversions::vecToArea(
+      substituteVerticesVector);
 
     // Set the overall candidate hole's keypoint to the mean of the keypoints
     // of the connector and the connectable
-    conveyor->holes[connectorId].keypoint.pt.x =
-      (conveyor->holes[connectorId].keypoint.pt.x
-       + conveyor->holes[connectableId].keypoint.pt.x) / 2;
+    conveyor->getBlob(connectorId).areaOfInterest.center.x =
+      (conveyor->getBlob(connectorId).areaOfInterest.center.x
+       + conveyor->getBlob(connectableId).areaOfInterest.center.x) / 2;
 
-    conveyor->holes[connectorId].keypoint.pt.y =
-      (conveyor->holes[connectorId].keypoint.pt.y
-       + conveyor->holes[connectableId].keypoint.pt.y) / 2;
+    conveyor->getBlob(connectorId).areaOfInterest.center.y =
+      (conveyor->getBlob(connectorId).areaOfInterest.center.y
+       + conveyor->getBlob(connectableId).areaOfInterest.center.y) / 2;
 
     #ifdef DEBUG_TIME
     Timer::tick("connectOnce");
     #endif
   }
-
-
 
   /**
     @brief Indicates whether a hole assigned the role of the amalgamator
@@ -892,8 +858,6 @@ namespace pandora_vision
     return true;
   }
 
-
-
   /**
     @brief Indicates whether a hole assigned the role of the assimilator
     is capable of assimilating another hole assigned the role of
@@ -954,8 +918,6 @@ namespace pandora_vision
     return true;
   }
 
-
-
   /**
     @brief Indicates whether a hole assigned the role of the connectable
     is capable of being connected with another hole assigned the role of
@@ -965,12 +927,12 @@ namespace pandora_vision
     rectangle of the connector is larger in area than the bounding
     rectangle of the connectable, and the minimum distance between the
     two outlines is lower than a threshold value.
-    @param[in] conveyor [const HolesConveyor&] The HolesConveyor that
+    @param[in] conveyor [const BlobVector&] The BlobVector that
     contains the holes
     @param[in] connectorId [const int&] The index of the specific hole
-    that acts as the connector inside the connectors HolesConveyor
+    that acts as the connector inside the connectors BlobVector
     @param[in] connectableId [const int&] The index of the specific hole
-    that acts as the connectable inside the connectables HolesConveyor
+    that acts as the connectable inside the connectables BlobVector
     @param[in] connectorHoleMaskSet [const std::set<unsigned int>&]
     A set that includes the indices of points inside the connector's
     outline
@@ -984,7 +946,7 @@ namespace pandora_vision
     with the connector
    **/
   bool HoleMerger::isCapableOfConnecting(
-    const HolesConveyor& conveyor,
+    const BlobVector& conveyor,
     const int& connectorId,
     const int& connectableId,
     const std::set<unsigned int>& connectorHoleMaskSet,
@@ -1025,7 +987,6 @@ namespace pandora_vision
       return false;
     }
 
-
     // The real min distance (in meters) between two points of the
     // connector's and connectable's outlines
     double minOutlinesDistance = 10000.0;
@@ -1034,45 +995,43 @@ namespace pandora_vision
     // connector's and connectable's outlines
     double maxOutlinesDistance = 0.0;
 
-    for (int av = 0; av < conveyor.holes[connectableId].outline.size(); av++)
+    for (int av = 0; av < conveyor.getBlob(connectableId).outline.size(); av++)
     {
       // The connectable's current outline point x,y,z coordinates
       // measured by the depth sensor
       float connectableOutlinePointX = pointCloud->points[
-        static_cast<int>(conveyor.holes[connectableId].outline[av].x)
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].x)
         + pointCloud->width *
-        static_cast<int>(conveyor.holes[connectableId].outline[av].y)].x;
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].y)].x;
 
       float connectableOutlinePointY = pointCloud->points[
-        static_cast<int>(conveyor.holes[connectableId].outline[av].x)
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].x)
         + pointCloud->width *
-        static_cast<int>(conveyor.holes[connectableId].outline[av].y)].y;
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].y)].y;
 
       float connectableOutlinePointZ = pointCloud->points[
-        static_cast<int>(conveyor.holes[connectableId].outline[av].x)
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].x)
         + pointCloud->width *
-        static_cast<int>(conveyor.holes[connectableId].outline[av].y)].z;
+        static_cast<int>(conveyor.getBlob(connectableId).outline[av].y)].z;
 
-
-      for (int ac = 0; ac < conveyor.holes[connectorId].outline.size(); ac++)
+      for (int ac = 0; ac < conveyor.getBlob(connectorId).outline.size(); ac++)
       {
         // The connector's current outline point x,y,z coordinates
         // measured by the depth sensor
         float connectorOutlinePointX = pointCloud->points[
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].x)
           + pointCloud->width *
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].x;
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].y)].x;
 
         float connectorOutlinePointY = pointCloud->points[
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].x)
           + pointCloud->width *
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].y;
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].y)].y;
 
         float connectorOutlinePointZ = pointCloud->points[
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].x)
           + pointCloud->width *
-          static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].z;
-
+          static_cast<int>(conveyor.getBlob(connectorId).outline[ac].y)].z;
 
         // The current outline points distance
         float outlinePointsDistance = sqrt(
@@ -1111,15 +1070,12 @@ namespace pandora_vision
       return false;
     }
 
-
     #ifdef DEBUG_TIME
     Timer::tick("isCapableOfConnecting");
     #endif
 
     return true;
   }
-
-
 
   /**
     @brief With an input a conveyor of holes, this method, depending on
@@ -1133,7 +1089,7 @@ namespace pandora_vision
     than 0.5-0.6m. In this way of operation, the merging of holes does not
     consider employing validator filters and simply merges holes that can
     be merged with each other (assimilated, amalgamated, or connected).
-    @param[in,out] conveyor [HolesConveyor*]
+    @param[in,out] conveyor [BlobVector*]
     The conveyor of holes to be merged with one another, where applicable.
     @param[in] filteringMethod [const int&]
     Indicates whether candidate holes can be merged on conditions
@@ -1145,7 +1101,7 @@ namespace pandora_vision
     The interpolated point cloud. Needed in the connection process.
     @return void
    **/
-  void HoleMerger::mergeHoles(HolesConveyor* conveyor,
+  void HoleMerger::mergeHoles(BlobVector* conveyor,
     const int& filteringMethod,
     const cv::Mat& interpolatedDepthImage,
     const PointCloudPtr& pointCloud)
@@ -1156,16 +1112,15 @@ namespace pandora_vision
 
     // Keep a copy of the initial (not merged) candidate holes for
     // debugging and exibition purposes
-    HolesConveyor conveyorBeforeMerge;
-
-    HolesConveyorUtils::copyTo(*conveyor, &conveyorBeforeMerge);
+    BlobVector conveyorBeforeMerge;
+    conveyorBeforeMerge.copy(*conveyor);
 
     #ifdef DEBUG_SHOW
     std::vector<std::string> msgs;
     std::vector<cv::Mat> canvases;
     std::vector<std::string> titles;
 
-    if(Parameters::Debug::show_merge_holes)
+    if (Parameters::Debug::show_merge_holes)
     {
       // Push back the identifier of each keypoint
       for (int i = 0; i < conveyorBeforeMerge.size(); i++)

@@ -42,7 +42,7 @@ namespace pandora_vision
   /**
     @brief Applies a specific active filter, either from an RGB
     or a Depth sources.
-    @param[in] conveyor [const HolesConveyor&]
+    @param[in] conveyor [const BlobVector&]
     The conveyor of candidateholes
     @param[in] filteringMethod [const int&]
     Each filter's identifier
@@ -88,7 +88,7 @@ namespace pandora_vision
     @return void
    **/
   void Filters::applyFilter(
-    const HolesConveyor& conveyor,
+    const BlobVector& conveyor,
     const int& filteringMethod,
     const cv::Mat& depthImage,
     const cv::Mat& rgbImage,
@@ -116,7 +116,7 @@ namespace pandora_vision
     finalMsgs.clear();
     msgs_.clear();
 
-    switch(filteringMethod)
+    switch (filteringMethod)
     {
       // Filter #1 (Color homogeneity inside blob)------------------------------
       case 1 :
@@ -255,16 +255,16 @@ namespace pandora_vision
         }
     }
 
-    for(int i = 0; i < conveyor.size(); i++)
+    for (int i = 0; i < conveyor.size(); i++)
     {
-      if(msgs_.size() == conveyor.size())
+      if (msgs_.size() == conveyor.size())
       {
         finalMsgs.push_back(msgs_[i]);
       }
     }
 
     #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_check_holes) // Debug
+    if (Parameters::Debug::show_check_holes)  // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" ") + windowMsg;
@@ -309,7 +309,7 @@ namespace pandora_vision
     @brief Applies all active filters, from both RGB and Depth sources.
     The order of execution is derived from the dynamic reconfigure
     facility.
-    @param[in] conveyor [const HolesConveyor&]
+    @param[in] conveyor [const BlobVector&]
     The conveyor of candidateholes
     @param[in] filteringMode [const int&]
     The filtering mode used: If RGBD_MODE, depth analysis is possible,
@@ -354,7 +354,7 @@ namespace pandora_vision
     @return void
    **/
   void Filters::applyFilters(
-    const HolesConveyor& conveyor,
+    const BlobVector& conveyor,
     const int& filteringMode,
     const cv::Mat& depthImage,
     const cv::Mat& rgbImage,
@@ -496,10 +496,10 @@ namespace pandora_vision
         &msgs);
 
       counter++;
-    } // o_it iterator ends
+    }  // o_it iterator ends
 
     #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_check_holes) // Debug
+    if (Parameters::Debug::show_check_holes)  // Debug
     {
       Visualization::multipleShow("CheckHoles function", imgs, msgs,
         Parameters::Debug::show_check_holes_size, 1);

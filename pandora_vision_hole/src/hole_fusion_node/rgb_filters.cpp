@@ -94,7 +94,6 @@ namespace pandora_vision
       }
     }
 
-
     for (unsigned int i = 0; i < holesMasksImageVector.size(); i++)
     {
       // Sets featuring all the different colours found inside each image mask
@@ -128,9 +127,7 @@ namespace pandora_vision
       }
 
       probabilitiesVector->at(i) = static_cast<float>(numberOfColours) / 4096;
-
       msgs->push_back(TOSTR(probabilitiesVector->at(i)));
-
     }
 
     #ifdef DEBUG_TIME
@@ -225,7 +222,6 @@ namespace pandora_vision
           / holesMasksSetVector[rectanglesIndices[i]].size();
       }
 
-
       // Mean luminosity of the intermediate points
       float meanBoundingBoxLuminosity = 0.0;
       if (intermediatePointsSetVector[i].size() > 0)
@@ -233,7 +229,6 @@ namespace pandora_vision
         meanBoundingBoxLuminosity = static_cast<float> (boundingBoxLuminosity)
           / intermediatePointsSetVector[i].size();
       }
-
 
       // If the luminosity of the inside of the candidate hole is greater
       // than the luminosity of the points beyond it and restricted by the
@@ -244,7 +239,6 @@ namespace pandora_vision
         probabilitiesVector->at(rectanglesIndices[i]) =
           1 - meanBlobLuminosity / meanBoundingBoxLuminosity;
       }
-
       msgs->push_back(TOSTR(probabilitiesVector->at(rectanglesIndices[i])));
     }
 
@@ -508,9 +502,7 @@ namespace pandora_vision
           }
         }
       }
-
       probabilitiesVector->at(rectanglesIndices[i]) = maxProbability;
-
       msgs->push_back(TOSTR(probabilitiesVector->at(rectanglesIndices[i])));
     }
 

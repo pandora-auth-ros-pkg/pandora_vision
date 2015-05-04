@@ -146,6 +146,8 @@ namespace pandora_vision
      */
     pandora_vision_msgs::Blob
       getBlob(int index) const;
+    pandora_vision_msgs::Blob&
+      getBlob(int index);
 
     /**
      * @brief Given two sources of struct BlobVector, this function
@@ -239,7 +241,6 @@ namespace pandora_vision
 
   private:
     pandora_vision_msgs::BlobVector blobVector_;
-
   };
 
 } // namespace pandora_vision

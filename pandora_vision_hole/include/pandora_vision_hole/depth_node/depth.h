@@ -42,8 +42,7 @@
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/wavelets.h"
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
-
+#include "pandora_vision_msgs/BlobVector.h"
 
 /**
   @namespace pandora_vision
@@ -113,9 +112,7 @@ namespace pandora_vision
         const pandora_vision_hole::depth_cfgConfig& config,
         const uint32_t& level);
 
-
     public:
-
       /**
         @brief Default constructor. Initiates communications, loads parameters.
         @return void
@@ -127,9 +124,8 @@ namespace pandora_vision
         @return void
        **/
       ~Depth(void);
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
 #endif  // DEPTH_NODE_DEPTH_H

@@ -158,7 +158,12 @@ namespace pandora_vision
 
     static cv::KeyPoint
       msgToKeypoint(const pandora_vision_msgs::Keypoint& point);
+    
+    static std::vector<pandora_vision_msgs::Keypoint>
+      vecToMsg(const std::vector<cv::Point2f>& vec);
 
+    static pandora_vision_msgs::AreaOfInterest
+      vecToArea(const std::vector<cv::Point2f>& vert);
   };
 
 } // namespace pandora_vision

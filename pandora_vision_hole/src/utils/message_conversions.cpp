@@ -195,4 +195,40 @@ namespace pandora_vision
     return keypoint;
   }
 
+  std::vector<pandora_vision_msgs::Keypoint>
+  MessageConversions::
+  vecToMsg(const std::vector<cv::Point2f>& vec)
+  {
+    std::vector<pandora_vision_msgs::Keypoint> temp;
+    
+    for (int ii = 0; ii < vec.size(); ii++)
+    {
+      temp.push_back(cvToMsg(vec[ii]));
+    }
+    return temp;
+  }
+  
+  pandora_vision_msgs::AreaOfInterest
+  MessageConversions::
+  vecToArea(const std::vector<cv::Point2f>& vert)
+  {
+    pandora_vision_msgs::AreaOfInterest area;
+
+    int minx = vert[0].x, maxx = vert[0].x, miny = vert[0].y, maxy = vert[0].y;
+    for (unsigned int j = 1 ; j < 4 ; j++)
+    {
+      int xx = vert[j].x;
+      int yy = vert[j].y;
+      minx = xx < minx ? xx : minx;
+      maxx = xx > maxx ? xx : maxx;
+      miny = yy < miny ? yy : miny;
+      maxy = yy > maxy ? yy : maxy;
+    }
+    area.width = maxx - minx;
+    area.height = maxy - miny;
+    area.center.x = minx + area.width / 2;
+    area.center.y = miny + area.height / 2;
+
+    return area;
+  }
 } // namespace pandora_vision
