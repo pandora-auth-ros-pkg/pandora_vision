@@ -183,8 +183,6 @@ namespace pandora_vision
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Initiated");
   }
 
-
-
   /**
     @brief The HoleFusion deconstructor
    **/
@@ -193,8 +191,6 @@ namespace pandora_vision
     ros::shutdown();
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Terminated");
   }
-
-
 
   /**
     @brief Completes the transition to a new state
@@ -205,8 +201,6 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Detector] : Transition Complete");
   }
-
-
 
   /**
     @brief Callback for the candidate holes via the depth node.
@@ -237,13 +231,13 @@ namespace pandora_vision
     // (or else keyPoints, rectangles and outlines accumulate)
     depthHolesConveyor_.clear();
 
-    // Unpack the message
-    MessageConversions::unpackMessage(depthCandidateHolesVector,
-      &depthHolesConveyor_,
-      &interpolatedDepthImage_,
-      Parameters::Image::image_representation_method,
-      sensor_msgs::image_encodings::TYPE_32FC1,
-      Parameters::Outline::raycast_keypoint_partitions);
+    depthHolesConveyor_ = depthCandidateHolesVector;
+    if (Parameters::Outline::raycast_keypoint_partitions == 1)
+    {
+      depthHolesConveyor_.fromWavelets(Parameters::Outline::raycast_keypoint_partitions);
+    }
+    interpolatedDepthImage_ = depthHolesConveyor_.getCvImage(
+      sensor_msgs::image_encodings::TYPE_32FC1);
 
     // The candidate holes acquired from the depth node and the interpolated
     // depth image are set
@@ -1496,26 +1490,27 @@ namespace pandora_vision
   {
     // The overall message of enhanced holes that will be published
     pandora_vision_msgs::EnhancedImage enhancedHolesMsg;
-
+    std_msgs::Header header;
+    
+    // Set the message's header
+    header.stamp = timestamp_;
+    header.frame_id = frame_id_;
+    
     // Set the rgbImage in the enhancedHolesMsg message to the rgb image
     enhancedHolesMsg.rgbImage = MessageConversions::convertImageToMessage(
       rgbImage_,
       sensor_msgs::image_encodings::TYPE_8UC3,
-      enhancedHolesMsg.rgbImage);
+      header);
 
     // Set the depthImage in the enhancedHolesMsg message to the depth image
     enhancedHolesMsg.depthImage = MessageConversions::convertImageToMessage(
       Visualization::scaleImageForVisualization(interpolatedDepthImage_,
         Parameters::Image::scale_method),
       sensor_msgs::image_encodings::TYPE_8UC1,
-      enhancedHolesMsg.depthImage);
+      header);
 
     // Set whether depth analysis is applicable
     enhancedHolesMsg.isDepth = (filteringMode_ == RGBD_MODE);
-
-    // Set the message's header
-    enhancedHolesMsg.header.stamp = timestamp_;
-    enhancedHolesMsg.header.frame_id = frame_id_;
 
     for (std::map<int, float>::iterator it = validHolesMap->begin();
       it != validHolesMap->end(); it++)
@@ -1715,13 +1710,12 @@ namespace pandora_vision
     // (or else keyPoints, rectangles and outlines accumulate)
     rgbHolesConveyor_.clear();
 
-    // Unpack the message
-    MessageConversions::unpackMessage(rgbCandidateHolesVector,
-      &rgbHolesConveyor_,
-      &rgbImage_,
-      Parameters::Image::image_representation_method,
-      sensor_msgs::image_encodings::TYPE_8UC3,
-      Parameters::Outline::raycast_keypoint_partitions);
+    rgbHolesConveyor_ = rgbCandidateHolesVector;
+    if (Parameters::Image::image_representation_method == 1)
+    {
+      rgbHolesConveyor_.fromWavelets(Parameters::Outline::raycast_keypoint_partitions);
+    }
+    rgbImage_ = rgbHolesConveyor_.getCvImage(sensor_msgs::image_encodings::TYPE_8UC3);
 
     // The candidate holes acquired from the rgb node and the rgb image are set
     numNodesReady_++;
