@@ -44,12 +44,12 @@
 #include <urdf_parser/urdf_parser.h>
 #include <image_transport/image_transport.h>
 #include "state_manager/state_client.h"
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
-#include "pandora_vision_msgs/CandidateHoleMsg.h"
-#include "pandora_vision_msgs/HolesDirectionsVectorMsg.h"
-#include "pandora_vision_msgs/HoleDirectionMsg.h"
-#include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
-#include "pandora_vision_msgs/EnhancedHoleMsg.h"
+#include "pandora_vision_msgs/BlobVector.h"
+#include "pandora_vision_msgs/Blob.h"
+#include "pandora_vision_msgs/HoleDirectionAlertVector.h"
+#include "pandora_vision_msgs/HoleDirectionAlert.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
+#include "pandora_vision_msgs/AreaOfInterest.h"
 #include "utils/defines.h"
 #include "utils/histogram.h"
 #include "utils/message_conversions.h"
@@ -213,10 +213,10 @@ namespace pandora_vision
       cv::Mat interpolatedDepthImage_;
 
       // The conveyor of hole candidates received by the depth node
-      HolesConveyor depthHolesConveyor_;
+      BlobVector depthHolesConveyor_;
 
       // The conveyor of hole candidates received by the rgb node
-      HolesConveyor rgbHolesConveyor_;
+      BlobVector rgbHolesConveyor_;
 
       // Indicates whether RGB-based only
       // or both the RGB and Depth based filtering is applicable
@@ -293,7 +293,7 @@ namespace pandora_vision
         @return void
        **/
       void depthCandidateHolesCallback(
-        const pandora_vision_msgs::CandidateHolesVectorMsg&
+        const pandora_vision_msgs::BlobVector&
         depthCandidateHolesVector);
 
       /**
@@ -301,7 +301,7 @@ namespace pandora_vision
         Probabilities for each candidate hole and filter
         are printed in the console, with an order specified by the
         hole_fusion_cfg of the dynamic reconfigure utility
-        @param[in] conveyor [const HolesConveyor&] The conveyor
+        @param[in] conveyor [const BlobVector&] The conveyor
         containing candidate holes that are to be checked against selected
         filters
         @return [std::vector<std::vector<float> >]
@@ -310,16 +310,16 @@ namespace pandora_vision
         filter applied, each column to a particular hole
        **/
       std::vector<std::vector<float> > filterHoles(
-        const HolesConveyor& conveyor);
+        const BlobVector& conveyor);
 
       /**
-        @brief Recreates the HolesConveyor struct for the
+        @brief Recreates the BlobVector struct for the
         candidate holes from the
         pandora_vision_msgs::CandidateHolerMsg message
         @param[in]candidateHolesVector
         [const std::vector<pandora_vision_msgs::CandidateHoleMsg>&]
         The input candidate holes
-        @param[out] conveyor [HolesConveyor*] The output conveyor
+        @param[out] conveyor [BlobVector*] The output conveyor
         struct
         @param[in] inImage [const cv::Mat&] An image used for its size.
         It is needed if the wavelet method is used in the keypoints' extraction,
@@ -327,9 +327,9 @@ namespace pandora_vision
         @return void
        **/
       void fromCandidateHoleMsgToConveyor(
-        const std::vector<pandora_vision_msgs::CandidateHoleMsg>&
+        const std::vector<pandora_vision_msgs::Blob>&
         candidateHolesVector,
-        HolesConveyor* conveyor,
+        BlobVector* conveyor,
         const cv::Mat& inImage);
 
       /**
@@ -368,13 +368,13 @@ namespace pandora_vision
         locates valid holes that refer to the same physical hole in space
         inside the allHoles container and picks the one with the largest
         validity probability.
-        @param[in,out] allHoles [HolesConveyor*] The conveyor of holes.
+        @param[in,out] allHoles [BlobVector*] The conveyor of holes.
         @param[in,out] validHolesMap [std::map<int, float>*] The std::map
         that maps holes inside the allHoles conveyor to their validity
         probability
         @return void
        **/
-      void makeValidHolesUnique(HolesConveyor* allHoles,
+      void makeValidHolesUnique(BlobVector* allHoles,
         std::map<int, float>* validHolesMap);
 
       /**
@@ -474,19 +474,19 @@ namespace pandora_vision
       void processCandidateHoles();
 
       void produceDataset(
-        const HolesConveyor& conveyor,
+        const BlobVector& conveyor,
         const std::vector<std::vector<float> >& probabilities);
 
       /**
         @brief Publishes the holes' enhanced information.
-        @param[in] conveyor [const HolesConveyor&]
+        @param[in] conveyor [const BlobVector&]
         The overall valid holes found by the depth and RGB nodes.
         @param[in] validHolesMap [std::map<int, float>*]
         A map containing the indices of the valid holes inside the conveyor
         and their respective validity probabilities
         @return void
        **/
-      void publishEnhancedHoles (const HolesConveyor& conveyor,
+      void publishEnhancedHoles (const BlobVector& conveyor,
         std::map<int, float>* validHolesMap);
 
       /**
@@ -499,14 +499,14 @@ namespace pandora_vision
 
       /**
         @brief Publishes the valid holes' information.
-        @param[in] conveyor [const HolesConveyor&] The overall unique holes
+        @param[in] conveyor [const BlobVector&] The overall unique holes
         found by the depth and RGB nodes.
         @param[in] map [std::map<int, float>*] A map containing the indices
         of valid holes inside the conveyor and their respective
         probabilities of validity
         @return void
        **/
-      void publishValidHoles(const HolesConveyor& conveyor,
+      void publishValidHoles(const BlobVector& conveyor,
         std::map<int, float>* map);
 
       /**
@@ -525,7 +525,7 @@ namespace pandora_vision
         @return void
        **/
       void rgbCandidateHolesCallback(
-        const pandora_vision_msgs::CandidateHolesVectorMsg&
+        const pandora_vision_msgs::BlobVector&
         rgbCandidateHolesVector);
 
       /**
@@ -553,27 +553,25 @@ namespace pandora_vision
       void unlockSynchronizer();
 
       /**
-        @brief Unpacks the the HolesConveyor struct for the
+        @brief Unpacks the the BlobVector struct for the
         candidate holes, the interpolated depth image and the point cloud
         from the pandora_vision_msgs::CandidateHolesVectorMsg message
         @param[in] holesMsg
         [pandora_vision_msgs::CandidateHolesVectorMsg&] The input
         candidate holes message obtained through the depth node
-        @param[out] conveyor [HolesConveyor*] The output conveyor
+        @param[out] conveyor [BlobVector*] The output conveyor
         struct
         @param[out] interpolatedDepthImage [cv::Mat*] The output interpolated
         depth image
         @return void
        **/
       void unpackMessage(
-        const pandora_vision_msgs::CandidateHolesVectorMsg& holesMsg,
-        HolesConveyor* conveyor,
+        const pandora_vision_msgs::BlobVector& holesMsg,
+        BlobVector* conveyor,
         cv::Mat* image,
         const std::string& encoding);
 
-
     public:
-
       /**
         @brief The HoleFusion constructor
        **/
@@ -606,7 +604,6 @@ namespace pandora_vision
         @return void
        **/
       void completeTransition(void);
-
   };
 
 } // namespace pandora_vision

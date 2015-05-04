@@ -231,4 +231,18 @@ namespace pandora_vision
 
     return area;
   }
-} // namespace pandora_vision
+  
+  std::vector<cv::Point2f>
+  MessageConversions::
+  areaToVec(const pandora_vision_msgs::AreaOfInterest& area)
+  {
+    std::vector<cv::Point2f> vec;
+    
+    vec.push_back(cv::Point2f(area.center.x - area.width / 2, area.center.y - area.height / 2));
+    vec.push_back(cv::Point2f(vec[0].x, vec[0].y + area.height));
+    vec.push_back(cv::Point2f(vec[0].x + area.width, vec[0].y));
+    vec.push_back(cv::Point2f(vec[2].x, vec[2].y + area.height));
+    
+    return vec;
+  }
+}  // namespace pandora_vision

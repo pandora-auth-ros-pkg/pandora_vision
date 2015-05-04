@@ -164,6 +164,9 @@ namespace pandora_vision
 
     static pandora_vision_msgs::AreaOfInterest
       vecToArea(const std::vector<cv::Point2f>& vert);
+    
+    static std::vector<cv::Point2f>
+      areaToVec(const pandora_vision_msgs::AreaOfInterest& area);
   };
 
 } // namespace pandora_vision
