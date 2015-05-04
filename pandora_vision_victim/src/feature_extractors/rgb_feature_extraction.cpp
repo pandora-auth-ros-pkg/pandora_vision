@@ -46,6 +46,7 @@
 
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/sift_extractor.h"
+#include "pandora_vision_victim/feature_extractors/hog_extractor.h"
 
 /**
  * @namespace pandora_vision
@@ -62,6 +63,7 @@ namespace pandora_vision
     bool extractEdgeOrientationFeatures = false;
     bool extractHaralickFeatures = false;
     bool extractSiftFeatures = true;
+    bool extractHogFeatures = false;
 
     chosenFeatureTypesMap_["channels_statistics"] =
         extractChannelsStatisticsFeatures;
@@ -69,11 +71,25 @@ namespace pandora_vision
         extractEdgeOrientationFeatures;
     chosenFeatureTypesMap_["haralick"] = extractHaralickFeatures;
     chosenFeatureTypesMap_["sift"] = extractSiftFeatures;
+    chosenFeatureTypesMap_["hog"] = extractHogFeatures;
 
     if (chosenFeatureTypesMap_["sift"] == true)
     {
-      featureFactory_.reset(new SiftExtractor());
-      bowTrainer_.reset(new BagOfWordsTrainer());
+      std::string featureDetectorType = "SIFT";
+      std::string descriptorExtractorType = "SIFT";
+      boost::shared_ptr<FeatureExtractorFactory> siftPtr(new SiftExtractor(
+          featureDetectorType, descriptorExtractorType));
+      featureFactoryPtrMap_["sift"] = siftPtr;
+
+      std::string descriptorMatcherType = "FlannBased";
+      int dictionarySize = 1000;
+      bowTrainerPtr_.reset(new BagOfWordsTrainer(featureDetectorType,
+          descriptorExtractorType, descriptorMatcherType, dictionarySize));
+    }
+    if (chosenFeatureTypesMap_["hog"] == true)
+    {
+      boost::shared_ptr<FeatureExtractorFactory> hogPtr(new HOGExtractor());
+      featureFactoryPtrMap_["hog"] = hogPtr;
     }
   }
 
@@ -133,10 +149,19 @@ namespace pandora_vision
     {
       /// Extract SIFT features from RGB image
       cv::Mat siftDescriptors;
-      bowTrainer_->createBowRepresentation(inImage, &siftDescriptors);
+      bowTrainerPtr_->createBowRepresentation(inImage, &siftDescriptors);
       /// Append SIFT features to RGB feature vector.
       for (int ii = 0; ii < siftDescriptors.cols; ii++)
         featureVector_.push_back(siftDescriptors.at<float>(ii));
+    }
+    if (chosenFeatureTypesMap_["hog"] == true)
+    {
+      /// Extract HOG features from RGB image
+      std::vector<float> hogDescriptors;
+      featureFactoryPtrMap_["hog"]->extractFeatures(inImage, &hogDescriptors);
+      /// Append HOG features to RGB feature vector.
+      for (int ii = 0; ii < hogDescriptors.size(); ii++)
+        featureVector_.push_back(hogDescriptors.at(ii));
     }
   }
 }  // namespace pandora_vision

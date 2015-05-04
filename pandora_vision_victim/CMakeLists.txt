@@ -79,6 +79,7 @@ add_library(${PROJECT_NAME}_feature_extractors
     src/feature_extractors/edge_orientation_extractor.cpp
     src/feature_extractors/haralickfeature_extractor.cpp
     src/feature_extractors/sift_extractor.cpp
+    src/feature_extractors/hog_extractor.cpp
     src/feature_extractors/feature_extraction.cpp
     src/feature_extractors/depth_feature_extraction.cpp
     src/feature_extractors/rgb_feature_extraction.cpp

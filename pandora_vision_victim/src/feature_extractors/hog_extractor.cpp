@@ -35,16 +35,12 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-
 #include <string>
 #include <vector>
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+
+#include "pandora_vision_victim/feature_extractors/hog_extractor.h"
 
 /**
  * @namespace pandora_vision
@@ -53,50 +49,47 @@
 namespace pandora_vision
 {
   /**
-   * @class FeatureExtractorFactory
-   * @brief This class extracts features from images.
+   * @brief Default Constructor
    */
-  class FeatureExtractorFactory
+  HOGExtractor::HOGExtractor() : FeatureExtractorFactory()
   {
-    public:
-      /**
-       * @brief Default Constructor
-       */
-      FeatureExtractorFactory()
-      {
-      }
+    cv::Size windowSize = cv::Size(160, 128);
+    cv::Size blockSize = cv::Size(16, 16);
+    cv::Size blockStride = cv::Size(16, 16);
+    cv::Size cellSize = cv::Size(8, 8);
+    int numBins = 9;
+    double winSigma = cv::HOGDescriptor::L2Hys;
+    double thresholdL2Hys = 0.2;
+    bool gammaCorrection = true;
+    int numLevels = cv::HOGDescriptor::DEFAULT_NLEVELS;
+    hogDescriptor_ = new cv::HOGDescriptor(windowSize, blockSize, blockStride,
+        cellSize, numBins, 1, -1, winSigma, thresholdL2Hys, gammaCorrection,
+        numLevels);
+  }
 
-      /**
-       * @brief Destructor
-       */
-      virtual ~FeatureExtractorFactory()
-      {
-      }
+  /**
+   * @brief Destructor
+   */
+  HOGExtractor::~HOGExtractor()
+  {
+  }
 
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          cv::Mat* descriptors)
-      {
-      }
+  /**
+   *
+   */
+  void HOGExtractor::extractFeatures(const cv::Mat& inImage,
+      std::vector<float>* descriptors)
+  {
+    cv::Mat grayscaleImage = inImage.clone();
+    // TODO Check if HOG works with RGB image.
+    if (grayscaleImage.channels() > 1)
+      cvtColor(grayscaleImage, grayscaleImage, CV_BGR2GRAY);
+    // TODO Check proper size.
+    cv::resize(grayscaleImage, grayscaleImage, cv::Size(160, 128));
 
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<double>* featureVector)
-      {
-      }
-
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<float>* featureVector)
-      {
-      }
-  };
+    std::vector<cv::Point> pointLocations;
+    hogDescriptor_->compute(grayscaleImage, *descriptors, cv::Size(0, 0),
+        cv::Size(0, 0), pointLocations);
+  }
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
 

@@ -43,6 +43,7 @@
 
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/sift_extractor.h"
+#include "pandora_vision_victim/feature_extractors/hog_extractor.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 #include "pandora_vision_victim/utilities/bag_of_words_trainer.h"
 
@@ -60,7 +61,8 @@ namespace pandora_vision
     bool extractChannelsStatisticsFeatures = true;
     bool extractEdgeOrientationFeatures = true;
     bool extractHaralickFeatures = true;
-    bool extractSiftFeatures = true;
+    bool extractSiftFeatures = false;
+    bool extractHogFeatures = false;
 
     chosenFeatureTypesMap_["channels_statistics"] =
         extractChannelsStatisticsFeatures;
@@ -68,11 +70,19 @@ namespace pandora_vision
         extractEdgeOrientationFeatures;
     chosenFeatureTypesMap_["haralick"] = extractHaralickFeatures;
     chosenFeatureTypesMap_["sift"] = extractSiftFeatures;
+    chosenFeatureTypesMap_["hog"] = extractHogFeatures;
 
     if (chosenFeatureTypesMap_["sift"] == true)
     {
-      featureFactory_.reset(new SiftExtractor());
-      bowTrainer_.reset(new BagOfWordsTrainer());
+      boost::shared_ptr<FeatureExtractorFactory> siftPtr(new SiftExtractor());
+      featureFactoryPtrMap_["sift"] = siftPtr;
+
+      bowTrainerPtr_.reset(new BagOfWordsTrainer());
+    }
+    if (chosenFeatureTypesMap_["hog"] == true)
+    {
+      boost::shared_ptr<FeatureExtractorFactory> hogPtr(new HOGExtractor());
+      featureFactoryPtrMap_["hog"] = hogPtr;
     }
   }
 
@@ -131,11 +141,20 @@ namespace pandora_vision
     {
       /// Extract SIFT features from RGB image
       cv::Mat siftDescriptors;
-      bowTrainer_->createBowRepresentation(inImage, &siftDescriptors);
-      std::cout << siftDescriptors.cols << " " << siftDescriptors.rows << std::endl;
+      bowTrainerPtr_->createBowRepresentation(inImage, &siftDescriptors);
       /// Append SIFT features to RGB feature vector.
-      //for (int ii = 0; ii < haralickFeatureVector.size(); ii++)
-        //featureVector_.push_back(haralickFeatureVector[ii]);
+      for (int ii = 0; ii < siftDescriptors.cols; ii++)
+        featureVector_.push_back(siftDescriptors.at<float>(ii));
+    }
+
+    if (chosenFeatureTypesMap_["hog"] == true)
+    {
+      /// Extract HOG features from RGB image
+      std::vector<float> hogDescriptors;
+      featureFactoryPtrMap_["hog"]->extractFeatures(inImage, &hogDescriptors);
+      /// Append HOG features to RGB feature vector.
+      for (int ii = 0; ii < hogDescriptors.size(); ii++)
+        featureVector_.push_back(hogDescriptors.at(ii));
     }
 
   }

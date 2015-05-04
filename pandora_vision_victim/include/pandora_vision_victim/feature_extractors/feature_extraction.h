@@ -144,10 +144,10 @@ namespace pandora_vision
       std::map<std::string, bool> chosenFeatureTypesMap_;
 
       ///
-      boost::shared_ptr<FeatureExtractorFactory> featureFactory_;
+      std::map<std::string, boost::shared_ptr<FeatureExtractorFactory> > featureFactoryPtrMap_;
 
       ///
-      boost::shared_ptr<BagOfWordsTrainer> bowTrainer_;
+      boost::shared_ptr<BagOfWordsTrainer> bowTrainerPtr_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTION_H

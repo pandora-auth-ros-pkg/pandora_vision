@@ -35,16 +35,16 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
+#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HOG_EXTRACTOR_H
+#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HOG_EXTRACTOR_H
 
 #include <string>
 #include <vector>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+
+#include "pandora_vision_victim/feature_extractors/feature_extractor_factory.h"
 
 /**
  * @namespace pandora_vision
@@ -53,50 +53,32 @@
 namespace pandora_vision
 {
   /**
-   * @class FeatureExtractorFactory
-   * @brief This class extracts features from images.
+   * @class HOGExtractor
+   * @brief This class extracts HOG features from images.
    */
-  class FeatureExtractorFactory
+  class HOGExtractor : public FeatureExtractorFactory
   {
     public:
       /**
        * @brief Default Constructor
        */
-      FeatureExtractorFactory()
-      {
-      }
+      HOGExtractor();
 
       /**
        * @brief Destructor
        */
-      virtual ~FeatureExtractorFactory()
-      {
-      }
+      virtual ~HOGExtractor();
 
       /**
-       * @brief
+       *
        */
       virtual void extractFeatures(const cv::Mat& inImage,
-          cv::Mat* descriptors)
-      {
-      }
+          std::vector<float>* descriptors);
 
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<double>* featureVector)
-      {
-      }
-
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<float>* featureVector)
-      {
-      }
+    private:
+      ///
+      cv::Ptr<cv::HOGDescriptor> hogDescriptor_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
+#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_HOG_EXTRACTOR_H
 

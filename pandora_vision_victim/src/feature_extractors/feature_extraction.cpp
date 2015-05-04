@@ -85,8 +85,10 @@ namespace pandora_vision
     if (chosenFeatureTypesMap_["sift"] == true)
     {
       cv::Mat descriptors;
-      featureFactory_->extractFeatures(inImage, &descriptors);
-      bowTrainer_->addDescriptors(descriptors);
+      featureFactoryPtrMap_["sift"]->extractFeatures(inImage, &descriptors);
+      std::cout << "SIFT size:" << descriptors.rows << " " << descriptors.cols << std::endl;
+      if (!descriptors.empty())
+        bowTrainerPtr_->addDescriptors(descriptors);
     }
   }
 
@@ -114,60 +116,74 @@ namespace pandora_vision
 
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
-    int rowIndex = 0;
     std::cout << "Iterate over dataset images" << std::endl;
-    for (boost::filesystem::recursive_directory_iterator iter(directory);
-         iter != boost::filesystem::recursive_directory_iterator();
-         iter++)
-    {
-      if (is_directory(iter->status()))
-        continue;
-      std::string imageAbsolutePath = iter->path().string();
-      std::string imageName = iter->path().filename().string();
-      image = cv::imread(imageAbsolutePath);
-      if (!image.data)
-      {
-        std::cout << "Error reading file " << imageName << std::endl;
-        continue;
-      }
-      // cv::Size size(640, 480);
-      // cv::resize(image, image, size);
 
-      if (successfulFileLoad)
+    if (successfulFileLoad)
+    {
+      std::cout << "Read class attributes from annotation file." << std::endl;
+      for (int ii = 0; ii < annotatedImages.size(); ii++)
       {
-        std::cout << "Read class attribute from annotation file." << std::endl;
-        for (int ii = 0; ii < annotatedImages.size(); ii++)
+        std::string imageAbsolutePath = directory.string() + "/" + annotatedImages[ii];
+        image = cv::imread(imageAbsolutePath);
+        if (!image.data)
         {
-          if (annotatedImages[ii] == imageName)
-          {
-            imageROI = image(boundingBox[ii]);
-                annotatedImages[ii].clear();
-            labelsMat->at<double>(rowIndex, 0) = classAttributes[ii];
-            break;
-          }
+          std::cout << "Error reading file " << annotatedImages[ii] << std::endl;
+          continue;
         }
+
+        imageROI = image(boundingBox[ii]);
         extractFeatures(imageROI);
+
+        std::cout << "Feature vector of image " << annotatedImages[ii]
+                  << ": Size = " << featureVector_.size()
+                  << ", Class = " << classAttributes[ii] << std::endl;
+
+        for (int jj = 0; jj < featureVector_.size(); jj++)
+          featuresMat->at<double>(ii, jj) = featureVector_[jj];
       }
-      else
+      *labelsMat = cv::Mat(classAttributes);
+    }
+    else
+    {
+      std::cout << "Find class attributes from image names." << std::endl;
+      int rowIndex = 0;
+      for (boost::filesystem::recursive_directory_iterator iter(directory);
+           iter != boost::filesystem::recursive_directory_iterator();
+           iter++)
       {
-        std::cout << "Find class attribute from image name." << std::endl;
+        if (is_directory(iter->status()))
+          continue;
+        std::string imageAbsolutePath = iter->path().string();
+        std::string imageName = iter->path().filename().string();
+        image = cv::imread(imageAbsolutePath);
+        if (!image.data)
+        {
+          std::cout << "Error reading file " << imageName << std::endl;
+          continue;
+        }
 
         std::string checkIfPositive = "positive";
+        std::string checkIfNegative = "negative";
         if (boost::algorithm::contains(imageName, checkIfPositive))
+        {
           labelsMat->at<double>(rowIndex, 0) = 1.0;
+        }
         else
+        {
+          if (!boost::algorithm::contains(imageName, checkIfNegative))
+            std::cout << "Missing class attribute. Image is considered negative";
           labelsMat->at<double>(rowIndex, 0) = -1.0;
-
+        }
         extractFeatures(image);
+
+        std::cout << "Feature vector of image " << imageName
+                  << ": Size = " << featureVector_.size() << std::endl;
+
+        for (int jj = 0; jj < featureVector_.size(); jj++)
+          featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
+
+        rowIndex += 1;
       }
-
-      std::cout << "Feature vector of image " << imageName << " "
-                << featureVector_.size() << std::endl;
-
-      for (int jj = 0; jj < featureVector_.size(); jj++)
-        featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
-
-      rowIndex += 1;
     }
   }
 
@@ -196,43 +212,51 @@ namespace pandora_vision
 
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
-    int rowIndex = 0;
-    for (boost::filesystem::recursive_directory_iterator iter(directory);
-         iter != boost::filesystem::recursive_directory_iterator();
-         iter++)
-    {
-      if (is_directory(iter->status()))
-        continue;
-      std::string imageAbsolutePath = iter->path().string();
-      std::string imageName = iter->path().filename().string();
-      image = cv::imread(imageAbsolutePath);
-      if (!image.data)
-      {
-        std::cout << "Error reading file " << imageName << std::endl;
-        continue;
-      }
 
-      if (successfulFileLoad)
+    if (successfulFileLoad)
+    {
+      std::cout << "Find descriptors from bounding boxes." << std::endl;
+      for (int ii = 0; ii < annotatedImages.size(); ii++)
       {
-        for (int ii = 0; ii < annotatedImages.size(); ii++)
+        std::cout << "Processing file " << annotatedImages[ii] << std::endl;
+        std::string imageAbsolutePath = directory.string() + "/" + annotatedImages[ii];
+        image = cv::imread(imageAbsolutePath);
+        if (!image.data)
         {
-          if (annotatedImages[ii] == imageName)
-          {
-            imageROI = image(boundingBox[ii]);
-                annotatedImages[ii].clear();
-            break;
-          }
+          std::cout << "Error reading file " << annotatedImages[ii] << std::endl;
+          continue;
         }
+
+        imageROI = image(boundingBox[ii]);
         addDescriptorsToBagOfWords(imageROI);
       }
-      else
-      {
-        addDescriptorsToBagOfWords(image);
-      }
-      rowIndex += 1;
     }
-    std::cout << "Create Vocabulary" << std::endl;
-    bowTrainer_->createVocabulary();
+    else
+    {
+      std::cout << "Find descriptors from whole images." << std::endl;
+      int rowIndex = 0;
+      for (boost::filesystem::recursive_directory_iterator iter(directory);
+           iter != boost::filesystem::recursive_directory_iterator();
+           iter++)
+      {
+        if (is_directory(iter->status()))
+          continue;
+        std::string imageAbsolutePath = iter->path().string();
+        std::string imageName = iter->path().filename().string();
+        std::cout << "Processing file " << imageName << std::endl;
+        image = cv::imread(imageAbsolutePath);
+        if (!image.data)
+        {
+          std::cout << "Error reading file " << imageName << std::endl;
+          continue;
+        }
+        addDescriptorsToBagOfWords(image);
+
+        rowIndex += 1;
+      }
+    }
+    std::cout << "Creating visual Vocabulary" << std::endl;
+    bowTrainerPtr_->createVocabulary();
     return true;
   }
 
@@ -257,6 +281,6 @@ namespace pandora_vision
    */
   cv::Mat FeatureExtraction::getBagOfWordsVocabulary() const
   {
-    return bowTrainer_->getVocabulary();
+    return bowTrainerPtr_->getVocabulary();
   }
 }  // namespace pandora_vision

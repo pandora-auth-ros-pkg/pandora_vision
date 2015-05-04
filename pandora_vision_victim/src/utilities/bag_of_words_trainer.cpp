@@ -56,7 +56,7 @@ namespace pandora_vision
    */
   BagOfWordsTrainer::BagOfWordsTrainer()
   {
-    featureDetectorType_ = "Dense";
+    featureDetectorType_ = "SIFT";
     descriptorExtractorType_ = "SIFT";
     descriptorMatcherType_ = "FlannBased";
 
@@ -66,8 +66,8 @@ namespace pandora_vision
     descriptorMatcher_ = cv::DescriptorMatcher::create(descriptorMatcherType_);
 
     int termCriteriaType = CV_TERMCRIT_ITER + CV_TERMCRIT_EPS;
-    int termCriteriaMaxIterations = 10000;
-    double termCriteriaEpsilon = 1e-6;
+    int termCriteriaMaxIterations = 1000;
+    double termCriteriaEpsilon = 1e-3;
 
     int dictionarySize = 1000;
     cv::TermCriteria termCrit(termCriteriaType, termCriteriaMaxIterations,
@@ -108,8 +108,8 @@ namespace pandora_vision
      */
 
     int termCriteriaType = CV_TERMCRIT_ITER + CV_TERMCRIT_EPS;
-    int termCriteriaMaxIterations = 10000;
-    double termCriteriaEpsilon = 1e-6;
+    int termCriteriaMaxIterations = 100;
+    double termCriteriaEpsilon = 1e-3;
 
     cv::TermCriteria termCrit(termCriteriaType, termCriteriaMaxIterations,
         termCriteriaEpsilon);
