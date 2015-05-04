@@ -51,8 +51,7 @@ int main(int argc, char** argv)
   std::cin >> numFeatures;
   std::string datasetPath;
   std::cout << "Add absolute path, where your samples are stored " << std::endl;
-  //std::cin >> datasetPath;
-  datasetPath = "/media/63bafe48-9130-4840-9d0f-510d5cb46bc5/miltos/svm_new";
+  std::cin >> datasetPath;
 
   pandora_vision::RgbSvmTraining victim_rgb_svm_trainer("victim",
       numFeatures, datasetPath);

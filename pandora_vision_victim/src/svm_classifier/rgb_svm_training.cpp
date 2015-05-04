@@ -126,7 +126,6 @@ namespace pandora_vision
           trainingAnnotationsFilePath);
       constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
           &trainingFeaturesMat, &trainingLabelsMat);
-
       std::vector<double> meanVector;
       std::vector<double> stdDevVector;
       featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,

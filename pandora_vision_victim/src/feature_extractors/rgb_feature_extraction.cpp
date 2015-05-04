@@ -82,7 +82,7 @@ namespace pandora_vision
       featureFactoryPtrMap_["sift"] = siftPtr;
 
       std::string descriptorMatcherType = "FlannBased";
-      int dictionarySize = 1000;
+      int dictionarySize = 10000;
       bowTrainerPtr_.reset(new BagOfWordsTrainer(featureDetectorType,
           descriptorExtractorType, descriptorMatcherType, dictionarySize));
     }

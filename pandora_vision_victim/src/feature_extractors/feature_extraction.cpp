@@ -121,6 +121,8 @@ namespace pandora_vision
     if (successfulFileLoad)
     {
       std::cout << "Read class attributes from annotation file." << std::endl;
+      *labelsMat = cv::Mat(classAttributes);
+
       for (int ii = 0; ii < annotatedImages.size(); ii++)
       {
         std::string imageAbsolutePath = directory.string() + "/" + annotatedImages[ii];
@@ -141,7 +143,6 @@ namespace pandora_vision
         for (int jj = 0; jj < featureVector_.size(); jj++)
           featuresMat->at<double>(ii, jj) = featureVector_[jj];
       }
-      *labelsMat = cv::Mat(classAttributes);
     }
     else
     {
