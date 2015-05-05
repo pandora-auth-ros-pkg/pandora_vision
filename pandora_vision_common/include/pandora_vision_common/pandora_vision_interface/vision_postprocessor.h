@@ -155,6 +155,7 @@ namespace pandora_vision
     VisionPostProcessor<VisionAlertMsg>::
     getGeneralAlertInfo(const POIsStampedConstPtr& result)
     {
+      //ROS_INFO_STREAM("key = " + result->header.frame_id);
       pandora_common_msgs::GeneralAlertVector generalAlertInfos;
 
       float x = 0, y = 0;
@@ -199,15 +200,25 @@ namespace pandora_vision
         }
         else
         {
-          T param;
+          ROS_INFO("[%s] First at: %s", this->getName().c_str(), key.c_str());
 
-          if (!this->accessPublicNh()->getParam(key, param))
-          {
-            ROS_ERROR_NAMED(this->getName(),
-                "Params couldn't be retrieved for %s", key.c_str());
-            throw vision_config_error(key + " : not found");
+          std::string true_key;
+          if (key[0] == '/') {
+            true_key = key;
+          }
+          else {
+            true_key = '/' + key;
           }
 
+          T param;
+
+          if (!this->accessPublicNh()->getParam(true_key, param))
+          {
+            ROS_ERROR_NAMED(this->getName(),
+                "Params couldn't be retrieved for %s", true_key.c_str());
+            throw vision_config_error(key + " : not found");
+          }
+          ROS_INFO("[%s] Got: %f", this->getName().c_str(), param);
           dict->insert(std::make_pair(key, param));
           return param;
         }
@@ -227,6 +238,17 @@ namespace pandora_vision
       }
       else
       {
+        ROS_INFO("[%s] First at: %s", this->getName().c_str(), key.c_str());
+          
+        std::string true_key;
+        if (key[0] == '/') {
+          true_key = key;
+          true_key.erase(0, 1);
+        }
+        else {
+          true_key = key;
+        }
+
         std::string robot_description;
 
         if (!this->accessPublicNh()->getParam(model_param_name, robot_description))
@@ -241,10 +263,11 @@ namespace pandora_vision
         boost::shared_ptr<urdf::ModelInterface> model(
           urdf::parseURDF(robot_description));
         // Get current link and its parent
-        boost::shared_ptr<const urdf::Link> currentLink = model->getLink(key);
-        boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
+        boost::shared_ptr<const urdf::Link> currentLink( model->getLink(true_key) );
+        boost::shared_ptr<const urdf::Link> parentLink( currentLink->getParent() );
         // Set the parent frame_id to the parent of the frame_id
         parent_frame_id = parentLink->name;
+        ROS_INFO("[%s] Got: %s", this->getName().c_str(), parent_frame_id.c_str());
         dict->insert(std::make_pair(key, parent_frame_id));
         return parent_frame_id;
       }

@@ -46,6 +46,8 @@ namespace pandora_vision
   QrCodePostProcessor::QrCodePostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_vision_msgs::QRAlertVector>(ns, handler)
   {
+    ROS_INFO_STREAM("["+this->getName()+"] postprocessor nh processor : "+
+        this->accessProcessorNh()->getNamespace());
   }
 
   QrCodePostProcessor::~QrCodePostProcessor()
@@ -54,6 +56,7 @@ namespace pandora_vision
 
   bool QrCodePostProcessor::postProcess(const POIsStampedConstPtr& input, const QRAlertVectorPtr& output)
   {
+    //ROS_INFO("yo!");
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 

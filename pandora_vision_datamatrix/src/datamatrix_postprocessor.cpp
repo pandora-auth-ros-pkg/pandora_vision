@@ -43,7 +43,7 @@ namespace pandora_vision
 {
 
   DataMatrixPostProcessor::DataMatrixPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionPostProcessor<pandora_vision_msgs::DataMatrixAlertsVectorMsg>(ns, handler)
+    VisionPostProcessor<pandora_vision_msgs::DataMatrixAlertVector>(ns, handler)
   {
   }
 
@@ -52,14 +52,14 @@ namespace pandora_vision
   }
 
   bool DataMatrixPostProcessor::postProcess(const POIsStampedConstPtr& input, 
-    const DataMatrixAlertsVectorMsgPtr& output)
+    const DataMatrixAlertVectorPtr& output)
   {
-    pandora_common_msgs::GeneralAlertInfoVector alertVector = getGeneralAlertInfo(input);
+    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 
     for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      pandora_vision_msgs::DataMatrixAlertMsg dataMatrixAlert;
+      pandora_vision_msgs::DataMatrixAlert dataMatrixAlert;
 
       dataMatrixAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
       dataMatrixAlert.info.pitch = alertVector.generalAlerts[ii].pitch;

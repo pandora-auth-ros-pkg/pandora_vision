@@ -25,7 +25,9 @@ include_directories(
 catkin_add_gtest(feature_detector_test unit/feature_matching_test.cpp)
 target_link_libraries(feature_detector_test
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_detectors
+  ${PROJECT_NAME}_sift_detector
+  ${PROJECT_NAME}_surf_detector
+  ${PROJECT_NAME}_orb_detector
   gtest_main
   gtest
   ${GTEST_LIBRARIES} 

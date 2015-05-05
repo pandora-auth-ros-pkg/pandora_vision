@@ -108,15 +108,15 @@ add_library(${PROJECT_NAME}_3d_lib
 target_link_libraries(${PROJECT_NAME}_3d_lib ${catkin_LIBRARIES})
 
 ########################### landoltc3dNode ############################
-add_executable(landoltc3d_node
+add_executable(${PROJECT_NAME}_3d_node
               src/landoltc_3d/landoltc3d_parameters.cpp
               src/landoltc_3d/landoltc3d_node.cpp
               src/landoltc_3d/landoltc3d_detection.cpp
               src/landoltc_3d/landoltc3d_detector.cpp
 )
-target_link_libraries(landoltc3d_node ${catkin_LIBRARIES} )
+target_link_libraries(${PROJECT_NAME}_3d_node ${catkin_LIBRARIES} )
 
-add_dependencies(landoltc3d_node
+add_dependencies(${PROJECT_NAME}_3d_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )

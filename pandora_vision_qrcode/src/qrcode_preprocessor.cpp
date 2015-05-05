@@ -44,6 +44,8 @@ namespace pandora_vision
   QrCodePreProcessor::QrCodePreProcessor(const std::string& ns, 
     sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler)
   {
+    ROS_INFO_STREAM("["+this->getName()+"] preprocessor nh processor : "+
+        this->accessProcessorNh()->getNamespace());
   }
   
   QrCodePreProcessor::~QrCodePreProcessor()

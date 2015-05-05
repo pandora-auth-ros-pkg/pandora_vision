@@ -88,9 +88,9 @@ namespace pandora_vision
 
         if (previouslyOff && currentlyOn)
         {
-          preProcPtr_.reset(new PreProc("~/preprocessor", this));
-          processorPtr_.reset(new Detector("~/processor", this));
-          postProcPtr_.reset(new PostProc("~/postprocessor", this));
+          preProcPtr_.reset(new PreProc("~preprocessor", this));
+          processorPtr_.reset(new Detector("~detector", this));
+          postProcPtr_.reset(new PostProc("~postprocessor", this));
         }
         else if (!previouslyOff && !currentlyOn)
         {

@@ -59,8 +59,7 @@ add_library(
   ${PROJECT_NAME}_detector
   src/detection/planar_object_detector.cpp
   )
-target_link_libraries(
-  ${PROJECT_NAME}_detector
+target_link_libraries(${PROJECT_NAME}_detector
   ${PROJECT_NAME}_filters
   ${catkin_LIBRARIES}
   )
@@ -70,8 +69,7 @@ add_library(
   ${PROJECT_NAME}_feature_matching_detector
   src/detection/feature_matching_detector.cpp
   )
-target_link_libraries(
-  ${PROJECT_NAME}_feature_matching_detector
+target_link_libraries(${PROJECT_NAME}_feature_matching_detector
   ${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
   )
@@ -81,8 +79,7 @@ add_library(
   ${PROJECT_NAME}_sift_detector
   src/detection/sift_detector.cpp
   )
-target_link_libraries(
-  ${PROJECT_NAME}_sift_detector
+target_link_libraries(${PROJECT_NAME}_sift_detector
   ${PROJECT_NAME}_feature_matching_detector
   ${catkin_LIBRARIES}
   )
@@ -92,8 +89,7 @@ add_library(
   ${PROJECT_NAME}_surf_detector
   src/detection/surf_detector.cpp
   )
-target_link_libraries(
-  ${PROJECT_NAME}_surf_detector
+target_link_libraries(${PROJECT_NAME}_surf_detector
   ${PROJECT_NAME}_feature_matching_detector
   ${catkin_LIBRARIES}
   )
@@ -103,8 +99,7 @@ add_library(
   ${PROJECT_NAME}_orb_detector
   src/detection/orb_detector.cpp
   )
-target_link_libraries(
-  ${PROJECT_NAME}_orb_detector
+target_link_libraries(${PROJECT_NAME}_orb_detector
   ${PROJECT_NAME}_feature_matching_detector
   ${catkin_LIBRARIES}
   )
@@ -112,8 +107,7 @@ target_link_libraries(
 add_library(
   ${PROJECT_NAME}_detector_factory
   src/detection/detector_factory.cpp)
-target_link_libraries(
-  ${PROJECT_NAME}_detector_factory
+target_link_libraries(${PROJECT_NAME}_detector_factory
   ${PROJECT_NAME}_sift_detector
   ${PROJECT_NAME}_surf_detector
   ${PROJECT_NAME}_orb_detector
@@ -128,7 +122,8 @@ target_link_libraries(${PROJECT_NAME}_processor
     ${PROJECT_NAME}_detector_factory
     ${catkin_LIBRARIES}
     )
-add_dependencies(${PROJECT_NAME}_processor ${PROJECT_NAME}_gencfg)
+add_dependencies(${PROJECT_NAME}_processor
+  ${PROJECT_NAME}_gencfg)
 
 
 ################# hazmat preprocessor #################
@@ -164,7 +159,8 @@ add_executable(${PROJECT_NAME}_node
       )
 target_link_libraries(${PROJECT_NAME}_node
     ${PROJECT_NAME}_handler
-    ${catkin_LIBRARIES} )
+    ${catkin_LIBRARIES}
+    )
 add_dependencies(${PROJECT_NAME}_node
     ${catkin_EXPORTED_TARGETS}
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

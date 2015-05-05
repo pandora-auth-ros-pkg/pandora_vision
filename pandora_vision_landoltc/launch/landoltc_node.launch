@@ -1,12 +1,13 @@
 <launch>
   
-    <node name="landoltc_node" type="landoltc_node" pkg="pandora_vision_landoltc" respawn="False" />
+  <node name="landoltc_2d_node" type="pandora_vision_landoltc_2d_node" pkg="pandora_vision_landoltc"
+    respawn="False" ns="pandora_vision"/>
     
     <rosparam file="$(find pandora_vision_landoltc)/cfg/landoltc_topics.yaml" 
-        command="load" ns="landoltc"/>
+      command="load" ns="pandora_vision/pandora_vision_landoltc_2d"/>
         
     <rosparam file="$(find pandora_vision_landoltc)/cfg/landoltc_params.yaml" 
-        command="load" ns="landoltc"/>
+        command="load" ns="pandora_vision/pandora_vision_landoltc_2d"/>
         
     <param name="patternPath" type="str" value="$(find pandora_vision_landoltc)/bold.jpg"/>  
        

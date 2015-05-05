@@ -36,30 +36,30 @@
       <arg name="depth_registration" value="true" />
       <arg name="publish_tf" value="false" />
     </include>
+    <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
+    <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
   </group>
 
-  <param name="kinect/topic_name" value="/kinect/rgb/image_raw" />
-
   <!-- Vision Nodes -->
-  <group if="$(arg vision_nodes)" ns="vision">
-    <include if="$(arg vision_qr)"
+  <group if="$(arg vision_nodes)" >
+    <include if="$(arg vision_qr)"                                     
       file="$(find pandora_vision_qrcode)/launch/qrcode_node.launch" />
-    <include if="$(arg vision_hazmat)"
-      file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
-    <include if="$(arg vision_landoltc)"
-      file="$(find pandora_vision_landoltc)/launch/landoltc_node.launch" />
-    <include if="$(arg vision_motion)"
-      file="$(find pandora_vision_motion)/launch/motion_node.launch" />
-    <include if="$(arg vision_datamatrix)"
-      file="$(find pandora_vision_datamatrix)/launch/datamatrix_node.launch" />
-    <include if="$(arg vision_landoltc3d)"
-      file="$(find pandora_vision_landoltc)/launch/predator-landoltc3d.launch" />
-    <include if="$(arg vision_predator)"
-      file="$(find pandora_vision_predator)/launch/predator_node.launch" />
-    <include if="$(arg vision_hole_detector)"
-      file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch" />
-    <include if="$(arg vision_victim)"
-      file="$(find pandora_vision_victim)/launch/victim_node.launch" />
+    <!--<include if="$(arg vision_hazmat)"                                 -->
+    <!--  file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />-->
+    <!--<include if="$(arg vision_landoltc)"                                   -->
+    <!--  file="$(find pandora_vision_landoltc)/launch/landoltc_node.launch" />-->
+    <!--<include if="$(arg vision_motion)"                                 -->
+    <!--  file="$(find pandora_vision_motion)/launch/motion_node.launch" />-->
+    <!--<include if="$(arg vision_datamatrix)"                                       -->
+    <!--  file="$(find pandora_vision_datamatrix)/launch/datamatrix_node.launch" />  -->
+    <!--<include if="$(arg vision_landoltc3d)"                                       -->
+    <!--  file="$(find pandora_vision_landoltc)/launch/predator-landoltc3d.launch" />-->
+    <!--<include if="$(arg vision_predator)"                                         -->
+    <!--  file="$(find pandora_vision_predator)/launch/predator_node.launch" />      -->
+    <!--<include if="$(arg vision_hole_detector)"                                -->
+    <!--  file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch" />-->
+    <!--<include if="$(arg vision_victim)"                                 -->
+    <!--  file="$(find pandora_vision_victim)/launch/victim_node.launch" />-->
 
   </group>
 </launch>

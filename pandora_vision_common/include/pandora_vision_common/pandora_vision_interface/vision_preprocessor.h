@@ -96,6 +96,7 @@ namespace pandora_vision
   VisionPreProcessor::
   preProcess(const ImageConstPtr& input, const CVMatStampedPtr& output)
   {
+    //ROS_DEBUG_STREAM("["+this->accessPublicNh()->getNamespace()+"] Calling vision preprocessor.");
     cv_bridge::CvImagePtr inMsg;
     inMsg = cv_bridge::toCvCopy(*input, sensor_msgs::image_encodings::BGR8);
     output->image = inMsg->image.clone();
