@@ -285,4 +285,26 @@ namespace pandora_vision
   {
     return bowTrainerPtr_->getVocabulary();
   }
+
+  /**
+   * @brief
+   */
+  void FeatureExtraction::setBagOfWordsVocabulary(const cv::Mat& vocabulary)
+  {
+    bowTrainerPtr_->setVocabulary(vocabulary);
+  }
+
+
+  /**
+   * @brief This function checks whether a Bag of Words vocabulary is needed.
+   * @return [bool] Variable declaring whether a bag of words vocabulary is
+   * needed or not.
+   */
+  bool FeatureExtraction::bagOfWordsVocabularyNeeded()
+  {
+    if (!chosenFeatureTypesMap_["sift"])
+      return false;
+    else
+      return true;
+  }
 }  // namespace pandora_vision

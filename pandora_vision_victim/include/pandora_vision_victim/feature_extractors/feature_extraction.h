@@ -132,6 +132,19 @@ namespace pandora_vision
        */
       cv::Mat getBagOfWordsVocabulary() const;
 
+      /**
+       * @brief
+       */
+      void setBagOfWordsVocabulary(const cv::Mat& vocabulary);
+
+      /**
+       * @brief This function checks whether a Bag of Words vocabulary is
+       * needed.
+       * @return [bool] Variable declaring whether a bag of words vocabulary is
+       * needed or not.
+       */
+      bool bagOfWordsVocabularyNeeded();
+
     protected:
       /// Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;

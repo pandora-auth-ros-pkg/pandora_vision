@@ -68,13 +68,14 @@ namespace pandora_vision
     svmParams_.gamma = VictimParameters::rgb_svm_gamma;
 
     packagePath_ = ros::package::getPath("pandora_vision_victim");
+    std::string filesDirectory = packagePath_ + "/data/";
 
     std::string normalizationParamOne = "rgb_mean_values.xml";
     std::stringstream normalizationParamOnePath;
-    normalizationParamOnePath << packagePath_ << "/data/" << normalizationParamOne;
+    normalizationParamOnePath << filesDirectory << normalizationParamOne;
     std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
     std::stringstream normalizationParamTwoPath;
-    normalizationParamTwoPath << packagePath_ << "/data/" << normalizationParamTwo;
+    normalizationParamTwoPath << filesDirectory << normalizationParamTwo;
 
     normalizationParamOneVec_ = file_utilities::loadFiles(
         normalizationParamOnePath.str(), "mean");
@@ -82,6 +83,15 @@ namespace pandora_vision
         normalizationParamTwoPath.str(), "std_dev");
 
     featureExtraction_ = new RgbFeatureExtraction();
+    bool vocabularyNeeded = featureExtraction_->bagOfWordsVocabularyNeeded();
+    if (vocabularyNeeded)
+    {
+      const std::string bagOfWordsFile = "rgb_bag_of_words.xml";
+      const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
+      cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
+          "bag_of_words");
+      featureExtraction_->setBagOfWordsVocabulary(vocabulary);
+    }
     ROS_INFO("Initialized RGB SVM Validator");
   }
 

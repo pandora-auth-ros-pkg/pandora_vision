@@ -113,45 +113,82 @@ namespace pandora_vision
     std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
     std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
 
-    if (file_utilities::exist(in_file_stream.str().c_str()) == false ||
-        doFeatureExtraction_)
+    if (loadClassifierModel_ && file_utilities::exist(svm_file_stream.str().c_str()))
     {
-      std::cout << "Create necessary training matrix" << std::endl;
-      std::string prefix = "training_";
-
-      const std::string trainingAnnotationsFile = imageType_ + "training_annotations.txt";
-      const std::string trainingAnnotationsFilePath = filesDirectory + trainingAnnotationsFile;
-
-      constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
-          &trainingFeaturesMat, &trainingLabelsMat);
-
-      std::vector<double> meanVector;
-      std::vector<double> stdDevVector;
-      featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,
-          &meanVector, &stdDevVector);
-
-      file_utilities::saveToFile(normalizationParamOnePath, "mean",
-          cv::Mat(meanVector));
-      file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
-          cv::Mat(stdDevVector));
-
-      trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
-      trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
-
-      file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
-          prefix, trainingFeaturesMatrixFile, trainingLabelsMatrixFile,
-          imageType_);
+      SVM.load(svm_file_stream.str().c_str());
     }
     else
     {
-      trainingFeaturesMat = file_utilities::loadFiles(
-          in_file_stream.str(), "training_features_mat");
-      trainingLabelsMat = file_utilities::loadFiles(
-          labels_mat_file_stream.str(), "training_labels_mat");
+      if (file_utilities::exist(in_file_stream.str().c_str()) == false ||
+          trainingSetFeatureExtraction_)
+      {
+        std::cout << "Create necessary training matrix" << std::endl;
+        std::string prefix = "training_";
+
+        const std::string trainingAnnotationsFile = imageType_ + "training_annotations.txt";
+        const std::string trainingAnnotationsFilePath = filesDirectory + trainingAnnotationsFile;
+
+        constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
+            &trainingFeaturesMat, &trainingLabelsMat);
+
+        std::vector<double> meanVector;
+        std::vector<double> stdDevVector;
+        featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,
+            &meanVector, &stdDevVector);
+
+        file_utilities::saveToFile(normalizationParamOnePath, "mean",
+            cv::Mat(meanVector));
+        file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
+            cv::Mat(stdDevVector));
+
+        trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
+        trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
+
+        file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
+            prefix, trainingFeaturesMatrixFile, trainingLabelsMatrixFile,
+            imageType_);
+      }
+      else
+      {
+        trainingFeaturesMat = file_utilities::loadFiles(
+            in_file_stream.str(), "training_features_mat");
+        trainingLabelsMat = file_utilities::loadFiles(
+            labels_mat_file_stream.str(), "training_labels_mat");
+      }
+
+      // Start Training Process
+      std::cout << "Starting training process for the depth images" << std::endl;
+      if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
+      {
+        std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
+        SVM.train_auto(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(),
+                       params, 10, CvSVM::get_default_grid(CvSVM::C),
+                       CvSVM::get_default_grid(CvSVM::GAMMA),
+                       CvSVM::get_default_grid(CvSVM::P),
+                       CvSVM::get_default_grid(CvSVM::NU),
+                       CvSVM::get_default_grid(CvSVM::COEF),
+                       CvSVM::get_default_grid(CvSVM::DEGREE),
+                       true);
+
+        params = SVM.get_params();
+        std::cout << "Using optimal Parameters" << std::endl;
+        std::cout << "degree=" << params.degree << std::endl;
+        std::cout << "gamma=" << params.gamma << std::endl;
+        std::cout << "coef0=" << params.coef0 << std::endl;
+        std::cout << "C=" << params.C << std::endl;
+        std::cout << "nu=" << params.nu << std::endl;
+        std::cout << "p=" << params.p << std::endl;
+      }
+      else
+      {
+        SVM.train(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(), params);
+      }
+      SVM.save(svm_file_stream.str().c_str());
+      std::cout << "Finished training process" << std::endl;
     }
 
     if (file_utilities::exist(in_test_file_stream.str().c_str()) == false ||
-        doFeatureExtraction_)
+        testSetFeatureExtraction_)
     {
       std::cout << "Create necessary test matrix" << std::endl;
       std::string prefix = "test_";
@@ -182,37 +219,6 @@ namespace pandora_vision
       testLabelsMat = file_utilities::loadFiles(
           test_labels_mat_file_stream.str(), "test_labels_mat");
     }
-
-    // calcMinDistance();
-
-    std::cout << "Starting training process for the depth images" << std::endl;
-    if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
-    {
-      std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
-      SVM.train_auto(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(),
-                     params, 10, CvSVM::get_default_grid(CvSVM::C),
-                     CvSVM::get_default_grid(CvSVM::GAMMA),
-                     CvSVM::get_default_grid(CvSVM::P),
-                     CvSVM::get_default_grid(CvSVM::NU),
-                     CvSVM::get_default_grid(CvSVM::COEF),
-                     CvSVM::get_default_grid(CvSVM::DEGREE),
-                     true);
-
-      params = SVM.get_params();
-      std::cout << "Using optimal Parameters" << std::endl;
-      std::cout << "degree=" << params.degree << std::endl;
-      std::cout << "gamma=" << params.gamma << std::endl;
-      std::cout << "coef0=" << params.coef0 << std::endl;
-      std::cout << "C=" << params.C << std::endl;
-      std::cout << "nu=" << params.nu << std::endl;
-      std::cout << "p=" << params.p << std::endl;
-    }
-    else
-    {
-      SVM.train(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(), params);
-    }
-    SVM.save(svm_file_stream.str().c_str());
-    std::cout << "Finished training process" << std::endl;
 
     // uncomment to produce the platt probability
     // float prediction;

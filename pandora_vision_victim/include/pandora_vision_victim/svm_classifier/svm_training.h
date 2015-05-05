@@ -145,9 +145,17 @@ namespace pandora_vision
       /// Variable used for State Managing
       bool trainingNowON;
 
-      /// Variable used to decide whether to perform the feature extraction or
-      /// to read features from a file.
-      bool doFeatureExtraction_;
+      /// Variable used to decide whether to perform the feature extraction for
+      /// the training set or to read features from a file.
+      bool trainingSetFeatureExtraction_;
+
+      /// Variable used to decide whether to perform the feature extraction for
+      /// the test set or to read features from a file.
+      bool testSetFeatureExtraction_;
+
+      /// Variable used to decide whether to train a classifier or to load the
+      /// classifier model from a file.
+      bool loadClassifierModel_;
 
       /// Variable used to decide whether to perform PCA analysis on the
       /// features or not.
