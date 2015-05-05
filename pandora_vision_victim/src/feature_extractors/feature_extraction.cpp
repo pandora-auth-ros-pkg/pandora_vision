@@ -121,7 +121,8 @@ namespace pandora_vision
     if (successfulFileLoad)
     {
       std::cout << "Read class attributes from annotation file." << std::endl;
-      *labelsMat = cv::Mat(classAttributes);
+      for (int ii = 0; ii < classAttributes.size(); ii++)
+        labelsMat->at<double>(ii) =  classAttributes[ii];
 
       for (int ii = 0; ii < annotatedImages.size(); ii++)
       {
