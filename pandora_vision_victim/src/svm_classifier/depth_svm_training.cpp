@@ -51,8 +51,23 @@ namespace pandora_vision
       int numFeatures, const std::string& datasetPath) :
       SvmTraining(ns, numFeatures, datasetPath)
   {
-    doPcaAnalysis_ = false;
-    typeOfNormalization_ = 2;
+    std::string paramFile = "config/depth_svm_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::string trainingSetExtraction = fs["training_set_feature_extraction"];
+    std::string testSetExtraction = fs["test_set_feature_extraction"];
+    std::string loadModel = fs["load_classifier_model"];
+    std::string pcaAnalysis = fs["do_pca_analysis"];
+
+    trainingSetFeatureExtraction_ = trainingSetExtraction.compare("false");
+    testSetFeatureExtraction_ = testSetExtraction.compare("false");
+    loadClassifierModel_ = loadModel.compare("false");
+    doPcaAnalysis_ = pcaAnalysis.compare("false");
+    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
+
+    fs.release();
+
     imageType_ = "depth_";
     featureExtraction_ = new DepthFeatureExtraction();
     std::cout << "Created Depth SVM Training Instance" << std::endl;

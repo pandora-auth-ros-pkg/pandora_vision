@@ -1,0 +1,18 @@
+%YAML:1.0
+extract_channels_statistics_features: false
+extract_edge_orientation_features: false
+extract_haralick_features: false
+extract_sift_features: true
+extract_hog_features: false
+
+dictionary_size: 10
+
+training_set_feature_extraction: true
+test_set_feature_extraction:true
+load_classifier_model: false
+
+do_pca_analysis: false
+type_of_normalization: 2
+
+training_annotations_file: rgb_training_annotations.txt
+test_annotations_file: rgb_test_annotations.txt

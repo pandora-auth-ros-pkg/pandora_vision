@@ -73,9 +73,6 @@ namespace pandora_vision
     package_path = ros::package::getPath("pandora_vision_victim");
     ROS_INFO("[victim_node] : Created Svm training instance");
 
-    trainingSetFeatureExtraction_ = true;
-    testSetFeatureExtraction_ = true;
-    loadClassifierModel_ = false;
     featureExtractionUtilities_ = new FeatureExtractionUtilities();
     featureExtraction_ = new FeatureExtraction();
   }

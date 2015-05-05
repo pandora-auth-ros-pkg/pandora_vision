@@ -38,6 +38,7 @@
 *********************************************************************/
 
 #include <vector>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 
@@ -59,11 +60,24 @@ namespace pandora_vision
    */
   RgbFeatureExtraction::RgbFeatureExtraction() : FeatureExtraction()
   {
-    bool extractChannelsStatisticsFeatures = false;
-    bool extractEdgeOrientationFeatures = false;
-    bool extractHaralickFeatures = false;
-    bool extractSiftFeatures = true;
-    bool extractHogFeatures = false;
+    std::string paramFile = "config/rgb_svm_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::string channelsStatisticsFeatures = fs["extract_channels_statistics_features"];
+    std::string edgeOrientationFeatures = fs["extract_edge_orientation_features"];
+    std::string haralickFeatures = fs["extract_haralick_features"];
+    std::string siftFeatures = fs["extract_sift_features"];
+    std::string hogFeatures = fs["extract_hog_features"];
+
+    bool extractChannelsStatisticsFeatures = channelsStatisticsFeatures.compare("false");
+    bool extractEdgeOrientationFeatures = edgeOrientationFeatures.compare("false");
+    bool extractHaralickFeatures = haralickFeatures.compare("false");
+    bool extractSiftFeatures = siftFeatures.compare("false");
+    bool extractHogFeatures = hogFeatures.compare("false");
+
+    int dictionarySize = static_cast<int>(fs["dictionary_size"]);
+    fs.release();
 
     chosenFeatureTypesMap_["channels_statistics"] =
         extractChannelsStatisticsFeatures;
@@ -82,7 +96,6 @@ namespace pandora_vision
       featureFactoryPtrMap_["sift"] = siftPtr;
 
       std::string descriptorMatcherType = "FlannBased";
-      int dictionarySize = 10000;
       bowTrainerPtr_.reset(new BagOfWordsTrainer(featureDetectorType,
           descriptorExtractorType, descriptorMatcherType, dictionarySize));
     }

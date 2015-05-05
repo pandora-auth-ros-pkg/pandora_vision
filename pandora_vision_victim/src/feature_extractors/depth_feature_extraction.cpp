@@ -58,11 +58,24 @@ namespace pandora_vision
    */
   DepthFeatureExtraction::DepthFeatureExtraction() : FeatureExtraction()
   {
-    bool extractChannelsStatisticsFeatures = true;
-    bool extractEdgeOrientationFeatures = true;
-    bool extractHaralickFeatures = true;
-    bool extractSiftFeatures = false;
-    bool extractHogFeatures = false;
+    std::string paramFile = "config/depth_svm_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::string channelsStatisticsFeatures = fs["extract_channels_statistics_features"];
+    std::string edgeOrientationFeatures = fs["extract_edge_orientation_features"];
+    std::string haralickFeatures = fs["extract_haralick_features"];
+    std::string siftFeatures = fs["extract_sift_features"];
+    std::string hogFeatures = fs["extract_hog_features"];
+
+    bool extractChannelsStatisticsFeatures = channelsStatisticsFeatures.compare("false");
+    bool extractEdgeOrientationFeatures = edgeOrientationFeatures.compare("false");
+    bool extractHaralickFeatures = haralickFeatures.compare("false");
+    bool extractSiftFeatures = siftFeatures.compare("false");
+    bool extractHogFeatures = hogFeatures.compare("false");
+
+    int dictionarySize = static_cast<int>(fs["dictionary_size"]);
+    fs.release();
 
     chosenFeatureTypesMap_["channels_statistics"] =
         extractChannelsStatisticsFeatures;
@@ -74,10 +87,15 @@ namespace pandora_vision
 
     if (chosenFeatureTypesMap_["sift"] == true)
     {
-      boost::shared_ptr<FeatureExtractorFactory> siftPtr(new SiftExtractor());
+      std::string featureDetectorType = "SIFT";
+      std::string descriptorExtractorType = "SIFT";
+      boost::shared_ptr<FeatureExtractorFactory> siftPtr(new SiftExtractor(
+          featureDetectorType, descriptorExtractorType));
       featureFactoryPtrMap_["sift"] = siftPtr;
 
-      bowTrainerPtr_.reset(new BagOfWordsTrainer());
+      std::string descriptorMatcherType = "FlannBased";
+      bowTrainerPtr_.reset(new BagOfWordsTrainer(featureDetectorType,
+          descriptorExtractorType, descriptorMatcherType, dictionarySize));
     }
     if (chosenFeatureTypesMap_["hog"] == true)
     {
