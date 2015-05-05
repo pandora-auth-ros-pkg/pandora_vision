@@ -19,7 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  config/Display.cfg
+  config/pandora_vision_hazmat/Display.cfg
+  config/pandora_vision_hazmat/HazmatNode.cfg
 )
 
 catkin_package(

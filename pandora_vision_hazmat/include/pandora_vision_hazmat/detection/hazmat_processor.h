@@ -91,7 +91,10 @@ namespace pandora_vision
           dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig> 
           dynamicReconfServer_; //<! Reconfigure server for 
                                 //<! changing object params
+          dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig>::
+            CallbackType f_detector_;
 
+          bool visualizationFlag_;
           bool execTimerFlag_; //<! Flag that toggles the execution time
                                //<! printing.
 
