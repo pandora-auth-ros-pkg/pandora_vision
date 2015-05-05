@@ -142,8 +142,8 @@ namespace pandora_vision
     {
       for (int j = 0; j < trueDescriptors.rows; ++j)
       {
-        ASSERT_FLOAT_EQ(trueDescriptors.at<float>(i,j),
-                        descriptors.at<float>(i,j)); 
+        ASSERT_FLOAT_EQ(trueDescriptors.at<float>(i, j),
+                        descriptors.at<float>(i, j)); 
       }
       
     }
@@ -190,8 +190,8 @@ namespace pandora_vision
 
       for (int j = 0; j < trueDescriptors.rows; ++j)
       {
-        ASSERT_FLOAT_EQ(trueDescriptors.at<float>(i,j),
-                        descriptors.at<float>(i,j)); 
+        ASSERT_FLOAT_EQ(trueDescriptors.at<float>(i, j),
+                        descriptors.at<float>(i, j)); 
       }
       
     }

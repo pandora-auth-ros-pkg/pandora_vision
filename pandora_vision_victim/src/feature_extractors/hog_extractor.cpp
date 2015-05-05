@@ -81,10 +81,10 @@ namespace pandora_vision
       std::vector<float>* descriptors)
   {
     cv::Mat grayscaleImage = inImage.clone();
-    // TODO Check if HOG works with RGB image.
+    // TODO(Miltos/Vassilis) Check if HOG works with RGB image.
     if (grayscaleImage.channels() > 1)
       cvtColor(grayscaleImage, grayscaleImage, CV_BGR2GRAY);
-    // TODO Check proper size.
+    // TODO(Miltos/Vassilis) Check proper size.
     cv::resize(grayscaleImage, grayscaleImage, cv::Size(160, 128));
 
     std::vector<cv::Point> pointLocations;
