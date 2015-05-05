@@ -45,7 +45,7 @@ using pandora_vision::VictimHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_node");
-  VictimHandler victimHandler("victim");
+  VictimHandler victimHandler("pandora_vision_victim");
   ros::spin();
   return 0;
 }

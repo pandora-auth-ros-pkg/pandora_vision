@@ -124,7 +124,7 @@ namespace pandora_vision
     if (Parameters::Image::image_representation_method == 1)
     {
       // Obtain the low-low part of the rgb image via wavelet analysis
-      Wavelets::getLowLow(rgbImage, &rgbImage);
+      Wavelets::getLowLow(rgbImageSent, &rgbImage);  // rgbImageSent insteed of rgbImage
     }
 
     // Locate potential holes in the rgb image
