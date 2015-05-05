@@ -155,7 +155,7 @@ namespace pandora_vision
     VisionPostProcessor<VisionAlertMsg>::
     getGeneralAlertInfo(const POIsStampedConstPtr& result)
     {
-      //ROS_INFO_STREAM("key = " + result->header.frame_id);
+      //ROS_DEBUG_STREAM("key = " + result->header.frame_id);
       pandora_common_msgs::GeneralAlertVector generalAlertInfos;
 
       float x = 0, y = 0;
@@ -200,7 +200,7 @@ namespace pandora_vision
         }
         else
         {
-          ROS_INFO("[%s] First at: %s", this->getName().c_str(), key.c_str());
+          ROS_DEBUG("[%s] First at: %s", this->getName().c_str(), key.c_str());
 
           std::string true_key;
           if (key[0] == '/') {
@@ -218,7 +218,7 @@ namespace pandora_vision
                 "Params couldn't be retrieved for %s", true_key.c_str());
             throw vision_config_error(key + " : not found");
           }
-          ROS_INFO("[%s] Got: %f", this->getName().c_str(), param);
+          ROS_DEBUG("[%s] Got: %f", this->getName().c_str(), param);
           dict->insert(std::make_pair(key, param));
           return param;
         }
@@ -238,7 +238,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_INFO("[%s] First at: %s", this->getName().c_str(), key.c_str());
+        ROS_DEBUG("[%s] First at: %s", this->getName().c_str(), key.c_str());
           
         std::string true_key;
         if (key[0] == '/') {
@@ -267,7 +267,7 @@ namespace pandora_vision
         boost::shared_ptr<const urdf::Link> parentLink( currentLink->getParent() );
         // Set the parent frame_id to the parent of the frame_id
         parent_frame_id = parentLink->name;
-        ROS_INFO("[%s] Got: %s", this->getName().c_str(), parent_frame_id.c_str());
+        ROS_DEBUG("[%s] Got: %s", this->getName().c_str(), parent_frame_id.c_str());
         dict->insert(std::make_pair(key, parent_frame_id));
         return parent_frame_id;
       }
