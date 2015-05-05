@@ -9,5 +9,5 @@
     <arg name="frame_id" value="kinect_link"/>
   </include>
   
-  <include file="$(find pandora_vision_landoltc)/launch/landoltc3d_node.launch" />
+  <include file="$(find pandora_vision_landoltc)/launch/landoltc_3d_node.launch" />
 </launch>  

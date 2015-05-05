@@ -20,8 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  cfg/landoltc_cfg.cfg
-  cfg/landoltc3d_cfg.cfg
+  config/pandora_vision_landoltc/landoltc_cfg.cfg
+  config/pandora_vision_landoltc/landoltc3d_cfg.cfg
 )
 
 

@@ -47,6 +47,8 @@ namespace pandora_vision
     _threshold = 90;
     _edges = 0;
     params.configLandoltC(*this->accessPublicNh());
+
+    initializeReferenceImage();
   }
   
   LandoltCDetector::LandoltCDetector() : VisionProcessor() {}
@@ -473,7 +475,7 @@ namespace pandora_vision
     std::vector<cv::Point> approx;
 
     //!< Shape matching using Hu Moments, and contour center proximity
-    LandoltCPOIPtr temp;
+    LandoltCPOIPtr temp( new LandoltCPOI );
     
     for (std::vector<cv::Point>::iterator it = _centers.begin(); it != _centers.end(); ++it)
     {
@@ -521,6 +523,7 @@ namespace pandora_vision
   **/
   std::vector<POIPtr> LandoltCDetector::begin(cv::Mat input)
   {
+    _landoltc.clear();
     cv::Mat gray, gradX, gradY, binary;
     cv::Mat erodeKernel(cv::Size(1, 1), CV_8UC1, cv::Scalar(1));
 
@@ -570,7 +573,7 @@ namespace pandora_vision
     std::vector<POIPtr> landoltc;
     for (int ii = 0; ii < _landoltc.size(); ii++)
     {
-      landoltc[ii] = static_cast<POIPtr>(_landoltc[ii]);
+      landoltc.push_back(_landoltc[ii]);
     }
     return landoltc;
   }
@@ -704,7 +707,6 @@ namespace pandora_vision
     output->frameWidth = input->getImage().cols;
     output->frameHeight = input->getImage().rows;
     
-    initializeReferenceImage();
     output->pois = begin(input->getImage());
     
     if (output->pois.empty())

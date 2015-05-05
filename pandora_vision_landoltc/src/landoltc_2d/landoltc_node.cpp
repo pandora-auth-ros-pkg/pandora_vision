@@ -44,8 +44,8 @@ using pandora_vision::LandoltCHandler;
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "landoltc_node");
-  LandoltCHandler landoltCHandler("landoltc");
+  ros::init(argc, argv, "landoltc_2d_node");
+  LandoltCHandler landoltCHandler("pandora_vision_landoltc_2d");
   ros::spin();
   return 0;
 }
