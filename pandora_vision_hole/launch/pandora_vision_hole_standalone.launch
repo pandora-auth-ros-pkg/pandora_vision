@@ -41,9 +41,9 @@
   <group unless="$(arg openni)">
     <group unless="$(arg openni2)">
 
-      <arg name="path" default="/home/aggelos/Desktop/flir_rosbag/flir_pc.bag" />
+      <arg name="path" default="$(find pandora_vision_hole)/test/functional/bag1.bag" />
 
-      <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l -k $(arg path)" >
+      <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
         <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
       </node>
 

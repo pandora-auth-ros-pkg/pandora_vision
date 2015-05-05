@@ -41,7 +41,6 @@
 #include "thermal_node/hole_detector.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
-#include "utils/wavelets.h"
 #include "utils/image_matching.h"
 #include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
 
@@ -68,12 +67,20 @@ namespace pandora_vision
       // The name of the topic where the thermal image is acquired from
       std::string thermalImageTopic_;
 
-      // ros publisher for the candidate holes
+      // Ros publisher for the candidate holes to hole-fusion.
       ros::Publisher candidateHolesPublisher_;
 
       // The name of the topic where the candidate holes that the thermal node
-      // locates are published to
+      // locates are published to. Publishes to hole-fusion and its independent
+      // from the state.
       std::string candidateHolesTopic_;
+
+      // Ros publisher for candidate holes POI directly to Data fusion.
+      ros::Publisher holeFusionThermalPublisher_;
+
+      // The name of the topic where the thermal node publishes 
+      // directly to Data fusion.
+      std::string holeFusionThermalTopic_;
 
       // The variables used to match the holeConveyor information to the
       // Rgb and Depth images.

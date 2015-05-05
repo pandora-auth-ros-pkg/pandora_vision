@@ -1,11 +1,13 @@
 <launch>
 
+  <!-- when running comment the absolute path at thermal.cpp -->
+
   <!-- =========================== The namespace =========================== -->
   <arg name="namespace" default="hole_detector" />
 
-    <arg name="path" default="/home/aggelos/Desktop/flir_rosbag/flir_pc.bag" />
+    <arg name="path" default="/home/aggelos/Desktop/flir_rosbag/bag4.bag" />
 
-    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l -k $(arg path)" >
+    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
     <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
     </node>
 
