@@ -52,7 +52,6 @@
 #include <ros/package.h>
 
 #include "pandora_vision_victim/svm_classifier/svm_training.h"
-#include "pandora_vision_victim/svm_classifier/training_parameters.h"
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
