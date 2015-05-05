@@ -59,7 +59,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <cv_bridge/cv_bridge.h>
 
-#include "pandora_common_msgs/GeneralAlertMsg.h"
+#include "pandora_common_msgs/GeneralAlert.h"
 #include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
 #include "pandora_vision_msgs/EnhancedHoleMsg.h"
 #include "state_manager/state_client.h"

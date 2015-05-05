@@ -28,6 +28,14 @@ target_link_libraries(haralickfeature_extractor_test
     ${PROJECT_NAME}_victim_parameters
     gtest_main)
 
+catkin_add_gtest(sift_feature_extractor_test 
+  unit/feature_extractors/sift_extractor_test.cpp)
+target_link_libraries(sift_feature_extractor_test
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_feature_extractors
+    ${PROJECT_NAME}_victim_parameters
+    gtest_main)
+
 #catkin_add_gtest(color_angles_test unit/channels_statistics_feature_extractors/color_angles_test.cpp)
 #target_link_libraries(color_angles_test ${catkin_LIBRARIES} ${PROJECT_NAME}_channels_statistics_feature_extractors  ${PROJECT_NAME}_victim_parameters gtest_main)
 

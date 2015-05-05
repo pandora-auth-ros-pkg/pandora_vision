@@ -7,3 +7,5 @@ files:
   url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/version2013-2014/model_dolls.xml
 - md5: 3b321c52b97bf9a1303a399060ef6dde
   url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/version2013-2014/depth_svm_classifier.xml
+- md5: 1b2263183819cd2553f73ed9e890f9cd 
+  url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/test/box.png

@@ -60,7 +60,7 @@ namespace pandora_vision
     //! Declare publisher and advertise topic
     //! where algorithm results are posted
     _victimDirectionPublisher =
-      _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(
+      _nh.advertise<pandora_common_msgs::GeneralAlert>(
         VictimParameters::victimAlertTopic, 10, true);
 
     /// Subscribe to input image's topic
@@ -377,21 +377,21 @@ namespace pandora_vision
           - final_victims[i].keypoint.y;
 
         //!< Create message of Victim Detector
-        pandora_common_msgs::GeneralAlertMsg victimMessage;
+        pandora_common_msgs::GeneralAlert victimMessage;
 
         victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
 
         victimMessage.header.stamp = victimFrameTimestamp;
 
-        victimMessage.yaw =
+        victimMessage.info.yaw =
           atan(2 * x / VictimParameters::frameWidth
             * tan(VictimParameters::hfov / 2));
 
-        victimMessage.pitch =
+        victimMessage.info.pitch =
           atan(2 * y / VictimParameters::frameHeight
             * tan(VictimParameters::vfov / 2));
 
-        victimMessage.probability = final_victims[i].probability;
+        victimMessage.info.probability = final_victims[i].probability;
 
         _victimDirectionPublisher.publish(victimMessage);
       }
@@ -676,21 +676,21 @@ namespace pandora_vision
           - final_victims[i].keypoint.y;
 
         //!< Create message of Victim Detector
-        pandora_common_msgs::GeneralAlertMsg victimMessage;
+        pandora_common_msgs::GeneralAlert victimMessage;
 
         victimMessage.header.frame_id = _frame_ids_map.find(_frame_id)->second;
 
         victimMessage.header.stamp = victimFrameTimestamp;
 
-        victimMessage.yaw =
+        victimMessage.info.yaw =
           atan(2 * x / VictimParameters::frameWidth
             * tan(VictimParameters::hfov / 2));
 
-        victimMessage.pitch =
+        victimMessage.info.pitch =
           atan(2 * y / VictimParameters::frameHeight
             * tan(VictimParameters::vfov / 2));
 
-        victimMessage.probability = final_victims[i].probability;
+        victimMessage.info.probability = final_victims[i].probability;
 
         _victimDirectionPublisher.publish(victimMessage);
       }
