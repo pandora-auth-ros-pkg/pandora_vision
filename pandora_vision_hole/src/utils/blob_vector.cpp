@@ -213,14 +213,6 @@ namespace pandora_vision
 
   void
   BlobVector::
-  append(const std::vector<cv::Point2f>& rectanglePoints,
-      const std::vector<cv::Point2f>& outlinePoints)
-  {
-
-  }
-
-  void
-  BlobVector::
   clear()
   {
     this->blobVector_.blobs.clear();

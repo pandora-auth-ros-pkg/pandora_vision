@@ -43,7 +43,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-
 namespace pandora_vision
 {
   /**
@@ -53,7 +52,6 @@ namespace pandora_vision
   class RgbFiltersTest : public ::testing::Test
   {
     protected:
-
       RgbFiltersTest() {}
 
       /**
@@ -68,12 +66,12 @@ namespace pandora_vision
         imprinted
         return void
        **/
-      void generateRgbRectangle (
+      void generateRgbRectangle(
         const cv::Point2f& upperLeft,
         const int& x,
         const int& y,
         const unsigned char rgbIn,
-        cv::Mat* image );
+        cv::Mat* image);
 
       /**
         @brief Constructs the internals of a rectangular hole
@@ -82,12 +80,12 @@ namespace pandora_vision
         rectangle to be created
         @param[in] x [const int&] The recgangle's width
         @param[in] y [const int&] The rectangle's height
-        return [HolesConveyor] A struct containing the elements of one hole
+        return [BlobVector] A struct containing the elements of one hole
        **/
-      HolesConveyor getConveyor (
+      BlobVector getConveyor(
         const cv::Point2f& upperLeft,
         const int& x,
-        const int& y );
+        const int& y);
 
       //! Sets up one image: squares_,
       //! which features four squares of size 100, and one of size 140
@@ -112,21 +110,19 @@ namespace pandora_vision
         cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
         RgbFiltersTest::generateRgbRectangle
-          ( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
+          (cv::Point2f(WIDTH - 100, HEIGHT - 100),
             100,
             100,
             140,
-            &lowerRightSquare );
+            &lowerRightSquare);
 
-        HolesConveyorUtils::append(
-          getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
+        conveyor.extend(
+          getConveyor(cv::Point2f(WIDTH - 100, HEIGHT - 100),
             100,
-            100 ),
-          &conveyor);
-
+            100));
 
         // Construct the upper right image
-        cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+        cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 
         RgbFiltersTest::generateRgbRectangle
           ( cv::Point2f ( WIDTH - 103, 3 ),
@@ -135,11 +131,10 @@ namespace pandora_vision
             160,
             &upperRightSquare );
 
-        HolesConveyorUtils::append(
-          getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
+        conveyor.extend(
+          getConveyor(cv::Point2f(WIDTH - 103, 3),
             100,
-            100 ),
-          &conveyor);
+            100));
 
         // Construct the upper left square
         cv::Mat upperLeftSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -151,11 +146,10 @@ namespace pandora_vision
             180,
             &upperLeftSquare );
 
-        HolesConveyorUtils::append(
-          getConveyor( cv::Point2f ( 100, 100 ),
+        conveyor.extend(
+          getConveyor(cv::Point2f(100, 100),
             100,
-            100 ),
-          &conveyor);
+            100));
 
         // Construct the square surrounding the upper left square
         cv::Mat surroundingSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -167,25 +161,24 @@ namespace pandora_vision
             1,
             &surroundingSquare );
 
-        HolesConveyorUtils::append(
-          getConveyor( cv::Point2f ( 80, 80 ),
+        conveyor.extend(
+          getConveyor(cv::Point2f(80, 80),
             140,
-            140 ),
-          &conveyor);
+            140));
 
         // Construct the middle square. In contrast to the other three
         // rectangles, this is scattered with random colours inside it
         cv::Mat middleSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
-        cv::Point upperLeft ( 250, 250 );
+        cv::Point upperLeft (250, 250);
         int x = 100;
         int y = 100;
 
         // The seed for the rand_r method
         unsigned int seed = 0;
-        for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
+        for (int rows = upperLeft.y; rows < upperLeft.y + y; rows++)
         {
-          for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
+          for (int cols = upperLeft.x; cols < upperLeft.x + x; cols++)
           {
             unsigned char randomBlue = rand_r(&seed) % 256;
 
@@ -198,13 +191,8 @@ namespace pandora_vision
             middleSquare.at< cv::Vec3b >( rows, cols ).val[2] = randomRed;
           }
         }
-
-        HolesConveyorUtils::append(
-          getConveyor( cv::Point2f ( 250, 250 ),
-            100,
-            100 ),
-          &conveyor);
-
+        conveyor.extend(
+          getConveyor(cv::Point2f(250, 250), 100, 100));
 
         // The image upon which the squares will be inprinted
         squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -231,10 +219,7 @@ namespace pandora_vision
             }
           }
         }
-
       }
-
-
       // The images' width and height
       int WIDTH;
       int HEIGHT;
@@ -244,11 +229,8 @@ namespace pandora_vision
 
       // The conveyor of holes that will be used to test methods of class
       // RgbFilters
-      HolesConveyor conveyor;
-
+      BlobVector conveyor;
   };
-
-
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -262,24 +244,22 @@ namespace pandora_vision
     imprinted on
     return void
    **/
-  void RgbFiltersTest::generateRgbRectangle (
+  void RgbFiltersTest::generateRgbRectangle(
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y,
     const unsigned char rgbIn,
-    cv::Mat* image )
+    cv::Mat* image)
   {
     // Fill the inside of the desired rectangle with the @param rgbIn provided
-    for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
+    for (int rows = upperLeft.y; rows < upperLeft.y + y; rows++)
     {
-      for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
+      for (int cols = upperLeft.x; cols < upperLeft.x + x; cols++)
       {
-        image->at< cv::Vec3b >( rows, cols ) = rgbIn;
+        image->at< cv::Vec3b >(rows, cols) = rgbIn;
       }
     }
   }
-
-
 
   /**
     @brief Constructs the internals of a rectangular hole
@@ -288,51 +268,39 @@ namespace pandora_vision
     rectangle to be created
     @param[in] x [const int&] The recgangle's width
     @param[in] y [const int&] The rectangle's height
-    return [HolesConveyor] A struct containing the elements of one hole
+    return [BlobVector] A struct containing the elements of one hole
    **/
-  HolesConveyor RgbFiltersTest::getConveyor (
+  BlobVector RgbFiltersTest::getConveyor(
     const cv::Point2f& upperLeft,
     const int& x,
-    const int& y )
+    const int& y)
   {
     // A single hole
-    HoleConveyor hole;
+    pandora_vision_msgs::Blob hole;
 
     // The hole's keypoint
-    cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
+    hole.areaOfInterest.center.x = upperLeft.x + x / 2;
+    hole.areaOfInterest.center.y = upperLeft.y + y / 2;
 
-    hole.keypoint = k;
-
-
-    // The four vertices of the rectangle
-    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
-
-    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
-
-    std::vector<cv::Point2f> rectangle;
-    rectangle.push_back(vertex_1);
-    rectangle.push_back(vertex_2);
-    rectangle.push_back(vertex_3);
-    rectangle.push_back(vertex_4);
-
-    hole.rectangle = rectangle;
-
+    // The width and height of the rectangle
+    hole.areaOfInterest.width = x;
+    hole.areaOfInterest.height = y;
 
     // The outline points of the hole will be obtained through the depiction
     // of the points consisting the rectangle
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
+    
+    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
+    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
+    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
+    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
+    
     cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
 
-    for(unsigned int j = 0; j < 4; j++)
+    for (unsigned int j = 0; j < 4; j++)
     {
       cv::line(image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
     }
-
 
     std::vector<cv::Point2f> outline;
     for ( int rows = 0; rows < image.rows; rows++ )
@@ -345,31 +313,27 @@ namespace pandora_vision
         }
       }
     }
+    hole.outline = MessageConversions::vecToMsg(outline);
 
-    hole.outline = outline;
-
-    // Push hole back into a HolesConveyor
-    HolesConveyor conveyor;
-    conveyor.holes.push_back( hole );
+    // Push hole back into a BlobVector
+    BlobVector conveyor;
+    conveyor.append(hole);
 
     return conveyor;
-
   }
 
-
-
   // Tests RgbFilters::checkHolesColorHomogeneity
-  TEST_F ( RgbFiltersTest, checkHolesColorHomogeneityTest )
+  TEST_F(RgbFiltersTest, checkHolesColorHomogeneityTest)
   {
     // Generate the needed resources
     std::vector<cv::Mat> holesMasksImageVector;
     FiltersResources::createHolesMasksImageVector(
       conveyor,
       squares_,
-      &holesMasksImageVector );
+      &holesMasksImageVector);
 
     // The vector of probabilities returned
-    std::vector<float> probabilitiesVector( conveyor.size(), 0.0 );
+    std::vector<float> probabilitiesVector(conveyor.size(), 0.0);
     std::vector<std::string> msgs;
 
     // Run RgbFilters::checkHolesColorHomogeneity
@@ -386,13 +350,10 @@ namespace pandora_vision
     EXPECT_EQ ( 0.0, probabilitiesVector[2] );
     EXPECT_EQ ( 0.0, probabilitiesVector[3] );
     EXPECT_LT ( 0.8, probabilitiesVector[4] );
-
   }
 
-
-
-  //! Tests RgbFilters::checkHolesLuminosityDiff
-  TEST_F ( RgbFiltersTest, checkHolesLuminosityDiffTest )
+  /// Tests RgbFilters::checkHolesLuminosityDiff
+  TEST_F(RgbFiltersTest, checkHolesLuminosityDiffTest)
   {
     // Generate the needed resources for an inflation size of value 0
 
@@ -402,7 +363,7 @@ namespace pandora_vision
     FiltersResources::createHolesMasksSetVector(
       conveyor,
       squares_,
-      &holesMasksSetVector_0 );
+      &holesMasksSetVector_0);
 
     // The vectors of inflated rectangles and in-bounds inflated rectangles'
     // indices
@@ -414,20 +375,20 @@ namespace pandora_vision
       squares_,
       0,
       &rectanglesVector_0,
-      &rectanglesIndices_0 );
+      &rectanglesIndices_0);
 
     // The intermediate points vector of sets
-    std::vector<std::set<unsigned int> > intermediatePointsSetVector_0;
+    std::vector< std::set<unsigned int> > intermediatePointsSetVector_0;
 
     FiltersResources::createIntermediateHolesPointsSetVector(
       conveyor,
       squares_,
       rectanglesVector_0,
       rectanglesIndices_0,
-      &intermediatePointsSetVector_0 );
+      &intermediatePointsSetVector_0);
 
     // The vector of probabilities returned
-    std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
+    std::vector< float > probabilitiesVector_0(conveyor.size(), 0.0);
     std::vector< std::string > msgs;
 
     // Run RgbFilters::checkHolesLuminosityDiff
@@ -441,11 +402,10 @@ namespace pandora_vision
 
     // All probabilities amount to zero: the size of each set inside the
     // intermediatePointsSetVector_0 vector is zero
-    for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+    for (int i = 0; i < probabilitiesVector_0.size(); i++)
     {
       EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
     }
-
 
     // Generate the needed resources for an inflation size of value 10
 
@@ -455,11 +415,11 @@ namespace pandora_vision
     FiltersResources::createHolesMasksSetVector(
       conveyor,
       squares_,
-      &holesMasksSetVector_10 );
+      &holesMasksSetVector_10);
 
     // The vectors of inflated rectangles and in-bounds inflated rectangles'
     // indices
-    std::vector< std::vector< cv::Point2f > > rectanglesVector_10;
+    std::vector< std::vector<cv::Point2f> > rectanglesVector_10;
     std::vector< int > rectanglesIndices_10;
 
     FiltersResources::createInflatedRectanglesVector(
@@ -467,7 +427,7 @@ namespace pandora_vision
       squares_,
       10,
       &rectanglesVector_10,
-      &rectanglesIndices_10 );
+      &rectanglesIndices_10);
 
     // The intermediate points vector of sets
     std::vector< std::set< unsigned int> > intermediatePointsSetVector_10;
@@ -477,10 +437,10 @@ namespace pandora_vision
       squares_,
       rectanglesVector_10,
       rectanglesIndices_10,
-      &intermediatePointsSetVector_10 );
+      &intermediatePointsSetVector_10);
 
     // The vector of probabilities returned
-    std::vector< float > probabilitiesVector_10( conveyor.size(), 0.0 );
+    std::vector<float> probabilitiesVector_10(conveyor.size(), 0.0);
     msgs.clear();
 
     // Run RgbFilters::checkHolesLuminosityDiff
@@ -503,10 +463,8 @@ namespace pandora_vision
     EXPECT_LT ( 0.0, probabilitiesVector_10[4] );
   }
 
-
-
   //! Tests RgbFilters::checkHolesTextureBackProject
-  TEST_F ( RgbFiltersTest, checkHolesTextureBackProjectTest )
+  TEST_F(RgbFiltersTest, checkHolesTextureBackProjectTest)
   {
     // Generate the needed resources for an inflation size of value 0
 
@@ -520,34 +478,34 @@ namespace pandora_vision
 
     // The vectors of inflated rectangles and in-bounds inflated rectangles'
     // indices
-    std::vector< std::vector< cv::Point2f > > rectanglesVector_0;
-    std::vector< int > rectanglesIndices_0;
+    std::vector< std::vector<cv::Point2f> > rectanglesVector_0;
+    std::vector<int> rectanglesIndices_0;
 
     FiltersResources::createInflatedRectanglesVector(
       conveyor,
       squares_,
       0,
       &rectanglesVector_0,
-      &rectanglesIndices_0 );
+      &rectanglesIndices_0);
 
     // The intermediate points vector of sets
-    std::vector<std::set<unsigned int> > intermediatePointsSetVector_0;
+    std::vector< std::set<unsigned int> > intermediatePointsSetVector_0;
 
     FiltersResources::createIntermediateHolesPointsSetVector(
       conveyor,
       squares_,
       rectanglesVector_0,
       rectanglesIndices_0,
-      &intermediatePointsSetVector_0 );
+      &intermediatePointsSetVector_0);
 
     // The vector of probabilities returned
-    std::vector< float > probabilitiesVector_0( conveyor.size(), 0.0 );
+    std::vector< float > probabilitiesVector_0(conveyor.size(), 0.0);
     std::vector< std::string > msgs;
 
     // Generate the histogram of walls
     std::vector<cv::MatND> histogram;
     Histogram::getHistogram
-      ( &histogram, Parameters::Histogram::secondary_channel );
+      (&histogram, Parameters::Histogram::secondary_channel);
 
     // Run RgbFilters::checkHolesTextureBackProject
     RgbFilters::checkHolesTextureBackProject(
@@ -561,11 +519,10 @@ namespace pandora_vision
 
     // All probabilities amount to zero: the size of each set inside the
     // intermediatePointsSetVector_0 vector is zero
-    for ( int i = 0; i < probabilitiesVector_0.size(); i++ )
+    for (int i = 0; i < probabilitiesVector_0.size(); i++)
     {
       EXPECT_EQ ( 0.0, probabilitiesVector_0[i] );
     }
-
 
     // Generate the needed resources for an inflation size of value 10
 
@@ -575,11 +532,11 @@ namespace pandora_vision
     FiltersResources::createHolesMasksSetVector(
       conveyor,
       squares_,
-      &holesMasksSetVector_10 );
+      &holesMasksSetVector_10);
 
     // The vectors of inflated rectangles and in-bounds inflated rectangles'
     // indices
-    std::vector< std::vector< cv::Point2f > > rectanglesVector_10;
+    std::vector< std::vector<cv::Point2f> > rectanglesVector_10;
     std::vector< int > rectanglesIndices_10;
 
     FiltersResources::createInflatedRectanglesVector(
@@ -587,7 +544,7 @@ namespace pandora_vision
       squares_,
       10,
       &rectanglesVector_10,
-      &rectanglesIndices_10 );
+      &rectanglesIndices_10);
 
     // The intermediate points vector of sets
     std::vector< std::set< unsigned int> > intermediatePointsSetVector_10;

@@ -30,9 +30,9 @@ target_link_libraries(hole_filters_test
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(holes_conveyor_test
-  unit/utils/holes_conveyor_test.cpp)
-target_link_libraries(holes_conveyor_test
+catkin_add_gtest(blob_vector_test
+  unit/utils/blob_vector_test.cpp)
+target_link_libraries(blob_vector_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)

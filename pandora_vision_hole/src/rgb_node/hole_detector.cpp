@@ -54,9 +54,9 @@ namespace pandora_vision
     in CV_8UC3 format
     @param[in] histogram [const std::vector<cv::MatND>&]
     The vector of histograms of images of wooden walls
-    @return HolesConveyor The struct that contains the holes found
+    @return BlobVector The struct that contains the holes found
    **/
-  HolesConveyor HoleDetector::findHoles(const cv::Mat& rgbImage,
+  BlobVector HoleDetector::findHoles(const cv::Mat& rgbImage,
     const std::vector<cv::MatND>& histogram)
   {
     #ifdef DEBUG_TIME
@@ -70,7 +70,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if (Parameters::Debug::show_find_holes)  // Debug
     {
       cv::Mat tmp;
       rgbImage.copyTo(tmp);
@@ -90,7 +90,7 @@ namespace pandora_vision
       &edges);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if (Parameters::Debug::show_find_holes)  // Debug
     {
       cv::Mat tmp;
       edges.copyTo(tmp);
@@ -107,7 +107,7 @@ namespace pandora_vision
     BlobDetection::detectBlobs(edges, &keyPoints);
 
     #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if (Parameters::Debug::show_find_holes)  // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Initial keypoints");
@@ -117,7 +117,7 @@ namespace pandora_vision
     #endif
 
     // The final vectors of keypoints, rectangles and blobs' outlines.
-    HolesConveyor conveyor;
+    BlobVector conveyor;
 
     /**
       Get me blobs that their center point is inside the image,
@@ -166,4 +166,4 @@ namespace pandora_vision
     return conveyor;
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

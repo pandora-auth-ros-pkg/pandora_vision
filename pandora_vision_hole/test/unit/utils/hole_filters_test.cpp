@@ -35,6 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
+#include "utils/message_conversions.h"
 #include "utils/hole_filters.h"
 #include "gtest/gtest.h"
 
@@ -47,7 +48,6 @@ namespace pandora_vision
   class HoleFiltersTest : public ::testing::Test
   {
     protected:
-
       HoleFiltersTest () {}
 
       /**
@@ -83,7 +83,6 @@ namespace pandora_vision
         // D' (WIDTH - 1, HEIGHT - 1 - 100) and
         // A'' (200, 200), B'' (200, 300), C'' (300, 300), D'' (300, 200)
         squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
 
         // The two square outlines
         cv::Mat upperLeftSquare = cv::Mat::zeros ( HEIGHT, WIDTH, CV_8UC1 );
@@ -143,14 +142,10 @@ namespace pandora_vision
             }
           }
         }
-
         // The total squares_ image is the sum of all the square images
         squares_ = upperLeftSquare + upperLeftSquare2
           + lowerRightSquare + middleSquare;
-
       }
-
-
       int WIDTH;
       int HEIGHT;
 
@@ -177,8 +172,6 @@ namespace pandora_vision
       std::vector< cv::Point2f > middleSquareVertices_;
   };
 
-
-
   /**
     @brief Constructs a rectangle of width @param x and height of @param y
     @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
@@ -198,13 +191,9 @@ namespace pandora_vision
   {
     // The four vertices of the rectangle
     cv::Point2f vertex_1(upperLeft.x, upperLeft.y);
-
     cv::Point2f vertex_2(upperLeft.x, upperLeft.y + y - 1);
-
     cv::Point2f vertex_3(upperLeft.x + x - 1, upperLeft.y + y - 1);
-
     cv::Point2f vertex_4(upperLeft.x + x - 1, upperLeft.y);
-
     cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
 
     vertices->push_back( vertex_1 );
@@ -212,15 +201,13 @@ namespace pandora_vision
     vertices->push_back( vertex_3 );
     vertices->push_back( vertex_4 );
 
-    for(unsigned int j = 0; j < 4; j++)
+    for (unsigned int j = 0; j < 4; j++)
     {
       cv::line(*image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
     }
   }
 
-
-
-  //! Tests HoleFilters::validateKeypointsToRectangles
+  /// Tests HoleFilters::validateKeypointsToRectangles
   TEST_F ( HoleFiltersTest, validateKeypointsToRectanglesTest )
   {
     // Test two keypoints VS four rectangles
@@ -253,9 +240,8 @@ namespace pandora_vision
     inContours.push_back ( middleSquareOutline_ );
     inContours.push_back ( lowerRightSquareOutline_ );
 
-    // The HolesConveyor struct
-    HolesConveyor conveyor;
-
+    // The BlobVector struct
+    BlobVector conveyor;
 
     // Run HoleFilters::validateKeypointsToRectangles
     HoleFilters::validateKeypointsToRectangles
@@ -266,28 +252,30 @@ namespace pandora_vision
 
     // The amount of points in the outlines of the two holes should be
     // equal to 4 * 100 - 4
-    EXPECT_EQ ( 396, conveyor.holes[0].outline.size() );
-    EXPECT_EQ ( 396, conveyor.holes[0].outline.size() );
+    EXPECT_EQ ( 396, conveyor.getBlob(0).outline.size() );
+    EXPECT_EQ ( 396, conveyor.getBlob(0).outline.size() );
+    
+    std::vector<cv::Point2f> vec = MessageConversions::areaToVec(
+      conveyor.getBlob(0).areaOfInterest);
 
     // The first vertex of the first hole
-    EXPECT_NEAR ( 100, conveyor.holes[0].rectangle[0].x, 1 );
-    EXPECT_NEAR ( 100, conveyor.holes[0].rectangle[0].y, 1 );
+    EXPECT_NEAR ( 100, vec[0].x, 1 );
+    EXPECT_NEAR ( 100, vec[0].y, 1 );
 
     // The last vertex of the first hole
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[2].x, 1 );
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[2].y, 1 );
-
+    EXPECT_NEAR ( 199, vec[2].x, 1 );
+    EXPECT_NEAR ( 199, vec[2].y, 1 );
+    
+    vec = MessageConversions::areaToVec(conveyor.getBlob(1).areaOfInterest);
+    
     // The first vertex of the second hole
-    EXPECT_NEAR ( WIDTH - 100, conveyor.holes[1].rectangle[0].x, 1 );
-    EXPECT_NEAR ( HEIGHT - 100, conveyor.holes[1].rectangle[0].y, 1 );
+    EXPECT_NEAR ( WIDTH - 100, vec[0].x, 1 );
+    EXPECT_NEAR ( HEIGHT - 100, vec[0].y, 1 );
 
     // The last vertex of the second hole
-    EXPECT_NEAR ( WIDTH - 1, conveyor.holes[1].rectangle[2].x, 1 );
-    EXPECT_NEAR ( HEIGHT - 1, conveyor.holes[1].rectangle[2].y, 1 );
-
+    EXPECT_NEAR ( WIDTH - 1, vec[2].x, 1 );
+    EXPECT_NEAR ( HEIGHT - 1, vec[2].y, 1 );
   }
-
-
 
   //! Tests HoleFilters::validateBlobs
   TEST_F ( HoleFiltersTest, validateBlobsTest )
@@ -301,79 +289,82 @@ namespace pandora_vision
     keyPoints.push_back ( upperLeftKeypoint );
     keyPoints.push_back ( lowerRightKeypoint );
 
-    // The HolesConveyor struct
-    HolesConveyor conveyor;
+    // The BlobVector struct
+    BlobVector conveyor;
 
     // Run HoleFilters::validateBlobs, using Brushfire
     HoleFilters::validateBlobs ( keyPoints, &squares_, 0, &conveyor);
 
-
     // There should be two entries in the conveyor
     ASSERT_EQ ( 2, conveyor.size() );
 
     // The amount of points in the outlines of the two holes should be
     // equal to 4 * 100 - 8
-    EXPECT_EQ ( 392, conveyor.holes[0].outline.size() );
-    EXPECT_EQ ( 392, conveyor.holes[0].outline.size() );
-
+    EXPECT_EQ ( 392, conveyor.getBlob(0).outline.size() );
+    EXPECT_EQ ( 392, conveyor.getBlob(0).outline.size() );
+    
+    std::vector<cv::Point2f> vec = MessageConversions::areaToVec(
+      conveyor.getBlob(0).areaOfInterest);
+    
     // The first vertex of the first hole.
     // Upper right corner, going counter-clockwise
-    EXPECT_NEAR ( 99, conveyor.holes[0].rectangle[0].x, 2 );
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[0].y, 1 );
+    EXPECT_NEAR ( 99, vec[0].x, 2 );
+    EXPECT_NEAR ( 199, vec[0].y, 1 );
 
     // The last vertex of the first hole
     // Lower right corner, going counter-clockwise
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[3].x, 1 );
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[3].y, 1 );
-
+    EXPECT_NEAR ( 199, vec[3].x, 1 );
+    EXPECT_NEAR ( 199, vec[3].y, 1 );
+    
+    vec = MessageConversions::areaToVec(conveyor.getBlob(1).areaOfInterest);
+    
     // The first vertex of the second hole
     // Upper right corner, going counter-clockwise
-    EXPECT_NEAR ( WIDTH - 100, conveyor.holes[1].rectangle[0].x, 1 );
-    EXPECT_NEAR ( HEIGHT - 1, conveyor.holes[1].rectangle[0].y, 1 );
+    EXPECT_NEAR ( WIDTH - 100, vec[0].x, 1 );
+    EXPECT_NEAR ( HEIGHT - 1, vec[0].y, 1 );
 
     // The last vertex of the second hole
     // Lower right corner, going counter-clockwise
-    EXPECT_NEAR ( WIDTH - 1, conveyor.holes[1].rectangle[3].x, 1);
-    EXPECT_NEAR ( HEIGHT - 1, conveyor.holes[1].rectangle[3].y, 1 );
-
-
+    EXPECT_NEAR ( WIDTH - 1, vec[3].x, 1);
+    EXPECT_NEAR ( HEIGHT - 1, vec[3].y, 1 );
 
     // Run HoleFilters::validateBlobs, using Raycast
     // First, clear the conveyor
 
-    HolesConveyorUtils::clear(&conveyor);
-
+    conveyor.clear();
     HoleFilters::validateBlobs ( keyPoints, &squares_, 1, &conveyor);
-
 
     // There should be two entries in the conveyor
     ASSERT_EQ ( 2, conveyor.size() );
 
     // The amount of points in the outlines of the two holes should be
     // equal to 4 * 100 - 8
-    EXPECT_EQ ( 390, conveyor.holes[0].outline.size() );
-    EXPECT_EQ ( 390, conveyor.holes[0].outline.size() );
-
+    EXPECT_EQ ( 390, conveyor.getBlob(0).outline.size() );
+    EXPECT_EQ ( 390, conveyor.getBlob(0).outline.size() );
+    
+    vec = MessageConversions::areaToVec(conveyor.getBlob(0).areaOfInterest);
+    
     // The first vertex of the first hole.
     // Lower right corner, going counter-clockwise
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[0].x, 1 );
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[0].y, 1 );
+    EXPECT_NEAR ( 199, vec[0].x, 1 );
+    EXPECT_NEAR ( 199, vec[0].y, 1 );
 
     // The last vertex of the first hole
     // Upper right corner, going counter-clockwise
-    EXPECT_NEAR ( 199, conveyor.holes[0].rectangle[3].x, 1 );
-    EXPECT_NEAR ( 99, conveyor.holes[0].rectangle[3].y, 1 );
-
+    EXPECT_NEAR ( 199, vec[3].x, 1 );
+    EXPECT_NEAR ( 99, vec[3].y, 1 );
+    
+    vec = MessageConversions::areaToVec(conveyor.getBlob(1).areaOfInterest);
+    
     // The first vertex of the second hole
     // Lower right corner, going counter-clockwise
-    EXPECT_NEAR ( WIDTH - 1, conveyor.holes[1].rectangle[0].x, 1 );
-    EXPECT_NEAR ( HEIGHT - 1, conveyor.holes[1].rectangle[0].y, 1 );
+    EXPECT_NEAR ( WIDTH - 1, vec[0].x, 1 );
+    EXPECT_NEAR ( HEIGHT - 1, vec[0].y, 1 );
 
     // The last vertex of the second hole
     // Lower right corner, going counter-clockwise
-    EXPECT_NEAR ( WIDTH - 1, conveyor.holes[1].rectangle[3].x, 1);
-    EXPECT_NEAR ( HEIGHT - 100, conveyor.holes[1].rectangle[3].y, 1 );
-
+    EXPECT_NEAR ( WIDTH - 1, vec[3].x, 1);
+    EXPECT_NEAR ( HEIGHT - 100, vec[3].y, 1 );
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

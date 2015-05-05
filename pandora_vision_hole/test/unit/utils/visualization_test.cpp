@@ -35,6 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
+#include "utils/message_conversions.h"
 #include "utils/visualization.h"
 #include "gtest/gtest.h"
 
@@ -89,22 +90,20 @@ namespace pandora_vision
         }
 
         // Set up the conveyor
-        HoleConveyor hole;
+        pandora_vision_msgs::Blob hole;
 
-        cv::KeyPoint k ( 150, 150, 1 );
-        hole.keypoint = k;
+        hole.areaOfInterest.center.x = 150;
+        hole.areaOfInterest.center.y = 150;
+        
+        hole.areaOfInterest.width = 100;
+        hole.areaOfInterest.height = 100;
 
-        hole.rectangle.push_back( cv::Point2f( 100, 100 ) );
-        hole.rectangle.push_back( cv::Point2f( 100, 199 ) );
-        hole.rectangle.push_back( cv::Point2f( 199, 199 ) );
-        hole.rectangle.push_back( cv::Point2f( 199, 100 ) );
+        hole.outline.push_back(MessageConversions::cvToMsg(cv::Point2f(90, 90)));
+        hole.outline.push_back(MessageConversions::cvToMsg(cv::Point2f(90, 209)));
+        hole.outline.push_back(MessageConversions::cvToMsg(cv::Point2f(209, 209)));
+        hole.outline.push_back(MessageConversions::cvToMsg(cv::Point2f(209, 90)));
 
-        hole.outline.push_back( cv::Point2f( 90, 90 ) );
-        hole.outline.push_back( cv::Point2f( 90, 209 ) );
-        hole.outline.push_back( cv::Point2f( 209, 209 ) );
-        hole.outline.push_back( cv::Point2f( 209, 90 ) );
-
-        conveyor.holes.push_back( hole );
+        conveyor.append(hole);
       }
 
       // The images' dimensions
@@ -121,11 +120,8 @@ namespace pandora_vision
       cv::Mat rgb;
 
       // A dummy conveyor
-      HolesConveyor conveyor;
-
+      BlobVector conveyor;
   };
-
-
 
   //! Tests Visualization::multipleShow
   TEST_F ( VisualizationTest, multipleShowTest )
@@ -153,8 +149,6 @@ namespace pandora_vision
     //Visualization::multipleShow( "Overall title", images, titles, 1000, 0 );
   }
 
-
-
   //! Tests Visualization::scaleImageForVisualization
   TEST_F ( VisualizationTest, scaleImageForVisualizationTest )
   {
@@ -167,8 +161,6 @@ namespace pandora_vision
     }
   }
 
-
-
   //! Tests Visualization::show
   TEST_F ( VisualizationTest, showTest )
   {
@@ -178,8 +170,6 @@ namespace pandora_vision
     //Visualization::show( "Gray image", gray, 0 );
     //Visualization::show( "Rgb image", rgb, 0 );
   }
-
-
 
   //! Tests Visualization::showHoles
   TEST_F ( VisualizationTest, showHolesTest )
@@ -192,7 +182,6 @@ namespace pandora_vision
     // Uncomment for visual inspection
     //Visualization::showHoles( "Overall title", gray, conveyor, 0, msgs, 1 );
 
-
     msgs.clear();
     msgs.push_back( "rgb" );
 
@@ -200,8 +189,6 @@ namespace pandora_vision
     // Uncomment for visual inspection
     //Visualization::showHoles( "Overall title", rgb, conveyor, 0, msgs, 1 );
   }
-
-
 
   //! Tests Visualization::showKeypoints
   TEST_F ( VisualizationTest, showKeypointsTest )
@@ -228,8 +215,6 @@ namespace pandora_vision
     }
   }
 
-
-
   //! Tests Visualization::showScaled
   TEST_F ( VisualizationTest, showScaledTest )
   {
@@ -237,4 +222,4 @@ namespace pandora_vision
     //Visualization::showScaled( "Title", floats, 0 );
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

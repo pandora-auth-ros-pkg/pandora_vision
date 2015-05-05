@@ -57,9 +57,9 @@ namespace pandora_vision
         rectangle to be created
         @param[in] x [const int&] The recgangle's width
         @param[in] y [const int&] The rectangle's height
-        return [HolesConveyor] A struct containing the elements of one hole
+        return [BlobVector] A struct containing the elements of one hole
        **/
-      HolesConveyor getConveyor (
+      BlobVector getConveyor (
         const cv::Point2f& upperLeft,
         const int& x,
         const int& y );
@@ -72,29 +72,24 @@ namespace pandora_vision
         // An image needed only for its size
         squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
             100,
-            100 ),
-          &conveyor );
+            100 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
             100,
-            100 ),
-          &conveyor );
+            100 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( 100, 100 ),
             100,
-            100 ),
-          &conveyor );
+            100 ));
 
         // In total, there should be three holes
         ASSERT_EQ ( 3, conveyor.size() );
-
       }
-
       // An image needed only for its size
       cv::Mat squares_;
 
@@ -103,11 +98,8 @@ namespace pandora_vision
       int HEIGHT;
 
       // The overall conveyor holding the holes
-      HolesConveyor conveyor;
-
+      BlobVector conveyor;
   };
-
-
 
   /**
     @brief Constructs the internals of a rectangular hole
@@ -116,51 +108,39 @@ namespace pandora_vision
     rectangle to be created
     @param[in] x [const int&] The recgangle's width
     @param[in] y [const int&] The rectangle's height
-    return [HolesConveyor] A struct containing the elements of one hole
+    return [BlobVector] A struct containing the elements of one hole
    **/
-  HolesConveyor FiltersResourcesTest::getConveyor (
+  BlobVector FiltersResourcesTest::getConveyor (
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y )
   {
     // A single hole
-    HoleConveyor hole;
+    pandora_vision_msgs::Blob hole;
 
     // The hole's keypoint
-    cv::KeyPoint k ( upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
+    hole.areaOfInterest.center.x = upperLeft.x + x / 2;
+    hole.areaOfInterest.center.y = upperLeft.y + y / 2;
 
-    hole.keypoint = k;
-
-
-    // The four vertices of the rectangle
-    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
-
-    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
-
-    std::vector< cv::Point2f > rectangle;
-    rectangle.push_back( vertex_1 );
-    rectangle.push_back( vertex_2 );
-    rectangle.push_back( vertex_3 );
-    rectangle.push_back( vertex_4 );
-
-    hole.rectangle = rectangle;
-
+    // The width and height of the rectangle
+    hole.areaOfInterest.width = x;
+    hole.areaOfInterest.height = y;
 
     // The outline points of the hole will be obtained through the depiction
     // of the points consisting the rectangle
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
+    
+    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
+    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
+    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
+    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
+    
+    cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
 
-    cv::Point2f a[] = { vertex_1, vertex_2, vertex_3, vertex_4 };
-
-    for(unsigned int j = 0; j < 4; j++)
+    for (unsigned int j = 0; j < 4; j++)
     {
-      cv::line( image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8 );
+      cv::line(image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
     }
-
 
     std::vector<cv::Point2f> outline;
     for ( int rows = 0; rows < image.rows; rows++ )
@@ -173,18 +153,14 @@ namespace pandora_vision
         }
       }
     }
+    hole.outline = MessageConversions::vecToMsg(outline);
 
-    hole.outline = outline;
-
-    // Push back hole into a HolesConveyor
-    HolesConveyor conveyor;
-    conveyor.holes.push_back( hole );
+    // Push hole back into a BlobVector
+    BlobVector conveyor;
+    conveyor.append(hole);
 
     return conveyor;
-
   }
-
-
 
   //! Tests FiltersResources::createCheckerRequiredVectors
   TEST_F ( FiltersResourcesTest, createCheckerRequiredVectorsTest )
@@ -248,7 +224,6 @@ namespace pandora_vision
                         &intermediatePointsImageVector,
                         &intermediatePointsSetVector );
 
-
                       // Inquire about holesMasksImageVector
                       if ( a == 1 || c == 1)
                       {
@@ -269,7 +244,6 @@ namespace pandora_vision
                               }
                             }
                           }
-
                           // There should be 100 X 100 points in each mask
                           EXPECT_EQ ( 10000, nonZero );
                         }
@@ -280,7 +254,6 @@ namespace pandora_vision
                         // a and c are disabled
                         EXPECT_EQ ( 0, holesMasksImageVector.size() );
                       }
-
 
                       // Inquire about holesMasksSetVector
                       if ( b == 1 || d == 1 || f == 1 || i == 1 )
@@ -300,7 +273,6 @@ namespace pandora_vision
                         // b, d, f and i are disabled
                         EXPECT_EQ ( 0, holesMasksSetVector.size() );
                       }
-
 
                       // Inquire about inflatedRectangles*
                       if ( b == 1 || c == 1 || d == 1
@@ -334,7 +306,6 @@ namespace pandora_vision
                         EXPECT_EQ ( 0, inflatedRectanglesVector.size() );
                       }
 
-
                       // Inquire about intermediatePointsImageVector
                       if ( c == 1 )
                       {
@@ -356,7 +327,6 @@ namespace pandora_vision
                               }
                             }
                           }
-
                           // There should be more than 400 intermediate points
                           EXPECT_LT ( 400, nonZero );
                         }
@@ -367,7 +337,6 @@ namespace pandora_vision
                         // c is disabled
                         EXPECT_EQ ( 0, intermediatePointsImageVector.size() );
                       }
-
 
                       // Inquire about intermediatePointsSetVector
                       if ( b == 1 || d == 1 || g == 1 )
@@ -389,7 +358,6 @@ namespace pandora_vision
                         // b, d and g are disabled
                         EXPECT_EQ ( 0, intermediatePointsSetVector.size() );
                       }
-
 
                       // Clear the vectors for the next run
                       holesMasksImageVector.clear();
@@ -448,7 +416,6 @@ namespace pandora_vision
               &intermediatePointsImageVector,
               &intermediatePointsSetVector );
 
-
             // Inquire about holesMasksImageVector
             if ( a == 1 || c == 1)
             {
@@ -469,7 +436,6 @@ namespace pandora_vision
                     }
                   }
                 }
-
                 // There should be 100 X 100 points in each mask
                 EXPECT_EQ ( 10000, nonZero );
               }
@@ -480,7 +446,6 @@ namespace pandora_vision
               // a and c are disabled
               EXPECT_EQ ( 0, holesMasksImageVector.size() );
             }
-
 
             // Inquire about holesMasksSetVector
             if ( b == 1 || d == 1 )
@@ -500,7 +465,6 @@ namespace pandora_vision
               // b, d, f and i are disabled
               EXPECT_EQ ( 0, holesMasksSetVector.size() );
             }
-
 
             // Inquire about inflatedRectangles*
             if ( b == 1 || c == 1 || d == 1 )
@@ -532,7 +496,6 @@ namespace pandora_vision
               EXPECT_EQ ( 0, inflatedRectanglesVector.size() );
             }
 
-
             // Inquire about intermediatePointsImageVector
             if ( c == 1 )
             {
@@ -554,7 +517,6 @@ namespace pandora_vision
                     }
                   }
                 }
-
                 // There should be more than 400 intermediate points
                 EXPECT_LT ( 400, nonZero );
               }
@@ -565,7 +527,6 @@ namespace pandora_vision
               // c is disabled
               EXPECT_EQ ( 0, intermediatePointsImageVector.size() );
             }
-
 
             // Inquire about intermediatePointsSetVector
             if ( b == 1 || d == 1 )
@@ -588,7 +549,6 @@ namespace pandora_vision
               EXPECT_EQ ( 0, intermediatePointsSetVector.size() );
             }
 
-
             // Clear the vectors for the next run
             holesMasksImageVector.clear();
             holesMasksSetVector.clear();
@@ -603,8 +563,6 @@ namespace pandora_vision
     }
   }
 
-
-
   //! Tests FiltersResources::createHolesMasksVectors
   TEST_F ( FiltersResourcesTest, createHolesMasksVectorsTest )
   {
@@ -613,7 +571,6 @@ namespace pandora_vision
 
     // The indices of points inside the holes in conveyor
     std::vector< std::set< unsigned int > > holesMasksSetVector;
-
 
     // Run FiltersResources::createHolesMasksVectors
     FiltersResources::createHolesMasksVectors(
@@ -641,7 +598,6 @@ namespace pandora_vision
         }
       }
     }
-
     // The total number of non-zero value pixels in all of the images should
     // be equal to three times as much as in any image, which is 100 X 100
     EXPECT_EQ ( 3 * 10000, nonZero );
@@ -650,10 +606,7 @@ namespace pandora_vision
     {
       EXPECT_EQ ( 10000, holesMasksSetVector[h].size() );
     }
-
   }
-
-
 
   //! Tests FiltersResources::createHolesMasksImageVector
   TEST_F ( FiltersResourcesTest, createHolesMasksImageVectorTest )
@@ -691,13 +644,10 @@ namespace pandora_vision
         }
       }
     }
-
     // The total number of non-zero value pixels in all of the images should
     // be equal to three times as much as in any image, which is 100 X 100
     EXPECT_EQ ( 3 * 10000, nonZero );
   }
-
-
 
   //! Tests FiltersResources::createHolesMasksSetVector
   TEST_F ( FiltersResourcesTest, createHolesMasksSetVectorTest )
@@ -710,7 +660,6 @@ namespace pandora_vision
       conveyor,
       squares_,
       &holesMasksSetVector );
-
 
     for ( int h = 0; h < conveyor.size(); h++ )
     {
@@ -734,8 +683,6 @@ namespace pandora_vision
        */
     }
   }
-
-
 
   //! Tests FiltersResources::createInflatedRectanglesVector
   TEST_F ( FiltersResourcesTest, createInflatedRectanglesVectorTest )
@@ -804,8 +751,6 @@ namespace pandora_vision
     EXPECT_EQ ( 2, inflatedRectanglesIndices_2[1] );
   }
 
-
-
   //! Tests FiltersResources::createIntermediateHolesPointsVectors
   TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsVectorsTest )
   {
@@ -857,7 +802,6 @@ namespace pandora_vision
         }
       }
     }
-
     // There shouldn't be any intermediate points for inflation size equal to 0
     EXPECT_EQ ( 0, nonZeroImage );
 
@@ -866,7 +810,6 @@ namespace pandora_vision
     {
       EXPECT_EQ ( 0, intermediatePointsSetVector_0[i].size() );
     }
-
 
     // First off, we need to obtain the inflated rectangles vector and the
     // corresponding vector of indices of holes with valid inflated rectangles
@@ -917,7 +860,6 @@ namespace pandora_vision
         }
       }
     }
-
     // There shouldn't be any intermediate points for inflation size equal to 0
     EXPECT_LT ( 2 * 400, nonZeroImage );
 
@@ -926,10 +868,7 @@ namespace pandora_vision
     {
       EXPECT_LT ( 400, intermediatePointsSetVector_2[i].size() );
     }
-
   }
-
-
 
   //! Tests FiltersResources::createIntermediateHolesPointsImageVector
   TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsImageVectorTest )
@@ -977,10 +916,8 @@ namespace pandora_vision
         }
       }
     }
-
     // There shouldn't be any intermediate points for inflation size equal to 0
     EXPECT_EQ ( 0, nonZero );
-
 
     // First off, we need to obtain the inflated rectangles vector and the
     // corresponding vector of indices of holes with valid inflated rectangles
@@ -1025,15 +962,11 @@ namespace pandora_vision
         }
       }
     }
-
     // There should be two valid inflated rectangles, so the total number
     // of intermediate points should be greater than two times the outline
     // of each hole
     EXPECT_LT ( 2 * 400 , nonZero );
-
   }
-
-
 
   //! Tests FiltersResources::createIntermediateHolesPointsSetVector
   TEST_F ( FiltersResourcesTest, createIntermediateHolesPointsSetVectorTest )
@@ -1125,4 +1058,4 @@ namespace pandora_vision
      */
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

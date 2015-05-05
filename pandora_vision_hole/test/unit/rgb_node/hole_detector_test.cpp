@@ -35,6 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
+#include "utils/message_conversions.h"
 #include "rgb_node/hole_detector.h"
 #include "gtest/gtest.h"
 
@@ -123,17 +124,13 @@ namespace pandora_vision
           }
         }
       }
-
       // The images' width and height
       int WIDTH;
       int HEIGHT;
 
       // The image under processing
       cv::Mat squares_;
-
   };
-
-
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -168,8 +165,6 @@ namespace pandora_vision
     }
   }
 
-
-
   //! Tests HoleDetector::findHoles
   TEST_F ( HoleDetectorTest, findHolesTest )
   {
@@ -182,7 +177,7 @@ namespace pandora_vision
     Parameters::Rgb::edges_extraction_method = 0;
 
     // Run HoleDetector:findHoles
-    HolesConveyor conveyor =
+    BlobVector conveyor =
       HoleDetector::findHoles ( squares_, wallsHistogram );
 
     // The number of keypoints found
@@ -197,24 +192,23 @@ namespace pandora_vision
     // For every keypoint found, make assertions and expectations
     for (int k = 0; k < size; k++)
     {
+      std::vector<cv::Point2f> vec = MessageConversions::areaToVec(
+        conveyor.getBlob(k).areaOfInterest);
+
       // The location of the keypoint should near the center of the square
       // in which it lies
-      EXPECT_NEAR ( conveyor.holes[k].keypoint.pt.x,
-        conveyor.holes[k].rectangle[0].x + 50, 1 );
-
-      // The hole should have exactly four vertices
-      EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
+      EXPECT_NEAR ( conveyor.getBlob(k).areaOfInterest.center.x,
+        vec[0].x + 50, 1 );
 
       // There should be 400 outline points
-      EXPECT_EQ ( 400, conveyor.holes[k].outline.size() );
+      EXPECT_EQ ( 400, conveyor.getBlob(k).outline.size() );
     }
-
 
     // Extract the edges of the rgb image via backprojection
     Parameters::Rgb::edges_extraction_method = 1;
 
     // Clear the conveyor
-    HolesConveyorUtils::clear( &conveyor );
+    conveyor.clear();
 
     // Run HoleDetector:findHoles
     conveyor = HoleDetector::findHoles ( squares_, wallsHistogram );
@@ -231,17 +225,17 @@ namespace pandora_vision
     // For every keypoint found, make assertions and expectations
     for (int k = 0; k < size; k++)
     {
+      std::vector<cv::Point2f> vec = MessageConversions::areaToVec(
+        conveyor.getBlob(k).areaOfInterest);
+
       // The location of the keypoint should near the center of the square
       // in which it lies
-      EXPECT_NEAR ( conveyor.holes[k].keypoint.pt.x,
-        conveyor.holes[k].rectangle[0].x + 50, 1 );
-
-      // The hole should have exactly four vertices
-      EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
+      EXPECT_NEAR ( conveyor.getBlob(k).areaOfInterest.center.x,
+        vec[0].x + 50, 1 );
 
       // There should be 400 minus 4 (vertices) * 3 (points) outline points
-      EXPECT_EQ ( 400 - 4 * 3, conveyor.holes[k].outline.size() );
+      EXPECT_EQ ( 400 - 4 * 3, conveyor.getBlob(k).outline.size() );
     }
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

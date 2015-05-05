@@ -72,12 +72,11 @@ namespace pandora_vision
         }
 
         // A single hole
-        HoleConveyor hole;
+        pandora_vision_msgs::Blob hole;
 
         // Construct a dummy conveyor
-        cv::KeyPoint k_1 ( 150, 150, 1 );
-
-        hole.keypoint = k_1;
+        hole.areaOfInterest.center.x = 150;
+        hole.areaOfInterest.center.y = 150;
 
         // The outline of the hole
         std::vector< cv::Point2f > outline;
@@ -92,34 +91,25 @@ namespace pandora_vision
             }
           }
         }
+        hole.outline = MessageConversions::vecToMsg(outline);
 
-        hole.outline = outline;
-
-        // The vertices of the hole's bounding box
-        std::vector< cv::Point2f > rectangle;
-
-        rectangle.push_back( cv::Point2f( 100, 100 ) );
-        rectangle.push_back( cv::Point2f( 100, 199 ) );
-        rectangle.push_back( cv::Point2f( 199, 199 ) );
-        rectangle.push_back( cv::Point2f( 199, 100 ) );
-
-        hole.rectangle = rectangle;
+        // The width and height of the hole's bounding box
+        hole.areaOfInterest.width = 100;
+        hole.areaOfInterest.height = 100;
 
         // Push hole back into the conveyor
-        conveyor.holes.push_back( hole );
+        conveyor.append( hole );
       }
-
       // The images' width and height
       int WIDTH;
       int HEIGHT;
 
       // A conveyor of dummy holes
-      HolesConveyor conveyor;
+      BlobVector conveyor;
 
       // An image of dimensions HEIGHT x WIDTH, representing the conveyor
       cv::Mat image;
   };
-
 
   //! Tests MessageConversions::convertImageToMessage
   TEST_F ( MessageConversionsTest, convertImageToMessageTest )
@@ -138,7 +128,6 @@ namespace pandora_vision
           static_cast< unsigned char >(rand_r( &seed ) % 255);
       }
     }
-
     // A dummy message. Needed for its header
     sensor_msgs::Image msg_8UC1;
 
@@ -147,7 +136,7 @@ namespace pandora_vision
     sensor_msgs::Image image_msg = MessageConversions::convertImageToMessage(
       image_8UC1,
       encoding,
-      msg_8UC1);
+      msg_8UC1.header);
 
     // Extract the image message and compare this image to the original
     cv_bridge::CvImagePtr br_8UC1 = cv_bridge::toCvCopy(image_msg, encoding);
@@ -167,10 +156,8 @@ namespace pandora_vision
         }
       }
     }
-
     // There should be no discrepancies
     ASSERT_EQ ( 0, diff );
-
 
     // A RGB image
     cv::Mat image_8UC3 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -201,7 +188,7 @@ namespace pandora_vision
     image_msg = MessageConversions::convertImageToMessage(
       image_8UC3,
       encoding,
-      msg_8UC3);
+      msg_8UC3.header);
 
     // Extract the image message and compare this image to the original
     cv_bridge::CvImagePtr br_8UC3 = cv_bridge::toCvCopy(image_msg, encoding);
@@ -221,12 +208,9 @@ namespace pandora_vision
         }
       }
     }
-
     // There should be no discrepancies
     ASSERT_EQ ( 0, diff );
   }
-
-
 
   //! Tests MessageConversions::convertPointCloudMessageToImage
   TEST_F ( MessageConversionsTest, convertPointCloudMessageToImageTest )
@@ -244,11 +228,9 @@ namespace pandora_vision
           static_cast< float >( rand_r(&seed) % 2 );
       }
     }
-
     // Set some NaNs
     image_32FC1.at< float >( 10, 10 ) = NAN;
     image_32FC1.at< float >( 100, 100 ) = NAN;
-
 
     // Create a RGB image
     cv::Mat image_8UC3 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -269,7 +251,6 @@ namespace pandora_vision
           static_cast< unsigned char >( rand_r(&seed) % 255 );
       }
     }
-
     // Set some NaNs
     image_8UC3.at< unsigned char >( 10, 10 ) = NAN;
     image_8UC3.at< unsigned char >( 100, 100 ) = NAN;
@@ -340,142 +321,9 @@ namespace pandora_vision
         }
       }
     }
-
     // There should be no discrepancies
     ASSERT_EQ ( 0, diff );
   }
-
-
-
-  //! Tests MessageConversions::createCandidateHolesVector
-  TEST_F ( MessageConversionsTest, createCandidateHolesVectorTest )
-  {
-    // The vector of messages of candidate holes
-    std::vector<pandora_vision_msgs::CandidateHoleMsg> candidateHolesVector;
-
-    // Run MessageConversions::createCandidateHolesVector
-    MessageConversions::createCandidateHolesVector( conveyor,
-      &candidateHolesVector );
-
-    for (unsigned int i = 0; i < conveyor.size(); i++)
-    {
-      // The keypoints should be the same
-      EXPECT_EQ ( conveyor.holes[i].keypoint.pt.x,
-        candidateHolesVector[i].keypointX );
-      EXPECT_EQ ( conveyor.holes[i].keypoint.pt.y,
-        candidateHolesVector[i].keypointY );
-
-      for (int v = 0; v < conveyor.holes[i].rectangle.size(); v++)
-      {
-        // The rectangle's vertices should be the same
-        EXPECT_EQ ( conveyor.holes[i].rectangle[v].x,
-          candidateHolesVector[i].verticesX[v]);
-        EXPECT_EQ ( conveyor.holes[i].rectangle[v].y,
-          candidateHolesVector[i].verticesY[v]);
-      }
-
-      for (int o = 0; o < conveyor.holes[i].outline.size(); o++)
-      {
-        // The outline points should be the same
-        EXPECT_EQ ( conveyor.holes[i].outline[o].x,
-          candidateHolesVector[i].outlineX[o]);
-        EXPECT_EQ ( conveyor.holes[i].outline[o].y,
-          candidateHolesVector[i].outlineY[o]);
-      }
-    }
-  }
-
-
-
-  //! Tests MessageConversions::createCandidateHolesVectorMessage
-  TEST_F ( MessageConversionsTest, createCandidateHolesVectorMessageTest )
-  {
-    // Create a grayscale image
-    cv::Mat image= cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
-
-    // Fill it with randomness
-    unsigned int seed = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image.at< float >( rows, cols ) =
-          static_cast< float >( rand_r(&seed) % 2 );
-      }
-    }
-
-    // The message of candidate holes
-    pandora_vision_msgs::CandidateHolesVectorMsg candidateHolesVectorMsg;
-
-    // A dummy image. Needed only for its header.
-    sensor_msgs::Image msg;
-    msg.header.frame_id = "a";
-
-    // Run MessageConversions::createCandidateHolesVector
-    MessageConversions::createCandidateHolesVectorMessage(
-      conveyor,
-      image,
-      &candidateHolesVectorMsg,
-      sensor_msgs::image_encodings::TYPE_8UC1,
-      msg);
-
-    // Check the integrity of image
-    cv::Mat extracted;
-    MessageConversions::extractImageFromMessageContainer(
-      candidateHolesVectorMsg,
-      &extracted,
-      sensor_msgs::image_encodings::TYPE_8UC1);
-
-    // The number of pixels differing between image and extracted
-    int diff = 0;
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image.at< unsigned char >( rows, cols ) !=
-          extracted.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0, diff );
-
-
-    // Check the integrity of the conveyor
-    for (unsigned int i = 0; i < conveyor.size(); i++)
-    {
-      // The keypoints should be the same
-      EXPECT_EQ ( conveyor.holes[i].keypoint.pt.x,
-        candidateHolesVectorMsg.candidateHoles[i].keypointX );
-      EXPECT_EQ ( conveyor.holes[i].keypoint.pt.y,
-        candidateHolesVectorMsg.candidateHoles[i].keypointY );
-
-      for (int v = 0; v < conveyor.holes[i].rectangle.size(); v++)
-      {
-        // The rectangle's vertices should be the same
-        EXPECT_EQ ( conveyor.holes[i].rectangle[v].x,
-          candidateHolesVectorMsg.candidateHoles[i].verticesX[v]);
-        EXPECT_EQ ( conveyor.holes[i].rectangle[v].y,
-          candidateHolesVectorMsg.candidateHoles[i].verticesY[v]);
-      }
-
-      for (int o = 0; o < conveyor.holes[i].outline.size(); o++)
-      {
-        // The outline points should be the same
-        EXPECT_EQ ( conveyor.holes[i].outline[o].x,
-          candidateHolesVectorMsg.candidateHoles[i].outlineX[o]);
-        EXPECT_EQ ( conveyor.holes[i].outline[o].y,
-          candidateHolesVectorMsg.candidateHoles[i].outlineY[o]);
-      }
-    }
-
-  }
-
-
 
   //! Tests MessageConversions::extractImageFromMessage
   TEST_F ( MessageConversionsTest, extractImageFromMessageTest )
@@ -518,12 +366,9 @@ namespace pandora_vision
         }
       }
     }
-
     // There should be no discrepancies
     ASSERT_EQ ( 0 , diff );
   }
-
-
 
   //! Tests MessageConversions::extractImageFromMessageContainer
   TEST_F ( MessageConversionsTest, extractImageFromMessageContainerTest )
@@ -547,12 +392,11 @@ namespace pandora_vision
     msgPtr->image = image;
 
     // The message of candidate holes
-    pandora_vision_msgs::CandidateHolesVectorMsg msg;
-    msg.image = *msgPtr->toImageMsg();
+    sensor_msgs::Image msg = *msgPtr->toImageMsg();
 
     // Run MessageConversions::extractImageFromMessageContainer
     cv::Mat extracted;
-    MessageConversions::extractImageFromMessageContainer( msg,
+    MessageConversions::extractImageFromMessage( msg,
       &extracted, sensor_msgs::image_encodings::TYPE_8UC1 );
 
     // The number of pixels differing between image and extracted
@@ -568,275 +412,6 @@ namespace pandora_vision
         }
       }
     }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0 , diff );
-  }
-
-
-
-  //! Tests MessageConversions::fromCandidateHoleMsgToConveyor
-  TEST_F ( MessageConversionsTest, fromCandidateHoleMsgToConveyorTest )
-  {
-    // The vector of candidate holes
-    std::vector<pandora_vision_msgs::CandidateHoleMsg> candidateHolesVector;
-
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      pandora_vision_msgs::CandidateHoleMsg candidateHole;
-
-      // The keypoints
-      candidateHole.keypointX = conveyor.holes[i].keypoint.pt.x;
-      candidateHole.keypointY = conveyor.holes[i].keypoint.pt.y;
-
-      // The rectangles
-      for ( int v = 0; v < conveyor.holes[i].rectangle.size(); v++ )
-      {
-        candidateHole.verticesX.push_back(conveyor.holes[i].rectangle[v].x);
-        candidateHole.verticesY.push_back(conveyor.holes[i].rectangle[v].y);
-      }
-
-      // The outlines
-      for ( int o = 0; o < conveyor.holes[i].outline.size(); o++ )
-      {
-        candidateHole.outlineX.push_back(conveyor.holes[i].outline[o].x);
-        candidateHole.outlineY.push_back(conveyor.holes[i].outline[o].y);
-      }
-
-      candidateHolesVector.push_back(candidateHole);
-    }
-
-    // The conveyor extracted from the message
-    HolesConveyor extractedConveyor;
-
-    // Run MessageConversions::fromCandidateHoleMsgToConveyor
-    // for representationMethod 0
-    MessageConversions::fromCandidateHoleMsgToConveyor(
-      candidateHolesVector,
-      &extractedConveyor,
-      image,
-      0,
-      32);
-
-    // Check the integrity of the extracted conveyor
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.x,
-        conveyor.holes[i].keypoint.pt.x );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.y,
-        conveyor.holes[i].keypoint.pt.y );
-
-      for ( int v = 0; v < conveyor.holes[i].rectangle.size(); v++ )
-      {
-        EXPECT_EQ ( extractedConveyor.holes[i].rectangle[v].x,
-          conveyor.holes[i].rectangle[v].x );
-        EXPECT_EQ ( extractedConveyor.holes[i].rectangle[v].y,
-          conveyor.holes[i].rectangle[v].y );
-      }
-
-      for ( int o = 0; o < conveyor.holes[i].outline.size(); o++ )
-      {
-        EXPECT_EQ ( extractedConveyor.holes[i].outline[o].x,
-          conveyor.holes[i].outline[o].x );
-        EXPECT_EQ ( extractedConveyor.holes[i].outline[o].y,
-          conveyor.holes[i].outline[o].y );
-      }
-    }
-
-    // Clear the conveyor
-    HolesConveyorUtils::clear( &extractedConveyor );
-
-    // Run MessageConversions::fromCandidateHoleMsgToConveyor
-    // for representationMethod 1
-    MessageConversions::fromCandidateHoleMsgToConveyor(
-      candidateHolesVector,
-      &extractedConveyor,
-      image,
-      1,
-      32);
-
-    // Check the inflated of the extracted conveyor
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.x,
-        2 * conveyor.holes[i].keypoint.pt.x );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.y,
-        2 * conveyor.holes[i].keypoint.pt.y );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].rectangle.size(),
-        conveyor.holes[i].rectangle.size() );
-
-      EXPECT_GT ( extractedConveyor.holes[i].outline.size(),
-        conveyor.holes[i].outline.size() );
-    }
-  }
-
-
-
-  //! Tests MessageConversions::unpackMessage
-  TEST_F ( MessageConversionsTest, unpackMessageTest )
-  {
-    // The overall message
-    pandora_vision_msgs::CandidateHolesVectorMsg candidateHolesVectorMsg;
-
-    // The vector of candidate holes
-    std::vector<pandora_vision_msgs::CandidateHoleMsg> candidateHolesVector;
-
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      pandora_vision_msgs::CandidateHoleMsg candidateHole;
-
-      // The keypoints
-      candidateHole.keypointX = conveyor.holes[i].keypoint.pt.x;
-      candidateHole.keypointY = conveyor.holes[i].keypoint.pt.y;
-
-      // The rectangle points
-      for ( int v = 0; v < conveyor.holes[i].rectangle.size(); v++ )
-      {
-        candidateHole.verticesX.push_back(conveyor.holes[i].rectangle[v].x);
-        candidateHole.verticesY.push_back(conveyor.holes[i].rectangle[v].y);
-      }
-
-      // The outline points
-      for ( int o = 0; o < conveyor.holes[i].outline.size(); o++ )
-      {
-        candidateHole.outlineX.push_back(conveyor.holes[i].outline[o].x);
-        candidateHole.outlineY.push_back(conveyor.holes[i].outline[o].y);
-      }
-
-      candidateHolesVector.push_back(candidateHole);
-    }
-
-    candidateHolesVectorMsg.candidateHoles = candidateHolesVector;
-
-    // A grayscale image
-    cv::Mat image_8UC1 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
-    // Insert randomness into image
-    unsigned int seed = 0;
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image_8UC1.at< unsigned char >( rows, cols ) =
-          static_cast< unsigned char >(rand_r( &seed ) % 255);
-      }
-    }
-
-    // Pack image_8UC1 into the message
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-    msgPtr->encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-    msgPtr->image = image_8UC1;
-
-    candidateHolesVectorMsg.image = *msgPtr->toImageMsg();
-
-    // The extracted conveyor
-    HolesConveyor extractedConveyor;
-
-    // The extracted image
-    cv::Mat extractedImage;
-
-    // Run MessageConversions::unpackMessage for representationMethod 0
-    MessageConversions::unpackMessage(
-      candidateHolesVectorMsg,
-      &extractedConveyor,
-      &extractedImage,
-      0,
-      sensor_msgs::image_encodings::TYPE_8UC1,
-      32);
-
-
-    // Check the integrity of the extracted conveyor
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.x,
-        conveyor.holes[i].keypoint.pt.x );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.y,
-        conveyor.holes[i].keypoint.pt.y );
-
-      for ( int v = 0; v < conveyor.holes[i].rectangle.size(); v++ )
-      {
-        EXPECT_EQ ( extractedConveyor.holes[i].rectangle[v].x,
-          conveyor.holes[i].rectangle[v].x );
-        EXPECT_EQ ( extractedConveyor.holes[i].rectangle[v].y,
-          conveyor.holes[i].rectangle[v].y );
-      }
-
-      for ( int o = 0; o < conveyor.holes[i].outline.size(); o++ )
-      {
-        EXPECT_EQ ( extractedConveyor.holes[i].outline[o].x,
-          conveyor.holes[i].outline[o].x );
-        EXPECT_EQ ( extractedConveyor.holes[i].outline[o].y,
-          conveyor.holes[i].outline[o].y );
-      }
-    }
-
-
-    // The number of pixels differing between image_8UC1 and extractedImage
-    int diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_8UC1.at< unsigned char >( rows, cols ) !=
-          extractedImage.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0 , diff );
-
-
-    // Clear extractedConveyor
-    HolesConveyorUtils::clear( &extractedConveyor );
-
-    // Run MessageConversions::unpackMessage for representationMethod 1
-    MessageConversions::unpackMessage(
-      candidateHolesVectorMsg,
-      &extractedConveyor,
-      &extractedImage,
-      1,
-      sensor_msgs::image_encodings::TYPE_8UC1,
-      32);
-
-    // Check the inflated of the extracted conveyor
-    for ( int i = 0; i < conveyor.size(); i++ )
-    {
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.x,
-        2 * conveyor.holes[i].keypoint.pt.x );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].keypoint.pt.y,
-        2 * conveyor.holes[i].keypoint.pt.y );
-
-      EXPECT_EQ ( extractedConveyor.holes[i].rectangle.size(),
-        conveyor.holes[i].rectangle.size() );
-
-      EXPECT_GT ( extractedConveyor.holes[i].outline.size(),
-        conveyor.holes[i].outline.size() );
-    }
-
-    // The number of pixels differing between image_8UC1 and extractedImage
-    diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_8UC1.at< unsigned char >( rows, cols ) !=
-          extractedImage.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
     // There should be no discrepancies
     ASSERT_EQ ( 0 , diff );
   }

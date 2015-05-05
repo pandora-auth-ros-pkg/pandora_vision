@@ -103,9 +103,9 @@ namespace pandora_vision
         rectangle to be created
         @param[in] x [const int&] The recgangle's width
         @param[in] y [const int&] The rectangle's height
-        return [HolesConveyor] A struct containing the elements of one hole
+        return [BlobVector] A struct containing the elements of one hole
        **/
-      HolesConveyor getConveyor (
+      BlobVector getConveyor (
         const cv::Point2f& upperLeft,
         const int& x,
         const int& y );
@@ -290,39 +290,32 @@ namespace pandora_vision
           }
         }
 
-
         // Create the conveyor of candidate holes for both images
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( 100, 100 ),
             100,
-            100 ),
-          &conveyor);
+            100 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
             100,
-            100 ),
-          &conveyor);
+            100 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
             100,
-            100 ),
-          &conveyor);
+            100 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( 80, 80 ),
             140,
-            140 ),
-          &conveyor);
+            140 ));
 
-        HolesConveyorUtils::append(
+        conveyor.extend(
           getConveyor( cv::Point2f ( 250, 250 ),
             100,
-            100 ),
-          &conveyor);
-
+            100 ));
 
         // The image upon which the squares will be inprinted
         rgbSquares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
@@ -350,8 +343,6 @@ namespace pandora_vision
           }
         }
       }
-
-
       // The images' width and height
       int WIDTH;
       int HEIGHT;
@@ -364,14 +355,11 @@ namespace pandora_vision
 
       // The conveyor of holes that will be used to test methods of class
       // Filters
-      HolesConveyor conveyor;
+      BlobVector conveyor;
 
       // The point cloud corresponding to the depthSquares_ image
       PointCloudPtr cloud;
-
   };
-
-
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -402,8 +390,6 @@ namespace pandora_vision
     }
   }
 
-
-
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
     @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
@@ -433,8 +419,6 @@ namespace pandora_vision
     }
   }
 
-
-
   /**
     @brief Constructs the internals of a rectangular hole
     of width @param x and height of @param y
@@ -442,51 +426,39 @@ namespace pandora_vision
     rectangle to be created
     @param[in] x [const int&] The recgangle's width
     @param[in] y [const int&] The rectangle's height
-    return [HolesConveyor] A struct containing the elements of one hole
+    return [BlobVector] A struct containing the elements of one hole
    **/
-  HolesConveyor FiltersTest::getConveyor (
+  BlobVector FiltersTest::getConveyor (
     const cv::Point2f& upperLeft,
     const int& x,
     const int& y )
   {
     // What will be returned: the internal elements of one hole
-    HoleConveyor hole;
+    pandora_vision_msgs::Blob hole;
 
     // The hole's keypoint
-    cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
+    hole.areaOfInterest.center.x = upperLeft.x + x / 2;
+    hole.areaOfInterest.center.y = upperLeft.y + y / 2;
 
-    hole.keypoint = k;
-
-
-    // The four vertices of the rectangle
-    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
-
-    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
-
-    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
-
-    std::vector<cv::Point2f> rectangle;
-    rectangle.push_back(vertex_1);
-    rectangle.push_back(vertex_2);
-    rectangle.push_back(vertex_3);
-    rectangle.push_back(vertex_4);
-
-    hole.rectangle = rectangle;
-
+    // The width and height of the rectangle
+    hole.areaOfInterest.width = x;
+    hole.areaOfInterest.height = y;
 
     // The outline points of the hole will be obtained through the depiction
     // of the points consisting the rectangle
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
+    
+    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
+    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
+    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
+    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
+    
     cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
 
-    for(unsigned int j = 0; j < 4; j++)
+    for (unsigned int j = 0; j < 4; j++)
     {
       cv::line(image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
     }
-
 
     std::vector<cv::Point2f> outline;
     for ( int rows = 0; rows < image.rows; rows++ )
@@ -499,17 +471,14 @@ namespace pandora_vision
         }
       }
     }
+    hole.outline = MessageConversions::vecToMsg(outline);
 
-    hole.outline = outline;
-
-    // Push hole into a HolesConveyor
-    HolesConveyor conveyor;
-    conveyor.holes.push_back(hole);
+    // Push hole back into a BlobVector
+    BlobVector conveyor;
+    conveyor.append(hole);
 
     return conveyor;
   }
-
-
 
   //! Tests Filters::applyFilter
   TEST_F ( FiltersTest, applyFilterTest )
@@ -561,7 +530,6 @@ namespace pandora_vision
       inflatedRectanglesVector_0,
       inflatedRectanglesIndices_0,
       &intermediatePointsImageVector_0 );
-
 
     // Run Filters::applyFilter for every filter,
     // except for the ones that utilize textures
@@ -677,9 +645,7 @@ namespace pandora_vision
 
         EXPECT_EQ ( 0, probabilitiesVector_0[4]);
       }
-
     }
-
 
     // Inflations size : 10
 
@@ -845,8 +811,6 @@ namespace pandora_vision
     }
   }
 
-
-
   //! Tests Filters::applyFiltersTest:
   TEST_F ( FiltersTest, applyFiltersTest )
   {
@@ -1010,7 +974,6 @@ namespace pandora_vision
         EXPECT_EQ ( 0.0, probabilitiesVector2D_0_RGBD_MODE[f][4] );
       }
     }
-
 
     // ---------------------------- RGB_ONLY_MODE ------------------------------
 
@@ -1229,7 +1192,6 @@ namespace pandora_vision
       }
     }
 
-
     // ---------------------------- RGB_ONLY_MODE ------------------------------
 
     // Set the order of the filters' execution in random
@@ -1289,4 +1251,4 @@ namespace pandora_vision
     }
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

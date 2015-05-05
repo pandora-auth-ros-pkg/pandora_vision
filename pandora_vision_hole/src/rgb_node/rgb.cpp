@@ -60,12 +60,12 @@ namespace pandora_vision
 
     // Subscribe to the RGB image published by the
     // rgb_depth_synchronizer node
-    rgbImageSubscriber_= nodeHandle_.subscribe( rgbImageTopic_, 1,
+    rgbImageSubscriber_= nodeHandle_.subscribe(rgbImageTopic_, 1,
       &Rgb::inputRgbImageCallback, this);
 
     // Advertise the candidate holes found by the rgb node
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      <pandora_vision_msgs::BlobVector>(
       candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (RGB) parameter's callback
@@ -74,8 +74,6 @@ namespace pandora_vision
     ROS_INFO_NAMED(PKG_NAME, "[RGB node] Initiated");
   }
 
-
-
   /**
     @brief Destructor
    **/
@@ -83,8 +81,6 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED(PKG_NAME, "[RGB node] Terminated");
   }
-
-
 
   /**
     @brief Callback for the rgb image received by the synchronizer node.
@@ -132,17 +128,15 @@ namespace pandora_vision
     }
 
     // Locate potential holes in the rgb image
-    HolesConveyor conveyor = HoleDetector::findHoles(rgbImage, wallsHistogram_);
+    BlobVector conveyor = HoleDetector::findHoles(rgbImage, wallsHistogram_);
 
     // Create the candidate holes message
-    pandora_vision_msgs::CandidateHolesVectorMsg rgbCandidateHolesMsg;
+    pandora_vision_msgs::BlobVector rgbCandidateHolesMsg;
 
     // Pack information about holes found and the rgb image inside a message.
     // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(conveyor,
-      rgbImageSent,
-      &rgbCandidateHolesMsg,
-      sensor_msgs::image_encodings::TYPE_8UC3, msg);
+    rgbCandidateHolesMsg = conveyor.createMessage(rgbImageSent,
+      sensor_msgs::image_encodings::TYPE_8UC3, msg.header);
 
     // Publish the candidate holes message
     candidateHolesPublisher_.publish(rgbCandidateHolesMsg);
@@ -152,8 +146,6 @@ namespace pandora_vision
     Timer::printAllMeansTree();
     #endif
   }
-
-
 
   /**
     @brief Acquires topics' names needed to be subscribed to and advertise
@@ -203,8 +195,6 @@ namespace pandora_vision
         "[RGB Node] Could not find topic candidate_holes_topic");
     }
   }
-
-
 
   /**
     @brief The function called when a parameter is changed
@@ -268,7 +258,6 @@ namespace pandora_vision
     Parameters::Blob::filter_by_circularity =
       config.filter_by_circularity;
 
-
     ////////////////////////////// Debug parameters ////////////////////////////
 
     // Show the rgb image that arrives in the rgb node
@@ -300,9 +289,7 @@ namespace pandora_vision
     Parameters::Debug::show_get_shapes_clear_border_size =
       config.show_get_shapes_clear_border_size;
 
-
     //////////////////// Parameters specific to the RGB node ///////////////////
-
 
     //------------------- Edge detection specific parameters -------------------
 
@@ -331,7 +318,6 @@ namespace pandora_vision
     Parameters::Edge::canny_blur_noise_kernel_size =
       config.canny_blur_noise_kernel_size;
 
-
     //------------- Parameters needed for histogram calculation ----------------
 
     Parameters::Histogram::number_of_hue_bins =
@@ -345,7 +331,6 @@ namespace pandora_vision
 
     Parameters::Histogram::secondary_channel =
       config.secondary_channel;
-
 
     //----------------- Outline discovery specific parameters ------------------
 
@@ -362,7 +347,6 @@ namespace pandora_vision
     Parameters::Outline::raycast_keypoint_partitions =
       config.raycast_keypoint_partitions;
 
-
     //------------------- Loose ends connection parameters ---------------------
 
     Parameters::Outline::AB_to_MO_ratio = config.AB_to_MO_ratio;
@@ -378,7 +362,6 @@ namespace pandora_vision
       Parameters::Outline::minimum_curve_points =
         static_cast<int>(config.minimum_curve_points / 4);
     }
-
 
     // Selects the method for extracting a RGB image's edges.
     // Choices are via segmentation and via backprojection
@@ -429,4 +412,4 @@ namespace pandora_vision
       config.watershed_background_erosion_factor;
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
