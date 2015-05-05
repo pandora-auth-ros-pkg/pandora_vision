@@ -48,7 +48,7 @@ namespace pandora_vision
   /**
     @brief Converts Conveyors which represent each hole and include all 
     necessary information about it to match with rgb and depth images.
-    @param[in] conveyor [HolesConveyor*]
+    @param[out] conveyor [HolesConveyor*]
     The input conveyor to be converted and sent back as output.
     @param[in] x_th [double] The x coordinate of thermal image in rgb image
     @param[in] y_th [double] The y coordinate of thermal image in rgb image
@@ -85,15 +85,13 @@ namespace pandora_vision
           conveyor->holes[i].outline[o].x, x_th, c_x);
         conveyor->holes[i].outline[o].y = matchingFunction(
           conveyor->holes[i].outline[o].y, y_th, c_y);
-
-        // Put the outline points in order
-        outlinePointsInOrder();
-
-        // Connect the points in order to have a coherent set of points 
-        // as the hole's outline.
-        outlineConnector();
       }
+      // Put the outline points in order for each hole
+      outlinePointsInOrder(conveyor);
 
+      // Connect the points in order to have a coherent set of points 
+      // as the hole's outline. For each hole.
+      outlinePointsConnector(conveyor);
     }
   }
 
@@ -119,12 +117,40 @@ namespace pandora_vision
     @brief When the outline points of the thermal image are matched on 
     the rgb image they are not connected anymore. So this function connects
     all the matched outline points and extracts the new matched outline vector.
-    @param[in]
+    @param[out] conveyor[HolesConveyor*]. The final struct with 
+    the connected points.
     @return void
   **/
-  static void outlinePointsConnector()
+  void ImageMatching::outlinePointsConnector(HolesConveyor* conveyor)
   {
-    cv::Mat outlineImage = cv::Mat::zeros();
+    cv::Mat outlineImage = cv::Mat::zeros(Parameters::Image::HEIGHT,
+      Parameters::Image::WIDTH, CV_8UC1);
+
+    // Draw the outline of the new ordered points for each hole
+    for(unsigned int i = 0; i < conveyor->size(); i++)
+    {
+      for(unsigned int j = 0; j < conveyor->holes[i].outline.size(); j++)
+      {
+        cv::line(outlineImage, conveyor->holes[i].outline[j], 
+          conveyor->holes[i].outline[(j+1) % conveyor->holes[i].outline.size()],
+          cv::Scalar(255, 0, 0), 1, 8);
+      }
+      // Clear the outline vector so it can be filled with the new outline
+      // points from the outlineImage image.
+      conveyor->holes[i].outline.clear();
+
+      // Every non-zero point is a point drawn so pass it to the vector.
+      for(unsigned int rows = 0; rows < outlineImage.rows; rows++)
+      {
+        for(unsigned int cols = 0; cols < outlineImage.cols; cols++)
+        {
+          if(outlineImage.at<unsigned char>(rows,cols) != 0)
+          {
+            conveyor->holes[i].outline.push_back(cv::Point2f(cols, rows));
+          }
+        }
+      }
+    }
   }
 
 
@@ -134,45 +160,66 @@ namespace pandora_vision
     based on the distance between them. For that reason checks one 
     point with all the others. In the next loop that point is beeing 
     taken out of consideration.
-    @param[in]
+    @param[out] conveyor[HolesConveyor*]. 
+    The new conveyor with the points in order.
     @return void
   **/
-  static void outlinePointsInOrder(width)
+  void ImageMatching::outlinePointsInOrder(HolesConveyor* conveyor)
   {
+    // Vector of points that will contain the points in order.
+    std::vector<cv::Point2f> newVector;
+
     // For each hole found.
     for(unsigned int i = 0; i < conveyor->size(); i++)
     {
-
-      // Set as starting minimum value width*2, a value that can never 
-      // been surpassed by any distance between points
-      float minimum = width * width;
-
-      // Vector of points that will contain the points in order.
-      std::vector<cv::Point2f> vector;
-      vector.push_back(conveyor->holes[i].outline[0]);
+      // Push the first point in the new vector and erase it from the old vector
+      newVector.push_back(conveyor->holes[i].outline[0]);
+      cv::Point currp = newVector[0];
+      conveyor->holes[i].outline.erase(conveyor->holes[i].outline.begin());
       
-      for(unsigned int j = 0; j < conveyor->holes[i].outline.size(); j++)
+      while (conveyor->holes[i].outline.size() > 0)
       {
-        for(unsigned int k = 0; k < n - j; k++)
-        // Find the x distance between two points and square it.
-        double dx = std::pow(conveyor->holes[i].outline[j].x - vec[s].x, 2);  
+        // Set as starting minimum value width*2, a value that can never 
+        // been surpassed by any distance between points
+        float minimum = Parameters::Image::WIDTH * Parameters::Image::WIDTH;
+      
+        // Index that shows the place of the new closest point found in
+        // the old vector.
+        int minIndex = -1;
+
+        for(unsigned int j = 0; j < conveyor->holes[i].outline.size(); j++)
+        {  
+          // Find the x distance between two points and square it.
+          double dx = std::pow(conveyor->holes[i].outline[j].x - currp.x, 2);  
         
-        // Find the y distance between two points and square it.
-        double dy = std::pow(conveyor->holes[i].outline[j+1].y - vec[s].y, 2);
+          // Find the y distance between two points and square it.
+          double dy = std::pow(conveyor->holes[i].outline[j+1].y - currp.y, 2);
 
-        // Find the euclidean distance between two points.
-        double distance = std::sqrt(dx + dy);
+          // Find the euclidean distance between two points.
+          double distance = std::sqrt(dx + dy);
 
-        if(distance < minimum)
-        {
-          s = s + 1;
-
-          // Pass the point found to the new vector.
-          vector.push_back(conveyor->holes[i].outline[j]);
+          if(distance < minimum)
+          {
+            minimum = distance;
+            minIndex = j;
+          }
         }
+
+        // Pass the point found to the new vector.
+        newVector.push_back(conveyor->holes[i].outline[minIndex]);
+
+        // The new initial point that we check distances changes.
+        currp = conveyor->holes[i].outline[minIndex];
+
+        // Erase that point from the starting vector.
+        conveyor->holes[i].outline.erase(
+          conveyor->holes[i].outline.begin() + minIndex);
       }
-      // Connect the points of the new vector and extract the new outline points
-      outlinePointsConnector(vector);
+      // Pass the points found in order to the holesconveyor struct
+      conveyor->holes[i].outline = newVector;
+
+      // Clear the newVector so it can be used for the next hole
+      newVector.clear();
     }
   }
 

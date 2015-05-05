@@ -40,6 +40,7 @@
 #define UTILS_IMAGE_MATCHING_H
 
 #include "utils/holes_conveyor.h"
+#include "utils/parameters.h"
 
 /**
   @namespace pandora_vision
@@ -59,7 +60,7 @@ namespace pandora_vision
       /**
         @brief Converts Conveyors which represent each hole and include all
         necessary information about it to match with rgb and depth images.
-        @param[in] conveyor [HolesConveyor* conveyor] 
+        @param[out] conveyor [HolesConveyor* conveyor] 
         The input conveyor to be converted and sent back as output.
         @param[in] x_th [double] The x coordinate of thermal image in rgb image
         @param[in] y_th [double] The y coordinate of thermal image in rgb image
@@ -106,10 +107,11 @@ namespace pandora_vision
         the rgb image they are not connected anymore. So this function connects
         all the matched outline points and extracts the new matched 
         outline vector.
-        @param[in]
+        @param[out] conveyor [const HolesConveyor&]. The final struct with 
+        the connected points.
         @return void
        **/
-      static void outlinePointsConnector();
+      static void outlinePointsConnector(HolesConveyor* conveyor);
 
       /**
         @brief The vector of the outline points must have the points in
@@ -117,10 +119,11 @@ namespace pandora_vision
         based on the distance between them. For that reason checks one 
         point with all the others. In the next loop that point is beeing 
         taken out of consideration.
-        @param[in]
+        @param[out] conveyor [HolesConveyor*].
+        The new conveyor with the points in order.
         @return void
        **/
-      static void outlinePointsInOrder(width);
+      static void outlinePointsInOrder(HolesConveyor* conveyor);
   };
 
 } // namespace pandora_vision
