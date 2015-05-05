@@ -72,7 +72,7 @@ namespace pandora_vision
     output->setDepth(input->isDepth);
     for (int ii = 0; ii < input->areasOfInterest.size(); ii++)
     {
-      Rect2f rect(input->areasOfInterest[ii].x, input->areasOfInterest[ii].y, 
+      Rect2f rect(input->areasOfInterest[ii].center.x, input->areasOfInterest[ii].center.y, 
         input->areasOfInterest[ii].width, input->areasOfInterest[ii].height);
       output->setArea(ii, rect);
     }
