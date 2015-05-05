@@ -29,6 +29,7 @@
     <!-- OK -->
     <!--<include if="$(arg vision_qr)"                                     -->
     <!--  file="$(find pandora_vision_qrcode)/launch/qrcode_node.launch" />-->
+    <!-- OK -->
     <include if="$(arg vision_hazmat)"                                 
       file="$(find pandora_vision_hazmat)/launch/hazmat_node.launch" />
     <!--<include if="$(arg vision_landoltc)"                                   -->
