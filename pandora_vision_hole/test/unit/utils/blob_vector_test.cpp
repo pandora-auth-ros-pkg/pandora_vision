@@ -185,7 +185,7 @@ namespace pandora_vision
       }
     }
     // The new entry
-    EXPECT_NEAR ( 22.5, dst.getBlob(2).areaOfInterest.center.x, 1 );
+    EXPECT_NEAR ( 15, dst.getBlob(2).areaOfInterest.center.x, 1 );
     EXPECT_NEAR ( 10, dst.getBlob(2).areaOfInterest.width, 1 );  //
     EXPECT_NEAR ( 20, dst.getBlob(2).outline[0].x, 1 );
   }
@@ -443,8 +443,8 @@ namespace pandora_vision
     EXPECT_EQ ( dst.getBlob(1).areaOfInterest.center.x, dstBackup.getBlob(1).areaOfInterest.center.x );
     EXPECT_EQ ( dst.getBlob(1).areaOfInterest.center.y, dstBackup.getBlob(1).areaOfInterest.center.y );
 
-    EXPECT_EQ ( dst.getBlob(1).areaOfInterest.width, src.getBlob(1).areaOfInterest.width );
-    EXPECT_EQ ( dst.getBlob(1).areaOfInterest.height, src.getBlob(1).areaOfInterest.height );
+    EXPECT_EQ ( dst.getBlob(1).areaOfInterest.width, dstBackup.getBlob(1).areaOfInterest.width );
+    EXPECT_EQ ( dst.getBlob(1).areaOfInterest.height, dstBackup.getBlob(1).areaOfInterest.height );
 
     for ( int o = 0; o < dst.getBlob(0).outline.size(); o++ )
     {

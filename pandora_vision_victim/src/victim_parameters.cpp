@@ -87,30 +87,30 @@ namespace pandora_vision
     packagePath =  
       ros::package::getPath("pandora_vision_victim");
 
-    if (!nh.getParam("/victim_interpolated_depth_img", interpolatedDepthImg))
+    if (!nh.getParam("victim_interpolated_depth_img_topic", interpolatedDepthImg))
     {
       interpolatedDepthImg = "";
       ROS_FATAL("[victim_node] : interpolatedDepthImg name param not found");
       ROS_BREAK();
     }
     
-    if (!nh.getParam("/victim_debug_img_topic", victimDebugImg))
+    if (!nh.getParam("victim_debug_img_topic", victimDebugImg))
     {
       victimDebugImg = "";
       ROS_FATAL("[victim_node] : victimDebugImg name param not found");
       ROS_BREAK();
     }
 
-    nh.param("/model_image_height", modelImageHeight, 0);
-    nh.param("/model_image_width", modelImageWidth, 0);
-    nh.param("/rgb_svm_C", rgb_svm_C, 312.5);
-    nh.param("/rgb_svm_gamma", rgb_svm_gamma, 0.50625);
-    nh.param("/depth_svm_C", depth_svm_C, 312.5);
-    nh.param("/depth_svm_gamma", depth_svm_gamma, 0.50625);
-    nh.param("/depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5);
-    nh.param("/depth_svm_prob_translation", depth_svm_prob_translation, 7.);
+    nh.param("model_image_height", modelImageHeight, 0);
+    nh.param("model_image_width", modelImageWidth, 0);
+    nh.param("rgb_svm_C", rgb_svm_C, 312.5);
+    nh.param("rgb_svm_gamma", rgb_svm_gamma, 0.50625);
+    nh.param("depth_svm_C", depth_svm_C, 312.5);
+    nh.param("depth_svm_gamma", depth_svm_gamma, 0.50625);
+    nh.param("depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5);
+    nh.param("depth_svm_prob_translation", depth_svm_prob_translation, 7.);
     
-    if (!nh.getParam("/cascade_path", cascade_path))
+    if (!nh.getParam("cascade_path", cascade_path))
     {
       cascade_path = "/data/haarcascade_frontalface_alt_tree.xml";
       ROS_FATAL("[victim_node] : cascade_path name param not found");
@@ -118,7 +118,7 @@ namespace pandora_vision
     }
     cascade_path = packagePath + cascade_path;
     
-    if (!nh.getParam("/model_path", model_path))
+    if (!nh.getParam("model_path", model_path))
     {
       model_path = "/data/model.xml";
       ROS_FATAL("[victim_node] : model_path name param not found");
@@ -126,7 +126,7 @@ namespace pandora_vision
     }
     model_path = packagePath + model_path;
     
-    if (!nh.getParam("/rgb_classifier_path", rgb_classifier_path))
+    if (!nh.getParam("rgb_classifier_path", rgb_classifier_path))
     {
       rgb_classifier_path = "data/rgb_svm_classifier.xml";
       ROS_FATAL("[victim_node] : rgb_classifier_path name param not found");
@@ -134,7 +134,7 @@ namespace pandora_vision
     }
     rgb_classifier_path = packagePath + rgb_classifier_path;
     
-    if (!nh.getParam("/depth_classifier_path", depth_classifier_path))
+    if (!nh.getParam("depth_classifier_path", depth_classifier_path))
     {
       depth_classifier_path = "/data/depth_svm_classifier.xml";
       ROS_FATAL("[victim_node] : depth_classifier_path name param not found");
@@ -142,7 +142,7 @@ namespace pandora_vision
     }
     depth_classifier_path = packagePath + depth_classifier_path;
     
-    if (!nh.getParam("/model_url", model_url))
+    if (!nh.getParam("model_url", model_url))
     {
       model_url = "https://pandora.ee.auth.gr/vision/model.xml";
       ROS_FATAL("[victim_node] : model_url name param not found");

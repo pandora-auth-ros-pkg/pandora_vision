@@ -545,11 +545,7 @@ namespace pandora_vision
       key_y = conveyor.getBlob(i).areaOfInterest.center.y;
       key_x = conveyor.getBlob(i).areaOfInterest.center.x;
 
-      pandora_vision_msgs::AreaOfInterest area = conveyor.getBlob(i).areaOfInterest;
-      vert.push_back(cv::Point2f(area.center.x - area.width / 2, area.center.y - area.height / 2));
-      vert.push_back(cv::Point2f(vert[0].x, vert[0].y + area.height));
-      vert.push_back(cv::Point2f(vert[0].x + area.width, vert[0].y));
-      vert.push_back(cv::Point2f(vert[2].x, vert[2].y + area.height));
+      vert = MessageConversions::areaToVec(conveyor.getBlob(i).areaOfInterest);
 
       for (int j = 0; j < 4; j++)
       {
@@ -569,6 +565,8 @@ namespace pandora_vision
           cv::Point2f(round(vert[j].x - inflationSize * cos(theta)),
             round(vert[j].y - inflationSize * sin(theta))));
       }  // end for rectangle's points
+
+      vert.clear();
 
       // If one or more vertices are out of bounds discard the whole
       // inflated rectangle
