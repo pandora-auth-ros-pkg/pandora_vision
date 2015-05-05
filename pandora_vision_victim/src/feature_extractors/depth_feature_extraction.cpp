@@ -58,7 +58,7 @@ namespace pandora_vision
    */
   DepthFeatureExtraction::DepthFeatureExtraction() : FeatureExtraction()
   {
-    std::string paramFile = "config/depth_svm_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/depth_svm_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 

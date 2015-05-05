@@ -58,6 +58,8 @@ namespace pandora_vision
       featureMatrix_.clear();
     if (!chosenFeatureTypesMap_.empty())
       chosenFeatureTypesMap_.clear();
+
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
   }
 
   /**

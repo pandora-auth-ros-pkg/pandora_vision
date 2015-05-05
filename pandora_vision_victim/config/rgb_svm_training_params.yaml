@@ -8,7 +8,7 @@ extract_hog_features: false
 dictionary_size: 10
 
 training_set_feature_extraction: true
-test_set_feature_extraction:true
+test_set_feature_extraction: true
 load_classifier_model: false
 
 do_pca_analysis: false

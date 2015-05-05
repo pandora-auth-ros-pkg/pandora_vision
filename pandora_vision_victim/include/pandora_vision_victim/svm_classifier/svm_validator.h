@@ -63,10 +63,8 @@ namespace pandora_vision
       /**
        * @brief Constructor. Initializes SVM classifier parameters and loads
        * classifier model.
-       * @param classifierPath [const std::string&] The path to the classifier
-       * model.
        */
-      explicit SvmValidator(const std::string& classifierPath);
+      explicit SvmValidator();
 
       /**
        * @brief Default Destructor.

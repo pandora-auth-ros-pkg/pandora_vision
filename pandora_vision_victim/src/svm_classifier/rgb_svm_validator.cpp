@@ -59,8 +59,14 @@ namespace pandora_vision
    * model.
    */
   RgbSvmValidator::RgbSvmValidator(const std::string& classifierPath)
-    : SvmValidator(classifierPath)
+    : SvmValidator()
   {
+    ROS_INFO("Enter RGB SVM Validator");
+    classifierPath_ = classifierPath;
+
+    ROS_INFO_STREAM(classifierPath.c_str());
+    svmValidator_.load(classifierPath.c_str());
+
     probabilityScaling_ = VictimParameters::rgb_svm_prob_scaling;
     probabilityTranslation_ = VictimParameters::rgb_svm_prob_translation;
 

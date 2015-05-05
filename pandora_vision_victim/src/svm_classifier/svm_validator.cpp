@@ -56,18 +56,14 @@ namespace pandora_vision
    * @param classifierPath [const std::string&] The path to the classifier
    * model.
    */
-  SvmValidator::SvmValidator(const std::string& classifierPath)
+  SvmValidator::SvmValidator()
   {
     ROS_INFO("Enter SVM Validator");
-    classifierPath_ = classifierPath;
 
     svmParams_.svm_type = CvSVM::C_SVC;
     svmParams_.kernel_type = CvSVM::RBF;
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
         10000, 1e-6);
-    /// Load classifier model path.
-    ROS_INFO_STREAM(classifierPath.c_str());
-    svmValidator_.load(classifierPath.c_str());
 
     featureExtraction_ = new FeatureExtraction();
     featureExtractionUtilities_ = new FeatureExtractionUtilities();

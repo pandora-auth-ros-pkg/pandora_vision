@@ -51,7 +51,7 @@ namespace pandora_vision
       int numFeatures, const std::string& datasetPath) :
       SvmTraining(ns, numFeatures, datasetPath)
   {
-    std::string paramFile = "config/rgb_svm_training_params.yaml";
+    std::string paramFile = package_path + "/config/rgb_svm_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 

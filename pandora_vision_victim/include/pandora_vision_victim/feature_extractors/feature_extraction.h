@@ -146,6 +146,9 @@ namespace pandora_vision
       bool bagOfWordsVocabularyNeeded();
 
     protected:
+      /// String containing the package path.
+      std::string packagePath_;
+
       /// Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;
 

@@ -60,7 +60,7 @@ namespace pandora_vision
    */
   RgbFeatureExtraction::RgbFeatureExtraction() : FeatureExtraction()
   {
-    std::string paramFile = "config/rgb_svm_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/rgb_svm_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
