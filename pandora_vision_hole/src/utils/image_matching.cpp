@@ -70,7 +70,7 @@ namespace pandora_vision
         conveyor->holes[i].keypoint.pt.y, y_th, c_y); 
 
       // Match the bounding box
-      for(int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
+      for(unsigned int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
       {
         conveyor->holes[i].rectangle[j].x = matchingFunction(
           conveyor->holes[i].rectangle[j].x, x_th, c_x);
@@ -79,12 +79,19 @@ namespace pandora_vision
       }
 
       // Match the blobs outline points
-      for(int o = 0; o < conveyor->holes[i].outline.size(); o++)
+      for(unsigned int o = 0; o < conveyor->holes[i].outline.size(); o++)
       {
         conveyor->holes[i].outline[o].x = matchingFunction(
           conveyor->holes[i].outline[o].x, x_th, c_x);
         conveyor->holes[i].outline[o].y = matchingFunction(
           conveyor->holes[i].outline[o].y, y_th, c_y);
+
+        // Put the outline points in order
+        outlinePointsInOrder();
+
+        // Connect the points in order to have a coherent set of points 
+        // as the hole's outline.
+        outlineConnector();
       }
 
     }
@@ -105,6 +112,68 @@ namespace pandora_vision
     double coordinates_rgb = arg1 + arg2 * point;
 
     return coordinates_rgb;
+  }
+
+
+  /**
+    @brief When the outline points of the thermal image are matched on 
+    the rgb image they are not connected anymore. So this function connects
+    all the matched outline points and extracts the new matched outline vector.
+    @param[in]
+    @return void
+  **/
+  static void outlinePointsConnector()
+  {
+    cv::Mat outlineImage = cv::Mat::zeros();
+  }
+
+
+  /**
+    @brief The vector of the outline points must have the points in
+    order so they can be connected in the next step. The order is produced 
+    based on the distance between them. For that reason checks one 
+    point with all the others. In the next loop that point is beeing 
+    taken out of consideration.
+    @param[in]
+    @return void
+  **/
+  static void outlinePointsInOrder(width)
+  {
+    // For each hole found.
+    for(unsigned int i = 0; i < conveyor->size(); i++)
+    {
+
+      // Set as starting minimum value width*2, a value that can never 
+      // been surpassed by any distance between points
+      float minimum = width * width;
+
+      // Vector of points that will contain the points in order.
+      std::vector<cv::Point2f> vector;
+      vector.push_back(conveyor->holes[i].outline[0]);
+      
+      for(unsigned int j = 0; j < conveyor->holes[i].outline.size(); j++)
+      {
+        for(unsigned int k = 0; k < n - j; k++)
+        // Find the x distance between two points and square it.
+        double dx = std::pow(conveyor->holes[i].outline[j].x - vec[s].x, 2);  
+        
+        // Find the y distance between two points and square it.
+        double dy = std::pow(conveyor->holes[i].outline[j+1].y - vec[s].y, 2);
+
+        // Find the euclidean distance between two points.
+        double distance = std::sqrt(dx + dy);
+
+        if(distance < minimum)
+        {
+          s = s + 1;
+
+          // Pass the point found to the new vector.
+          vector.push_back(conveyor->holes[i].outline[j]);
+        }
+      }
+      // Connect the points of the new vector and extract the new outline points
+      outlinePointsConnector(vector);
+    }
   }
 
   /**

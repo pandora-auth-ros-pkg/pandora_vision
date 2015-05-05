@@ -100,6 +100,27 @@ namespace pandora_vision
         **/
       static void variableSetUp(ros::NodeHandle& nh, double* x_th, double* y_th,
         double* c_x, double* c_y);
+
+      /**
+        @brief When the outline points of the thermal image are matched on 
+        the rgb image they are not connected anymore. So this function connects
+        all the matched outline points and extracts the new matched 
+        outline vector.
+        @param[in]
+        @return void
+       **/
+      static void outlinePointsConnector();
+
+      /**
+        @brief The vector of the outline points must have the points in
+        order so they can be connected in the next step. The order is produced 
+        based on the distance between them. For that reason checks one 
+        point with all the others. In the next loop that point is beeing 
+        taken out of consideration.
+        @param[in]
+        @return void
+       **/
+      static void outlinePointsInOrder(width);
   };
 
 } // namespace pandora_vision
