@@ -57,11 +57,12 @@ namespace pandora_vision
       bool readFlag = this->readData();
       if (!readFlag)
       {
-        ROS_FATAL("Could not read the necessary training data!\n"); 
-        ROS_FATAL("The node will now shutdown!\n");
+        ROS_FATAL_STREAM("[Hazmat Detection]: Could not read the necessary" 
+                         << " training data!");
+        ROS_FATAL_STREAM("[Hazmat Detection]: The node will now shutdown!");
         ROS_BREAK();
       }
-      ROS_INFO("Succesfully read training Data!\n");
+      ROS_INFO_STREAM("[Hazmat Detection]: Succesfully read training Data!");
     }
 
     /**
@@ -71,7 +72,7 @@ namespace pandora_vision
       reading the data.
      **/
 
-    bool FeatureMatchingDetector::readData( void )
+    bool FeatureMatchingDetector::readData(void)
     {
       // Open the file for reading .
       std::string patternNameInputFile = fileName_ + "/data/input.xml";
@@ -79,7 +80,8 @@ namespace pandora_vision
       // Check if the file was opened succesfully .
       if ( !fs.isOpened() )
       {
-        ROS_ERROR("XML file could not be opened! \n");
+        ROS_ERROR_STREAM("[Hazmat Detection]: XML file for training data" 
+                         <<" file names could not be opened!");
         return false;
       }
 
@@ -87,14 +89,16 @@ namespace pandora_vision
       cv::FileNode inputNames = fs["PatternName"];
       if (inputNames.empty())
       {
-        ROS_ERROR("The xml file does not contain a node named :"
-            " PatternName!\n");
+        ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: The xml" 
+                               << " file does not contain a node named :"
+                               << " PatternName!");
         return false;
       }
       // Check if the node has a sequence.
       if ( inputNames.type() != cv::FileNode::SEQ)
       {
-        ROS_ERROR("Input data  is not a string sequence!\n");
+        ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: Input data" 
+                               << " is not a string sequence!");
         return false;
       }
 
@@ -109,8 +113,10 @@ namespace pandora_vision
       {
         if ( (*it)["name"].empty() )
         {
-          ROS_ERROR("No name tag exists for the current value of the "
-              "iteration. The procedure will continue with the next node!\n");
+          ROS_DEBUG_STREAM_NAMED("detection", "[Hazmat Detection]: No name" 
+                                 << " tag exists for the current value of the "
+                                 << "iteration. The procedure will continue" 
+                                 << " with the next node!");
           continue;
         }
         inputName = (std::string)(*it)["name"];
@@ -120,7 +126,8 @@ namespace pandora_vision
       // Check if the names of the patters where read successfully.
       if (input.size() <= 0)
       {
-        ROS_FATAL("No patterns names were read from the provided file!\n");
+        ROS_FATAL_STREAM("No patterns names were read from the "
+                         << " provided file!");
         return false;
       }
       // Close the file with the pattern names.
@@ -142,7 +149,8 @@ namespace pandora_vision
         // Check if the file was properly opened.
         if ( !fs2.isOpened() )
         {
-          ROS_ERROR("File %s could not be opened!\n ", fileName.c_str());
+          ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: File "
+                                 << fileName << " could not be opened!");
           continue;
         }
 
@@ -153,8 +161,9 @@ namespace pandora_vision
         // Read the pattern's descriptors.
         if ( fs2["Descriptors"].empty() )
         {
-          ROS_ERROR("No descriptors entry was specified for the pattern :"
-              " %s !\n", fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: No " 
+                                 << "descriptors entry was specified for" 
+                                 << " the pattern : " <<  fileName);
           continue;
         }
         fs2["Descriptors"] >> descriptors;
@@ -162,8 +171,9 @@ namespace pandora_vision
         // Read the pattern's keypoints.
         if ( fs2["PatternKeypoints"].empty() )
         {
-          ROS_ERROR("No Keypoints entry was specified for the pattern :"
-              " %s ! \n", fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: No " 
+              << "Keypoints entry was specified for "
+              <<  " the pattern : " << fileName);
           continue;
         }
         cv::FileNode keyPointsNode = fs2["PatternKeypoints"];
@@ -179,8 +189,9 @@ namespace pandora_vision
         {
           if ( (*it)["Keypoint"].empty() )
           {
-            ROS_ERROR("Error in reading keypoint %d for pattern %s ! \n", 
-                counter + 1 , fileName.c_str());
+            ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: Error when"
+                                   << " reading keypoint " << counter + 1 
+                                   << " for pattern " << fileName << "!");
             continue;
           }
           (*it)["Keypoint"] >> tempPoint;
@@ -189,16 +200,19 @@ namespace pandora_vision
         }
         if (keyPoints.size() <= 0)
         {
-          ROS_ERROR("No keypoints were read from the specified file for "
-              "the pattern %s!", fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: No"
+                                 << "keypoints were read from the "
+                                 << " specified file for "
+                                 << "the pattern " << fileName << " !");
           continue;
         }
         // Read the pattern's bounding box. 
         cv::FileNode boundingBoxNode = fs2["BoundingBox"];
         if (boundingBoxNode.empty() )
         {
-          ROS_ERROR("No bounding box entry exists for the pattern %s !\n", 
-              fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: No bounding"
+                                 << " box entry exists for the pattern "  
+                                 << fileName << " !");
           continue;
         }
         // Initialize it's iterator.
@@ -213,14 +227,17 @@ namespace pandora_vision
         }
         if (boundingBoxNode.size() <= 0 )
         {
-          ROS_ERROR("The bounding box for the pattern %s could not be read!\n",
-              fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: The" 
+                                 << " bounding box for the pattern"
+                                 << fileName << " could not be read!");
           continue;
         }
         if (boundingBoxNode.size() < 5 )
         {
-          ROS_ERROR("Not all the points of the bounding box for the pattern %s" 
-              "were read!\n", fileName.c_str());
+          ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]: Not all "
+                                 << "the points of the bounding box for" 
+                                 << " the pattern " << fileName
+                                 << "were read!");
           continue;
         }
         // Add the pattern to the pattern vector.
@@ -239,13 +256,15 @@ namespace pandora_vision
       if (patterns_->size() > 0 )
       {
         if (patterns_->size() != input.size())
-          ROS_ERROR("Could not read the training files for all "
-              "the patterns!\n");
+          ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: Could not" 
+                                 << " read the training files for all "
+                                 "the patterns!\n");
         return true;
       }
       else
       {
-        ROS_FATAL("No pattern was read! The node cannot function!\n");
+        ROS_FATAL_STREAM_NAMED("detection", "[Hazmat Detection]: No pattern "
+                               << " was read! The node cannot function!");
         ROS_BREAK();
       }
       return true;
@@ -272,7 +291,7 @@ namespace pandora_vision
         const std::vector<cv::KeyPoint>& sceneKeyPoints ,
         std::vector<cv::Point2f>* matchedPatternKeyPoints , 
         std::vector<cv::Point2f>* matchedSceneKeyPoints , 
-        const int &patternID  ) 
+        const int &patternID) 
     {
       // Clear the vectors containing the matched keypoints.
       matchedSceneKeyPoints->clear();
@@ -285,34 +304,38 @@ namespace pandora_vision
       // Check if the keypoints for pattern #patternID have been loaded.
       if (patternKeyPoints.size() <= 0)
       {
-        ROS_ERROR("No keypoints stored for pattern %d!\n", patternID);
+        ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: No keypoints"
+                              " stored for pattern " << patternID);
         return false;
       }
 
       // Check if we have stored the descriptors for pattern #patternID.
       if (patternDescriptors.data == NULL)
       {
-        ROS_ERROR("No descriptors stored for pattern %d!\n", patternID);
+        ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: No descriptors"
+                              " stored for pattern " << patternID);
         return false;
       }
       // No keypoints detected in the scene so the matching cannot continue.
       if (sceneKeyPoints.size() <=0 )
       {
-        ROS_ERROR("No keypoints were detected in the current scene! \n");
+        ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: No keypoints"
+                              <<  " were detected in the current scene!");
         return false;
       }
       // No descriptors calculated for the current frame.
       if (frameDescriptors.data == NULL)
       {
-        ROS_ERROR("No descriptors were calculated for the the keypoints of the "
-            "frame!\n");
+        ROS_WARN_STREAM_NAMED("detection", "[Hazmat Detection]: No "
+                              << "descriptors were calculated in the current" 
+                              << " scene!");
         return false;
       }
 
 
       // Perfom the matching using the matcher of the patternID-th 
       // pattern and find the top 2 correspondences. 
-      matchers_[patternID]->knnMatch( frameDescriptors , matches , 2 );
+      matchers_[patternID]->knnMatch(frameDescriptors , matches , 2 );
 
       // The vector containing the best matches
       std::vector< cv::DMatch > goodMatches;
@@ -359,12 +382,7 @@ namespace pandora_vision
       if ( goodMatches.size() < 4 )
         return false;
 
-
-      goodMatches.clear();
-      matches.clear();
-
       return true;
-
     }
 
 } // namespace pandora_vision_hazmat

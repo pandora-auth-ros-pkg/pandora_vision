@@ -60,22 +60,23 @@ namespace pandora_vision
 
       if( !feature.compare("SIFT"))
       {
-        ROS_INFO("Creating new SIFT Detector!\n");
+        ROS_INFO_STREAM("[Hazmat Detection]: Creating new SIFT Detector!");
         return new SiftDetector();
       } 
       else if ( !feature.compare("SURF"))
       {
-        ROS_INFO("Creating new SURF Detector!\n");
+        ROS_INFO_STREAM("[Hazmat Detection]: Creating new SURF Detector!");
         return new SurfDetector();
       } 
       else if ( !featureType.compare("ORB"))
       {
-        ROS_INFO("Creating new ORB Detector!\n");
+        ROS_INFO_STREAM("[Hazmat Detection]: Creating new ORB Detector!");
         return new OrbDetector();
       }
       else
       {
-        ROS_FATAL("Invalid feature type! Detection cannot continue!\n");
+        ROS_FATAL_STREAM("[Hazmat Detection]: Invalid feature type!" 
+            << " Detection cannot continue!");
         return NULL;
       }
       return NULL;

@@ -59,25 +59,33 @@ namespace pandora_vision
 
       if (!this->accessProcessorNh()->getParam("feature_type", featureType))
       {
-        ROS_ERROR("[%s] Could not get the feature type parameter!", this->getName().c_str());
-        ROS_INFO("[%s] Initializing default detector!", this->getName().c_str());
+        ROS_ERROR("[%s] Could not get the feature type parameter!",
+            this->getName().c_str());
+        ROS_INFO("[%s] Initializing default detector!",
+            this->getName().c_str());
         featureType = "SIFT";
       }
 
-      this->accessProcessorNh()->param<bool>("visualization", visualizationFlag_, false);
-      this->accessProcessorNh()->param<bool>("execution_timer", execTimerFlag_, false);
-      this->accessProcessorNh()->param<bool>("debug_message", debugMsgFlag_, true);
+      this->accessProcessorNh()->param<bool>("visualization",
+          visualizationFlag_, false);
+      this->accessProcessorNh()->param<bool>("execution_timer",
+          execTimerFlag_, false);
+      this->accessProcessorNh()->param<bool>("debug_message",
+          debugMsgFlag_, true);
 
       detector_ = factory_.createDetectorObject(featureType);
 
       // Check if the detector was initialized.
       if (detector_ == NULL)
       {
-        ROS_FATAL("[%s] Could not create a detector object!", this->getName().c_str());
-        ROS_FATAL("[%s] The node will now exit!", this->getName().c_str());
+        ROS_FATAL("[%s] Could not create a detector object!",
+            this->getName().c_str());
+        ROS_FATAL("[%s] The node will now exit!",
+            this->getName().c_str());
         ROS_BREAK();
       }
-      ROS_INFO_NAMED(this->getName().c_str(), "Created the detector object!");
+      ROS_INFO_NAMED(this->getName().c_str(),
+          "Created the detector object!");
 
       dynamicReconfServer_.setCallback(boost::bind(
             &HazmatProcessor::dynamicReconfigCallback, this, _1, _2));
@@ -114,6 +122,7 @@ namespace pandora_vision
       detector_->setMaskDisplayFlag(config.Mask_Display);
       this->execTimerFlag_ = config.Execution_Timer;
       this->debugMsgFlag_ = config.Debug_Messages;
+      this->visualizationFlag_ = config.Visualization_Flag;
     }
     
     bool HazmatProcessor::process(const CVMatStampedConstPtr& input, 
@@ -142,37 +151,30 @@ namespace pandora_vision
         {
           boost::shared_ptr<HazmatPOI> hazmatPOIPtr(
             boost::dynamic_pointer_cast<HazmatPOI>(output->pois[i]));
-          ROS_INFO("[%s] : Found Hazmat : %d",
+          ROS_DEBUG_NAMED("detection", "[%s] : Found Hazmat : %d",
               this->getName().c_str(),
               hazmatPOIPtr->getPattern());
         }
-        ROS_INFO("[%s] : Number of Hazmats Found = %d",
-            this->getName().c_str(),
+        ROS_DEBUG_NAMED("detection", "[%s] : Number of Hazmats" 
+            " Found = %d", this->getName().c_str(),
             static_cast<int>(output->pois.size()));
       }
 
       if (execTimerFlag_)
-        ROS_DEBUG_NAMED(this->getName().c_str(), "Detection Execution Time is : %f!",
-            execTime);
+        ROS_DEBUG_NAMED(this->getName().c_str(), "Detection Execution Time" 
+            " is : %f!", execTime);
 
-      //~ ss << execTime * 1000;
-
-      //~ cv::putText(input->image, "Exec Time : " + ss.str() + "ms", 
-          //~ cv::Point(0, input->image.rows) ,
-          //~ CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0 , 0 , 255), 3);
-
-      // TO DO : Add visualization flag
       if (visualizationFlag_) {
         cv::imshow("Input Image", input->getImage());
         char key = cv::waitKey(10);
         if ( key == 27)
         {
-          ROS_INFO("Goodbye! \n");
+          ROS_INFO("[%s]: Goodbye! \n", this->getName().c_str());
           ros::shutdown();
         }
       }
 
       return found;
     }
-  }  // namespace pandora_vision_hazmat
+}  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision

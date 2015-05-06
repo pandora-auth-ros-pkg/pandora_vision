@@ -35,8 +35,8 @@
  * Authors: Choutas Vassilis 
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
-#define PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_PROCESSOR_H
+#define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_PROCESSOR_H
 
 #include <dynamic_reconfigure/server.h>
 
@@ -106,6 +106,7 @@ namespace pandora_vision
 
           PlanarObjectDetector* detector_; //<! Pointer to the detector used.
     };
-  }  // pandora_vision_hazmat
-}  // namspace pandora_vision
-#endif  // PANDORA_VISION_HAZMAT_PROCESSOR_HAZMAT_PROCESSOR_H
+
+}  // namespace pandora_vision_hazmat
+}  // namespace pandora_vision
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_PROCESSOR_H

@@ -118,10 +118,12 @@ namespace pandora_vision
           startwtime.tv_sec);  
       if (featureTimerFlag_)
       {  
-        ROS_INFO( "[%s] : Descriptors Computation time : %f .",
-            featuresName_.c_str(), descriptorsTime);
-        ROS_INFO( "[%s] : Keypoint Extraction time : %f .",
-            featuresName_.c_str(), keyPointTime);
+        ROS_DEBUG_STREAM_NAMED("detection", "[Hazmat Detection]: ["
+            << featuresName_ << "] : Descriptors Computation time : "
+            << descriptorsTime);
+        ROS_DEBUG_STREAM_NAMED("detection", "[Hazmat Detection]: ["
+            << featuresName_ << "] : Keypoint Extraction time : "
+            << descriptorsTime);
       }
 #endif
     }

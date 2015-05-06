@@ -37,8 +37,8 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_HAZMAT_HANDLER_H
-#define PANDORA_VISION_HAZMAT_HAZMAT_HANDLER_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_HANDLER_H
+#define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_HANDLER_H
 
 #include <string>
 #include "pandora_vision_common/vision_handler.h"
@@ -60,4 +60,4 @@ namespace pandora_vision
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HAZMAT_HAZMAT_HANDLER_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_HANDLER_H

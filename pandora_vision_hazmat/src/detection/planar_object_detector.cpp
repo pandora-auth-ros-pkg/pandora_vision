@@ -61,20 +61,22 @@ namespace pandora_vision
       // Check if the frame is not an empty matrix.
       if ( !frame.data )
       {
-        ROS_ERROR("The provided frame is empty!\n");
+        ROS_ERROR_STREAM_NAMED("detection", "[Hazmat Detection]:" << 
+            " The provided frame is empty!");
         return false;
       }
       if ( patterns_ == NULL )
       {
-        ROS_FATAL("ERROR :  Pointer to pattern array is NULL!\n");
+        ROS_FATAL_STREAM("[Hazmat Detection]: Pointer to pattern array" <<
+            " is NULL!");
         ROS_BREAK();
       }
       // Check if that patterns have been read succesfully.
       // TO DO : Produce Fatal Error on Failure.
       if ( patterns_->size() < 1 )
       {
-        std::cerr << "No patterns read . Detection cannot continue " << 
-          std::endl;
+        ROS_FATAL_STREAM("[Hazmat Detection]: No patterns read." <<
+            " Detection cannot continue ");
         return false;
       }
 
@@ -104,6 +106,7 @@ namespace pandora_vision
         cv::Mat maskedFrame;
         frame.copyTo(maskedFrame, mask);
         imshow("Saliency Map Mask", maskedFrame);
+        cv::waitKey(5);
       }
 
 #ifdef CHRONO
@@ -117,8 +120,8 @@ namespace pandora_vision
       double featuresTime = static_cast<double>((endwtime.tv_usec - 
             startwtime.tv_usec) / 1.0e6 
             + endwtime.tv_sec - startwtime.tv_sec);
-      ROS_INFO("Calculation time for the features in the frame is %f \n", 
-          featuresTime);
+      ROS_DEBUG_STREAM_NAMED("detection", "Calculation time for the" 
+          << " features in the frame is " << featuresTime);
 #endif
 
       bool matchesFound;
@@ -156,8 +159,8 @@ namespace pandora_vision
         double keyPointTime = static_cast<double>((endwtime.tv_usec - 
               startwtime.tv_usec) / 1.0e6 + 
               endwtime.tv_sec - startwtime.tv_sec);
-        ROS_INFO("Calculation time for the keypoints in the frame is %f \n", 
-            featuresTime);
+        ROS_DEBUG_STREAM_NAMED("detection", "Calculation time for the" 
+            " keypoints in the frame is " << featuresTime);
 #endif
 
         // If we have succesfully found the matches.
@@ -176,8 +179,9 @@ namespace pandora_vision
           double boundingBoxTime = static_cast<double>((endwtime.tv_usec - 
                 startwtime.tv_usec) / 1.0e6 
               + endwtime.tv_sec - startwtime.tv_sec);
-          ROS_INFO("Calculation time for the bounding box for "
-              "the pattern %d  is : %f .\n", i, boundingBoxTime);
+          ROS_DEBUG_STREAM_NAMED("detection", "Calculation time for the" 
+              << " bounding box for the pattern " << i << "  is : "
+              << boundingBoxTime);
 #endif      
 
           // If this flag is true then a valid match has been found and
@@ -206,25 +210,10 @@ namespace pandora_vision
 
             foundPattern |= boundingBoxFound; 
 
-            //~ std::cout << "Surface " << surface << std::endl;
-            //~ std::cout << "SideA " << sideA << std::endl;
-            //~ std::cout << "SideB " << sideB << std::endl;
-
-
+            // Get the center of the detected pattern.
             x = sceneBB[ sceneBB.size() - 1 ].x;
             y = sceneBB[ sceneBB.size() - 1 ].y;
 
-
-            //~ if ( sideA / sideB < 0.75 || sideA/sideB > 1.25)
-            //~ continue;
-            //if (surface < 10 || surface > frame.rows*frame.cols)
-            //{ 
-            //patternKeyPoints.clear();
-            //sceneBB.clear();
-            //sceneKeyPoints.clear();
-
-            //continue;
-            //}
             boost::shared_ptr<HazmatPOI> hazmatPOIPtr(new HazmatPOI);
             hazmatPOIPtr->setName((*patterns_)[i].name);
             hazmatPOIPtr->setPoint(cv::Point2f(x, y ));
@@ -241,31 +230,11 @@ namespace pandora_vision
       }
 
       if (displayResultsFlag_)
-        imshow("Tracking Frame" , trackingFrame);
-      /* if ( !boundingBoxFound )
-         {
-       *x = -1 ;
-       *y = -1 ;
-       patternKeyPoints.clear();
-       sceneBB.clear();
-       sceneKeyPoints.clear();
-       return false;
-       }
-
-*/
-
-      // If all these conditions are met return the coordinates of the 
-      // center of the detected pattern . 
-      /* if ( sceneBB.empty() )
-         {
-       *x = -1 ;
-       *y = -1 ;
-       patternKeyPoints.clear();
-       sceneBB.clear();
-       sceneKeyPoints.clear();
-
-       return false;
-       } */
+      {
+        cv::imshow("Tracking Frame", trackingFrame);
+        cv::waitKey(5);
+      }
+      
       patternKeyPoints.clear();
       sceneBB.clear();
       sceneKeyPoints.clear();
@@ -296,11 +265,13 @@ namespace pandora_vision
         const std::vector<cv::Point2f>& patternBB , 
         std::vector<cv::Point2f>* sceneBB) 
     {
+      bool boundingBoxFound = false;
 
       if (patternBB.size() <= 0)
       {
-        ROS_ERROR("No bounding box has been read for the current pattern!\n");
-        return false;
+        ROS_DEBUG_STREAM_NAMED("detection", "No bounding box has been"
+                               << " read for the current pattern!");
+        return boundingBoxFound;
       }
 
       // Check if we have enough points to find the homography between
@@ -326,7 +297,9 @@ namespace pandora_vision
               || ( (*sceneBB)[i].y > PlanarObjectDetector::height_ ))
           {
             sceneBB->clear();
-            return false;
+            // The bounding box has a point out of the screen so it is 
+            // rejected.
+            return boundingBoxFound;
           }
         }
 
@@ -337,20 +310,19 @@ namespace pandora_vision
         boundingBox.pop_back();
         if ( !cv::isContourConvex(boundingBox) )
         {
-          boundingBox.clear();
-          return false;
+          return boundingBoxFound;
         }
+        // A convex bounding box has been found inside the frame.
+        boundingBoxFound = true;
 
         // Clear the bounding box vector .
-        boundingBox.clear();
-        return true;
-
+        return boundingBoxFound;
       }
       else
-        return false;
+        // Not enough points for the homography.
+        return boundingBoxFound;
 
     }
-
 
 } // namespace pandora_vision_hazmat
 } // namespace pandora_vision

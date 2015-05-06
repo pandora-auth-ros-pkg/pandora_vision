@@ -37,8 +37,8 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HAZMAT_HAZMAT_POI_H
-#define PANDORA_VISION_HAZMAT_HAZMAT_POI_H
+#ifndef PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_POI_H
+#define PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_POI_H
 
 #include <string>
 #include "pandora_vision_common/poi.h"
@@ -75,4 +75,4 @@ namespace pandora_vision
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HAZMAT_HAZMAT_POI_H
+#endif  // PANDORA_VISION_HAZMAT_DETECTION_HAZMAT_POI_H
