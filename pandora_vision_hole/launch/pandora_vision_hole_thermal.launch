@@ -5,7 +5,7 @@
   <!-- =========================== The namespace =========================== -->
   <arg name="namespace" default="hole_detector" />
 
-    <arg name="path" default="/home/aggelos/Desktop/flir_rosbag/bag4.bag" />
+    <arg name="path" default="/home/aggelos/Desktop/flir_rosbag/bag3.bag" />
 
     <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
     <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
