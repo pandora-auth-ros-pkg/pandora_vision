@@ -523,6 +523,7 @@ namespace pandora_vision
     HolesConveyor conveyor;
     std::vector<cv::Point2f> keypoints;
     std::vector<cv::Rect> rectangles;
+    std::vector<std::vector<cv::Point> > outlines;
     for(int i = 0; i < contours.size(); i++)
     {
       if(realContours.at(i))
@@ -535,11 +536,13 @@ namespace pandora_vision
               contourHeight[i]);
         keypoints.push_back(mc[i]);
         rectangles.push_back(boundRect[i]);
+        outlines.push_back(contours[i]);
       }
     }
 
     conveyor.keypoint = keypoints;
     conveyor.rectangle = rectangles;
+    conveyor.outline = outlines;
 
 #ifdef DEBUG_SHOW
     if(Parameters::Debug::show_find_holes) // Debug

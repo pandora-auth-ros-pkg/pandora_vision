@@ -69,7 +69,7 @@ namespace pandora_vision
   {
     std::vector<cv::Point2f> keypoint;
     std::vector<cv::Rect> rectangle;
-
+    std::vector<std::vector<cv::Point> > outline;
     /**
       @brief Returns the size of the @param holes vector
       @param void

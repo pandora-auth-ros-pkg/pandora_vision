@@ -571,6 +571,7 @@ namespace pandora_vision
       // The final vectors of keypoints, and rectangles.
       std::vector<cv::Point2f> keypoints;
       std::vector<cv::Rect> rectangles;
+      std::vector<std::vector<cv::Point> > outlines;
       for(int i = 0; i < contours.size(); i++)
         if(realContours.at(i))
         {
@@ -581,10 +582,12 @@ namespace pandora_vision
               contourWidth[i], 
               contourHeight[i]);
           rectangles.push_back(temp);
+          outlines.push_back(contours[i]);
         }
 
       conveyor.keypoint = keypoints;
       conveyor.rectangle = rectangles;
+      conveyor.outline = outlines;
 
 #ifdef DEBUG_SHOW
       if(Parameters::Debug::show_find_holes) // Debug

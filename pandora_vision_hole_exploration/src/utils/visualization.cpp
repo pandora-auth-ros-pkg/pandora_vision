@@ -255,6 +255,13 @@ namespace pandora_vision
       }
     }
 
+    for (int i = 0; i < conveyor.outline.size(); i++)
+    {
+      cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+      cv::drawContours( img, conveyor.outline, i, color);
+
+    }
+
     if(hz > 0)
     {
       cv::putText(img,
