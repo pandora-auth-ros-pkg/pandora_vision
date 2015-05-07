@@ -70,13 +70,12 @@ include_directories(
 
 ################################ Utils library #################################
 add_library(${PROJECT_NAME}_utils
-  src/utils/blob_vector.cpp
   src/utils/blob_detection.cpp
-  src/utils/blob_vector.cpp
   src/utils/bounding_box_detection.cpp
   src/utils/edge_detection.cpp
   src/utils/histogram.cpp
   src/utils/hole_filters.cpp
+  src/utils/holes_conveyor.cpp
   src/utils/message_conversions.cpp
   src/utils/morphological_operators.cpp
   src/utils/noise_elimination.cpp
@@ -86,6 +85,7 @@ add_library(${PROJECT_NAME}_utils
   src/utils/visualization.cpp
   src/utils/wavelets.cpp
   )
+
 target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
@@ -240,7 +240,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   ############### hole fusion node ################
   test/unit/hole_fusion_node/depth_filters_test.cpp
   test/unit/hole_fusion_node/filters_resources_test.cpp
-  #~ test/unit/hole_fusion_node/hole_merger_test.cpp
+  test/unit/hole_fusion_node/hole_merger_test.cpp
   test/unit/hole_fusion_node/hole_validation_test.cpp
   test/unit/hole_fusion_node/hole_uniqueness_test.cpp
   test/unit/hole_fusion_node/planes_detection_test.cpp

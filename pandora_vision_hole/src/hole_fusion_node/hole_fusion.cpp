@@ -81,7 +81,7 @@ namespace pandora_vision
     // Advertise the topic that the yaw and pitch of the keypoints of the final,
     // valid holes will be published to
     validHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::HoleDirectionAlertVector>(
+      <pandora_vision_msgs::HolesDirectionsVectorMsg>(
         validHolesTopic_, 10, true);
 
     // Advertise the topic that information about the final holes,
@@ -103,7 +103,7 @@ namespace pandora_vision
     // Advertise the topic that the image of the final holes,
     // will be published to
     enhancedHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::EnhancedImage>(
+      <pandora_vision_msgs::EnhancedHolesVectorMsg>(
         enhancedHolesTopic_, 1000, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
@@ -183,6 +183,8 @@ namespace pandora_vision
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Initiated");
   }
 
+
+
   /**
     @brief The HoleFusion deconstructor
    **/
@@ -191,6 +193,8 @@ namespace pandora_vision
     ros::shutdown();
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Terminated");
   }
+
+
 
   /**
     @brief Completes the transition to a new state
@@ -201,6 +205,8 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED(PKG_NAME, "[Hole Detector] : Transition Complete");
   }
+
+
 
   /**
     @brief Callback for the candidate holes via the depth node.
@@ -218,7 +224,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleFusion::depthCandidateHolesCallback(
-    const pandora_vision_msgs::BlobVector&
+    const pandora_vision_msgs::CandidateHolesVectorMsg&
     depthCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
@@ -229,15 +235,15 @@ namespace pandora_vision
 
     // Clear the current depthHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
-    depthHolesConveyor_.clear();
+    HolesConveyorUtils::clear(&depthHolesConveyor_);
 
-    depthHolesConveyor_ = depthCandidateHolesVector;
-    if (Parameters::Outline::raycast_keypoint_partitions == 1)
-    {
-      depthHolesConveyor_.fromWavelets(Parameters::Outline::raycast_keypoint_partitions);
-    }
-    interpolatedDepthImage_ = depthHolesConveyor_.getCvImage(
-      sensor_msgs::image_encodings::TYPE_32FC1);
+    // Unpack the message
+    MessageConversions::unpackMessage(depthCandidateHolesVector,
+      &depthHolesConveyor_,
+      &interpolatedDepthImage_,
+      Parameters::Image::image_representation_method,
+      sensor_msgs::image_encodings::TYPE_32FC1,
+      Parameters::Outline::raycast_keypoint_partitions);
 
     // The candidate holes acquired from the depth node and the interpolated
     // depth image are set
@@ -249,7 +255,9 @@ namespace pandora_vision
     if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
+
       unlockSynchronizer();
+
       processCandidateHoles();
     }
 
@@ -259,12 +267,14 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Runs candidate holes through selected filters.
     Probabilities for each candidate hole and filter
     are printed in the console, with an order specified by the
     hole_fusion_cfg of the dynamic reconfigure utility
-    @param[in] conveyor [const BlobVector&] The conveyor
+    @param[in] conveyor [const HolesConveyor&] The conveyor
     containing candidate holes that are to be checked against selected
     filters
     @return [std::vector<std::vector<float> >]
@@ -273,7 +283,7 @@ namespace pandora_vision
     filter applied, each column to a particular hole
    **/
   std::vector<std::vector<float> > HoleFusion::filterHoles(
-    const BlobVector& conveyor)
+    const HolesConveyor& conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("filterHoles", "processCandidateHoles");
@@ -316,6 +326,7 @@ namespace pandora_vision
       &inflatedRectanglesIndices,
       &intermediatePointsImageVector,
       &intermediatePointsSetVector);
+
 
     // Initialize the probabilities 2D vector.
 
@@ -1255,19 +1266,20 @@ namespace pandora_vision
     publishRespectiveHolesFound();
 
     // Merge the conveyors from the RGB and Depth sources into one conveyor
-    BlobVector rgbdHolesConveyor;
-    rgbdHolesConveyor.merge(depthHolesConveyor_, rgbHolesConveyor_);
+    HolesConveyor rgbdHolesConveyor;
+    HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
+      &rgbdHolesConveyor);
 
     // The container in which holes will be assembled before validation
-    BlobVector preValidatedHoles;
+    HolesConveyor preValidatedHoles;
 
     // Check if merging is enabled
     if (Parameters::HoleFusion::Merger::merge_holes)
     {
       // Keep a backup of the original holes found from both the
       // RGB and Depth nodes
-      BlobVector originalRgbdHolesConveyor;
-      originalRgbdHolesConveyor.copy(rgbdHolesConveyor);
+      HolesConveyor originalRgbdHolesConveyor;
+      HolesConveyorUtils::copyTo(rgbdHolesConveyor, &originalRgbdHolesConveyor);
 
       // Apply the {assimilation, amalgamation, connection} processes
       HoleMerger::mergeHoles(&rgbdHolesConveyor,
@@ -1277,12 +1289,14 @@ namespace pandora_vision
 
       // The original holes and the merged ones now reside under the
       // preValidatedHoles conveyor
-      preValidatedHoles.merge(originalRgbdHolesConveyor, rgbdHolesConveyor);
+      HolesConveyorUtils::merge(originalRgbdHolesConveyor, rgbdHolesConveyor,
+        &preValidatedHoles);
     }
     else
     {
-      preValidatedHoles.copy(rgbdHolesConveyor);
+      HolesConveyorUtils::copyTo(rgbdHolesConveyor, &preValidatedHoles);
     }
+
 
     // Because mergers may have not been deemed valid, the preValidatedHoles
     // container may include duplicate holes. Delete them, so that resources
@@ -1302,8 +1316,8 @@ namespace pandora_vision
       {
         ROS_INFO_NAMED(PKG_NAME, "--------------------------------");
         ROS_INFO_NAMED(PKG_NAME, "Keypoint [%f %f]",
-          preValidatedHoles.getBlob(i).areaOfInterest.center.x,
-          preValidatedHoles.getBlob(i).areaOfInterest.center.y);
+          preValidatedHoles.holes[i].keypoint.pt.x,
+          preValidatedHoles.holes[i].keypoint.pt.y);
 
         for (int j = 0; j < probabilitiesVector2D.size(); j++)
         {
@@ -1348,9 +1362,11 @@ namespace pandora_vision
         msgs.push_back(TOSTR(it->second));
 
         // The it->first-th valid hole
-        BlobVector oneHole;
+        HolesConveyor oneHole;
 
-        oneHole.append(preValidatedHoles.getBlob(it->first));
+        HolesConveyorUtils::append(
+          HolesConveyorUtils::getHole(preValidatedHoles, it->first),
+          &oneHole);
 
         // Project this valid hole onto the rgb image
         holesImages.push_back(
@@ -1374,8 +1390,8 @@ namespace pandora_vision
     HoleUniqueness::makeHolesUnique(&preValidatedHoles, &validHolesMap);
 
     // Rename the preValidatedHoles to uniqueValidHoles
-    BlobVector uniqueValidHoles;
-    uniqueValidHoles.copy(preValidatedHoles);
+    HolesConveyor uniqueValidHoles;
+    HolesConveyorUtils::copyTo(preValidatedHoles, &uniqueValidHoles);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_final_holes)
@@ -1435,8 +1451,10 @@ namespace pandora_vision
     #endif
   }
 
+
+
   void HoleFusion::produceDataset(
-    const BlobVector& conveyor,
+    const HolesConveyor& conveyor,
     const std::vector<std::vector<float> >& probabilities)
   {
     // Open the dataset
@@ -1446,10 +1464,10 @@ namespace pandora_vision
     for (int i = 0; i < conveyor.size(); i++)
     {
       // True holes
-      if (conveyor.getBlob(i).areaOfInterest.center.x >  0
-        && conveyor.getBlob(i).areaOfInterest.center.x < 1
-        && conveyor.getBlob(i).areaOfInterest.center.y > 0
-        && conveyor.getBlob(i).areaOfInterest.center.y < 1)
+      if (conveyor.holes[i].keypoint.pt.x >  0
+        && conveyor.holes[i].keypoint.pt.x < 1
+        && conveyor.holes[i].keypoint.pt.y > 0
+        && conveyor.holes[i].keypoint.pt.y < 1)
       {
         dataset << probabilities[0][i] << ", "
           << probabilities[1][i] << ", "
@@ -1476,58 +1494,75 @@ namespace pandora_vision
     }
   }
 
+
+
   /**
     @brief Publishes the holes' enhanced information.
-    @param[in] conveyor [const BlobVector&]
+    @param[in] conveyor [const HolesConveyor&]
     The overall valid holes found by the depth and RGB nodes.
     @param[in] validHolesMap [std::map<int, float>*]
     A map containing the indices of the valid holes inside the conveyor
     and their respective validity probabilities
     @return void
    **/
-  void HoleFusion::publishEnhancedHoles(const BlobVector& conveyor,
+  void HoleFusion::publishEnhancedHoles (const HolesConveyor& conveyor,
     std::map<int, float>* validHolesMap)
   {
     // The overall message of enhanced holes that will be published
-    pandora_vision_msgs::EnhancedImage enhancedHolesMsg;
-    std_msgs::Header header;
-    
-    // Set the message's header
-    header.stamp = timestamp_;
-    header.frame_id = frame_id_;
-    
+    pandora_vision_msgs::EnhancedHolesVectorMsg enhancedHolesMsg;
+
     // Set the rgbImage in the enhancedHolesMsg message to the rgb image
     enhancedHolesMsg.rgbImage = MessageConversions::convertImageToMessage(
       rgbImage_,
       sensor_msgs::image_encodings::TYPE_8UC3,
-      header);
+      enhancedHolesMsg.rgbImage);
 
     // Set the depthImage in the enhancedHolesMsg message to the depth image
     enhancedHolesMsg.depthImage = MessageConversions::convertImageToMessage(
       Visualization::scaleImageForVisualization(interpolatedDepthImage_,
         Parameters::Image::scale_method),
       sensor_msgs::image_encodings::TYPE_8UC1,
-      header);
+      enhancedHolesMsg.depthImage);
 
     // Set whether depth analysis is applicable
     enhancedHolesMsg.isDepth = (filteringMode_ == RGBD_MODE);
+
+    // Set the message's header
+    enhancedHolesMsg.header.stamp = timestamp_;
+    enhancedHolesMsg.header.frame_id = frame_id_;
 
     for (std::map<int, float>::iterator it = validHolesMap->begin();
       it != validHolesMap->end(); it++)
     {
       // The enhanced hole message. Used for one hole only
-      pandora_vision_msgs::AreaOfInterest enhancedHoleMsg;
+      pandora_vision_msgs::EnhancedHoleMsg enhancedHoleMsg;
 
-      // Set the hole's bounding box
-      enhancedHoleMsg = conveyor.getBlob(it->first).areaOfInterest;
+      // Set the hole's keypoint
+      enhancedHoleMsg.keypointX = conveyor.holes[it->first].keypoint.pt.x;
+      enhancedHoleMsg.keypointY = conveyor.holes[it->first].keypoint.pt.y;
+
+      // Set the hole's bounding box vertices
+      for (int r = 0; r < conveyor.holes[it->first].rectangle.size(); r++)
+      {
+        enhancedHoleMsg.verticesX.push_back(
+          conveyor.holes[it->first].rectangle[r].x);
+        enhancedHoleMsg.verticesY.push_back(
+          conveyor.holes[it->first].rectangle[r].y);
+      }
+
+      // Set the message's header
+      enhancedHoleMsg.header.stamp = timestamp_;
+      enhancedHoleMsg.header.frame_id = frame_id_;
 
       // Push back into the enhancedHolesMsg message
-      enhancedHolesMsg.areasOfInterest.push_back(enhancedHoleMsg);
+      enhancedHolesMsg.enhancedHoles.push_back(enhancedHoleMsg);
     }
 
     // Publish the overall message
     enhancedHolesPublisher_.publish(enhancedHolesMsg);
   }
+
+
 
   /**
     @brief Publishes an image showing holes found from the Depth node
@@ -1586,16 +1621,18 @@ namespace pandora_vision
     debugRespectiveHolesPublisher_.publish(*msgPtr->toImageMsg());
   }
 
+
+
   /**
     @brief Publishes the valid holes' information.
-    @param[in] conveyor [const BlobVector&] The overall unique holes
+    @param[in] conveyor [const HolesConveyor&] The overall unique holes
     found by the depth and RGB nodes.
     @param[in] map [std::map<int, float>*] A map containing the indices
     of valid holes inside the conveyor and their respective
     probabilities of validity
     @return void
    **/
-  void HoleFusion::publishValidHoles(const BlobVector& conveyor,
+  void HoleFusion::publishValidHoles(const HolesConveyor& conveyor,
     std::map<int, float>* map)
   {
     // The depth sensor's horizontal and vertical field of view
@@ -1607,7 +1644,7 @@ namespace pandora_vision
     int width = interpolatedDepthImage_.cols;
 
     // The overall valid holes found message
-    pandora_vision_msgs::HoleDirectionAlertVector holesVectorMsg;
+    pandora_vision_msgs::HolesDirectionsVectorMsg holesVectorMsg;
 
     // Counter for the holes' identifiers
     int holeId = 0;
@@ -1616,22 +1653,22 @@ namespace pandora_vision
       it != map->end(); it++)
     {
       // A single hole's message
-      pandora_vision_msgs::HoleDirectionAlert holeMsg;
+      pandora_vision_msgs::HoleDirectionMsg holeMsg;
 
       // The hole's keypoint coordinates relative to the center of the frame
-      float x = conveyor.getBlob(it->first).areaOfInterest.center.x
+      float x = conveyor.holes[it->first].keypoint.pt.x
         - static_cast<float>(width) / 2;
       float y = static_cast<float>(height) / 2
-        - conveyor.getBlob(it->first).areaOfInterest.center.y;
+        - conveyor.holes[it->first].keypoint.pt.y;
 
       // The keypoint's yaw and pitch
       float yaw = atan(2 * x / width * tan(hfov / 2));
       float pitch = atan(2 * y / height * tan(vfov / 2));
 
       // Setup everything needed by the single hole's message
-      holeMsg.info.yaw = yaw;
-      holeMsg.info.pitch = pitch;
-      holeMsg.info.probability = it->second;
+      holeMsg.yaw = yaw;
+      holeMsg.pitch = pitch;
+      holeMsg.probability = it->second;
       holeMsg.holeId = holeId;
 
       // Fill the overall holes found message with the current hole message
@@ -1649,7 +1686,7 @@ namespace pandora_vision
     // Publish an image with the valid holes found
 
     // The holes conveyor containing only the valid holes
-    BlobVector validHolesConveyor;
+    HolesConveyor validHolesConveyor;
 
     // Contains the validity probability for each hole considered valid
     std::vector<std::string> msgs;
@@ -1657,7 +1694,9 @@ namespace pandora_vision
     for (std::map<int, float>::iterator it = map->begin();
       it != map->end(); it++)
     {
-      validHolesConveyor.append(conveyor.getBlob(it->first));
+      HolesConveyorUtils::append(
+        HolesConveyorUtils::getHole(conveyor, it->first),
+        &validHolesConveyor);
 
       msgs.push_back(TOSTR(it->second));
     }
@@ -1681,6 +1720,8 @@ namespace pandora_vision
     debugValidHolesPublisher_.publish(*msgPtr->toImageMsg());
   }
 
+
+
   /**
     @brief Callback for the candidate holes via the rgb node
 
@@ -1691,13 +1732,13 @@ namespace pandora_vision
     the synchronizer and calls for processing of the candidate
     holes.
     @param[in] rgbCandidateHolesVector
-    [const pandora_vision_msgs::BlobVector&]
+    [const pandora_vision_msgs::CandidateHolesVectorMsg&]
     The message containing the necessary information to filter hole
     candidates acquired through the rgb node
     @return void
    **/
   void HoleFusion::rgbCandidateHolesCallback(
-    const pandora_vision_msgs::BlobVector&
+    const pandora_vision_msgs::CandidateHolesVectorMsg&
     rgbCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
@@ -1708,14 +1749,15 @@ namespace pandora_vision
 
     // Clear the current rgbHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
-    rgbHolesConveyor_.clear();
+    HolesConveyorUtils::clear(&rgbHolesConveyor_);
 
-    rgbHolesConveyor_ = rgbCandidateHolesVector;
-    if (Parameters::Image::image_representation_method == 1)
-    {
-      rgbHolesConveyor_.fromWavelets(Parameters::Outline::raycast_keypoint_partitions);
-    }
-    rgbImage_ = rgbHolesConveyor_.getCvImage(sensor_msgs::image_encodings::TYPE_8UC3);
+    // Unpack the message
+    MessageConversions::unpackMessage(rgbCandidateHolesVector,
+      &rgbHolesConveyor_,
+      &rgbImage_,
+      Parameters::Image::image_representation_method,
+      sensor_msgs::image_encodings::TYPE_8UC3,
+      Parameters::Outline::raycast_keypoint_partitions);
 
     // The candidate holes acquired from the rgb node and the rgb image are set
     numNodesReady_++;
@@ -1726,7 +1768,9 @@ namespace pandora_vision
     if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
+
       unlockSynchronizer();
+
       processCandidateHoles();
     }
 
@@ -1735,6 +1779,8 @@ namespace pandora_vision
     Timer::printAllMeansTree();
     #endif
   }
+
+
 
   /**
     @brief Sets the depth values of a point cloud according to the
@@ -1777,6 +1823,8 @@ namespace pandora_vision
     Timer::tick("setDepthValuesInPointCloud");
     #endif
   }
+
+
 
   /**
     @brief The node's state manager.
@@ -1839,8 +1887,11 @@ namespace pandora_vision
     {
       isOn_ = toBeOn;
     }
+
     transitionComplete(newState);
   }
+
+
 
   /**
     @brief Requests from the synchronizer to process a new point cloud
@@ -1860,4 +1911,4 @@ namespace pandora_vision
     }
   }
 
-}  // namespace pandora_vision
+} // namespace pandora_vision

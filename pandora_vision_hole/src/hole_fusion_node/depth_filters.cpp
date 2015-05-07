@@ -45,7 +45,7 @@ namespace pandora_vision
 {
   /**
     @brief Checks for valid holes by area / depth comparison
-    @param[in] conveyor [const BlobVector&] The candidate holes
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] depthImage [const cv::Mat&] The depth image
     @param[in] holesMasksSetVector [const std::vector<std::set<unsigned int> >&]
     A vector that holds sets of points; each point is internal to its
@@ -61,7 +61,7 @@ namespace pandora_vision
     @return void
    **/
   void DepthFilters::checkHolesDepthArea(
-    const BlobVector& conveyor,
+    const HolesConveyor& conveyor,
     const cv::Mat& depthImage,
     const std::vector<std::set<unsigned int> >& holesMasksSetVector,
     std::vector<std::string>* msgs,
@@ -71,7 +71,7 @@ namespace pandora_vision
     Timer::start("checkHolesDepthArea", "applyFilter");
     #endif
 
-    for (unsigned int i = 0 ; i < conveyor.size() ; i++)
+    for(unsigned int i = 0 ; i < conveyor.size() ; i++)
     {
       // The mean depth value of the points inside the i-th hole
       float mean = 0.0;
@@ -102,10 +102,12 @@ namespace pandora_vision
       // At least, one complete hole is one circular hole
       float low = singleHoleDepthArea - area - 7000;
 
-      if (low < 0 && high > 0)
+
+      if(low < 0 && high > 0)
       {
         probabilitiesVector->at(i) = 1.0;
       }
+
       msgs->push_back(TOSTR(low) + std::string(" / ") + TOSTR(high));
     }
 
@@ -120,7 +122,7 @@ namespace pandora_vision
     @brief Checks for valid holes just by the depth difference between
     the keypoint of the blob and the edges of its bounding box
     @param[in] depthImage [const cv::Mat&] The depth image
-    @param[in] conveyor [const BlobVector&] The candidate holes
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] inflatedRectanglesVector
     [const std::vector<std::vector<cv::Point2f> >&] A vector that holds
     the vertices of the inflated rectangle that corresponds to a specific
@@ -141,7 +143,7 @@ namespace pandora_vision
    **/
   void DepthFilters::checkHolesDepthDiff(
     const cv::Mat& depthImage,
-    const BlobVector& conveyor,
+    const HolesConveyor& conveyor,
     const std::vector<std::vector<cv::Point2f> >& inflatedRectanglesVector,
     const std::vector<int>& inflatedRectanglesIndices,
     std::vector<std::string>* msgs,
@@ -151,25 +153,27 @@ namespace pandora_vision
     Timer::start("checkHolesDepthDiff", "applyFilter");
     #endif
 
-    for (unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
+    for(unsigned int i = 0 ; i < inflatedRectanglesIndices.size() ; i++)
     {
       // The mean distance of this hole's bounding box vertices
       float mean = 0.0;
 
-      for (unsigned int j = 0 ; j < 4; j++)
+      for(unsigned int j = 0 ; j < 4; j++)
       {
         int x = inflatedRectanglesVector[i][j].x;
         int y = inflatedRectanglesVector[i][j].y;
 
         mean += depthImage.at<float>(y, x);
       }
+
       mean /= inflatedRectanglesVector[i].size();
 
       // The difference between the distance of this hole's keypoint and
       // the mean distance of the vertices of its bounding box
       float value = depthImage.at<float>(
-        conveyor.getBlob(inflatedRectanglesIndices[i]).areaOfInterest.center.y,
-        conveyor.getBlob(inflatedRectanglesIndices[i]).areaOfInterest.center.x) - mean;
+        conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.y,
+        conveyor.holes[inflatedRectanglesIndices[i]].keypoint.pt.x) - mean;
+
 
       // The keypoint's distance from the depth sensor should be greater than
       // that of the mean distance of the vertices of the candidate hole's
@@ -199,6 +203,7 @@ namespace pandora_vision
             exp(-pow((value - m) / s, 2) / 2);
         }
       }
+
       msgs->push_back(TOSTR(
           probabilitiesVector->at(inflatedRectanglesIndices[i])));
     }
@@ -214,7 +219,7 @@ namespace pandora_vision
     @brief Checks the homogeneity of the gradient of an interpolated
     depth image in areas denoted by the points inside the
     holesMasksSetVector vector
-    @param[in] conveyor [const BlobVector&] The candidate holes
+    @param[in] conveyor [const HolesConveyor&] The candidate holes
     @param[in] interpolatedDepthImage [const cv::Mat&] The input
     interpolated depth image
     @param[in] holesMasksSetVector [const std::vector<std::set<unsigned int> >&]
@@ -230,7 +235,7 @@ namespace pandora_vision
     @return void
    **/
   void DepthFilters::checkHolesDepthHomogeneity(
-    const BlobVector& conveyor,
+    const HolesConveyor& conveyor,
     const cv::Mat& interpolatedDepthImage,
     const std::vector<std::set<unsigned int> >& holesMasksSetVector,
     std::vector<std::string>* msgs,
@@ -278,6 +283,7 @@ namespace pandora_vision
         probabilitiesVector->at(i) =
           static_cast<float>(numWhites) / (holesMasksSetVector[i].size());
       }
+
       msgs->push_back(TOSTR(probabilitiesVector->at(i)));
     }
 

@@ -58,6 +58,7 @@ namespace pandora_vision
   class HoleDetector
   {
     public:
+
       /**
         @brief Finds holes, provided a RGB image in CV_8UC3 format.
 
@@ -69,12 +70,13 @@ namespace pandora_vision
         in CV_8UC3 format
         @param[in] histogram [const std::vector<cv::MatND>&]
         The vector of histograms of images of wooden walls
-        @return BlobVector The struct that contains the holes found
+        @return HolesConveyor The struct that contains the holes found
        **/
-      static BlobVector findHoles(const cv::Mat& rgbImage,
+      static HolesConveyor findHoles(const cv::Mat& rgbImage,
         const std::vector<cv::MatND>& histogram);
+
   };
 
-}  // namespace pandora_vision
+} // namespace pandora_vision
 
 #endif  // RGB_NODE_HOLE_DETECTOR_H

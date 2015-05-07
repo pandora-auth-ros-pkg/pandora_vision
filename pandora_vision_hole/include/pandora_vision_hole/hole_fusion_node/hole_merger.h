@@ -34,14 +34,13 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
-
 #ifndef HOLE_FUSION_NODE_HOLE_MERGER_H
 #define HOLE_FUSION_NODE_HOLE_MERGER_H
 
 #include "hole_fusion_node/filters_resources.h"
 #include "hole_fusion_node/depth_filters.h"
 #include "utils/defines.h"
-#include "utils/blob_vector.h"
+#include "utils/holes_conveyor.h"
 #include "utils/outline_discovery.h"
 #include "utils/parameters.h"
 #include <math.h>
@@ -72,12 +71,13 @@ namespace pandora_vision
   class HoleMerger
   {
     public:
+
       /**
         @brief Applies a merging operation of @param operationId, until
         every candidate hole, even as it changes through the various merges that
         happen, has been merged with every candidate hole that can be merged
         with it.
-        @param[in,out] rgbdHolesConveyor [BlobVector*] The unified rgb-d
+        @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
         candidate holes conveyor
         @param[in] image [const cv::Mat&] An image used for filters' resources
         creation and size usage
@@ -90,7 +90,7 @@ namespace pandora_vision
         @return void
        **/
       static void applyMergeOperation(
-        BlobVector* rgbdHolesConveyor,
+        HolesConveyor* rgbdHolesConveyor,
         const cv::Mat& image,
         const PointCloudPtr& pointCloud,
         const int& operationId);
@@ -102,7 +102,7 @@ namespace pandora_vision
         with it. In contrast to the applyMergeOperation method, this method
         does not consult hole checkers to validate the newly merged holes.
         (Used when depth analysis is unattainable)
-        @param[in,out] rgbdHolesConveyor [BlobVector*] The unified rgb-d
+        @param[in,out] rgbdHolesConveyor [HolesConveyor*] The unified rgb-d
         candidate holes conveyor
         @param[in] image [const cv::Mat&] An image used for filters' resources
         creation and size usage
@@ -111,7 +111,7 @@ namespace pandora_vision
         @return void
        **/
       static void applyMergeOperationWithoutValidation(
-        BlobVector* rgbdHolesConveyor,
+        HolesConveyor* rgbdHolesConveyor,
         const cv::Mat& image,
         const int& operationId);
 
@@ -157,16 +157,16 @@ namespace pandora_vision
       /**
         @brief Intended to use after the check of the
         isCapableOfAmalgamating function, this function modifies the
-        BlobVector conveyor[amalgamatorId] entry so that it
+        HolesConveyor conveyor[amalgamatorId] entry so that it
         has absorbed the amalgamatable hole (conveyor[amalgamatableId])
         in terms of keypoint location, outline unification and bounding
         rectangle inclusion of the amalgamatable's outline
-        @param[in,out] conveyor [BlobVector*] The holes conveyor
+        @param[in,out] conveyor [HolesConveyor*] The holes conveyor
         whose keypoint, outline and bounding rectangle entries
         will be modified. CAUTION: the amalgamatable is not deleted upon
         amalgamation, only the internals of the amalgamator are modified
         @param[in] amalgamatorId [const int&] The identifier of the
-        hole inside the BlobVector amalgamator struct
+        hole inside the HolesConveyor amalgamator struct
         @param[in,out] amalgamatorHoleMaskSet [std::set<unsigned int>*]
         A set that includes the indices of points inside the amalgamator's
         outline
@@ -177,7 +177,7 @@ namespace pandora_vision
         @return void
        **/
       static void amalgamateOnce(
-        BlobVector* conveyor,
+        HolesConveyor* conveyor,
         const int& amalgamatorId,
         std::set<unsigned int>* amalgamatorHoleMaskSet,
         const std::set<unsigned int>& amalgamatableHoleMaskSet,
@@ -192,12 +192,12 @@ namespace pandora_vision
         rectangle of the connector is larger in area than the bounding
         rectangle of the connectable, and the minimum distance between the
         two outlines is lower than a threshold value.
-        @param[in] conveyor [const BlobVector&] The BlobVector that
+        @param[in] conveyor [const HolesConveyor&] The HolesConveyor that
         contains the holes
         @param[in] connectorId [const int&] The index of the specific hole
-        that acts as the connector inside the connectors BlobVector
+        that acts as the connector inside the connectors HolesConveyor
         @param[in] connectableId [const int&] The index of the specific hole
-        that acts as the connectable inside the connectables BlobVector
+        that acts as the connectable inside the connectables HolesConveyor
         @param[in] connectorHoleMaskSet [const std::set<unsigned int>&]
         A set that includes the indices of points inside the connector's
         outline
@@ -211,7 +211,7 @@ namespace pandora_vision
         with the connector
        **/
       static bool isCapableOfConnecting(
-        const BlobVector& conveyor,
+        const HolesConveyor& conveyor,
         const int& connectorId,
         const int& connectableId,
         const std::set<unsigned int>& connectorHoleMaskSet,
@@ -220,18 +220,18 @@ namespace pandora_vision
 
       /**
         @brief Intended to use after the check of the
-        isCapableOfConnecting function, this method modifies the BlobVector
+        isCapableOfConnecting function, this method modifies the HolesConveyor
         connector struct entry so that it it has absorbed the connectable hole
         in terms of keypoint location, outline unification and bounding
         rectangle inclusion of the connectable's outline
-        @param[in,out] conveyor [BlobVector*] The holes conveyor
+        @param[in,out] conveyor [HolesConveyor*] The holes conveyor
         whose keypoint, outline and bounding rectangle entries
         will be modified. CAUTION: the connectable is not deleted upon
         connection, only the internals of the connector are modified
         @param[in] connectorId [const int&] The identifier of the hole inside
-        the BlobVector connectables struct
+        the HolesConveyor connectables struct
         @param[in] connectableId [const int&] The identifier of the hole inside
-        the BlobVector connectables struct
+        the HolesConveyor connectables struct
         @param[in] connectorHoleMaskSet [const std::set<unsigned int>&]
         A set that includes the indices of points inside the connector's
         outline
@@ -239,7 +239,7 @@ namespace pandora_vision
         @return void
        **/
       static void connectOnce(
-        BlobVector* conveyor,
+        HolesConveyor* conveyor,
         const int& connectorId,
         const int& connectableId,
         std::set<unsigned int>* connectorHoleMaskSet,
@@ -257,7 +257,7 @@ namespace pandora_vision
         than 0.5-0.6m. In this way of operation, the merging of holes does not
         consider employing validator filters and simply merges holes that can
         be merged with each other (assimilated, amalgamated, or connected).
-        @param[in,out] conveyor [BlobVector*]
+        @param[in,out] conveyor [HolesConveyor*]
         The conveyor of holes to be merged with one another, where applicable.
         @param[in] filteringMethod [const int&]
         Indicates whether candidate holes can be merged on conditions
@@ -269,12 +269,13 @@ namespace pandora_vision
         The interpolated point cloud. Needed in the connection process.
         @return void
        **/
-      static void mergeHoles(BlobVector* conveyor,
+      static void mergeHoles(HolesConveyor* conveyor,
         const int& filteringMethod,
         const cv::Mat& interpolatedDepthImage,
         const PointCloudPtr& pointCloud);
+
   };
 
-}  // namespace pandora_vision
+} // namespace pandora_vision
 
 #endif  // HOLE_FUSION_NODE_HOLE_MERGER_H

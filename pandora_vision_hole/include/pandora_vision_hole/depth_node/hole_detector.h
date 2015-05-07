@@ -39,9 +39,8 @@
 #define DEPTH_NODE_HOLE_DETECTOR_H
 
 #include "utils/blob_detection.h"
-#include "utils/blob_vector.h"
+#include "utils/holes_conveyor.h"
 #include "utils/hole_filters.h"
-#include "utils/message_conversions.h"
 
 /**
   @namespace pandora_vision
@@ -57,6 +56,7 @@ namespace pandora_vision
   class HoleDetector
   {
     public:
+
       /**
         @brief Finds the holes provided a depth image in CV_32FC1 format
 
@@ -66,9 +66,10 @@ namespace pandora_vision
         boxes of those outlines.
         @param[in] interpolatedDepthImage [const cv::Mat&] The interpolated
         depth image in CV_32FC1 format
-        @return BlobVector The struct that contains the holes found
+        @return HolesConveyor The struct that contains the holes found
        **/
-      static BlobVector findHoles(const cv::Mat& interpolatedDepthImage);
+      static HolesConveyor findHoles(const cv::Mat& interpolatedDepthImage);
+
   };
 
 } // namespace pandora_vision

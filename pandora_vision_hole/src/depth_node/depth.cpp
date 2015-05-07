@@ -60,7 +60,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the depth node
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::BlobVector>(
+      <pandora_vision_msgs::CandidateHolesVectorMsg>(
       candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (depth) parameter's callback
@@ -68,6 +68,8 @@ namespace pandora_vision
 
     ROS_INFO_NAMED(PKG_NAME, "[Depth node] Initiated");
   }
+
+
 
   /**
     @brief Default destructor
@@ -77,6 +79,8 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED(PKG_NAME, "[Depth node] Terminated");
   }
+
+
 
   /**
     @brief Callback for the depth image received by the synchronizer node.
@@ -141,18 +145,19 @@ namespace pandora_vision
     }
 
     // Locate potential holes in the interpolated depth image
-    BlobVector holes = HoleDetector::findHoles(interpolatedDepthImage);
+    HolesConveyor holes = HoleDetector::findHoles(interpolatedDepthImage);
 
     // Create the candidate holes message
-    pandora_vision_msgs::BlobVector depthCandidateHolesMsg;
+    pandora_vision_msgs::CandidateHolesVectorMsg depthCandidateHolesMsg;
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.
     // This message will be published to and received by the hole fusion node
-    depthCandidateHolesMsg = holes.createMessage(
+    MessageConversions::createCandidateHolesVectorMessage(holes,
       interpolatedDepthImageSent,
+      &depthCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_32FC1,
-      msg.header);
+      msg);
 
     // Publish the candidate holes message
     candidateHolesPublisher_.publish(depthCandidateHolesMsg);
@@ -173,7 +178,7 @@ namespace pandora_vision
     @param void
     @return void
    **/
-  void Depth::getTopicNames()
+  void Depth::getTopicNames ()
   {
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();

@@ -38,7 +38,7 @@
 #ifndef RGB_NODE_RGB_H
 #define RGB_NODE_RGB_H
 
-#include "pandora_vision_msgs/BlobVector.h"
+#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
 #include "utils/message_conversions.h"
 #include "utils/histogram.h"
 #include "utils/parameters.h"
@@ -59,6 +59,7 @@ namespace pandora_vision
   class Rgb
   {
     private:
+
       // The NodeHandle
       ros::NodeHandle nodeHandle_;
 
@@ -117,7 +118,9 @@ namespace pandora_vision
         const pandora_vision_hole::rgb_cfgConfig& config,
         const uint32_t& level);
 
+
     public:
+
       // The constructor
       Rgb();
 
@@ -125,6 +128,6 @@ namespace pandora_vision
       ~Rgb();
   };
 
-}  //namespace pandora_vision
+} //namespace pandora_vision
 
 #endif  // RGB_NODE_RGB_H

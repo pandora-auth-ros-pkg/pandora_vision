@@ -51,20 +51,20 @@ namespace pandora_vision
     setting the output message's header by extracting its header
     @return [sensor_msgs::Image] The output image message
    **/
-  sensor_msgs::Image
-  MessageConversions::
-  convertImageToMessage(
-      const cv::Mat& image, const std::string& encoding,
-      const std_msgs::Header& header)
+  sensor_msgs::Image MessageConversions::convertImageToMessage(
+    const cv::Mat& image, const std::string& encoding,
+    const sensor_msgs::Image& msg)
   {
     cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
 
-    msgPtr->header = header;
+    msgPtr->header = msg.header;
     msgPtr->encoding = encoding;
     msgPtr->image = image;
 
     return *msgPtr->toImageMsg();
   }
+
+
 
   /**
     @brief Extracts an image from a point cloud message
@@ -74,10 +74,8 @@ namespace pandora_vision
     CV_32FC1 for a depth image, CV_8UC3 for a rgb image
     @return cv::Mat The output image
    **/
-  cv::Mat
-  MessageConversions::
-  convertPointCloudMessageToImage(
-      const PointCloudPtr& pointCloud, const int& encoding)
+  cv::Mat MessageConversions::convertPointCloudMessageToImage(
+    const PointCloudPtr& pointCloud, const int& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("convertPointCloudMessageToImage");
@@ -127,6 +125,111 @@ namespace pandora_vision
     return image;
   }
 
+
+
+  /**
+    @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
+    message
+    @param[in] conveyor [HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[out] candidateHolesVector
+    [std::vector<pandora_vision_msgs::CandidateHolesVectorMsg>*]
+    The vector containing the conveyor's holes in
+    pandora_vision_msgs::CandidateHolesVectorMsg format
+    @return void
+   **/
+  void MessageConversions::createCandidateHolesVector(
+    const HolesConveyor& conveyor,
+    std::vector<pandora_vision_msgs::CandidateHoleMsg>* candidateHolesVector)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesVector");
+    #endif
+
+    // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
+    // candidateHoles vector
+    for (unsigned int i = 0; i < conveyor.size(); i++)
+    {
+      pandora_vision_msgs::CandidateHoleMsg holeMsg;
+
+      // Push back the keypoint
+      holeMsg.keypointX = conveyor.holes[i].keypoint.pt.x;
+      holeMsg.keypointY = conveyor.holes[i].keypoint.pt.y;
+
+      // Push back the bounding rectangle's vertices
+      for (int v = 0; v < conveyor.holes[i].rectangle.size(); v++)
+      {
+        holeMsg.verticesX.push_back(conveyor.holes[i].rectangle[v].x);
+        holeMsg.verticesY.push_back(conveyor.holes[i].rectangle[v].y);
+      }
+
+      // Push back the blob's outline points
+      for (int o = 0; o < conveyor.holes[i].outline.size(); o++)
+      {
+        holeMsg.outlineX.push_back(conveyor.holes[i].outline[o].x);
+        holeMsg.outlineY.push_back(conveyor.holes[i].outline[o].y);
+      }
+
+      // Push back one hole to the holes vector message
+      candidateHolesVector->push_back(holeMsg);
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesVector");
+    #endif
+  }
+
+
+
+  /**
+    @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
+    message
+    @param[in] conveyor [HolesConveyor&] A struct containing
+    vectors of the holes' keypoints, bounding rectangles' vertices
+    and blobs' outlines
+    @param[in] image [cv::Mat&] The image to be packed in the message
+    @param[out] candidateHolesVectorMsg
+    [pandora_vision_msgs::CandidateHolesVectorMsg*] The output message
+    @param[in] encoding [std::string&] The image's encoding
+    @param[in] msg [const sensor_msgs::Image&] Needed to extract
+    its header and place it as the header of the output message
+    @return void
+   **/
+  void MessageConversions::createCandidateHolesVectorMessage(
+    const HolesConveyor& conveyor,
+    const cv::Mat& image,
+    pandora_vision_msgs::CandidateHolesVectorMsg* candidateHolesVectorMsg,
+    const std::string& encoding,
+    const sensor_msgs::Image& msg)
+  {
+    #ifdef DEBUG_TIME
+    Timer::start("createCandidateHolesVectorMessage");
+    #endif
+
+    // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
+    // candidateHoles vector
+    std::vector<pandora_vision_msgs::CandidateHoleMsg> candidateHolesVector;
+    createCandidateHolesVector(conveyor, &candidateHolesVector);
+
+    candidateHolesVectorMsg->candidateHoles = candidateHolesVector;
+
+    // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
+    // image
+    candidateHolesVectorMsg->image =
+      convertImageToMessage(image, encoding, msg);
+
+    // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
+    // header
+    candidateHolesVectorMsg->header = msg.header;
+
+    #ifdef DEBUG_TIME
+    Timer::tick("createCandidateHolesVectorMessage");
+    #endif
+  }
+
+
+
   /**
     @brief Extracts a cv::Mat image from a ROS image message
     @param[in] msg [const sensor_msgs::Image&] The input ROS image
@@ -135,12 +238,10 @@ namespace pandora_vision
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
-  void
-  MessageConversions::
-  extractImageFromMessage(
-      const sensor_msgs::Image& msg,
-      cv::Mat* image,
-      const std::string& encoding)
+  void MessageConversions::extractImageFromMessage(
+    const sensor_msgs::Image& msg,
+    cv::Mat* image,
+    const std::string& encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("extractImageFromMessage");
@@ -157,92 +258,224 @@ namespace pandora_vision
     #endif
   }
 
-  pandora_vision_msgs::Keypoint
-  MessageConversions::
-  cvToMsg(const cv::Point2f& point)
+
+
+  /**
+    @brief Extracts a cv::Mat image from a custom ROS message of type
+    pandora_vision_msgs::CandidateHolesVectorMsg
+    containing the interpolated depth image
+    @param[in] msg [const sensor_msgs::ImageConstPtr&] The input ROS message
+    @param[out] image [cv::Mat*] The output image
+    @param[in] encoding [const std::string&] The image encoding
+    @return void
+   **/
+  void MessageConversions::extractImageFromMessageContainer(
+    const pandora_vision_msgs::CandidateHolesVectorMsg& msg,
+    cv::Mat* image, const std::string& encoding)
   {
-    pandora_vision_msgs::Keypoint msg_point;
-    msg_point.x = point.x;
-    msg_point.y = point.y;
-    return msg_point;
+    #ifdef DEBUG_TIME
+    Timer::start("extractDepthImageFromMessageContainer");
+    #endif
+
+    sensor_msgs::Image imageMsg = msg.image;
+    extractImageFromMessage(imageMsg, image, encoding);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("extractDepthImageFromMessageContainer");
+    #endif
   }
 
-  cv::Point2f
-  MessageConversions::
-  msgToCv(const pandora_vision_msgs::Keypoint& point)
-  {
-    cv::Point2f cv_point(point.x, point.y);
-    return cv_point;
-  }
 
-  pandora_vision_msgs::Keypoint
-  MessageConversions::
-  keypointToMsg(const cv::KeyPoint& point)
-  {
-    pandora_vision_msgs::Keypoint msg_point;
-    msg_point.x = point.pt.x;
-    msg_point.y = point.pt.y;
-    return msg_point;
-  }
 
-  cv::KeyPoint
-  MessageConversions::
-  msgToKeypoint(const pandora_vision_msgs::Keypoint& point)
+  /**
+    @brief Recreates the HolesConveyor struct for the candidate holes
+    from the pandora_vision_msgs::CandidateHolerMsg message
+    @param[in] candidateHolesVector
+    [const std::vector<pandora_vision_msgs::CandidateHoleMsg>&]
+    The input candidate holes
+    @param[out] conveyor [HolesConveyor*] The output conveyor
+    struct
+    @param[in] inImage [const cv::Mat&] An image used for its size.
+    It is needed if the wavelet method is used in the keypoints' extraction,
+    in order to obtain the coherent shape of holes' outline points
+    @param[in] representationMethod [const int&] The @param inImage
+    representation method. 0 for normal mode, 1 for wavelet mode
+    @param[in] raycastKeypointPartitions [const int&] The number of rays
+    used, if @param representationMethod = 1, in order to recreate a
+    blob's outline
+    @return void
+   **/
+  void MessageConversions::fromCandidateHoleMsgToConveyor(
+    const std::vector<pandora_vision_msgs::CandidateHoleMsg>&
+    candidateHolesVector,
+    HolesConveyor* conveyor,
+    const cv::Mat& inImage,
+    const int& representationMethod,
+    const int& raycastKeypointPartitions)
   {
-    cv::KeyPoint keypoint;
-    keypoint.pt.x = point.x;
-    keypoint.pt.y = point.y;
-    return keypoint;
-  }
+    #ifdef DEBUG_TIME
+    Timer::start("fromCandidateHoleMsgToConveyor", "unpackMessage");
+    #endif
 
-  std::vector<pandora_vision_msgs::Keypoint>
-  MessageConversions::
-  vecToMsg(const std::vector<cv::Point2f>& vec)
-  {
-    std::vector<pandora_vision_msgs::Keypoint> temp;
-    
-    for (int ii = 0; ii < vec.size(); ii++)
+    // Normal mode
+    if (representationMethod == 0)
     {
-      temp.push_back(cvToMsg(vec[ii]));
-    }
-    return temp;
-  }
-  
-  pandora_vision_msgs::AreaOfInterest
-  MessageConversions::
-  vecToArea(const std::vector<cv::Point2f>& vert)
-  {
-    pandora_vision_msgs::AreaOfInterest area;
+      for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
+      {
+        // A single hole
+        HoleConveyor hole;
 
-    int minx = vert[0].x, maxx = vert[0].x, miny = vert[0].y, maxy = vert[0].y;
-    for (unsigned int j = 1 ; j < 4 ; j++)
+        // Recreate the hole's keypoint
+        hole.keypoint.pt.x = candidateHolesVector[i].keypointX;
+        hole.keypoint.pt.y = candidateHolesVector[i].keypointY;
+
+        // Recreate the hole's rectangle points
+        std::vector<cv::Point2f> renctangleVertices;
+        for (unsigned int v = 0;
+          v < candidateHolesVector[i].verticesX.size(); v++)
+        {
+          cv::Point2f vertex;
+          vertex.x = candidateHolesVector[i].verticesX[v];
+          vertex.y = candidateHolesVector[i].verticesY[v];
+          renctangleVertices.push_back(vertex);
+        }
+        hole.rectangle = renctangleVertices;
+
+        // Recreate the hole's outline points
+        std::vector<cv::Point2f> outlinePoints;
+        for (unsigned int o = 0;
+          o < candidateHolesVector[i].outlineX.size(); o++)
+        {
+          cv::Point2f outlinePoint;
+          outlinePoint.x = candidateHolesVector[i].outlineX[o];
+          outlinePoint.y = candidateHolesVector[i].outlineY[o];
+          outlinePoints.push_back(outlinePoint);
+        }
+        hole.outline= outlinePoints;
+
+        // Push hole back into the conveyor
+        conveyor->holes.push_back(hole);
+      }
+    }
+    // Wavelet mode
+    else if (representationMethod == 1)
     {
-      int xx = vert[j].x;
-      int yy = vert[j].y;
-      minx = xx < minx ? xx : minx;
-      maxx = xx > maxx ? xx : maxx;
-      miny = yy < miny ? yy : miny;
-      maxy = yy > maxy ? yy : maxy;
-    }
-    area.width = maxx - minx;
-    area.height = maxy - miny;
-    area.center.x = minx + area.width / 2;
-    area.center.y = miny + area.height / 2;
+      for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
+      {
+        // A single hole
+        HoleConveyor hole;
 
-    return area;
+        // Recreate conveyor.keypoints
+        hole.keypoint.pt.x = 2 * candidateHolesVector[i].keypointX;
+        hole.keypoint.pt.y = 2 * candidateHolesVector[i].keypointY;
+
+        // Recreate conveyor.rectangles
+        std::vector<cv::Point2f> renctangleVertices;
+        for (unsigned int v = 0;
+          v < candidateHolesVector[i].verticesX.size(); v++)
+        {
+          cv::Point2f vertex;
+          vertex.x = 2 * candidateHolesVector[i].verticesX[v];
+          vertex.y = 2 * candidateHolesVector[i].verticesY[v];
+          renctangleVertices.push_back(vertex);
+        }
+        hole.rectangle = renctangleVertices;
+
+        // Recreate conveyor.outlines
+        std::vector<cv::Point2f> sparceOutlinePoints;
+        for (unsigned int o = 0;
+          o < candidateHolesVector[i].outlineX.size(); o++)
+        {
+          cv::Point2f outlinePoint;
+          outlinePoint.x = 2 * candidateHolesVector[i].outlineX[o];
+          outlinePoint.y = 2 * candidateHolesVector[i].outlineY[o];
+          sparceOutlinePoints.push_back(outlinePoint);
+        }
+
+        std::vector<cv::Point2f> outlinePoints = sparceOutlinePoints;
+
+        // Because the outline points do not constitute a coherent shape,
+        // we need to draw them, connect them linearly and then the
+        // points that are drawn will be the hole's outline points
+        cv::Mat canvas = cv::Mat::zeros(inImage.size(), CV_8UC1);
+        unsigned char* ptr = canvas.ptr();
+
+        for(unsigned int a = 0; a < sparceOutlinePoints.size(); a++)
+        {
+          unsigned int ind =
+            sparceOutlinePoints[a].x + inImage.cols * sparceOutlinePoints[a].y;
+
+          ptr[ind] = 255;
+        }
+
+        // The easiest and most efficient way to obtain the same result as
+        // if image_representation_method was 0 is to apply the raycast
+        // algorithm
+        float area = 0.0;
+        OutlineDiscovery::raycastKeypoint(hole.keypoint,
+          &canvas,
+          raycastKeypointPartitions,
+          false,
+          &hole.outline,
+          &area);
+
+
+        // Push hole back into the conveyor
+        conveyor->holes.push_back(hole);
+      }
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::tick("fromCandidateHoleMsgToConveyor");
+    #endif
   }
-  
-  std::vector<cv::Point2f>
-  MessageConversions::
-  areaToVec(const pandora_vision_msgs::AreaOfInterest& area)
+
+
+
+  /**
+    @brief Unpacks the the HolesConveyor struct for the
+    candidate holes, the interpolated depth image or the RGB image
+    from the pandora_vision_msgs::CandidateHolesVectorMsg message
+    @param[in] holesMsg
+    [pandora_vision_msgs::CandidateHolesVectorMsg&] The input
+    candidate holes message obtained through the depth node
+    @param[out] conveyor [HolesConveyor*] The output conveyor
+    struct
+    @param[out] image [cv::Mat*] The output image
+    @param[in] representationMethod [const int&] The @param inImage
+    representation method. 0 for normal mode, 1 for wavelet mode
+    @param[in] encoding [const std::string&] The encoding used for
+    @param[in] raycastKeypointPartitions [const int&] The number of rays
+    used, if @param representationMethod = 1, in order to recreate a
+    blob's outline
+    @return void
+   **/
+  void MessageConversions::unpackMessage(
+    const pandora_vision_msgs::CandidateHolesVectorMsg& holesMsg,
+    HolesConveyor* conveyor,
+    cv::Mat* image,
+    const int& representationMethod,
+    const std::string& encoding,
+    const int& raycastKeypointPartitions)
   {
-    std::vector<cv::Point2f> vec;
-    
-    vec.push_back(cv::Point2f(area.center.x - area.width / 2, area.center.y - area.height / 2));
-    vec.push_back(cv::Point2f(vec[0].x, vec[0].y + area.height));
-    vec.push_back(cv::Point2f(vec[0].x + area.width, vec[0].y));
-    vec.push_back(cv::Point2f(vec[2].x, vec[2].y + area.height));
-    
-    return vec;
+    #ifdef DEBUG_TIME
+    Timer::start("unpackMessage");
+    #endif
+
+    // Unpack the image
+    extractImageFromMessageContainer(holesMsg, image, encoding);
+
+    // Recreate the conveyor
+    fromCandidateHoleMsgToConveyor(
+      holesMsg.candidateHoles,
+      conveyor,
+      *image,
+      representationMethod,
+      raycastKeypointPartitions);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("unpackMessage");
+    #endif
   }
-}  // namespace pandora_vision
+
+} // namespace pandora_vision

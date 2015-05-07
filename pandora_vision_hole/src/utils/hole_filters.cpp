@@ -35,10 +35,6 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include <cmath>
-
-#include "pandora_vision_msgs/Blob.h"
-#include "utils/message_conversions.h"
 #include "utils/hole_filters.h"
 
 /**
@@ -59,7 +55,7 @@ namespace pandora_vision
     outline of a blob is obtained.
     0 means by means of brushfire,
     1 by means of raycasting
-    @param[in,out] conveyor [BlobVector*] A struct that contains
+    @param[in,out] conveyor [HolesConveyor*] A struct that contains
     the final valid candidate holes
     @return void
    **/
@@ -67,13 +63,13 @@ namespace pandora_vision
     const std::vector<cv::KeyPoint>& keyPoints,
     cv::Mat* denoisedDepthImageEdges,
     const int& detectionMethod,
-    BlobVector* conveyor)
+    HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("validateBlobs", "findHoles");
     #endif
 
-    switch (detectionMethod)
+    switch(detectionMethod)
     {
       // Locate the outline of blobs via brushfiring
       case 0:
@@ -111,6 +107,7 @@ namespace pandora_vision
             blobsArea,
             blobsOutlineVector,
             conveyor);
+
           break;
         }
       // Locate the outline of blobs via raycasting
@@ -150,6 +147,7 @@ namespace pandora_vision
             blobsArea,
             blobsOutlineVector,
             conveyor);
+
           break;
         }
     }
@@ -182,7 +180,7 @@ namespace pandora_vision
     The area of each rectangle
     @param[in] inContours [const std::vector<std::vector<cv::Point2f> >&]
     The outline of each blob found
-    @param[out] conveyor [BlobVector*] The container of vector of blobs'
+    @param[out] conveyor [HolesConveyor*] The container of vector of blobs'
     keypoints, outlines and areas
     @return void
    **/
@@ -191,7 +189,7 @@ namespace pandora_vision
     const std::vector<std::vector<cv::Point2f> >& inRectangles,
     const std::vector<float>& inRectanglesArea,
     const std::vector<std::vector<cv::Point2f> >& inContours,
-    BlobVector* conveyor)
+    HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("validateKeypointsToRectangles", "validateBlobs");
@@ -211,26 +209,20 @@ namespace pandora_vision
         }
       }
 
+
       // If the keypoint resides in exactly one rectangle.
       if (keypointResidesInRectIds.size() == 1)
       {
         // A single hole
-        pandora_vision_msgs::Blob hole;
+        HoleConveyor hole;
 
         // Accumulate keypoint, rectangle and outline properties onto hole
-        hole.areaOfInterest.center = MessageConversions::keypointToMsg(
-            inKeyPoints[keypointId]);
-        hole.areaOfInterest.width = fabs(inRectangles[keypointResidesInRectIds[0]][0].x -
-          inRectangles[keypointResidesInRectIds[0]][1].x);
-        hole.areaOfInterest.height = fabs(inRectangles[keypointResidesInRectIds[0]][0].y -
-          inRectangles[keypointResidesInRectIds[0]][3].y);
-        hole.outline.clear();
-        for (int i = 0; i < inContours[keypointId].size(); ++i) {
-          hole.outline.push_back(MessageConversions::cvToMsg(inContours[keypointId][i]));
-        }
+        hole.keypoint = inKeyPoints[keypointId];
+        hole.rectangle = inRectangles[keypointResidesInRectIds[0]];
+        hole.outline = inContours[keypointId];
 
         // Push hole back into the conveyor
-        conveyor->append(hole);
+        conveyor->holes.push_back(hole);
       }
 
       // If the keypoint resides in multiple rectangles,
@@ -253,29 +245,24 @@ namespace pandora_vision
         }
 
         // A single hole
-        pandora_vision_msgs::Blob hole;
+        HoleConveyor hole;
 
         // Accumulate keypoint, rectangle and outline properties onto hole
-        hole.areaOfInterest.center = MessageConversions::keypointToMsg(
-            inKeyPoints[keypointId]);
-        hole.areaOfInterest.width = fabs(inRectangles[minAreaRectId][0].x -
-          inRectangles[minAreaRectId][1].x);
-        hole.areaOfInterest.height = fabs(inRectangles[minAreaRectId][0].y -
-          inRectangles[minAreaRectId][3].y);
-        hole.outline.clear();
-        for (int i = 0; i < inContours[keypointId].size(); ++i) {
-          hole.outline.push_back(MessageConversions::cvToMsg(inContours[keypointId][i]));
-        }
+        hole.keypoint = inKeyPoints[keypointId];
+        hole.rectangle = inRectangles[minAreaRectId];
+        hole.outline = inContours[keypointId];
 
         // Push hole back into the conveyor
-        conveyor->append(hole);
+        conveyor->holes.push_back(hole);
       }
+
       // If the keypoint has no rectangle attached to it,
       // do not insert the hole it corresponds to in struct hole
     }
+
     #ifdef DEBUG_TIME
     Timer::tick("validateKeypointsToRectangles");
     #endif
   }
 
-}  // namespace pandora_vision
+} // namespace pandora_vision

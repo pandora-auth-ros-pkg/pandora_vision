@@ -39,8 +39,7 @@
 #define HOLE_FUSION_NODE_HOLE_UNIQUENESS_H
 
 #include "utils/defines.h"
-#include "utils/blob_vector.h"
-#include "utils/message_conversions.h"
+#include "utils/holes_conveyor.h"
 
 /**
   @namespace pandora_vision
@@ -51,18 +50,19 @@ namespace pandora_vision
   /**
     @class HoleUniqueness
     @brief Provides method for making holes inside a
-    BlobVector container unique
+    HolesConveyor container unique
    **/
   class HoleUniqueness
   {
     public:
+
       /**
-        @brief Given a BlobVector container, this method detects
+        @brief Given a HolesConveyor container, this method detects
         multiple unique holes and deletes the extra copies.
-        @param[in,out] conveyor [BlobVector*] The container of holes
+        @param[in,out] conveyor [HolesConveyor*] The container of holes
         @return void
        **/
-      static void makeHolesUnique(BlobVector* conveyor);
+      static void makeHolesUnique(HolesConveyor* conveyor);
 
       /**
         @brief Takes as input a container of holes and a map of indices
@@ -76,16 +76,16 @@ namespace pandora_vision
         locates valid holes that refer to the same physical hole in space
         inside the conveyor container and picks the one with the largest
         validity probability.
-        @param[in,out] conveyor [BlobVector*] The conveyor of holes.
+        @param[in,out] conveyor [HolesConveyor*] The conveyor of holes.
         @param[in,out] validHolesMap [std::map<int, float>*] The std::map
         that maps holes inside the conveyor conveyor to their validity
         probability
         @return void
        **/
-      static void makeHolesUnique(BlobVector* conveyor,
+      static void makeHolesUnique(HolesConveyor* conveyor,
         std::map<int, float>* validHolesMap);
   };
 
-}  // namespace pandora_vision
+} // namespace pandora_vision
 
 #endif  // HOLE_FUSION_NODE_HOLE_UNIQUENESS_H

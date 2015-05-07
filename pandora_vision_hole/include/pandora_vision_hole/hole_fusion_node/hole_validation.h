@@ -39,7 +39,7 @@
 #define HOLE_FUSION_NODE_HOLE_VALIDATION_H
 
 #include "utils/defines.h"
-#include "utils/blob_vector.h"
+#include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
 
 // The hole's validation process identifiers
@@ -61,6 +61,7 @@ namespace pandora_vision
   class HoleValidation
   {
     public:
+
       /**
         @brief Validates candidate holes, meaning that having a two dimensional
         array that is the product of a series of validity ascertainers that
@@ -155,6 +156,7 @@ namespace pandora_vision
       static std::map<int, float> validateHolesViaThresholding(
         const std::vector<std::vector<float> >& probabilitiesVector2D,
         const int& filteringMode);
+
   };
 
 } // namespace pandora_vision

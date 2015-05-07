@@ -42,7 +42,7 @@
 #include "utils/edge_detection.h"
 #include "utils/outline_discovery.h"
 #include "utils/bounding_box_detection.h"
-#include "utils/blob_vector.h"
+#include "utils/holes_conveyor.h"
 #include <math.h>
 
 /**
@@ -58,6 +58,7 @@ namespace pandora_vision
   class HoleFilters
   {
     public:
+
       /**
         @brief Given a set of keypoints and an edges image, this function
         returns the valid keypoints and for each one, its respective, least
@@ -70,24 +71,21 @@ namespace pandora_vision
         outline of a blob is obtained.
         0 means by means of brushfire,
         1 by means of raycasting
-        @param[in,out] blobVec [BlobVector*] A class that contains
-        the final valid blobs
+        @param[in,out] conveyor [HolesConveyor*] A struct that contains
+        the final valid candidate holes
         @return void
        **/
       static void validateBlobs(
         const std::vector<cv::KeyPoint>& keyPoints,
         cv::Mat* denoisedDepthImageEdges,
         const int& detectionMethod,
-        BlobVector* conveyor);
+        HolesConveyor* conveyor);
 
       /**
         @brief This functions takes as input arguments a keypoints vector of
         size N, a rectangles vector of size M (the rectangle is represented
         by its 4 vertices so that the input can be either a Rectangle or a
         Rotated Rectangle) and a vector with the area of each rectangle
-
-
-;
         with purpose to identify the least area rectangle in which a
         keypoint resides. It outputs a vector of keypoints (each keypoint must
         reside in at least one rectangle) and a vector of rectangles (again
@@ -100,7 +98,7 @@ namespace pandora_vision
         rectangle
         @param[in] inContours [const std::vector<std::vector<cv::Point2f> >&]
         The outline of each blob found
-        @param[out] conveyor [BlobVector*] The container of vector of blobs'
+        @param[out] conveyor [HolesConveyor*] The container of vector of blobs'
         keypoints, outlines and areas
         @return void
        **/
@@ -109,7 +107,7 @@ namespace pandora_vision
         const std::vector<std::vector<cv::Point2f> >& inRectangles,
         const std::vector<float>& inRectanglesArea,
         const std::vector<std::vector<cv::Point2f> >& inContours,
-        BlobVector* conveyor);
+        HolesConveyor* conveyor);
 
   };
 

@@ -30,9 +30,9 @@ target_link_libraries(hole_filters_test
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(blob_vector_test
-  unit/utils/blob_vector_test.cpp)
-target_link_libraries(blob_vector_test
+catkin_add_gtest(holes_conveyor_test
+  unit/utils/holes_conveyor_test.cpp)
+target_link_libraries(holes_conveyor_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
@@ -178,19 +178,3 @@ find_package(rostest REQUIRED)
 #    MD5 1844a18c09ee3f7b5725bb788fa43ac1
 #    )
 #add_rostest(functional/hole_detector_test.launch)
-
-
-################################################################################
-#                               Benchmark Tests                                #
-################################################################################
-
-download_extra_data(
-  ${PROJECT_NAME}_benchmark_images_bags_pcl
-  EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
-  #EXCLUDE_FROM_ALL
-  )
-add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
-
-add_rostest(benchmark/hole_benchmark_test.launch)
-# add_rostest(benchmark/hole_benchmark_test.launch DEPENDENCIES
-            # ${PROJECT_NAME}_benchmark_images_bags_pcl)

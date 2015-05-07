@@ -113,6 +113,8 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief Validates candidate holes by giving weights to each
     probability from the set of per-hole probabilities set.
@@ -441,6 +443,8 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief Validates candidate holes by checking each set of
     probabilities obtained against individually-set thresholds
@@ -712,6 +716,8 @@ namespace pandora_vision
     return valid;
   }
 
+
+
   /**
     @brief Validates candidate holes by giving weights to each
     probability from the set of per-hole probabilities set.
@@ -925,4 +931,4 @@ namespace pandora_vision
     return valid;
   }
 
-}  // namespace pandora_vision
+} // namespace pandora_vision

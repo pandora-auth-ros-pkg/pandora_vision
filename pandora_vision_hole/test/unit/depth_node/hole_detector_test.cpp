@@ -131,13 +131,18 @@ namespace pandora_vision
         squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
 
       }
+
+
       // The images' width and height
       int WIDTH;
       int HEIGHT;
 
       // The image that will be used to locate blobs in
       cv::Mat squares_;
+
   };
+
+
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -168,11 +173,13 @@ namespace pandora_vision
     }
   }
 
+
+
   //! Tests HoleDetector::findHoles
   TEST_F ( HoleDetectorTest, findHolesTest )
   {
     // Run HoleDetector:findHoles
-    BlobVector conveyor = HoleDetector::findHoles ( squares_ );
+    HolesConveyor conveyor = HoleDetector::findHoles ( squares_ );
 
     // The number of keypoints found
     int size = conveyor.size();
@@ -186,17 +193,18 @@ namespace pandora_vision
     // For every keypoint found, make assertions and expectations
     for ( int k = 0; k < size; k++ )
     {
-      std::vector<cv::Point2f> vec = MessageConversions::areaToVec(
-        conveyor.getBlob(k).areaOfInterest);
-
       // The location of the keypoint should be near the center of the square
       // in which it lies
-      EXPECT_NEAR ( conveyor.getBlob(k).areaOfInterest.center.x,
-        vec[0].x + 50, 1 );
+      EXPECT_NEAR ( conveyor.holes[k].keypoint.pt.x,
+        conveyor.holes[k].rectangle[0].x + 50, 1 );
+
+      // The hole should have exactly four vertices
+      EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
       // There should be 400 outline points
-      EXPECT_EQ ( 400, conveyor.getBlob(k).outline.size() );
+      EXPECT_EQ ( 400, conveyor.holes[k].outline.size() );
     }
+
   }
 
-}  // namespace pandora_vision
+} // namespace pandora_vision

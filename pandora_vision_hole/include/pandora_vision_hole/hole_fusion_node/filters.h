@@ -44,7 +44,7 @@
 #include "hole_fusion_node/rgb_filters.h"
 #include "utils/edge_detection.h"
 #include "utils/histogram.h"
-#include "utils/blob_vector.h"
+#include "utils/holes_conveyor.h"
 #include "utils/morphological_operators.h"
 #include "utils/outline_discovery.h"
 #include "utils/parameters.h"
@@ -64,10 +64,11 @@ namespace pandora_vision
   class Filters
   {
     public:
+
       /**
         @brief Applies a specific active filter, either from an RGB
         or a Depth sources.
-        @param[in] conveyor [const BlobVector&]
+        @param[in] conveyor [const HolesConveyor&]
         The conveyor of candidateholes
         @param[in] filteringMethod [const int&]
         Each filter's identifier
@@ -113,7 +114,7 @@ namespace pandora_vision
         @return void
        **/
       static void applyFilter(
-        const BlobVector& conveyor,
+        const HolesConveyor& conveyor,
         const int& filteringMethod,
         const cv::Mat& depthImage,
         const cv::Mat& rgbImage,
@@ -133,7 +134,7 @@ namespace pandora_vision
         @brief Applies all active filters, from both RGB and Depth sources.
         The order of execution is derived from the dynamic reconfigure
         facility.
-        @param[in] conveyor [const BlobVector&]
+        @param[in] conveyor [const HolesConveyor&]
         The conveyor of candidateholes
         @param[in] filteringMode [const int&]
         The filtering mode used: If RGBD_MODE, depth analysis is possible,
@@ -178,7 +179,7 @@ namespace pandora_vision
         @return void
        **/
       static void applyFilters(
-        const BlobVector& conveyor,
+        const HolesConveyor& conveyor,
         const int& interpolationMethod,
         const cv::Mat& depthImage,
         const cv::Mat& rgbImage,
@@ -191,6 +192,7 @@ namespace pandora_vision
         const std::vector<std::set<unsigned int> >& intermediatePointsSetVector,
         const std::vector<cv::Mat>& intermediatePointsImageVector,
         std::vector<std::vector<float> >* probabilitiesVector);
+
   };
 
 } // namespace pandora_vision

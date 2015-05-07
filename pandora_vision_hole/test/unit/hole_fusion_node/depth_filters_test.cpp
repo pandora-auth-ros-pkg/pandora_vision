@@ -40,6 +40,7 @@
 #include "hole_fusion_node/planes_detection.h"
 #include "gtest/gtest.h"
 
+
 namespace pandora_vision
 {
   /**
@@ -49,6 +50,7 @@ namespace pandora_vision
   class DepthFiltersTest : public ::testing::Test
   {
     protected:
+
       DepthFiltersTest() : cloud ( new PointCloud ) {}
 
       /**
@@ -77,9 +79,9 @@ namespace pandora_vision
         rectangle to be created
         @param[in] x [const int&] The recgangle's width
         @param[in] y [const int&] The rectangle's height
-        return [BlobVector] A struct containing the elements of one hole
+        return [HolesConveyor] A struct containing the elements of one hole
        **/
-      BlobVector getConveyor (
+      HolesConveyor getConveyor (
         const cv::Point2f& upperLeft,
         const int& x,
         const int& y );
@@ -123,10 +125,12 @@ namespace pandora_vision
             0.2,
             &lowerRightSquare );
 
-        conveyor.extend(
-          getConveyor(cv::Point2f(WIDTH - 100, HEIGHT - 100),
+        HolesConveyorUtils::append(
+          getConveyor( cv::Point2f ( WIDTH - 100, HEIGHT - 100 ),
             100,
-            100));
+            100 ),
+          &conveyor);
+
 
         // Construct the upper right image
         cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
@@ -138,10 +142,11 @@ namespace pandora_vision
             0.2,
             &upperRightSquare );
 
-        conveyor.extend(
-          getConveyor(cv::Point2f(WIDTH - 103, 3),
+        HolesConveyorUtils::append(
+          getConveyor( cv::Point2f ( WIDTH - 103, 3 ),
             100,
-            100));
+            100 ),
+          &conveyor);
 
         // Construct the upper left square
         cv::Mat upperLeftSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
@@ -153,13 +158,15 @@ namespace pandora_vision
             0.3,
             &upperLeftSquare );
 
-        conveyor.extend(
-          getConveyor(cv::Point2f(100, 100),
+        HolesConveyorUtils::append(
+          getConveyor( cv::Point2f ( 100, 100 ),
             100,
-            100));
+            100 ),
+          &conveyor);
 
         // Compose the final squares_ image
         squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
+
 
         // Construct the point cloud corresponding to the squares_ image
 
@@ -181,7 +188,9 @@ namespace pandora_vision
           cloud->points[i].y = 1 + y / 10;
           cloud->points[i].z = squares_.at< float >( x, y );
         }
+
       }
+
 
       // The images' width and height
       int WIDTH;
@@ -192,11 +201,14 @@ namespace pandora_vision
 
       // The conveyor of holes that will be used to test methods of class
       // DepthFilters
-      BlobVector conveyor;
+      HolesConveyor conveyor;
 
       // The point cloud corresponding to the squares_ image
       PointCloudPtr cloud;
+
   };
+
+
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -227,6 +239,8 @@ namespace pandora_vision
     }
   }
 
+
+
   /**
     @brief Constructs the internals of a rectangular hole
     of width @param x and height of @param y
@@ -234,39 +248,51 @@ namespace pandora_vision
     rectangle to be created
     @param[in] x [const int&] The recgangle's width
     @param[in] y [const int&] The rectangle's height
-    return [BlobVector] A struct containing the elements of one hole
+    return [HolesConveyor] A struct containing the elements of one hole
    **/
-  BlobVector DepthFiltersTest::getConveyor(
+  HolesConveyor DepthFiltersTest::getConveyor (
     const cv::Point2f& upperLeft,
     const int& x,
-    const int& y)
+    const int& y )
   {
     // What will be returned: the internal elements of one hole
-    pandora_vision_msgs::Blob hole;
+    HoleConveyor hole;
 
     // The hole's keypoint
-    hole.areaOfInterest.center.x = upperLeft.x + x / 2;
-    hole.areaOfInterest.center.y = upperLeft.y + y / 2;
+    cv::KeyPoint k (  upperLeft.x + x / 2, upperLeft.y + y / 2 , 1 );
 
-    // The width and height of the rectangle
-    hole.areaOfInterest.width = x;
-    hole.areaOfInterest.height = y;
+    hole.keypoint = k;
+
+
+    // The four vertices of the rectangle
+    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
+
+    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
+
+    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
+
+    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
+
+    std::vector<cv::Point2f> rectangle;
+    rectangle.push_back(vertex_1);
+    rectangle.push_back(vertex_2);
+    rectangle.push_back(vertex_3);
+    rectangle.push_back(vertex_4);
+
+    hole.rectangle = rectangle;
+
 
     // The outline points of the hole will be obtained through the depiction
     // of the points consisting the rectangle
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-    
-    cv::Point2f vertex_1( upperLeft.x, upperLeft.y );
-    cv::Point2f vertex_2( upperLeft.x, upperLeft.y + y - 1 );
-    cv::Point2f vertex_3( upperLeft.x + x - 1, upperLeft.y + y - 1 );
-    cv::Point2f vertex_4( upperLeft.x + x - 1, upperLeft.y );
-    
+
     cv::Point2f a[] = {vertex_1, vertex_2, vertex_3, vertex_4};
 
-    for (unsigned int j = 0; j < 4; j++)
+    for(unsigned int j = 0; j < 4; j++)
     {
       cv::line(image, a[j], a[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
     }
+
 
     std::vector<cv::Point2f> outline;
     for ( int rows = 0; rows < image.rows; rows++ )
@@ -279,16 +305,20 @@ namespace pandora_vision
         }
       }
     }
-    hole.outline = MessageConversions::vecToMsg(outline);
 
-    // Push hole back into a BlobVector
-    BlobVector conveyor;
-    conveyor.append(hole);
+    hole.outline = outline;
+
+    // Push hole into a HolesConveyor
+    HolesConveyor conveyor;
+    conveyor.holes.push_back(hole);
 
     return conveyor;
+
   }
 
-  /// Tests DepthFilters::checkHolesDepthArea
+
+
+  //! Tests DepthFilters::checkHolesDepthArea
   TEST_F ( DepthFiltersTest, checkHolesDepthAreaTest )
   {
     // Generate the vector of holes' mask (set)

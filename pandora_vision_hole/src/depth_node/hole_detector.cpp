@@ -52,9 +52,9 @@ namespace pandora_vision
     boxes of those outlines.
     @param[in] interpolatedDepthImage [const cv::Mat&] The interpolated
     depth image in CV_32FC1 format
-    @return BlobVector The struct that contains the holes found
+    @return HolesConveyor The struct that contains the holes found
    **/
-  BlobVector HoleDetector::findHoles(const cv::Mat& interpolatedDepthImage)
+  HolesConveyor HoleDetector::findHoles(const cv::Mat& interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("findHoles", "inputDepthImageCallback");
@@ -63,7 +63,7 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if (Parameters::Debug::show_find_holes)  // Debug
+    if(Parameters::Debug::show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Interpolated depth image";
@@ -80,7 +80,7 @@ namespace pandora_vision
       &denoisedDepthImageEdges);
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)  // Debug
+    if(Parameters::Debug::show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Edges after denoise");
@@ -97,7 +97,7 @@ namespace pandora_vision
     BlobDetection::detectBlobs(denoisedDepthImageEdges, &keyPoints);
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)  // Debug
+    if(Parameters::Debug::show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Initial keypoints");
@@ -109,8 +109,8 @@ namespace pandora_vision
     }
     #endif
 
-    // The final vectors of rectangles and blobs' outlines.
-    BlobVector conveyor;
+    // The final vectors of keypoints, rectangles and blobs' outlines.
+    HolesConveyor conveyor;
 
     /**
       Get me blobs that their center point is inside the image,
@@ -128,7 +128,7 @@ namespace pandora_vision
       &conveyor);
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)  // Debug
+    if(Parameters::Debug::show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Blobs");
@@ -145,15 +145,14 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)  // Debug
+    if(Parameters::Debug::show_find_holes) // Debug
     {
       // A vector of keypoints
       std::vector<cv::KeyPoint> keypointsVector;
 
       for (int i = 0; i < conveyor.size(); i++)
       {
-        keypointsVector.push_back(MessageConversions::msgToKeypoint(
-          conveyor.getBlob(i).areaOfInterest.center));
+        keypointsVector.push_back(conveyor.holes[i].keypoint);
       }
 
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);

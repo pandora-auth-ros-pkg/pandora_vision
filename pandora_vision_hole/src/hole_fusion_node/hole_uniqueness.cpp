@@ -44,19 +44,19 @@
 namespace pandora_vision
 {
   /**
-    @brief Given a BlobVector container, this method detects
+    @brief Given a HolesConveyor container, this method detects
     multiple unique holes and deletes the extra copies.
-    @param[in,out] conveyor [BlobVector*] The container of holes
+    @param[in,out] conveyor [HolesConveyor*] The container of holes
     @return void
    **/
-  void HoleUniqueness::makeHolesUnique(BlobVector* conveyor)
+  void HoleUniqueness::makeHolesUnique(HolesConveyor* conveyor)
   {
     #ifdef DEBUG_TIME
     Timer::start("makeHolesUniqueA", "processCandidateHoles");
     #endif
 
     // A container in which one of every duplicate hole will be inserted
-    BlobVector uniqueDuplicates;
+    HolesConveyor uniqueDuplicates;
 
     // A set of sets containing the indices of duplicate holes.
     // Each internal set points to one unique hole
@@ -71,19 +71,22 @@ namespace pandora_vision
         if (i != j)
         {
           // First off, the two holes' keypoints must be identical.
-          if (conveyor->getBlob(i).areaOfInterest.center.x ==
-            conveyor->getBlob(j).areaOfInterest.center.x &&
-            conveyor->getBlob(i).areaOfInterest.center.y ==
-            conveyor->getBlob(j).areaOfInterest.center.y)
+          if (conveyor->holes[i].keypoint.pt.x ==
+            conveyor->holes[j].keypoint.pt.x &&
+            conveyor->holes[i].keypoint.pt.y ==
+            conveyor->holes[j].keypoint.pt.y)
           {
             // Second off, it is sufficient to check the identicalness of
             // the vertices of the two holes' bounding boxes.
-            if (conveyor->getBlob(i).areaOfInterest.width ==
-              conveyor->getBlob(j).areaOfInterest.width &&
-              conveyor->getBlob(i).areaOfInterest.height ==
-              conveyor->getBlob(j).areaOfInterest.height)
+            for (int v = 0; v < conveyor->holes[i].rectangle.size(); v++)
             {
-              identical.insert(j);
+              if (conveyor->holes[i].rectangle[v].x ==
+                conveyor->holes[j].rectangle[v].x &&
+                conveyor->holes[i].rectangle[v].y ==
+                conveyor->holes[j].rectangle[v].y)
+              {
+                identical.insert(j);
+              }
             }
           }
         }
@@ -98,6 +101,7 @@ namespace pandora_vision
       }
     }
 
+
     // Populate the uniqueDuplicates container with a copy of each duplicate
     // hole. All the duplicate holes will be deleted from the input conveyor,
     // and then merged with the uniqueDuplicates conveyor.
@@ -106,7 +110,9 @@ namespace pandora_vision
     {
       std::set<int>::iterator it = d_it->begin();
 
-      uniqueDuplicates.append(conveyor->getBlob(*it));
+      HolesConveyorUtils::append(
+        HolesConveyorUtils::getHole(*conveyor, *it),
+        &uniqueDuplicates);
     }
 
     // Now, all the duplicate holes must be deleted from the input conveyor.
@@ -125,16 +131,18 @@ namespace pandora_vision
     for (std::set<int>::reverse_iterator it = duplicates.rbegin();
       it != duplicates.rend(); it++)
     {
-      conveyor->removeHole(*it);
+      conveyor->holes.erase(conveyor->holes.begin() + *it);
     }
 
     // Add one copy of each duplicate hole deleted to the conveyor container
-    conveyor->extend(uniqueDuplicates);
+    HolesConveyorUtils::append(uniqueDuplicates, conveyor);
 
     #ifdef DEBUG_TIME
     Timer::tick("makeHolesUniqueA");
     #endif
   }
+
+
 
   /**
     @brief Takes as input a container of holes and a map of indices
@@ -148,13 +156,13 @@ namespace pandora_vision
     locates valid holes that refer to the same physical hole in space
     inside the conveyor container and picks the one with the largest
     validity probability.
-    @param[in,out] conveyor [BlobVector*] The conveyor of holes.
+    @param[in,out] conveyor [HolesConveyor*] The conveyor of holes.
     @param[in,out] validHolesMap [std::map<int, float>*] The std::map
     that maps holes inside the conveyor conveyor to their validity
     probability
     @return void
    **/
-  void HoleUniqueness::makeHolesUnique(BlobVector* conveyor,
+  void HoleUniqueness::makeHolesUnique(HolesConveyor* conveyor,
     std::map<int, float>* validHolesMap)
   {
     #ifdef DEBUG_TIME
@@ -178,8 +186,8 @@ namespace pandora_vision
     {
       // The keypoint of the i-th hole in cv::Point2f format
       cv::Point2f keypoint;
-      keypoint.x = conveyor->getBlob(o_it->first).areaOfInterest.center.x;
-      keypoint.y = conveyor->getBlob(o_it->first).areaOfInterest.center.y;
+      keypoint.x = conveyor->holes[o_it->first].keypoint.pt.x;
+      keypoint.y = conveyor->holes[o_it->first].keypoint.pt.y;
 
       // A set of the identifiers of holes inside the conveyor conveyor,
       // whose bounding box the i-th hole is inside, recursively.
@@ -187,12 +195,13 @@ namespace pandora_vision
       for (std::map<int, float>::iterator i_it = validHolesMap->begin();
         i_it != validHolesMap->end(); i_it++)
       {
-        if (cv::pointPolygonTest(MessageConversions::areaToVec(
-          conveyor->getBlob(i_it->first).areaOfInterest), keypoint, false) > 0)
+        if (cv::pointPolygonTest(
+            conveyor->holes[i_it->first].rectangle, keypoint, false) > 0)
         {
           parents.insert(i_it->first);
         }
       }
+
       residenceMap[o_it->first] = parents;
     }
 
@@ -248,7 +257,7 @@ namespace pandora_vision
     }
 
     // The conveyor of unique and valid holes
-    BlobVector uniqueHoles;
+    HolesConveyor uniqueHoles;
 
     // Maps a unique, valid hole to its validity probability
     std::map<int, float> finalMap;
@@ -290,7 +299,9 @@ namespace pandora_vision
       // The index-th hole inside this cluster of nearby holes is the most
       // accurate one, since its probability is the highest among its rearby
       // holes. Append it to the uniqueHoles conveyor.
-      uniqueHoles.append(conveyor->getBlob(index));
+      HolesConveyorUtils::append(
+        HolesConveyorUtils::getHole(*conveyor, index),
+        &uniqueHoles);
 
       // Map the most accurate hole to its probability.
       finalMap[numHoles] = maxProbability;
@@ -302,11 +313,12 @@ namespace pandora_vision
     // Replace the uniqueHoles conveyor with the one containing
     // clusters of holes and the input map with the one corresponding to the
     // unique holes found.
-    conveyor->replace(uniqueHoles);
+    HolesConveyorUtils::replace(uniqueHoles, conveyor);
     *validHolesMap = finalMap;
 
     #ifdef DEBUG_TIME
     Timer::tick("makeHolesUniqueB");
     #endif
   }
-}  // namespace pandora_vision
+
+} // namespace pandora_vision
