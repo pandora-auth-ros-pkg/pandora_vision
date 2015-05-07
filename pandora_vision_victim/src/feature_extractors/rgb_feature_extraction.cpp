@@ -70,13 +70,19 @@ namespace pandora_vision
     std::string siftFeatures = fs["extract_sift_features"];
     std::string hogFeatures = fs["extract_hog_features"];
 
-    bool extractChannelsStatisticsFeatures = channelsStatisticsFeatures.compare("false");
-    bool extractEdgeOrientationFeatures = edgeOrientationFeatures.compare("false");
-    bool extractHaralickFeatures = haralickFeatures.compare("false");
-    bool extractSiftFeatures = siftFeatures.compare("false");
-    bool extractHogFeatures = hogFeatures.compare("false");
+    bool extractChannelsStatisticsFeatures =
+      channelsStatisticsFeatures.compare("true") == 0;
+    bool extractEdgeOrientationFeatures =
+      edgeOrientationFeatures.compare("true") == 0;
+    bool extractHaralickFeatures = haralickFeatures.compare("true") == 0;
+    bool extractSiftFeatures = siftFeatures.compare("true") == 0;
+    bool extractHogFeatures = hogFeatures.compare("true") == 0;
+
+    std::string viewDescriptor = fs["visualization"];
+    visualization_ = viewDescriptor.compare("true") == 0; 
 
     int dictionarySize = static_cast<int>(fs["dictionary_size"]);
+
     fs.release();
 
     chosenFeatureTypesMap_["channels_statistics"] =
@@ -163,6 +169,9 @@ namespace pandora_vision
       /// Extract SIFT features from RGB image
       cv::Mat siftDescriptors;
       bowTrainerPtr_->createBowRepresentation(inImage, &siftDescriptors);
+
+      if (visualization_)
+        bowTrainerPtr_->plotDescriptor(siftDescriptors);
       /// Append SIFT features to RGB feature vector.
       for (int ii = 0; ii < siftDescriptors.cols; ii++)
         featureVector_.push_back(siftDescriptors.at<float>(ii));

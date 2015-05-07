@@ -100,6 +100,12 @@ namespace pandora_vision
       void createBowRepresentation(const cv::Mat& inImage,
           cv::Mat* descriptors);
 
+      /*
+       * @brief : Plots the input descriptor.
+       * @param descriptor[const cv::Mat&]: The descriptor to plot
+       */
+      void plotDescriptor(const cv::Mat& descriptor);
+
       /**
        * @brief
        */

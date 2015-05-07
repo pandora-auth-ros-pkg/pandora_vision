@@ -174,4 +174,40 @@ namespace pandora_vision
   {
     return bowVocabulary_;
   }
+
+  void BagOfWordsTrainer::plotDescriptor(const cv::Mat& descriptor)
+  {
+    // Initialize the window where the histogram will be displayed.
+    std::string windowName = "BagOfWords Descriptor";
+    cv::namedWindow(windowName, cv::WINDOW_NORMAL);
+
+    // Initialize the window dimensions.
+    const int windowHeight = 640;
+    const int windowWidth = descriptor.cols;
+    
+    int bins = descriptor.cols > descriptor.rows ? descriptor.cols :
+      descriptor.rows;
+
+    // Create the canvas where the descriptor/histogram of visual words
+    // will be drawn.
+    cv::Mat canvas = cv::Mat::ones(windowHeight, bins, CV_8UC3);
+
+    for (int i = 0; i < bins; ++i)
+    {
+      cv::line(canvas,
+          cv::Point(i, windowHeight),
+          cv::Point(i, windowHeight - descriptor.at<float>(i) * windowHeight),
+          cv::Scalar(255, 0, 0),
+          1,
+          CV_AA,
+          0);  
+    }
+
+    cv::imshow(windowName, canvas);
+    cv::waitKey(0);
+
+    cv::destroyAllWindows();
+
+    return;
+  }
 }  // namespace pandora_vision

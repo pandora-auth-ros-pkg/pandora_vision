@@ -146,6 +146,9 @@ namespace pandora_vision
       bool bagOfWordsVocabularyNeeded();
 
     protected:
+      /// Flag for displaying the calculated descriptors.
+      bool visualization_;
+
       /// String containing the package path.
       std::string packagePath_;
 
