@@ -292,6 +292,8 @@ namespace pandora_vision
   int Parameters::HoleFusion::hole_border_thresh = 10;
   float Parameters::HoleFusion::depth_difference_thresh = 1.2;
   int Parameters::HoleFusion::remove_unstuffed_holes = 1;
+  int Parameters::HoleFusion::unstuffed_removal_method = 1;
+  float Parameters::HoleFusion::difference_scanline_thresh = 1.0;
   //
   //
   //

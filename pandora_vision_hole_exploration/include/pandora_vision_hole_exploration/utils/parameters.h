@@ -375,6 +375,8 @@ namespace pandora_vision
       static int hole_border_thresh;
       static float depth_difference_thresh;
       static int remove_unstuffed_holes;
+      static int unstuffed_removal_method;
+      static float difference_scanline_thresh;
     };
     //
     //

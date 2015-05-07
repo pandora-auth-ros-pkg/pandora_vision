@@ -90,6 +90,24 @@ namespace pandora_vision
           cv::Mat* image );
 
       /**
+        @brief Constructs a rectangle with highly variant color between border and internal of width @param x and height of @param y.
+        @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
+        rectangle to be created
+        @param[in] x [const int&] The rectangle's width
+        @param[in] y [const int&] The rectangle's height
+        @param[in] diff [const float&] The difference between border and internal
+        @param[out] image [cv::Mat*] The image on which the rectangle will be
+        imprinted
+        return void
+       **/
+      void generateBorderInternalDifferenceDepthRectangle (
+          const cv::Point2f& upperLeft,
+          const int& x,
+          const int& y,
+          const float& diff,
+          cv::Mat* image );
+
+      /**
         @brief Constructs a rectangle of width @param x and height of @param y.
         @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
         rectangle to be created
@@ -221,8 +239,8 @@ namespace pandora_vision
     // Fill the inside of the desired rectangle with the @param depthIn provided
     for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
     {
-        // The seed for the random depth value
-        unsigned int seed = 0;
+      // The seed for the random depth value
+      unsigned int seed = 0;
       for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
       {
         image->at< float >( rows, cols ) = rand_r(&seed) % range;
@@ -230,6 +248,69 @@ namespace pandora_vision
     }
   }
 
+
+  /**
+    @brief Constructs a rectangle with highly variant color between border and internal of width @param x and height of @param y.
+    @param[in] upperLeft [const cv::Point2f&] The upper left vertex of the
+    rectangle to be created
+    @param[in] x [const int&] The rectangle's width
+    @param[in] y [const int&] The rectangle's height
+    @param[in] diff [const float&] The difference between border and internal
+    @param[out] image [cv::Mat*] The image on which the rectangle will be
+    imprinted
+    return void
+   **/
+  void HoleFusionTest::generateBorderInternalDifferenceDepthRectangle(
+      const cv::Point2f& upperLeft,
+      const int& x,
+      const int& y,
+      const float& diff,
+      cv::Mat* image )
+  {
+    float borderColor = 2.0;
+    // Fill the border of the desired rectangle with a color.
+    for( int rows = upperLeft.y; rows < upperLeft.y + 10; rows++ )
+    {
+      for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
+      {
+        image->at< float >( rows, cols ) = borderColor;
+      }
+    }
+
+    for( int rows = upperLeft.y + y - 10; rows < upperLeft.y + y; rows++ )
+    {
+      for ( int cols = upperLeft.x; cols < upperLeft.x + x; cols++ )
+      {
+        image->at< float >( rows, cols ) = borderColor;
+      }
+    }
+
+    for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
+    {
+      for ( int cols = upperLeft.x; cols < upperLeft.x + 10; cols++ )
+      {
+        image->at< float >( rows, cols ) = borderColor;
+      }
+    }
+
+    for( int rows = upperLeft.y; rows < upperLeft.y + y; rows++ )
+    {
+      for ( int cols = upperLeft.x + x - 10; cols < upperLeft.x + x; cols++ )
+      {
+        image->at< float >( rows, cols ) = borderColor;
+      }
+    }
+
+    // Fill the internal of the desired rectangle with color bigger from the border.
+    // The difference is @param diff
+    for( int rows = upperLeft.y + 10; rows < upperLeft.y + y - 10; rows++ )
+    {
+      for ( int cols = upperLeft.x + 10; cols < upperLeft.x + x - 10; cols++ )
+      {
+        image->at< float >( rows, cols ) = borderColor + diff;
+      }
+    }
+  }
 
   /**
     @brief Constructs a rectangle of width @param x and height of @param y.
@@ -536,15 +617,32 @@ namespace pandora_vision
         3,
         &depthMedVarSquare );
 
-    // Construct the big depth variance square area
     cv::Mat depthBigVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+    // unstuffed removal method 0 means remove holes on depth area with big overall depth variance, 
+    // while 1 means remove holes on depth area with big difference avg from points at the border 
+    // and all other points until the rectangle's center point
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      // Construct the big depth variance square area
 
-    HoleFusionTest::generateNonHomogeneousDepthRectangle( 
-        cv::Point2f ( 200, 200 ),
-        70,
-        70,
-        10,
-        &depthBigVarSquare );
+      HoleFusionTest::generateNonHomogeneousDepthRectangle( 
+          cv::Point2f ( 200, 200 ),
+          70,
+          70,
+          10,
+          &depthBigVarSquare );
+    }
+    else
+    {
+      // Construct the square area with big depth variance between border and internal
+
+      HoleFusionTest::generateBorderInternalDifferenceDepthRectangle( 
+          cv::Point2f ( 200, 200 ),
+          50,
+          50,
+          5.0,
+          &depthBigVarSquare );
+    }
 
     // Construct the very small depth variance square area
     cv::Mat depthSmallSmallVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
@@ -561,6 +659,7 @@ namespace pandora_vision
       depthBigVarSquare +
       depthSmallVarSquare +
       depthMedVarSquare;
+
 
     /////////////////////// Construct the rgb image ////////////////////////
 
@@ -585,15 +684,30 @@ namespace pandora_vision
         140,
         &rgbInsideSmallDepthVarSquare );
 
-    // Construct the square inside the big depth variance area
-    cv::Mat rgbInsideBigDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      // Construct the square inside the big depth variance area
+      cv::Mat rgbInsideBigDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
-    HoleFusionTest::generateRgbRectangle
-      ( cv::Point2f ( 220, 220),
-        40,
-        40,
-        140,
-        &rgbInsideBigDepthVarSquare );
+      HoleFusionTest::generateRgbRectangle
+        ( cv::Point2f ( 220, 220),
+          40,
+          40,
+          140,
+          &rgbInsideBigDepthVarSquare );
+    }
+    else
+    {
+      // Construct the square inside the big depth variance area
+      cv::Mat rgbInsideBigDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
+
+      HoleFusionTest::generateRgbRectangle
+        ( cv::Point2f ( 200, 200),
+          50,
+          50,
+          140,
+          &rgbInsideBigDepthVarSquare );
+    }
 
     //std::vector<bool> realContours(4, true);
     conveyorTemp = getConveyor(
@@ -608,22 +722,45 @@ namespace pandora_vision
         40 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 220, 220 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 220, 220 ),
+          40,
+          40 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
+    else
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 200, 200 ),
+          50,
+          50 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
     HolesConveyor depthConveyor;
     HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
     HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
 
-    // Expected that the small hole on the small depth val area 
-    // and the big hole on the big depth val area will be eliminated, 
-    // and also the two holes inside the small depth variance area 
-    // and the hole on the big depth variance area
-    EXPECT_EQ ( 1, conveyor.rectangle.size());
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      // Expected that the small hole on the small depth val area 
+      // and the big hole on the big depth val area will be eliminated, 
+      // and also the two holes inside the small depth variance area 
+      // and the hole on the big depth variance area
+      EXPECT_EQ ( 1, conveyor.rectangle.size());
+    }
+    else
+    {
+      // Expected that the small hole on the small depth val area 
+      // and the big hole on the big depth val area will be eliminated, 
+      // and also the two holes inside the small depth variance area 
+      // and the hole on the big depth variance between border and internal area
+      EXPECT_EQ ( 1, conveyor.rectangle.size());
+    }
 
     // Construct the overlapping depth hole with the last rgb hole left
     cv::Mat depthOverlappingSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
@@ -659,7 +796,7 @@ namespace pandora_vision
     // the small variance threshold is used to eliminate RGB contours 
     // (thus just a small variance inside the hole's bounding box 
     // does not mean invalid RGB hole)
-    
+
     // Set the depth for each point of the depthSquares_ image to 0.3
     for ( int rows = 0; rows < depthSquares_.rows; rows++ )
     {
@@ -685,12 +822,24 @@ namespace pandora_vision
         40 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 220, 220 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 220, 220 ),
+          40,
+          40 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
+    else
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 200, 200 ),
+          50,
+          50 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
     preValidatedHoles.keypoint.clear();
     preValidatedHoles.rectangle.clear();
     validHolesMap.clear();
@@ -728,12 +877,24 @@ namespace pandora_vision
         40 );
     conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 220, 220 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 220, 220 ),
+          40,
+          40 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
+    else
+    {
+      conveyorTemp = getConveyor(
+          cv::Point2f ( 200, 200 ),
+          50,
+          50 );
+      conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+      conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    }
     preValidatedHoles.keypoint.clear();
     preValidatedHoles.rectangle.clear();
     validHolesMap.clear();

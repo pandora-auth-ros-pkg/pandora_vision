@@ -758,6 +758,10 @@ namespace pandora_vision
       config.depth_difference_thresh;
     Parameters::HoleFusion::remove_unstuffed_holes = 
       config.remove_unstuffed_holes;
+    Parameters::HoleFusion::unstuffed_removal_method = 
+      config.unstuffed_removal_method;
+    Parameters::HoleFusion::difference_scanline_thresh = 
+      config.difference_scanline_thresh;
 
   }
 
@@ -1264,11 +1268,72 @@ namespace pandora_vision
             realRgbContours[i] = false;
         }
         else
-          if(distanceVariance < Parameters::HoleFusion::rgb_small_distance_variance_thresh 
-              || (Parameters::HoleFusion::remove_unstuffed_holes 
-                && distanceVariance > Parameters::HoleFusion::depth_difference_thresh))
+          if(distanceVariance < Parameters::HoleFusion::rgb_small_distance_variance_thresh)
             realRgbContours[i] = false;
 
+      }
+    }
+
+
+    // eliminate unstuffed rgb holes
+    if(Parameters::HoleFusion::remove_unstuffed_holes)
+    {
+      if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+      {
+        for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+        {
+          if(realRgbContours[i])
+          {
+            cv::Scalar mean;
+            cv::Scalar stddev;
+            cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
+            cv::meanStdDev (ROI, mean, stddev);
+            float distanceVariance = static_cast<float>(stddev.val[0]); 
+            if(distanceVariance > Parameters::HoleFusion::depth_difference_thresh)
+              realRgbContours[i] = false;
+
+          }
+        }
+      }
+      else
+      {
+        // use a vertical and a horizontal line which pass from the middle of each box. 
+        // Find an average of differences from initial pixel to the keypoint        
+        for(int i = 0; i < rgbHolesConveyor -> rectangle.size(); i++)
+        {
+          if(realRgbContours[i])
+          {
+            float startY = rgbHolesConveyor -> rectangle[i].y;
+            float startX = rgbHolesConveyor -> rectangle[i].x;
+            float sumV = 0.0;
+            float sumH = 0.0;
+            int sumVPixels = 0;
+            int sumHPixels = 0;
+            for(int j = startY; j < rgbHolesConveyor -> keypoint[i].y; j ++) 
+            {
+              if(image.at<float>(j, rgbHolesConveyor -> keypoint[i].x) != 0)
+              {
+                sumV += 
+                  std::abs(image.at<float>(startY, rgbHolesConveyor -> keypoint[i].x) 
+                      - image.at<float>(j, rgbHolesConveyor -> keypoint[i].x));
+                sumVPixels++;
+              }
+            }
+            for(int j = startX; j < rgbHolesConveyor -> keypoint[i].x; j ++) 
+            {
+              if(image.at<float>(rgbHolesConveyor -> keypoint[i].y, j) != 0)
+              {
+                sumH += 
+                  std::abs(image.at<float>(rgbHolesConveyor -> keypoint[i].y, startX) 
+                      - image.at<float>(rgbHolesConveyor -> keypoint[i].y, j));
+                sumHPixels++;
+              }
+            }
+            float avg = (sumV / sumVPixels + sumH / sumHPixels) / 2;
+            if(avg > Parameters::HoleFusion::difference_scanline_thresh)
+              realRgbContours[i] = false;
+          }
+        }
       }
     }
     // keep only the valid contours till this point in a temporary conveyor
@@ -1292,18 +1357,61 @@ namespace pandora_vision
     // eliminate unstuffed depth holes
     if(Parameters::HoleFusion::remove_unstuffed_holes)
     {
-      for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+      if(Parameters::HoleFusion::unstuffed_removal_method == 0)
       {
-        if(realRgbContours[i])
+        for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
         {
-          cv::Scalar mean;
-          cv::Scalar stddev;
-          cv::Mat ROI = image(depthHolesConveyor -> rectangle[i]);
-          cv::meanStdDev (ROI, mean, stddev);
-          float distanceVariance = static_cast<float>(stddev.val[0]); 
-          if(distanceVariance > Parameters::HoleFusion::depth_difference_thresh)
-            realDepthContours[i] = false;
+          if(realDepthContours[i])
+          {
+            cv::Scalar mean;
+            cv::Scalar stddev;
+            cv::Mat ROI = image(depthHolesConveyor -> rectangle[i]);
+            cv::meanStdDev (ROI, mean, stddev);
+            float distanceVariance = static_cast<float>(stddev.val[0]); 
+            if(distanceVariance > Parameters::HoleFusion::depth_difference_thresh)
+              realDepthContours[i] = false;
 
+          }
+        }
+      }
+      else
+      {
+        // use a vertical and a horizontal line which pass from the middle of each box. 
+        // Find an average of differences from initial pixel to the keypoint        
+        for(int i = 0; i < depthHolesConveyor -> rectangle.size(); i++)
+        {
+          if(realDepthContours[i])
+          {
+            float startY = depthHolesConveyor -> rectangle[i].y;
+            float startX = depthHolesConveyor -> rectangle[i].x;
+            float sumV = 0.0;
+            float sumH = 0.0;
+            int sumVPixels = 0;
+            int sumHPixels = 0;
+            for(int j = startY; j < depthHolesConveyor -> keypoint[i].y; j ++) 
+            {
+              if(image.at<float>(j, depthHolesConveyor -> keypoint[i].x) != 0)
+              {
+                sumV += 
+                  std::abs(image.at<float>(startY, depthHolesConveyor -> keypoint[i].x) 
+                      - image.at<float>(j, depthHolesConveyor -> keypoint[i].x));
+                sumVPixels++;
+              }
+            }
+            for(int j = startX; j < depthHolesConveyor -> keypoint[i].x; j ++) 
+            {
+              if(image.at<float>(depthHolesConveyor -> keypoint[i].y, j) != 0)
+              {
+                sumH += 
+                  std::abs(image.at<float>(depthHolesConveyor -> keypoint[i].y, startX) 
+                      - image.at<float>(depthHolesConveyor -> keypoint[i].y, j));
+                sumHPixels++;
+              }
+            }
+            float avg = (sumV / sumVPixels + sumH / sumHPixels) / 2;
+            if(avg > Parameters::HoleFusion::difference_scanline_thresh)
+              realDepthContours[i] = false;
+          }
         }
       }
     }
