@@ -167,13 +167,20 @@ add_dependencies(${PROJECT_NAME}_node
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 
-# Download necessary data to run
+############### Download necessary data to detect patterns ##################
+
 download_extra_data(${PROJECT_NAME}_download_training_results
                     EXTRA_FILES data/extra_files.yaml)
 
 option(${PROJECT_NAME}_training "Build flag for the training module")
 ########################### hazmatTrainNode ############################
+
 if(${PROJECT_NAME}_training)
+  
+############### Download images for training the detector ################  
+  download_extra_data(${PROJECT_NAME}_download_training_images
+                    EXTRA_FILES data/training_files.yaml)
+
   add_library(${PROJECT_NAME}_feature_trainer
     src/training/planar_pattern_trainer.cpp 
     src/training/sift_trainer.cpp
