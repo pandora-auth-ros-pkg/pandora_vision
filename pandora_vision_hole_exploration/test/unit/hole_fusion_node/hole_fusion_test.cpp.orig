@@ -618,6 +618,7 @@ namespace pandora_vision
         &depthMedVarSquare );
 
     cv::Mat depthBigVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+<<<<<<< HEAD
     // unstuffed removal method 0 means remove holes on depth area with big overall depth variance, 
     // while 1 means remove holes on depth area with big difference avg from points at the border 
     // and all other points until the rectangle's center point
@@ -653,6 +654,41 @@ namespace pandora_vision
         70,
         1,
         &depthSmallSmallVarSquare );
+||||||| merged common ancestors
+
+    HoleFusionTest::generateNonHomogeneousDepthRectangle( 
+        cv::Point2f ( 200, 200 ),
+        70,
+        70,
+        10,
+        &depthBigVarSquare );
+=======
+    // unstuffed removal method 0 means remove holes on depth area with big overall depth variance, 
+    // while 1 means remove holes on depth area with big difference avg from points at the border 
+    // and all other points until the rectangle's center point
+    if(Parameters::HoleFusion::unstuffed_removal_method == 0)
+    {
+      // Construct the big depth variance square area
+
+      HoleFusionTest::generateNonHomogeneousDepthRectangle( 
+          cv::Point2f ( 200, 200 ),
+          70,
+          70,
+          10,
+          &depthBigVarSquare );
+    }
+    else
+    {
+      // Construct the square area with big depth variance between border and internal
+
+      HoleFusionTest::generateBorderInternalDifferenceDepthRectangle( 
+          cv::Point2f ( 200, 200 ),
+          50,
+          50,
+          5.0,
+          &depthBigVarSquare );
+    }
+>>>>>>> added alternative unstuffed holes removal method, based on difference depth average between one point at the border and points in the same scanline until the keypoint of the rectangle
 
     // Construct the very small depth variance square area
     cv::Mat depthSmallSmallVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
@@ -801,7 +837,6 @@ namespace pandora_vision
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
-<<<<<<< HEAD
 
     // Test that for very small depth, 
     // the small variance threshold is used to eliminate RGB contours 
@@ -918,98 +953,6 @@ namespace pandora_vision
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
-||||||| merged common ancestors
-=======
-
-    // Test that for very small depth, the small variance threshold is used to eliminate RGB contours (thus just a small variance inside the hole's bounding box does not mean invalid RGB hole)
-    
-    // Set the depth for each point of the depthSquares_ image to 0.3
-    for ( int rows = 0; rows < depthSquares_.rows; rows++ )
-    {
-      for ( int cols = 0; cols < depthSquares_.cols; cols++ )
-      {
-        depthSquares_.at< float >( rows, cols ) = 0.3;
-      }
-    }
-    // Compose the final depthSquares_ image
-    depthSquares_ +=
-      depthBigVarSquare +
-      depthSmallVarSquare +
-      depthMedVarSquare;
-    conveyorTemp = getConveyor(
-        cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 90, 90 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 220, 220 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    preValidatedHoles.keypoint.clear();
-    preValidatedHoles.rectangle.clear();
-    validHolesMap.clear();
-    depthConveyor.keypoint.clear();
-    depthConveyor.rectangle.clear();
-
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
-    // It is expected that there are two valid holes those inside small and medium depth variance
-    EXPECT_EQ ( 2, preValidatedHoles.rectangle.size());
-
-    conveyor.keypoint.clear();
-    conveyor.rectangle.clear();
-    // Set the depth for each point of the depthSquares_ image to 0.3
-    for ( int rows = 0; rows < depthSquares_.rows; rows++ )
-    {
-      for ( int cols = 0; cols < depthSquares_.cols; cols++ )
-      {
-        depthSquares_.at< float >( rows, cols ) = 0.3;
-      }
-    }
-    // Compose the final depthSquares_ image
-    depthSquares_ +=
-      depthBigVarSquare +
-      depthSmallSmallVarSquare +
-      depthMedVarSquare;
-    conveyorTemp = getConveyor(
-        cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 90, 90 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    conveyorTemp = getConveyor(
-        cv::Point2f ( 220, 220 ),
-        40,
-        40 );
-    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
-    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
-    preValidatedHoles.keypoint.clear();
-    preValidatedHoles.rectangle.clear();
-    validHolesMap.clear();
-    depthConveyor.keypoint.clear();
-    depthConveyor.rectangle.clear();
-
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
-    // It is expected that there is one valid hole the onee inside the medium variance square
-    EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
-
-    conveyor.keypoint.clear();
-    conveyor.rectangle.clear();
->>>>>>> change in depth node; merge holes parameter. add in depth node and hole fusion; check if the depth frame has a small avg depth value (too many noise or too close to sensor) and, in this case, do not find any depth holes and be more loose with rgb holes elimination based on small depth variance -fixes issues with holes in very small distance. in .gitignore adds swn and swo suffixes [ci skip]
   }
 
 
