@@ -1560,13 +1560,13 @@ namespace pandora_vision
 
     //idBinX, idBinY, id of vector with holes that overlap
     std::map<std::pair<int, int>, float> overlappingInBins;
-    std::vector<std::vector<int> > assignedHolesIds(numberOfBins); 
+    std::vector<std::vector<std::vector<int> > > assignedHolesIds(numberOfBins); 
 
     int binId = 0;
     if((*depthHolesConveyor).rectangle.size() == 0)
       for(int i = 0; i < numberOfBins; i ++)
       {
-        assignedHolesIds[binId].push_back(-1);
+        assignedHolesIds[binId][0].push_back(-1);
         binId++;
       }
     else
@@ -1580,9 +1580,9 @@ namespace pandora_vision
                 && (*depthHolesConveyor).keypoint[i].x < (binx + 1) * binSize
                 && (*depthHolesConveyor).keypoint[i].y >= biny * binSize
                 && (*depthHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
-              assignedHolesIds[binId].push_back(i);
+              assignedHolesIds[binId][0].push_back(i);
             else
-              assignedHolesIds[binId].push_back(-1);
+              assignedHolesIds[binId][0].push_back(-1);
             binId++;
           }
       }
@@ -1591,7 +1591,7 @@ namespace pandora_vision
     if((*thermalHolesConveyor).rectangle.size() == 0)
       for(int i = 0; i < numberOfBins; i ++)
       {
-        assignedHolesIds[binId].push_back(-1);
+        assignedHolesIds[binId][1].push_back(-1);
         binId++;
       }
     else
@@ -1604,9 +1604,9 @@ namespace pandora_vision
                 && (*thermalHolesConveyor).keypoint[i].x < (binx + 1) * binSize
                 && (*thermalHolesConveyor).keypoint[i].y >= biny * binSize
                 && (*thermalHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
-              assignedHolesIds[binId].push_back(i);
+              assignedHolesIds[binId][1].push_back(i);
             else
-              assignedHolesIds[binId].push_back(-1);
+              assignedHolesIds[binId][1].push_back(-1);
             binId++;
           }
       }
@@ -1615,7 +1615,7 @@ namespace pandora_vision
     if((*rgbHolesConveyor).rectangle.size() == 0)
       for(int i = 0; i < numberOfBins; i ++)
       {
-        assignedHolesIds[binId].push_back(-1);
+        assignedHolesIds[binId][2].push_back(-1);
         binId++;
       }
     else
@@ -1628,9 +1628,9 @@ namespace pandora_vision
                 && (*rgbHolesConveyor).keypoint[i].x < (binx + 1) * binSize
                 && (*rgbHolesConveyor).keypoint[i].y >= biny * binSize
                 && (*rgbHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
-              assignedHolesIds[binId].push_back(i);
+              assignedHolesIds[binId][2].push_back(i);
             else
-              assignedHolesIds[binId].push_back(-1);
+              assignedHolesIds[binId][2].push_back(-1);
             binId++;
           }
       }
@@ -1644,48 +1644,86 @@ namespace pandora_vision
       int minX = std::numeric_limits<int>::max();
       int minY = std::numeric_limits<int>::max();
       int overlapsNumber = 0;
-      if(assignedHolesIds[i][0] != -1)
-      {
-        sumKX += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
-        sumKY += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
-        overlapsNumber++;
-        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x > maxX)
-          maxX = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
-        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y > maxY)
-          maxY = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
-        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x < minX)
-          minX = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
-        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y < minY)
-          minY = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
-      }
-      if(assignedHolesIds[i][1] != -1)
-      {
-        sumKX += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
-        sumKY += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
-        overlapsNumber++;
-        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x > maxX)
-          maxX = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
-        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y > maxY)
-          maxY = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
-        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x < minX)
-          minX = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
-        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y < minY)
-          minY = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
-      }
-      if(assignedHolesIds[i][2] != -1)
-      {
-        sumKX += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
-        sumKY += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
-        overlapsNumber++;
-        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x > maxX)
-          maxX = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
-        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y > maxY)
-          maxY = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
-        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x < minX)
-          minX = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
-        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y < minY)
-          minY = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
-      }
+      bool counted = false;
+      for(int j = 0; j < assignedHolesIds[i][0].size(); j ++)
+        if(assignedHolesIds[i][0][j] != -1)
+        {
+          sumKX += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0][j]].x;
+          sumKY += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0][j]].y;
+          if(!counted)
+          {
+            overlapsNumber++;
+            counted = true;
+          }
+          if((*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].x
+              + (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].width > maxX)
+            maxX = 
+              (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].x
+              + (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].width;
+          if((*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].y
+              + (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].height > maxY)
+            maxY = 
+              (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].y
+              + (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].height;
+          if((*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].x < minX)
+            minX = (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].x;
+          if((*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].y < minY)
+            minY = (*depthHolesConveyor).rectangle[assignedHolesIds[i][0][j]].y;
+        }
+
+      counted = false;
+      for(int j = 0; j < assignedHolesIds[i][1].size(); j ++)
+        if(assignedHolesIds[i][1][j] != -1)
+        {
+          sumKX += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1][j]].x;
+          sumKY += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1][j]].y;
+          if(!counted)
+          {
+            overlapsNumber++;
+            counted = true;
+          }
+          if((*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].x
+              + (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].width > maxX)
+            maxX = 
+              (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].x
+              + (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].width;
+          if((*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].y
+              + (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].height > maxY)
+            maxY = 
+              (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].y
+              + (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].height;
+          if((*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].x < minX)
+            minX = (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].x;
+          if((*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].y < minY)
+            minY = (*thermalHolesConveyor).rectangle[assignedHolesIds[i][1][j]].y;
+        }
+
+      counted = false;
+      for(int j = 0; j < assignedHolesIds[i][2].size(); j ++)
+        if(assignedHolesIds[i][2][j] != -1)
+        {
+          sumKX += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2][j]].x;
+          sumKY += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2][j]].y;
+          if(!counted)
+          {
+            overlapsNumber++;
+            counted = true;
+          }
+          if((*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].x
+              + (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].width > maxX)
+            maxX = 
+              (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].x
+              + (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].width;
+          if((*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].y
+              + (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].height > maxY)
+            maxY = 
+              (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].y
+              + (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].height;
+          if((*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].x < minX)
+            minX = (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].x;
+          if((*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].y < minY)
+            minY = (*rgbHolesConveyor).rectangle[assignedHolesIds[i][2][j]].y;
+        }
       if(overlapsNumber > 0)
       {
         cv::Point2f mergedKeypoint(sumKX / overlapsNumber, sumKY / overlapsNumber);
