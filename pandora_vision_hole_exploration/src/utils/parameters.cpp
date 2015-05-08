@@ -134,6 +134,9 @@ namespace pandora_vision
   int Parameters::Depth::canny_kernel_size = 3;
   int Parameters::Depth::filtering_type = 1;
   float Parameters::Depth::min_valid_depth = 0.92;
+  int Parameters::Depth::shape_validation = 0;
+  float Parameters::Depth::one_direction_rectangle_contour_overlap_thresh = 40.0;
+  int Parameters::Depth::max_intersections_thresh = 4;
   //
   //
   //  ///////////////////// Edge detection specific parameters /////////////////////
@@ -390,4 +393,7 @@ namespace pandora_vision
   float Parameters::Rgb::homogenity_thresh = 0.8;
   int Parameters::Rgb::neighbor_tiny_distance_thresh = 50;
   int Parameters::Rgb::rect_diff_thresh = 2;
+  int Parameters::Rgb::shape_validation = 0;
+  float Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh = 40.0;
+  int Parameters::Rgb::max_intersections_thresh = 4;
 } // namespace pandora_vision

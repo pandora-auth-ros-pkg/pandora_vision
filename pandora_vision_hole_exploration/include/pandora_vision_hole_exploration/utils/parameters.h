@@ -162,6 +162,9 @@ namespace pandora_vision
       static int canny_kernel_size;
       static int filtering_type;
       static float min_valid_depth;
+      static int shape_validation;
+      static float one_direction_rectangle_contour_overlap_thresh;
+      static int max_intersections_thresh;
     };
     //
     //
@@ -476,6 +479,9 @@ namespace pandora_vision
       static float homogenity_thresh;
       static int neighbor_tiny_distance_thresh;
       static int rect_diff_thresh;
+      static int shape_validation;
+      static float one_direction_rectangle_contour_overlap_thresh;
+      static int max_intersections_thresh;
     };
 
   };

@@ -484,6 +484,12 @@ namespace pandora_vision
       config.filtering_type;
     Parameters::Depth::min_valid_depth =
       config.min_valid_depth;
+    Parameters::Depth::shape_validation =
+      config.shape_validation;
+    Parameters::Depth::one_direction_rectangle_contour_overlap_thresh =
+      config.one_direction_rectangle_contour_overlap_thresh;
+    Parameters::Depth::max_intersections_thresh =
+      config.max_intersections_thresh;
   }
 
 
@@ -827,7 +833,8 @@ namespace pandora_vision
    **/
   bool Depth::validateContour(
       const cv::Mat& image, 
-      int ci, std::vector<cv::Point2f>* mcv, 
+      int ci, 
+      std::vector<cv::Point2f>* mcv, 
       std::vector<int>* contourHeight, 
       std::vector<int>* contourWidth, 
       std::map<std::pair<int, int>, float>* contourLabel, 
@@ -842,87 +849,187 @@ namespace pandora_vision
       return false;
     else
     {
-      for(int i = 0; i < contours.size(); i ++)
+      if(Parameters::Depth::shape_validation)
+        validateShape(image, contours, boundRect, ci, &(*realContours));
+      if((*realContours)[ci])
       {
-        if(i != ci)
+        for(int i = 0; i < contours.size(); i ++)
         {
-          if((*realContours)[i] 
-              && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) 
-              && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) 
-              && (std::abs(static_cast<int>(image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x)) 
-                  - static_cast<int>(image.at<uchar>((*mcv)[i].y, (*mcv)[i].x))) 
-                < Parameters::Depth::neighbor_value_thresh))
+          if(i != ci)
           {
-            int upperX;
-            int upperY;
-            int lowerX;
-            int lowerY;
-            if((*mcv)[ci].x > (*mcv)[i].x)
-              upperX = (*mcv)[i].x;
-            else
-              upperX = (*mcv)[ci].x;
-            if((*mcv)[ci].y> (*mcv)[i].y)
-              upperY = (*mcv)[i].y;
-            else
-              upperY = (*mcv)[ci].y;
-            if((*mcv)[ci].x > (*mcv)[i].x)
-              lowerX = (*mcv)[ci].x;
-            else
-              lowerX = (*mcv)[i].x;
-            if((*mcv)[ci].y > (*mcv)[i].y)
-              lowerY = (*mcv)[ci].y;
-            else
-              lowerY = (*mcv)[i].y;
-            cv::Mat ROI = image(boundRect[i]);
-            cv::Scalar otherAvg = cv::mean(ROI);
-            int homogRectWidth = std::abs(lowerX - upperX);
-            if(homogRectWidth < Parameters::Depth::depth_similarity_rect_dims_thresh)
-              homogRectWidth = Parameters::Depth::depth_similarity_rect_dims_thresh;
-            int homogRectHeight = std::abs(lowerY - upperY);
-            if(homogRectHeight < Parameters::Depth::depth_similarity_rect_dims_thresh)
-              homogRectHeight = Parameters::Depth::depth_similarity_rect_dims_thresh;
-            if(upperX + homogRectWidth > image.cols)
-              homogRectWidth = image.cols - upperX - 1;
-            if(upperY + homogRectHeight > image.rows)
-              homogRectHeight = image.rows - upperY - 1;
-            if(upperX < 0)
-              upperX = 0;
-            if(upperY < 0)
-              upperY = 0;
-            if(lowerX > image.cols)
-              lowerX = image.cols;
-            if(lowerY > image.rows)
-              lowerY = image.rows;
-            //cout << upperX << ", " << upperY << ", " << homogRectWidth << ", " << homogRectHeight << "\n";
-            ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
-            int sumBlacks = 0;
-            for(int r = 0; r < ROI.rows; r ++)
-              for(int c = 0; c < ROI.cols; c ++)
-                if(static_cast<int>(image.at<uchar>(r, c)) == 0)
-                  sumBlacks++;
-            float euclideanDistance = 
-              1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) 
-                    + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
-            float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
-            //std::cout << mergeProbability << "\n";
-            if(mergeProbability > Parameters::Depth::merge_thresh)
+            if((*realContours)[i] 
+                && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) 
+                && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) 
+                && (std::abs(static_cast<int>(image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x)) 
+                    - static_cast<int>(image.at<uchar>((*mcv)[i].y, (*mcv)[i].x))) 
+                  < Parameters::Depth::neighbor_value_thresh))
             {
-              if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
+              int upperX;
+              int upperY;
+              int lowerX;
+              int lowerY;
+              if((*mcv)[ci].x > (*mcv)[i].x)
+                upperX = (*mcv)[i].x;
+              else
+                upperX = (*mcv)[ci].x;
+              if((*mcv)[ci].y> (*mcv)[i].y)
+                upperY = (*mcv)[i].y;
+              else
+                upperY = (*mcv)[ci].y;
+              if((*mcv)[ci].x > (*mcv)[i].x)
+                lowerX = (*mcv)[ci].x;
+              else
+                lowerX = (*mcv)[i].x;
+              if((*mcv)[ci].y > (*mcv)[i].y)
+                lowerY = (*mcv)[ci].y;
+              else
+                lowerY = (*mcv)[i].y;
+              cv::Mat ROI = image(boundRect[i]);
+              cv::Scalar otherAvg = cv::mean(ROI);
+              int homogRectWidth = std::abs(lowerX - upperX);
+              if(homogRectWidth < Parameters::Depth::depth_similarity_rect_dims_thresh)
+                homogRectWidth = Parameters::Depth::depth_similarity_rect_dims_thresh;
+              int homogRectHeight = std::abs(lowerY - upperY);
+              if(homogRectHeight < Parameters::Depth::depth_similarity_rect_dims_thresh)
+                homogRectHeight = Parameters::Depth::depth_similarity_rect_dims_thresh;
+              if(upperX + homogRectWidth > image.cols)
+                homogRectWidth = image.cols - upperX - 1;
+              if(upperY + homogRectHeight > image.rows)
+                homogRectHeight = image.rows - upperY - 1;
+              if(upperX < 0)
+                upperX = 0;
+              if(upperY < 0)
+                upperY = 0;
+              if(lowerX > image.cols)
+                lowerX = image.cols;
+              if(lowerY > image.rows)
+                lowerY = image.rows;
+              //cout << upperX << ", " << upperY << ", " << homogRectWidth << ", " << homogRectHeight << "\n";
+              ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
+              int sumBlacks = 0;
+              for(int r = 0; r < ROI.rows; r ++)
+                for(int c = 0; c < ROI.cols; c ++)
+                  if(static_cast<int>(image.at<uchar>(r, c)) == 0)
+                    sumBlacks++;
+              float euclideanDistance = 
+                1 / (sqrt(pow((*mcv)[i].x - (*mcv)[ci].x, 2) 
+                      + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
+              float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
+              //std::cout << mergeProbability << "\n";
+              if(mergeProbability > Parameters::Depth::merge_thresh)
               {
-                (*contourLabel)[std::make_pair(ci, i)] = mergeProbability;
-                (*numLabels)[ci]++;
-                (*numLabels)[i]++;
+                if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
+                {
+                  (*contourLabel)[std::make_pair(ci, i)] = mergeProbability;
+                  (*numLabels)[ci]++;
+                  (*numLabels)[i]++;
+                }
               }
             }
           }
         }
+        int newIndX = (*mcv)[ci].x;
+        int newIndY = (*mcv)[ci].y;
+        return true;
       }
-      int newIndX = (*mcv)[ci].x;
-      int newIndY = (*mcv)[ci].y;
+      return false;
     }
-    return true;
   }
 
+  void Depth::validateShape(
+      const cv::Mat& image, 
+      const std::vector<std::vector<cv::Point> >& outline, 
+      const std::vector<cv::Rect>& boundRect, 
+      int ci, 
+      std::vector<bool>* realContours)
+  {
+    // Draw contour on a black frame with white color
+    cv::Mat canvas = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
+    cv::Scalar color = cv::Scalar(255, 255, 255);
+    cv::drawContours(canvas, outline, ci, color);
+    int intersectionX = 0;
+    int intersectionY = 0;
+    int pixelsInside = 0;
+    int maxIntersectionsX = 0;
+    int maxIntersectionsY = 0;
+    for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
+    {
+      bool isInside = false;
+      bool isOutline = false;
+      int intersectionCurrent = 0;
+      for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
+      {
+        if(canvas.at<int>(row, col) == 255)
+        {
+          if(!isOutline)
+          {
+            intersectionX++;
+            intersectionCurrent++;
+            isOutline = true;
+          }
+        } 
+        else
+        {
+          if(intersectionCurrent % 2 != 0)
+          {
+            isInside = true;
+            pixelsInside++;
+          }
+          else
+            isInside = false;
+          isOutline = false;
+        }
+      }
+      if(intersectionCurrent > maxIntersectionsX)
+        maxIntersectionsX = intersectionCurrent;
+    }
+
+    float avgPixelsInsideX = pixelsInside / boundRect[ci].height; 
+    pixelsInside = 0;
+
+    for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
+    {
+      bool isInside = false;
+      bool isOutline = false;
+      int intersectionCurrent = 0;
+      for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
+      {
+        if(canvas.at<int>(row, col) == 255)
+        {
+          if(!isOutline)
+          {
+            intersectionY++;
+            intersectionCurrent++;
+            isOutline = true;
+          }
+        } 
+        else
+        {
+          if(intersectionCurrent % 2 != 0)
+          {
+            isInside = true;
+            pixelsInside++;
+          }
+          else
+            isInside = false;
+          isOutline = false;
+        }
+      }
+      if(intersectionCurrent > maxIntersectionsY)
+        maxIntersectionsY = intersectionCurrent;
+    }
+
+    float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
+
+    if((boundRect[ci].height / avgPixelsInsideY >= 
+          Parameters::Depth::one_direction_rectangle_contour_overlap_thresh 
+          || boundRect[ci].width / avgPixelsInsideX >= 
+          Parameters::Depth::one_direction_rectangle_contour_overlap_thresh)
+        && (maxIntersectionsX > Parameters::Depth::max_intersections_thresh
+          || maxIntersectionsY > Parameters::Depth::max_intersections_thresh))
+      (*realContours)[ci] = false;
+
+  }
 
   /**
     @brief The function called to make validation of found contours

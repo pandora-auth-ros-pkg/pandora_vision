@@ -449,6 +449,12 @@ namespace pandora_vision
       config.homogenity_thresh;
     Parameters::Rgb::neighbor_tiny_distance_thresh =
       config.neighbor_tiny_distance_thresh;
+    Parameters::Rgb::shape_validation =
+      config.shape_validation;
+    Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh =
+      config.one_direction_rectangle_contour_overlap_thresh;
+    Parameters::Rgb::max_intersections_thresh =
+      config.max_intersections_thresh;
   }
 
 
@@ -715,6 +721,8 @@ namespace pandora_vision
   {
     for(int ci = 0; ci < contours.size(); ci ++)
     {
+      if(Parameters::Rgb::shape_validation)
+        validateShape(image, contours, boundRect, ci, &(*realContours));
       if((*realContours)[ci])
 
         if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge 
@@ -840,6 +848,102 @@ namespace pandora_vision
             || (*contourHeight)[i] > Parameters::Rgb::rect_diff_thresh * (*contourWidth)[i])
           (*realContours)[i] = false;
     }
+  }
+
+
+  void Rgb::validateShape(
+      const cv::Mat& image, 
+      const std::vector<std::vector<cv::Point> >& outline, 
+      const std::vector<cv::Rect>& boundRect, 
+      int ci, 
+      std::vector<bool>* realContours)
+  {
+    // Draw contour on a black frame with white color
+    cv::Mat canvas = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
+    cv::Scalar color = cv::Scalar(255, 255, 255);
+    cv::drawContours(canvas, outline, ci, color);
+    int intersectionX = 0;
+    int intersectionY = 0;
+    int pixelsInside = 0;
+    int maxIntersectionsX = 0;
+    int maxIntersectionsY = 0;
+    for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
+    {
+      bool isInside = false;
+      bool isOutline = false;
+      int intersectionCurrent = 0;
+      for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
+      {
+        if(canvas.at<int>(row, col) == 255)
+        {
+          if(!isOutline)
+          {
+            intersectionX++;
+            intersectionCurrent++;
+            isOutline = true;
+          }
+        } 
+        else
+        {
+          if(intersectionCurrent % 2 != 0)
+          {
+            isInside = true;
+            pixelsInside++;
+          }
+          else
+            isInside = false;
+          isOutline = false;
+        }
+      }
+      if(intersectionCurrent > maxIntersectionsX)
+        maxIntersectionsX = intersectionCurrent;
+    }
+
+    float avgPixelsInsideX = pixelsInside / boundRect[ci].height; 
+    pixelsInside = 0;
+
+    for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
+    {
+      bool isInside = false;
+      bool isOutline = false;
+      int intersectionCurrent = 0;
+      for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
+      {
+        if(canvas.at<int>(row, col) == 255)
+        {
+          if(!isOutline)
+          {
+            intersectionY++;
+            intersectionCurrent++;
+            isOutline = true;
+          }
+        } 
+        else
+        {
+          if(intersectionCurrent % 2 != 0)
+          {
+            isInside = true;
+            pixelsInside++;
+          }
+          else
+            isInside = false;
+          isOutline = false;
+        }
+      }
+      if(intersectionCurrent > maxIntersectionsY)
+        maxIntersectionsY = intersectionCurrent;
+    }
+
+    float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
+
+    if((boundRect[ci].height / avgPixelsInsideY >= 
+          Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh 
+          || boundRect[ci].width / avgPixelsInsideX >= 
+          Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh)
+        && (maxIntersectionsX > Parameters::Rgb::max_intersections_thresh
+          || maxIntersectionsY > Parameters::Rgb::max_intersections_thresh))
+      (*realContours)[ci] = false;
+
   }
 
 } // namespace pandora_vision

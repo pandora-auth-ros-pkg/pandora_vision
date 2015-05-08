@@ -181,6 +181,13 @@ namespace pandora_vision
           const std::vector<cv::Rect>& boundRect);
 
 
+      static void validateShape(
+          const cv::Mat& image, 
+          const std::vector<std::vector<cv::Point> >& outline, 
+          const std::vector<cv::Rect>& boundRect, 
+          int ci, 
+          std::vector<bool>* realContours);
+
       // The destructor
       ~Rgb();
   };

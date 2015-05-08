@@ -208,6 +208,12 @@ namespace pandora_vision
           const std::vector<std::vector<cv::Point> >& contours, 
           std::vector<bool>* realContours);
 
+      static void validateShape(
+          const cv::Mat& image, 
+          const std::vector<std::vector<cv::Point> >& outline, 
+          const std::vector<cv::Rect>& boundRect, 
+          int ci, 
+          std::vector<bool>* realContours);
       /**
         @brief The function called by validateContours to do the final merging after the probabilities for each pair were found in validateContour. New contourwidths and heights are calculated for merged contours. New coordinates for the merged contour as the average of all the contours that consist it are calculated.
         @param[in] ci [int] Current contour index in contours vector 
