@@ -1,8 +1,8 @@
 %YAML:1.0
-extract_channels_statistics_features: false
-extract_edge_orientation_features: false
-extract_haralick_features: false
-extract_sift_features: true
+extract_channels_statistics_features: true
+extract_edge_orientation_features: true
+extract_haralick_features: true
+extract_sift_features: false
 extract_hog_features: false
 
 dictionary_size: 50

@@ -13,6 +13,10 @@
 
   <author>Despoina Paschalidou</author>
   <author>Marios Protopapas</author>
+  <author>Miltiadis Kofinas</author>
+  <author>Eirini Chatzieleftheriou</author>
+  <author>Manos Tsardoulias</author>
+  <author>Vasilis Choutas</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -20,7 +24,6 @@
   <build_depend>roslint</build_depend>
 
   <depend>roscpp</depend>
-  <build_depend>pandora_cmake_tools</build_depend>
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
   <depend version_eq="sensor_processor_devel">pandora_common_msgs</depend>

@@ -60,16 +60,17 @@ namespace pandora_vision
     const EnhancedImageStampedPtr& output)
   {
     output->setHeader(input->header);
-
     cv_bridge::CvImagePtr inMsg;
+
     inMsg = cv_bridge::toCvCopy(input->rgbImage, sensor_msgs::image_encodings::TYPE_8UC3);
     output->setRgbImage(inMsg->image.clone());
-    
+
     inMsg = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     cv::Mat depthImage = inMsg->image.clone();
     output->setDepthImage(depthImage);
-    
+
     output->setDepth(input->isDepth);
+
     for (int ii = 0; ii < input->areasOfInterest.size(); ii++)
     {
       Rect2f rect(input->areasOfInterest[ii].center.x, input->areasOfInterest[ii].center.y, 
@@ -87,7 +88,6 @@ namespace pandora_vision
 
     // Publish the image message
     interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
-    
     return true;
   }
 }  // namespace pandora_vision

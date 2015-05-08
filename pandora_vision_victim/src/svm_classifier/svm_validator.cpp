@@ -97,10 +97,13 @@ namespace pandora_vision
   */
   float SvmValidator::calculatePredictionProbability(const cv::Mat& inImage)
   {
+    ROS_INFO("Extracting features");
     extractFeatures(inImage);
+    ROS_INFO("Extracted Features");
     if (!featureVector_.empty())
       featureVector_.clear();
     featureVector_ = featureExtraction_->getFeatureVector();
+    ROS_INFO("Find prediction probability");
     return predictionToProbability(predict());
   }
 
@@ -115,6 +118,7 @@ namespace pandora_vision
     // Make features matrix a row vector.
     transpose(featuresMat, featuresMat);
     /// Normalize the data
+    ROS_INFO("Normalize features");
     if (typeOfNormalization_ == 1)
     {
       double newMin = -1.0;

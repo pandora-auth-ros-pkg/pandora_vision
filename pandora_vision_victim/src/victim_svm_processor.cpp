@@ -85,7 +85,7 @@ namespace pandora_vision
     }
 
     DetectionImages imgs;
-    int stateIndicator = 2 * input->getDepth() + (input->getAreas().size() > 0) + 1;
+    int stateIndicator = 2; //* input->getDepth() + (input->getAreas().size() > 0) + 1;
 
     DetectionMode detectionMode;
     switch (stateIndicator)
@@ -296,7 +296,6 @@ namespace pandora_vision
             rgb_svm_probabilities[i]->getProbability()) /
           (params_.depth_svm_weight +
             params_.rgb_svm_weight));
-
         temp->setPoint(depth_svm_probabilities[i]->getPoint());
         temp->setSource(DEPTH_RGB_SVM);
         temp->setWidth(depth_svm_probabilities[i]->getWidth());
@@ -336,9 +335,13 @@ namespace pandora_vision
     
     for (int ii = 0; ii < victims.size(); ii++)
     {
+      if (ii == 0)
+      {
+        output->pois.clear();
+      }
       if (victims[ii]->getProbability() > 0.0001)
       {
-        output->pois[ii] = victims[ii];
+        output->pois.push_back(victims[ii]);
       }
     }
     

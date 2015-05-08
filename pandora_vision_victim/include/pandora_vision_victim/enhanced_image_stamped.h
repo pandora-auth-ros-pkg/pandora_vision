@@ -87,7 +87,9 @@ namespace pandora_vision
   
   void EnhancedImageStamped::setArea(int it, const Rect2f& area)
   {
-    areasOfInterest[it] = area;
+    if (it == 0)
+      areasOfInterest.clear();
+    areasOfInterest.push_back(area);
   }
   EnhancedImageStamped::Rect2f EnhancedImageStamped::getArea(int it) const
   {
