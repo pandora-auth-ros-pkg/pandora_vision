@@ -60,6 +60,8 @@ namespace pandora_vision
   {
     ROS_INFO("Enter SVM Validator");
 
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
+
     svmParams_.svm_type = CvSVM::C_SVC;
     svmParams_.kernel_type = CvSVM::RBF;
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
@@ -113,8 +115,19 @@ namespace pandora_vision
     // Make features matrix a row vector.
     transpose(featuresMat, featuresMat);
     /// Normalize the data
-    featureExtractionUtilities_->performZScoreNormalization(
-        &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    if (typeOfNormalization_ == 1)
+    {
+      double newMin = -1.0;
+      double newMax = 1.0;
+      featureExtractionUtilities_->performMinMaxNormalization(newMax, newMin,
+          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    }
+    else if (typeOfNormalization_ == 2)
+    {
+      featureExtractionUtilities_->performZScoreNormalization(
+          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    }
+
     featuresMat.convertTo(featuresMat, CV_32FC1);
 
     ROS_INFO_STREAM("SVM class label: " <<

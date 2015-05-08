@@ -122,6 +122,9 @@ namespace pandora_vision
       double probabilityScaling_;
       double probabilityTranslation_;
 
+      /// Variable used to decide the type of feature normalization to perform.
+      int typeOfNormalization_;
+
       /// Extractor of all the neccesary features for the classification.
       FeatureExtraction* featureExtraction_;
 

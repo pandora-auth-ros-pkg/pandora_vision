@@ -123,11 +123,6 @@ namespace pandora_vision
     cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
     cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
 
-    std::string normalizationParamOne = imageType_ + "mean_values.xml";
-    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
-    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
-    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
-
     if (loadClassifierModel_ && file_utilities::exist(svm_file_stream.str().c_str()))
     {
       SVM.load(svm_file_stream.str().c_str());
@@ -146,15 +141,7 @@ namespace pandora_vision
         constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
             &trainingFeaturesMat, &trainingLabelsMat);
 
-        std::vector<double> meanVector;
-        std::vector<double> stdDevVector;
-        featureExtractionUtilities_->findZScoreParameters(&trainingFeaturesMat,
-            &meanVector, &stdDevVector);
-
-        file_utilities::saveToFile(normalizationParamOnePath, "mean",
-            cv::Mat(meanVector));
-        file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
-            cv::Mat(stdDevVector));
+        normalizeFeaturesAndSaveNormalizationParameters(&trainingFeaturesMat);
 
         trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
         trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
@@ -214,12 +201,7 @@ namespace pandora_vision
       constructFeaturesMatrix(testDirectory, testAnnotationsFilePath,
           &testFeaturesMat, &testLabelsMat);
 
-      std::vector<double> meanVector = file_utilities::loadFiles(
-          normalizationParamOnePath, "mean");
-      std::vector<double> stdDevVector = file_utilities::loadFiles(
-          normalizationParamTwoPath, "std_dev");
-      featureExtractionUtilities_->performZScoreNormalization(
-          &testFeaturesMat, meanVector, stdDevVector);
+      loadNormalizationParametersAndNormalizeFeatures(&testFeaturesMat);
 
       testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
       testLabelsMat.convertTo(testLabelsMat, CV_32FC1);

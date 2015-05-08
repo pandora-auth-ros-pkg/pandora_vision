@@ -73,7 +73,6 @@ namespace pandora_vision
     svmParams_.C = VictimParameters::rgb_svm_C;
     svmParams_.gamma = VictimParameters::rgb_svm_gamma;
 
-    packagePath_ = ros::package::getPath("pandora_vision_victim");
     std::string filesDirectory = packagePath_ + "/data/";
 
     std::string normalizationParamOne = "rgb_mean_values.xml";
@@ -87,6 +86,14 @@ namespace pandora_vision
         normalizationParamOnePath.str(), "mean");
     normalizationParamTwoVec_ = file_utilities::loadFiles(
         normalizationParamTwoPath.str(), "std_dev");
+
+    std::string paramFile = packagePath_ + "/config/rgb_svm_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
+
+    fs.release();
 
     featureExtraction_ = new RgbFeatureExtraction();
     bool vocabularyNeeded = featureExtraction_->bagOfWordsVocabularyNeeded();
