@@ -144,6 +144,14 @@ namespace pandora_vision
   /**
    * @brief
    */
+  std::vector<cv::Mat> BagOfWordsTrainer::getDescriptors() const
+  {
+    return bowKmeansTrainer_->getDescriptors();
+  }
+
+  /**
+   * @brief
+   */
   void BagOfWordsTrainer::createVocabulary()
   {
     bowVocabulary_ = bowKmeansTrainer_->cluster();

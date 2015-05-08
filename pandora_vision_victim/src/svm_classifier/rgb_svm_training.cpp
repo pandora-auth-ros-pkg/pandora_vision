@@ -140,6 +140,7 @@ namespace pandora_vision
 
         bool vocabularyNeeded = constructBagOfWordsVocabulary(trainingDirectory,
             trainingAnnotationsFilePath);
+
         constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
             &trainingFeaturesMat, &trainingLabelsMat);
 

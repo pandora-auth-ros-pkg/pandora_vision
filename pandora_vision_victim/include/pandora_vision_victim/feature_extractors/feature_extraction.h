@@ -87,6 +87,12 @@ namespace pandora_vision
       void addDescriptorsToBagOfWords(const cv::Mat& inImage);
 
       /**
+       * @brief
+       */
+      void addDescriptorsToBagOfWords(
+          const std::vector<cv::Mat>& descriptorsVec);
+
+      /**
        * @brief This function constructs the features matrix, i.e. the feature
        * vectors of a set of images.
        * @param directory [const boost::filesystem::path&] The directory that
@@ -145,12 +151,20 @@ namespace pandora_vision
        */
       bool bagOfWordsVocabularyNeeded();
 
+      /**
+       * @brief
+       */
+      std::vector<cv::Mat> getBagOfWordsDescriptors() const;
+
     protected:
       /// Flag for displaying the calculated descriptors.
       bool visualization_;
 
       /// String containing the package path.
       std::string packagePath_;
+
+      /// String indicating the type of the processed images.
+      std::string imageType_;
 
       /// Vector containing the features extracted from a single image.
       std::vector<double> featureVector_;

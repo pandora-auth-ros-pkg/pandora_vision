@@ -106,6 +106,36 @@ namespace file_utilities
   }
 
   /**
+   * @brief Function that saves a set of matrices in a file.
+   * @param fileName [const std::string&] The name of the file to be created
+   * @param varNameVec [const std::vector<std::string>&] The names of the
+   * matrices to be saved.
+   * @param dataVec [std::vector<cv::Mat>&] : The matrices to be saved.
+   * @return void
+   */
+  void saveDataToFile(const std::string& fileName,
+      const std::vector<std::string>& varNameVec,
+      const std::vector<cv::Mat>& dataVec)
+  {
+    cv::FileStorage fs(fileName, cv::FileStorage::WRITE);
+
+    if (!fs.isOpened())
+    {
+      fs.open(fileName, cv::FileStorage::WRITE);
+    }
+    if (dataVec.size() != varNameVec.size())
+    {
+      std::cout << "ERROR: Name vector and data vector have different size"
+                << std::endl;
+      return;
+    }
+    for (int ii = 0; ii < dataVec.size(); ii++)
+      fs << varNameVec[ii] << dataVec[ii];
+
+    fs.release();
+  }
+
+  /**
   @brief Function that saves a variable to a file
   @param file_name [std::string] : name of the file to be created
   @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
@@ -150,6 +180,44 @@ namespace file_utilities
       }
       outFile.close();
     }
+  }
+
+  /**
+   * @brief Function that loads a set of descriptors to be used for training.
+   * @param dataMatFile [const std::string&] The name of the file to read the
+   * desriptors from.
+   * @param nameTagVec [const std::vector<std::string>&] The names of the images
+   * to load the descriptors from.
+   * @param descriptorsVec [std::vector<cv::Mat>*] A set of image descriptors.
+   * @return [bool] Variable indicating whether the loading was successful or
+   * not.
+   */
+  bool loadDescriptorsFromFile(const std::string& dataMatFile,
+      const std::vector<std::string>& nameTagVec,
+      std::vector<cv::Mat>* descriptorsVec)
+  {
+    cv::FileStorage fs(dataMatFile, cv::FileStorage::READ);
+
+    if (!fs.isOpened())
+    {
+      fs.open(dataMatFile, cv::FileStorage::READ);
+    }
+    for (int ii = 0; ii < nameTagVec.size(); ii++)
+    {
+      cv::Mat tempDataMat;
+      fs[nameTagVec[ii]] >> tempDataMat;
+      if (!tempDataMat.data)
+      {
+        std::cout << "ERROR: Matrix has no data" << std::endl;
+        fs.release();
+        descriptorsVec->clear();
+        return false;
+      }
+      descriptorsVec->push_back(tempDataMat);
+    }
+
+    fs.release();
+    return true;
   }
 
   /**

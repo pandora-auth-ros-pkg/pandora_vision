@@ -102,6 +102,8 @@ namespace pandora_vision
       boost::shared_ptr<FeatureExtractorFactory> hogPtr(new HOGExtractor());
       featureFactoryPtrMap_["hog"] = hogPtr;
     }
+
+    imageType_ = "depth_";
   }
 
   /**

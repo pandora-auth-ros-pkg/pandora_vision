@@ -87,6 +87,11 @@ namespace pandora_vision
       /**
        * @brief
        */
+      std::vector<cv::Mat> getDescriptors() const;
+
+      /**
+       * @brief
+       */
       void createVocabulary();
 
       /**

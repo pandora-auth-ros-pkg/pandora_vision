@@ -86,6 +86,18 @@ namespace file_utilities
                   const cv::Mat& src);
 
   /**
+   * @brief Function that saves a set of matrices in a file.
+   * @param fileName [const std::string&] The name of the file to be created
+   * @param varNameVec [const std::vector<std::string>&] The names of the
+   * matrices to be saved.
+   * @param dataVec [std::vector<cv::Mat>&] : The matrices to be saved.
+   * @return void
+   */
+  void saveDataToFile(const std::string& fileName,
+      const std::vector<std::string>& varNameVec,
+      const std::vector<cv::Mat>& dataVec);
+
+  /**
   @brief Function that saves a variable to a file
   @param file_name [std::string] : name of the file to be created
   @param training_mat [cv::Mat] : name of the mat of features to be saved to the file
@@ -95,6 +107,20 @@ namespace file_utilities
   void saveToCSV(const std::string& fileName,
                  const cv::Mat& featuresMat,
                  const cv::Mat& labelsMat);
+
+  /**
+   * @brief Function that loads a set of descriptors to be used for training.
+   * @param dataMatFile [const std::string&] The name of the file to read the
+   * desriptors from.
+   * @param nameTagVec [const std::vector<std::string>&] The names of the images
+   * to load the descriptors from.
+   * @param descriptorsVec [std::vector<cv::Mat>*] A set of image descriptors.
+   * @return [bool] Variable indicating whether the loading was successful or
+   * not.
+   */
+  bool loadDescriptorsFromFile(const std::string& dataMatFile,
+      const std::vector<std::string>& nameTagVec,
+      std::vector<cv::Mat>* descriptorsVec);
 
   /**
   @brief Function that loads the necessary files for the training

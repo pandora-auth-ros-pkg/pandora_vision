@@ -88,9 +88,25 @@ namespace pandora_vision
     {
       cv::Mat descriptors;
       featureFactoryPtrMap_["sift"]->extractFeatures(inImage, &descriptors);
-      std::cout << "SIFT size:" << descriptors.rows << " " << descriptors.cols << std::endl;
+      std::cout << "SIFT descriptors:" << descriptors.rows << std::endl;
       if (!descriptors.empty())
         bowTrainerPtr_->addDescriptors(descriptors);
+    }
+  }
+
+  /**
+   * @brief
+   */
+  void FeatureExtraction::addDescriptorsToBagOfWords(
+      const std::vector<cv::Mat>& descriptorsVec)
+  {
+    if (chosenFeatureTypesMap_["sift"] == true)
+    {
+      for (int ii = 0; ii < descriptorsVec.size(); ii++)
+      {
+        if (!descriptorsVec[ii].empty())
+          bowTrainerPtr_->addDescriptors(descriptorsVec[ii]);
+      }
     }
   }
 
@@ -217,48 +233,68 @@ namespace pandora_vision
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
 
-    if (successfulFileLoad)
-    {
-      std::cout << "Find descriptors from bounding boxes." << std::endl;
-      for (int ii = 0; ii < annotatedImages.size(); ii++)
-      {
-        std::cout << "Processing file " << annotatedImages[ii] << std::endl;
-        std::string imageAbsolutePath = directory.string() + "/" + annotatedImages[ii];
-        image = cv::imread(imageAbsolutePath);
-        if (!image.data)
-        {
-          std::cout << "Error reading file " << annotatedImages[ii] << std::endl;
-          continue;
-        }
+    std::cout << "Trying to load descriptors from file" << std::endl;
+    std::vector<cv::Mat> descriptorsVec;
+    const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
+    const std::string descriptorsFilePath = packagePath_ + "/data/" + descriptorsFile;
+    bool descriptorsAvailable = file_utilities::loadDescriptorsFromFile(
+        descriptorsFilePath, annotatedImages, &descriptorsVec);
 
-        imageROI = image(boundingBox[ii]);
-        addDescriptorsToBagOfWords(imageROI);
-      }
+    if (descriptorsAvailable)
+    {
+      std::cout << "Load descriptors to create vocabulary" << std::endl;
+      addDescriptorsToBagOfWords(descriptorsVec);
     }
     else
     {
-      std::cout << "Find descriptors from whole images." << std::endl;
-      int rowIndex = 0;
-      for (boost::filesystem::recursive_directory_iterator iter(directory);
-           iter != boost::filesystem::recursive_directory_iterator();
-           iter++)
+      if (successfulFileLoad)
       {
-        if (is_directory(iter->status()))
-          continue;
-        std::string imageAbsolutePath = iter->path().string();
-        std::string imageName = iter->path().filename().string();
-        std::cout << "Processing file " << imageName << std::endl;
-        image = cv::imread(imageAbsolutePath);
-        if (!image.data)
+        std::cout << "Find descriptors from bounding boxes." << std::endl;
+        for (int ii = 0; ii < annotatedImages.size(); ii++)
         {
-          std::cout << "Error reading file " << imageName << std::endl;
-          continue;
-        }
-        addDescriptorsToBagOfWords(image);
+          std::cout << "Processing file " << annotatedImages[ii] << std::endl;
+          std::string imageAbsolutePath = directory.string() + "/" + annotatedImages[ii];
+          image = cv::imread(imageAbsolutePath);
+          if (!image.data)
+          {
+            std::cout << "Error reading file " << annotatedImages[ii] << std::endl;
+            continue;
+          }
 
-        rowIndex += 1;
+          imageROI = image(boundingBox[ii]);
+          addDescriptorsToBagOfWords(imageROI);
+        }
       }
+      else
+      {
+        std::cout << "Find descriptors from whole images." << std::endl;
+        int rowIndex = 0;
+        for (boost::filesystem::recursive_directory_iterator iter(directory);
+             iter != boost::filesystem::recursive_directory_iterator();
+             iter++)
+        {
+          if (is_directory(iter->status()))
+            continue;
+          std::string imageAbsolutePath = iter->path().string();
+          std::string imageName = iter->path().filename().string();
+          std::cout << "Processing file " << imageName << std::endl;
+          image = cv::imread(imageAbsolutePath);
+          if (!image.data)
+          {
+            std::cout << "Error reading file " << imageName << std::endl;
+            continue;
+          }
+          addDescriptorsToBagOfWords(image);
+
+          rowIndex += 1;
+        }
+      }
+
+      std::cout << "Saving descriptors to file" << std::endl;
+      file_utilities::saveDataToFile(descriptorsFilePath, annotatedImages,
+          getBagOfWordsDescriptors());
     }
+
     std::cout << "Creating visual Vocabulary" << std::endl;
     bowTrainerPtr_->createVocabulary();
     return true;
@@ -308,5 +344,13 @@ namespace pandora_vision
       return false;
     else
       return true;
+  }
+
+  /**
+   * @brief
+   */
+  std::vector<cv::Mat> FeatureExtraction::getBagOfWordsDescriptors() const
+  {
+    return bowTrainerPtr_->getDescriptors();
   }
 }  // namespace pandora_vision
