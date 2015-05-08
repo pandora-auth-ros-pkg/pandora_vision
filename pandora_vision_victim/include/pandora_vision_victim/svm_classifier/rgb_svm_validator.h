@@ -41,6 +41,7 @@
 
 #include <string>
 
+#include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/svm_classifier/svm_validator.h"
 
 /**
@@ -62,7 +63,7 @@ namespace pandora_vision
        * @param classifierPath [const std::string&] The path to the classifier
        * model.
        */
-      explicit RgbSvmValidator(const std::string& classifierPath);
+      explicit RgbSvmValidator(const VictimParameters& params);
 
       /**
        * @brief Default Destructor.

@@ -19,11 +19,13 @@ project(pandora_vision_hole)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  message_generation
   pandora_vision_msgs
   state_manager
   state_manager_msgs
   cv_bridge
   image_transport
+  std_msgs
   sensor_msgs
   dynamic_reconfigure
   pcl_ros
@@ -44,14 +46,28 @@ generate_dynamic_reconfigure_options(
   cfg/rgb_node_cfg/rgb_cfg.cfg
   )
 
+add_message_files(
+  FILES
+  CandidateHoleMsg.msg
+  CandidateHolesVectorMsg.msg
+  )
+  
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  )
+
 catkin_package(
   CATKIN_DEPENDS
     roscpp
+    message_runtime
     pandora_vision_msgs
     state_manager
     state_manager_msgs
     cv_bridge
     image_transport
+    std_msgs
     sensor_msgs
     dynamic_reconfigure
     pcl_ros
@@ -240,7 +256,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   ############### hole fusion node ################
   test/unit/hole_fusion_node/depth_filters_test.cpp
   test/unit/hole_fusion_node/filters_resources_test.cpp
-  #~ test/unit/hole_fusion_node/hole_merger_test.cpp
+  test/unit/hole_fusion_node/hole_merger_test.cpp
   test/unit/hole_fusion_node/hole_validation_test.cpp
   test/unit/hole_fusion_node/hole_uniqueness_test.cpp
   test/unit/hole_fusion_node/planes_detection_test.cpp

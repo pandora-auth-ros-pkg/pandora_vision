@@ -58,20 +58,20 @@ namespace pandora_vision
    * @param classifierPath [const std::string&] The path to the classifier
    * model.
    */
-  DepthSvmValidator::DepthSvmValidator(const std::string& classifierPath)
+  DepthSvmValidator::DepthSvmValidator(const VictimParameters& params)
     : SvmValidator()
   {
     ROS_INFO("Enter Depth SVM Validator");
-    classifierPath_ = classifierPath;
+    classifierPath_ = params.depth_classifier_path;
 
-    ROS_INFO_STREAM(classifierPath.c_str());
-    svmValidator_.load(classifierPath.c_str());
+    ROS_INFO_STREAM(params.depth_classifier_path.c_str());
+    svmValidator_.load(params.depth_classifier_path.c_str());
+    
+    probabilityScaling_ = params.depth_svm_prob_scaling;
+    probabilityTranslation_ = params.depth_svm_prob_translation;
 
-    probabilityScaling_ = VictimParameters::depth_svm_prob_scaling;
-    probabilityTranslation_ = VictimParameters::depth_svm_prob_translation;
-
-    svmParams_.C = VictimParameters::depth_svm_C;
-    svmParams_.gamma = VictimParameters::depth_svm_gamma;
+    svmParams_.C = params.depth_svm_C;
+    svmParams_.gamma = params.depth_svm_gamma;
 
     std::string filesDirectory = packagePath_ + "/data/";
 
@@ -116,4 +116,3 @@ namespace pandora_vision
   {
   }
 }  // namespace pandora_vision
-

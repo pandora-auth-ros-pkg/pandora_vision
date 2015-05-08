@@ -9,10 +9,17 @@ ${roslib_INCLUDE_DIRS}
 ${catkin_INCLUDE_DIRS})
 
 ################################################################################
-#                               Benchmark Tests                                #
+#                               Unit Tests                                     #
 ################################################################################
 
-add_rostest(benchmark/landoltc_benchmark_test.launch)
+catkin_add_gtest(${PROJECT_NAME}_2d_detector_test
+  unit/landoltc_2d/landoltc_detector_test.cpp
+)
+target_link_libraries(${PROJECT_NAME}_2d_detector_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_2d_detector
+  gtest_main
+)
 
 ################################################################################
 #                               Functional Tests                               #
@@ -25,3 +32,27 @@ add_rostest(benchmark/landoltc_benchmark_test.launch)
 #~ add_dependencies(${PROJECT_NAME}_landoltc_test_images tests)
 #~ 
 #~ add_rostest(functional/landoltc_test.launch)
+
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+
+download_extra_data(
+  ${PROJECT_NAME}_benchmark_images_480p
+  EXTRA_FILES test/benchmark/images/images_480p/extra_files.yaml
+  #EXCLUDE_FROM_ALL
+  )
+add_dependencies(${PROJECT_NAME}_benchmark_images_480p tests)
+
+download_extra_data(
+  ${PROJECT_NAME}_benchmark_images_720p
+  EXTRA_FILES test/benchmark/images/images_720p/extra_files.yaml
+  #EXCLUDE_FROM_ALL
+  )
+add_dependencies(${PROJECT_NAME}_benchmark_images_720p tests)
+
+add_rostest(benchmark/landoltc_kinect_benchmark_test.launch)
+add_rostest(benchmark/landoltc_web_camera_benchmark_test.launch)
+
+# add_rostest(benchmark/landoltc_kinect_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_480p)
+# add_rostest(benchmark/landoltc_web_camera_benchmark_test.launch DEPENDENCIES ${PROJECT_NAME}_benchmark_images_720p)

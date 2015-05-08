@@ -234,6 +234,7 @@ namespace pandora_vision
      // for (int jj = 0; jj < results.cols; jj++)
       // if(results.at<float>(ii, jj) == 0)
           // results.at<float>(ii, jj) = -1;
+
     cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
     SVM.predict(testFeaturesMat, results);
     // std::cout << "results" << results.size() << std::endl << results <<std::endl <<std::endl;
@@ -241,6 +242,3 @@ namespace pandora_vision
     evaluate(results, testLabelsMat);
   }
 }  // namespace pandora_vision
-
-
-

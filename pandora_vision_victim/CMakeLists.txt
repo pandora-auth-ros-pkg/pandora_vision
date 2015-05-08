@@ -5,6 +5,8 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     pandora_common_msgs
     pandora_vision_msgs
+    pandora_vision_common
+    sensor_processor
     state_manager
     state_manager_msgs
     pandora_cmake_tools
@@ -26,6 +28,8 @@ catkin_package(
       roscpp
       pandora_common_msgs
       pandora_vision_msgs
+      pandora_vision_common
+      sensor_processor
       state_manager
       state_manager_msgs
       cv_bridge
@@ -55,6 +59,10 @@ target_link_libraries(${PROJECT_NAME}_utilities
 
 add_library(${PROJECT_NAME}_victim_parameters
     src/victim_parameters.cpp
+)
+add_dependencies(${PROJECT_NAME}_victim_parameters
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 target_link_libraries(${PROJECT_NAME}_victim_parameters
     ${catkin_LIBRARIES}
@@ -106,27 +114,80 @@ target_link_libraries(${PROJECT_NAME}_svm_classifier
     ${PROJECT_NAME}_utilities
 )
 
-############################# Victim Node ######################################
-add_executable(victim_node
-    src/victim_node.cpp
-    src/victim_detection.cpp
-    src/svm_classifier/svm_validator.cpp
-    src/svm_classifier/rgb_svm_validator.cpp
-    src/svm_classifier/depth_svm_validator.cpp
-    src/victim_vj_detector.cpp
+
+################# victim svm processor #################
+add_library(${PROJECT_NAME}_svm_processor
+  src/victim_svm_processor.cpp
+  src/svm_classifier/svm_validator.cpp
+  src/svm_classifier/rgb_svm_validator.cpp
+  src/svm_classifier/depth_svm_validator.cpp
+)
+target_link_libraries(${PROJECT_NAME}_svm_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_victim_parameters
+  ${PROJECT_NAME}_feature_extractors
 )
 
-target_link_libraries(victim_node
-    ${catkin_LIBRARIES}
-    ${PROJECT_NAME}_feature_extractors
-    ${PROJECT_NAME}_channels_statistics_feature_extractors
-    ${PROJECT_NAME}_victim_parameters
+################# victim svm preprocessor #################
+add_library(${PROJECT_NAME}_svm_preprocessor
+  src/victim_svm_preprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_svm_preprocessor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_victim_parameters
 )
 
-add_dependencies(victim_node
-    ${catkin_EXPORTED_TARGETS}
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+################# victim vj detector #################
+#~ add_library(${PROJECT_NAME}_vj_detector
+  #~ src/victim_vj_detector.cpp
+#~ )
+#~ target_link_libraries(${PROJECT_NAME}_vj_detector
+  #~ ${catkin_LIBRARIES}
+  #~ ${PROJECT_NAME}_victim_parameters
+#~ )
+
+################# victim vj preprocessor #################
+#~ add_library(${PROJECT_NAME}_vj_preprocessor
+  #~ src/victim_vj_preprocessor.cpp
+#~ )
+#~ target_link_libraries(${PROJECT_NAME}_vj_preprocessor
+  #~ ${catkin_LIBRARIES}
+#~ )
+
+################# victim postprocessor #################
+add_library(${PROJECT_NAME}_postprocessor
+  src/victim_postprocessor.cpp
 )
+target_link_libraries(${PROJECT_NAME}_postprocessor
+  ${catkin_LIBRARIES}
+)
+
+################# victim handler #################
+add_library(${PROJECT_NAME}_handler
+  src/victim_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_svm_processor
+  ${PROJECT_NAME}_svm_preprocessor
+  #~ ${PROJECT_NAME}_vj_detector
+  #~ ${PROJECT_NAME}_vj_preprocessor
+  ${PROJECT_NAME}_postprocessor
+)
+
+################# victim node #################
+add_executable(${PROJECT_NAME}_node
+  src/victim_node.cpp
+)
+add_dependencies(${PROJECT_NAME}_node
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_node 
+  ${catkin_LIBRARIES} 
+  ${PROJECT_NAME}_handler
+)
+
 
 ############################## Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)
@@ -178,16 +239,22 @@ download_extra_data(
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
     "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use")
-
+    
 ## Additional lint filters - Not Needed ##
 # -whitespace/braces, -whitespace/newline, -readability/multiline_string
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  include/*.h
-  src/*.cpp
-  test/*.cpp
+  #~ include/*.h
+  #~ src/*.cpp
+  #~ test/*.cpp
+  include/victim_p*.h
+  include/victim_h*.h
+  include/e*.h
+  src/victim_p*.cpp
+  src/victim_h*.cpp
+  src/victim_node.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

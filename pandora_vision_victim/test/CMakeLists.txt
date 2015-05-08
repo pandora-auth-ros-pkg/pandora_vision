@@ -1,4 +1,13 @@
+find_package(roslib REQUIRED)
 find_package(rostest REQUIRED)
+find_package(pandora_testing_tools REQUIRED)
+find_package(pandora_cmake_tools REQUIRED)
+
+include_directories(
+${pandora_testing_tools_INCLUDE_DIRS}
+${roslib_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS})
+
 
 catkin_add_gtest(mean_std_dev_test unit/channels_statistics_feature_extractors/mean_std_dev_test.cpp)
 target_link_libraries(mean_std_dev_test
@@ -46,4 +55,21 @@ target_link_libraries(sift_feature_extractor_test
 #    https://pandora.ee.auth.gr/rosbags/2014_bags/hole_detector_test.bag
 #    DESTINATION functional
 #    )
-#add_rostest(functional/victim_test.launch)
+#add_rostest(functional/hole_detector_test.launch)
+
+add_rostest(functional/victim_test.launch)
+
+################################################################################
+#                               Benchmark Tests                                #
+################################################################################
+
+download_extra_data(
+  ${PROJECT_NAME}_benchmark_images_bags_pcl
+  EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
+  #EXCLUDE_FROM_ALL
+  )
+add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
+
+add_rostest(benchmark/victim_benchmark_test.launch)
+# add_rostest(benchmark/victim_benchmark_test.launch DEPENDENCIES
+            # ${PROJECT_NAME}_benchmark_images_bags_pcl)

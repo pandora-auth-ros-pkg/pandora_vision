@@ -8,6 +8,6 @@
 <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
 
 <test test-name="QrAccuracyTest" pkg="pandora_vision_qrcode"
-  type="accuracy_test.py"/>
+  type="accuracy_test.py time-limit="200.0"/>
 
 </launch>

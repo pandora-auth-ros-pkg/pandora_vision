@@ -52,13 +52,14 @@ namespace pandora_vision
   struct LandoltcParameters
   {
     //!< Threshold parameters
-    static double gradientThreshold;
-    static double centerThreshold;
-    static double huMomentsPrec;
-    static int adaptiveThresholdSubtractSize;
-    static bool visualization;
-    static double timerThreshold;
+    double gradientThreshold;
+    double centerThreshold;
+    double huMomentsPrec;
+    int adaptiveThresholdSubtractSize;
+    bool visualization;
+    double timerThreshold;
     
+    void configLandoltC(const ros::NodeHandle& nh);
   };
 
 } // namespace pandora_vision

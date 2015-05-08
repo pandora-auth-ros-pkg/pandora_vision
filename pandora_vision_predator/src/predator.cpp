@@ -1,6 +1,6 @@
 /*  Copyright (c) 2014, Victor Daropoulos
  *  All rights reserved.
- *  
+ *
  *  This file is part of Pandora_OpenTLD.
 
  *  Pandora_OpenTLD is free software: you can redistribute it and/or modify
@@ -8,7 +8,7 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Pandora_OpenTLD is distributed in the hope that it will be useful, 
+ *  Pandora_OpenTLD is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
@@ -47,7 +47,7 @@ namespace pandora_vision
     model_path_stream << packagePath << "/model";
     
     patternPath = model_path_stream.str();
-    if(is_file_exist(patternPath))
+    if (is_file_exist(patternPath))
       modelLoaded = true;
     else
       ROS_INFO("Model not found!Waiting... <3 ");
@@ -87,21 +87,21 @@ namespace pandora_vision
     detectorCascade->numFeatures = detectorCascadeParams.num_features;
     detectorCascade->nnClassifier->thetaTP = detectorCascadeParams.theta_TP;
     detectorCascade->nnClassifier->thetaFP = detectorCascadeParams.theta_FP;
-    if(annotations)
+    
+    if (annotations)
     {
-    _inputImageSubscriber = _nh.subscribe(annotator_topic_name, 1, &Predator::annotationCallback, this);
+      _inputImageSubscriber = _nh.subscribe(annotator_topic_name, 1, &Predator::annotationCallback, this);
     }
 
     else
     {
-    _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
+      _inputImageSubscriber = _nh.subscribe(imageTopic, 1, &Predator::imageCallback, this);
     }
     //!< initialize states - robot starts in STATE_OFF
     curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
     prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
 
     clientInitialize();
-    
   }
 
   /**
@@ -112,8 +112,6 @@ namespace pandora_vision
   {
     ROS_INFO("[predator_node] : Destroying Predator instance");
   }
-
-
 
   static int drag = 0;
   static cv::Point point;
@@ -130,7 +128,6 @@ namespace pandora_vision
   **/
   static void mouseHandler(int event, int x, int y, int flags, void *param)
   {
-    
     cv::Mat *img = (cv::Mat *)param;
 
     /* user press left button */
@@ -141,7 +138,7 @@ namespace pandora_vision
     }
 
     /* user drag the mouse */
-    if (event == CV_EVENT_MOUSEMOVE && drag) 
+    if (event == CV_EVENT_MOUSEMOVE && drag)
     {
       cv::Mat imgCopy;
       //img->copyTo(imgCopy);
@@ -149,13 +146,12 @@ namespace pandora_vision
 
       cv::rectangle(imgCopy, point, cv::Point(x, y), CV_RGB(255, 0, 0), 3, 8, 0);
       
-      if(Predator::show_debug_image)
+      if (Predator::show_debug_image)
       {
         cv::imshow("tld", imgCopy);
         cv::waitKey(20);
       }
     }
-
     /* user release left button */
     if (event == CV_EVENT_LBUTTONUP && drag) 
     {
@@ -177,7 +173,7 @@ namespace pandora_vision
 
     std::string robot_description = "";
 
-    if(!res || !_nh.getParam(model_param_name, robot_description))
+    if (!res || !_nh.getParam(model_param_name, robot_description))
     {
       ROS_ERROR("[Predator_node]:Robot description couldn't be retrieved from the parameter server.");
       return false;
@@ -188,7 +184,8 @@ namespace pandora_vision
 
     // Get current link and its parent
     boost::shared_ptr<const urdf::Link> currentLink = model->getLink(_frame_id);
-    if(currentLink){
+    if (currentLink)
+    {
       boost::shared_ptr<const urdf::Link> parentLink = currentLink->getParent();
       // Set the parent frame_id to the parent of the frame_id
       _parent_frame_id = parentLink->name;
@@ -199,7 +196,7 @@ namespace pandora_vision
       
     return false;
   }
-
+  
   /**
   @brief Callback for the RGB Image
   @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
@@ -207,12 +204,11 @@ namespace pandora_vision
   **/
   void Predator::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-    
-    if(!predatorNowON)
+    if (!predatorNowON)
     {
       return;
     }
-        
+
     double start = static_cast<double>(cv::getTickCount());
     framecounter++;
     double fps;
@@ -220,7 +216,7 @@ namespace pandora_vision
     char LearningString[10]="";
     char mystring[128];
     
-    if(!semaphore_locked)
+    if (!semaphore_locked)
     {
       cv_bridge::CvImagePtr in_msg;
       in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -228,11 +224,10 @@ namespace pandora_vision
       PredatorFrameTimeStamp = msg->header.stamp;
       _frame_id = msg->header.frame_id;
       
-      if(_frame_id.c_str()[0] == '/')
+      if (_frame_id.c_str()[0] == '/')
         _frame_id = _frame_id.substr(1);
-        
-        
-      if ( PredatorFrame.empty() )
+      
+      if (PredatorFrame.empty())
       {
         ROS_ERROR("[predator_node] : No more Frames");
         return;
@@ -240,7 +235,7 @@ namespace pandora_vision
       
       std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
         
-      if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) 
+      if (_frame_ids_map.find(_frame_id) == _frame_ids_map.end()) 
       {
         bool _indicator = getParentFrameId();      
         _frame_ids_map.insert( it , std::pair<std::string, std::string>(
@@ -252,10 +247,9 @@ namespace pandora_vision
       tld->detectorCascade->imgWidth = grey.cols;
       tld->detectorCascade->imgHeight = grey.rows;
       tld->detectorCascade->imgWidthStep = grey.step; 
-    
       
       tld->processImage(PredatorFrame);
-          
+
       double end = (cvGetTickCount() - start) / cvGetTickFrequency();
 
       end = end / 1000000;
@@ -278,7 +272,6 @@ namespace pandora_vision
         cv::Rect temp = cv::Rect(0, 0, 0, 0);
         sendMessage(temp, 0, msg);
       }
-      
     }
     
     snprintf(mystring, sizeof(mystring), "#%d, Posterior %.2f; fps: %.2f, #numwindows:%d, %s",
@@ -286,7 +279,7 @@ namespace pandora_vision
     cv::rectangle(PredatorFrame, cv::Point(0, 0), cv::Point(PredatorFrame.cols, 50), CV_RGB(0, 0, 0), CV_FILLED, 8, 0);
     cv::putText(PredatorFrame, mystring, cv::Point(25, 25), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255, 255, 255));
     
-    if(Predator::show_debug_image)
+    if (Predator::show_debug_image)
     {
       cv::imshow("tld", PredatorFrame);
     
@@ -294,7 +287,6 @@ namespace pandora_vision
       
       switch (keyCode)
       {
-        
         // draw bounding box
         case 'r':
 
@@ -355,12 +347,10 @@ namespace pandora_vision
         ROS_INFO("Importing Model");
         tld->readFromFile(modelPath);
         break;
-
-        
       }
     }
     
-    if(modelLoaded)
+    if (modelLoaded)
     {
       const char* modelPath = patternPath.c_str();
       tld->release();
@@ -368,23 +358,22 @@ namespace pandora_vision
       tld->readFromFile(modelPath);
       ROS_INFO("Initiating Hunt");
       modelLoaded = false;
-    } 
-
+    }
   }
 
   /**
   @brief Callback for the pandora_vision_annotator node
-  @param msg [const pandora_vision_msgs::AnnotationMsg& msg] The annotator msg
+  @param msg [const pandora_vision_msgs::Predator& msg] The annotator msg
   @return void
   **/
-  void Predator::annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg)
+  void Predator::annotationCallback(const pandora_vision_msgs::Predator& msg)
   {  
-    if(!predatorNowON)
+    if (!predatorNowON)
     {
       return;
     }
 
-    if(msg.header.frame_id == "close") 
+    if (msg.header.frame_id == "close") 
     {
       ROS_INFO_STREAM("Shutting down Predator node");
       ros::shutdown(); 
@@ -393,29 +382,29 @@ namespace pandora_vision
     framecounter++;
     double fps;
     
-    char LearningString[10]="";
+    char LearningString[10] = "";
     char mystring[128];
     
-    if(!semaphore_locked)
+    if (!semaphore_locked)
     {
       cv_bridge::CvImagePtr in_msg;
-      in_msg = cv_bridge::toCvCopy(msg.img, sensor_msgs::image_encodings::BGR8);
+      in_msg = cv_bridge::toCvCopy(msg.image, sensor_msgs::image_encodings::BGR8);
       PredatorFrame = in_msg -> image.clone();
       PredatorFrameTimeStamp = msg.header.stamp;
       _frame_id = msg.header.frame_id;
       
-      if(_frame_id.c_str()[0] == '/')
+      if (_frame_id.c_str()[0] == '/')
         _frame_id = _frame_id.substr(1);
           
-      if ( PredatorFrame.empty() )
+      if (PredatorFrame.empty())
       {
         ROS_ERROR("[predator_node] : No more Frames");
         return;
       }
-      
+
       std::map<std::string, std::string>::iterator it = _frame_ids_map.begin();
         
-      if(_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) 
+      if (_frame_ids_map.find(_frame_id) == _frame_ids_map.end() ) 
       {
         bool _indicator = getParentFrameId();      
         _frame_ids_map.insert( it , std::pair<std::string, std::string>(
@@ -428,17 +417,20 @@ namespace pandora_vision
       tld->detectorCascade->imgHeight = grey.rows;
       tld->detectorCascade->imgWidthStep = grey.step; 
 
-      if(msg.x != -1 && msg.y != -1 &&  msg.width != -1 && msg.height !=-1) 
+      if (msg.areaOfInterest.center.x != -1 && msg.areaOfInterest.center.y != -1 
+        && msg.areaOfInterest.width != -1 && msg.areaOfInterest.height !=-1) 
       {
-        ROS_INFO_STREAM("Starting at: " << msg.x <<" " <<msg.y << " " << msg.width << " " << msg.height);
-        bbox = cv::Rect(msg.x,msg.y,msg.width,msg.height);
+        ROS_INFO_STREAM("Starting at: " << msg.areaOfInterest.center.x << " " 
+          << msg.areaOfInterest.center.y << " " << msg.areaOfInterest.width << " " 
+          << msg.areaOfInterest.height);
+        bbox = cv::Rect(msg.areaOfInterest.center.x, msg.areaOfInterest.center.y,
+          msg.areaOfInterest.width, msg.areaOfInterest.height);
         tld->selectObject(grey, &bbox); 
         tld->learningEnabled = true;
         sendAnnotation(*tld->currBB, tld->currConf);
         cv::imshow("tld", PredatorFrame);
         cv::waitKey(20);
       }
-        
       else
       { 
         double start = static_cast<double>(cv::getTickCount());
@@ -447,18 +439,17 @@ namespace pandora_vision
         end = end / 1000000;
         fps = 1 / end;
       
-        if(tld->learning)
+        if (tld->learning)
         {
           snprintf(LearningString, sizeof(LearningString), "Learning");
         }
       
-        if(tld->currBB != NULL)
+        if (tld->currBB != NULL)
         {
           cv::Scalar rectangleColor = tld->currConf > static_cast<double>(0.7) ? CV_RGB(0, 0, 255) : CV_RGB(255, 255, 0);
           cv::rectangle(PredatorFrame, tld->currBB->tl(), tld->currBB->br(), rectangleColor, 8, 8, 0);
           sendAnnotation(*tld->currBB, tld->currConf);
-        } 
-
+        }
         else
         { 
           cv::Rect temp = cv::Rect(0, 0, 0, 0);
@@ -482,7 +473,7 @@ namespace pandora_vision
   bool Predator::is_file_exist(const std::string& fileName)
   {
     struct stat buffer;
-    return(stat (fileName.c_str(), &buffer) == 0);
+    return (stat (fileName.c_str(), &buffer) == 0);
   }
 
   /**
@@ -491,15 +482,14 @@ namespace pandora_vision
   **/
   void Predator::getGeneralParams()
   {
-    
     packagePath = ros::package::getPath("pandora_vision_predator");
      
     //!< Get value of annotations state
-    if( _nh.getParam("annotations", annotations))
+    if (_nh.getParam("annotations", annotations))
       ROS_INFO("annotations state is loaded");
     else
     {
-       annotations= false;
+      annotations= false;
       ROS_INFO("Unable to load annotations state from launcher");
     }
 
@@ -509,18 +499,16 @@ namespace pandora_vision
     //! where algorithm results are posted if it works alone or with annotator
     if (_nh.getParam("published_topic_names/predator_alert", param))
     {
-      if(annotations)
+      if (annotations)
       {
-         _predatorPublisher = 
-          _nh.advertise<pandora_vision_msgs::PredatorMsg>(param, 1000);
+        _predatorPublisher = 
+          _nh.advertise<pandora_vision_msgs::Predator>(param, 1000);
       }
       else
       {
         _predatorPublisher = 
-          _nh.advertise<pandora_common_msgs::GeneralAlertMsg>(param, 1000);
-
+          _nh.advertise<pandora_common_msgs::GeneralAlert>(param, 1000);
       }
-
     }
     else
     {
@@ -533,7 +521,7 @@ namespace pandora_vision
     if (_nh.getParam("published_topic_names/predator_employment_output", param))
     {
       _landoltc3dPredatorPublisher =
-        _nh.advertise<pandora_vision_msgs::LandoltcPredatorMsg>(param, 1000);
+        _nh.advertise<pandora_vision_msgs::Predator>(param, 1000);
     }
     else
     {
@@ -550,7 +538,6 @@ namespace pandora_vision
       ROS_FATAL("[predator_node] : annotator topic name not found");
       ROS_BREAK();
     }
-
     
     //!< Get value for enabling or disabling TLD learning mode
     if( _nh.getParam("learning_enabled", learningEnabled))
@@ -589,7 +576,7 @@ namespace pandora_vision
     }
       
     //! Get the Width parameter if available;
-    if ( _nh.getParam("image_width", frameWidth))
+    if (_nh.getParam("image_width", frameWidth))
       ROS_DEBUG_STREAM("width : " << frameWidth);
     else
     {
@@ -605,7 +592,7 @@ namespace pandora_vision
       ROS_FATAL("[predator_node] : Horizontal field of view not found");
       ROS_BREAK();
     }
-    
+
     //!< Get the VFOV parameter if available;
     if (_nh.getParam("vfov", vfov))
       ROS_DEBUG_STREAM("VFOV : " << vfov);
@@ -771,22 +758,22 @@ namespace pandora_vision
   **/
   void Predator::sendAnnotation(const cv::Rect& rec, const float& posterior) 
   {
-    if( operation_state == true)
+    if (operation_state == true)
     {
-      pandora_vision_msgs::PredatorMsg predatorMsg;
+      pandora_vision_msgs::Predator predatorMsg;
       predatorMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
       predatorMsg.header.stamp = PredatorFrameTimeStamp;
-      predatorMsg.x = rec.x;
-      predatorMsg.y = rec.y;
-      predatorMsg.width = rec.width;
-      predatorMsg.height = rec.height;
+      predatorMsg.areaOfInterest.center.x = rec.x;
+      predatorMsg.areaOfInterest.center.y = rec.y;
+      predatorMsg.areaOfInterest.width = rec.width;
+      predatorMsg.areaOfInterest.height = rec.height;
       predatorMsg.posterior = posterior;
-      
-      ROS_INFO_STREAM("send predator alert " << predatorMsg.header.frame_id << " " 
-                    << predatorMsg.header.stamp << " "  << predatorMsg.x << " " 
-                    << predatorMsg.y << " "<< predatorMsg.width << " "
-                    << predatorMsg.height <<  " " << predatorMsg.posterior);
-      _predatorPublisher.publish(predatorMsg);  
+
+     ROS_INFO_STREAM("send predator alert " << predatorMsg.header.frame_id << " " 
+                    << predatorMsg.header.stamp << " "  << predatorMsg.areaOfInterest.center.x << " " 
+                    << predatorMsg.areaOfInterest.center.y << " "<< predatorMsg.areaOfInterest.width << " "
+                    << predatorMsg.areaOfInterest.height <<  " " << predatorMsg.posterior);
+      _predatorPublisher.publish(predatorMsg);
     }
   }
 
@@ -799,47 +786,47 @@ namespace pandora_vision
   void Predator::sendMessage(const cv::Rect& rec, const float& posterior, 
       const sensor_msgs::ImageConstPtr& frame)
   {
-    
-    if( operation_state == true){
-      
-      pandora_vision_msgs::LandoltcPredatorMsg predatorLandoltcMsg;
+    if ( operation_state == true)
+    {
+      pandora_vision_msgs::Predator predatorLandoltcMsg;
       predatorLandoltcMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
       predatorLandoltcMsg.header.stamp = PredatorFrameTimeStamp;
-      predatorLandoltcMsg.x = rec.x;
-      predatorLandoltcMsg.y = rec.y;
-      predatorLandoltcMsg.width = rec.width;
-      predatorLandoltcMsg.height = rec.height;
+      predatorLandoltcMsg.areaOfInterest.center.x = rec.x;
+      predatorLandoltcMsg.areaOfInterest.center.y = rec.y;
+      predatorLandoltcMsg.areaOfInterest.width = rec.width;
+      predatorLandoltcMsg.areaOfInterest.height = rec.height;
       predatorLandoltcMsg.posterior = posterior;
-      predatorLandoltcMsg.img = *frame;
+      predatorLandoltcMsg.image = *frame;
       
       _landoltc3dPredatorPublisher.publish(predatorLandoltcMsg);  
     }
-    else{
-      
-      pandora_common_msgs::GeneralAlertMsg predatorAlertMsg;
-      
-      if(posterior != 0){
+    else
+    {
+      pandora_common_msgs::GeneralAlert predatorAlertMsg;
+
+      if (posterior != 0)
+      {
         predatorAlertMsg.header.frame_id = _frame_ids_map.find(_frame_id)->second;
         predatorAlertMsg.header.stamp = PredatorFrameTimeStamp;
-        predatorAlertMsg.probability = posterior;
-        int center_x = rec.x + rec.width/2;
-        int center_y = rec.y + rec.height/2;
-        
+        predatorAlertMsg.info.probability = posterior;
+        int center_x = rec.x + rec.width / 2;
+        int center_y = rec.y + rec.height / 2;
+
         // Predator's center's coordinates relative to the center of the frame
         float x = center_x
           - static_cast<float>(frameWidth) / 2;
         float y = static_cast<float>(frameHeight) / 2
           - center_y;
 
-        //Predator center's yaw and pitch
-        predatorAlertMsg.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
-        predatorAlertMsg.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
-            
+        // Predator center's yaw and pitch
+        predatorAlertMsg.info.yaw = atan(2 * x / frameWidth * tan(hfov / 2));
+        predatorAlertMsg.info.pitch = atan(2 * y / frameHeight * tan(vfov / 2));
+
         _predatorPublisher.publish(predatorAlertMsg);
-      }  
+      }
     }
   }
-    
+
   /**
   @brief Node's state manager
   @param newState [int] The robot's new state
@@ -886,7 +873,7 @@ namespace pandora_vision
   /**
   @brief The function called when a parameter is changed
   @param[in] config [const pandora_vision_predator::predator_cfgConfig&]
-  @param[in] level [const uint32_t] The level 
+  @param[in] level [const uint32_t] The level
   @return void
   **/
   void Predator::parametersCallback(
@@ -896,7 +883,4 @@ namespace pandora_vision
     Predator::show_debug_image = config.show_predator_image;
   }
 
-} // namespace pandora_vision
-
-
-
+}  // namespace pandora_vision

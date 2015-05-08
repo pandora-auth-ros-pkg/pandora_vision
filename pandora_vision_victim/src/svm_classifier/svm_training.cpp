@@ -49,8 +49,10 @@ namespace pandora_vision
   SvmTraining::SvmTraining(const std::string& ns,
       int numFeatures,
       const std::string& datasetPath) :
-      nh_(ns), vparams(ns)
+      nh_(ns)
   {
+    vparams.configVictim(nh_);
+    
     path_to_samples = datasetPath;
     numFeatures_ = numFeatures;
     params.svm_type = CvSVM::C_SVC;

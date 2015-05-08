@@ -1,6 +1,6 @@
 /*  Copyright (c) 2014, Victor Daropoulos
  *  All rights reserved.
- *  
+ *
  *  This file is part of Pandora_OpenTLD.
 
  *  Pandora_OpenTLD is free software: you can redistribute it and/or modify
@@ -8,7 +8,7 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Pandora_OpenTLD is distributed in the hope that it will be useful, 
+ *  Pandora_OpenTLD is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
@@ -35,10 +35,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "pandora_common_msgs/GeneralAlertMsg.h"
-#include "pandora_vision_msgs/LandoltcPredatorMsg.h"
-#include "pandora_vision_msgs/PredatorMsg.h"
-#include "pandora_vision_msgs/AnnotationMsg.h"
+#include "pandora_common_msgs/GeneralAlert.h"
+#include "pandora_vision_msgs/Predator.h"
 
 #include <tld/TLD.h>
 #include <urdf_parser/urdf_parser.h>
@@ -167,10 +165,10 @@ namespace pandora_vision
 
       /**
       @brief Callback for the pandora_vision_annotator node
-      @param msg [const pandora_vision_msgs::AnnotationMsg& msg] The annotator msg
+      @param msg [const pandora_vision_msgs::Predator& msg] The annotator msg
       @return void
       **/
-      void annotationCallback(const pandora_vision_msgs::AnnotationMsg& msg);
+      void annotationCallback(const pandora_vision_msgs::Predator& msg);
       
       /**
       @brief Function that retrieves the parent to the frame_id
@@ -201,7 +199,6 @@ namespace pandora_vision
       const uint32_t& level);
       
      
-      
     public:
     
       static bool show_debug_image;
@@ -264,7 +261,6 @@ namespace pandora_vision
       int prevState;
     
   };
-} // namespace pandora_vision
+}  // namespace pandora_vision
+
 #endif  // PANDORA_VISION_PREDATOR_PREDATOR_NODE_H
-  
-  

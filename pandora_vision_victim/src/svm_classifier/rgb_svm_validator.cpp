@@ -58,20 +58,20 @@ namespace pandora_vision
    * @param classifierPath [const std::string&] The path to the classifier
    * model.
    */
-  RgbSvmValidator::RgbSvmValidator(const std::string& classifierPath)
+  RgbSvmValidator::RgbSvmValidator(const VictimParameters& params)
     : SvmValidator()
   {
     ROS_INFO("Enter RGB SVM Validator");
-    classifierPath_ = classifierPath;
+    classifierPath_ = params.rgb_classifier_path;
 
-    ROS_INFO_STREAM(classifierPath.c_str());
-    svmValidator_.load(classifierPath.c_str());
+    ROS_INFO_STREAM(params.rgb_classifier_path.c_str());
+    svmValidator_.load(params.rgb_classifier_path.c_str());
 
-    probabilityScaling_ = VictimParameters::rgb_svm_prob_scaling;
-    probabilityTranslation_ = VictimParameters::rgb_svm_prob_translation;
+    probabilityScaling_ = params.rgb_svm_prob_scaling;
+    probabilityTranslation_ = params.rgb_svm_prob_translation;
 
-    svmParams_.C = VictimParameters::rgb_svm_C;
-    svmParams_.gamma = VictimParameters::rgb_svm_gamma;
+    svmParams_.C = params.rgb_svm_C;
+    svmParams_.gamma = params.rgb_svm_gamma;
 
     std::string filesDirectory = packagePath_ + "/data/";
 
@@ -115,4 +115,3 @@ namespace pandora_vision
   {
   }
 }  // namespace pandora_vision
-
