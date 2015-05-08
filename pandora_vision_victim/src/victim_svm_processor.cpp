@@ -252,7 +252,7 @@ namespace pandora_vision
     std::vector<VictimPOIPtr> rgb_svm_probabilities;
     std::vector<VictimPOIPtr> depth_svm_probabilities;
 
-    VictimPOIPtr temp;
+    VictimPOIPtr temp(new VictimPOI);
     
     if (detectionMode == GOT_HOLES || detectionMode == GOT_HOLES_AND_DEPTH )  // || detectionMode == GOT_RGB
     {
