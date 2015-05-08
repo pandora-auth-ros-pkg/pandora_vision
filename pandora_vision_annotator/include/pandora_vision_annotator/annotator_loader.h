@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015 P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,15 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_ANNOTATOR_LOADER
-#define PANDORA_VISION_ANNOTATOR_LOADER
+#ifndef PANDORA_VISION_ANNOTATOR_ANNOTATOR_LOADER_H
+#define PANDORA_VISION_ANNOTATOR_ANNOTATOR_LOADER_H
 
-#include "pandora_vision_annotator/pandora_vision_annotator_tools.h"
+#include "pandora_vision_annotator/annotator_tools.h"
 #include "ui_pandora_annotator.h"
 /**
 @namespace pandora_vision
@@ -60,9 +62,9 @@ namespace pandora_vision
       char**  argv_;
       
       //!< True if the exit signal was emmited
-      bool   close_signal_;
+      bool close_signal_;
       //!< The exit event (when occurs)
-      QCloseEvent   *event_;
+      QCloseEvent *event_;
       
     //------------------------------------------------------------------------//
     public:
@@ -76,7 +78,7 @@ namespace pandora_vision
       @param argv [char **] Input arguments
       @return void
       **/
-      CLoader(int argc,char **argv);
+      CLoader(int argc, char **argv);
       
       /**
       @brief Overloading of closeEvent function from QMainWindow
@@ -105,6 +107,6 @@ namespace pandora_vision
       
   };
   
-}
+}// namespace pandora_vision
 
-#endif
+#endif  // PANDORA_VISION_ANNOTATOR_ANNOTATOR_LOADER_H

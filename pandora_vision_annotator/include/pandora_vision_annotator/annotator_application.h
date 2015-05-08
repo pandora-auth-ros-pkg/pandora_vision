@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,74 +32,48 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_annotator/pandora_vision_annotator_loader.h"
+#ifndef PANDORA_VISION_ANNOTATOR_ANNOTATOR_APPLICATION_H
+#define PANDORA_VISION_ANNOTATOR_ANNOTATOR_APPLICATION_H
 
+#include <QDebug>
+#include <QApplication>
+
+/**
+@namespace pandora_vision
+@brief The main namespace for pandora vision
+**/ 
 namespace pandora_vision
 {
   /**
-  @brief Default contructor
-  @param argc [int] Number of input arguments
-  @param argv [char **] Input arguments
-  @return void
-  **/
-  CLoader::CLoader(int argc,char **argv):
-    argc_(argc),
-    argv_(argv)
+  @class CPandoraVisionAnnotatorApplication
+  @brief Inherits QApplications. Created to overload the notify function.
+  **/ 
+  class CApplication:public QApplication
   {
-    setupUi(this);
+    public:
     
-    close_signal_ = false;
-  }
-  
- 
-  /**
-  @brief Overloading of closeEvent function from QMainWindow
-  @param event [QCloseEvent*] The exit event
-  @return void
-  **/
-  void CLoader::closeEvent(QCloseEvent *event)
-  {
-    //~ ROS_ERROR("Shutdown signal!");
-    if(close_signal_)
-    {
-      event->accept();
-      //~ ROS_ERROR("Shutting down ros...");
-      ros::shutdown();
-      exit(0);
-      return;
-    }
-    close_signal_ = true;
-    event->ignore();
-    event_ = event;
-  }
-  
-  /**
-  @brief Returns the exit event
-  @return QEvent* 
-  **/
-  QEvent* CLoader::getCloseEvent(void)
-  {
-    return event_;
-  }
-  
-  /**
-  @brief Returns true if a close event was triggered
-  @return bool
-  **/
-  bool CLoader::closeTriggered(void)
-  {
-    return close_signal_;
-  }
-  
-  /**
-  @brief Shuts down the main window
-  @return void
-  **/
-  void CLoader::shutdown(void)
-  {
-    this->close();
-  }
-}
+      /**
+      @brief Default contructor
+      @param argc [int&] Number of input arguments
+      @param argv [char **] Input arguments
+      @return void
+      **/
+      CApplication (int& argc, char **argv);
+      
+      /**
+      @brief Called at every Qt event 
+      @param receiver [QObject*] The event receiver
+      @param event [QEvent*] The event triggered
+      @return bool : True if receiver was notified about event
+      **/
+      bool notify(QObject * receiver, QEvent * event);
+  };
+
+}// namespace pandora_vision
+
+#endif  // PANDORA_VISION_ANNOTATOR_ANNOTATOR_APPLICATION_H

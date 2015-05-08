@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,46 +32,43 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_ANNOTATOR_APPLICATION
-#define PANDORA_VISION_ANNOTATOR_APPLICATION
+#include "pandora_vision_annotator/annotator_application.h"
 
-#include <QDebug>
-#include <QApplication>
-
-/**
-@namespace pandora_vision
-@brief The main namespace for pandora vision
-**/ 
 namespace pandora_vision
 {
   /**
-  @class CPandoraVisionAnnotatorApplication
-  @brief Inherits QApplications. Created to overload the notify function.
-  **/ 
-  class CApplication:public QApplication
+  @brief Default contructor
+  @param argc [int&] Number of input arguments
+  @param argv [char **] Input arguments
+  @return void
+  **/
+  CApplication::CApplication(int& argc, char **argv):
+    QApplication(argc, argv)  
   {
-    public:
-    
-      /**
-      @brief Default contructor
-      @param argc [int&] Number of input arguments
-      @param argv [char **] Input arguments
-      @return void
-      **/
-      CApplication (int &argc,char **argv);
-      
-      /**
-      @brief Called at every Qt event 
-      @param receiver [QObject*] The event receiver
-      @param event [QEvent*] The event triggered
-      @return bool : True if receiver was notified about event
-      **/
-      bool notify(QObject * receiver, QEvent * event);
-  };
+  }
+  
+  /**
+  @brief Called at every Qt event 
+  @param receiver [QObject*] The event receiver
+  @param event [QEvent*] The event triggered
+  @return bool : True if receiver was notified about event
+  **/
+  bool CApplication::notify(QObject * receiver, QEvent * event)
+  {
+    try 
+    {
+      return QApplication::notify(receiver, event);
+    } 
+    catch(std::exception& e) 
+    {
+      qDebug() << "Exception thrown:" << e.what();
+    }
+    return false;
+  }
+}// namespace pandora_vision
 
-}
-
-#endif

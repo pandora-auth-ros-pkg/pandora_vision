@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,15 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_ANNOTATOR_CONTROLLER
-#define PANDORA_VISION_ANNOTATOR_CONTROLLER
+#ifndef PANDORA_VISION_ANNOTATOR_ANNOTATOR_CONTROLLER_H
+#define PANDORA_VISION_ANNOTATOR_ANNOTATOR_CONTROLLER_H
 
-#include "pandora_vision_annotator/pandora_vision_annotator_connector.h"
+#include "pandora_vision_annotator/annotator_connector.h"
 /**
 @namespace pandora_vision
 @brief The main namespace for pandora vision
@@ -65,18 +67,16 @@ namespace pandora_vision
 
       //!< ROS subscriber for the image topic
       ros::Subscriber img_subscriber_;
-
-
+      
       //!< ROS subscriber for the predator alert
       ros::Subscriber predatorSubscriber_;
-      
 
       //!< ROS publisher for the predator 
       ros::Publisher annotationPublisher_;
 
-
       //!< The ROS node handle
       ros::NodeHandle n_;
+      
       //!< QImage created one time, containing the frame from the input topic
       QImage topic_img_;
 
@@ -86,20 +86,25 @@ namespace pandora_vision
       //!< Vector of frames
       std::vector<cv::Mat> frames;
 
+      //!< Vector of bag msgs Header
       std::vector<std_msgs::Header> msgHeader_;
-     //sensors_msgs::Image::ConstPtr imgs;
-      int count,prevcount;
-
+      
+      //!< the number of current Frame
       int currentFrameNo_;
 
+      //!< Initial frame to be used with Predator
       int baseFrame;
 
+      //!< offset added to current frame Number
       int offset;
 
+      //!< flag to indicate if annotator is on online onlinemode
       bool onlinemode;
 
+      //!< flag to indicate if Predator is on
       bool PredatorNowOn;
 
+      //!< flag to indicate if backward tracking is enabled
       bool enableBackwardTracking;
 
 
@@ -112,7 +117,7 @@ namespace pandora_vision
       @param argv [char **] Input arguments
       @return void
       **/
-      CController(int argc,char **argv);
+      CController(int argc, char **argv);
 
       /**
       @brief Default destructor
@@ -132,32 +137,107 @@ namespace pandora_vision
       **/
       bool init();
 
+      /**
+      @brief function that receives pointcloud msg and converts it
+      to cv::Mat
+      @param msg [const sensor_msgs::PointCloud2Ptr&] the pointcloud msg
+      @return void
+      **/
       void receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg);
+      /**
+      @brief Function called when new ROS message appears, from any topic
+      posting a sensor_msgs kind of msg
+      @param msg [const sensor_msgs::ImageConstPtr& ] The message
+      @return void
+      **/
       void receiveImage(const sensor_msgs::ImageConstPtr& msg);
-      void loadBag(const std::string& filename, const std::string& topic);
-      void predatorCallback(const pandora_vision_msgs::PredatorMsg& msg);
-      void sendInitialFrame(const int &initialFrame);
-      void sendNextFrame(bool enableBackward);
-      void sendFinalFrame();
-      cv::Mat getFrame(int x);
 
+      /**
+      @brief function that loads the bag
+      @param filename [const std::string&] the name of the bag file
+      @param topic [const std::string&] the topic to be loaded
+      @return void
+      **/
+      void loadBag(const std::string& filename, const std::string& topic);
+      /**
+      @brief Function called when new ROS message appears, from predator node
+      @param msg [const pandora_vision_msgs::PredatorMsg&] The message
+      @return void
+      **/
+      void predatorCallback(const pandora_vision_msgs::PredatorMsg& msg);
+      /**
+      @brief function that prepares and publish the fist msg to 
+      be used in predator
+      @param initialFrame [const int&] the initial frame number
+      @return void
+      **/
+      void sendInitialFrame(const int &initialFrame);
+
+      /**
+      @brief function that prepares and publish the next msg to 
+      be used in predator
+      @param initialFrame [const int&] the initial frame number
+      @return void
+      **/
+      void sendNextFrame(bool enableBackward);
+
+      /**
+      @brief function that prepares and publish the final msg to 
+      be used in predator
+      @param initialFrame [const int&] the initial frame number
+      @return void
+      **/
+      void sendFinalFrame();
 
 
          //------------------------------------------------------------------------//
     public Q_SLOTS:
 
+      /**
+      @brief if online mode subscribes to topic else
+      calls the loadBag() function when rosTopicGiven signal 
+      is received
+      @return void
+      **/
       void rosTopicGiven(void);
+
+      /**
+      @brief sets initial frame and calls function to publish
+      first msg to be used in Predator when signal predatorEnabled is
+      received
+      @return void
+      **/
       void predatorEnabled(void);
+      
+      /**
+      @brief Initializes the Qt event connections when onlineMode signal is sent
+      @return void
+      **/
       void onlineModeGiven(void);
+      
+      /**
+      @brief Initializes the Qt event connections when offlineMode signal is sent
+      @return void
+      **/
       void offlineModeGiven(void);
+
+      /**
+      @brief gets last frame index when appendToFile signal is sent
+      @return void
+      **/
       void appendToFile(void);
+
+      /**
+      @brief Delete annotation file  when removeFile signal is sent
+      @return void
+      **/
       void removeFile();
     
     //------------------------------------------------------------------------//
     Q_SIGNALS:
       void updateImage();
-    };
-}
+  };
 
-#endif
+}// namespace pandora_vision
 
+#endif  // PANDORA_VISION_ANNOTATOR_ANNOTATOR_CONTROLLER_H

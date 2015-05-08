@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +32,76 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#include <signal.h>
-#include "pandora_vision_annotator/pandora_vision_annotator_controller.h"
-#include "pandora_vision_annotator/pandora_vision_annotator_application.h"
+#include "pandora_vision_annotator/annotator_loader.h"
 
-void signalHandler(int sig);
-
-/**
-@brief The main node function
-@param argc [int] Number of input arguments
-@param argv [char] The input arguments
-@return int : 0 for success
-**/
-int main(int argc,char **argv)
+namespace pandora_vision
 {
-  pandora_vision::CApplication app(argc, argv);
-  app.setAttribute(Qt::AA_DontShowIconsInMenus, false);
-  ros::init(argc, argv, "pandora_vision_annotator_node", ros::init_options::NoSigintHandler);
-  pandora_vision::CController con(argc, argv);
-
-  // Add custom signal handlers
-  signal(SIGTERM, signalHandler);
-  signal(SIGINT, signalHandler);
-  signal(SIGHUP, signalHandler);
-
-  con.init();
-  app.exec();
-  return 0;
-}
-
-/**
-@brief Signal handler, kills QApplication
-**/
-void signalHandler(int sig)
-{
-  QApplication::quit();
-}
+  /**
+  @brief Default contructor
+  @param argc [int] Number of input arguments
+  @param argv [char **] Input arguments
+  @return void
+  **/
+  CLoader::CLoader(int argc, char **argv):
+    argc_(argc),
+    argv_(argv)
+  {
+    setupUi(this);
+    
+    close_signal_ = false;
+  }
+  
+ 
+  /**
+  @brief Overloading of closeEvent function from QMainWindow
+  @param event [QCloseEvent*] The exit event
+  @return void
+  **/
+  void CLoader::closeEvent(QCloseEvent *event)
+  {
+    //~ ROS_ERROR("Shutdown signal!");
+    if(close_signal_)
+    {
+      event->accept();
+      //~ ROS_ERROR("Shutting down ros...");
+      ros::shutdown();
+      exit(0);
+      return;
+    }
+    close_signal_ = true;
+    event->ignore();
+    event_ = event;
+  }
+  
+  /**
+  @brief Returns the exit event
+  @return QEvent* 
+  **/
+  QEvent* CLoader::getCloseEvent(void)
+  {
+    return event_;
+  }
+  
+  /**
+  @brief Returns true if a close event was triggered
+  @return bool
+  **/
+  bool CLoader::closeTriggered(void)
+  {
+    return close_signal_;
+  }
+  
+  /**
+  @brief Shuts down the main window
+  @return void
+  **/
+  void CLoader::shutdown(void)
+  {
+    this->close();
+  }
+}// namespace pandora_vision

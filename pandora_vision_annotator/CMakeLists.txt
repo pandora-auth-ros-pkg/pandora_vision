@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy 
   rosbag
+  roslint
   camera_calibration_parsers
   roslib
   cv_bridge
@@ -60,8 +61,8 @@ set(QT_FORMS
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 
 QT_WRAP_CPP(pandora_vision_annotator_node SAMPLE_MOC_SRCS 
-  include/pandora_vision_annotator/pandora_vision_annotator_connector.h
-  include/pandora_vision_annotator/pandora_vision_annotator_controller.h
+  include/pandora_vision_annotator/annotator_connector.h
+  include/pandora_vision_annotator/annotator_controller.h
   )
 #-----------------------------------------------------------------------------#
 
@@ -69,12 +70,12 @@ QT_WRAP_CPP(pandora_vision_annotator_node SAMPLE_MOC_SRCS
 set(CMAKE_BUILD_TYPE Release)
 
 add_executable(pandora_vision_annotator_node
-  src/pandora_vision_annotator/pandora_vision_annotator_node.cpp
-  src/pandora_vision_annotator/pandora_vision_annotator_application.cpp
-  src/pandora_vision_annotator/pandora_vision_annotator_connector.cpp
-  src/pandora_vision_annotator/pandora_vision_annotator_controller.cpp
-  src/pandora_vision_annotator/pandora_vision_annotator_loader.cpp
-  src/pandora_vision_annotator/pandora_vision_annotator_tools.cpp
+  src/annotator_node.cpp
+  src/annotator_application.cpp
+  src/annotator_connector.cpp
+  src/annotator_controller.cpp
+  src/annotator_loader.cpp
+  src/annotator_tools.cpp
   ${QT_FORMS_HPP} ${SAMPLE_MOC_SRCS}
 )
 target_link_libraries(pandora_vision_annotator_node
@@ -86,4 +87,23 @@ install(PROGRAMS scripts/images_to_bag
 install(PROGRAMS scripts/split_bag
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+#~ To check lint : catkin_make roslint_pandora_vision_annotator
+set(ROSLINT_CPP_OPTS
+    "--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use")
+
+## Additional lint filters - Not Needed ##
+# -whitespace/braces, -whitespace/newline, -readability/multiline_string
+
+file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
+  RELATIVE ${PROJECT_SOURCE_DIR}
+
+  include/annotator_connector.h
+  include/annotator_controller.h
+  include/annotator_tools.h
+  src/annotator_controller.cpp
+  src/annotator_loader.cpp
+  src/annotator_tools.cpp
+  src/annotator_node.cpp
+)
+roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

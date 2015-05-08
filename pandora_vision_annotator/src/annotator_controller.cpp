@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,12 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors: Manos Tsardoulias
+* Authors: 
+*   Protopapas Marios <protopapas_marios@hotmail.com>
+*   Manos Tsardoulias <etsardou@gmail.com>
 *********************************************************************/
 
-#include "pandora_vision_annotator/pandora_vision_annotator_controller.h"
+#include "pandora_vision_annotator/annotator_controller.h"
 
 
 namespace pandora_vision
@@ -55,8 +57,8 @@ namespace pandora_vision
   @param argv [char **] Input arguments
   @return void
   **/
-  CController::CController(int argc,char **argv):
-    connector_(argc,argv),
+  CController::CController(int argc, char **argv):
+    connector_(argc, argv),
     argc_(argc),
     argv_(argv)
   {
@@ -79,57 +81,63 @@ namespace pandora_vision
   **/
   void CController::initializeCommunications(void)
   {
-
- /* QObject::connect(*/
-    //&connector_,SIGNAL(rosTopicGiven()),
-    /*this, SLOT(rosTopicGiven()));*/
-
-     QObject::connect(
-       &connector_,SIGNAL(offlineModeGiven()),
+    QObject::connect(
+       &connector_, SIGNAL(offlineModeGiven()),
        this, SLOT(offlineModeGiven()));
   
     QObject::connect(
-      &connector_,SIGNAL(onlineModeGiven()),
+      &connector_, SIGNAL(onlineModeGiven()),
       this, SLOT(onlineModeGiven()));
   
     QObject::connect(
-      this,SIGNAL(updateImage()),
+      this, SIGNAL(updateImage()),
       &connector_, SLOT(updateImage())); 
     
-   
     annotationPublisher_ = n_.advertise<pandora_vision_msgs::AnnotationMsg>("/vision/annotator_output", 1000);
-    predatorSubscriber_ = n_.subscribe("/vision/predator_alert",1, &CController::predatorCallback, this );
+    predatorSubscriber_ = n_.subscribe("/vision/predator_alert", 1, &CController::predatorCallback, this );
 
   }
 
+  /**
+  @brief Initializes the Qt event connections when offlineMode signal is sent
+  @return void
+  **/
   void CController::offlineModeGiven(void)
   {
      onlinemode = false;
      QObject::connect(
-       &connector_,SIGNAL(rosTopicGiven()),
+       &connector_, SIGNAL(rosTopicGiven()),
         this, SLOT(rosTopicGiven()));
 
      QObject::connect(
-       &connector_,SIGNAL(predatorEnabled()),
+       &connector_, SIGNAL(predatorEnabled()),
         this, SLOT(predatorEnabled()));
 
      QObject::connect(
-        &connector_,SIGNAL(appendToFile()),
+        &connector_, SIGNAL(appendToFile()),
         this, SLOT(appendToFile()));
 
     QObject::connect(
-        &connector_,SIGNAL(removeFile()),
+        &connector_, SIGNAL(removeFile()),
         this, SLOT(removeFile()));
   }      
 
+  /**
+  @brief Initializes the Qt event connections when onlineMode signal is sent
+  @return void
+  **/
   void CController::onlineModeGiven(void)
   {
     onlinemode = true;
     QObject::connect(
-      &connector_,SIGNAL(rosTopicGiven()),
+      &connector_, SIGNAL(rosTopicGiven()),
       this, SLOT(rosTopicGiven()));
   }
 
+  /**
+  @brief Delete annotation file  when removeFile signal is sent
+  @return void
+  **/
   void CController::removeFile(void)
   {
     std::string package_path = ros::package::getPath("pandora_vision_annotator");
@@ -137,16 +145,27 @@ namespace pandora_vision
     filename << package_path << "/data/annotations.txt";
     ImgAnnotations::removeFile(filename.str());
   }
+
+  /**
+  @brief gets last frame index when appendToFile signal is sent
+  @return void
+  **/
   void CController::appendToFile(void)
   {
     std::string package_path = ros::package::getPath("pandora_vision_annotator");
     std::stringstream filename;
     filename << package_path << "/data/annotations.txt";
-    ImgAnnotations::getLastFrameIndex(filename.str(),offset);
+    ImgAnnotations::getLastFrameIndex(filename.str(), &offset);
     offset += 1;
     ROS_INFO_STREAM("Frame indexing starting at: " << offset);
   }
 
+  /**
+  @brief sets initial frame and calls function to publish
+  first msg to be used in Predator when signal predatorEnabled is
+  received
+  @return void
+  **/
   void CController::predatorEnabled(void)
   {
     ROS_INFO("PREDATOR NOW ON");
@@ -156,34 +175,14 @@ namespace pandora_vision
     sendInitialFrame(baseFrame);
     enableBackwardTracking = false;
 
-    /*pandora_vision_msgs::AnnotationMsg annotationMsg;
-    currentFrameNo_ = connector_.getFrameNumber();
-    connector_.getcurrentFrame(currentFrameNo_,&temp);
-    baseFrame = currentFrameNo_;
-    if(baseFrame > 0)
-      enableBackwardTracking = true;
-    annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
-    annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-    annotationMsg.x = ImgAnnotations::annotations[0].x1;
-    annotationMsg.y = ImgAnnotations::annotations[0].y1;
-    annotationMsg.width =  ImgAnnotations::annotations[0].x2 - ImgAnnotations::annotations[0].x1;
-    annotationMsg.height = ImgAnnotations::annotations[0].y2 - ImgAnnotations::annotations[0].y1;
-    cv_bridge::CvImage out_msg;
-    out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
-    out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-    out_msg.encoding = "rgb8" ;     
-    out_msg.image = temp;
-    out_msg.toImageMsg(annotationMsg.img);
-    annotationPublisher_.publish(annotationMsg);
-    ROS_INFO_STREAM("send initial frame " << currentFrameNo_ 
-                    << " " << annotationMsg.header.frame_id
-                    << " " << annotationMsg.header.stamp 
-                    << " " << annotationMsg.x 
-                    << " " << annotationMsg.y 
-                    << " " << annotationMsg.width 
-                    << " " << annotationMsg.height);*/
   }
-
+  
+  /**
+  @brief if online mode subscribes to topic else
+  calls the loadBag() function when rosTopicGiven signal 
+  is received
+  @return void
+  **/
   void CController::rosTopicGiven(void)
   {
     QString ros_topic = connector_.getRosTopic();
@@ -201,21 +200,26 @@ namespace pandora_vision
       QString bag_name = connector_.getBagName();
       std::string  package_path = ros::package::getPath("pandora_vision_annotator");
       std::stringstream bag_path;
-      count = 0;
       currentFrameNo_ = 0;
       bag_path << package_path << "/data/" <<bag_name.toStdString();
-      loadBag(bag_path.str(),ros_topic.toStdString());
+      loadBag(bag_path.str(), ros_topic.toStdString());
     }
   }
 
+  /**
+  @brief function that loads the bag
+  @param filename [const std::string&] the name of the bag file
+  @param topic [const std::string&] the topic to be loaded
+  @return void
+  **/
   void CController::loadBag(const std::string& filename, const std::string& topic)
   {     
     ROS_INFO("Loading bag...");
     rosbag::Bag bag;
     bag.open(filename, rosbag::bagmode::Read);
     rosbag::View view(bag, rosbag::TopicQuery(topic));
+    
     // Load all messages 
-    int count = 0;
     BOOST_FOREACH(rosbag::MessageInstance const m, view)
     {
       sensor_msgs::Image::ConstPtr img = m.instantiate<sensor_msgs::Image>();
@@ -223,22 +227,25 @@ namespace pandora_vision
       
       if(img != NULL)
       {
-     
-       receiveImage(img);
-       count++;
+        receiveImage(img);
       }
 
       if (pc != NULL)
       {
         receivePointCloud(pc);
-        count++;
       }
     }
-    connector_.setFrames(frames,offset);
+    connector_.setFrames(frames, offset);
     connector_.setcurrentFrame(0);
     frames.clear();
   }
-
+  
+  /**
+  @brief function that receives pointcloud msg and converts it
+  to cv::Mat
+  @param msg [const sensor_msgs::PointCloud2Ptr&] the pointcloud msg
+  @return void
+  **/
   void CController::receivePointCloud(const sensor_msgs::PointCloud2ConstPtr& msg)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -253,15 +260,20 @@ namespace pandora_vision
         {
           pcl::PointXYZRGB point = cloud->at(w, h);
           Eigen::Vector3i rgb = point.getRGBVector3i();
-          imageFrame.at<cv::Vec3b>(h,w)[2] = rgb[2];
-          imageFrame.at<cv::Vec3b>(h,w)[1] = rgb[1];
-          imageFrame.at<cv::Vec3b>(h,w)[0] = rgb[0];
+          imageFrame.at<cv::Vec3b>(h, w)[2] = rgb[2];
+          imageFrame.at<cv::Vec3b>(h, w)[1] = rgb[1];
+          imageFrame.at<cv::Vec3b>(h, w)[0] = rgb[0];
         }
       }
     } 
     frames.push_back(imageFrame);
   }
-
+  
+  /**
+  @brief Function called when new ROS message appears, from predator node
+  @param msg [const pandora_vision_msgs::PredatorMsg&] The message
+  @return void
+  **/
   void CController::predatorCallback(const pandora_vision_msgs::PredatorMsg& msg)
   { 
  
@@ -309,17 +321,19 @@ namespace pandora_vision
       ROS_INFO_STREAM("SEND FINAL FRAME");
       sendFinalFrame();
     }
-
-
-
-    
   }
-
+  
+  /**
+  @brief function that prepares and publish the fist msg to 
+  be used in predator
+  @param initialFrame [const int&] the initial frame number
+  @return void
+  **/
   void CController::sendInitialFrame(const int& initialFrame)
   {
       pandora_vision_msgs::AnnotationMsg annotationMsg;
       cv::Mat temp;
-      currentFrameNo_= initialFrame ; 
+      currentFrameNo_ = initialFrame; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
       if(enableBackwardTracking)
       {
@@ -329,7 +343,7 @@ namespace pandora_vision
       std::string img_name = "frame" + boost::to_string(currentFrameNo_) + ".png";
       //loader_.statusLabel->setText(QString(img_name.c_str()));
       ImgAnnotations::annotations.clear();
-      ImgAnnotations::readFromFile(filename.str(),img_name);
+      ImgAnnotations::readFromFile(filename.str(), img_name);
       ROS_INFO_STREAM("READING FROM FILE" << img_name);
       }
       
@@ -342,7 +356,7 @@ namespace pandora_vision
       cv_bridge::CvImage out_msg;
       out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-      out_msg.encoding = "rgb8" ;     
+      out_msg.encoding = "rgb8";     
       out_msg.image = temp;
       out_msg.toImageMsg(annotationMsg.img);
       annotationPublisher_.publish(annotationMsg);
@@ -355,6 +369,13 @@ namespace pandora_vision
                     << " " << annotationMsg.height);
 
   }
+
+  /**
+  @brief function that prepares and publish the next msg to 
+  be used in predator
+  @param initialFrame [const int&] the initial frame number
+  @return void
+  **/
   void CController::sendNextFrame(bool enableBackward)
   {  
       pandora_vision_msgs::AnnotationMsg annotationMsg;
@@ -388,11 +409,17 @@ namespace pandora_vision
 
   }
 
+  /**
+  @brief function that prepares and publish the final msg to 
+  be used in predator
+  @param initialFrame [const int&] the initial frame number
+  @return void
+  **/
   void CController::sendFinalFrame()
   {
     pandora_vision_msgs::AnnotationMsg annotationMsg;
     cv::Mat temp;
-    currentFrameNo_= 0 ; 
+    currentFrameNo_ = 0; 
     connector_.getcurrentFrame(currentFrameNo_, &temp);
     annotationMsg.header.frame_id = "close";
     annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
@@ -419,6 +446,13 @@ namespace pandora_vision
       predatorSubscriber_.shutdown();
 
   }
+  
+  /**
+  @brief Function called when new ROS message appears, from any topic
+  posting a sensor_msgs kind of msg
+  @param msg [const sensor_msgs::ImageConstPtr& ] The message
+  @return void
+  **/
   void CController::receiveImage(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImageConstPtr in_msg;
@@ -432,13 +466,13 @@ namespace pandora_vision
       }
       else if (msg->encoding == "16UC1" || msg->encoding == "32FC1")
       {
-      
         double min, max;
         cv::minMaxLoc(in_msg->image, &min, &max);
-   	cv::Mat img_scaled_8u;
+        cv::Mat img_scaled_8u;
         cv::Mat(in_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
         cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
       }
+
       else if(msg->encoding == "rgb8" || msg->encoding == "bgr8" )
       {
         in_msg = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
@@ -450,13 +484,13 @@ namespace pandora_vision
 
     catch(cv_bridge::Exception& e)
     {
-      qWarning("CController::receiveImage() while trying to convert image from '%s' to 'rgb8' an exception was thrown ((%s)", msg->encoding.c_str(), e.what());
+      qWarning("while trying to convert image from '%s' to 'rgb8' an exception was thrown ((%s)", 
+               msg->encoding.c_str(), e.what());
       return;
     }
 
     if(!onlinemode)
     {
-      count++;
       frames.push_back(temp);
       msgHeader_.push_back(msg->header);
     }
@@ -479,7 +513,7 @@ namespace pandora_vision
 
   bool CController::init(void)
   {
-    if ( ! ros::master::check() )
+    if ( !ros::master::check() )
     {
       return false;
     }
@@ -489,6 +523,6 @@ namespace pandora_vision
     boost::thread spinThread(&spinThreadFunction);
     return true;
   }
-}
+}// namespace pandora_vision
 
 
