@@ -86,6 +86,89 @@ namespace pandora_vision
   }
 
   /**
+   * @brief This function normalizes the features and saves normalization
+   * parameters in a file.
+   * @param featuresMatrix [cv::Mat*] The features matrix to be normalized.
+   */
+  void SvmTraining::normalizeFeaturesAndSaveNormalizationParameters(
+      cv::Mat* featuresMatrix)
+  {
+    if (typeOfNormalization_ == 0)
+    {
+      return;
+    }
+
+    std::string filesDirectory = package_path + "/data/";
+    std::string normalizationParamOne = imageType_ + "mean_values.xml";
+    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+    std::vector<double> normalizationParamOneVector;
+    std::vector<double> normalizationParamTwoVector;
+
+    if (typeOfNormalization_ == 1)
+    {
+      double newMin = -1.0;
+      double newMax = 1.0;
+      featureExtractionUtilities_->findMinMaxParameters(newMax, newMin,
+          featuresMatrix, &normalizationParamOneVector,
+          &normalizationParamTwoVector);
+    }
+    else
+    {
+      featureExtractionUtilities_->findZScoreParameters(featuresMatrix,
+          &normalizationParamOneVector, &normalizationParamTwoVector);
+    }
+
+    file_utilities::saveToFile(normalizationParamOnePath, "mean",
+        cv::Mat(normalizationParamOneVector));
+    file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
+        cv::Mat(normalizationParamTwoVector));
+  }
+
+  /**
+   * @brief This function loads normalization parameters and normalizes the
+   * input features matrix.
+   * @param featuresMatrix [cv::Mat*] The features matrix to be normalized.
+   */
+  void SvmTraining::loadNormalizationParametersAndNormalizeFeatures(
+      cv::Mat* featuresMatrix)
+  {
+    if (typeOfNormalization_ == 0)
+    {
+      return;
+    }
+
+    std::string filesDirectory = package_path + "/data/";
+    std::string normalizationParamOne = imageType_ + "mean_values.xml";
+    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+    std::vector<double> normalizationParamOneVector = file_utilities::loadFiles(
+          normalizationParamOnePath, "mean");
+    std::vector<double> normalizationParamTwoVector = file_utilities::loadFiles(
+          normalizationParamTwoPath, "std_dev");
+
+    if (typeOfNormalization_ == 1)
+    {
+      double newMax = 1.0;
+      double newMin = -1.0;
+      featureExtractionUtilities_->performMinMaxNormalization(newMax, newMin,
+          featuresMatrix, normalizationParamOneVector,
+          normalizationParamTwoVector);
+    }
+    else
+    {
+      featureExtractionUtilities_->performZScoreNormalization(
+          featuresMatrix, normalizationParamOneVector,
+          normalizationParamTwoVector);
+    }
+  }
+
+
+  /**
    * @brief
    */
   bool SvmTraining::constructBagOfWordsVocabulary(

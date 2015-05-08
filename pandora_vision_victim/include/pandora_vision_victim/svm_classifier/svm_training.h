@@ -76,6 +76,22 @@ namespace pandora_vision
       virtual ~SvmTraining();
 
       /**
+       * @brief This function normalizes the features and saves normalization
+       * parameters in a file.
+       * @param featuresMatrix [cv::Mat*] The features matrix to be normalized.
+       */
+      void normalizeFeaturesAndSaveNormalizationParameters(
+          cv::Mat* featuresMatrix);
+
+      /**
+       * @brief This function loads normalization parameters and normalizes the
+       * input features matrix.
+       * @param featuresMatrix [cv::Mat*] The features matrix to be normalized.
+       */
+      void loadNormalizationParametersAndNormalizeFeatures(
+          cv::Mat* featuresMatrix);
+
+      /**
        * @brief
        */
       bool constructBagOfWordsVocabulary(

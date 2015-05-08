@@ -61,7 +61,7 @@ namespace pandora_vision
   DepthSvmValidator::DepthSvmValidator(const std::string& classifierPath)
     : SvmValidator()
   {
-    ROS_INFO("Enter RGB SVM Validator");
+    ROS_INFO("Enter Depth SVM Validator");
     classifierPath_ = classifierPath;
 
     ROS_INFO_STREAM(classifierPath.c_str());

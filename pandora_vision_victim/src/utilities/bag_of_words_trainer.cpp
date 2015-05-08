@@ -184,7 +184,7 @@ namespace pandora_vision
     // Initialize the window dimensions.
     const int windowHeight = 640;
     const int windowWidth = descriptor.cols;
-    
+
     int bins = descriptor.cols > descriptor.rows ? descriptor.cols :
       descriptor.rows;
 
@@ -207,7 +207,5 @@ namespace pandora_vision
     cv::waitKey(0);
 
     cv::destroyAllWindows();
-
-    return;
   }
 }  // namespace pandora_vision

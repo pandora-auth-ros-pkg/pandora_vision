@@ -38,6 +38,8 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 #define PANDORA_VISION_VICTIM_VICTIM_DETECTION_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "pandora_vision_victim/victim_vj_detector.h"
 //#include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
@@ -77,9 +79,9 @@ namespace pandora_vision
       //~ VictimVJDetector _victimDetector;
 
       /// Instance of RGB SVM Validator
-      RgbSvmValidator rgbSvmValidator_;
+      boost::shared_ptr<RgbSvmValidator> rgbSvmValidator_;
       /// Instance of Depth SVM Validator
-      DepthSvmValidator depthSvmValidator_;
+      boost::shared_ptr<DepthSvmValidator> depthSvmValidator_;
 
       /**
       @brief This method check in which state we are, according to

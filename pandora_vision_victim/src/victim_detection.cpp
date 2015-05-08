@@ -45,9 +45,7 @@ namespace pandora_vision
   VictimDetection::VictimDetection(const std::string& ns) :
       _nh(ns),
       params(ns),
-      imageTransport_(_nh),
-      rgbSvmValidator_(VictimParameters::rgb_classifier_path),
-      depthSvmValidator_(VictimParameters::depth_classifier_path)
+      imageTransport_(_nh)
   {
      //!< Set initial value of parent frame id to null
     _parent_frame_id = "";
@@ -72,10 +70,14 @@ namespace pandora_vision
         VictimParameters::enhancedHolesTopic,
           1, &VictimDetection::imageCallback, this);
 
+
+
+    rgbSvmValidator_.reset(new RgbSvmValidator(VictimParameters::rgb_classifier_path));
+    depthSvmValidator_.reset(new DepthSvmValidator(VictimParameters::depth_classifier_path));
     /// Initialize the face detector and the svm classifiers
-    _rgbViolaJonesDetector = VictimVJDetector(
-      VictimParameters::cascade_path,
-      VictimParameters::model_path);
+    //_rgbViolaJonesDetector = VictimVJDetector(
+      //VictimParameters::cascade_path,
+      //VictimParameters::model_path);
 
     /// Initialize states - robot starts in STATE_OFF
     curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
@@ -184,7 +186,7 @@ namespace pandora_vision
   void VictimDetection::imageCallback(
       const pandora_vision_msgs::EnhancedHolesVectorMsg& msg)
   {
-
+    ROS_INFO_STREAM("ENTER CALLBACK");
     if(
       (curState !=
         state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION) &&
@@ -566,7 +568,7 @@ namespace pandora_vision
     const pandora_vision_msgs::EnhancedHolesVectorMsg& msg
   )
   {
-
+    ROS_INFO("Detect Victims");
     if(VictimParameters::debug_img || VictimParameters::debug_img_publisher)
     {
       rgbImage.copyTo(debugImage);
@@ -873,7 +875,7 @@ namespace pandora_vision
     DetectedVictim temp;
 
     ///Enable Viola Jones for rgb image
-    rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
+    //rgb_vj_probabilities = _rgbViolaJonesDetector.findFaces(imgs.rgb.img);
 
     if(detectionMode == GOT_HOLES_AND_DEPTH || detectionMode == GOT_DEPTH)
     {
@@ -883,7 +885,7 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
-        temp.probability = rgbSvmValidator_.calculatePredictionProbability(
+        temp.probability = rgbSvmValidator_->calculatePredictionProbability(
             imgs.rgbMasks.at(i).img);
         temp.keypoint = imgs.rgbMasks[i].keypoint;
         temp.source = RGB_SVM;
@@ -895,7 +897,7 @@ namespace pandora_vision
     {
       for(int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
-        temp.probability = depthSvmValidator_.calculatePredictionProbability(
+        temp.probability = depthSvmValidator_->calculatePredictionProbability(
             imgs.depthMasks.at(i).img);
         temp.keypoint = imgs.depthMasks[i].keypoint;
         temp.source = DEPTH_RGB_SVM;
