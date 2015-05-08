@@ -237,8 +237,16 @@ namespace pandora_vision
     std::vector<cv::Mat> descriptorsVec;
     const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
     const std::string descriptorsFilePath = packagePath_ + "/data/" + descriptorsFile;
+
+    std::vector<std::string> annotatedImageNames;
+    for (int jj = 0; jj < annotatedImages.size(); jj++)
+    {
+      int lastIndex = annotatedImages[jj].find_last_of(".");
+      std::string rawName = annotatedImages[jj].substr(0, lastIndex);
+      annotatedImageNames.push_back(rawName);
+    }
     bool descriptorsAvailable = file_utilities::loadDescriptorsFromFile(
-        descriptorsFilePath, annotatedImages, &descriptorsVec);
+        descriptorsFilePath, annotatedImageNames, &descriptorsVec);
 
     if (descriptorsAvailable)
     {
@@ -291,7 +299,7 @@ namespace pandora_vision
       }
 
       std::cout << "Saving descriptors to file" << std::endl;
-      file_utilities::saveDataToFile(descriptorsFilePath, annotatedImages,
+      file_utilities::saveDataToFile(descriptorsFilePath, annotatedImageNames,
           getBagOfWordsDescriptors());
     }
 
