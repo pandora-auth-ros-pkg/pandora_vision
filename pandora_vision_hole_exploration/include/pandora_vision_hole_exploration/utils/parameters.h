@@ -365,7 +365,7 @@ namespace pandora_vision
       //
       //      // The inflation size of holes' bounding rectangles.
 
-      static int keypoint_overlap_threshold;
+      static int bin_to_find_mergable_size;
       static float valid_strong_probability;
       static float valid_medium_probability;
       static float valid_light_probability;

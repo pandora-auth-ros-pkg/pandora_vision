@@ -282,7 +282,7 @@ namespace pandora_vision
   //  float Parameters::HoleFusion::Merger::depth_area_threshold = 1.0;
   //
   //  // The inflation size of holes' bounding rectangles
-  int Parameters::HoleFusion::keypoint_overlap_threshold = 30;
+  int Parameters::HoleFusion::bin_to_find_mergable_size = 30;
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;

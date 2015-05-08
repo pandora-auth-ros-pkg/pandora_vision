@@ -127,6 +127,12 @@ namespace pandora_vision
         rgbCandidateHolesTopic_, 1,
         &HoleFusion::rgbCandidateHolesCallback, this);
 
+    // Subscribe to the topic where the thermal node publishes
+    // candidate holes
+    thermalCandidateHolesSubscriber_= nodeHandle_.subscribe(
+        thermalCandidateHolesTopic_, 1,
+        &HoleFusion::thermalCandidateHolesCallback, this);
+
     // Subscribe to the topic where the synchronizer node publishes
     // the point cloud
     //pointCloudSubscriber_= nodeHandle_.subscribe(
@@ -247,7 +253,7 @@ namespace pandora_vision
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
     ROS_INFO("nodesReady %d \n", numNodesReady_);
-    if (numNodesReady_ == 2)
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
@@ -262,6 +268,63 @@ namespace pandora_vision
 #endif
   }
 
+  /**
+    @brief Callback for the candidate holes via the thermal node.
+
+    This method sets the thermal image and the
+    candidate holes acquired from the thermal node.
+    If the depth and rgb callback counterparts have done
+    what must be, it resets the number of ready nodes, unlocks
+    the synchronizer and calls for processing of the candidate
+    holes.
+    @param[in] thermalCandidateHolesVector
+    [const pandora_vision_msgs::CandidateHolesVectorMsg&]
+    The message containing the necessary information acquired through
+    the thermal node
+    @return void
+   **/
+  void HoleFusion::thermalCandidateHolesCallback(
+      const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+      thermalCandidateHolesVector)
+  {
+#ifdef DEBUG_TIME
+    Timer::start("thermalCandidateHolesCallback", "", true);
+#endif
+
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Thermal callback");
+
+    // Clear the current thermalHolesConveyor struct
+    // (or else keyPoints, rectangles and outlines accumulate)
+    HolesConveyorUtils::clear(&thermalHolesConveyor_);
+
+    // Unpack the message
+    MessageConversions::unpackMessage(thermalCandidateHolesVector,
+        &thermalHolesConveyor_,
+        &interpolatedThermalImage_,
+        sensor_msgs::image_encodings::TYPE_32FC1);
+
+    // The candidate holes acquired from the thermal node and the
+    // thermal image are set
+    numNodesReady_++;
+
+    // If the Thermal candidate holes and the Thermal image are set
+    // and the point cloud has been delivered and interpolated,
+    // unlock the synchronizer and process the candidate holes from all sources
+    ROS_INFO("nodesReady %d \n", numNodesReady_);
+    if (numNodesReady_ == 3)
+    {
+      numNodesReady_ = 0;
+
+      unlockSynchronizer();
+
+      processCandidateHoles();
+    }
+
+#ifdef DEBUG_TIME
+    Timer::tick("thermalCandidateHolesCallback");
+    Timer::printAllMeansTree();
+#endif
+  }
 
 
   /**
@@ -368,6 +431,24 @@ namespace pandora_vision
     {
       ROS_INFO_NAMED (PKG_NAME,
           "[Hole Fusion Node] Could not find topic rgb_candidate_holes_topic");
+    }
+
+    // Read the name of the topic from where the Hole Fusion node acquires the
+    // candidate holes originated from the Thermal node
+    if (nodeHandle_.getParam(
+          ns + "/hole_fusion_node/subscribed_topics/thermal_candidate_holes_topic",
+          thermalCandidateHolesTopic_))
+    {
+      // Make the topic's name absolute
+      thermalCandidateHolesTopic_ = ns + "/" + thermalCandidateHolesTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Subscribed to the Thermal candidate holes topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+          "[Hole Fusion Node] Could not find topic thermal_candidate_holes_topic");
     }
 
     // Read the name of the topic that the Hole Fusion node uses to unlock
@@ -732,8 +813,8 @@ namespace pandora_vision
       const pandora_vision_hole_exploration::validity_cfgConfig &config,
       const uint32_t& level)
   {
-    Parameters::HoleFusion::keypoint_overlap_threshold =
-      config.keypoint_overlap_threshold;
+    Parameters::HoleFusion::bin_to_find_mergable_size =
+      config.bin_to_find_mergable_size;
     Parameters::HoleFusion::valid_strong_probability =
       config.valid_strong_probability;
     Parameters::HoleFusion::valid_medium_probability =
@@ -848,8 +929,8 @@ namespace pandora_vision
 
     // If the depth and RGB candidate holes, the interpolated depth image
     // and the RGB image are set,
-    // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 2)
+    // unlock the synchronizer and process the candidate holes from all sources
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
@@ -868,7 +949,7 @@ namespace pandora_vision
 
   /**
     @brief Implements a strategy to combine information from both
-    the depth and rgb image and holes sources in order to accurately
+    the depth, thermal and rgb image and holes sources in order to accurately
     find valid holes.
 
     Each probability is a measure of each candidate hole's validity: the more a value of a probability, the more a candidate hole is indeed a hole in space. Finally, information about the valid holes is published.
@@ -898,6 +979,16 @@ namespace pandora_vision
             -1,
             msgs);
 
+      // Holes originated from analysis on the thermal image,
+      // on top of the thermal image
+      cv::Mat thermalHolesOnThermalImage =
+        Visualization::showHoles(
+            "Holes originated from Thermal analysis, on the Thermal image",
+            interpolatedThermalImage_,
+            thermalHolesConveyor_,
+            -1,
+            msgs);
+
       // Holes originated from analysis on the RGB image,
       // on top of the RGB image
       cv::Mat rgbHolesOnRgbImage =
@@ -918,6 +1009,16 @@ namespace pandora_vision
             -1,
             msgs);
 
+      // Holes originated from analysis on the thermal image,
+      // on top of the RGB image
+      cv::Mat thermalHolesOnRgbImage =
+        Visualization::showHoles(
+            "Holes originated from Thermal analysis, on the RGB image",
+            rgbImage_,
+            thermalHolesConveyor_,
+            -1,
+            msgs);
+
       // Holes originated from analysis on the RGB image,
       // on top of the Depth image
       cv::Mat rgbHolesOnDepthImage =
@@ -928,10 +1029,12 @@ namespace pandora_vision
             -1,
             msgs);
 
-      // The four images
+      // The six images
       std::vector<cv::Mat> imgs;
       imgs.push_back(depthHolesOnDepthImage);
       imgs.push_back(depthHolesOnRgbImage);
+      imgs.push_back(thermalHolesOnThermalImage);
+      imgs.push_back(thermalHolesOnRgbImage);
       imgs.push_back(rgbHolesOnRgbImage);
       imgs.push_back(rgbHolesOnDepthImage);
 
@@ -940,6 +1043,8 @@ namespace pandora_vision
 
       titles.push_back("Holes originated from Depth analysis, on the Depth image");
       titles.push_back("Holes originated from Depth analysis, on the RGB image");
+      titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
+      titles.push_back("Holes originated from Thermal analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the Depth image");
 
@@ -948,12 +1053,14 @@ namespace pandora_vision
 #endif
     double min, max;
     cv::minMaxLoc(interpolatedDepthImage_, &min, &max);
+    cv::minMaxLoc(interpolatedThermalImage_, &min, &max);
     HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
 
     mergeHoles(
         &rgbHolesConveyor_, 
         &depthHolesConveyor_, 
+        &thermalHolesConveyor_, 
         interpolatedDepthImage_, 
         pointCloud_, 
         &preValidatedHoles, 
@@ -1196,7 +1303,7 @@ namespace pandora_vision
     // If the depth candidate holes and the interpolated depth image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 2)
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
@@ -1218,6 +1325,8 @@ namespace pandora_vision
     candidate holes conveyor
     @param[in,out] depthHolesConveyor [HolesConveyor*] The depth
     candidate holes conveyor
+    @param[in,out] thermalHolesConveyor [HolesConveyor*] The thermal
+    candidate holes conveyor
     @param[in] image [const cv::Mat&] Depth Image used for validation purposes
     @param[in] pointCloud [const PointCloudPtr] An interpolated point
     cloud used in the connection operation; it maybe will be used to obtain real world
@@ -1229,6 +1338,7 @@ namespace pandora_vision
   void HoleFusion::mergeHoles(
       HolesConveyor* rgbHolesConveyor,
       HolesConveyor* depthHolesConveyor,
+      HolesConveyor* thermalHolesConveyor,
       const cv::Mat& image,
       const PointCloudPtr& pointCloud, 
       HolesConveyor* preValidatedHoles,
@@ -1437,61 +1547,159 @@ namespace pandora_vision
     {
     }
 
+    // merge overlapping contours. Firstly, split the image in some bins 
+    // and find the keypoints of depth, rgb and thermal candidate holes 
+    // inside each bin. Then for each bin merge the containing depth,
+    // rgb and thermal candid holes by averaging their attributes
 
+    int binSize = Parameters::HoleFusion::bin_to_find_mergable_size;
 
-    // merge overlapping contours
-    std::vector<bool> rgbSoloValid((*rgbHolesConveyor).rectangle.size(), true);
-    for(int i = 0; i < (*depthHolesConveyor).rectangle.size(); i ++)
+    int numberOfBinsX = static_cast<int>(image.cols / binSize);
+    int numberOfBinsY = static_cast<int>(image.rows / binSize);
+    int numberOfBins = numberOfBinsX * numberOfBinsY;
+
+    //idBinX, idBinY, id of vector with holes that overlap
+    std::map<std::pair<int, int>, float> overlappingInBins;
+    std::vector<std::vector<int> > assignedHolesIds(numberOfBins); 
+
+    int binId = 0;
+    if((*depthHolesConveyor).rectangle.size() == 0)
+      for(int i = 0; i < numberOfBins; i ++)
+      {
+        assignedHolesIds[binId].push_back(-1);
+        binId++;
+      }
+    else
+      for(int i = 0; i < (*depthHolesConveyor).rectangle.size(); i ++)
+      {
+        for(int binx = 0; binx < numberOfBinsX; binx ++)
+          for(int biny = 0; biny < numberOfBinsY; biny ++)
+          {
+            overlappingInBins[std::make_pair(binx, biny)] = binId;
+            if((*depthHolesConveyor).keypoint[i].x >= binx * binSize
+                && (*depthHolesConveyor).keypoint[i].x < (binx + 1) * binSize
+                && (*depthHolesConveyor).keypoint[i].y >= biny * binSize
+                && (*depthHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
+              assignedHolesIds[binId].push_back(i);
+            else
+              assignedHolesIds[binId].push_back(-1);
+            binId++;
+          }
+      }
+
+    binId = 0;
+    if((*thermalHolesConveyor).rectangle.size() == 0)
+      for(int i = 0; i < numberOfBins; i ++)
+      {
+        assignedHolesIds[binId].push_back(-1);
+        binId++;
+      }
+    else
+      for(int i = 0; i < (*thermalHolesConveyor).rectangle.size(); i ++)
+      {
+        for(int binx = 0; binx < numberOfBinsX; binx ++)
+          for(int biny = 0; biny < numberOfBinsY; biny ++)
+          {
+            if((*thermalHolesConveyor).keypoint[i].x >= binx * binSize
+                && (*thermalHolesConveyor).keypoint[i].x < (binx + 1) * binSize
+                && (*thermalHolesConveyor).keypoint[i].y >= biny * binSize
+                && (*thermalHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
+              assignedHolesIds[binId].push_back(i);
+            else
+              assignedHolesIds[binId].push_back(-1);
+            binId++;
+          }
+      }
+
+    binId = 0;
+    if((*rgbHolesConveyor).rectangle.size() == 0)
+      for(int i = 0; i < numberOfBins; i ++)
+      {
+        assignedHolesIds[binId].push_back(-1);
+        binId++;
+      }
+    else
+      for(int i = 0; i < (*rgbHolesConveyor).rectangle.size(); i ++)
+      {
+        for(int binx = 0; binx < numberOfBinsX; binx ++)
+          for(int biny = 0; biny < numberOfBinsY; biny ++)
+          {
+            if((*rgbHolesConveyor).keypoint[i].x >= binx * binSize
+                && (*rgbHolesConveyor).keypoint[i].x < (binx + 1) * binSize
+                && (*rgbHolesConveyor).keypoint[i].y >= biny * binSize
+                && (*rgbHolesConveyor).keypoint[i].y < (biny + 1) * binSize)
+              assignedHolesIds[binId].push_back(i);
+            else
+              assignedHolesIds[binId].push_back(-1);
+            binId++;
+          }
+      }
+
+    for(int i = 0; i < numberOfBins; i ++)
     {
-      bool overlapFlag = false;
-      for(int j = 0; j < (*rgbHolesConveyor).rectangle.size(); j ++)
+      int sumKX = 0;
+      int sumKY = 0;
+      int maxX = 0;
+      int maxY = 0;
+      int minX = std::numeric_limits<int>::max();
+      int minY = std::numeric_limits<int>::max();
+      int overlapsNumber = 0;
+      if(assignedHolesIds[i][0] != -1)
       {
-        if(std::abs((*depthHolesConveyor).keypoint[i].x 
-              - (*rgbHolesConveyor).keypoint[j].x) < Parameters::HoleFusion::keypoint_overlap_threshold 
-            && std::abs((*depthHolesConveyor).keypoint[i].y 
-              - (*rgbHolesConveyor).keypoint[j].y) < Parameters::HoleFusion::keypoint_overlap_threshold)
-        {
-          rgbSoloValid[j] = false;
-          overlapFlag = true;
-          //break;
-        }
+        sumKX += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
+        sumKY += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
+        overlapsNumber++;
+        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x > maxX)
+          maxX = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
+        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y > maxY)
+          maxY = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
+        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x < minX)
+          minX = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].x;
+        if((*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y < minY)
+          minY = (*depthHolesConveyor).keypoint[assignedHolesIds[i][0]].y;
       }
-      (*preValidatedHoles).rectangle.push_back((*depthHolesConveyor).rectangle[i]);
-      (*preValidatedHoles).keypoint.push_back((*depthHolesConveyor).keypoint[i]);
-      if(overlapFlag)
-        (*validHolesMap)[i] = Parameters::HoleFusion::valid_strong_probability;
-      else
-        (*validHolesMap)[i] = Parameters::HoleFusion::valid_medium_probability;
+      if(assignedHolesIds[i][1] != -1)
+      {
+        sumKX += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
+        sumKY += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
+        overlapsNumber++;
+        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x > maxX)
+          maxX = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
+        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y > maxY)
+          maxY = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
+        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x < minX)
+          minX = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].x;
+        if((*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y < minY)
+          minY = (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1]].y;
+      }
+      if(assignedHolesIds[i][2] != -1)
+      {
+        sumKX += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
+        sumKY += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
+        overlapsNumber++;
+        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x > maxX)
+          maxX = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
+        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y > maxY)
+          maxY = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
+        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x < minX)
+          minX = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].x;
+        if((*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y < minY)
+          minY = (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2]].y;
+      }
+      if(overlapsNumber > 0)
+      {
+        cv::Point2f mergedKeypoint(sumKX / overlapsNumber, sumKY / overlapsNumber);
+        (*preValidatedHoles).keypoint.push_back(mergedKeypoint);
+        cv::Rect mergedRect(minX, minY, maxX - minX, maxY - minY);
+        (*preValidatedHoles).rectangle.push_back(mergedRect);
+        if(overlapsNumber == 1)
+          (*validHolesMap)[i] = Parameters::HoleFusion::valid_light_probability;
+        else if(overlapsNumber == 2)
+          (*validHolesMap)[i] = Parameters::HoleFusion::valid_medium_probability;
+        else
+          (*validHolesMap)[i] = Parameters::HoleFusion::valid_strong_probability;
+      }
     }
-
-    // Assign probabilities to RGB holes that do not overlap with depth
-    int counter = (*depthHolesConveyor).rectangle.size();
-    for(int j = 0; j < (*rgbHolesConveyor).rectangle.size(); j ++)
-      if(rgbSoloValid[j])
-      {
-        (*preValidatedHoles).rectangle.push_back((*rgbHolesConveyor).rectangle[j]);
-        (*preValidatedHoles).keypoint.push_back((*rgbHolesConveyor).keypoint[j]);
-        (*validHolesMap)[counter] = Parameters::HoleFusion::valid_light_probability;
-        counter++;
-      }
-
-
-    //   float connectorOutlinePointX = pointCloud->points[
-    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
-    //     + pointCloud->width *
-    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].x;
-
-    //   float connectorOutlinePointY = pointCloud->points[
-    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].x)
-    //     + pointCloud->width *
-    //     static_cast<int>(conveyor.holes[connectorId].outline[ac].y)].y;
-
-
-    // merge based on distance and homogenity in RGB
-    //    for(int i = 0; i < rgbHolesConveyor -> size(); i ++)
-
-
-    // merge based on overlapping
 
 
 #ifdef DEBUG_TIME
