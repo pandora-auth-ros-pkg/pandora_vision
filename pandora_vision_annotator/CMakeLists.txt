@@ -78,6 +78,10 @@ add_executable(pandora_vision_annotator_node
   src/annotator_tools.cpp
   ${QT_FORMS_HPP} ${SAMPLE_MOC_SRCS}
 )
+add_dependencies(pandora_vision_annotator_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
 target_link_libraries(pandora_vision_annotator_node
   ${catkin_LIBRARIES} 
   ${QT_LIBRARIES}

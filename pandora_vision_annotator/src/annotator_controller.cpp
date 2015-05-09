@@ -93,7 +93,7 @@ namespace pandora_vision
       this, SIGNAL(updateImage()),
       &connector_, SLOT(updateImage())); 
     
-    annotationPublisher_ = n_.advertise<pandora_vision_msgs::AnnotationMsg>("/vision/annotator_output", 1000);
+    annotationPublisher_ = n_.advertise<pandora_vision_msgs::Predator>("/vision/annotator_output", 1000);
     predatorSubscriber_ = n_.subscribe("/vision/predator_alert", 1, &CController::predatorCallback, this );
 
   }
@@ -274,16 +274,16 @@ namespace pandora_vision
   @param msg [const pandora_vision_msgs::PredatorMsg&] The message
   @return void
   **/
-  void CController::predatorCallback(const pandora_vision_msgs::PredatorMsg& msg)
+  void CController::predatorCallback(const pandora_vision_msgs::Predator& msg)
   { 
  
-    if(msg.header.stamp == msgHeader_[currentFrameNo_ ].stamp && msg.x != 0 && msg.y != 0 
-      && msg.width != 0 && msg.height != 0 )
+    if(msg.header.stamp == msgHeader_[currentFrameNo_ ].stamp && msg.areaOfInterest.center.x != 0 && msg.areaOfInterest.center.y != 0 
+      && msg.areaOfInterest.width != 0 && msg.areaOfInterest.height != 0 )
     {
       if(currentFrameNo_ == baseFrame)
-       connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height, true);
+       connector_.setPredatorValues(msg.areaOfInterest.center.x, msg.areaOfInterest.center.y, msg.areaOfInterest.width, msg.areaOfInterest.height, true);
       else
-        connector_.setPredatorValues(msg.x, msg.y, msg.width, msg.height, false);
+        connector_.setPredatorValues(msg.areaOfInterest.center.x, msg.areaOfInterest.center.y, msg.areaOfInterest.width, msg.areaOfInterest.height, false);
        ROS_INFO_STREAM("predator alert for frame " << currentFrameNo_);
      
     }
@@ -331,7 +331,7 @@ namespace pandora_vision
   **/
   void CController::sendInitialFrame(const int& initialFrame)
   {
-      pandora_vision_msgs::AnnotationMsg annotationMsg;
+      pandora_vision_msgs::Predator annotationMsg;
       cv::Mat temp;
       currentFrameNo_ = initialFrame; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
@@ -349,24 +349,24 @@ namespace pandora_vision
       
       annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-      annotationMsg.x = ImgAnnotations::annotations[0].x1;
-      annotationMsg.y = ImgAnnotations::annotations[0].y1;
-      annotationMsg.width =  ImgAnnotations::annotations[0].x2 - ImgAnnotations::annotations[0].x1;
-      annotationMsg.height = ImgAnnotations::annotations[0].y2 - ImgAnnotations::annotations[0].y1;
+      annotationMsg.areaOfInterest.center.x = ImgAnnotations::annotations[0].x1;
+      annotationMsg.areaOfInterest.center.y = ImgAnnotations::annotations[0].y1;
+      annotationMsg.areaOfInterest.width =  ImgAnnotations::annotations[0].x2 - ImgAnnotations::annotations[0].x1;
+      annotationMsg.areaOfInterest.height = ImgAnnotations::annotations[0].y2 - ImgAnnotations::annotations[0].y1;
       cv_bridge::CvImage out_msg;
       out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
       out_msg.encoding = "rgb8";     
       out_msg.image = temp;
-      out_msg.toImageMsg(annotationMsg.img);
+      out_msg.toImageMsg(annotationMsg.image);
       annotationPublisher_.publish(annotationMsg);
       ROS_INFO_STREAM("send initial frame" << currentFrameNo_ 
                     << " " << annotationMsg.header.frame_id
                     << " " << annotationMsg.header.stamp 
-                    << " " << annotationMsg.x 
-                    << " " << annotationMsg.y 
-                    << " " << annotationMsg.width 
-                    << " " << annotationMsg.height);
+                    << " " << annotationMsg.areaOfInterest.center.x
+                    << " " << annotationMsg.areaOfInterest.center.y
+                    << " " << annotationMsg.areaOfInterest.width
+                    << " " << annotationMsg.areaOfInterest.height);
 
   }
 
@@ -378,7 +378,7 @@ namespace pandora_vision
   **/
   void CController::sendNextFrame(bool enableBackward)
   {  
-      pandora_vision_msgs::AnnotationMsg annotationMsg;
+      pandora_vision_msgs::Predator annotationMsg;
       cv::Mat temp;
       if(enableBackward)
         currentFrameNo_--;
@@ -387,25 +387,25 @@ namespace pandora_vision
       connector_.getcurrentFrame(currentFrameNo_, &temp);
       annotationMsg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-      annotationMsg.x = -1;
-      annotationMsg.y = -1;
-      annotationMsg.width =  -1;
-      annotationMsg.height = -1;
+      annotationMsg.areaOfInterest.center.x = -1;
+      annotationMsg.areaOfInterest.center.y = -1;
+      annotationMsg.areaOfInterest.width =  -1;
+      annotationMsg.areaOfInterest.height = -1;
       cv_bridge::CvImage out_msg;
       out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
       out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
       out_msg.encoding = "rgb8"; 
       out_msg.image = temp;
-      out_msg.toImageMsg(annotationMsg.img);
+      out_msg.toImageMsg(annotationMsg.image);
       annotationPublisher_.publish(annotationMsg);
       connector_.setcurrentFrame(currentFrameNo_);
       ROS_INFO_STREAM("send next frame "<< currentFrameNo_ 
                        << " " << annotationMsg.header.frame_id 
                        << " " << annotationMsg.header.stamp 
-                       << " " << annotationMsg.x 
-                       << " " << annotationMsg.y 
-                       << " " << annotationMsg.width 
-                       << " " << annotationMsg.height);
+                       << " " << annotationMsg.areaOfInterest.center.x 
+                       << " " << annotationMsg.areaOfInterest.center.y 
+                       << " " << annotationMsg.areaOfInterest.width 
+                       << " " << annotationMsg.areaOfInterest.height);
 
   }
 
@@ -417,31 +417,31 @@ namespace pandora_vision
   **/
   void CController::sendFinalFrame()
   {
-    pandora_vision_msgs::AnnotationMsg annotationMsg;
+    pandora_vision_msgs::Predator annotationMsg;
     cv::Mat temp;
     currentFrameNo_ = 0; 
     connector_.getcurrentFrame(currentFrameNo_, &temp);
     annotationMsg.header.frame_id = "close";
     annotationMsg.header.stamp = msgHeader_[currentFrameNo_].stamp;
-    annotationMsg.x = 2;
-    annotationMsg.y = 2;
-    annotationMsg.width =  2;
-    annotationMsg.height = 2;
+    annotationMsg.areaOfInterest.center.x = 2;
+    annotationMsg.areaOfInterest.center.y = 2;
+    annotationMsg.areaOfInterest.width =  2;
+    annotationMsg.areaOfInterest.height = 2;
     cv_bridge::CvImage out_msg;
     out_msg.header.frame_id = msgHeader_[currentFrameNo_].frame_id;
     out_msg.header.stamp = msgHeader_[currentFrameNo_].stamp;
     out_msg.encoding = "rgb8"; 
     out_msg.image = temp;
-    out_msg.toImageMsg(annotationMsg.img);
+    out_msg.toImageMsg(annotationMsg.image);
     annotationPublisher_.publish(annotationMsg);
     connector_.setcurrentFrame(currentFrameNo_);
     ROS_INFO_STREAM("send 'closing' frame " << currentFrameNo_ 
                      << " " << annotationMsg.header.frame_id 
                      << " " << annotationMsg.header.stamp 
-                     << " " << annotationMsg.x 
-                     << " " << annotationMsg.y 
-                     << " " << annotationMsg.width 
-                     << " " << annotationMsg.height);
+                     << " " << annotationMsg.areaOfInterest.center.x 
+                     << " " << annotationMsg.areaOfInterest.center.y 
+                     << " " << annotationMsg.areaOfInterest.width 
+                     << " " << annotationMsg.areaOfInterest.height);
 
       predatorSubscriber_.shutdown();
 

@@ -164,7 +164,7 @@ namespace pandora_vision
       @param msg [const pandora_vision_msgs::PredatorMsg&] The message
       @return void
       **/
-      void predatorCallback(const pandora_vision_msgs::PredatorMsg& msg);
+      void predatorCallback(const pandora_vision_msgs::Predator& msg);
       /**
       @brief function that prepares and publish the fist msg to 
       be used in predator

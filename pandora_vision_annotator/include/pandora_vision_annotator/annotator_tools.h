@@ -97,8 +97,7 @@
 #include <QtGui/QTimeEdit>
 #include <QtGui/QFont>
 
-#include "pandora_vision_msgs/PredatorMsg.h"
-#include "pandora_vision_msgs/AnnotationMsg.h"
+#include "pandora_vision_msgs/Predator.h"
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
