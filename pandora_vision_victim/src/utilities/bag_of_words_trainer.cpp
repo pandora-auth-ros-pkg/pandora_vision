@@ -198,7 +198,7 @@ namespace pandora_vision
 
     // Create the canvas where the descriptor/histogram of visual words
     // will be drawn.
-    cv::Mat canvas = cv::Mat::ones(windowHeight, bins, CV_8UC3);
+    cv::Mat canvas = cv::Mat::zeros(windowHeight, bins, CV_8UC3);
 
     for (int i = 0; i < bins; ++i)
     {

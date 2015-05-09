@@ -91,6 +91,7 @@ add_library(${PROJECT_NAME}_feature_extractors
     src/feature_extractors/feature_extraction.cpp
     src/feature_extractors/depth_feature_extraction.cpp
     src/feature_extractors/rgb_feature_extraction.cpp
+    src/feature_extractors/histogram_extractor.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_feature_extractors

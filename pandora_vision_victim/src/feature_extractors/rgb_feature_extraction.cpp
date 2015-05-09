@@ -48,6 +48,7 @@
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/sift_extractor.h"
 #include "pandora_vision_victim/feature_extractors/hog_extractor.h"
+#include "pandora_vision_victim/feature_extractors/histogram_extractor.h"
 
 /**
  * @namespace pandora_vision
@@ -69,6 +70,7 @@ namespace pandora_vision
     std::string haralickFeatures = fs["extract_haralick_features"];
     std::string siftFeatures = fs["extract_sift_features"];
     std::string hogFeatures = fs["extract_hog_features"];
+    std::string histogramFeatures = fs["extract_color_histograms"];
 
     bool extractChannelsStatisticsFeatures =
       channelsStatisticsFeatures.compare("true") == 0;
@@ -77,6 +79,8 @@ namespace pandora_vision
     bool extractHaralickFeatures = haralickFeatures.compare("true") == 0;
     bool extractSiftFeatures = siftFeatures.compare("true") == 0;
     bool extractHogFeatures = hogFeatures.compare("true") == 0;
+    bool extractColorHistogramFeatures =
+      histogramFeatures.compare("true") == 0; 
 
     std::string viewDescriptor = fs["visualization"];
     visualization_ = viewDescriptor.compare("true") == 0; 
@@ -92,6 +96,7 @@ namespace pandora_vision
     chosenFeatureTypesMap_["haralick"] = extractHaralickFeatures;
     chosenFeatureTypesMap_["sift"] = extractSiftFeatures;
     chosenFeatureTypesMap_["hog"] = extractHogFeatures;
+    chosenFeatureTypesMap_["color_histograms"] = extractColorHistogramFeatures; 
 
     if (chosenFeatureTypesMap_["sift"] == true)
     {
@@ -109,6 +114,12 @@ namespace pandora_vision
     {
       boost::shared_ptr<FeatureExtractorFactory> hogPtr(new HOGExtractor());
       featureFactoryPtrMap_["hog"] = hogPtr;
+    }
+    if (chosenFeatureTypesMap_["color_histograms"] == true)
+    {
+      boost::shared_ptr<FeatureExtractorFactory> histPtr(new
+        HistogramExtractor(fs));
+      featureFactoryPtrMap_["histogram"] = histPtr;
     }
 
     imageType_ = "rgb_";
@@ -186,6 +197,19 @@ namespace pandora_vision
       /// Append HOG features to RGB feature vector.
       for (int ii = 0; ii < hogDescriptors.size(); ii++)
         featureVector_.push_back(hogDescriptors.at(ii));
+    }
+    if (chosenFeatureTypesMap_["color_histograms"] == true)
+    {
+      cv::Mat colorHistogramFeatures;
+      featureFactoryPtrMap_["color_histograms"]->extractFeatures(inImage,
+          &colorHistogramFeatures);
+
+      // Plot the features if the visualization flag is true. 
+       if (visualization_)
+        featureFactoryPtrMap_["color_histograms"]->plotFeatures(
+            colorHistogramFeatures);
+       for (int ii = 0; ii < colorHistogramFeatures.cols; ii++)
+         featureVector_.push_back(colorHistogramFeatures.at<float>(ii));
     }
   }
 }  // namespace pandora_vision

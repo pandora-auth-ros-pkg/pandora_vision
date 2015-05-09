@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
+*  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,75 +32,37 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Author: Vassilis Choutas 
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-#define PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-
-#include <string>
 #include <vector>
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include "gtest/gtest.h"
+#include "ros/package.h"
+#include "pandora_vision_victim/feature_extractors/histogram_extractor.h"
 
-/**
- * @namespace pandora_vision
- * @brief The main namespace for PANDORA vision
- */
 namespace pandora_vision
 {
-  /**
-   * @class FeatureExtractorFactory
-   * @brief This class extracts features from images.
-   */
-  class FeatureExtractorFactory
+  class HistogramExtractorTest: public ::testing:Test
   {
     public:
-      /**
-       * @brief Default Constructor
-       */
-      FeatureExtractorFactory()
+      HistogramExtractorTest(){}
+
+      virtual void SetUp()
       {
+        std::string packagePath = ros::package::getPath("pandora_vision_victim");
+        testImg = cv::imread(packagePath + "/data/box.png");      
+
+        ASSERT_TRUE(testImg.data != NULL) << "Could not read the test image!";
+      }
+      virtual ~HistogramExtractorTest()
+      {
+        delete object;
       }
 
-      /**
-       * @brief Destructor
-       */
-      virtual ~FeatureExtractorFactory()
-      {
-      }
 
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          cv::Mat* descriptors)
-      {
-      }
+      HistogramExtractor* histExtractorTestFixturePtr_; 
+  }
 
-      virtual void plotFeatures(const cv::Mat& featureVector)
-      {
-      }
 
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<double>* featureVector)
-      {
-      }
-
-      /**
-       * @brief
-       */
-      virtual void extractFeatures(const cv::Mat& inImage,
-          std::vector<float>* featureVector)
-      {
-      }
-  };
-}  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_FEATURE_EXTRACTORS_FEATURE_EXTRACTOR_FACTORY_H
-
+} // namespace pandora_vision

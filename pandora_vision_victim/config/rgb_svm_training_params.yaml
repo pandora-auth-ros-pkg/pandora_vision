@@ -4,6 +4,7 @@ extract_edge_orientation_features: true
 extract_haralick_features: true
 extract_sift_features: false
 extract_hog_features: false
+extract_color_histograms: false
 
 dictionary_size: 50
 visualization: false

@@ -59,7 +59,7 @@ namespace pandora_vision
 
     virtual ~SiftExtractorTest()
     {
-      delete object;
+      delete siftExtractorTestFixture_;
     }
 
     /*
@@ -89,8 +89,8 @@ namespace pandora_vision
     //<! The image used for testingg purposes.
     cv::Mat testImg;
 
-    //<! A pointer to the extractor object that will be tested.
-    SiftExtractor* object;
+    //<! A pointer to the extractor siftExtractorTestFixture_ that will be tested.
+    SiftExtractor* siftExtractorTestFixture_;
 
     //<! The pointer the keypoint detector that produces the correct results.
     cv::Ptr<cv::FeatureDetector> detector;
@@ -102,9 +102,9 @@ namespace pandora_vision
 
   TEST_F(SiftExtractorTest, SiftTest)
   {
-    // Create the SIFT object 
-    object = new SiftExtractor("SIFT", "SIFT");
-    ASSERT_TRUE(object != NULL) << "Could not Feature Extractor Object!"; 
+    // Create the SIFT siftExtractorTestFixture_ 
+    siftExtractorTestFixture_ = new SiftExtractor("SIFT", "SIFT");
+    ASSERT_TRUE(siftExtractorTestFixture_ != NULL) << "Could not Feature Extractor Object!"; 
 
     // Create the SIFT keypoint detector.
     detector = create_detector("SIFT");
@@ -133,7 +133,7 @@ namespace pandora_vision
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
 
-    object->extractFeatures(grayImg, &descriptors);
+    siftExtractorTestFixture_->extractFeatures(grayImg, &descriptors);
 
     ASSERT_EQ(trueDescriptors.rows, descriptors.rows);
     ASSERT_EQ(trueDescriptors.cols, descriptors.cols);
@@ -152,8 +152,8 @@ namespace pandora_vision
 
   TEST_F(SiftExtractorTest, DenseSiftTest)
   {
-    object = new SiftExtractor("Dense", "SIFT");
-    ASSERT_TRUE(object != NULL) << "Could not Feature Extractor Object!";
+    siftExtractorTestFixture_ = new SiftExtractor("Dense", "SIFT");
+    ASSERT_TRUE(siftExtractorTestFixture_ != NULL) << "Could not Feature Extractor Object!";
 
     detector = create_detector("Dense");
     ASSERT_TRUE(detector != NULL) << "Could not create SIFT keypoint" << 
@@ -180,7 +180,7 @@ namespace pandora_vision
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
 
-    object->extractFeatures(grayImg, &descriptors);
+    siftExtractorTestFixture_->extractFeatures(grayImg, &descriptors);
 
     ASSERT_EQ(trueDescriptors.rows, descriptors.rows);
     ASSERT_EQ(trueDescriptors.cols, descriptors.cols);
