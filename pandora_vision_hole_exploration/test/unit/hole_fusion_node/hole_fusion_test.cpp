@@ -777,14 +777,14 @@ namespace pandora_vision
     cv::Mat depthOverlappingSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
     HoleFusionTest::generateDepthRectangle
-      ( cv::Point2f ( 90, 90 ),
+      ( cv::Point2f ( 70, 70 ),
         60,
         60,
         1.9,
         &depthOverlappingSquare );
 
     conveyorTemp = getConveyor(
-        cv::Point2f ( 90, 90 ),
+        cv::Point2f ( 70, 70 ),
         60,
         60 );
     depthConveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
@@ -796,13 +796,61 @@ namespace pandora_vision
 
     HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
 
+    // It is expected that there is only one hole with probability 0.6
+    EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
+    EXPECT_NEAR ( 0.6, validHolesMap[0], 0.05);
+
+    // Generate thermal small squares to merge with the aboveset
+    // overlapping rgb and depth squares
+
+
+    cv::Mat thermalOverlappingSquare1 = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    HoleFusionTest::generateDepthRectangle
+      ( cv::Point2f ( 65, 65 ),
+        10,
+        10,
+        1.9,
+        &thermalOverlappingSquare1 );
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 65, 65 ),
+        10,
+        10 );
+    thermalConveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    thermalConveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    cv::Mat thermalOverlappingSquare2 = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    HoleFusionTest::generateDepthRectangle
+      ( cv::Point2f ( 95, 95 ),
+        25,
+        25,
+        1.9,
+        &thermalOverlappingSquare2 );
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 95, 95 ),
+        25,
+        25 );
+    thermalConveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    thermalConveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    preValidatedHoles.keypoint.clear();
+    preValidatedHoles.rectangle.clear();
+    validHolesMap.clear();
+
+    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+
     // It is expected that there is only one hole with probability 1.0
+    // and keypoint at (96.875, 96.875)
     EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
     EXPECT_EQ ( 1.0, validHolesMap[0]);
+    EXPECT_NEAR(96.875, preValidatedHoles.keypoint[0].x, 5);
+    EXPECT_NEAR(96.875, preValidatedHoles.keypoint[0].y, 5);
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
-
     // Test that for very small depth, 
     // the small variance threshold is used to eliminate RGB contours 
     // (thus just a small variance inside the hole's bounding box 
@@ -856,6 +904,8 @@ namespace pandora_vision
     validHolesMap.clear();
     depthConveyor.keypoint.clear();
     depthConveyor.rectangle.clear();
+    thermalConveyor.keypoint.clear();
+    thermalConveyor.rectangle.clear();
 
     HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
     // It is expected that there are two valid holes those inside small and medium depth variance

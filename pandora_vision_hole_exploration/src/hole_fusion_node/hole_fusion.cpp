@@ -1558,9 +1558,8 @@ namespace pandora_vision
     int numberOfBinsY = static_cast<int>(image.rows / binSize);
     int numberOfBins = numberOfBinsX * numberOfBinsY;
 
-    //idBinX, idBinY, id of vector with holes that overlap
-    std::map<std::pair<int, int>, float> overlappingInBins;
-    std::vector<std::vector<std::vector<int> > > assignedHolesIds(numberOfBins); 
+    std::vector<std::vector<std::vector<int> > > 
+      assignedHolesIds(numberOfBins, std::vector<std::vector<int> >(3)); 
 
     int binId = 0;
     if((*depthHolesConveyor).rectangle.size() == 0)
@@ -1572,10 +1571,10 @@ namespace pandora_vision
     else
       for(int i = 0; i < (*depthHolesConveyor).rectangle.size(); i ++)
       {
+        binId = 0;
         for(int binx = 0; binx < numberOfBinsX; binx ++)
           for(int biny = 0; biny < numberOfBinsY; biny ++)
           {
-            overlappingInBins[std::make_pair(binx, biny)] = binId;
             if((*depthHolesConveyor).keypoint[i].x >= binx * binSize
                 && (*depthHolesConveyor).keypoint[i].x < (binx + 1) * binSize
                 && (*depthHolesConveyor).keypoint[i].y >= biny * binSize
@@ -1597,6 +1596,7 @@ namespace pandora_vision
     else
       for(int i = 0; i < (*thermalHolesConveyor).rectangle.size(); i ++)
       {
+        binId = 0;
         for(int binx = 0; binx < numberOfBinsX; binx ++)
           for(int biny = 0; biny < numberOfBinsY; biny ++)
           {
@@ -1621,6 +1621,7 @@ namespace pandora_vision
     else
       for(int i = 0; i < (*rgbHolesConveyor).rectangle.size(); i ++)
       {
+        binId = 0;
         for(int binx = 0; binx < numberOfBinsX; binx ++)
           for(int biny = 0; biny < numberOfBinsY; biny ++)
           {
@@ -1634,6 +1635,7 @@ namespace pandora_vision
             binId++;
           }
       }
+    int vi = 0;
 
     for(int i = 0; i < numberOfBins; i ++)
     {
@@ -1644,12 +1646,14 @@ namespace pandora_vision
       int minX = std::numeric_limits<int>::max();
       int minY = std::numeric_limits<int>::max();
       int overlapsNumber = 0;
+      int overlapsSum = 0;
       bool counted = false;
       for(int j = 0; j < assignedHolesIds[i][0].size(); j ++)
         if(assignedHolesIds[i][0][j] != -1)
         {
           sumKX += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0][j]].x;
           sumKY += (*depthHolesConveyor).keypoint[assignedHolesIds[i][0][j]].y;
+          overlapsSum++;
           if(!counted)
           {
             overlapsNumber++;
@@ -1677,6 +1681,7 @@ namespace pandora_vision
         {
           sumKX += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1][j]].x;
           sumKY += (*thermalHolesConveyor).keypoint[assignedHolesIds[i][1][j]].y;
+          overlapsSum++;
           if(!counted)
           {
             overlapsNumber++;
@@ -1704,6 +1709,7 @@ namespace pandora_vision
         {
           sumKX += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2][j]].x;
           sumKY += (*rgbHolesConveyor).keypoint[assignedHolesIds[i][2][j]].y;
+          overlapsSum++;
           if(!counted)
           {
             overlapsNumber++;
@@ -1726,16 +1732,18 @@ namespace pandora_vision
         }
       if(overlapsNumber > 0)
       {
-        cv::Point2f mergedKeypoint(sumKX / overlapsNumber, sumKY / overlapsNumber);
+        
+        cv::Point2f mergedKeypoint(sumKX / overlapsSum, sumKY / overlapsSum);
         (*preValidatedHoles).keypoint.push_back(mergedKeypoint);
         cv::Rect mergedRect(minX, minY, maxX - minX, maxY - minY);
         (*preValidatedHoles).rectangle.push_back(mergedRect);
         if(overlapsNumber == 1)
-          (*validHolesMap)[i] = Parameters::HoleFusion::valid_light_probability;
+          (*validHolesMap)[vi] = Parameters::HoleFusion::valid_light_probability;
         else if(overlapsNumber == 2)
-          (*validHolesMap)[i] = Parameters::HoleFusion::valid_medium_probability;
+          (*validHolesMap)[vi] = Parameters::HoleFusion::valid_medium_probability;
         else
-          (*validHolesMap)[i] = Parameters::HoleFusion::valid_strong_probability;
+          (*validHolesMap)[vi] = Parameters::HoleFusion::valid_strong_probability;
+        vi++;
       }
     }
 
