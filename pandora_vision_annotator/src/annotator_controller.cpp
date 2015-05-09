@@ -62,7 +62,7 @@ namespace pandora_vision
     argc_(argc),
     argv_(argv)
   {
-    PredatorNowOn == false;
+    PredatorNowOn = false;
     offset = 0;
   }
 
@@ -170,11 +170,10 @@ namespace pandora_vision
   {
     ROS_INFO("PREDATOR NOW ON");
     cv::Mat temp;
-    PredatorNowOn == true;
+    PredatorNowOn = true;
     baseFrame = connector_.getFrameNumber();
     sendInitialFrame(baseFrame);
     enableBackwardTracking = false;
-
   }
   
   /**

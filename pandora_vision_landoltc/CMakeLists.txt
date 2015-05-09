@@ -56,6 +56,10 @@ add_library(${PROJECT_NAME}_2d_detector
 target_link_libraries(${PROJECT_NAME}_2d_detector 
   ${catkin_LIBRARIES}
   )
+add_dependencies(${PROJECT_NAME}_2d_detector
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  )
 
 ########################### landoltc preprocessor ############################
 
