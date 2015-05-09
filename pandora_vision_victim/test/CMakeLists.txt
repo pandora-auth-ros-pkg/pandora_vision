@@ -57,19 +57,19 @@ target_link_libraries(sift_feature_extractor_test
 #    )
 #add_rostest(functional/hole_detector_test.launch)
 
-add_rostest(functional/victim_test.launch)
+#add_rostest(functional/victim_test.launch)
 
 ################################################################################
 #                               Benchmark Tests                                #
 ################################################################################
 
-download_extra_data(
-  ${PROJECT_NAME}_benchmark_images_bags_pcl
-  EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
-  #EXCLUDE_FROM_ALL
-  )
-add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
+#download_extra_data(
+  #${PROJECT_NAME}_benchmark_images_bags_pcl
+  #EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
+  ##EXCLUDE_FROM_ALL
+  #)
+#add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
 
-add_rostest(benchmark/victim_benchmark_test.launch)
+#add_rostest(benchmark/victim_benchmark_test.launch)
 # add_rostest(benchmark/victim_benchmark_test.launch DEPENDENCIES
             # ${PROJECT_NAME}_benchmark_images_bags_pcl)
