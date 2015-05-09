@@ -48,8 +48,8 @@
 #include "pandora_vision_msgs/ExplorerCandidateHoleMsg.h"
 #include "pandora_vision_msgs/HolesDirectionsVectorMsg.h"
 #include "pandora_vision_msgs/HoleDirectionMsg.h"
-//#include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
-//#include "pandora_vision_msgs/EnhancedHoleMsg.h"
+#include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
+#include "pandora_vision_msgs/EnhancedHoleMsg.h"
 #include "utils/defines.h"
 #include "utils/message_conversions.h"
 #include "utils/parameters.h"
@@ -111,12 +111,12 @@ namespace pandora_vision
 
       // The ROS publisher that will be used to publish the enhanced valid holes
       // produced by this package
-      //ros::Publisher enhancedHolesPublisher_;
+      ros::Publisher enhancedHolesPublisher_;
 
       // The name of the topic where the Hole Fusion node will publish
       // additional information, in respect to the valid holes topic,
-      // pertaining to the valid holes found by the Hole Detector package
-      //std::string enhancedHolesTopic_;
+      // pertaining to the valid holes found by the Hole Exploration package
+      std::string enhancedHolesTopic_;
 
       // The ROS publisher that will be used to publish an image depicting
       // the keypoint, outline points and bounding rectangle of holes found
@@ -407,6 +407,18 @@ namespace pandora_vision
         @return void
        **/
       void processCandidateHoles();
+
+      /**
+        @brief Publishes the holes' enhanced information.
+        @param[in] conveyor [const HolesConveyor&]
+        The overall valid holes found by the depth, thermal and RGB nodes.
+        @param[in] validHolesMap [std::map<int, float>*]
+        A map containing the indices of the valid holes inside the conveyor
+        and their respective validity probabilities
+        @return void
+       **/
+      void publishEnhancedHoles (const HolesConveyor& conveyor,
+        std::map<int, float>* validHolesMap);
 
       /**
         @brief Publishes the valid holes' information.

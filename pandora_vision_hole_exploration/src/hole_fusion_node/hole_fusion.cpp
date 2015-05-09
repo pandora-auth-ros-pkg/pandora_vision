@@ -98,9 +98,9 @@ namespace pandora_vision
 
     // Advertise the topic that the image of the final holes,
     // will be published to
-    //enhancedHolesPublisher_ = nodeHandle_.advertise
-    //  <pandora_vision_msgs::EnhancedHolesVectorMsg>(
-    //    enhancedHolesTopic_, 1000, true);
+    enhancedHolesPublisher_ = nodeHandle_.advertise
+      <pandora_vision_msgs::EnhancedHolesVectorMsg>(
+          enhancedHolesTopic_, 1000, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
     // synchronizer node to subscribe to the input point cloud topic
@@ -487,18 +487,18 @@ namespace pandora_vision
     // Read the name of the topic that the Hole Fusion node uses to publish
     // additional information about the valid holes found by the
     // Hole Detector package
-    //if (nodeHandle_.getParam(
-    //      ns + "/hole_fusion_node/published_topics/enhanced_holes_topic",
-    //      enhancedHolesTopic_))
-    //{
-    //  ROS_INFO_NAMED(PKG_NAME,
-    //      "[Hole Fusion Node] Advertising to the enhanced holes topic");
-    //}
-    //else
-    //{
-    //  ROS_INFO_NAMED (PKG_NAME,
-    //      "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
-    //}
+    if (nodeHandle_.getParam(
+          ns + "/hole_fusion_node/published_topics/enhanced_holes_topic",
+          enhancedHolesTopic_))
+    {
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Advertising to the enhanced holes topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+          "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
+    }
 
     // Read the name of the topic that the Hole Fusion node uses to publish
     // messages so that the synchronizer node subscribes to the
@@ -1111,9 +1111,9 @@ namespace pandora_vision
       publishValidHoles(preValidatedHoles, &validHolesMap);
     }
 
-    //// Publish the enhanced holes message
-    //// regardless of the amount of valid holes
-    //publishEnhancedHoles(uniqueValidHoles, &validHolesMap);
+    // Publish the enhanced holes message
+    // regardless of the amount of valid holes
+    publishEnhancedHoles(preValidatedHoles, &validHolesMap);
 
     //#ifdef DEBUG_TIME
     //Timer::tick("processCandidateHoles");
@@ -1164,6 +1164,93 @@ namespace pandora_vision
   //  }
   //}
 
+
+  /**
+    @brief Publishes the holes' enhanced information.
+    @param[in] conveyor [const HolesConveyor&]
+    The overall valid holes found by the depth, thermal and RGB nodes.
+    @param[in] validHolesMap [std::map<int, float>*]
+    A map containing the indices of the valid holes inside the conveyor
+    and their respective validity probabilities
+    @return void
+   **/
+  void HoleFusion::publishEnhancedHoles (const HolesConveyor& conveyor,
+      std::map<int, float>* validHolesMap)
+  {
+    // The overall message of enhanced holes that will be published
+    pandora_vision_msgs::EnhancedHolesVectorMsg enhancedHolesMsg;
+
+    // Set the rgbImage in the enhancedHolesMsg message to the rgb image
+    enhancedHolesMsg.rgbImage = MessageConversions::convertImageToMessage(
+        rgbImage_,
+        sensor_msgs::image_encodings::TYPE_8UC3,
+        enhancedHolesMsg.rgbImage);
+
+    // Set the depthImage in the enhancedHolesMsg message to the depth image
+    enhancedHolesMsg.depthImage = MessageConversions::convertImageToMessage(
+        Visualization::scaleImageForVisualization(interpolatedDepthImage_,
+          Parameters::Image::scale_method),
+        sensor_msgs::image_encodings::TYPE_8UC1,
+        enhancedHolesMsg.depthImage);
+
+    // Set the thermalImage in the enhancedHolesMsg message to the thermal image
+    enhancedHolesMsg.thermalImage = MessageConversions::convertImageToMessage(
+        Visualization::scaleImageForVisualization(interpolatedThermalImage_,
+          Parameters::Image::scale_method),
+        sensor_msgs::image_encodings::TYPE_8UC1,
+        enhancedHolesMsg.thermalImage);
+
+    // Set whether depth analysis is applicable
+    enhancedHolesMsg.isDepth = (filteringMode_ == RGBD_MODE);
+
+    // Set the message's header
+    enhancedHolesMsg.header.stamp = timestamp_;
+    enhancedHolesMsg.header.frame_id = frame_id_;
+
+    for (std::map<int, float>::iterator it = validHolesMap->begin();
+        it != validHolesMap->end(); it++)
+    {
+      // The enhanced hole message. Used for one hole only
+      pandora_vision_msgs::EnhancedHoleMsg enhancedHoleMsg;
+
+      // Set the hole's keypoint
+      enhancedHoleMsg.keypointX = conveyor.keypoint[it->first].x;
+      enhancedHoleMsg.keypointY = conveyor.keypoint[it->first].y;
+
+      // Set the hole's bounding box vertices
+      enhancedHoleMsg.verticesX.push_back(
+          conveyor.rectangle[it->first].x);
+      enhancedHoleMsg.verticesY.push_back(
+          conveyor.rectangle[it->first].y);
+      enhancedHoleMsg.verticesX.push_back(
+          conveyor.rectangle[it->first].x);
+      enhancedHoleMsg.verticesY.push_back(
+          conveyor.rectangle[it->first].y 
+          + conveyor.rectangle[it->first].height);
+      enhancedHoleMsg.verticesX.push_back(
+          conveyor.rectangle[it->first].x
+          + conveyor.rectangle[it->first].width);
+      enhancedHoleMsg.verticesY.push_back(
+          conveyor.rectangle[it->first].y 
+          + conveyor.rectangle[it->first].height);
+      enhancedHoleMsg.verticesX.push_back(
+          conveyor.rectangle[it->first].x
+          + conveyor.rectangle[it->first].width);
+      enhancedHoleMsg.verticesY.push_back(
+          conveyor.rectangle[it->first].y);
+
+
+      // Set the message's header
+      enhancedHoleMsg.header.stamp = timestamp_;
+      enhancedHoleMsg.header.frame_id = frame_id_;
+
+      // Push back into the enhancedHolesMsg message
+      enhancedHolesMsg.enhancedHoles.push_back(enhancedHoleMsg);
+    }
+
+    // Publish the overall message
+    enhancedHolesPublisher_.publish(enhancedHolesMsg);
+  }
 
   /**
     @brief Publishes the valid holes' information.
@@ -1732,7 +1819,7 @@ namespace pandora_vision
         }
       if(overlapsNumber > 0)
       {
-        
+
         cv::Point2f mergedKeypoint(sumKX / overlapsSum, sumKY / overlapsSum);
         (*preValidatedHoles).keypoint.push_back(mergedKeypoint);
         cv::Rect mergedRect(minX, minY, maxX - minX, maxY - minY);
