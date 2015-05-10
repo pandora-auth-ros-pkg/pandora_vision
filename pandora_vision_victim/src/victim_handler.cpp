@@ -44,48 +44,48 @@ namespace pandora_vision
   VictimHandler::VictimHandler(const std::string& ns) : 
     sensor_processor::Handler(ns)
   {
-    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
-    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    svmActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+    holeActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    holeActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    holeActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
     
-    //~ vjActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+    //~ imageActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
   }
   
   void VictimHandler::startTransition(int newState)
   {
     currentState_ = newState;
     
-    bool svmPreviouslyOff = true;
-    bool vjPreviouslyOff = true;
+    bool holePreviouslyOff = true;
+    bool imagePreviouslyOff = true;
     
-    bool svmCurrentlyOn = false;
-    bool vjCurrentlyOn = false;
+    bool holeCurrentlyOn = false;
+    bool imageCurrentlyOn = false;
     
-    for (int ii = 0; ii < svmActiveStates_.size(); ii++)
+    for (int ii = 0; ii < holeActiveStates_.size(); ii++)
     {
-      svmPreviouslyOff = (svmPreviouslyOff && previousState_ != svmActiveStates_[ii]);
-      svmCurrentlyOn = (svmCurrentlyOn || currentState_ == svmActiveStates_[ii]);
+      holePreviouslyOff = (holePreviouslyOff && previousState_ != holeActiveStates_[ii]);
+      holeCurrentlyOn = (holeCurrentlyOn || currentState_ == holeActiveStates_[ii]);
     }
     
-    //~ for (int ii = 0; ii < vjActiveStates_.size(); ii++)
+    //~ for (int ii = 0; ii < imageActiveStates_.size(); ii++)
     //~ {
-      //~ vjPreviouslyOff = (vjPreviouslyOff && previousState_ != vjActiveStates_[ii]);
-      //~ vjCurrentlyOn = (vjCurrentlyOn || currentState_ == vjActiveStates_[ii]);
+      //~ imagePreviouslyOff = (imagePreviouslyOff && previousState_ != imageActiveStates_[ii]);
+      //~ imageCurrentlyOn = (imageCurrentlyOn || currentState_ == imageActiveStates_[ii]);
     //~ }
    
-    if (svmPreviouslyOff && svmCurrentlyOn)
+    if (holePreviouslyOff && holeCurrentlyOn)
     {
-      preProcPtr_.reset(new VictimSvmPreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new VictimSvmProcessor("~/processor", this));
+      preProcPtr_.reset(new VictimHolePreProcessor("~/preprocessor", this));
+      processorPtr_.reset(new VictimHoleProcessor("~/processor", this));
       postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
     }
-    //~ else if (vjPreviouslyOff && vjCurrentlyOn)
+    //~ else if (imagePreviouslyOff && imageCurrentlyOn)
     //~ {
-      //~ preProcPtr_.reset(new VictimVJPreProcessor("~/preprocessor", this));
-      //~ processorPtr_.reset(new VictimVJProcessor("~/processor", this));
+      //~ preProcPtr_.reset(new VictimImagePreProcessor("~/preprocessor", this));
+      //~ processorPtr_.reset(new VictimImageProcessor("~/processor", this));
       //~ postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
     //~ }
-    else if ((!svmPreviouslyOff || !vjPreviouslyOff) && (!svmCurrentlyOn && !vjCurrentlyOn))
+    else if ((!holePreviouslyOff || !imagePreviouslyOff) && (!holeCurrentlyOn && !imageCurrentlyOn))
     {
       preProcPtr_.reset();
       processorPtr_.reset();

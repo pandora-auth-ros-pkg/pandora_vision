@@ -37,8 +37,8 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_SVM_PROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_SVM_PROCESSOR_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H
 
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
@@ -50,13 +50,13 @@
 
 namespace pandora_vision
 {
-  class VictimSvmProcessor : public sensor_processor::Processor<EnhancedImageStamped, POIsStamped>
+  class VictimHoleProcessor : public sensor_processor::Processor<EnhancedImageStamped, POIsStamped>
   {
     public:
-      VictimSvmProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      VictimSvmProcessor();
+      VictimHoleProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      VictimHoleProcessor();
       
-      virtual ~VictimSvmProcessor();
+      virtual ~VictimHoleProcessor();
       
       virtual bool process(const EnhancedImageStampedConstPtr& input, 
         const POIsStampedPtr& output);
@@ -103,4 +103,4 @@ namespace pandora_vision
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_SVM_PROCESSOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H

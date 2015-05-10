@@ -37,34 +37,56 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H
-
-#include "sensor_processor/processor.h"
-#include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_victim/images_stamped.h"
-#include "pandora_vision_victim/victim_poi.h"
-#include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_victim/victim_image_processor.h"
 
 namespace pandora_vision
 {
-  class VictimVJProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
+  VictimImageProcessor::VictimImageProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
   {
-    public:
-      VictimVJProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      VictimVJProcessor();
-      
-      virtual ~VictimVJProcessor();
-      
-      virtual bool process(const ImagesStampedConstPtr& input, const POIsStampedPtr& output);
-    
-    private:
-      /// Instance of class face_detector
-      VictimVJDetector _rgbViolaJonesDetector;
-      
-      VictimParameters params_;
-      // ................
-  };
-}  // namespace pandora_vision
+    params_.configVictim(*this->accessPublicNh());
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H
+    // .........
+
+    ROS_INFO("[victim_node] : Created Victim Image Processor instance");
+  }
+  
+  VictimImageProcessor::VictimImageProcessor() : VisionProcessor() {}
+  
+  VictimImageProcessor::~VictimImageProcessor()
+  {
+    ROS_DEBUG("[victim_node] : Destroying Victim Image Processor instance");
+  }
+  
+  
+  // .........
+  
+  
+  
+  /**
+   * @brief
+   **/
+  bool VictimImageProcessor::process(const ImagesStampedConstPtr& input, 
+    const POIsStampedPtr& output)
+  {
+    output->header = input->getHeader();
+    output->frameWidth = input->getRgbImage().cols;
+    output->frameHeight = input->getRgbImage().rows;
+    
+    std::vector<VictimPOIPtr> victims = detectVictims(input);
+    
+    for (int ii = 0; ii < victims.size(); ii++)
+    {
+      if (victims[ii]->getProbability() > 0.0001)
+      {
+        output->pois[ii] = victims[ii];
+      }
+    }
+    
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
+  }
+}  // namespace pandora_vision

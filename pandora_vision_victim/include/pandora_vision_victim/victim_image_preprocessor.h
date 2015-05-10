@@ -37,37 +37,31 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_SVM_PREPROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_SVM_PREPROCESSOR_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_IMAGE_PREPROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_IMAGE_PREPROCESSOR_H
 
 #include <string>
-#include <image_transport/image_transport.h>
+#include <sensor_msgs/PointCloud2.h>
 #include "sensor_processor/handler.h"
 #include "sensor_processor/preprocessor.h"
-#include "pandora_vision_msgs/EnhancedImage.h"
-#include "pandora_vision_victim/enhanced_image_stamped.h"
-#include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_hole/utils/message_conversions.h"
+#include "pandora_vision_victim/images_stamped.h"
 
 namespace pandora_vision
 {
-  class VictimSvmPreProcessor : public sensor_processor::PreProcessor<
-    pandora_vision_msgs::EnhancedImage, EnhancedImageStamped>
+  class VictimImagePreProcessor : public sensor_processor::PreProcessor<
+    sensor_msgs::PointCloud2, ImagesStamped>
   {
     protected:
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage> EnhancedImagePtr;
-      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage const> EnhancedImageConstPtr;
-      
+      boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+      boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
+    
     public:
-      VictimSvmPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~VictimSvmPreProcessor();
+      VictimImagePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~VictimImagePreProcessor();
       
-      virtual bool
-        preProcess(const EnhancedImageConstPtr& input, const EnhancedImageStampedPtr& output);
-        
-    private:
-      VictimParameters params_;
-      image_transport::Publisher interpolatedDepthPublisher_;
+      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_SVM_PREPROCESSOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_IMAGE_PREPROCESSOR_H

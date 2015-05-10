@@ -37,58 +37,22 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_victim/victim_vj_processor.h"
+#include "pandora_vision_victim/victim_image_preprocessor.h"
 
 namespace pandora_vision
 {
-  VictimVJProcessor::VictimVJProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
+  VictimImagePreProcessor::VictimImagePreProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2, 
+    ImagesStamped>(ns, handler) {}
+  
+  VictimImagePreProcessor::~VictimImagePreProcessor() {}
+  
+  bool VictimImagePreProcessor::preProcess(const PointCloud2ConstPtr& input, 
+    const ImagesStampedPtr& output)
   {
-    params_.configVictim(*this->accessPublicNh());
-
-    /// Initialize the face detector classifiers
-    _rgbViolaJonesDetector = VictimVJDetector(params_.cascade_path,
-      params_.model_path);
+    output->setHeader(input->header);
     
-    ROS_INFO("[victim_node] : Created Victim VJ Processor instance");
-  }
-  
-  VictimVJProcessor::VictimVJProcessor() : VisionProcessor() {}
-  
-  VictimVJProcessor::~VictimVJProcessor()
-  {
-    ROS_DEBUG("[victim_node] : Destroying Victim VJ Processor instance");
-  }
-  
-  
-  // .........
-  
-  
-  
-  /**
-   * @brief
-   **/
-  bool VictimVJProcessor::process(const ImagesStampedConstPtr& input, 
-    const POIsStampedPtr& output)
-  {
-    output->header = input->getHeader();
-    output->frameWidth = input->getRgbImage().cols;
-    output->frameHeight = input->getRgbImage().rows;
-    
-    std::vector<VictimPOIPtr> victims = detectVictims(input);
-    
-    for (int ii = 0; ii < victims.size(); ii++)
-    {
-      if (victims[ii]->getProbability() > 0.0001)
-      {
-        output->pois[ii] = victims[ii];
-      }
-    }
-    
-    if (output->pois.empty())
-    {
-      return false;
-    }
-    return true;
+    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(input, CV_8UC3);
+    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(input, CV_32FC1);
   }
 }  // namespace pandora_vision

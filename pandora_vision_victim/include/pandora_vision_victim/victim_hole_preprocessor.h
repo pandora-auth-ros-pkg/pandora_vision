@@ -37,31 +37,37 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
-#define PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
+#ifndef PANDORA_VISION_VICTIM_VICTIM_HOLE_PREPROCESSOR_H
+#define PANDORA_VISION_VICTIM_VICTIM_HOLE_PREPROCESSOR_H
 
 #include <string>
-#include <sensor_msgs/PointCloud2.h>
+#include <image_transport/image_transport.h>
 #include "sensor_processor/handler.h"
 #include "sensor_processor/preprocessor.h"
-#include "pandora_vision_hole/utils/message_conversions.h"
-#include "pandora_vision_victim/images_stamped.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
+#include "pandora_vision_victim/enhanced_image_stamped.h"
+#include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
 {
-  class VictimVJPreProcessor : public sensor_processor::PreProcessor<
-    sensor_msgs::PointCloud2, ImagesStamped>
+  class VictimHolePreProcessor : public sensor_processor::PreProcessor<
+    pandora_vision_msgs::EnhancedImage, EnhancedImageStamped>
   {
     protected:
-      boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
-      boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
-    
-    public:
-      VictimVJPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~VictimVJPreProcessor();
+      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage> EnhancedImagePtr;
+      typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage const> EnhancedImageConstPtr;
       
-      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
+    public:
+      VictimHolePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~VictimHolePreProcessor();
+      
+      virtual bool
+        preProcess(const EnhancedImageConstPtr& input, const EnhancedImageStampedPtr& output);
+        
+    private:
+      VictimParameters params_;
+      image_transport::Publisher interpolatedDepthPublisher_;
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_VJ_PREPROCESSOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_HOLE_PREPROCESSOR_H

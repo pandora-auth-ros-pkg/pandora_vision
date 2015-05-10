@@ -42,10 +42,10 @@
 
 #include <string>
 #include "sensor_processor/handler.h"
-//~ #include "pandora_vision_victim/victim_vj_preprocessor.h"
-#include "pandora_vision_victim/victim_svm_preprocessor.h"
-//~ #include "pandora_vision_victim/victim_vj_processor.h"
-#include "pandora_vision_victim/victim_svm_processor.h"
+//~ #include "pandora_vision_victim/victim_image_preprocessor.h"
+#include "pandora_vision_victim/victim_hole_preprocessor.h"
+//~ #include "pandora_vision_victim/victim_image_processor.h"
+#include "pandora_vision_victim/victim_hole_processor.h"
 #include "pandora_vision_victim/victim_postprocessor.h"
 
 namespace pandora_vision
@@ -61,8 +61,8 @@ namespace pandora_vision
       virtual void completeTransition();
       
     private:
-      std::vector<int> svmActiveStates_;
-      std::vector<int> vjActiveStates_;
+      std::vector<int> holeActiveStates_;
+      std::vector<int> imageActiveStates_;
   };
 }  // namespace pandora_vision
 

@@ -37,11 +37,11 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_victim/victim_svm_preprocessor.h"
+#include "pandora_vision_victim/victim_hole_preprocessor.h"
 
 namespace pandora_vision
 {
-  VictimSvmPreProcessor::VictimSvmPreProcessor(const std::string& ns, 
+  VictimHolePreProcessor::VictimHolePreProcessor(const std::string& ns, 
     sensor_processor::Handler* handler) :
     sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
     EnhancedImageStamped>(ns, handler)
@@ -52,11 +52,11 @@ namespace pandora_vision
       params_.interpolatedDepthImg, 1, true);
   }
   
-  VictimSvmPreProcessor::~VictimSvmPreProcessor()
+  VictimHolePreProcessor::~VictimHolePreProcessor()
   {
   }
   
-  bool VictimSvmPreProcessor::preProcess(const EnhancedImageConstPtr& input, 
+  bool VictimHolePreProcessor::preProcess(const EnhancedImageConstPtr& input, 
     const EnhancedImageStampedPtr& output)
   {
     output->setHeader(input->header);
