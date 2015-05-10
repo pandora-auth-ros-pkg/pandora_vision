@@ -82,7 +82,7 @@ namespace pandora_vision
     {
       cv::minMaxLoc(image->col(ii), &minVal, &maxVal);
       minVec->push_back(minVal);
-      minVec->push_back(maxVal);
+      maxVec->push_back(maxVal);
     }
     performMinMaxNormalization(newMax, newMin, image, *minVec, *maxVec);
   }
@@ -103,8 +103,11 @@ namespace pandora_vision
     for (int ii = 0; ii < image->cols; ii++)
     {
       subtract(image->col(ii), minVec.at(ii), image->col(ii));
-      divide(image->col(ii), maxVec.at(ii) - minVec.at(ii), image->col(ii));
-      multiply(image->col(ii), newMax - newMin, image->col(ii));
+      if (maxVec.at(ii) != minVec.at(ii))
+      {
+        divide(image->col(ii), maxVec.at(ii) - minVec.at(ii), image->col(ii));
+        multiply(image->col(ii), newMax - newMin, image->col(ii));
+      }
       add(image->col(ii), newMin, image->col(ii));
     }
   }
