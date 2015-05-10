@@ -26,7 +26,7 @@
   <depend>roscpp</depend>
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
-  <depend version_eq="sensor_processor_devel">pandora_common_msgs</depend>
+  <depend>pandora_common_msgs</depend>
   <depend>pandora_vision_msgs</depend>
   <depend>pandora_vision_common</depend>
   <depend>sensor_processor</depend>

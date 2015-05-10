@@ -67,4 +67,4 @@ namespace pandora_vision
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_VICTIM_VICTIM_SVM_PROCESSOR_H
+#endif  // PANDORA_VISION_VICTIM_VICTIM_VJ_PROCESSOR_H

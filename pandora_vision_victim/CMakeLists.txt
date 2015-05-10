@@ -232,10 +232,10 @@ if(MODEL_ENABLE_TRAIN)
   )
 endif()
 
-download_extra_data(
-  ${PROJECT_NAME}_download_training_files
-  EXTRA_FILES data/extra_files.yaml
-  )
+# download_extra_data(
+  # ${PROJECT_NAME}_download_training_files
+  # EXTRA_FILES data/extra_files.yaml
+  # )
 
 #~ To check lint : catkin_make roslint_pandora_vision_victim
 set(ROSLINT_CPP_OPTS
@@ -247,15 +247,15 @@ set(ROSLINT_CPP_OPTS
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  #~ include/*.h
-  #~ src/*.cpp
-  #~ test/*.cpp
-  include/victim_p*.h
-  include/victim_h*.h
-  include/e*.h
-  src/victim_p*.cpp
-  src/victim_h*.cpp
-  src/victim_node.cpp
+  include/*.h
+  src/*.cpp
+  test/*.cpp
+  # include/victim_p*.h
+  # include/victim_h*.h
+  # include/e*.h
+  # src/victim_p*.cpp
+  # src/victim_h*.cpp
+  # src/victim_node.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 

@@ -91,12 +91,13 @@ namespace pandora_vision
         channelPermutations_.push_back(permutation);
 
         int myints[] = {0, 1, 2};
-        std::sort (myints,myints+3);
+        std::sort (myints, myints + 3);
 
         // Store all the possible 3-permutations of the image channels.
-        do {
+        channelPermutations_.push_back(std::vector<int>(myints, myints + 3));
+
+        while (std::next_permutation(myints, myints + 3))
           channelPermutations_.push_back(std::vector<int>(myints, myints + 3));
-        } while (std::next_permutation(myints,myints+3));
 
       }
 
@@ -111,9 +112,9 @@ namespace pandora_vision
 
       void createRangeCombinations(
           std::vector<std::vector<float> >* outputRanges,
-          std::vector<int>& permutation,
-          std::vector<int>& binSizes,
-          std::vector<float>& maxRanges)
+          const std::vector<int>& permutation,
+          const std::vector<int>& binSizes,
+          const std::vector<float>& maxRanges)
       {
         outputRanges->clear();
         if (permutation.size() == 1)
@@ -172,7 +173,7 @@ namespace pandora_vision
       }
 
       void createSingleChannelImage(cv::Mat* outputImage,
-          std::pair<float, float>& range, 
+          const std::pair<float, float>& range, 
           int width_, int height_)
       {
         *outputImage = cv::Mat::zeros(width_, height_, CV_8UC1);
