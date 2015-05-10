@@ -134,27 +134,34 @@ namespace pandora_vision
     //!< Message alert creation
     for (int i = 0;  i < final_victims.size() ; i++)
     {
-      //!< Debug purposes
-      if (params_.debug_img || params_.debug_img_publisher)
+      if(final_victims[i]->getClassLabel() == 1)
       {
-        cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
-        cv::Rect re(final_victims[i]->getPoint(), cv::Size(final_victims[i]->getWidth(), 
-          final_victims[i]->getHeight()));
-        switch (final_victims[i]->getSource())
+        //!< Debug purposes
+        if (params_.debug_img || params_.debug_img_publisher)
         {
-          case RGB_SVM:
-            rgb_svm_keypoints.push_back(kp);
-            rgb_svm_bounding_boxes.push_back(re);
-            rgb_svm_p.push_back(final_victims[i]->getProbability());
-            break;
-          case DEPTH_RGB_SVM:
-            depth_svm_keypoints.push_back(kp);
-            depth_svm_bounding_boxes.push_back(re);
-            depth_svm_p.push_back(final_victims[i]->getProbability());
-            break;
+          cv::Point victimPOI = final_victims[i]->getPoint();
+          victimPOI.x -= final_victims[i]->getWidth()/2;
+          victimPOI.y -= final_victims[i]->getHeight()/2;
+          cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
+          cv::Rect re(victimPOI, cv::Size(final_victims[i]->getWidth(), 
+            final_victims[i]->getHeight()));
+          switch (final_victims[i]->getSource())
+          {
+            case RGB_SVM:
+              rgb_svm_keypoints.push_back(kp);
+              rgb_svm_bounding_boxes.push_back(re);
+              rgb_svm_p.push_back(final_victims[i]->getProbability());
+              break;
+            case DEPTH_RGB_SVM:
+              depth_svm_keypoints.push_back(kp);
+              depth_svm_bounding_boxes.push_back(re);
+              depth_svm_p.push_back(final_victims[i]->getProbability());
+              break;
+          }
         }
       }
     }
+
 
     /// Debug image
     if (params_.debug_img || params_.debug_img_publisher)
@@ -257,13 +264,15 @@ namespace pandora_vision
     std::vector<VictimPOIPtr> depth_svm_probabilities;
 
     VictimPOIPtr temp(new VictimPOI);
+    float probability, classLabel;
     
     if (detectionMode == GOT_HOLES || detectionMode == GOT_HOLES_AND_DEPTH )  // || detectionMode == GOT_RGB
     {
       for (int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
-        temp->setProbability(rgbSvmValidatorPtr_->calculatePredictionProbability(
-            imgs.rgbMasks.at(i).img));
+        rgbSvmValidatorPtr_->calculatePredictionProbability(imgs.rgbMasks.at(i).img, &classLabel, &probability);
+        temp->setProbability(probability);
+        temp->setClassLabel(classLabel);
         temp->setPoint(imgs.rgbMasks[i].keypoint);
         temp->setSource(RGB_SVM);
         temp->setWidth(imgs.rgbMasks[i].bounding_box.width);
@@ -276,8 +285,9 @@ namespace pandora_vision
     {
       for (int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
-        temp->setProbability(depthSvmValidatorPtr_->calculatePredictionProbability(
-            imgs.depthMasks.at(i).img));
+        depthSvmValidatorPtr_->calculatePredictionProbability(imgs.depthMasks.at(i).img, &classLabel, &probability);
+        temp->setProbability(probability);
+        temp->setClassLabel(classLabel);
         temp->setPoint(imgs.depthMasks[i].keypoint);
         temp->setSource(DEPTH_RGB_SVM);
         temp->setWidth(imgs.depthMasks[i].bounding_box.width);

@@ -56,6 +56,7 @@ namespace pandora_vision
 
     public:
       int source;
+      int classLabel;
 
     public:
       void setSource(int sourceArg)
@@ -65,6 +66,15 @@ namespace pandora_vision
       int getSource() const
       {
         return source;
+      }
+      
+      void setClassLabel(int classLabelArg)
+      {
+        classLabel = classLabelArg;
+      }
+      int getClassLabel() const
+      {
+        return classLabel;
       }
   };
   

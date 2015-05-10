@@ -95,7 +95,7 @@ namespace pandora_vision
    * @param inImage [cv::Mat] current rgb frame to be processed
    * @return void
   */
-  float SvmValidator::calculatePredictionProbability(const cv::Mat& inImage)
+  void SvmValidator::calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability)
   {
     ROS_INFO("Extracting features");
     extractFeatures(inImage);
@@ -104,7 +104,11 @@ namespace pandora_vision
       featureVector_.clear();
     featureVector_ = featureExtraction_->getFeatureVector();
     ROS_INFO("Find prediction probability");
-    return predictionToProbability(predict());
+    float prediction;
+    predict(classLabel, &prediction);
+    *probability = predictionToProbability(prediction);
+    ROS_INFO_STREAM("SVM Class Label: " << *classLabel);
+    ROS_INFO_STREAM("SVM prediction: " << prediction);
   }
 
   /**
@@ -112,7 +116,7 @@ namespace pandora_vision
   according to the featurevector given for each image
   @return void
   **/
-  float SvmValidator::predict()
+  void SvmValidator::predict(float* classLabel, float* prediction)
   {
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
@@ -134,9 +138,8 @@ namespace pandora_vision
 
     featuresMat.convertTo(featuresMat, CV_32FC1);
 
-    ROS_INFO_STREAM("SVM class label: " <<
-                    svmValidator_.predict(featuresMat, false));
-    return svmValidator_.predict(featuresMat, true);
+    *classLabel = svmValidator_.predict(featuresMat, false);
+    *prediction = svmValidator_.predict(featuresMat, true);
   }
 
   /**
@@ -155,7 +158,6 @@ namespace pandora_vision
         probabilityTranslation_);
     // Normalize probability to [0,1]
     probability = (1.0 + probability) / 2.0;
-    ROS_INFO_STREAM("SVM prediction: " << prediction);
     ROS_INFO_STREAM("SVM probability: " << probability);
     return probability;
   }

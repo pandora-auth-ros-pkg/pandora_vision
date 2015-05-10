@@ -85,14 +85,14 @@ namespace pandora_vision
        * @param inImage [cv::Mat] current rgb frame to be processed
        * @return void
       */
-      float calculatePredictionProbability(const cv::Mat& inImage);
+      void calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability);
 
       /**
       @brief Function that loads the trained classifier and makes a prediction
       according to the featurevector given for each image
       @return void
       **/
-      float predict();
+      void predict(float* classLabel, float* prediction);
 
       /**
        * @brief This function calculates the classification probability
