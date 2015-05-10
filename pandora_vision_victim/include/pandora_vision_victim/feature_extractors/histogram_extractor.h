@@ -141,6 +141,15 @@ namespace pandora_vision
         std::vector<float>* featureVector)
     {
     }
+
+    /*
+     * @brief: Function used to change the color space for the image
+     * histograms
+    */
+    void setColorSpace(const std::string& colorSpace)
+    {
+      colorSpace_ = stringToCvColorCode(colorSpace);
+    }
   private:
     /* data */
     //<! The channels of the image that will be used to create the histogram.

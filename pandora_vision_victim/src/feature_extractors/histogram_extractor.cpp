@@ -43,6 +43,24 @@
  */
 namespace pandora_vision
 {
+  HistogramExtractor::HistogramExtractor()
+  {
+    std::vector<int> channels;
+    std::vector<int> histBins;
+    std::vector<float> histRanges;
+    for (int i = 0; i < 3; ++i)
+    {
+      channels.push_back(i);
+      histBins.push_back(32);
+      histRanges.push_back(0.0f);
+      histRanges.push_back(256.0f);
+    }
+    int dims = 1;
+    std::string colorSpace("BGR");
+
+    HistogramExtractor(channels, dims, histBins, histRanges,
+        colorSpace, false);
+  }
 
   /*
    * @brief: The main constructor for the class that takes as input the 
@@ -218,13 +236,13 @@ namespace pandora_vision
     cv::split(img, imgChannels);
 
     // The final vector that will contain the histograms.
-    std::vector<cv::Mat> histograms;
-    cv::Mat tempHist;
+    std::vector<cv::Mat> histograms(3);
 
     int totalElements = 0;
     int index;
     for (int i = 0; i < channels_.size(); ++i)
     {
+      cv::Mat tempHist;
       // Define the ranges for the histogram.
       index = channels_[i];
       float range[] = {ranges_[2 * i], ranges_[2 * i + 1]};
@@ -235,17 +253,20 @@ namespace pandora_vision
       // Normalize the histogram to convert it to a probability 
       // distribution.
       cv::normalize(tempHist, tempHist, 0, 1, cv::NORM_MINMAX);
-
       // Store the resulting histogram.
-      histograms.push_back(tempHist);
+      histograms[i] = tempHist;
       totalElements += tempHist.rows;
     }
    
     // Concatenate the histograms so as to form a compact feature vector.
-    *descriptors = histograms[0];
-    for (int i = 1; i < histograms.size(); ++i)
+    *descriptors = cv::Mat(totalElements, 1, CV_32FC1);
+    int offset = 0;
+    for (int i = 0; i < histograms.size(); ++i)
     {
-      cv::vconcat(histograms[i], *descriptors, *descriptors);
+      for (int j = 0; j < histograms[i].rows; ++j) {
+        descriptors->at<float>(j + offset) = histograms[i].at<float>(j);
+      }
+      offset += histograms[i].rows;
     }
 
     return;

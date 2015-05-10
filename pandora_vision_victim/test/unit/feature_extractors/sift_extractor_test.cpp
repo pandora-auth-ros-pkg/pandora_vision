@@ -59,6 +59,9 @@ namespace pandora_vision
 
     virtual ~SiftExtractorTest()
     {
+    }
+    virtual void TearDown()
+    {
       delete siftExtractorTestFixture_;
     }
 
