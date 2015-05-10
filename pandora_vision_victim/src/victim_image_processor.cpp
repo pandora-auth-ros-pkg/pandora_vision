@@ -46,7 +46,11 @@ namespace pandora_vision
   {
     params_.configVictim(*this->accessPublicNh());
 
-    // .........
+    _debugVictimsPublisher = image_transport::ImageTransport(
+      *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
+    
+    rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
+    depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
 
     ROS_INFO("[victim_node] : Created Victim Image Processor instance");
   }
@@ -58,14 +62,142 @@ namespace pandora_vision
     ROS_DEBUG("[victim_node] : Destroying Victim Image Processor instance");
   }
   
+  std::vector<VictimPOIPtr> VictimHoleProcessor::detectVictims(
+    const EnhancedImageStampedConstPtr& input)
+  {
+    if (params_.debug_img || params_.debug_img_publisher)
+    {
+      input->getRgbImage().copyTo(debugImage);
+      rgb_svm_keypoints.clear();
+      depth_svm_keypoints.clear();
+      rgb_svm_bounding_boxes.clear();
+      depth_svm_bounding_boxes.clear();
+      rgb_svm_p.clear();
+      depth_svm_p.clear();
+    }
+
+    bool depthEnable;  // NO VALUE??
+
+    std::vector<VictimPOIPtr> final_victims = victimFusion(input, depthEnable);
+
+    //!< Message alert creation
+    for (int i = 0;  i < final_victims.size() ; i++)
+    {
+      //!< Debug purposes
+      if (params_.debug_img || params_.debug_img_publisher)
+      {
+        cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
+        cv::Rect re(final_victims[i]->getPoint(), cv::Size(final_victims[i]->getWidth(), 
+          final_victims[i]->getHeight()));
+        switch (final_victims[i]->getSource())
+        {
+          case RGB_SVM:
+            rgb_svm_keypoints.push_back(kp);
+            rgb_svm_bounding_boxes.push_back(re);
+            rgb_svm_p.push_back(final_victims[i]->getProbability());
+            break;
+          case DEPTH_RGB_SVM:
+            depth_svm_keypoints.push_back(kp);
+            depth_svm_bounding_boxes.push_back(re);
+            depth_svm_p.push_back(final_victims[i]->getProbability());
+            break;
+        }
+      }
+    }
+
+    /// Debug image
+    if (params_.debug_img || params_.debug_img_publisher)
+    {
+      cv::drawKeypoints(debugImage, rgb_svm_keypoints, debugImage,
+        CV_RGB(0, 100, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for (unsigned int i = 0 ; i < rgb_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, rgb_svm_bounding_boxes[i],
+          CV_RGB(0, 100, 255));
+        {
+          std::ostringstream convert;
+          convert << rgb_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            rgb_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+        }
+      }
+
+      cv::drawKeypoints(debugImage, depth_svm_keypoints, debugImage,
+        CV_RGB(0, 255, 255),
+        cv::DrawMatchesFlags::DEFAULT);
+      for (unsigned int i = 0 ; i < depth_svm_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, depth_svm_bounding_boxes[i],
+          CV_RGB(0, 255, 255));
+        {
+          std::ostringstream convert;
+          convert << depth_svm_p[i];
+          cv::putText(debugImage, convert.str().c_str(),
+            depth_svm_keypoints[i].pt,
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+        }
+      }
+
+      {
+        std::ostringstream convert;
+        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+      }
+      {
+        std::ostringstream convert;
+        convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 80),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
+      }
+    }
+    
+    if (params_.debug_img_publisher)
+    {
+      // Convert the image into a message
+      cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+      msgPtr->header = input->getHeader();
+      msgPtr->encoding = sensor_msgs::image_encodings::BGR8;
+      msgPtr->image = debugImage;
+      // Publish the image message
+      _debugVictimsPublisher.publish(*msgPtr->toImageMsg());
+    }
+    
+    if (params_.debug_img)
+    {
+      cv::imshow("Victim Image processor", debugImage);
+      cv::waitKey(30);
+    }
+    return final_victims;
+  }
   
-  // .........
-  
-  
-  
-  /**
-   * @brief
-   **/
+  std::vector<VictimPOIPtr> VictimHoleProcessor::victimFusion(const ImageStampedConstPtr& input, 
+    bool depthEnable)
+  {
+    std::vector<VictimPOIPtr> final_probabilities;
+
+    VictimPOIPtr rgb_svm_probability(new VictimPOI);
+    VictimPOIPtr depth_svm_probability(new VictimPOI);
+
+    //VictimPOIPtr temp(new VictimPOI);
+    
+    rgb_svm_probability->setProbability(rgbSvmValidator_->calculatePredictionProbability(
+      input->getRgbImage()));
+
+    if (depthEnabled)
+    {
+      depth_svm_probability->setProbability(depthSvmValidator_->calculatePredictionProbability(
+        input->getDepthImage()));
+    }
+
+    //......
+  }
+
   bool VictimImageProcessor::process(const ImagesStampedConstPtr& input, 
     const POIsStampedPtr& output)
   {

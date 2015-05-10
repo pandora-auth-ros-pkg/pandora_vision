@@ -41,12 +41,12 @@
 #define PANDORA_VISION_VICTIM_VICTIM_HOLE_PREPROCESSOR_H
 
 #include <string>
-#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 #include "sensor_processor/handler.h"
 #include "sensor_processor/preprocessor.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "pandora_vision_victim/enhanced_image_stamped.h"
-#include "pandora_vision_victim/victim_parameters.h"
 
 namespace pandora_vision
 {
@@ -63,10 +63,6 @@ namespace pandora_vision
       
       virtual bool
         preProcess(const EnhancedImageConstPtr& input, const EnhancedImageStampedPtr& output);
-        
-    private:
-      VictimParameters params_;
-      image_transport::Publisher interpolatedDepthPublisher_;
   };
 }  // namespace pandora_vision
 

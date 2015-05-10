@@ -50,6 +50,10 @@ namespace pandora_vision
     _debugVictimsPublisher = image_transport::ImageTransport(
       *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
     
+    //~ interpolatedDepthPublisher_ = image_transport::ImageTransport(
+      //~ *this->accessProcessorNh()).advertise(
+      //~ params_.interpolatedDepthImg, 1, true);
+
     rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
     depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
     
@@ -103,8 +107,7 @@ namespace pandora_vision
         detectionMode = GOT_HOLES_AND_DEPTH;
         break;
     }
-    for (unsigned int i = 0 ; i < input->getAreas().size();
-      i++)
+    for (unsigned int i = 0 ; i < input->getAreas().size(); i++)
     {
       cv::Rect rect(input->getArea(i).x - input->getArea(i).width / 2,
         input->getArea(i).y - input->getArea(i).height / 2, input->getArea(i).width, 
@@ -230,9 +233,10 @@ namespace pandora_vision
     
     if (params_.debug_img)
     {
-      cv::imshow("Victim Svm processor", debugImage);
+      cv::imshow("Victim Hole processor", debugImage);
       cv::waitKey(30);
     }
+    
     return final_victims;
   }
   
@@ -344,6 +348,17 @@ namespace pandora_vision
         output->pois.push_back(victims[ii]);
       }
     }
+    
+    /// Interpolated depth image publishing
+    // Convert the image into a message
+    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
+
+    msgPtr->header = input->getHeader();
+    msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
+    input->getDepthImage().copyTo(msgPtr->image);
+
+    // Publish the image message
+    //interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
     
     if (output->pois.empty())
     {

@@ -89,6 +89,7 @@ namespace pandora_vision
       VictimParameters params_;
       
       /// Debug purposes
+      image_transport::Publisher interpolatedDepthPublisher_;
       image_transport::Publisher _debugVictimsPublisher;
       cv::Mat debugImage;
       std::vector<cv::KeyPoint> rgb_svm_keypoints;

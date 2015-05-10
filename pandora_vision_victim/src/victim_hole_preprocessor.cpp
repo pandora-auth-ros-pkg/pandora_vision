@@ -44,17 +44,9 @@ namespace pandora_vision
   VictimHolePreProcessor::VictimHolePreProcessor(const std::string& ns, 
     sensor_processor::Handler* handler) :
     sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
-    EnhancedImageStamped>(ns, handler)
-  {
-    params_.configVictim(*this->accessPublicNh());
-    interpolatedDepthPublisher_ = image_transport::ImageTransport(
-      *this->accessProcessorNh()).advertise(
-      params_.interpolatedDepthImg, 1, true);
-  }
+    EnhancedImageStamped>(ns, handler) {}
   
-  VictimHolePreProcessor::~VictimHolePreProcessor()
-  {
-  }
+  VictimHolePreProcessor::~VictimHolePreProcessor() {}
   
   bool VictimHolePreProcessor::preProcess(const EnhancedImageConstPtr& input, 
     const EnhancedImageStampedPtr& output)
@@ -77,17 +69,6 @@ namespace pandora_vision
         input->areasOfInterest[ii].width, input->areasOfInterest[ii].height);
       output->setArea(ii, rect);
     }
-    
-    /// Interpolated depth image publishing
-    // Convert the image into a message
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-    msgPtr->header = input->header;
-    msgPtr->encoding = sensor_msgs::image_encodings::MONO8;
-    depthImage.copyTo(msgPtr->image);
-
-    // Publish the image message
-    interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
     return true;
   }
 }  // namespace pandora_vision
