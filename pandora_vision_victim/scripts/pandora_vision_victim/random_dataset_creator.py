@@ -86,7 +86,7 @@ class RandomDatasetCreator(object):
         self.numPositives = 0
         self.numNegatives = 0
         self.positivesPercentage = 0
-        self.desiredDatasetSize = desiredDatasetSize
+        self.desiredDatasetSize = int(desiredDatasetSize)
 
         self.srcImagePath = srcImagePath
         self.srcAnnotationsPath = srcAnnotationsPath
