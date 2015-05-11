@@ -54,7 +54,8 @@ class RandomDatasetCreator(object):
     """
     def __init__(self, srcImagePath, srcAnnotationsPath,
                  srcAnnotationsFileName, dstImagePath, dstAnnotationsPath,
-                 dstAnnotationsFileName, saveRemainingImages = False):
+                 dstAnnotationsFileName, desiredDatasetSize,
+                 saveRemainingImages = False):
         """ Initialize class member variables.
 
             Parameters
@@ -70,6 +71,7 @@ class RandomDatasetCreator(object):
             dstAnnotationsPath: The absolute path to the new annotations file.
             dstAnnotationsFileName: The name of the new dataset annotations
             file (along with its file extension).
+            desiredDatasetSize: Size of the desired dataset.
             saveRemainingImages: Flag indicating whether the non chosen images
             from the initial dataset will be saved. Default value = False.
         """
@@ -84,7 +86,7 @@ class RandomDatasetCreator(object):
         self.numPositives = 0
         self.numNegatives = 0
         self.positivesPercentage = 0
-        self.desiredDatasetSize = 4907
+        self.desiredDatasetSize = desiredDatasetSize
 
         self.srcImagePath = srcImagePath
         self.srcAnnotationsPath = srcAnnotationsPath
@@ -279,6 +281,8 @@ if __name__ == "__main__":
     dstAnnotationsPath = raw_input("-->")
     print "Type the name of the new annotations file:"
     dstAnnotationsFileName = raw_input("-->")
+    print "Type the desired dataset size"
+    desiredDatasetSize = raw_input("-->")
     print "(Optional) Do you want to save the remaining images?"
     print "If so, press [y]. Every other key will be considered as a no."
     saveRemainingImages = raw_input("-->")
@@ -296,6 +300,7 @@ if __name__ == "__main__":
     randDataset = RandomDatasetCreator(srcImagePath, srcAnnotationsPath,
                                        srcAnnotationsFileName, dstImagePath,
                                        dstAnnotationsPath,
-                                       dstAnnotationsFileName, flag)
+                                       dstAnnotationsFileName,
+                                       desiredDatasetSize, flag)
     randDataset.createDataset()
     print "Process is finished successfully!"
