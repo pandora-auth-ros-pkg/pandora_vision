@@ -284,7 +284,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleFusion::thermalCandidateHolesCallback(
-      const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+      const pandora_vision_msgs::CandidateHolesVectorMsg&
       thermalCandidateHolesVector)
   {
 #ifdef DEBUG_TIME
@@ -298,7 +298,7 @@ namespace pandora_vision
     HolesConveyorUtils::clear(&thermalHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(thermalCandidateHolesVector,
+    MessageConversions::unpackHoleDetectorMessage(thermalCandidateHolesVector,
         &thermalHolesConveyor_,
         &interpolatedThermalImage_,
         sensor_msgs::image_encodings::TYPE_32FC1);
@@ -439,8 +439,6 @@ namespace pandora_vision
           ns + "/hole_fusion_node/subscribed_topics/thermal_candidate_holes_topic",
           thermalCandidateHolesTopic_))
     {
-      // Make the topic's name absolute
-      thermalCandidateHolesTopic_ = ns + "/" + thermalCandidateHolesTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
           "[Hole Fusion Node] Subscribed to the Thermal candidate holes topic");
@@ -979,12 +977,12 @@ namespace pandora_vision
             -1,
             msgs);
 
-      // Holes originated from analysis on the thermal image,
+      // Holes originated from thermal analysis on the depth image,
       // on top of the thermal image
-      cv::Mat thermalHolesOnThermalImage =
+      cv::Mat thermalHolesOnDepthImage =
         Visualization::showHoles(
-            "Holes originated from Thermal analysis, on the Thermal image",
-            interpolatedThermalImage_,
+            "Holes originated from Thermal analysis, on the Depth image",
+            interpolatedDepthImage_,
             thermalHolesConveyor_,
             -1,
             msgs);
@@ -1033,7 +1031,7 @@ namespace pandora_vision
       std::vector<cv::Mat> imgs;
       imgs.push_back(depthHolesOnDepthImage);
       imgs.push_back(depthHolesOnRgbImage);
-      imgs.push_back(thermalHolesOnThermalImage);
+      imgs.push_back(thermalHolesOnDepthImage);
       imgs.push_back(thermalHolesOnRgbImage);
       imgs.push_back(rgbHolesOnRgbImage);
       imgs.push_back(rgbHolesOnDepthImage);

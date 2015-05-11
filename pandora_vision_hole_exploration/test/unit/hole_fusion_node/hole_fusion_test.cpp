@@ -654,16 +654,6 @@ namespace pandora_vision
         1,
         &depthSmallSmallVarSquare );
 
-    // Construct the very small depth variance square area
-    cv::Mat depthSmallSmallVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
-
-    HoleFusionTest::generateNonHomogeneousDepthRectangle( 
-        cv::Point2f ( 200, 200 ),
-        70,
-        70,
-        1,
-        &depthSmallSmallVarSquare );
-
     // Compose the final depthSquares_ image
     depthSquares_ +=
       depthBigVarSquare +
