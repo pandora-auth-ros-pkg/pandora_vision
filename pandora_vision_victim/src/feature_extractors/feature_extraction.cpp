@@ -233,6 +233,8 @@ namespace pandora_vision
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
 
+    std::cout << "Number of annotated images: " << annotatedImages.size()
+              << std::endl;
     std::cout << "Trying to load descriptors from file" << std::endl;
     std::vector<cv::Mat> descriptorsVec;
     const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
@@ -299,6 +301,10 @@ namespace pandora_vision
       }
 
       std::cout << "Saving descriptors to file" << std::endl;
+      std::cout << "Number of annotated images: " << annotatedImageNames.size()
+                << std::endl;
+      std::cout << "Number of descriptors: " << getBagOfWordsDescriptors().size()
+                << std::endl;
       file_utilities::saveDataToFile(descriptorsFilePath, annotatedImageNames,
           getBagOfWordsDescriptors());
     }

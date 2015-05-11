@@ -144,6 +144,7 @@ namespace pandora_vision
         constructFeaturesMatrix(trainingDirectory, trainingAnnotationsFilePath,
             &trainingFeaturesMat, &trainingLabelsMat);
 
+        std::cout << "Normalize features" << std::endl;
         normalizeFeaturesAndSaveNormalizationParameters(&trainingFeaturesMat);
 
         trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
@@ -155,6 +156,7 @@ namespace pandora_vision
 
         if (vocabularyNeeded)
         {
+          std::cout << "Save bag of words vocabulary" << std::endl;
           const std::string bagOfWordsFile = imageType_ + "bag_of_words.xml";
           const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
           file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
