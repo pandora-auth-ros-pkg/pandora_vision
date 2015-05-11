@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""Provides functionalities to create a random subset of an already existing
+dataset.
+"""
+import os
+import shutil
+import random
+
+from collections import defaultdict
+
 # Software License Agreement
 __version__ = "0.0.1"
 __status__ = "Production"
@@ -36,38 +45,38 @@ __author__ = "Kofinas Miltiadis"
 __maintainer__ = "Kofinas Miltiadis"
 __email__ = "mkofinas@gmail.com"
 
-import os
-import shutil
-import random
 
-from collections import defaultdict
-
-
-class RandomDatasetCreator:
+class RandomDatasetCreator(object):
     """ This class is used to create a random sub-set of an already existing
         dataset. The original dataset contains class labeled images for a
         two-class classification problem. The sub-set chosen has about the same
         percentage of positive and negative images as the original one.
-
-        Parameters
-        ----------
-        srcImagePath: The absolute path to the initial dataset, i.e. the path
-        to the folder containing the initial dataset images.
-        srcAnnotationsPath: The absolute path to the initial annotations file.
-        srcAnnotationsFileName: The name of the initial annotations file (along
-        with its file extension).
-        dstImagePath: The absolute path to the new dataset, i.e. the path to
-        the folder that will contain the new dataset images.
-        dstAnnotationsPath: The absolute path to the new annotations file.
-        dstAnnotationsFileName: The name of the new dataset annotations file
-        (along with its file extension).
     """
     def __init__(self, srcImagePath, srcAnnotationsPath,
                  srcAnnotationsFileName, dstImagePath, dstAnnotationsPath,
-                 dstAnnotationsFileName):
-        """Initialize class member variables."""
+                 dstAnnotationsFileName, saveRemainingImages = False):
+        """ Initialize class member variables.
+
+            Parameters
+            ----------
+            srcImagePath: The absolute path to the initial dataset, i.e. the
+            path to the folder containing the initial dataset images.
+            srcAnnotationsPath: The absolute path to the initial annotations
+            file.
+            srcAnnotationsFileName: The name of the initial annotations file
+            (along with its file extension).
+            dstImagePath: The absolute path to the new dataset, i.e. the path
+            to the folder that will contain the new dataset images.
+            dstAnnotationsPath: The absolute path to the new annotations file.
+            dstAnnotationsFileName: The name of the new dataset annotations
+            file (along with its file extension).
+            saveRemainingImages: Flag indicating whether the non chosen images
+            from the initial dataset will be saved. Default value = False.
+        """
+
         self.annotationsDict = defaultdict(list)
         self.newAnnotationsDict = defaultdict(list)
+        self.remainingAnnotationsDict = defaultdict(list)
         self.positiveImageNames = []
         self.negativeImageNames = []
         self.newPositiveImageNames = []
@@ -75,7 +84,7 @@ class RandomDatasetCreator:
         self.numPositives = 0
         self.numNegatives = 0
         self.positivesPercentage = 0
-        self.desiredDatasetSize = 1000
+        self.desiredDatasetSize = 4907
 
         self.srcImagePath = srcImagePath
         self.srcAnnotationsPath = srcAnnotationsPath
@@ -83,6 +92,7 @@ class RandomDatasetCreator:
         self.dstImagePath = dstImagePath
         self.dstAnnotationsPath = dstAnnotationsPath
         self.dstAnnotationsFileName = dstAnnotationsFileName
+        self.saveRemainingImages = saveRemainingImages
 
     def readAnnotationsFile(self):
         """ This function reads a file containing the class attributes for each
@@ -165,6 +175,27 @@ class RandomDatasetCreator:
             annotationsFile.write("\n")
         annotationsFile.close()
 
+        if (self.saveRemainingImages):
+            remainingFileName = "remaining_" + self.dstAnnotationsFileName
+            annotationsFile = open(os.path.join(self.dstAnnotationsPath,
+                                   remainingFileName), "w")
+
+            # Save new annotations in file.
+            for (frameName, dictValues) in self.remainingAnnotationsDict.iteritems():
+                annotationsFile.write(frameName)
+                annotationsFile.write(",")
+                annotationsFile.write(str(dictValues[0][0][0]))
+                annotationsFile.write(",")
+                annotationsFile.write(str(dictValues[0][0][1]))
+                annotationsFile.write(",")
+                annotationsFile.write(str(dictValues[0][0][2]))
+                annotationsFile.write(",")
+                annotationsFile.write(str(dictValues[0][0][3]))
+                annotationsFile.write(",")
+                annotationsFile.write(str(dictValues[0][0][4]))
+                annotationsFile.write("\n")
+            annotationsFile.close()
+
     def chooseRandomSubset(self):
         """ This function creates a random sub-set of the original dataset,
             with the same percentage of positive and negative images as the
@@ -189,6 +220,9 @@ class RandomDatasetCreator:
             if (annotatorKey in self.newPositiveImageNames or
                     annotatorKey in self.newNegativeImageNames):
                 self.newAnnotationsDict[annotatorKey].append(annotatorValues)
+            elif self.saveRemainingImages:
+                self.remainingAnnotationsDict[annotatorKey].append(
+                        annotatorValues)
 
     def copyDatasetImages(self):
         """ This function copies the randomly chosen dataset images to a
@@ -216,6 +250,10 @@ class RandomDatasetCreator:
 
                 shutil.copyfile(os.path.join(self.srcImagePath, fileName),
                                 os.path.join(self.dstImagePath, fileName))
+            elif self.saveRemainingImages:
+                shutil.copyfile(os.path.join(self.srcImagePath, fileName),
+                                os.path.join(self.dstImagePath, "Remaining/",
+                                             fileName))
 
     def createDataset(self):
         """ This function creates a random dataset that is a subset of another
@@ -241,9 +279,23 @@ if __name__ == "__main__":
     dstAnnotationsPath = raw_input("-->")
     print "Type the name of the new annotations file:"
     dstAnnotationsFileName = raw_input("-->")
+    print "(Optional) Do you want to save the remaining images?"
+    print "If so, press [y]. Every other key will be considered as a no."
+    saveRemainingImages = raw_input("-->")
+    if saveRemainingImages == "y":
+        print "The remaining images will be stored in a folder named "\
+               "'Remaining' inside the new dataset folder. The annotations "\
+               "file for the remaining images will be stored in the same "\
+               "directory as the new annotations file and its name will have "\
+               "the prefix 'remaining_'."
+        flag = True
+    else:
+        print "Very well. The remaining images won't be stored."
+        flag = False
 
     randDataset = RandomDatasetCreator(srcImagePath, srcAnnotationsPath,
                                        srcAnnotationsFileName, dstImagePath,
                                        dstAnnotationsPath,
-                                       dstAnnotationsFileName)
+                                       dstAnnotationsFileName, flag)
     randDataset.createDataset()
+    print "Process is finished successfully!"
