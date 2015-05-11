@@ -48,22 +48,22 @@ namespace pandora_vision
 
     _debugVictimsPublisher = image_transport::ImageTransport(
       *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
-    
+
     rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
     depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
 
     ROS_INFO("[victim_node] : Created Victim Image Processor instance");
   }
-  
+
   VictimImageProcessor::VictimImageProcessor() : VisionProcessor() {}
-  
+
   VictimImageProcessor::~VictimImageProcessor()
   {
     ROS_DEBUG("[victim_node] : Destroying Victim Image Processor instance");
   }
-  
+
   std::vector<VictimPOIPtr> VictimHoleProcessor::detectVictims(
-    const EnhancedImageStampedConstPtr& input)
+    const ImageStampedConstPtr& input)
   {
     if (params_.debug_img || params_.debug_img_publisher)
     {
@@ -83,24 +83,31 @@ namespace pandora_vision
     //!< Message alert creation
     for (int i = 0;  i < final_victims.size() ; i++)
     {
-      //!< Debug purposes
-      if (params_.debug_img || params_.debug_img_publisher)
+      if (final_victims[i]->getClassLabel() == 1)
       {
-        cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
-        cv::Rect re(final_victims[i]->getPoint(), cv::Size(final_victims[i]->getWidth(), 
-          final_victims[i]->getHeight()));
-        switch (final_victims[i]->getSource())
+        //!< Debug purposes
+        if (params_.debug_img || params_.debug_img_publisher)
         {
-          case RGB_SVM:
-            rgb_svm_keypoints.push_back(kp);
-            rgb_svm_bounding_boxes.push_back(re);
-            rgb_svm_p.push_back(final_victims[i]->getProbability());
-            break;
-          case DEPTH_RGB_SVM:
-            depth_svm_keypoints.push_back(kp);
-            depth_svm_bounding_boxes.push_back(re);
-            depth_svm_p.push_back(final_victims[i]->getProbability());
-            break;
+          cv::Point victimPOI = final_victims[i]->getPoint();
+          victimPOI.x -= final_victims[i]->getWidth() / 2;
+          victimPOI.y -= final_victims[i]->getHeight() / 2;
+          cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
+          cv::Rect re(victimPOI, cv::Size(final_victims[i]->getWidth(), 
+            final_victims[i]->getHeight()));
+
+          switch (final_victims[i]->getSource())
+          {
+            case RGB_SVM:
+              rgb_svm_keypoints.push_back(kp);
+              rgb_svm_bounding_boxes.push_back(re);
+              rgb_svm_p.push_back(final_victims[i]->getProbability());
+              break;
+            case DEPTH_RGB_SVM:
+              depth_svm_keypoints.push_back(kp);
+              depth_svm_bounding_boxes.push_back(re);
+              depth_svm_p.push_back(final_victims[i]->getProbability());
+              break;
+          }
         }
       }
     }
@@ -155,7 +162,7 @@ namespace pandora_vision
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
       }
     }
-    
+
     if (params_.debug_img_publisher)
     {
       // Convert the image into a message
@@ -167,7 +174,7 @@ namespace pandora_vision
       // Publish the image message
       _debugVictimsPublisher.publish(*msgPtr->toImageMsg());
     }
-    
+
     if (params_.debug_img)
     {
       cv::imshow("Victim Image processor", debugImage);
@@ -175,27 +182,43 @@ namespace pandora_vision
     }
     return final_victims;
   }
-  
+
   std::vector<VictimPOIPtr> VictimHoleProcessor::victimFusion(const ImageStampedConstPtr& input, 
     bool depthEnable)
   {
-    std::vector<VictimPOIPtr> final_probabilities;
+    VictimPOIPtr finalProbability;
 
-    VictimPOIPtr rgb_svm_probability(new VictimPOI);
-    VictimPOIPtr depth_svm_probability(new VictimPOI);
+    VictimPOIPtr rgbSvmProbability(new VictimPOI);
+    VictimPOIPtr depthSvmProbability(new VictimPOI);
 
     //VictimPOIPtr temp(new VictimPOI);
-    
-    rgb_svm_probability->setProbability(rgbSvmValidator_->calculatePredictionProbability(
-      input->getRgbImage()));
+    float probability, classLabel;
+
+    rgbSvmProbability->setProbability(rgbSvmValidator_->calculatePredictionProbability(
+      input->getRgbImage(), &classLabel, &probability));
+    rgbSvmProbability->setProbability(probability);
+    rgbSvmProbability->setClassLabel(classLabel);
+    rgbSvmProbability->setPoint();  // center of frame???
+    rgbSvmProbability->setSource(RGB_SVM);
 
     if (depthEnabled)
     {
-      depth_svm_probability->setProbability(depthSvmValidator_->calculatePredictionProbability(
-        input->getDepthImage()));
+      depthSvmProbability->setProbability(depthSvmValidator_->calculatePredictionProbability(
+        input->getDepthImage(), &classLabel, &probability));
+      depthSvmProbability->setProbability(probability);
+      depthSvmProbability->setClassLabel(classLabel);
+      depthSvmProbability->setPoint();  // center of frame???
+      depthSvmProbability->setSource(DEPTH_RGB_SVM);
     }
 
+    finalProbability->setProbability((
+      params_.depth_svm_weight * depth_svm_probability->getProbability() +
+      params_.rgb_svm_weight * rgb_svm_probability->getProbability()) /
+      (params_.depth_svm_weight + params_.rgb_svm_weight));
+
     //......
+    
+    return finalProbability;  // vector??
   }
 
   bool VictimImageProcessor::process(const ImagesStampedConstPtr& input, 
@@ -204,17 +227,21 @@ namespace pandora_vision
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;
     output->frameHeight = input->getRgbImage().rows;
-    
+
     std::vector<VictimPOIPtr> victims = detectVictims(input);
-    
+
     for (int ii = 0; ii < victims.size(); ii++)
     {
+      if (ii == 0)
+      {
+        output->pois.clear();
+      }
       if (victims[ii]->getProbability() > 0.0001)
       {
-        output->pois[ii] = victims[ii];
+        output->pois.push_back(victims[ii]);
       }
     }
-    
+
     if (output->pois.empty())
     {
       return false;

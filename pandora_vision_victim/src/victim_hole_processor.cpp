@@ -46,28 +46,28 @@ namespace pandora_vision
       POIsStamped>(ns, handler)
   {
     params_.configVictim(*this->accessPublicNh());
-    
+
     _debugVictimsPublisher = image_transport::ImageTransport(
       *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
-    
-    //~ interpolatedDepthPublisher_ = image_transport::ImageTransport(
-      //~ *this->accessProcessorNh()).advertise(
-      //~ params_.interpolatedDepthImg, 1, true);
+
+    interpolatedDepthPublisher_ = image_transport::ImageTransport(
+      *this->accessProcessorNh()).advertise(
+      params_.interpolatedDepthImg, 1, true);
 
     rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
     depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
-    
+
     ROS_INFO("[victim_node] : Created Victim Hole Processor instance");
   }
-  
+
   VictimHoleProcessor::VictimHoleProcessor() : sensor_processor::Processor<EnhancedImageStamped, 
     POIsStamped>() {}
-  
+
   VictimHoleProcessor::~VictimHoleProcessor()
   {
     ROS_DEBUG("[victim_node] : Destroying Victim Hole Processor instance");
   }
-  
+
   /**
   @brief This method check in which state we are, according to
   the information sent from hole_detector_node
@@ -134,17 +134,18 @@ namespace pandora_vision
     //!< Message alert creation
     for (int i = 0;  i < final_victims.size() ; i++)
     {
-      if(final_victims[i]->getClassLabel() == 1)
+      if (final_victims[i]->getClassLabel() == 1)
       {
         //!< Debug purposes
         if (params_.debug_img || params_.debug_img_publisher)
         {
           cv::Point victimPOI = final_victims[i]->getPoint();
-          victimPOI.x -= final_victims[i]->getWidth()/2;
-          victimPOI.y -= final_victims[i]->getHeight()/2;
+          victimPOI.x -= final_victims[i]->getWidth() / 2;
+          victimPOI.y -= final_victims[i]->getHeight() / 2;
           cv::KeyPoint kp(final_victims[i]->getPoint(), 10);
           cv::Rect re(victimPOI, cv::Size(final_victims[i]->getWidth(), 
             final_victims[i]->getHeight()));
+
           switch (final_victims[i]->getSource())
           {
             case RGB_SVM:
@@ -161,7 +162,6 @@ namespace pandora_vision
         }
       }
     }
-
 
     /// Debug image
     if (params_.debug_img || params_.debug_img_publisher)
@@ -344,9 +344,9 @@ namespace pandora_vision
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;
     output->frameHeight = input->getRgbImage().rows;
-    
+
     std::vector<VictimPOIPtr> victims = detectVictims(input);
-    
+
     for (int ii = 0; ii < victims.size(); ii++)
     {
       if (ii == 0)
@@ -358,7 +358,7 @@ namespace pandora_vision
         output->pois.push_back(victims[ii]);
       }
     }
-    
+
     /// Interpolated depth image publishing
     // Convert the image into a message
     cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
@@ -369,7 +369,7 @@ namespace pandora_vision
 
     // Publish the image message
     //interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
-    
+
     if (output->pois.empty())
     {
       return false;
