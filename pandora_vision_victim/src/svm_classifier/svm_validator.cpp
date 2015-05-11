@@ -120,7 +120,8 @@ namespace pandora_vision
   {
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
-    transpose(featuresMat, featuresMat);
+    if(featuresMat.cols == 1)
+      transpose(featuresMat, featuresMat);
     /// Normalize the data
     ROS_INFO("Normalize features");
     if (typeOfNormalization_ == 1)

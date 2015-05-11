@@ -1055,8 +1055,8 @@ namespace pandora_vision
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
 
     // The validation process
-    Parameters::HoleFusion::Validation::validation_process =
-      config.validation_process;
+    Parameters::HoleFusion::Validation::validation_process = 1;
+      //config.validation_process;
 
 
     // When depth analysis is applicable

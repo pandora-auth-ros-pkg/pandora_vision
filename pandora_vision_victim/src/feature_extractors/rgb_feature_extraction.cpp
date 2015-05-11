@@ -85,7 +85,7 @@ namespace pandora_vision
     std::string viewDescriptor = fs["visualization"];
     visualization_ = viewDescriptor.compare("true") == 0; 
 
-    int dictionarySize = static_cast<int>(fs["dictionary_size"]);
+    dictionarySize_ = static_cast<int>(fs["dictionary_size"]);
 
     fs.release();
 
@@ -108,7 +108,7 @@ namespace pandora_vision
 
       std::string descriptorMatcherType = "FlannBased";
       bowTrainerPtr_.reset(new BagOfWordsTrainer(featureDetectorType,
-          descriptorExtractorType, descriptorMatcherType, dictionarySize));
+          descriptorExtractorType, descriptorMatcherType, dictionarySize_));
     }
     if (chosenFeatureTypesMap_["hog"] == true)
     {
@@ -182,12 +182,18 @@ namespace pandora_vision
       /// Extract SIFT features from RGB image
       cv::Mat siftDescriptors;
       bowTrainerPtr_->createBowRepresentation(inImage, &siftDescriptors);
-
       if (visualization_)
         bowTrainerPtr_->plotDescriptor(siftDescriptors);
       /// Append SIFT features to RGB feature vector.
       for (int ii = 0; ii < siftDescriptors.cols; ii++)
         featureVector_.push_back(siftDescriptors.at<float>(ii));
+      if (siftDescriptors.cols == 0)
+      {
+        for (int ii = 0; ii < dictionarySize_; ii++)
+        {
+          featureVector_.push_back(0.0);
+        }
+      }
     }
     if (chosenFeatureTypesMap_["hog"] == true)
     {

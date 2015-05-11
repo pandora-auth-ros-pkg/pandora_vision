@@ -160,6 +160,9 @@ namespace pandora_vision
       /// Flag for displaying the calculated descriptors.
       bool visualization_;
 
+      /// Dictionary size used for bag of words model.
+      int dictionarySize_;
+
       /// String containing the package path.
       std::string packagePath_;
 
