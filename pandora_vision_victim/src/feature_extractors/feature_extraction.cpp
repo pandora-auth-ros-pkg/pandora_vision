@@ -165,45 +165,8 @@ namespace pandora_vision
     }
     else
     {
-      std::cout << "Find class attributes from image names." << std::endl;
-      int rowIndex = 0;
-      for (boost::filesystem::recursive_directory_iterator iter(directory);
-           iter != boost::filesystem::recursive_directory_iterator();
-           iter++)
-      {
-        if (is_directory(iter->status()))
-          continue;
-        std::string imageAbsolutePath = iter->path().string();
-        std::string imageName = iter->path().filename().string();
-        image = cv::imread(imageAbsolutePath);
-        if (!image.data)
-        {
-          std::cout << "Error reading file " << imageName << std::endl;
-          continue;
-        }
-
-        std::string checkIfPositive = "positive";
-        std::string checkIfNegative = "negative";
-        if (boost::algorithm::contains(imageName, checkIfPositive))
-        {
-          labelsMat->at<double>(rowIndex, 0) = 1.0;
-        }
-        else
-        {
-          if (!boost::algorithm::contains(imageName, checkIfNegative))
-            std::cout << "Missing class attribute. Image is considered negative";
-          labelsMat->at<double>(rowIndex, 0) = -1.0;
-        }
-        extractFeatures(image);
-
-        std::cout << "Feature vector of image " << imageName
-                  << ": Size = " << featureVector_.size() << std::endl;
-
-        for (int jj = 0; jj < featureVector_.size(); jj++)
-          featuresMat->at<double>(rowIndex, jj) = featureVector_[jj];
-
-        rowIndex += 1;
-      }
+      std::cout << "Unsuccessful annotations file load. Exiting!";
+      exit(1);
     }
   }
 
@@ -233,24 +196,28 @@ namespace pandora_vision
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
 
-    std::cout << "Number of annotated images: " << annotatedImages.size()
-              << std::endl;
-    std::cout << "Trying to load descriptors from file" << std::endl;
-    std::vector<cv::Mat> descriptorsVec;
-    const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
-    const std::string descriptorsFilePath = packagePath_ + "/data/" + descriptorsFile;
-
-    std::vector<std::string> annotatedImageNames;
-    for (int jj = 0; jj < annotatedImages.size(); jj++)
+    if (loadDescriptors_)
     {
-      int lastIndex = annotatedImages[jj].find_last_of(".");
-      std::string rawName = annotatedImages[jj].substr(0, lastIndex);
-      annotatedImageNames.push_back(rawName);
-    }
-    bool descriptorsAvailable = file_utilities::loadDescriptorsFromFile(
-        descriptorsFilePath, annotatedImageNames, &descriptorsVec);
+      std::cout << "Number of annotated images: " << annotatedImages.size()
+                << std::endl;
+      std::cout << "Trying to load descriptors from file" << std::endl;
+      std::vector<cv::Mat> descriptorsVec;
+      const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
+      const std::string descriptorsFilePath = packagePath_ + "/data/" +
+                                              descriptorsFile;
 
-    if (descriptorsAvailable)
+      std::vector<std::string> annotatedImageNames;
+      for (int jj = 0; jj < annotatedImages.size(); jj++)
+      {
+        int lastIndex = annotatedImages[jj].find_last_of(".");
+        std::string rawName = annotatedImages[jj].substr(0, lastIndex);
+        annotatedImageNames.push_back(rawName);
+      }
+      bool descriptorsAvailable = file_utilities::loadDescriptorsFromFile(
+          descriptorsFilePath, annotatedImageNames, &descriptorsVec);
+    }
+
+    if (loadDescriptors_ && descriptorsAvailable)
     {
       std::cout << "Load descriptors to create vocabulary" << std::endl;
       addDescriptorsToBagOfWords(descriptorsVec);
@@ -277,36 +244,23 @@ namespace pandora_vision
       }
       else
       {
-        std::cout << "Find descriptors from whole images." << std::endl;
-        int rowIndex = 0;
-        for (boost::filesystem::recursive_directory_iterator iter(directory);
-             iter != boost::filesystem::recursive_directory_iterator();
-             iter++)
-        {
-          if (is_directory(iter->status()))
-            continue;
-          std::string imageAbsolutePath = iter->path().string();
-          std::string imageName = iter->path().filename().string();
-          std::cout << "Processing file " << imageName << std::endl;
-          image = cv::imread(imageAbsolutePath);
-          if (!image.data)
-          {
-            std::cout << "Error reading file " << imageName << std::endl;
-            continue;
-          }
-          addDescriptorsToBagOfWords(image);
-
-          rowIndex += 1;
-        }
+        std::cout << "Unsuccessful annotations file load for bag of words " <<
+                  << "vocabulary. Exiting!" std::endl;
+        exit(1);
       }
 
-      std::cout << "Saving descriptors to file" << std::endl;
-      std::cout << "Number of annotated images: " << annotatedImageNames.size()
-                << std::endl;
-      std::cout << "Number of descriptors: " << getBagOfWordsDescriptors().size()
-                << std::endl;
-      file_utilities::saveDataToFile(descriptorsFilePath, annotatedImageNames,
-          getBagOfWordsDescriptors());
+      if (saveDescriptors_)
+      {
+        std::cout << "Saving descriptors to file" << std::endl;
+        std::cout << "Number of annotated images: "
+                  << annotatedImageNames.size()
+                  << std::endl;
+        std::cout << "Number of descriptors: "
+                  << getBagOfWordsDescriptors().size()
+                  << std::endl;
+        file_utilities::saveDataToFile(descriptorsFilePath, annotatedImageNames,
+            getBagOfWordsDescriptors());
+      }
     }
 
     std::cout << "Creating visual Vocabulary" << std::endl;

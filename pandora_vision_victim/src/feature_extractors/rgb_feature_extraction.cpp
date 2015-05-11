@@ -80,10 +80,16 @@ namespace pandora_vision
     bool extractSiftFeatures = siftFeatures.compare("true") == 0;
     bool extractHogFeatures = hogFeatures.compare("true") == 0;
     bool extractColorHistogramFeatures =
-      histogramFeatures.compare("true") == 0; 
+      histogramFeatures.compare("true") == 0;
 
     std::string viewDescriptor = fs["visualization"];
-    visualization_ = viewDescriptor.compare("true") == 0; 
+    visualization_ = viewDescriptor.compare("true") == 0;
+
+    std::string saveDescriptors = fs["save_descriptors"];
+    saveDescriptors_ = saveDescriptors.compare("true") == 0;
+
+    std::string loadDescriptors = fs["load_descriptors"];
+    loadDescriptors_ = loadDescriptors.compare("true") == 0;
 
     dictionarySize_ = static_cast<int>(fs["dictionary_size"]);
 

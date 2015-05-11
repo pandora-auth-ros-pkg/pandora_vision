@@ -6,6 +6,9 @@ extract_sift_features: false
 extract_hog_features: false
 
 dictionary_size: 10
+visualization: false
+save_descriptors: false
+load_descriptors: false
 
 training_set_feature_extraction: true
 test_set_feature_extraction: true

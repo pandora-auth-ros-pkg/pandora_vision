@@ -160,6 +160,12 @@ namespace pandora_vision
       /// Flag for displaying the calculated descriptors.
       bool visualization_;
 
+      /// Flag indicating whether the image descriptors should be saved or not.
+      bool saveDescriptors_;
+
+      /// Flag indicating whether the image descriptors should be loaded or not.
+      bool loadDescriptors_;
+
       /// Dictionary size used for bag of words model.
       int dictionarySize_;
 
