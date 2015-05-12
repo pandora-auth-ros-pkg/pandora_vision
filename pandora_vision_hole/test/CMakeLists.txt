@@ -181,12 +181,14 @@ target_link_libraries(rgb_filters_test
 ############## Functional Tests ###############
 
 if(${PROJECT_NAME}_functional)
-  catkin_download_test_data(
-    ${PROJECT_NAME}_hole_detector_test
+
+  download_data(
+    ${PROJECT_NAME}_hole_detector_test.bag
     http://downloads.pandora.ee.auth.gr/bags/hole_detector_test.bag
     DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/test/functional
     MD5 1844a18c09ee3f7b5725bb788fa43ac1
     )
+
   add_rostest(functional/hole_detector_test.launch
-    DEPENDENCIES ${PROJECT_NAME}_hole_detector_test)
+    DEPENDENCIES ${PROJECT_NAME}_hole_detector_test.bag)
 endif()
