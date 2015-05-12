@@ -25,13 +25,15 @@ ${catkin_INCLUDE_DIRS})
 #                               Functional Tests                               #
 ################################################################################
 
-#~ download_extra_data(
-  #~ ${PROJECT_NAME}_landoltc_test_images
-  #~ EXTRA_FILES test/functional/images/extra_files.yaml
-#~ )
-#~ add_dependencies(${PROJECT_NAME}_landoltc_test_images tests)
-#~ 
-#~ add_rostest(functional/landoltc_test.launch)
+if(${PROJECT_NAME}_functional)
+  download_extra_data(
+    ${PROJECT_NAME}_landoltc_test_images
+    EXTRA_FILES test/functional/images/extra_files.yaml
+    )
+  add_dependencies(${PROJECT_NAME}_landoltc_test_images tests)
+
+  add_rostest(functional/landoltc_test.launch)
+endif()
 
 ################################################################################
 #                               Benchmark Tests                                #
