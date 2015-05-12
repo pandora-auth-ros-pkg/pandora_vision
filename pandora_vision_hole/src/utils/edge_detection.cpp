@@ -445,10 +445,6 @@ namespace pandora_vision
     corresponds to the input image
     @return void
    **/
-
-
-
-
   void EdgeDetection::computeThermalEdges(const cv::Mat& inImage, cv::Mat* edges)
   {
     if (inImage.type() != CV_8UC1)
