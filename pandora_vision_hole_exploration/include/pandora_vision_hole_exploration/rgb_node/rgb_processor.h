@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,10 @@
  * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#ifndef RGB_NODE_RGB_H
-#define RGB_NODE_RGB_H
+#ifndef RGB_NODE_RGB_PROCESSOR_H
+#define RGB_NODE_RGB_PROCESSOR_H
 
-#include "pandora_vision_msgs/ExplorerCandidateHolesVectorMsg.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
 #include "utils/haralickfeature_extractor.h"
@@ -52,72 +52,19 @@
 namespace pandora_vision
 {
   /**
-    @class Rgb
+    @class RgbProcessor
     @brief Provides functionalities for locating holes via
     analysis of a RGB image
    **/
-  class Rgb
+  class RgbProcessor : public VisionProcessor
   {
-    private:
-
-      // The NodeHandle
-      ros::NodeHandle nodeHandle_;
-
-      // The ROS subscriber for acquisition of the RGB image through the
-      // depth sensor
-      ros::Subscriber rgbImageSubscriber_;
-
-      // The name of the topic where the rgb image is acquired from
-      std::string rgbImageTopic_;
-
-      // The ROS publisher ofcandidate holes
-      ros::Publisher candidateHolesPublisher_;
-
-      // The name of the topic where the candidate holes that the rgb node
-      // locates are published to
-      std::string candidateHolesTopic_;
-
-      // The dynamic reconfigure (RGB) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig> server;
-
-      // The dynamic reconfigure (RGB) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig>::CallbackType f;
-
-      /**
-        @brief Callback for the rgb image received by the synchronizer node.
-
-        The rgb image message received by the synchronizer node is unpacked
-        in a cv::Mat image. Holes are then located inside this image and
-        information about them, along with the rgb image, is then sent to the
-        hole fusion node
-        @param msg [const sensor_msgs::Image&] The rgb image message
-        @return void
-       **/
-      void inputRgbImageCallback(const sensor_msgs::Image& inImage);
-
-      /**
-        @brief Acquires topics' names needed to be subscribed to and advertise
-        to by the rgb node
-        @param void
-        @return void
-       **/
-      void getTopicNames();
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-          const pandora_vision_hole_exploration::rgb_cfgConfig& config,
-          const uint32_t& level);
-
-
     public:
+      // The constructors
+      RgbProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      RgbProcessor();
 
-      // The constructor
-      Rgb();
+      // The destructor
+      virtual ~RgbProcessor();
 
       /**
         @brief The function called to extract holes from RGB image
@@ -187,12 +134,28 @@ namespace pandora_vision
           const std::vector<cv::Rect>& boundRect, 
           int ci, 
           std::vector<bool>* realContours);
+    
+    protected:
+      virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
+    
+    private:
+      // The dynamic reconfigure (RGB) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig> server;
 
-      // The destructor
-      ~Rgb();
+      // The dynamic reconfigure (RGB) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig>::CallbackType f;
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
+        @param[in] level [const uint32_t]
+        @return void
+       **/
+      void parametersCallback(
+          const pandora_vision_hole_exploration::rgb_cfgConfig& config,
+          const uint32_t& level);
   };
 
-} //namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // RGB_NODE_RGB_H
-
+#endif  // RGB_NODE_RGB_PROCESSOR_H

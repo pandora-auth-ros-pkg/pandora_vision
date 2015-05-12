@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
  * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "rgb_node/rgb.h"
+#include "rgb_node/rgb_processor.h"
 
 /**
   @namespace pandora_vision
@@ -46,36 +46,26 @@ namespace pandora_vision
   /**
     @brief Constructor
    **/
-  Rgb::Rgb()
+  RgbProcessor::RgbProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionProcessor(ns, handler)
   {
-    // Acquire the names of topics which the rgb node will be having
-    // transactionary affairs with
-    getTopicNames();
-
-    // Subscribe to the RGB image published by the
-    // rgb_depth_synchronizer node
-    rgbImageSubscriber_= nodeHandle_.subscribe( rgbImageTopic_, 1,
-        &Rgb::inputRgbImageCallback, this);
-
-    // Advertise the candidate holes found by the rgb node
-    candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::ExplorerCandidateHolesVectorMsg>(
-          candidateHolesTopic_, 1000);
+    ROS_INFO_STREAM("["+this->getName()+"] processor nh processor : "+
+        this->accessProcessorNh()->getNamespace());
 
     // The dynamic reconfigure (RGB) parameter's callback
     server.setCallback(boost::bind(&Rgb::parametersCallback, this, _1, _2));
-
-    ROS_INFO_NAMED(PKG_NAME, "[RGB node] Initiated");
   }
 
+
+  RgbProcessor::RgbProcessor() : VisionProcessor() {}
 
 
   /**
     @brief Destructor
    **/
-  Rgb::~Rgb()
+  RgbProcessor::~RgbProcessor()
   {
-    ROS_INFO_NAMED(PKG_NAME, "[RGB node] Terminated");
+    ROS_INFO_NAMED(PKG_NAME, "[Rgb Processor] Terminated");
   }
 
 
@@ -90,7 +80,7 @@ namespace pandora_vision
     @param msg [const sensor_msgs::Image&] The rgb image message
     @return void
    **/
-  void Rgb::inputRgbImageCallback(const sensor_msgs::Image& msg)
+  void RgbProcessor::inputRgbImageCallback(const sensor_msgs::Image& msg)
   {
     ROS_INFO_NAMED(PKG_NAME, "RGB node callback");
 
@@ -142,67 +132,16 @@ namespace pandora_vision
 
 
   /**
-    @brief Acquires topics' names needed to be subscribed to and advertise
-    to by the rgb node
-    @param void
-    @return void
-   **/
-  void Rgb::getTopicNames()
-  {
-    // The namespace dictated in the launch file
-    std::string ns = nodeHandle_.getNamespace();
-
-    // Read the name of the topic from where the rgb node acquires the
-    // rgb image and store it in a private member variable
-    if (nodeHandle_.getParam(
-          ns + "/rgb_node/subscribed_topics/rgb_image_topic",
-          rgbImageTopic_))
-    {
-      // Make the topic's name absolute
-      rgbImageTopic_ = ns + "/" + rgbImageTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-          "[RGB Node] Subscribed to the input RGB image");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-          "[RGB Node] Could not find topic rgb_image_topic");
-    }
-
-    // Read the name of the topic to which the rgb node will be publishing
-    // information about the candidate holes found and store it in a private
-    // member variable
-    if (nodeHandle_.getParam(
-          ns + "/rgb_node/published_topics/candidate_holes_topic",
-          candidateHolesTopic_))
-    {
-      // Make the topic's name absolute
-      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-          "[RGB Node] Advertising to the candidate holes topic");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-          "[RGB Node] Could not find topic candidate_holes_topic");
-    }
-  }
-
-
-
-  /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
-  void Rgb::parametersCallback(
+  void RgbProcessor::parametersCallback(
       const pandora_vision_hole_exploration::rgb_cfgConfig& config,
       const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[RGB node] Parameters callback called");
+    ROS_INFO_NAMED(PKG_NAME, "[Rgb Processor] Parameters callback called");
 
     //////////////////// Blob detection - specific parameters //////////////////
 
@@ -464,7 +403,7 @@ namespace pandora_vision
     in CV_8UC3 format
     @return [HolesConveyor] A struct with useful info about each hole.
    **/
-  HolesConveyor Rgb::findHoles(const cv::Mat& rgbImage) 
+  HolesConveyor RgbProcessor::findHoles(const cv::Mat& rgbImage) 
   {
     //#ifdef DEBUG_TIME
     //    Timer::start("findHoles", "inputRgbImageCallback");
@@ -600,7 +539,7 @@ namespace pandora_vision
     @param[in] bigVarianceContours [cv::Mat* bigVarianceContours] The output binary image thresholded based on the variance of the RGB image.
     @return void
    **/
-  void Rgb::computeVarianceImage(const cv::Mat& rgbImage, cv::Mat* bigVarianceContours)
+  void RgbProcessor::computeVarianceImage(const cv::Mat& rgbImage, cv::Mat* bigVarianceContours)
   {
     cv::GaussianBlur(rgbImage, rgbImage, cv::Size(0, 0), Parameters::Rgb::original_image_gaussian_blur);
 
@@ -657,7 +596,7 @@ namespace pandora_vision
     @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
     @return void
    **/
-  void Rgb::detectContours(const cv::Mat& bigVarianceContours, std::vector<std::vector<cv::Point> >* contours)
+  void RgbProcessor::detectContours(const cv::Mat& bigVarianceContours, std::vector<std::vector<cv::Point> >* contours)
   {
     int erodeKernel = Parameters::Rgb::contour_erode_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(erodeKernel, erodeKernel));
@@ -679,7 +618,7 @@ namespace pandora_vision
     @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
     @return void
    **/
-  void Rgb::getContourInfo(
+  void RgbProcessor::getContourInfo(
       const std::vector<std::vector<cv::Point> >& contours, 
       std::vector<cv::Point2f>* mc, 
       std::vector<cv::Rect>* boundRect)
@@ -710,7 +649,7 @@ namespace pandora_vision
     @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
     @return void
    **/
-  void Rgb::validateContours(
+  void RgbProcessor::validateContours(
       const cv::Mat& image, 
       const std::vector<std::vector<cv::Point> >& contours, 
       std::vector<cv::Point2f>* mc, 
@@ -851,7 +790,7 @@ namespace pandora_vision
   }
 
 
-  void Rgb::validateShape(
+  void RgbProcessor::validateShape(
       const cv::Mat& image, 
       const std::vector<std::vector<cv::Point> >& outline, 
       const std::vector<cv::Rect>& boundRect, 
@@ -936,14 +875,57 @@ namespace pandora_vision
 
     float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
 
-    if((boundRect[ci].height / avgPixelsInsideY >= 
+    if ((boundRect[ci].height / avgPixelsInsideY >= 
           Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh 
           || boundRect[ci].width / avgPixelsInsideX >= 
           Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh)
         && (maxIntersectionsX > Parameters::Rgb::max_intersections_thresh
           || maxIntersectionsY > Parameters::Rgb::max_intersections_thresh))
       (*realContours)[ci] = false;
+  }
+  
+  
+  
+  bool RgbProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
+    
+#ifdef DEBUG_TIME
+    Timer::start("rgbProcessor", "", true);
+#endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_rgb_image)
+    {
+      Visualization::show("RGB image", input->getImage(), 1);
+    }
+#endif
+
+    // Locate potential holes in the rgb image
+    HolesConveyor conveyor = findHoles(input->getImage());
+    
+    for (int ii = 0; ii < conveyor.rectangle.size(); ii++)
+    {
+      if (ii = 0)
+      {
+        output->pois.clear();
+      }
+      BBoxPOIPtr bbox(new BBoxPOI);
+
+      bbox->setPoint(conveyor.keypoint[ii]);
+      bbox->setWidth(conveyor.rectangle[ii].width);
+      bbox->setHeight(conveyor.rectangle[ii].height);
+
+      output->pois.push_back(bbox);
+    }
+
+#ifdef DEBUG_TIME
+    Timer::tick("rgbProcessor");
+    Timer::printAllMeansTree();
+#endif
 
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
