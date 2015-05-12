@@ -368,7 +368,7 @@ namespace pandora_vision
     input->getDepthImage().copyTo(msgPtr->image);
 
     // Publish the image message
-    //interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
+    interpolatedDepthPublisher_.publish(*msgPtr->toImageMsg());
 
     if (output->pois.empty())
     {

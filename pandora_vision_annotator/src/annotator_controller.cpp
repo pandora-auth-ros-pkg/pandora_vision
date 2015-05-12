@@ -465,7 +465,7 @@ namespace pandora_vision
     try
     {
       in_msg = cv_bridge::toCvCopy(msg);
-      if(msg->encoding == "8UC1")
+      if(msg->encoding == "8UC1"  || msg->encoding == "mono8" )
       {
         cv::cvtColor(in_msg->image, temp, CV_GRAY2RGB);
       }
