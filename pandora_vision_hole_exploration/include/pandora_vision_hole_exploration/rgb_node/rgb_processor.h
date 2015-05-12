@@ -72,7 +72,7 @@ namespace pandora_vision
         in CV_8UC3 format
         @return [HolesConveyor] A struct with useful info about each hole.
        **/
-      static HolesConveyor findHoles(const cv::Mat& rgbImage);
+      HolesConveyor findHoles(const cv::Mat& rgbImage);
 
       /**
         @brief The function called to calculate the variance in the RGB image, at overlapping windows of specific size.
@@ -81,7 +81,7 @@ namespace pandora_vision
         @param[in] bigVarianceContours [cv::Mat* bigVarianceContours] The output binary image thresholded based on the variance of the RGB image.
         @return void
        **/
-      static void computeVarianceImage(
+      void computeVarianceImage(
           const cv::Mat& rgbImage, 
           cv::Mat* bigVarianceContours);
 
@@ -92,7 +92,7 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
         @return void
        **/
-      static void detectContours(
+      void detectContours(
           const cv::Mat& bigVarianceContours, 
           std::vector<std::vector<cv::Point> >* contours);
 
@@ -103,7 +103,7 @@ namespace pandora_vision
         @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
         @return void
        **/
-      static void getContourInfo(
+      void getContourInfo(
           const std::vector<std::vector<cv::Point> >& contours, 
           std::vector<cv::Point2f>* mc, 
           std::vector<cv::Rect>* boundRect);
@@ -119,7 +119,7 @@ namespace pandora_vision
         @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
         @return void
        **/
-      static void validateContours(
+      void validateContours(
           const cv::Mat& image, 
           const std::vector<std::vector<cv::Point> >& contours, 
           std::vector<cv::Point2f>* mc, std::vector<int>* contourHeight, 
@@ -128,7 +128,7 @@ namespace pandora_vision
           const std::vector<cv::Rect>& boundRect);
 
 
-      static void validateShape(
+      void validateShape(
           const cv::Mat& image, 
           const std::vector<std::vector<cv::Point> >& outline, 
           const std::vector<cv::Rect>& boundRect, 

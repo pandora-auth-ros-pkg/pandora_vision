@@ -19,7 +19,9 @@ project(pandora_vision_hole_exploration)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  pandora_vision_common
   pandora_vision_msgs
+  sensor_processor
   state_manager
   state_manager_msgs
   cv_bridge
@@ -47,7 +49,9 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   CATKIN_DEPENDS
     roscpp
+    pandora_vision_common
     pandora_vision_msgs
+    sensor_processor
     state_manager
     state_manager_msgs
     cv_bridge
