@@ -196,31 +196,32 @@ namespace pandora_vision
     bool successfulFileLoad = file_utilities::loadAnnotationsFromFile(
         annotationsFile, &boundingBox, &annotatedImages, &classAttributes);
 
+    std::cout << "Number of annotated images: " << annotatedImages.size()
+              << std::endl;
+
+    std::vector<cv::Mat> descriptorsVec;
+    const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
+    const std::string descriptorsFilePath = packagePath_ + "/data/" +
+                                            descriptorsFile;
+
+    std::vector<std::string> annotatedImageNames;
+    for (int jj = 0; jj < annotatedImages.size(); jj++)
+    {
+      int lastIndex = annotatedImages[jj].find_last_of(".");
+      std::string rawName = annotatedImages[jj].substr(0, lastIndex);
+      annotatedImageNames.push_back(rawName);
+    }
     if (loadDescriptors_)
     {
-      std::cout << "Number of annotated images: " << annotatedImages.size()
-                << std::endl;
       std::cout << "Trying to load descriptors from file" << std::endl;
-      std::vector<cv::Mat> descriptorsVec;
-      const std::string descriptorsFile = imageType_ + "sift_descriptors.xml";
-      const std::string descriptorsFilePath = packagePath_ + "/data/" +
-                                              descriptorsFile;
-
-      std::vector<std::string> annotatedImageNames;
-      for (int jj = 0; jj < annotatedImages.size(); jj++)
-      {
-        int lastIndex = annotatedImages[jj].find_last_of(".");
-        std::string rawName = annotatedImages[jj].substr(0, lastIndex);
-        annotatedImageNames.push_back(rawName);
-      }
       bool descriptorsAvailable = file_utilities::loadDescriptorsFromFile(
           descriptorsFilePath, annotatedImageNames, &descriptorsVec);
-    }
 
-    if (loadDescriptors_ && descriptorsAvailable)
-    {
-      std::cout << "Load descriptors to create vocabulary" << std::endl;
-      addDescriptorsToBagOfWords(descriptorsVec);
+      if (descriptorsAvailable)
+      {
+        std::cout << "Load descriptors to create vocabulary" << std::endl;
+        addDescriptorsToBagOfWords(descriptorsVec);
+      }
     }
     else
     {
@@ -244,8 +245,8 @@ namespace pandora_vision
       }
       else
       {
-        std::cout << "Unsuccessful annotations file load for bag of words " <<
-                  << "vocabulary. Exiting!" std::endl;
+        std::cout << "Unsuccessful annotations file load for bag of words "
+                  << "vocabulary. Exiting!" << std::endl;
         exit(1);
       }
 
