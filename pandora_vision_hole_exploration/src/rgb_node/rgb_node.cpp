@@ -35,7 +35,7 @@
  * Author: Despoina Paschalidou, Vasilis Bosdelekidis
  *********************************************************************/
 
-#include "rgb_node/rgb.h"
+#include "rgb_node/rgb_handler.h"
 
 /**
   @brief Main function of the face node
@@ -46,7 +46,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "rgb_node");
-  pandora_vision::Rgb rgb;
+  pandora_vision::RgbHandler rgbHandler("pandora_vision_hole_exploration_rgb");
   ros::spin();
   return 0;
 }
