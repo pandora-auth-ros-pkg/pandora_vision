@@ -288,7 +288,7 @@ if __name__ == "__main__":
     print "Would you like to copy the new dataset images? If so, press [y]." \
           "In any other case, a new annotations file will only be created."
     copyNewDatasetImages = raw_input("-->")
-    if copyNewDatasetImages = "y":
+    if copyNewDatasetImages == "y":
         print "Type the absolute path to the new dataset:"
         dstImagePath = raw_input("-->")
     else:
@@ -306,7 +306,7 @@ if __name__ == "__main__":
     print "If so, press [y]. Every other key will be considered as a no."
     saveRemainingImages = raw_input("-->")
     if saveRemainingImages == "y":
-        if copyNewDatasetImages = "y":
+        if copyNewDatasetImages == "y":
             print "The remaining images will be stored in a folder named "\
                     "'Remaining' inside the new dataset folder."
         print "The annotations file for the remaining images will be stored "\
