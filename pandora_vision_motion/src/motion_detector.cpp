@@ -48,6 +48,9 @@ namespace pandora_vision
   MotionDetector::MotionDetector(const std::string& ns, sensor_processor::Handler* handler) :
     VisionProcessor(ns, handler)
   {
+    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
+
     params.configMotion(*this->accessPublicNh());
     setUpMotionDetector();
   }

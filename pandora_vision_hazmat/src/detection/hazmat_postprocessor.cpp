@@ -44,11 +44,11 @@ namespace pandora_vision
   HazmatPostProcessor::HazmatPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
     VisionPostProcessor<pandora_vision_msgs::HazmatAlertVector>(ns, handler)
   {
+    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
   }
 
-  HazmatPostProcessor::~HazmatPostProcessor()
-  {
-  }
+  HazmatPostProcessor::~HazmatPostProcessor() {}
 
   bool HazmatPostProcessor::postProcess(const POIsStampedConstPtr& input, const HazmatAlertVectorPtr& output)
   {

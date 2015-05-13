@@ -43,6 +43,9 @@ namespace pandora_vision
   LandoltCDetector::LandoltCDetector(const std::string& ns, sensor_processor::Handler* handler) :
     VisionProcessor(ns, handler)
   {
+    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
+
     _minDiff = 60;
     _threshold = 90;
     _edges = 0;

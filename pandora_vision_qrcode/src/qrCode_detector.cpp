@@ -44,8 +44,8 @@ namespace pandora_vision
   QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::Handler* handler) :
     VisionProcessor(ns, handler)
   {
-    ROS_INFO_STREAM("["+this->getName()+"] processor nh processor : "+
-        this->accessProcessorNh()->getNamespace());
+    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
     scanner.set_config(zbar::ZBAR_QRCODE, zbar::ZBAR_CFG_ENABLE, 1);
 
