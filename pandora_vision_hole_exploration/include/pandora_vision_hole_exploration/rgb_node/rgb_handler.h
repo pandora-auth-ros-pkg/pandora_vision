@@ -38,12 +38,10 @@
 #ifndef RGB_NODE_RGB_HANDLER_H
 #define RGB_NODE_RGB_HANDLER_H
 
-#define PKG_NAME "hole_exploration"
-
 #include "pandora_vision_common/vision_handler.h"
-#include "pandora_vision_hole_exploration/rgb_node/rgb_preprocessor.h"
-#include "pandora_vision_hole_exploration/rgb_node/rgb_processor.h"
-#include "pandora_vision_hole_exploration/rgb_node/rgb_postprocessor.h"
+#include "rgb_node/rgb_preprocessor.h"
+#include "rgb_node/rgb_processor.h"
+#include "rgb_node/rgb_postprocessor.h"
 
 namespace pandora_vision
 {

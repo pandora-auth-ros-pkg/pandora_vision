@@ -35,7 +35,7 @@
  * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "pandora_vision_hole_exploration/rgb_node/rgb_postprocessor.h"
+#include "rgb_node/rgb_postprocessor.h"
 
 namespace pandora_vision
 {
@@ -66,5 +66,6 @@ namespace pandora_vision
       
       output->regionsOfInterest.push_back(roi);
     }
+    return true;
   }
 }  // namespace pandora_vision

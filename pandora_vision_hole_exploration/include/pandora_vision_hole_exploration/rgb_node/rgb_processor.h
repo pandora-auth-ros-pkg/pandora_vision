@@ -38,6 +38,7 @@
 #ifndef RGB_NODE_RGB_PROCESSOR_H
 #define RGB_NODE_RGB_PROCESSOR_H
 
+#include "pandora_vision_common/bbox_poi.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"

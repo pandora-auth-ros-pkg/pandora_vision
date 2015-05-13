@@ -35,12 +35,12 @@
  * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "pandora_vision_hole_exploration/rgb_node/rgb_preprocessor.h"
+#include "rgb_node/rgb_preprocessor.h"
 
 namespace pandora_vision
 {
   RgbPreProcessor::RgbPreProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionPreProcessor(ns, handler)
+    VisionPreProcessor(ns, handler, sensor_msgs::image_encodings::BGR8)
   {
     ROS_INFO_STREAM("["+this->getName()+"] preprocessor nh processor : "+
       this->accessProcessorNh()->getNamespace());

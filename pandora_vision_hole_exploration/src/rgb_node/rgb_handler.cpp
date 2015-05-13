@@ -35,7 +35,7 @@
  * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "pandora_vision_hole_exploration/rgb_node/rgb_handler.h"
+#include "rgb_node/rgb_handler.h"
 
 namespace pandora_vision
 {

@@ -53,7 +53,7 @@ namespace pandora_vision
         this->accessProcessorNh()->getNamespace());
 
     // The dynamic reconfigure (RGB) parameter's callback
-    server.setCallback(boost::bind(&Rgb::parametersCallback, this, _1, _2));
+    server.setCallback(boost::bind(&RgbProcessor::parametersCallback, this, _1, _2));
   }
 
 
@@ -67,68 +67,6 @@ namespace pandora_vision
   {
     ROS_INFO_NAMED(PKG_NAME, "[Rgb Processor] Terminated");
   }
-
-
-
-  /**
-    @brief Callback for the rgb image received by the synchronizer node.
-
-    The rgb image message received by the synchronizer node is unpacked
-    in a cv::Mat image. Holes are then located inside this image and
-    information about them, along with the rgb image, is then sent to the
-    hole fusion node
-    @param msg [const sensor_msgs::Image&] The rgb image message
-    @return void
-   **/
-  void RgbProcessor::inputRgbImageCallback(const sensor_msgs::Image& msg)
-  {
-    ROS_INFO_NAMED(PKG_NAME, "RGB node callback");
-
-#ifdef DEBUG_TIME
-    Timer::start("inputRgbImageCallback", "", true);
-#endif
-
-    // Obtain the rgb image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be CV_8UC3.
-    cv::Mat rgbImage;
-    MessageConversions::extractImageFromMessage(msg, &rgbImage,
-        sensor_msgs::image_encodings::BGR8);
-
-#ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_rgb_image)
-    {
-      Visualization::show("RGB image", rgbImage, 1);
-    }
-#endif
-
-    // Regardless of the image representation method, the RGB node
-    // will publish the RGB image of original size to the Hole Fusion node
-    cv::Mat rgbImageSent;
-    rgbImage.copyTo(rgbImageSent);
-
-    // Locate potential holes in the rgb image
-    HolesConveyor conveyor = findHoles(rgbImage);
-
-    // Create the candidate holes message
-    pandora_vision_msgs::ExplorerCandidateHolesVectorMsg rgbCandidateHolesMsg;
-
-    // Pack information about holes found and the rgb image inside a message.
-    // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(conveyor,
-        rgbImageSent,
-        &rgbCandidateHolesMsg,
-        sensor_msgs::image_encodings::TYPE_8UC3, msg);
-
-    // Publish the candidate holes message
-    candidateHolesPublisher_.publish(rgbCandidateHolesMsg);
-
-#ifdef DEBUG_TIME
-    Timer::tick("inputRgbImageCallback");
-    Timer::printAllMeansTree();
-#endif
-  }
-
 
 
   /**
@@ -908,7 +846,7 @@ namespace pandora_vision
     
     for (int ii = 0; ii < conveyor.rectangle.size(); ii++)
     {
-      if (ii = 0)
+      if (ii == 0)
       {
         output->pois.clear();
       }
@@ -926,6 +864,11 @@ namespace pandora_vision
     Timer::printAllMeansTree();
 #endif
 
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
   }
 
 }  // namespace pandora_vision
