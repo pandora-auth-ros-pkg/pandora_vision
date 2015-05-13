@@ -150,36 +150,6 @@ namespace pandora_vision
           file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
               featureExtraction_->getBagOfWordsVocabulary());
         }
-
-        // Start Training Process
-        std::cout << "Starting training process for the rgb images" << std::endl;
-        if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
-        {
-          std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
-          SVM.train_auto(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(),
-                         params, 10, CvSVM::get_default_grid(CvSVM::C),
-                         CvSVM::get_default_grid(CvSVM::GAMMA),
-                         CvSVM::get_default_grid(CvSVM::P),
-                         CvSVM::get_default_grid(CvSVM::NU),
-                         CvSVM::get_default_grid(CvSVM::COEF),
-                         CvSVM::get_default_grid(CvSVM::DEGREE),
-                         true);
-
-          params = SVM.get_params();
-          std::cout << "Using optimal Parameters" << std::endl;
-          std::cout << "degree=" << params.degree << std::endl;
-          std::cout << "gamma=" << params.gamma << std::endl;
-          std::cout << "coef0=" << params.coef0 << std::endl;
-          std::cout << "C=" << params.C << std::endl;
-          std::cout << "nu=" << params.nu << std::endl;
-          std::cout << "p=" << params.p << std::endl;
-        }
-        else
-        {
-          SVM.train(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(), params);
-        }
-        SVM.save(svmClassifierFile.c_str());
-        std::cout << "Finished training process" << std::endl;
       }
       else
       {
@@ -188,6 +158,36 @@ namespace pandora_vision
         trainingLabelsMat = file_utilities::loadFiles(
             trainingLabelsMatrixFile, "training_labels_mat");
       }
+
+      // Start Training Process
+      std::cout << "Starting training process for the rgb images" << std::endl;
+      if (USE_OPENCV_GRID_SEARCH_AUTOTRAIN)
+      {
+        std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
+        SVM.train_auto(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(),
+                       params, 10, CvSVM::get_default_grid(CvSVM::C),
+                       CvSVM::get_default_grid(CvSVM::GAMMA),
+                       CvSVM::get_default_grid(CvSVM::P),
+                       CvSVM::get_default_grid(CvSVM::NU),
+                       CvSVM::get_default_grid(CvSVM::COEF),
+                       CvSVM::get_default_grid(CvSVM::DEGREE),
+                       true);
+
+        params = SVM.get_params();
+        std::cout << "Using optimal Parameters" << std::endl;
+        std::cout << "degree=" << params.degree << std::endl;
+        std::cout << "gamma=" << params.gamma << std::endl;
+        std::cout << "coef0=" << params.coef0 << std::endl;
+        std::cout << "C=" << params.C << std::endl;
+        std::cout << "nu=" << params.nu << std::endl;
+        std::cout << "p=" << params.p << std::endl;
+      }
+      else
+      {
+        SVM.train(trainingFeaturesMat, trainingLabelsMat, cv::Mat(), cv::Mat(), params);
+      }
+      SVM.save(svmClassifierFile.c_str());
+      std::cout << "Finished training process" << std::endl;
     }
     if (file_utilities::exist(testFeaturesMatrixFile.c_str()) == false ||
         testSetFeatureExtraction_)
