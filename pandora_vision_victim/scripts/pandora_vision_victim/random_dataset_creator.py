@@ -184,6 +184,7 @@ class RandomDatasetCreator(object):
 
             # Save new annotations in file.
             for (frameName, dictValues) in self.remainingAnnotationsDict.iteritems():
+
                 annotationsFile.write(frameName)
                 annotationsFile.write(",")
                 annotationsFile.write(str(dictValues[0][0][0]))
@@ -266,20 +267,38 @@ class RandomDatasetCreator(object):
         self.createAnnotationsFile()
         self.copyDatasetImages()
 
+    def createNewDatasetAnnotations(self):
+        """ This function creates a random dataset's annotations."""
+        self.readAnnotationsFile()
+        self.chooseRandomSubset()
+        self.createAnnotationsFile()
+
 
 if __name__ == "__main__":
     print "Initialize process"
     print "Type the absolute path to the initial dataset:"
+    print "e.g. /home/user/foo"
     srcImagePath = raw_input("-->")
     print "Type the absolute path to the initial annotations file:"
+    print "e.g. /home/user/bar"
     srcAnnotationsPath = raw_input("-->")
     print "Type the name of the initial annotations file:"
+    print "e.g. annotations.txt"
     srcAnnotationsFileName = raw_input("-->")
-    print "Type the absolute path to the new dataset:"
-    dstImagePath = raw_input("-->")
+    print "Would you like to copy the new dataset images? If so, press [y]." \
+          "In any other case, a new annotations file will only be created."
+    copyNewDatasetImages = raw_input("-->")
+    if copyNewDatasetImages = "y":
+        print "Type the absolute path to the new dataset:"
+        dstImagePath = raw_input("-->")
+    else:
+        dstImagePath = ""
+
     print "Type the absolute path to the new annotations file:"
+    print "e.g. /home/user/baz"
     dstAnnotationsPath = raw_input("-->")
     print "Type the name of the new annotations file:"
+    print "e.g. new_annotations.txt"
     dstAnnotationsFileName = raw_input("-->")
     print "Type the desired dataset size"
     desiredDatasetSize = raw_input("-->")
@@ -287,11 +306,12 @@ if __name__ == "__main__":
     print "If so, press [y]. Every other key will be considered as a no."
     saveRemainingImages = raw_input("-->")
     if saveRemainingImages == "y":
-        print "The remaining images will be stored in a folder named "\
-               "'Remaining' inside the new dataset folder. The annotations "\
-               "file for the remaining images will be stored in the same "\
-               "directory as the new annotations file and its name will have "\
-               "the prefix 'remaining_'."
+        if copyNewDatasetImages = "y":
+            print "The remaining images will be stored in a folder named "\
+                    "'Remaining' inside the new dataset folder."
+        print "The annotations file for the remaining images will be stored "\
+              "in the same directory as the new annotations file and its "\
+              "name will have the prefix 'remaining_'."
         flag = True
     else:
         print "Very well. The remaining images won't be stored."
@@ -302,5 +322,5 @@ if __name__ == "__main__":
                                        dstAnnotationsPath,
                                        dstAnnotationsFileName,
                                        desiredDatasetSize, flag)
-    randDataset.createDataset()
+    randDataset.createNewDatasetAnnotations()
     print "Process is finished successfully!"
