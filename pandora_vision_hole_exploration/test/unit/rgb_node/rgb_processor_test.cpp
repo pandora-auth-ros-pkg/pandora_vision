@@ -35,20 +35,20 @@
  * Author: Alexandros Philotheou, Vasilis Bosdelekidis
  *********************************************************************/
 
-#include "rgb_node/rgb.h"
+#include "rgb_node/rgb_processor.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
 {
   /**
-    @class RgbTest
+    @class RgbProcessorTest
     @brief Tests the integrity of methods of class Rgb
    **/
-  class RgbTest : public ::testing::Test
+  class RgbProcessorTest : public ::testing::Test
   {
     protected:
 
-      RgbTest () {}
+      RgbProcessorTest () {}
 
       /**
         @brief Constructs a rectangle of width @param x and height of @param y.
@@ -82,6 +82,7 @@ namespace pandora_vision
 
       // The image under processing
       cv::Mat squares_;
+      RgbProcessor RgbProcessor_;
 
   };
 
@@ -101,7 +102,7 @@ namespace pandora_vision
     imprinted on
     return void
    **/
-  void RgbTest::generateRgbRectangle (
+  void RgbProcessorTest::generateRgbRectangle (
       const cv::Point2f& upperLeft,
       const int& x,
       const int& y,
@@ -122,14 +123,14 @@ namespace pandora_vision
 
 
 
-  //! Tests Rgb::findHoles
-  TEST_F ( RgbTest, findHolesTest )
+  //! Tests RgbProcessor::findHoles
+  TEST_F ( RgbProcessorTest, findHolesTest )
   {
 
     // Construct the lower right square
     cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( WIDTH - 200, HEIGHT - 200 ),
         50,
         50,
@@ -139,7 +140,7 @@ namespace pandora_vision
     // Construct the upper right image
     cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( WIDTH - 13, 3 ),
         10,
         10,
@@ -150,7 +151,7 @@ namespace pandora_vision
     cv::Mat upperLeftSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
     // Construct the upperLeft image
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( 100, 100 ),
         50,
         50,
@@ -161,7 +162,7 @@ namespace pandora_vision
     cv::Mat mergable1Square = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
     // Construct the mergable1 image
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( 200, 200 ),
         50,
         50,
@@ -172,7 +173,7 @@ namespace pandora_vision
     cv::Mat mergable2Square = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
     // Construct the mergable2 image
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( 280, 280 ),
         40,
         40,
@@ -183,7 +184,7 @@ namespace pandora_vision
     cv::Mat nonMergableSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
 
     // Construct the nonMergable image
-    RgbTest::generateRgbRectangle
+    RgbProcessorTest::generateRgbRectangle
       ( cv::Point2f ( 130, 130 ),
         40,
         40,
@@ -209,9 +210,9 @@ namespace pandora_vision
     // Synthesize the final squares_ image
     squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
 
-    // Run Rgb::findHoles
+    // Run RgbProcessor::findHoles
     HolesConveyor conveyor =
-      Rgb::findHoles ( squares_ );
+      RgbProcessor_.findHoles ( squares_ );
 
     // The number of keypoints found
     int size = conveyor.keypoint.size();
@@ -257,9 +258,9 @@ namespace pandora_vision
     // Synthesize the final squares_ image with the mergable contours
     squares_ += mergable1Square + mergable2Square + nonMergableSquare;
 
-    // Run Rgb::findHoles
+    // Run RgbProcessor::findHoles
     conveyor =
-      Rgb::findHoles ( squares_ );
+      RgbProcessor_.findHoles ( squares_ );
 
     // The number of keypoints found
     size = conveyor.keypoint.size();
@@ -287,9 +288,9 @@ namespace pandora_vision
     // Synthesize the final squares_ image with the mergable contours
     squares_ += mergable1Square + mergable2Square;
 
-    // Run Rgb::findHoles
+    // Run RgbProcessor::findHoles
     conveyor =
-      Rgb::findHoles ( squares_ );
+      RgbProcessor_.findHoles ( squares_ );
 
     // The number of keypoints found
     size = conveyor.keypoint.size();

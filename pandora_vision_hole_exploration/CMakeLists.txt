@@ -128,13 +128,6 @@ set(ROSLINT_CPP_OPTS
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  ## depth_node ##
-
-  include/depth_node/depth.h
-
-  src/depth_node/depth.cpp
-  src/depth_node/depth_node.cpp
-
 
   ## utils ##
 
@@ -158,7 +151,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   #include/hole_fusion_node/depth_filters.h
   #include/hole_fusion_node/hole_merger.h
-  include/hole_fusion_node/hole_fusion.h
+  #include/hole_fusion_node/hole_fusion.h
   #include/hole_fusion_node/hole_validation.h
   #include/hole_fusion_node/hole_uniqueness.h
   #include/hole_fusion_node/filters.h
@@ -168,10 +161,10 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   #src/hole_fusion_node/depth_filters.cpp
   #src/hole_fusion_node/hole_merger.cpp
-  src/hole_fusion_node/hole_fusion.cpp
+  #src/hole_fusion_node/hole_fusion.cpp
   #src/hole_fusion_node/hole_validation.cpp
   #src/hole_fusion_node/hole_uniqueness.cpp
-  src/hole_fusion_node/hole_fusion_node.cpp
+  #src/hole_fusion_node/hole_fusion_node.cpp
   #src/hole_fusion_node/filters.cpp
   #src/hole_fusion_node/filters_resources.cpp
   #src/hole_fusion_node/planes_detection.cpp
@@ -187,10 +180,17 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   ## rgb_node ##
 
-  include/rgb_node/rgb.h
+  include/rgb_node/rgb_processor.h
 
-  src/rgb_node/rgb.cpp
+  src/rgb_node/rgb_processor.cpp
   src/rgb_node/rgb_node.cpp
+
+  ## depth_node ##
+
+  include/depth_node/depth_processor.h
+
+  src/depth_node/depth_processor.cpp
+  src/depth_node/depth_node.cpp
 
 
   ##################### tests #####################
@@ -209,10 +209,10 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   #test/unit/utils/wavelets_test.cpp
 
   #################### depth node ###################
-  test/unit/depth_node/depth_test.cpp
+  test/unit/depth_node/depth_processor_test.cpp
 
   #################### rgb node ####################
-  test/unit/rgb_node/rgb_test.cpp
+  test/unit/rgb_node/rgb_processor_test.cpp
 
   ################ hole fusion node ################
   test/unit/hole_fusion_node/hole_fusion_test.cpp

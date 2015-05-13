@@ -3,14 +3,6 @@
 #################################### utils #####################################
 
 
-#catkin_add_gtest(bounding_box_detection_test
-#  unit/utils/bounding_box_detection_test.cpp)
-#target_link_libraries(bounding_box_detection_test
-#  ${catkin_LIBRARIES}
-#  ${PROJECT_NAME}_utils
-#  gtest_main)
-
-
 catkin_add_gtest(holes_conveyor_test
   unit/utils/holes_conveyor_test.cpp)
 target_link_libraries(holes_conveyor_test
@@ -34,20 +26,20 @@ target_link_libraries(visualization_test
 
 
 ################################ depth node ####################################
-catkin_add_gtest(depth_test
-  unit/depth_node/depth_test.cpp)
+catkin_add_gtest(depth_processor_test
+  unit/depth_node/depth_processor_test.cpp)
 
-target_link_libraries(depth_test
+target_link_libraries(depth_processor_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_depth
   gtest_main)
 
 
 ################################# rgb node #####################################
-catkin_add_gtest(rgb_test
-  unit/rgb_node/rgb_test.cpp)
+catkin_add_gtest(rgb_processor_test
+  unit/rgb_node/rgb_processor_test.cpp)
 
-target_link_libraries(rgb_test
+target_link_libraries(rgb_processor_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_rgb
   gtest_main)

@@ -143,184 +143,6 @@ namespace pandora_vision
     Parameters::Debug::show_find_holes_size =
       config.show_find_holes_size;
 
-    //  //Parameters::Debug::show_produce_edges =
-    //  //  config.show_produce_edges;
-    //  //Parameters::Debug::show_produce_edges_size =
-    //  //  config.show_produce_edges_size;
-
-    //  //Parameters::Debug::show_denoise_edges =
-    //  //  config.show_denoise_edges;
-    //  //Parameters::Debug::show_denoise_edges_size =
-    //  //  config.show_denoise_edges_size;
-
-    //  //Parameters::Debug::show_connect_pairs =
-    //  //  config.show_connect_pairs;
-    //  //Parameters::Debug::show_connect_pairs_size =
-    //  //  config.show_connect_pairs_size;
-
-    //  //Parameters::Debug::show_get_shapes_clear_border  =
-    //  //  config.show_get_shapes_clear_border;
-    //  //Parameters::Debug::show_get_shapes_clear_border_size =
-    //  //  config.show_get_shapes_clear_border_size;
-
-
-    //  ////////////////////// Parameters specific to the RGB node ///////////////////
-
-
-    //  ////------------------- Edge detection specific parameters -------------------
-
-    //  //// The opencv edge detection method:
-    //  //// 0 for the Canny edge detector
-    //  //// 1 for the Scharr edge detector
-    //  //// 2 for the Sobel edge detector
-    //  //// 3 for the Laplacian edge detector
-    //  //// 4 for mixed Scharr / Sobel edge detection
-    //  //Parameters::Edge::edge_detection_method =
-    //  //  config.edge_detection_method;
-
-    //  //Parameters::Edge::denoised_edges_threshold =
-    //  //  config.denoised_edges_threshold;
-
-    //  //// Canny parameters
-    //  //Parameters::Edge::canny_ratio =
-    //  //  config.canny_ratio;
-
-    //  //Parameters::Edge::canny_kernel_size =
-    //  //  config.canny_kernel_size;
-
-    //  //Parameters::Edge::canny_low_threshold =
-    //  //  config.canny_low_threshold;
-
-    //  //Parameters::Edge::canny_blur_noise_kernel_size =
-    //  //  config.canny_blur_noise_kernel_size;
-
-
-    //  ////------------- Parameters needed for histogram calculation ----------------
-
-    //  //Parameters::Histogram::number_of_hue_bins =
-    //  //  config.number_of_hue_bins;
-
-    //  //Parameters::Histogram::number_of_saturation_bins =
-    //  //  config.number_of_saturation_bins;
-
-    //  //Parameters::Histogram::number_of_value_bins =
-    //  //  config.number_of_value_bins;
-
-    //  //Parameters::Histogram::secondary_channel =
-    //  //  config.secondary_channel;
-
-
-    //  ////----------------- Outline discovery specific parameters ------------------
-
-    //  //// The detection method used to obtain the outline of a blob
-    //  //// 0 for detecting by means of brushfire
-    //  //// 1 for detecting by means of raycasting
-    //  //Parameters::Outline::outline_detection_method =
-    //  //  config.outline_detection_method;
-
-    //  //// When using raycast instead of brushfire to find the (approximate here)
-    //  //// outline of blobs, raycast_keypoint_partitions dictates the number of
-    //  //// rays, or equivalently, the number of partitions in which the blob is
-    //  //// partitioned in search of the blob's borders
-    //  //Parameters::Outline::raycast_keypoint_partitions =
-    //  //  config.raycast_keypoint_partitions;
-
-
-    //  ////------------------- Loose ends connection parameters ---------------------
-
-    //  //Parameters::Outline::AB_to_MO_ratio = config.AB_to_MO_ratio;
-
-    //  //// In wavelet mode, the image shrinks by a factor of 4
-    //  //if (Parameters::Image::image_representation_method == 0)
-    //  //{
-    //  //  Parameters::Outline::minimum_curve_points =
-    //  //    config.minimum_curve_points;
-    //  //}
-    //  //else if (Parameters::Image::image_representation_method == 1)
-    //  //{
-    //  //  Parameters::Outline::minimum_curve_points =
-    //  //    static_cast<int>(config.minimum_curve_points / 4);
-    //  //}
-
-
-    //  //// Selects the method for extracting a RGB image's edges.
-    //  //// Choices are via segmentation and via backprojection
-    //  //Parameters::Rgb::edges_extraction_method =
-    //  //  config.edges_extraction_method;
-
-    //  ////------------------- RGB image segmentation parameters --------------------
-
-    //  //// Parameters specific to the pyrMeanShiftFiltering method
-    //  //Parameters::Rgb::spatial_window_radius =
-    //  //  config.spatial_window_radius;
-    //  //Parameters::Rgb::color_window_radius =
-    //  //  config.color_window_radius;
-    //  //Parameters::Rgb::maximum_level_pyramid_segmentation =
-    //  //  config.maximum_level_pyramid_segmentation;
-
-    //  //// Term criteria for the pyrMeanShiftFiltering method
-    //  //Parameters::Image::term_criteria_max_iterations =
-    //  //  config.term_criteria_max_iterations;
-    //  //Parameters::Image::term_criteria_max_epsilon =
-    //  //  config.term_criteria_max_epsilon;
-
-    //  //// True to posterize the product of the segmentation
-    //  //Parameters::Rgb::posterize_after_segmentation =
-    //  //  config.posterize_after_segmentation;
-
-    //  //// FloodFill options regarding minimum and maximum colour difference
-    //  //Parameters::Rgb::floodfill_lower_colour_difference =
-    //  //  config.floodfill_lower_colour_difference;
-    //  //Parameters::Rgb::floodfill_upper_colour_difference =
-    //  //  config.floodfill_upper_colour_difference;
-
-    //  ////------------ RGB image edges via backprojection parameters ---------------
-
-    //  //// The threshold applied to the backprojection of the RGB image
-    //  //// captured by the image sensor
-    //  //Parameters::Rgb::backprojection_threshold =
-    //  //  config.backprojection_threshold;
-
-    //  //// Watershed-specific parameters
-    //  //Parameters::Rgb::watershed_foreground_dilation_factor =
-    //  //  config.watershed_foreground_dilation_factor;
-    //  //Parameters::Rgb::watershed_foreground_erosion_factor =
-    //  //  config.watershed_foreground_erosion_factor;
-    //  //Parameters::Rgb::watershed_background_dilation_factor =
-    //  //  config.watershed_background_dilation_factor;
-    //  //Parameters::Rgb::watershed_background_erosion_factor =
-    //  //  config.watershed_background_erosion_factor;
-    //  // Std variance, morphology extraction, holes validation thresholds, holes merging thresholds.
-    //  Parameters::Rgb::original_image_gaussian_blur 
-    //    config.original_image_gaussian_blur;
-    //  Parameters::Rgb::std_variance_kernel_size 
-    //    config.std_variance_kernel_size;
-    //  Parameters::Rgb::std_variance_threshold 
-    //    config.std_variance_threshold;
-    //  Parameters::Rgb::std_variance_morphology_close_size 
-    //    config.std_variance_morphology_close_size;
-    //  Parameters::Rgb::std_variance_morphology_open_size 
-    //    config.std_variance_morphology_open_size;
-    //  Parameters::Rgb::contour_erode_kernel_size 
-    //    config.contour_erode_kernel_size;
-    //  Parameters::Rgb::lower_contour_number_to_test_huge 
-    //    config.lower_contour_number_to_test_huge;
-    //  Parameters::Rgb::huge_contour_thresh 
-    //    config.huge_contour_thresh;
-    //  Parameters::Rgb::tiny_contour_thresh 
-    //    config.tiny_contour_thresh;
-    //  Parameters::Rgb::border_thresh 
-    //    config.border_thresh;
-    //  Parameters::Rgb::small_contour_thresh 
-    //    config.small_contour_thresh;
-    //  Parameters::Rgb::neighbor_thresh 
-    //    config.neighbor_thresh;
-    //  Parameters::Rgb::homog_rect_dims_thresh 
-    //    config.homog_rect_dims_thresh;
-    //  Parameters::Rgb::neighbor_value_thresh 
-    //    config.neighbor_value_thresh;
-    //  Parameters::Rgb::homogenity_thresh 
-    //    config.homogenity_thresh;
     //  Parameters::Rgb::neighbor_tiny_distance_thresh 
     //    config.neighbor_tiny_distance_thresh;
     Parameters::Depth::intensity_threshold =
@@ -448,7 +270,14 @@ namespace pandora_vision
       std::vector<int> contourWidth(contours.size());
       std::vector<int> contourHeight(contours.size());
       // Validate contours found. The product is a vector with a flag for each contour.
-      validateContours(depthImage, contours , &mc, &contourHeight, &contourWidth, &realContours, boundRect);
+      validateContours(
+          depthImage, 
+          contours, 
+          &mc, 
+          &contourHeight, 
+          &contourWidth, 
+          &realContours, 
+          boundRect);
       // The final vectors of keypoints, and rectangles.
       std::vector<cv::Point2f> keypoints;
       std::vector<cv::Rect> rectangles;

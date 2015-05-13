@@ -35,20 +35,20 @@
  * Author: Alexandros Philotheou, Vasilis Bosdelekidis
  *********************************************************************/
 
-#include "depth_node/depth.h"
+#include "depth_node/depth_processor.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
 {
   /**
-    @class DepthTest
-    @brief Tests the integrity of methods of class Depth
+    @class DepthProcessorTest
+    @brief Tests the integrity of methods of class DepthProcessor
    **/
-  class DepthTest : public ::testing::Test
+  class DepthProcessorTest : public ::testing::Test
   {
     protected:
 
-      DepthTest() {}
+      DepthProcessorTest() {}
 
       /**
         @brief Constructs a rectangle of width @param x and height of @param y.
@@ -91,6 +91,7 @@ namespace pandora_vision
 
       // The image that will be used to locate blobs in
       cv::Mat squares_;
+      DepthProcessor DepthProcessor_;
 
   };
 
@@ -108,7 +109,7 @@ namespace pandora_vision
     imprinted on
     return void
    **/
-  void DepthTest::generateDepthRectangle (
+  void DepthProcessorTest::generateDepthRectangle (
       const cv::Point2f& upperLeft,
       const int& x,
       const int& y,
@@ -127,8 +128,8 @@ namespace pandora_vision
 
 
 
-  //! Tests Depth::findHoles
-  TEST_F ( DepthTest, findHolesTest )
+  //! Tests DepthProcessor::findHoles
+  TEST_F ( DepthProcessorTest, findHolesTest )
   {
     // The image upon which the squares will be inprinted
     squares_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
@@ -147,7 +148,7 @@ namespace pandora_vision
     // Construct the lower right square
     cv::Mat lowerRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( WIDTH - 200, HEIGHT - 300 ),
         80,
         80,
@@ -157,7 +158,7 @@ namespace pandora_vision
     // Construct the upper right image
     cv::Mat upperRightSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( WIDTH - 103, 3 ),
         5,
         5,
@@ -168,7 +169,7 @@ namespace pandora_vision
     cv::Mat upperLeftSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the square_ image
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( 20, 50 ),
         80,
         80,
@@ -179,7 +180,7 @@ namespace pandora_vision
     cv::Mat hugeSquare = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the square_ image
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( 5, 250 ),
         400,
         50,
@@ -190,7 +191,7 @@ namespace pandora_vision
     cv::Mat mergable1Square = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the square_ image
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( 195, 150 ),
         20,
         20,
@@ -201,7 +202,7 @@ namespace pandora_vision
     cv::Mat mergable2Square = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
 
     // Construct the mergable2 square
-    DepthTest::generateDepthRectangle
+    DepthProcessorTest::generateDepthRectangle
       ( cv::Point2f ( 225, 180),
         40,
         40,
@@ -214,10 +215,10 @@ namespace pandora_vision
     squares_.copyTo(cleanSquares_);
     // Synthesize the final squares_ image
     squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare + hugeSquare;
-    // Run Depth::findHoles
+    // Run DepthProcessor::findHoles
     HolesConveyor conveyor;
     int size;
-    conveyor = Depth::findHoles ( squares_ );
+    conveyor = DepthProcessor_.findHoles ( squares_ );
 
     // The number of keypoints found
     size = conveyor.keypoint.size();
@@ -256,10 +257,10 @@ namespace pandora_vision
     //  }
     //}
 
-    // Run Depth::findHoles
+    // Run DepthProcessor::findHoles
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
-    conveyor = Depth::findHoles ( squares_ );
+    conveyor = DepthProcessor_.findHoles ( squares_ );
     // The number of keypoints found
     size = conveyor.keypoint.size();
     // There should be one keypoint: the one from the merged contours
@@ -295,10 +296,10 @@ namespace pandora_vision
     squares_ += mergable1Square + mergable2Square;
     
 
-    // Run Depth::findHoles
+    // Run DepthProcessor::findHoles
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
-    conveyor = Depth::findHoles ( squares_ );
+    conveyor = DepthProcessor_.findHoles ( squares_ );
     // The number of keypoints found
     size = conveyor.keypoint.size();
     // There should be no keypoints: the hole depth node procedure is ignored
