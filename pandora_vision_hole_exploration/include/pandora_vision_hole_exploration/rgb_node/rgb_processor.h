@@ -135,8 +135,7 @@ namespace pandora_vision
           const std::vector<cv::Rect>& boundRect, 
           int ci, 
           std::vector<bool>* realContours);
-    
-    protected:
+
       virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
     
     private:

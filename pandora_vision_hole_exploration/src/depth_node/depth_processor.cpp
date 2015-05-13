@@ -35,7 +35,7 @@
  * Authors: Vasilis Bosdelekidis, Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "depth_node/depth.h"
+#include "depth_node/depth_processor.h"
 
 /**
   @namespace pandora_vision
@@ -46,152 +46,27 @@ namespace pandora_vision
   /**
     @brief Constructor
    **/
-  Depth::Depth()
+  DepthProcessor::DepthProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionProcessor(ns, handler)
   {
-    // Acquire the names of topics which the depth node will be having
-    // transactionary affairs with
-    getTopicNames();
-
-    // Subscribe to the Depth image published by the
-    // rgb_depth_synchronizer node
-    depthImageSubscriber_= nodeHandle_.subscribe( depthImageTopic_, 1,
-        &Depth::inputDepthImageCallback, this);
-
-    // Advertise the candidate holes found by the depth node
-    candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::ExplorerCandidateHolesVectorMsg>(
-          candidateHolesTopic_, 1000);
+    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
+        this->accessProcessorNh()->getNamespace());
 
     // The dynamic reconfigure (Depth) parameter's callback
-    server.setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));
-
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Initiated");
+    server.setCallback(boost::bind(&DepthProcessor::parametersCallback, this, _1, _2));
   }
 
+
+  DepthProcessor::DepthProcessor() : VisionProcessor() {}
 
 
   /**
     @brief Destructor
    **/
-  Depth::~Depth()
+  DepthProcessor::~DepthProcessor()
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Terminated");
+    ROS_INFO_NAMED(PKG_NAME, "[Depth Processor] Terminated");
   }
-
-
-
-  /**
-    @brief Callback for the depth image received by the synchronizer node.
-
-    The depth image message received by the synchronizer node is unpacked
-    in a cv::Mat image. Holes are then located inside this image and
-    information about them, along with the depth image, is then sent to the
-    hole fusion node
-    @param msg [const sensor_msgs::Image&] The depth image message
-    @return void
-   **/
-  void Depth::inputDepthImageCallback(const sensor_msgs::Image& msg)
-  {
-    ROS_INFO_NAMED(PKG_NAME, "Depth node callback");
-
-#ifdef DEBUG_TIME
-    Timer::start("inputDepthImageCallback", "", true);
-#endif
-
-    // Obtain the depth image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be TYPE_32FC1.
-    cv::Mat depthImage;
-    MessageConversions::extractImageFromMessage(msg, &depthImage,
-        sensor_msgs::image_encodings::TYPE_32FC1);
-
-#ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_depth_image)
-    {
-      Visualization::showScaled("Depth image", depthImage, 1);
-    }
-#endif
-
-    // Regardless of the image representation method, the depth node
-    // will publish the RGB image of original size to the Hole Fusion node
-    cv::Mat depthImageSent;
-    depthImage.copyTo(depthImageSent);
-
-    // Locate potential holes in the depth image
-    HolesConveyor conveyor = findHoles(depthImage);
-
-    // Create the candidate holes message
-    pandora_vision_msgs::ExplorerCandidateHolesVectorMsg depthCandidateHolesMsg;
-
-    // Pack information about holes found and the interpolated depth image
-    // inside a message.
-    // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(conveyor,
-        depthImageSent,
-        &depthCandidateHolesMsg,
-        sensor_msgs::image_encodings::TYPE_32FC1,
-        msg);
-
-    // Publish the candidate holes message
-    candidateHolesPublisher_.publish(depthCandidateHolesMsg);
-
-#ifdef DEBUG_TIME
-    Timer::tick("inputDepthImageCallback");
-    Timer::printAllMeansTree();
-#endif
-  }
-
-
-
-  /**
-    @brief Acquires topics' names needed to be subscribed to and advertise
-    to by the depth node
-    @param void
-    @return void
-   **/
-  void Depth::getTopicNames ()
-  {
-    // The namespace dictated in the launch file
-    std::string ns = nodeHandle_.getNamespace();
-
-    // Read the name of the topic from where the depth node acquires the
-    // unadulterated depth image and store it in a private member variable
-    if (nodeHandle_.getParam(
-          ns + "/depth_node/subscribed_topics/depth_image_topic",
-          depthImageTopic_ ))
-    {
-      // Make the topic's name absolute
-      depthImageTopic_ = ns + "/" + depthImageTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-          "[Depth Node] Subscribed to the input depth image");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-          "[Depth Node] Could not find topic depth_image_topic");
-    }
-
-    // Read the name of the topic to which the depth node will be publishing
-    // information about the candidate holes found and store it in a private
-    // member variable
-    if (nodeHandle_.getParam(
-          ns + "/depth_node/published_topics/candidate_holes_topic",
-          candidateHolesTopic_))
-    {
-      // Make the topic's name absolute
-      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-          "[Depth Node] Advertising to the candidate holes topic");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-          "[Depth Node] Could not find topic candidate_holes_topic");
-    }
-  }
-
 
 
   /**
@@ -200,7 +75,7 @@ namespace pandora_vision
     @param[in] level [const uint32_t]
     @return void
    **/
-  void Depth::parametersCallback(
+  void DepthProcessor::parametersCallback(
       const pandora_vision_hole_exploration::depth_cfgConfig& config,
       const uint32_t& level)
   {
@@ -504,7 +379,7 @@ namespace pandora_vision
     @param[in] depthImage [const cv::Mat&] The depth image in CV_32FC1 format
     @return HolesConveyor The struct that contains the holes found
    **/
-  HolesConveyor Depth::findHoles(const cv::Mat& depthImage) 
+  HolesConveyor DepthProcessor::findHoles(const cv::Mat& depthImage) 
   {
     //#ifdef DEBUG_TIME
     //    Timer::start("findHoles", "inputRgbImageCallback");
@@ -653,7 +528,7 @@ namespace pandora_vision
     @param[in] filteredImage [cv::Mat* filteredImage] The output filtered binary image.
     @return void
    **/
-  void Depth::filterImage(
+  void DepthProcessor::filterImage(
       const cv::Mat& depthImage, 
       cv::Mat* filteredImage)
   {
@@ -717,7 +592,7 @@ namespace pandora_vision
     @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
     @return void
    **/
-  void Depth::detectContours(
+  void DepthProcessor::detectContours(
       const cv::Mat& filteredImage, 
       std::vector<std::vector<cv::Point> >* contours)
   {
@@ -741,7 +616,7 @@ namespace pandora_vision
     @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
     @return void
    **/
-  void Depth::getContourInfo(
+  void DepthProcessor::getContourInfo(
       const std::vector<std::vector<cv::Point> >& contours, 
       std::vector<cv::Point2f>* mc, 
       std::vector<cv::Rect>* boundRect)
@@ -772,7 +647,7 @@ namespace pandora_vision
     @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
     @return void
    **/
-  void Depth::validateContours(
+  void DepthProcessor::validateContours(
       const cv::Mat& image, 
       const std::vector<std::vector<cv::Point> >& contours, 
       std::vector<cv::Point2f>* mc, 
@@ -831,7 +706,7 @@ namespace pandora_vision
     @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. 
     @return void
    **/
-  bool Depth::validateContour(
+  bool DepthProcessor::validateContour(
       const cv::Mat& image, 
       int ci, 
       std::vector<cv::Point2f>* mcv, 
@@ -936,7 +811,7 @@ namespace pandora_vision
     }
   }
 
-  void Depth::validateShape(
+  void DepthProcessor::validateShape(
       const cv::Mat& image, 
       const std::vector<std::vector<cv::Point> >& outline, 
       const std::vector<cv::Rect>& boundRect, 
@@ -1042,7 +917,7 @@ namespace pandora_vision
     @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
     @return void
    **/
-  void Depth::mergeContours(
+  void DepthProcessor::mergeContours(
       int ci, 
       std::vector<cv::Point2f>* mcv, 
       std::vector<int>* contourHeight, 
@@ -1101,5 +976,53 @@ namespace pandora_vision
     (*mcv)[ci].x = sumX / sum;
     (*mcv)[ci].y = sumY / sum;
   }
+  
+  
+  bool DepthProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
 
-} // namespace pandora_vision
+#ifdef DEBUG_TIME
+    Timer::start("depthProcessor", "", true);
+#endif
+
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_depth_image)
+    {
+      Visualization::showScaled("Depth image", input->getImage(), 1);
+    }
+#endif
+
+    // Locate potential holes in the depth image
+    HolesConveyor conveyor = findHoles(input->getImage());
+
+    for (int ii = 0; ii < conveyor.rectangle.size(); ii++)
+    {
+      if (ii == 0)
+      {
+        output->pois.clear();
+      }
+      BBoxPOIPtr bbox(new BBoxPOI);
+
+      bbox->setPoint(conveyor.keypoint[ii]);
+      bbox->setWidth(conveyor.rectangle[ii].width);
+      bbox->setHeight(conveyor.rectangle[ii].height);
+
+      output->pois.push_back(bbox);
+    }
+
+#ifdef DEBUG_TIME
+    Timer::tick("depthProcessor");
+    Timer::printAllMeansTree();
+#endif
+
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
+  }
+
+}  // namespace pandora_vision

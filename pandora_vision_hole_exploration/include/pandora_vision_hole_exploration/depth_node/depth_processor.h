@@ -35,10 +35,11 @@
  * Authors: Vasilis Bosdelekidis, Alexandros Philotheou
  *********************************************************************/
 
-#ifndef DEPTH_NODE_DEPTH_H
-#define DEPTH_NODE_DEPTH_H
+#ifndef DEPTH_NODE_DEPTH_PROCESSOR_H
+#define DEPTH_NODE_DEPTH_PROCESSOR_H
 
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
+#include "pandora_vision_common/bbox_poi.h"
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
@@ -51,69 +52,20 @@
 namespace pandora_vision
 {
   /**
-    @class Depth
+    @class DepthProcessor
     @brief Provides functionalities for locating holes via
     analysis of a Depth image
    **/
-  class Depth
+  class DepthProcessor : public VisionProcessor
   {
-    private:
-
-      // The NodeHandle
-      ros::NodeHandle nodeHandle_;
-
-      // Subscriber of Kinect point cloud
-      ros::Subscriber depthImageSubscriber_;
-
-      // The name of the topic where the depth image is acquired from
-      std::string depthImageTopic_;
-
-      // The ROS publisher ofcandidate holes
-      ros::Publisher candidateHolesPublisher_;
-
-      // The name of the topic where the candidate holes that the depth node
-      // locates are published to
-      std::string candidateHolesTopic_;
-
-      // The dynamic reconfigure (depth) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig> server;
-
-      // The dynamic reconfigure (depth) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig>::CallbackType f;
-
-      /**
-        @brief Callback for the depth image received by the synchronizer node.
-
-        The depth image message received by the synchronizer node is unpacked
-        in a cv::Mat image. After basic filtering, holes are located inside this        image and information about them, along with the depth image, is then se        nt to the hole fusion node;
-        @param msg [const sensor_msgs::Image&] The depth image message
-        @return void
-       **/
-      void inputDepthImageCallback(const sensor_msgs::Image& inImage);
-
-      /**
-        @brief Acquires topics' names needed to be subscribed to and advertise
-        to by the depth node
-        @param void
-        @return void
-       **/
-      void getTopicNames();
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-          const pandora_vision_hole_exploration::depth_cfgConfig& config,
-          const uint32_t& level);
-
-
     public:
-
-      // The constructor
-      Depth(void);
+      // The constructors
+      DepthProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      
+      DepthProcessor();
+      
+      // The destructor
+      virtual ~DepthProcessor();
 
       /**
         @brief Finds holes, provided a depth image in CV_32FC1 format.
@@ -126,7 +78,7 @@ namespace pandora_vision
         @param[in] depthImage [const cv::Mat&] The depth image in CV_32FC1 format
         @return HolesConveyor The struct that contains the holes found
        **/
-      static HolesConveyor findHoles(const cv::Mat& depthImage);
+      HolesConveyor findHoles(const cv::Mat& depthImage);
 
       /**
         @brief The function called to filter the depth image
@@ -136,7 +88,7 @@ namespace pandora_vision
         @param[in] filteredImage [cv::Mat* filteredImage] The output filtered binary image.
         @return void
        **/
-      static void filterImage(
+      void filterImage(
           const cv::Mat& depthImage, 
           cv::Mat* filteredImage);
 
@@ -147,7 +99,7 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point>>*] The contours found.
         @return void
        **/
-      static void detectContours(
+      void detectContours(
           const cv::Mat& filteredImage, 
           std::vector<std::vector<cv::Point> >* contours);
 
@@ -158,7 +110,7 @@ namespace pandora_vision
         @param[in] mc [std::vector<cv::Point2f>*] Center of mass of each contour as x, y coordinates..
         @return void
        **/
-      static void getContourInfo(
+      void getContourInfo(
           const std::vector<std::vector<cv::Point> >& contours, 
           std::vector<cv::Point2f>* mc, 
           std::vector<cv::Rect>* boundRect);
@@ -174,7 +126,7 @@ namespace pandora_vision
         @param[in] boundRect [std::vector<cv::Rect>&] A vector containing the bounding rectangles for each contour 
         @return void
        **/
-      static void validateContours(
+      void validateContours(
           const cv::Mat& image, 
           const std::vector<std::vector<cv::Point> >& contours,
           std::vector<cv::Point2f>* mc, 
@@ -197,7 +149,7 @@ namespace pandora_vision
         @param[in] realContours [std::vector<bool>*] Contains flags if a contour is valid or not. 
         @return void
        **/
-      static bool validateContour(
+      bool validateContour(
           const cv::Mat& image, 
           int ci, std::vector<cv::Point2f>* mcv, 
           std::vector<int>* contourHeight, 
@@ -208,7 +160,7 @@ namespace pandora_vision
           const std::vector<std::vector<cv::Point> >& contours, 
           std::vector<bool>* realContours);
 
-      static void validateShape(
+      void validateShape(
           const cv::Mat& image, 
           const std::vector<std::vector<cv::Point> >& outline, 
           const std::vector<cv::Rect>& boundRect, 
@@ -226,7 +178,7 @@ namespace pandora_vision
         @param[in] contours [std::vector<std::vector<cv::Point> >&] All contours found. 
         @return void
        **/
-      static void mergeContours(
+      void mergeContours(
           int ci, 
           std::vector<cv::Point2f>* mcv, 
           std::vector<int>* contourHeight, 
@@ -236,12 +188,27 @@ namespace pandora_vision
           std::vector<int>* numLabels, 
           std::vector<bool>* realContours, 
           const std::vector<std::vector<cv::Point> >& contours);
+    
+      virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
-      // The destructor
-      ~Depth(void);
+    private:
+      // The dynamic reconfigure (depth) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig> server;
+
+      // The dynamic reconfigure (depth) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig>::CallbackType f;
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
+        @param[in] level [const uint32_t]
+        @return void
+       **/
+      void parametersCallback(
+          const pandora_vision_hole_exploration::depth_cfgConfig& config,
+          const uint32_t& level);
   };
 
-} //namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // DEPTH_NODE_DEPTH_H
-
+#endif  // DEPTH_NODE_DEPTH_PROCESSOR_H

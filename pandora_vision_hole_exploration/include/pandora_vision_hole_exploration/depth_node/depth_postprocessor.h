@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,31 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
+ * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "depth_node/depth_handler.h"
+#ifndef DEPTH_NODE_DEPTH_POSTPROCESSOR_H
+#define DEPTH_NODE_DEPTH_POSTPROCESSOR_H
 
-/**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+#include "pandora_vision_msgs/RegionOfInterestVector.h"
+#include "pandora_vision_common/bbox_poi.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
+
+namespace pandora_vision
 {
-  ros::init(argc, argv, "depth_node");
-  pandora_vision::DepthHandler depthHandler("pandora_vision_hole_exploration_depth");
-  ros::spin();
-  return 0;
-}
+  class DepthPostProcessor : public VisionPostProcessor<pandora_vision_msgs::RegionOfInterestVector>
+  {
+    protected:
+      typedef boost::shared_ptr<pandora_vision_msgs::RegionOfInterestVector> RegionOfInterestVectorPtr;
+      typedef boost::shared_ptr<pandora_vision_msgs::RegionOfInterestVector const> RegionOfInterestVectorConstPtr;
+
+    public:
+      DepthPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~DepthPostProcessor();
+      
+      virtual bool postProcess(const POIsStampedConstPtr& input, 
+        const RegionOfInterestVectorPtr& output);
+  };
+}  // namespace pandora_vision
+
+#endif  // DEPTH_NODE_DEPTH_POSTPROCESSOR_H

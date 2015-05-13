@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,20 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
+ * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "depth_node/depth_handler.h"
+#include "depth_node/depth_preprocessor.h"
 
-/**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "depth_node");
-  pandora_vision::DepthHandler depthHandler("pandora_vision_hole_exploration_depth");
-  ros::spin();
-  return 0;
-}
+  DepthPreProcessor::DepthPreProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionPreProcessor(ns, handler, sensor_msgs::image_encodings::TYPE_32FC1)
+  {
+    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
+  }
+  
+  DepthPreProcessor::~DepthPreProcessor() {}
+  
+}  // namespace pandora_vision

@@ -32,21 +32,23 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
+ * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
 #include "depth_node/depth_handler.h"
 
-/**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "depth_node");
-  pandora_vision::DepthHandler depthHandler("pandora_vision_hole_exploration_depth");
-  ros::spin();
-  return 0;
-}
+  DepthHandler::DepthHandler(const std::string& ns) : VisionHandler<DepthPreProcessor, DepthProcessor,
+    DepthPostProcessor>(ns)
+  {
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+  }
+  
+  DepthHandler::~DepthHandler() {}
+  
+  void DepthHandler::completeTransition()
+  {
+    ROS_INFO_NAMED(PKG_NAME, "[Hole Handler] : Transition Complete");
+  }
+}  // namespace pandora_vision

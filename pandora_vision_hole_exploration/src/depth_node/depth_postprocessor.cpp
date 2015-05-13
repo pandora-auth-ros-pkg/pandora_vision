@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,40 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Alexandros Philotheou, Manos Tsardoulias, Vasilis Bosdelekidis
+ * Authors: Vasilis Bosdelekidis, Despoina Paschalidou, Alexandros Philotheou 
  *********************************************************************/
 
-#include "depth_node/depth_handler.h"
+#include "depth_node/depth_postprocessor.h"
 
-/**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
- **/
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "depth_node");
-  pandora_vision::DepthHandler depthHandler("pandora_vision_hole_exploration_depth");
-  ros::spin();
-  return 0;
-}
+  DepthPostProcessor::DepthPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
+    VisionPostProcessor<pandora_vision_msgs::RegionOfInterestVector>(ns, handler)
+  {
+    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
+  }
+  
+  DepthPostProcessor::~DepthPostProcessor() {}
+  
+  bool DepthPostProcessor::postProcess(const POIsStampedConstPtr& input,
+    const RegionOfInterestVectorPtr& output)
+  {
+    output->header = input->header;
+    
+    for (int ii = 0; ii < input->pois.size(); ii++)
+    {
+      pandora_vision_msgs::RegionOfInterest roi;
+      roi.center.x = input->pois[ii]->getPoint().x;
+      roi.center.y = input->pois[ii]->getPoint().y;
+      
+      boost::shared_ptr<BBoxPOI> bboxPOI(boost::dynamic_pointer_cast<BBoxPOI>(input->pois[ii]));
+      
+      roi.width = bboxPOI->getWidth();
+      roi.height = bboxPOI->getHeight();
+      
+      output->regionsOfInterest.push_back(roi);
+    }
+    return true;
+  }
+}  // namespace pandora_vision
