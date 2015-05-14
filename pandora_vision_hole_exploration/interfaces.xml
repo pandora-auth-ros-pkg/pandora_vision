@@ -40,6 +40,8 @@
     /hole_fusion_node
 
     <subscriber>/synchronized/depth/points</subscriber>
+    <subscriber>/synchronized/rgb/image</subscriber>
+    <subscriber>/synchronized/depth/image</subscriber>
     <subscriber>/synchronized/depth/candidate_holes</subscriber>
     <subscriber>/synchronized/depth/candidate_holes</subscriber>
 
