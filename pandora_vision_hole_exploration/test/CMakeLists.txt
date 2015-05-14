@@ -31,7 +31,7 @@ catkin_add_gtest(depth_processor_test
 
 target_link_libraries(depth_processor_test
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_depth
+  ${PROJECT_NAME}_depth_processor
   gtest_main)
 
 
@@ -41,7 +41,7 @@ catkin_add_gtest(rgb_processor_test
 
 target_link_libraries(rgb_processor_test
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_rgb
+  ${PROJECT_NAME}_rgb_processor
   gtest_main)
 
 ############################# hole fusion node #################################
