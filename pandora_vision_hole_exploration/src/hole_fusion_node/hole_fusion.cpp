@@ -77,7 +77,7 @@ namespace pandora_vision
     // Advertise the topic that the yaw and pitch of the keypoints of the final,
     // valid holes will be published to
     validHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::HolesDirectionsVectorMsg>(
+      <pandora_vision_msgs::HoleDirectionAlertVector>(
           validHolesTopic_, 10, true);
 
     // Advertise the topic that information about the final holes,
@@ -99,7 +99,7 @@ namespace pandora_vision
     // Advertise the topic that the image of the final holes,
     // will be published to
     enhancedHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::EnhancedHolesVectorMsg>(
+      <pandora_vision_msgs::EnhancedImage>(
           enhancedHolesTopic_, 1000, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
@@ -796,133 +796,6 @@ namespace pandora_vision
       const pandora_vision_hole_exploration::general_cfgConfig &config,
       const uint32_t& level)
   {
-    //  ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
-
-    //  // Threshold parameters
-    //  Parameters::Edge::denoised_edges_threshold =
-    //    config.denoised_edges_threshold;
-
-    //  // Histogram parameters
-    //  Parameters::Histogram::number_of_hue_bins =
-    //    config.number_of_hue_bins;
-    //  Parameters::Histogram::number_of_saturation_bins =
-    //    config.number_of_saturation_bins;
-    //  Parameters::Histogram::number_of_value_bins =
-    //    config.number_of_value_bins;
-    //  Parameters::Histogram::secondary_channel =
-    //    config.secondary_channel;
-
-
-    //  // Backprojection parameters
-    //  Parameters::Rgb::backprojection_threshold =
-    //    config.backprojection_threshold;
-
-
-    //  // The inflation size of the bounding box's vertices
-    //  Parameters::HoleFusion::rectangle_inflation_size =
-    //    config.rectangle_inflation_size;
-
-    //  // Depth diff parameters
-
-    //  // 0 for binary probability assignment on positive depth difference
-    //  // 1 for gaussian probability assignment on positive depth difference
-    //  Parameters::Filters::DepthDiff::probability_assignment_method =
-    //    config.depth_difference_probability_assignment_method;
-
-    //  // The mean expected difference in distance between a hole's keypoint
-    //  // and the mean distance of its bounding box's vertices
-    //  // from the depth sensor
-    //  Parameters::Filters::DepthDiff::gaussian_mean=
-    //    config.gaussian_mean;
-
-    //  // The standard deviation expected
-    //  Parameters::Filters::DepthDiff::gaussian_stddev=
-    //    config.gaussian_stddev;
-
-    //  // Min difference in depth between the inside and the outside of a hole
-    //  Parameters::Filters::DepthDiff::min_depth_cutoff =
-    //    config.depth_diff_min_depth_cutoff;
-
-    //  // Max difference in depth between the inside and the outside of a hole
-    //  Parameters::Filters::DepthDiff::max_depth_cutoff =
-    //    config.depth_diff_max_depth_cutoff;
-
-
-    //  // Plane detection parameters
-    //  Parameters::HoleFusion::Planes::filter_leaf_size =
-    //    config.filter_leaf_size;
-    //  Parameters::HoleFusion::Planes::max_iterations =
-    //    config.max_iterations;
-    //  Parameters::HoleFusion::Planes::num_points_to_exclude =
-    //    config.num_points_to_exclude;
-    //  Parameters::HoleFusion::Planes::point_to_plane_distance_threshold =
-    //    config.point_to_plane_distance_threshold;
-
-
-    //  //--------------------------- Merger parameters ----------------------------
-
-    //  // Option to enable or disable the merging of holes
-    //  Parameters::HoleFusion::Merger::merge_holes =
-    //    config.merge_holes;
-
-    //  // Holes connection - merger parameters
-    //  Parameters::HoleFusion::Merger::connect_holes_min_distance =
-    //    config.connect_holes_min_distance;
-    //  Parameters::HoleFusion::Merger::connect_holes_max_distance =
-    //    config.connect_holes_max_distance;
-
-    //  Parameters::HoleFusion::Merger::depth_diff_threshold =
-    //    config.merger_depth_diff_threshold;
-    //  Parameters::HoleFusion::Merger::depth_area_threshold =
-    //    config.merger_depth_area_threshold;
-
-
-    //  //--------------------------- Texture parameters ---------------------------
-
-    //  // The threshold for texture matching
-    //  Parameters::Filters::TextureDiff::match_texture_threshold =
-    //    config.match_texture_threshold;
-
-    //  // The threshold for texture mismatching
-    //  Parameters::Filters::TextureDiff::mismatch_texture_threshold =
-    //    config.mismatch_texture_threshold;
-
-
-
-    //  // Method to scale the CV_32FC1 image to CV_8UC1
-    //  Parameters::Image::scale_method =
-    //    config.scale_method;
-
-
-    //  //----------------- Outline discovery specific parameters ------------------
-
-    //  // The detection method used to obtain the outline of a blob
-    //  // 0 for detecting by means of brushfire
-    //  // 1 for detecting by means of raycasting
-    //  Parameters::Outline::outline_detection_method =
-    //    config.outline_detection_method;
-
-    //  // When using raycast instead of brushfire to find the (approximate here)
-    //  // outline of blobs, raycast_keypoint_partitions dictates the number of
-    //  // rays, or equivalently, the number of partitions in which the blob is
-    //  // partitioned in search of the blob's borders
-    //  Parameters::Outline::raycast_keypoint_partitions =
-    //    config.raycast_keypoint_partitions;
-
-
-    //  //------------ RGB image edges via backprojection parameters ---------------
-
-    //  // Backprojection parameters
-    //  Parameters::Rgb::backprojection_threshold =
-    //    config.backprojection_threshold;
-
-    //  // Watershed-specific parameters
-    //  Parameters::Rgb::watershed_foreground_dilation_factor =
-    //    config.watershed_foreground_dilation_factor;
-    //  Parameters::Rgb::watershed_foreground_erosion_factor =
-    //    config.watershed_foreground_erosion_factor;
-    //  Parameters::Rgb::watershed_background_dilation_factor =
-    //    config.watershed_background_dilation_factor;
     //  Parameters::Rgb::watershed_background_erosion_factor =
     //    config.watershed_background_erosion_factor;
 
@@ -1108,13 +981,13 @@ namespace pandora_vision
 
       // Holes originated from thermal analysis on the depth image,
       // on top of the thermal image
-      cv::Mat thermalHolesOnDepthImage =
-        Visualization::showHoles(
-            "Holes originated from Thermal analysis, on the Depth image",
-            interpolatedDepthImage_,
-            thermalHolesConveyor_,
-            -1,
-            msgs);
+      //cv::Mat thermalHolesOnDepthImage =
+      //  Visualization::showHoles(
+      //      "Holes originated from Thermal analysis, on the Depth image",
+      //      interpolatedDepthImage_,
+      //      thermalHolesConveyor_,
+      //      -1,
+      //      msgs);
 
       // Holes originated from analysis on the RGB image,
       // on top of the RGB image
@@ -1138,13 +1011,13 @@ namespace pandora_vision
 
       // Holes originated from analysis on the thermal image,
       // on top of the RGB image
-      cv::Mat thermalHolesOnRgbImage =
-        Visualization::showHoles(
-            "Holes originated from Thermal analysis, on the RGB image",
-            rgbImage_,
-            thermalHolesConveyor_,
-            -1,
-            msgs);
+      //cv::Mat thermalHolesOnRgbImage =
+      //  Visualization::showHoles(
+      //      "Holes originated from Thermal analysis, on the RGB image",
+      //      rgbImage_,
+      //      thermalHolesConveyor_,
+      //      -1,
+      //      msgs);
 
       // Holes originated from analysis on the RGB image,
       // on top of the Depth image
@@ -1160,8 +1033,8 @@ namespace pandora_vision
       std::vector<cv::Mat> imgs;
       imgs.push_back(depthHolesOnDepthImage);
       imgs.push_back(depthHolesOnRgbImage);
-      imgs.push_back(thermalHolesOnDepthImage);
-      imgs.push_back(thermalHolesOnRgbImage);
+      //imgs.push_back(thermalHolesOnDepthImage);
+      //imgs.push_back(thermalHolesOnRgbImage);
       imgs.push_back(rgbHolesOnRgbImage);
       imgs.push_back(rgbHolesOnDepthImage);
 
@@ -1170,8 +1043,8 @@ namespace pandora_vision
 
       titles.push_back("Holes originated from Depth analysis, on the Depth image");
       titles.push_back("Holes originated from Depth analysis, on the RGB image");
-      titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
-      titles.push_back("Holes originated from Thermal analysis, on the RGB image");
+      //titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
+      //titles.push_back("Holes originated from Thermal analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the Depth image");
 
@@ -1180,7 +1053,7 @@ namespace pandora_vision
 #endif
     double min, max;
     cv::minMaxLoc(interpolatedDepthImage_, &min, &max);
-    cv::minMaxLoc(interpolatedThermalImage_, &min, &max);
+    //cv::minMaxLoc(interpolatedThermalImage_, &min, &max);
     HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
 
@@ -1305,7 +1178,7 @@ namespace pandora_vision
       std::map<int, float>* validHolesMap)
   {
     // The overall message of enhanced holes that will be published
-    pandora_vision_msgs::EnhancedHolesVectorMsg enhancedHolesMsg;
+    pandora_vision_msgs::EnhancedImage enhancedHolesMsg;
 
     // Set the rgbImage in the enhancedHolesMsg message to the rgb image
     enhancedHolesMsg.rgbImage = MessageConversions::convertImageToMessage(
@@ -1321,11 +1194,11 @@ namespace pandora_vision
         enhancedHolesMsg.depthImage);
 
     // Set the thermalImage in the enhancedHolesMsg message to the thermal image
-    enhancedHolesMsg.thermalImage = MessageConversions::convertImageToMessage(
-        Visualization::scaleImageForVisualization(interpolatedThermalImage_,
-          Parameters::Image::scale_method),
-        sensor_msgs::image_encodings::TYPE_8UC1,
-        enhancedHolesMsg.thermalImage);
+    //enhancedHolesMsg.thermalImage = MessageConversions::convertImageToMessage(
+    //    Visualization::scaleImageForVisualization(interpolatedThermalImage_,
+    //      Parameters::Image::scale_method),
+    //    sensor_msgs::image_encodings::TYPE_8UC1,
+    //    enhancedHolesMsg.thermalImage);
 
     // Set whether depth analysis is applicable
     enhancedHolesMsg.isDepth = (filteringMode_ == RGBD_MODE);
@@ -1338,41 +1211,18 @@ namespace pandora_vision
         it != validHolesMap->end(); it++)
     {
       // The enhanced hole message. Used for one hole only
-      pandora_vision_msgs::EnhancedHoleMsg enhancedHoleMsg;
+      pandora_vision_msgs::RegionOfInterest enhancedHoleMsg;
 
       // Set the hole's keypoint
-      enhancedHoleMsg.keypointX = conveyor.keypoint[it->first].x;
-      enhancedHoleMsg.keypointY = conveyor.keypoint[it->first].y;
+      enhancedHoleMsg.center.x = conveyor.keypoint[it->first].x;
+      enhancedHoleMsg.center.y = conveyor.keypoint[it->first].y;
 
-      // Set the hole's bounding box vertices
-      enhancedHoleMsg.verticesX.push_back(
-          conveyor.rectangle[it->first].x);
-      enhancedHoleMsg.verticesY.push_back(
-          conveyor.rectangle[it->first].y);
-      enhancedHoleMsg.verticesX.push_back(
-          conveyor.rectangle[it->first].x);
-      enhancedHoleMsg.verticesY.push_back(
-          conveyor.rectangle[it->first].y 
-          + conveyor.rectangle[it->first].height);
-      enhancedHoleMsg.verticesX.push_back(
-          conveyor.rectangle[it->first].x
-          + conveyor.rectangle[it->first].width);
-      enhancedHoleMsg.verticesY.push_back(
-          conveyor.rectangle[it->first].y 
-          + conveyor.rectangle[it->first].height);
-      enhancedHoleMsg.verticesX.push_back(
-          conveyor.rectangle[it->first].x
-          + conveyor.rectangle[it->first].width);
-      enhancedHoleMsg.verticesY.push_back(
-          conveyor.rectangle[it->first].y);
-
-
-      // Set the message's header
-      enhancedHoleMsg.header.stamp = timestamp_;
-      enhancedHoleMsg.header.frame_id = frame_id_;
+      // Set the hole's bounding box width and height
+      enhancedHoleMsg.width = conveyor.rectangle[it->first].width;
+      enhancedHoleMsg.height = conveyor.rectangle[it->first].height;
 
       // Push back into the enhancedHolesMsg message
-      enhancedHolesMsg.enhancedHoles.push_back(enhancedHoleMsg);
+      enhancedHolesMsg.regionsOfInterest.push_back(enhancedHoleMsg);
     }
 
     // Publish the overall message
@@ -1400,7 +1250,7 @@ namespace pandora_vision
     int width = interpolatedDepthImage_.cols;
 
     // The overall valid holes found message
-    pandora_vision_msgs::HolesDirectionsVectorMsg holesVectorMsg;
+    pandora_vision_msgs::HoleDirectionAlertVector holesVectorMsg;
 
     // Counter for the holes' identifiers
     int holeId = 0;
@@ -1409,7 +1259,7 @@ namespace pandora_vision
         it != map->end(); it++)
     {
       // A single hole's message
-      pandora_vision_msgs::HoleDirectionMsg holeMsg;
+      pandora_vision_msgs::HoleDirectionAlert holeMsg;
 
       // The hole's keypoint coordinates relative to the center of the frame
       float x = conveyor.keypoint[it -> first].x

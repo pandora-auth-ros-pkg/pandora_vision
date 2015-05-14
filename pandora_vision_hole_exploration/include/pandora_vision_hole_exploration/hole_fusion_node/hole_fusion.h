@@ -44,12 +44,6 @@
 #include <urdf_parser/urdf_parser.h>
 #include <image_transport/image_transport.h>
 #include "state_manager/state_client.h"
-#include "pandora_vision_msgs/ExplorerCandidateHolesVectorMsg.h"
-#include "pandora_vision_msgs/ExplorerCandidateHoleMsg.h"
-#include "pandora_vision_msgs/HolesDirectionsVectorMsg.h"
-#include "pandora_vision_msgs/HoleDirectionMsg.h"
-#include "pandora_vision_msgs/EnhancedHolesVectorMsg.h"
-#include "pandora_vision_msgs/EnhancedHoleMsg.h"
 #include "utils/defines.h"
 #include "utils/message_conversions.h"
 #include "utils/parameters.h"

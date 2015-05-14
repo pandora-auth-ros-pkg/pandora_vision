@@ -44,6 +44,8 @@
 
 //#include "pandora_vision_hole/CandidateHolesVectorMsg.h"  // TO FIX
 #include "pandora_vision_msgs/RegionOfInterestVector.h" 
+#include "pandora_vision_msgs/HoleDirectionAlertVector.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
 
 /**
   @namespace pandora_vision
