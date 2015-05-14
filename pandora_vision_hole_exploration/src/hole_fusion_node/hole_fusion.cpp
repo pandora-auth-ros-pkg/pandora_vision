@@ -115,11 +115,23 @@ namespace pandora_vision
       nodeHandle_.advertise <std_msgs::Empty>(
           synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1000, true);
 
+    // Subscribe to the topic where the synchronizer node publishes
+    // the depth image
+    depthImageSubscriber_= nodeHandle_.subscribe(
+        depthImageTopic_, 1,
+        &HoleFusion::depthImageCallback, this);
+
     // Subscribe to the topic where the depth node publishes
     // candidate holes
     depthCandidateHolesSubscriber_= nodeHandle_.subscribe(
         depthCandidateHolesTopic_, 1,
         &HoleFusion::depthCandidateHolesCallback, this);
+
+    // Subscribe to the topic where the synchronizer node publishes
+    // the rgb image
+    rgbImageSubscriber_= nodeHandle_.subscribe(
+        rgbImageTopic_, 1,
+        &HoleFusion::rgbImageCallback, this);
 
     // Subscribe to the topic where the rgb node publishes
     // candidate holes
@@ -129,9 +141,9 @@ namespace pandora_vision
 
     // Subscribe to the topic where the thermal node publishes
     // candidate holes
-    thermalCandidateHolesSubscriber_= nodeHandle_.subscribe(
-        thermalCandidateHolesTopic_, 1,
-        &HoleFusion::thermalCandidateHolesCallback, this);
+    //thermalCandidateHolesSubscriber_= nodeHandle_.subscribe(
+    //    thermalCandidateHolesTopic_, 1,
+    //    &HoleFusion::thermalCandidateHolesCallback, this);
 
     // Subscribe to the topic where the synchronizer node publishes
     // the point cloud
@@ -144,18 +156,6 @@ namespace pandora_vision
     serverDebug.setCallback(
         boost::bind(&HoleFusion::parametersCallbackDebug,
           this, _1, _2));
-
-    //// The dynamic reconfigure server for parameters pertaining to the
-    //// priority of filters' execution
-    //serverFiltersPriority.setCallback(
-    //  boost::bind(&HoleFusion::parametersCallbackFiltersPriority,
-    //    this, _1, _2));
-
-    //// The dynamic reconfigure server for parameters pertaining to
-    //// thresholds of filters
-    //serverFiltersThresholds.setCallback(
-    //  boost::bind(&HoleFusion::parametersCallbackFiltersThresholds,
-    //    this, _1, _2));
 
     // The dynamic reconfigure server for general parameters
     serverGeneral.setCallback(
@@ -209,24 +209,42 @@ namespace pandora_vision
   }
 
 
+  /**
+    @brief Callback for a depth image via the synchronizer node.
+    This method sets the interpolated depth image which will be used 
+    for hole validation reasons, once there are any candidate holes
+    from rgb or depth nodes.
+    @param[in] image [const sensor_msgs::Image&] The depth image msg
+    @return void
+   **/
+  void HoleFusion::depthImageCallback(
+      const sensor_msgs::Image& image)
+  {
+    // Obtain the depth image. Since the image is in a format of
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be TYPE_32FC1.
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::TYPE_32FC1);
+    interpolatedDepthImage_ = in_msg->image.clone();
+  }
+
 
   /**
     @brief Callback for the candidate holes via the depth node.
 
-    This method sets the interpolated depth image and the
-    candidate holes acquired from the depth node.
-    If the rgb callback counterpart has done
+    This method sets the candidate holes acquired from the depth node.
+    If all the other callbacks (e.g. rgb, thermal) have done
     what must be, it resets the number of ready nodes, unlocks
     the synchronizer and calls for processing of the candidate
     holes.
     @param[in] depthCandidateHolesVector
-    [const pandora_vision_msgs::CandidateHolesVectorMsg&]
+    [const pandora_vision_msgs::RegionOfInterestVector&]
     The message containing the necessary information acquired through
     the depth node
     @return void
    **/
   void HoleFusion::depthCandidateHolesCallback(
-      const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+      const pandora_vision_msgs::RegionOfInterestVector&
       depthCandidateHolesVector)
   {
 #ifdef DEBUG_TIME
@@ -242,7 +260,6 @@ namespace pandora_vision
     // Unpack the message
     MessageConversions::unpackMessage(depthCandidateHolesVector,
         &depthHolesConveyor_,
-        &interpolatedDepthImage_,
         sensor_msgs::image_encodings::TYPE_32FC1);
 
     // The candidate holes acquired from the depth node and the interpolated
@@ -253,7 +270,7 @@ namespace pandora_vision
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
     ROS_INFO("nodesReady %d \n", numNodesReady_);
-    if (numNodesReady_ == 3)
+    if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
 
@@ -283,35 +300,111 @@ namespace pandora_vision
     the thermal node
     @return void
    **/
-  void HoleFusion::thermalCandidateHolesCallback(
-      const pandora_vision_msgs::CandidateHolesVectorMsg&
-      thermalCandidateHolesVector)
+  //void HoleFusion::thermalCandidateHolesCallback(
+  //    const pandora_vision_msgs::CandidateHolesVectorMsg&
+  //    thermalCandidateHolesVector)
+  //{
+  //ifdef DEBUG_TIME
+  //  Timer::start("thermalCandidateHolesCallback", "", true);
+  //endif
+
+  //  ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Thermal callback");
+
+  //  // Clear the current thermalHolesConveyor struct
+  //  // (or else keyPoints, rectangles and outlines accumulate)
+  //  HolesConveyorUtils::clear(&thermalHolesConveyor_);
+
+  //  // Unpack the message
+  //  MessageConversions::unpackHoleDetectorMessage(thermalCandidateHolesVector,
+  //      &thermalHolesConveyor_,
+  //      &interpolatedThermalImage_,
+  //      sensor_msgs::image_encodings::TYPE_32FC1);
+
+  //  // The candidate holes acquired from the thermal node and the
+  //  // thermal image are set
+  //  numNodesReady_++;
+
+  //  // If the Thermal candidate holes and the Thermal image are set
+  //  // and the point cloud has been delivered and interpolated,
+  //  // unlock the synchronizer and process the candidate holes from all sources
+  //  ROS_INFO("nodesReady %d \n", numNodesReady_);
+  //  if (numNodesReady_ == 2)
+  //  {
+  //    numNodesReady_ = 0;
+
+  //    unlockSynchronizer();
+
+  //    processCandidateHoles();
+  //  }
+
+  //ifdef DEBUG_TIME
+  //  Timer::tick("thermalCandidateHolesCallback");
+  //  Timer::printAllMeansTree();
+  //endif
+  //}
+
+
+  /**
+    @brief Callback for a rgb image via the synchronizer node.
+    This method sets the rgb image which will be used 
+    for hole validation reasons, once there are any candidate holes
+    from rgb or depth nodes.
+    @param[in] image [const sensor_msgs::Image&] The rgb image msg
+    @return void
+   **/
+  void HoleFusion::rgbImageCallback(
+      const sensor_msgs::Image& image)
+  {
+    // Obtain the rgb image. Since the image is in a format of
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be BGR8.
+    cv_bridge::CvImagePtr in_msg;
+    in_msg = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+    rgbImage_ = in_msg->image.clone();
+  }
+
+
+  /**
+    @brief Callback for the candidate holes via the rgb node
+
+    This method sets the candidate holes acquired
+    from the rgb node.
+    If the other callbacks (e.g. depth, thermal) have done
+    what must be, it resets the number of ready nodes, unlocks
+    the synchronizer and calls for processing of the candidate
+    holes.
+    @param[in] rgbCandidateHolesVector
+    [const pandora_vision_msgs::RegionOfInterestVector&]
+    The message containing the necessary information to filter hole
+    candidates acquired through the rgb node
+    @return void
+   **/
+  void HoleFusion::rgbCandidateHolesCallback(
+      const pandora_vision_msgs::RegionOfInterestVector&
+      rgbCandidateHolesVector)
   {
 #ifdef DEBUG_TIME
-    Timer::start("thermalCandidateHolesCallback", "", true);
+    Timer::start("rgbCandidateHolesCallback", "", true);
 #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Thermal callback");
+    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion RGB callback");
 
-    // Clear the current thermalHolesConveyor struct
+    // Clear the current rgbHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
-    HolesConveyorUtils::clear(&thermalHolesConveyor_);
+    HolesConveyorUtils::clear(&rgbHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackHoleDetectorMessage(thermalCandidateHolesVector,
-        &thermalHolesConveyor_,
-        &interpolatedThermalImage_,
-        sensor_msgs::image_encodings::TYPE_32FC1);
+    MessageConversions::unpackMessage(rgbCandidateHolesVector,
+        &rgbHolesConveyor_,
+        sensor_msgs::image_encodings::TYPE_8UC3);
 
-    // The candidate holes acquired from the thermal node and the
-    // thermal image are set
+    // The candidate holes acquired from the rgb node and the rgb image are set
     numNodesReady_++;
 
-    // If the Thermal candidate holes and the Thermal image are set
+    // If the depth candidate holes and the interpolated depth image are set
     // and the point cloud has been delivered and interpolated,
-    // unlock the synchronizer and process the candidate holes from all sources
-    ROS_INFO("nodesReady %d \n", numNodesReady_);
-    if (numNodesReady_ == 3)
+    // unlock the synchronizer and process the candidate holes from both sources
+    if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
 
@@ -321,7 +414,7 @@ namespace pandora_vision
     }
 
 #ifdef DEBUG_TIME
-    Timer::tick("thermalCandidateHolesCallback");
+    Timer::tick("rgbCandidateHolesCallback");
     Timer::printAllMeansTree();
 #endif
   }
@@ -398,6 +491,24 @@ namespace pandora_vision
     }
 
     // Read the name of the topic from where the Hole Fusion node acquires the
+    // depth images originated from the synchronizer node
+    if (nodeHandle_.getParam(
+          ns + "/hole_fusion_node/subscribed_topics/depth_image_topic",
+          depthImageTopic_))
+    {
+      // Make the topic's name absolute
+      depthImageTopic_ = ns + "/" + depthImageTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Subscribed to the Depth images topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+          "[Hole Fusion Node] Could not find topic depth_image_topic");
+    }
+
+    // Read the name of the topic from where the Hole Fusion node acquires the
     // candidate holes originated from the Depth node
     if (nodeHandle_.getParam(
           ns + "/hole_fusion_node/subscribed_topics/depth_candidate_holes_topic",
@@ -413,6 +524,24 @@ namespace pandora_vision
     {
       ROS_INFO_NAMED (PKG_NAME,
           "[Hole Fusion Node] Could not find topic depth_candidate_holes_topic");
+    }
+
+    // Read the name of the topic from where the Hole Fusion node acquires the
+    // rgb images originated from the synchronizer node
+    if (nodeHandle_.getParam(
+          ns + "/hole_fusion_node/subscribed_topics/rgb_image_topic",
+          rgbImageTopic_))
+    {
+      // Make the topic's name absolute
+      rgbImageTopic_ = ns + "/" + rgbImageTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+          "[Hole Fusion Node] Subscribed to the Rgb images topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+          "[Hole Fusion Node] Could not find topic rgb_image_topic");
     }
 
     // Read the name of the topic from where the Hole Fusion node acquires the
@@ -928,7 +1057,7 @@ namespace pandora_vision
     // If the depth and RGB candidate holes, the interpolated depth image
     // and the RGB image are set,
     // unlock the synchronizer and process the candidate holes from all sources
-    if (numNodesReady_ == 3)
+    if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;
 
@@ -1346,62 +1475,6 @@ namespace pandora_vision
     debugValidHolesPublisher_.publish(*msgPtr->toImageMsg());
   }
 
-
-  /**
-    @brief Callback for the candidate holes via the rgb node
-
-    This method sets the RGB image and the candidate holes acquired
-    from the rgb node.
-    If the depth callback counterpart has done
-    what must be, it resets the number of ready nodes, unlocks
-    the synchronizer and calls for processing of the candidate
-    holes.
-    @param[in] rgbCandidateHolesVector
-    [const pandora_vision_msgs::CandidateHolesVectorMsg&]
-    The message containing the necessary information to filter hole
-    candidates acquired through the rgb node
-    @return void
-   **/
-  void HoleFusion::rgbCandidateHolesCallback(
-      const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
-      rgbCandidateHolesVector)
-  {
-#ifdef DEBUG_TIME
-    Timer::start("rgbCandidateHolesCallback", "", true);
-#endif
-
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion RGB callback");
-
-    // Clear the current rgbHolesConveyor struct
-    // (or else keyPoints, rectangles and outlines accumulate)
-    HolesConveyorUtils::clear(&rgbHolesConveyor_);
-
-    // Unpack the message
-    MessageConversions::unpackMessage(rgbCandidateHolesVector,
-        &rgbHolesConveyor_,
-        &rgbImage_,
-        sensor_msgs::image_encodings::TYPE_8UC3);
-
-    // The candidate holes acquired from the rgb node and the rgb image are set
-    numNodesReady_++;
-
-    // If the depth candidate holes and the interpolated depth image are set
-    // and the point cloud has been delivered and interpolated,
-    // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 3)
-    {
-      numNodesReady_ = 0;
-
-      unlockSynchronizer();
-
-      processCandidateHoles();
-    }
-
-#ifdef DEBUG_TIME
-    Timer::tick("rgbCandidateHolesCallback");
-    Timer::printAllMeansTree();
-#endif
-  }
 
   /**
     @brief Applies a validation and merging operation of holes

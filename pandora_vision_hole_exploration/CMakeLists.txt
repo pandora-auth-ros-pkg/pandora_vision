@@ -140,7 +140,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utils/haralickfeature_extractor.h
 
   src/utils/parameters.cpp
-  #src/utils/timer.cpp
+  src/utils/timer.cpp
   src/utils/visualization.cpp
   src/utils/message_conversions.cpp
   src/utils/holes_conveyor.cpp
@@ -149,26 +149,10 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
   ### hole_fusion_node ##
 
-  #include/hole_fusion_node/depth_filters.h
-  #include/hole_fusion_node/hole_merger.h
-  #include/hole_fusion_node/hole_fusion.h
-  #include/hole_fusion_node/hole_validation.h
-  #include/hole_fusion_node/hole_uniqueness.h
-  #include/hole_fusion_node/filters.h
-  #include/hole_fusion_node/filters_resources.h
-  #include/hole_fusion_node/planes_detection.h
-  #include/hole_fusion_node/rgb_filters.h
+  include/hole_fusion_node/hole_fusion.h
 
-  #src/hole_fusion_node/depth_filters.cpp
-  #src/hole_fusion_node/hole_merger.cpp
-  #src/hole_fusion_node/hole_fusion.cpp
-  #src/hole_fusion_node/hole_validation.cpp
-  #src/hole_fusion_node/hole_uniqueness.cpp
-  #src/hole_fusion_node/hole_fusion_node.cpp
-  #src/hole_fusion_node/filters.cpp
-  #src/hole_fusion_node/filters_resources.cpp
-  #src/hole_fusion_node/planes_detection.cpp
-  #src/hole_fusion_node/rgb_filters.cpp
+  src/hole_fusion_node/hole_fusion.cpp
+  src/hole_fusion_node/hole_fusion_node.cpp
 
 
   ## synchronizer_node ##
@@ -196,17 +180,9 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   ##################### tests #####################
 
   ##################### utils #####################
-  #test/unit/utils/bounding_box_detection_test.cpp
-  #test/unit/utils/blob_detection_test.cpp
-  #test/unit/utils/edge_detection_test.cpp
-  #test/unit/utils/hole_filters_test.cpp
   test/unit/utils/holes_conveyor_test.cpp
   test/unit/utils/message_conversions_test.cpp
   test/unit/utils/visualization_test.cpp
-  #test/unit/utils/morphological_operators_test.cpp
-  #test/unit/utils/noise_elimination_test.cpp
-  #test/unit/utils/outline_discovery_test.cpp
-  #test/unit/utils/wavelets_test.cpp
 
   #################### depth node ###################
   test/unit/depth_node/depth_processor_test.cpp
@@ -223,6 +199,6 @@ roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
 
 ##################################### Testing ##################################
-if(CATKIN_ENABLE_TESTING)
-  add_subdirectory(test)
-endif()
+#if(CATKIN_ENABLE_TESTING)
+#  add_subdirectory(test)
+#endif()

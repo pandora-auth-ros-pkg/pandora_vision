@@ -155,6 +155,22 @@ namespace pandora_vision
       // input point cloud
       std::string synchronizerLeaveSubscriptionToInputPointCloudTopic_;
 
+      // The ROS subscriber for acquisition of depth images originated 
+      // from the synchronizer node
+      ros::Subscriber depthImageSubscriber_;
+
+      // The name of the topic where the Hole Fusion node is subscribed to
+      // acquire depth images from synchronizer node
+      std::string depthImageTopic_;
+
+      // The ROS subscriber for acquisition of rgb images originated 
+      // from the synchronizer node
+      ros::Subscriber rgbImageSubscriber_;
+
+      // The name of the topic where the Hole Fusion node is subscribed to
+      // acquire rgb images from synchronizer node
+      std::string rgbImageTopic_;
+
       // The ROS subscriber for acquisition of candidate holes originated
       // from the depth node
       ros::Subscriber depthCandidateHolesSubscriber_;
@@ -243,27 +259,6 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole_exploration::
         debug_cfgConfig>::CallbackType f_debug;
 
-
-      //// The dynamic reconfigure server for parameters pertaining to the
-      //// prioriority of filters' execution
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  filters_priority_cfgConfig> serverFiltersPriority;
-
-      //// The dynamic reconfigure callback type for the above server
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  filters_priority_cfgConfig>::CallbackType f_filters_priority;
-
-
-      //// The dynamic reconfigure server for parameters pertaining to
-      //// thresholds of filters
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  filters_thresholds_cfgConfig> serverFiltersThresholds;
-
-      //// The dynamic reconfigure callback type for the above server
-      //dynamic_reconfigure::Server<pandora_vision_hole::
-      //  filters_thresholds_cfgConfig>::CallbackType f_filters_thresholds;
-
-
       // The dynamic reconfigure server for general parameters
       dynamic_reconfigure::Server<pandora_vision_hole_exploration::
         general_cfgConfig> serverGeneral;
@@ -282,25 +277,47 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole_exploration::
         validity_cfgConfig>::CallbackType f_validity;
 
+      /**
+        @brief Callback for a depth image via the synchronizer node.
+        This method sets the interpolated depth image which will be used 
+        for hole validation reasons, once there are any candidate holes
+        from rgb or depth nodes.
+        @param[in] image [const sensor_msgs::Image&] The depth image msg
+        @return void
+       **/
+      void depthImageCallback(
+          const sensor_msgs::Image& image);
+
 
       /**
         @brief Callback for the candidate holes via the depth node.
 
-        This method sets the interpolated depth image and the
-        candidate holes acquired from the depth node.
-        If the rgb callback counterpart has done
+        This method sets the candidate holes acquired from the depth node.
+        If all the other callbacks (e.g. rgb, thermal) have done
         what must be, it resets the number of ready nodes, unlocks
         the synchronizer and calls for processing of the candidate
         holes.
         @param[in] depthCandidateHolesVector
-        [const pandora_vision_msgs::CandidateHolesVectorMsg&]
+        [const pandora_vision_msgs::RegionOfInterestVector&]
         The message containing the necessary information acquired through
         the depth node
         @return void
        **/
       void depthCandidateHolesCallback(
-          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
+          const pandora_vision_msgs::RegionOfInterestVector&
           depthCandidateHolesVector);
+
+
+      /**
+        @brief Callback for a rgb image via the synchronizer node.
+        This method sets the rgb image which will be used 
+        for hole validation reasons, once there are any candidate holes
+        from rgb or depth nodes.
+        @param[in] image [const sensor_msgs::Image&] The rgb image msg
+        @return void
+       **/
+      void rgbImageCallback(
+          const sensor_msgs::Image& image);
 
       /**
         @brief Callback for the candidate holes via the thermal node.
@@ -317,9 +334,30 @@ namespace pandora_vision
         the thermal node
         @return void
        **/
-      void thermalCandidateHolesCallback(
-          const pandora_vision_msgs::CandidateHolesVectorMsg&
-          thermalCandidateHolesVector);
+      //void thermalCandidateHolesCallback(
+      //    const pandora_vision_msgs::CandidateHolesVectorMsg&
+      //    thermalCandidateHolesVector);
+
+
+      /**
+        @brief Callback for the candidate holes via the rgb node
+
+        This method sets the RGB image and the candidate holes acquired
+        from the rgb node.
+        If the depth callback counterpart has done
+        what must be, it resets the number of ready nodes, unlocks
+        the synchronizer and calls for processing of the candidate
+        holes.
+        @param[in] rgbCandidateHolesVector
+        [const pandora_vision_msgs::RegionOfInterestVector&]
+        The message containing the necessary information to filter hole
+        candidates acquired through the rgb node
+        @return void
+       **/
+      void rgbCandidateHolesCallback(
+          const pandora_vision_msgs::RegionOfInterestVector&
+          rgbCandidateHolesVector);
+
 
       /**
         @brief Retrieves the parent to the frame_id of the input point cloud,
@@ -418,7 +456,7 @@ namespace pandora_vision
         @return void
        **/
       void publishEnhancedHoles (const HolesConveyor& conveyor,
-        std::map<int, float>* validHolesMap);
+          std::map<int, float>* validHolesMap);
 
       /**
         @brief Publishes the valid holes' information.
@@ -431,24 +469,6 @@ namespace pandora_vision
       void publishValidHoles(const HolesConveyor& conveyor,
           std::map<int, float>* map);
 
-      /**
-        @brief Callback for the candidate holes via the rgb node
-
-        This method sets the RGB image and the candidate holes acquired
-        from the rgb node.
-        If the depth callback counterpart has done
-        what must be, it resets the number of ready nodes, unlocks
-        the synchronizer and calls for processing of the candidate
-        holes.
-        @param[in] rgbCandidateHolesVector
-        [const pandora_vision_msgs::CandidateHolesVectorMsg&]
-        The message containing the necessary information to filter hole
-        candidates acquired through the rgb node
-        @return void
-       **/
-      void rgbCandidateHolesCallback(
-          const pandora_vision_msgs::ExplorerCandidateHolesVectorMsg&
-          rgbCandidateHolesVector);
 
       /**
         @brief Applies a validation and merging operation of holes
