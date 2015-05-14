@@ -1,5 +1,3 @@
-subscribed_topics:
-  rgb_image_topic: synchronized/rgb/image
+subscribed_topics: [synchronized/rgb/image]
 
-published_topics:
-  candidate_holes_topic: synchronized/rgb/candidate_holes
+published_topics: synchronized/rgb/candidate_holes
