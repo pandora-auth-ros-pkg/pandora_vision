@@ -8,7 +8,7 @@
 
   <!-- =========================== The namespace =========================== -->
 
-  <arg name="namespace" default="/pandora_vision_hole_exploration" />
+  <arg name="namespace" default="/pandora_vision" />
 
 
   <!-- ========================== Source selection ========================= -->
@@ -84,7 +84,7 @@
     ns="$(arg namespace)">
 
     <rosparam file="$(find pandora_vision_hole_exploration)/cfg/depth_node_topics.yaml"
-              command="load" ns="$(arg namespace)" />
+              command="load" ns="$(arg namespace)/pandora_vision_hole_exploration_depth"/>
   </node>
 
 
@@ -99,7 +99,7 @@
     ns="$(arg namespace)">
 
     <rosparam file="$(find pandora_vision_hole_exploration)/cfg/rgb_node_topics.yaml"
-              command="load" ns="$(arg namespace)" />
+              command="load" ns="$(arg namespace)/pandora_vision_hole_exploration_rgb" />
   </node>
 
 
