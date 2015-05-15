@@ -462,56 +462,6 @@ namespace pandora_vision
 
 
 
-  //! Tests MessageConversions::extractImageFromMessageContainer
-  TEST_F ( MessageConversionsTest, extractImageFromMessageContainerTest )
-  {
-    // Create a grayscale image
-    cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
-    // Fill it with randomness
-    unsigned int seed = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image.at< unsigned char >( rows, cols ) =
-          static_cast< unsigned char >( rand_r(&seed) % 2 );
-      }
-    }
-
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-    msgPtr->encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-    msgPtr->image = image;
-
-    // The message of candidate holes
-    pandora_vision_msgs::ExplorerCandidateHolesVectorMsg msg;
-    msg.image = *msgPtr->toImageMsg();
-
-    // Run MessageConversions::extractImageFromMessageContainer
-    cv::Mat extracted;
-    MessageConversions::extractImageFromMessageContainer( msg,
-        &extracted, sensor_msgs::image_encodings::TYPE_8UC1 );
-
-    // The number of pixels differing between image and extracted
-    int diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image.at< unsigned char >( rows, cols ) !=
-            extracted.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0 , diff );
-  }
-
-
-
   //! Tests MessageConversions::fromCandidateHoleMsgToConveyor
   TEST_F ( MessageConversionsTest, fromCandidateHoleMsgToConveyorTest )
   {
@@ -523,15 +473,15 @@ namespace pandora_vision
       pandora_vision_msgs::RegionOfInterest candidateHole;
 
       // The keypoints
-      candidateHole.keypointX = conveyor.keypoint[i].x;
-      candidateHole.keypointY = conveyor.keypoint[i].y;
+      candidateHole.center.x = conveyor.keypoint[i].x;
+      candidateHole.center.y = conveyor.keypoint[i].y;
 
       // The rectangles
-      double verticesX = conveyor.keypoint[i].x - conveyor.rectangle[i].width / 2;
-      double verticesY = conveyor.keypoint[i].y - conveyor.rectangle[i].height / 2;
+      double width = conveyor.rectangle[i].width;
+      double height = conveyor.rectangle[i].height;
 
-      candidateHole.verticeX = verticesX;
-      candidateHole.verticeY = verticesY;
+      candidateHole.width = width;
+      candidateHole.height = height;
 
 
       candidateHolesVector.push_back(candidateHole);
@@ -551,9 +501,9 @@ namespace pandora_vision
     {
       // The keypoints should be the same
       EXPECT_EQ ( conveyor.keypoint[i].x,
-          candidateHolesVector[i].keypointX );
+          candidateHolesVector[i].center.x );
       EXPECT_EQ ( conveyor.keypoint[i].y,
-          candidateHolesVector[i].keypointY );
+          candidateHolesVector[i].center.y );
       std::vector<double> verticesX(4);
       std::vector<double> verticesY(4);
       std::vector<double> verticesXEx(4);
@@ -626,15 +576,15 @@ namespace pandora_vision
       pandora_vision_msgs::RegionOfInterest candidateHole;
 
       // The keypoints
-      candidateHole.keypointX = conveyor.keypoint[i].x;
-      candidateHole.keypointY = conveyor.keypoint[i].y;
+      candidateHole.center.x = conveyor.keypoint[i].x;
+      candidateHole.center.y = conveyor.keypoint[i].y;
 
       // The rectangle points
-      double verticesX = conveyor.keypoint[i].x - conveyor.rectangle[i].width / 2;
-      double verticesY = conveyor.keypoint[i].y - conveyor.rectangle[i].height / 2;
+      double width = conveyor.rectangle[i].width;
+      double height = conveyor.rectangle[i].height;
 
-      candidateHole.verticeX = verticesX;
-      candidateHole.verticeY = verticesY;
+      candidateHole.width = width;
+      candidateHole.height = height;
 
       candidateHolesVector.push_back(candidateHole);
     }
