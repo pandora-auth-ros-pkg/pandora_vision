@@ -46,14 +46,11 @@ namespace pandora_vision
   /**
     @brief Constructor
    **/
-  RgbProcessor::RgbProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionProcessor(ns, handler)
+  RgbProcessor::RgbProcessor(const std::string& ns, sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
   {
     ROS_INFO_STREAM("["+this->getName()+"] processor nh processor : "+
         this->accessProcessorNh()->getNamespace());
-
-    // The dynamic reconfigure (RGB) parameter's callback
-    server.setCallback(boost::bind(&RgbProcessor::parametersCallback, this, _1, _2));
+    ParametersHandler_ = new ParametersHandler();
   }
 
 
@@ -69,74 +66,6 @@ namespace pandora_vision
   }
 
 
-  /**
-    @brief The function called when a parameter is changed
-    @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
-    @param[in] level [const uint32_t]
-    @return void
-   **/
-  void RgbProcessor::parametersCallback(
-      const pandora_vision_hole_exploration::rgb_cfgConfig& config,
-      const uint32_t& level)
-  {
-    ROS_INFO_NAMED(PKG_NAME, "[Rgb Processor] Parameters callback called");
-
-    //////////////////////////////// Debug parameters ////////////////////////////
-
-    //// Show the rgb image that arrives in the rgb node
-    Parameters::Debug::show_rgb_image =
-      config.show_rgb_image;
-
-    Parameters::Debug::show_std_variance_image =
-      config.show_std_variance_image;
-
-    Parameters::Debug::show_find_holes =
-      config.show_find_holes;
-    Parameters::Debug::show_find_holes_size =
-      config.show_find_holes_size;
-
-    ////////////////////// Parameters specific to the RGB node ///////////////////
-
-    // Std variance, morphology extraction, holes validation thresholds, holes merging thresholds.
-    Parameters::Rgb::original_image_gaussian_blur =
-      config.original_image_gaussian_blur;
-    Parameters::Rgb::std_variance_kernel_size =
-      config.std_variance_kernel_size;
-    Parameters::Rgb::std_variance_threshold =
-      config.std_variance_threshold;
-    Parameters::Rgb::std_variance_morphology_close_size =
-      config.std_variance_morphology_close_size;
-    Parameters::Rgb::std_variance_morphology_open_size =
-      config.std_variance_morphology_open_size;
-    Parameters::Rgb::contour_erode_kernel_size =
-      config.contour_erode_kernel_size;
-    Parameters::Rgb::lower_contour_number_to_test_huge =
-      config.lower_contour_number_to_test_huge;
-    Parameters::Rgb::huge_contour_thresh =
-      config.huge_contour_thresh;
-    Parameters::Rgb::tiny_contour_thresh =
-      config.tiny_contour_thresh;
-    Parameters::Rgb::border_thresh =
-      config.border_thresh;
-    Parameters::Rgb::small_contour_thresh =
-      config.small_contour_thresh;
-    Parameters::Rgb::neighbor_thresh =
-      config.neighbor_thresh;
-    Parameters::Rgb::homog_rect_dims_thresh =
-      config.homog_rect_dims_thresh;
-    Parameters::Rgb::neighbor_value_thresh =
-      config.neighbor_value_thresh;
-    Parameters::Rgb::homogenity_thresh =
-      config.homogenity_thresh;
-    Parameters::Rgb::neighbor_tiny_distance_thresh =
-      config.neighbor_tiny_distance_thresh;
-    Parameters::Rgb::shape_validation =
-      config.shape_validation;
-    Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh =
-      config.one_direction_rectangle_contour_overlap_thresh;
-    Parameters::Rgb::max_intersections_thresh =
-      config.max_intersections_thresh;
-  }
 
 
   /**

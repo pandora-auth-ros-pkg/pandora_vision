@@ -137,23 +137,10 @@ namespace pandora_vision
           std::vector<bool>* realContours);
 
       virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
-    
+
     private:
-      // The dynamic reconfigure (RGB) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig> server;
-
-      // The dynamic reconfigure (RGB) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::rgb_cfgConfig>::CallbackType f;
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-          const pandora_vision_hole_exploration::rgb_cfgConfig& config,
-          const uint32_t& level);
+      ParametersHandler* ParametersHandler_;
+    
   };
 
 }  // namespace pandora_vision

@@ -192,21 +192,8 @@ namespace pandora_vision
       virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
     private:
-      // The dynamic reconfigure (depth) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig> server;
+      ParametersHandler* ParametersHandler_;
 
-      // The dynamic reconfigure (depth) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole_exploration::depth_cfgConfig>::CallbackType f;
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-          const pandora_vision_hole_exploration::depth_cfgConfig& config,
-          const uint32_t& level);
   };
 
 }  // namespace pandora_vision

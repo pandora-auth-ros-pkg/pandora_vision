@@ -46,14 +46,11 @@ namespace pandora_vision
   /**
     @brief Constructor
    **/
-  DepthProcessor::DepthProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionProcessor(ns, handler)
+  DepthProcessor::DepthProcessor(const std::string& ns, sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
         this->accessProcessorNh()->getNamespace());
-
-    // The dynamic reconfigure (Depth) parameter's callback
-    server.setCallback(boost::bind(&DepthProcessor::parametersCallback, this, _1, _2));
+    ParametersHandler_ = new ParametersHandler();
   }
 
 
@@ -66,127 +63,6 @@ namespace pandora_vision
   DepthProcessor::~DepthProcessor()
   {
     ROS_INFO_NAMED(PKG_NAME, "[Depth Processor] Terminated");
-  }
-
-
-  /**
-    @brief The function called when a parameter is changed
-    @param[in] config [const pandora_vision_hole_exploration::depth_cfgConfig&]
-    @param[in] level [const uint32_t]
-    @return void
-   **/
-  void DepthProcessor::parametersCallback(
-      const pandora_vision_hole_exploration::depth_cfgConfig& config,
-      const uint32_t& level)
-  {
-    //  ROS_INFO_NAMED(PKG_NAME, "[RGB node] Parameters callback called");
-
-    //  //////////////////// Blob detection - specific parameters //////////////////
-
-    //  //Parameters::Blob::min_threshold =
-    //  //  config.min_threshold;
-
-    //  //Parameters::Blob::max_threshold =
-    //  //  config.max_threshold;
-
-    //  //Parameters::Blob::threshold_step =
-    //  //  config.threshold_step;
-
-    //  //// In wavelet mode, the image shrinks by a factor of 4
-    //  //if (Parameters::Image::image_representation_method == 0)
-    //  //{
-    //  //  Parameters::Blob::min_area =
-    //  //    config.min_area;
-
-    //  //  Parameters::Blob::max_area =
-    //  //    config.max_area;
-    //  //}
-    //  //else if (Parameters::Image::image_representation_method == 1)
-    //  //{
-    //  //  Parameters::Blob::min_area =
-    //  //    static_cast<int>(config.min_area / 4);
-
-    //  //  Parameters::Blob::max_area =
-    //  //    static_cast<int>(config.max_area / 4);
-    //  //}
-
-    //  //Parameters::Blob::min_convexity =
-    //  //  config.min_convexity;
-
-    //  //Parameters::Blob::max_convexity =
-    //  //  config.max_convexity;
-
-    //  //Parameters::Blob::min_inertia_ratio =
-    //  //  config.min_inertia_ratio;
-
-    //  //Parameters::Blob::max_circularity =
-    //  //  config.max_circularity;
-
-    //  //Parameters::Blob::min_circularity =
-    //  //  config.min_circularity;
-
-    //  //Parameters::Blob::filter_by_color =
-    //  //  config.filter_by_color;
-
-    //  //Parameters::Blob::filter_by_circularity =
-    //  //  config.filter_by_circularity;
-
-
-    //  //////////////////////////////// Debug parameters ////////////////////////////
-
-    // Show the rgb image that arrives in the rgb node
-    Parameters::Debug::show_depth_image =
-      config.show_depth_image;
-
-    Parameters::Debug::show_find_holes =
-      config.show_find_holes;
-    Parameters::Debug::show_find_holes_size =
-      config.show_find_holes_size;
-
-    //  Parameters::Rgb::neighbor_tiny_distance_thresh 
-    //    config.neighbor_tiny_distance_thresh;
-    Parameters::Depth::intensity_threshold =
-      config.intensity_threshold;
-    Parameters::Depth::morphology_open_kernel_size =
-      config.morphology_open_kernel_size;
-    Parameters::Depth::morphology_close_kernel_size =
-      config.morphology_close_kernel_size;
-    Parameters::Depth::border_thresh =
-      config.border_thresh;
-    Parameters::Depth::dilation_kernel_size =
-      config.dilation_kernel_size;
-    Parameters::Depth::rect_diff_thresh =
-      config.rect_diff_thresh;
-    Parameters::Depth::huge_contour_thresh =
-      config.huge_contour_thresh;
-    Parameters::Depth::tiny_contour_thresh =
-      config.tiny_contour_thresh;
-    Parameters::Depth::small_contour_thresh =
-      config.small_contour_thresh;
-    Parameters::Depth::neighbor_thresh =
-      config.neighbor_thresh;
-    Parameters::Depth::neighbor_value_thresh =
-      config.neighbor_value_thresh;
-    Parameters::Depth::depth_similarity_rect_dims_thresh =
-      config.depth_similarity_rect_dims_thresh;
-    Parameters::Depth::merge_thresh =
-      config.merge_thresh;
-    Parameters::Depth::canny_low_threshold =
-      config.canny_low_threshold;
-    Parameters::Depth::canny_ratio =
-      config.canny_ratio;
-    Parameters::Depth::canny_kernel_size =
-      config.canny_kernel_size;
-    Parameters::Depth::filtering_type =
-      config.filtering_type;
-    Parameters::Depth::min_valid_depth =
-      config.min_valid_depth;
-    Parameters::Depth::shape_validation =
-      config.shape_validation;
-    Parameters::Depth::one_direction_rectangle_contour_overlap_thresh =
-      config.one_direction_rectangle_contour_overlap_thresh;
-    Parameters::Depth::max_intersections_thresh =
-      config.max_intersections_thresh;
   }
 
 

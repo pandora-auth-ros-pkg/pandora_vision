@@ -43,24 +43,149 @@
  **/
 namespace pandora_vision
 {
-  //////////////////// Blob detection - specific parameters ////////////////////
+  ParametersHandler::ParametersHandler()
+  {
+    serverRgb.setCallback(boost::bind(&ParametersHandler::parametersCallbackRgb, this, _1, _2));
+    serverDepth.setCallback(boost::bind(&ParametersHandler::parametersCallbackDepth, this, _1, _2));
+  }
 
-  //  int Parameters::Blob::min_threshold = 0;
-  //  int Parameters::Blob::max_threshold = 1255;
-  //  int Parameters::Blob::threshold_step = 5;
-  //  int Parameters::Blob::min_area = 550;
-  //  int Parameters::Blob::max_area = 300000;
-  //  double Parameters::Blob::min_convexity = 0;
-  //  double Parameters::Blob::max_convexity = 100;
-  //  double Parameters::Blob::min_inertia_ratio = 0;
-  //  double Parameters::Blob::max_circularity = 1.0;
-  //  double Parameters::Blob::min_circularity = 0.3;
-  //  bool Parameters::Blob::filter_by_color = 0;
-  //  bool Parameters::Blob::filter_by_circularity = 1;
-  //
-  //
-  //  ///////////////////////// Debug-specific parameters //////////////////////////
-  //
+  /**
+    @brief The function called when a parameter is changed
+    @param[in] configRgb [const pandora_vision_hole::rgb_cfgConfig&]
+    @param[in] level [const uint32_t]
+    @return void
+   **/
+  void ParametersHandler::parametersCallbackRgb(
+      const pandora_vision_hole_exploration::rgb_cfgConfig& configRgb,
+      const uint32_t& level)
+  {
+
+    //////////////////////////////// Debug parameters ////////////////////////////
+
+    //// Show the rgb image that arrives in the rgb node
+    Parameters::Debug::show_rgb_image =
+      configRgb.show_rgb_image;
+
+    Parameters::Debug::show_std_variance_image =
+      configRgb.show_std_variance_image;
+
+    Parameters::Debug::show_find_holes =
+      configRgb.show_find_holes;
+    Parameters::Debug::show_find_holes_size =
+      configRgb.show_find_holes_size;
+
+    ////////////////////// Parameters specific to the RGB node ///////////////////
+
+    // Std variance, morphology extraction, holes validation thresholds, holes merging thresholds.
+    Parameters::Rgb::original_image_gaussian_blur =
+      configRgb.original_image_gaussian_blur;
+    Parameters::Rgb::std_variance_kernel_size =
+      configRgb.std_variance_kernel_size;
+    Parameters::Rgb::std_variance_threshold =
+      configRgb.std_variance_threshold;
+    Parameters::Rgb::std_variance_morphology_close_size =
+      configRgb.std_variance_morphology_close_size;
+    Parameters::Rgb::std_variance_morphology_open_size =
+      configRgb.std_variance_morphology_open_size;
+    Parameters::Rgb::contour_erode_kernel_size =
+      configRgb.contour_erode_kernel_size;
+    Parameters::Rgb::lower_contour_number_to_test_huge =
+      configRgb.lower_contour_number_to_test_huge;
+    Parameters::Rgb::huge_contour_thresh =
+      configRgb.huge_contour_thresh;
+    Parameters::Rgb::tiny_contour_thresh =
+      configRgb.tiny_contour_thresh;
+    Parameters::Rgb::border_thresh =
+      configRgb.border_thresh;
+    Parameters::Rgb::small_contour_thresh =
+      configRgb.small_contour_thresh;
+    Parameters::Rgb::neighbor_thresh =
+      configRgb.neighbor_thresh;
+    Parameters::Rgb::homog_rect_dims_thresh =
+      configRgb.homog_rect_dims_thresh;
+    Parameters::Rgb::neighbor_value_thresh =
+      configRgb.neighbor_value_thresh;
+    Parameters::Rgb::homogenity_thresh =
+      configRgb.homogenity_thresh;
+    Parameters::Rgb::neighbor_tiny_distance_thresh =
+      configRgb.neighbor_tiny_distance_thresh;
+    Parameters::Rgb::shape_validation =
+      configRgb.shape_validation;
+    Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh =
+      configRgb.one_direction_rectangle_contour_overlap_thresh;
+    Parameters::Rgb::max_intersections_thresh =
+      configRgb.max_intersections_thresh;
+  }
+
+
+  /**
+    @brief The function called when a parameter is changed
+    @param[in] configDepth [const pandora_vision_hole::depth_cfgConfig&]
+    @param[in] level [const uint32_t]
+    @return void
+   **/
+  void ParametersHandler::parametersCallbackDepth(
+      const pandora_vision_hole_exploration::depth_cfgConfig& configDepth,
+      const uint32_t& level)
+  {
+    //  //////////////////////////////// Debug parameters ////////////////////////////
+
+    // Show the depth image that arrives in the depth node
+    Parameters::Debug::show_depth_image =
+      configDepth.show_depth_image;
+
+    Parameters::Debug::show_find_holes =
+      configDepth.show_find_holes;
+    Parameters::Debug::show_find_holes_size =
+      configDepth.show_find_holes_size;
+
+    //  Parameters::Rgb::neighbor_tiny_distance_thresh 
+    //    configDepth.neighbor_tiny_distance_thresh;
+    Parameters::Depth::intensity_threshold =
+      configDepth.intensity_threshold;
+    Parameters::Depth::morphology_open_kernel_size =
+      configDepth.morphology_open_kernel_size;
+    Parameters::Depth::morphology_close_kernel_size =
+      configDepth.morphology_close_kernel_size;
+    Parameters::Depth::border_thresh =
+      configDepth.border_thresh;
+    Parameters::Depth::dilation_kernel_size =
+      configDepth.dilation_kernel_size;
+    Parameters::Depth::rect_diff_thresh =
+      configDepth.rect_diff_thresh;
+    Parameters::Depth::huge_contour_thresh =
+      configDepth.huge_contour_thresh;
+    Parameters::Depth::tiny_contour_thresh =
+      configDepth.tiny_contour_thresh;
+    Parameters::Depth::small_contour_thresh =
+      configDepth.small_contour_thresh;
+    Parameters::Depth::neighbor_thresh =
+      configDepth.neighbor_thresh;
+    Parameters::Depth::neighbor_value_thresh =
+      configDepth.neighbor_value_thresh;
+    Parameters::Depth::depth_similarity_rect_dims_thresh =
+      configDepth.depth_similarity_rect_dims_thresh;
+    Parameters::Depth::merge_thresh =
+      configDepth.merge_thresh;
+    Parameters::Depth::canny_low_threshold =
+      configDepth.canny_low_threshold;
+    Parameters::Depth::canny_ratio =
+      configDepth.canny_ratio;
+    Parameters::Depth::canny_kernel_size =
+      configDepth.canny_kernel_size;
+    Parameters::Depth::filtering_type =
+      configDepth.filtering_type;
+    Parameters::Depth::min_valid_depth =
+      configDepth.min_valid_depth;
+    Parameters::Depth::shape_validation =
+      configDepth.shape_validation;
+    Parameters::Depth::one_direction_rectangle_contour_overlap_thresh =
+      configDepth.one_direction_rectangle_contour_overlap_thresh;
+    Parameters::Depth::max_intersections_thresh =
+      configDepth.max_intersections_thresh;
+  }
+
+
   // Show the depth image that arrives in the depth node
   bool Parameters::Debug::show_depth_image = false;
   //
@@ -88,34 +213,8 @@ namespace pandora_vision
   //
   bool Parameters::Debug::show_find_holes = false;
   int Parameters::Debug::show_find_holes_size = 1000;
-  //
-  //  bool Parameters::Debug::show_produce_edges = false;
-  //  int Parameters::Debug::show_produce_edges_size = 900;
-  //
-  //  bool Parameters::Debug::show_denoise_edges = false;
-  //  int Parameters::Debug::show_denoise_edges_size = 900;
-  //
-  //  bool Parameters::Debug::show_connect_pairs = false;
-  //  int Parameters::Debug::show_connect_pairs_size = 1200;
-  //  bool Parameters::Debug::print_connect_pairs = false;
-  //
-  //  bool Parameters::Debug::show_get_shapes_clear_border = false;
-  //  int Parameters::Debug::show_get_shapes_clear_border_size  = 1200;
-  //
-  //  bool Parameters::Debug::show_check_holes = false;
-  //  int Parameters::Debug::show_check_holes_size = 1200;
-  //
-  //  bool Parameters::Debug::show_merge_holes = false;
-  //  int Parameters::Debug::show_merge_holes_size = 1200;
-  //
-  //
-  //  /////////////////// Parameters specific to the Depth node ////////////////////
-  //
-  //  // The interpolation method for noise removal
-  //  // 0 for averaging the pixel's neighbor values
-  //  // 1 for brushfire near
-  //  // 2 for brushfire far
-  //  int Parameters::Depth::interpolation_method = 0;
+
+
   float Parameters::Depth::intensity_threshold = 0.1;
   int Parameters::Depth::morphology_open_kernel_size = 2;
   int Parameters::Depth::morphology_close_kernel_size = 12;
@@ -137,151 +236,8 @@ namespace pandora_vision
   int Parameters::Depth::shape_validation = 0;
   float Parameters::Depth::one_direction_rectangle_contour_overlap_thresh = 40.0;
   int Parameters::Depth::max_intersections_thresh = 4;
-  //
-  //
-  //  ///////////////////// Edge detection specific parameters /////////////////////
-  //
-  //  // canny parameters
-  //  int Parameters::Edge::canny_ratio = 3;
-  //  int Parameters::Edge::canny_kernel_size = 3;
-  //  int Parameters::Edge::canny_low_threshold = 50;
-  //  int Parameters::Edge::canny_blur_noise_kernel_size = 3;
-  //
-  //  // The opencv edge detection method:
-  //  // 0 for the Canny edge detector
-  //  // 1 for the Scharr edge detector
-  //  // 2 for the Sobel edge detector
-  //  // 3 for the Laplacian edge detector
-  //  // 4 for mixed Scharr / Sobel edge detection
-  //  int Parameters::Edge::edge_detection_method = 2;
-  //
-  //  // Threshold parameters
-  //  int Parameters::Edge::denoised_edges_threshold = 10;
-  //
-  //  // When mixed edge detection is selected, this toggle switch
-  //  // is needed in order to shift execution from one edge detector
-  //  // to the other.
-  //  // 1 for the Scharr edge detector,
-  //  // 2 for the Sobel edge detector
-  //  int Parameters::Edge::mixed_edges_toggle_switch = 1;
-  //
-  //
-  //  ///////////////////////  Histogram related parameters ////////////////////////
-  //
-  //  int Parameters::Histogram::number_of_hue_bins = 30;
-  //  int Parameters::Histogram::number_of_saturation_bins = 32;
-  //  int Parameters::Histogram::number_of_value_bins = 32;
-  //  int Parameters::Histogram::secondary_channel = 2;
-  //
-  //
-  //
-  //  ////////////////////////// Filters-related parameters ////////////////////////
-  //
-  //  // DepthDiff
-  //  int Parameters::Filters::DepthDiff::priority = 5;
-  //  float Parameters::Filters::DepthDiff::threshold = 0.7;
-  //
-  //  // 0 for binary probability assignment on positive depth difference
-  //  // 1 for gaussian probability assignment on positive depth difference
-  //  int Parameters::Filters::DepthDiff::probability_assignment_method = 1;
-  //
-  //  // The mean stardard deviation for the normal distribution
-  //  // incorporated in the depth diff filter.
-  //  float Parameters::Filters::DepthDiff::gaussian_mean = 0.15;
-  //
-  //  float Parameters::Filters::DepthDiff::gaussian_stddev = 0.2;
-  //
-  //  // Min difference in depth between the inside and the outside of a hole
-  //  float Parameters::Filters::DepthDiff::min_depth_cutoff = 0.02;
-  //
-  //  // Max difference in depth between the inside and the outside of a hole
-  //  float Parameters::Filters::DepthDiff::max_depth_cutoff = 0.5;
-  //
-  //
-  //  // DepthArea
-  //  int Parameters::Filters::DepthArea::priority = 5;
-  //  float Parameters::Filters::DepthArea::threshold = 0.7;
-  //
-  //  // DepthHomogeneity
-  //  int Parameters::Filters::DepthHomogeneity::priority = 5;
-  //  float Parameters::Filters::DepthHomogeneity::threshold = 0.7;
-  //
-  //  // RectanglePlaneConstitution
-  //  int Parameters::Filters::RectanglePlaneConstitution::priority = 5;
-  //  float Parameters::Filters::RectanglePlaneConstitution::threshold = 0.7;
-  //
-  //  // IntermediatePointsPlaneConstitution
-  //  int Parameters::Filters::IntermediatePointsPlaneConstitution::priority = 5;
-  //  float Parameters::Filters::IntermediatePointsPlaneConstitution::threshold = 0.7;
-  //
-  //  // ColourHomogeneity
-  //  int Parameters::Filters::ColourHomogeneity::rgbd_priority = 5;
-  //  int Parameters::Filters::ColourHomogeneity::rgb_priority = 5;
-  //
-  //  float Parameters::Filters::ColourHomogeneity::rgbd_threshold = 0.7;
-  //  float Parameters::Filters::ColourHomogeneity::rgb_threshold = 0.7;
-  //
-  //  // LuminosityDiff
-  //  int Parameters::Filters::LuminosityDiff::rgbd_priority = 5;
-  //  int Parameters::Filters::LuminosityDiff::rgb_priority = 5;
-  //
-  //  float Parameters::Filters::LuminosityDiff::rgbd_threshold = 0.7;
-  //  float Parameters::Filters::LuminosityDiff::rgb_threshold = 0.7;
-  //
-  //  // TextureDiff
-  //  int Parameters::Filters::TextureDiff::rgbd_priority = 5;
-  //  int Parameters::Filters::TextureDiff::rgb_priority = 5;
-  //
-  //  float Parameters::Filters::TextureDiff::rgbd_threshold = 0.7;
-  //  float Parameters::Filters::TextureDiff::rgb_threshold = 0.7;
-  //
-  //  // The threshold for texture matching regarding the intermediate points
-  //  float Parameters::Filters::TextureDiff::match_texture_threshold = 0.85;
-  //
-  //  // The threshold for texture matching reagrding the points inside the hole
-  //  float Parameters::Filters::TextureDiff::mismatch_texture_threshold = 0.8;
-  //
-  //  // TextureBackprojection
-  //  int Parameters::Filters::TextureBackprojection::rgbd_priority = 5;
-  //  int Parameters::Filters::TextureBackprojection::rgb_priority = 5;
-  //
-  //  float Parameters::Filters::TextureBackprojection::rgbd_threshold = 0.7;
-  //  float Parameters::Filters::TextureBackprojection::rgb_threshold = 0.7;
-  //
-  //
-  //  /////////////////////// HoleFusion-specific parameters ///////////////////////
-  //
-  //  //-------------------------------- Validation --------------------------------
-  //
-  //  // The holes' validation process identifier
-  //  int Parameters::HoleFusion::Validation::validation_process = 0;
-  //
-  //  // When depth analysis is applicable
-  //  float Parameters::HoleFusion::Validation::rgbd_validity_threshold= 0.54;
-  //
-  //  // When depth analysis is not applicable, we can only rely
-  //  // on RGB analysis
-  //  float Parameters::HoleFusion::Validation::rgb_validity_threshold = 0.40;
-  //
-  //
-  //  // Plane detection parameters
-  //  float Parameters::HoleFusion::Planes::filter_leaf_size = 0.1;
-  //  int Parameters::HoleFusion::Planes::max_iterations = 1000;
-  //  double Parameters::HoleFusion::Planes::num_points_to_exclude = 0.2;
-  //  double Parameters::HoleFusion::Planes::point_to_plane_distance_threshold = 0.08;
-  //
-  //  // Option to enable or disable the merging of holes
-  //  bool Parameters::HoleFusion::Merger::merge_holes = true;
-  //
-  //  // Holes connection - merger
-  //  float Parameters::HoleFusion::Merger::connect_holes_min_distance = 0.1;
-  //  float Parameters::HoleFusion::Merger::connect_holes_max_distance = 0.2;
-  //
-  //  // Merger parameters
-  //  float Parameters::HoleFusion::Merger::depth_diff_threshold = 0.3;
-  //  float Parameters::HoleFusion::Merger::depth_area_threshold = 1.0;
-  //
-  //  // The inflation size of holes' bounding rectangles
+
+
   int Parameters::HoleFusion::bin_to_find_mergable_size = 60;
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
@@ -297,11 +253,9 @@ namespace pandora_vision
   int Parameters::HoleFusion::remove_unstuffed_holes = 1;
   int Parameters::HoleFusion::unstuffed_removal_method = 1;
   float Parameters::HoleFusion::difference_scanline_thresh = 1.0;
-  //
-  //
-  //
+
+
   //  ////////////////// Image representation specific parameters //////////////////
-  //
   // The depth sensor's horizontal field of view in rads
   float Parameters::Image::horizontal_field_of_view =
     static_cast<float>(58) / 180 * M_PI;
@@ -323,58 +277,7 @@ namespace pandora_vision
   // Method to scale the CV_32F image to CV_8UC1
   int Parameters::Image::scale_method = 0;
   //
-  //  // Term criteria for segmentation purposes
-  //  int Parameters::Image::term_criteria_max_iterations = 5;
-  //  double Parameters::Image::term_criteria_max_epsilon = 1;
-  //
-  //
-  //  /////////////////// Outline discovery specific parameters ////////////////////
-  //
-  //  // The detection method used to obtain the outline of a blob
-  //  // 0 for detecting by means of brushfire
-  //  // 1 for detecting by means of raycasting
-  //  int Parameters::Outline::outline_detection_method = 0;
-  //
-  //  // When using raycast instead of brushfire to find the (approximate here)
-  //  // outline of blobs, raycast_keypoint_partitions dictates the number of
-  //  // rays, or equivalently, the number of partitions in which the blob is
-  //  // partitioned in search of the blob's borders
-  //  int Parameters::Outline::raycast_keypoint_partitions = 32;
-  //
-  //  // Loose ends connection parameters
-  //  int Parameters::Outline::AB_to_MO_ratio = 4;
-  //  int Parameters::Outline::minimum_curve_points = 50;
-  //
-  //
-  //  //////////////////// Parameters specific to the RGB node /////////////////////
-  //
-  //  // RGB image segmentation parameters
-  //
-  //  // Selects the method for extracting a RGB image's edges.
-  //  // Choices are via segmentation and via backprojection
-  //  int Parameters::Rgb::edges_extraction_method = 0;
-  //
-  //  // The threshold applied to the backprojection of the RGB image
-  //  // captured by the image sensor
-  //  int Parameters::Rgb::backprojection_threshold = 128;
-  //
-  //  // Parameters specific to the pyrMeanShiftFiltering method
-  //  int Parameters::Rgb::spatial_window_radius = 13;
-  //  int Parameters::Rgb::color_window_radius = 40;
-  //  int Parameters::Rgb::maximum_level_pyramid_segmentation = 2;
-  //
-  //  // True to posterize the product of the segmentation
-  //  bool Parameters::Rgb::posterize_after_segmentation = false;
-  //
-  //  // FloodFill options regarding minimum and maximum colour difference
-  //  int Parameters::Rgb::floodfill_lower_colour_difference = 2;
-  //  int Parameters::Rgb::floodfill_upper_colour_difference = 3;
-  //
-  //  // Watershed-specific parameters
-  //  int Parameters::Rgb::watershed_foreground_dilation_factor = 1;
-  //  int Parameters::Rgb::watershed_foreground_erosion_factor = 1;
-  //  int Parameters::Rgb::watershed_background_dilation_factor = 1;
-  //  int Parameters::Rgb::watershed_background_erosion_factor = 1;
+
 
   int Parameters::Rgb::original_image_gaussian_blur = 3;
   int Parameters::Rgb::std_variance_kernel_size = 5;
