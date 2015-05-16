@@ -47,6 +47,7 @@
 #include "utils/defines.h"
 #include "utils/message_conversions.h"
 #include "utils/parameters.h"
+#include "utils/depth_parameters.h"
 #include "utils/visualization.h"
 
 

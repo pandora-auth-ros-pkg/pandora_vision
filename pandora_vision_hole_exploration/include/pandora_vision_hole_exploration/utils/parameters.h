@@ -41,8 +41,6 @@
 //#include "utils/defines.h"
 #include "utils/parameters.h"
 #include <dynamic_reconfigure/server.h>
-#include <pandora_vision_hole_exploration/depth_cfgConfig.h>
-#include <pandora_vision_hole_exploration/rgb_cfgConfig.h>
 #include <pandora_vision_hole_exploration/hole_fusion_cfgConfig.h>
 #include <pandora_vision_hole_exploration/debug_cfgConfig.h>
 //#include <pandora_vision_hole/filters_priority_cfgConfig.h>
@@ -81,6 +79,11 @@ namespace pandora_vision
       static int unstuffed_removal_method;
       static float difference_scanline_thresh;
       
+    };
+
+
+    struct Debug
+    {
       // Show the holes that each of the depth and RGB nodes transmit to the
       // hole fusion node, on top of their respective origin images
       static bool show_respective_holes;
@@ -91,6 +94,7 @@ namespace pandora_vision
       // In the terminal's window, show the probabilities of candidate holes
       static bool show_probabilities;
     };
+
 
     //    //! Image representation specific parameters
     struct Image

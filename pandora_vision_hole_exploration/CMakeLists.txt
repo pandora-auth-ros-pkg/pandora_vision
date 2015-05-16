@@ -75,6 +75,8 @@ include_directories(
 ################################ Utils library #################################
 add_library(${PROJECT_NAME}_utils
    src/utils/parameters.cpp
+   src/utils/rgb_parameters.cpp
+   src/utils/depth_parameters.cpp
    src/utils/timer.cpp
    src/utils/visualization.cpp
    src/utils/message_conversions.cpp
@@ -132,6 +134,8 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   ## utils ##
 
   include/utils/parameters.h
+  include/utils/rgb_parameters.h
+  include/utils/depth_parameters.h
   include/utils/timer.h
   include/utils/visualization.h
   include/utils/message_conversions.h

@@ -45,7 +45,7 @@ namespace pandora_vision
 {
   DepthParametersHandler::DepthParametersHandler()
   {
-    serverDepth.setCallback(boost::bind(&ParametersHandler::parametersCallbackDepth, this, _1, _2));
+    serverDepth.setCallback(boost::bind(&DepthParametersHandler::parametersCallbackDepth, this, _1, _2));
   }
 
 
@@ -117,25 +117,6 @@ namespace pandora_vision
 
   // Show the depth image that arrives in the depth node
   bool Depth::show_depth_image = false;
-  //
-  // Show the rgb image that arrives in the rgb node
-  bool Depth::show_rgb_image = false;
-  // Show the std variance image after processing rgb image
-  bool Depth::show_std_variance_image = false;
-  //
-  // Show the holes that each of the depth and RGB nodes transmit to the
-  // hole fusion node, on top of their respective origin images
-  bool Depth::show_respective_holes = false;
-  //
-  // Show all valid holes, from either the Depth or RGB source, or
-  // the merges between them
-  bool Depth::show_valid_holes = false;
-  //
-  //  // The product of this package: unique, valid holes
-  //  bool Depth::show_final_holes = false;
-  //
-  // In the terminal's window, show the probabilities of candidate holes
-  bool Depth::show_probabilities = false;
   //
   //  // Show the texture's watersheded backprojection
   //  bool Depth::show_texture = false;

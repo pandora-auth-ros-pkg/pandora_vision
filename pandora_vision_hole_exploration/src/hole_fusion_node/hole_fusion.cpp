@@ -1378,7 +1378,7 @@ namespace pandora_vision
         cv::Mat ROI = image(rgbHolesConveyor -> rectangle[i]);
         cv::meanStdDev (ROI, mean, stddev);
         float distanceVariance = static_cast<float>(stddev.val[0]); 
-        if(avg > Parameters::Depth::min_valid_depth)
+        if(avg > Depth::min_valid_depth)
         {
           if(distanceVariance < Parameters::HoleFusion::rgb_distance_variance_thresh 
               || (Parameters::HoleFusion::remove_unstuffed_holes 

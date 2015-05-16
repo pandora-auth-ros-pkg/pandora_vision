@@ -117,27 +117,10 @@ namespace pandora_vision
   }
 
 
-  // Show the depth image that arrives in the depth node
-  bool Rgb::show_depth_image = false;
-  //
   // Show the rgb image that arrives in the rgb node
   bool Rgb::show_rgb_image = false;
   // Show the std variance image after processing rgb image
   bool Rgb::show_std_variance_image = false;
-  //
-  // Show the holes that each of the depth and RGB nodes transmit to the
-  // hole fusion node, on top of their respective origin images
-  bool Rgb::show_respective_holes = false;
-  //
-  // Show all valid holes, from either the Depth or RGB source, or
-  // the merges between them
-  bool Rgb::show_valid_holes = false;
-  //
-  //  // The product of this package: unique, valid holes
-  //  bool Rgb::show_final_holes = false;
-  //
-  // In the terminal's window, show the probabilities of candidate holes
-  bool Rgb::show_probabilities = false;
   //
   //  // Show the texture's watersheded backprojection
   //  bool Rgb::show_texture = false;

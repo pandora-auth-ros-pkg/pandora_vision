@@ -45,17 +45,17 @@ namespace pandora_vision
 {
   // Show the holes that each of the depth and RGB nodes transmit to the
   // hole fusion node, on top of their respective origin images
-  bool Parameters::HoleFusion::show_respective_holes = false;
+  bool Parameters::Debug::show_respective_holes = false;
   //
   // Show all valid holes, from either the Depth or RGB source, or
   // the merges between them
-  bool Parameters::HoleFusion::show_valid_holes = false;
+  bool Parameters::Debug::show_valid_holes = false;
   //
   //  // The product of this package: unique, valid holes
   //  bool HoleFusion::show_final_holes = false;
   //
   // In the terminal's window, show the probabilities of candidate holes
-  bool Parameters::HoleFusion::show_probabilities = false;
+  bool Parameters::Debug::show_probabilities = false;
 
 
   int Parameters::HoleFusion::bin_to_find_mergable_size = 60;

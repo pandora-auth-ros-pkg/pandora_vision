@@ -50,7 +50,7 @@ namespace pandora_vision
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
         this->accessProcessorNh()->getNamespace());
-    ParametersHandler_ = new ParametersHandler();
+    DepthParametersHandler_ = new DepthParametersHandler();
   }
 
 
@@ -90,7 +90,7 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if(Depth::show_find_holes) // Debug
     {
       cv::Mat tmp;
       depthImage.copyTo(tmp);
@@ -112,7 +112,7 @@ namespace pandora_vision
         sum += depthImage.at<float>(row, col);
       }
     float avg = sum / (depthImage.rows * depthImage.cols);
-    if(avg > Parameters::Depth::min_valid_depth)
+    if(avg > Depth::min_valid_depth)
     {
 
       // Initial filtering of contours variant from the background
@@ -122,7 +122,7 @@ namespace pandora_vision
           &filteredImage);
 
 #ifdef DEBUG_SHOW
-      if(Parameters::Debug::show_find_holes) // Debug
+      if(Depth::show_find_holes) // Debug
       {
         cv::Mat tmp;
         filteredImage.copyTo(tmp);
@@ -176,7 +176,7 @@ namespace pandora_vision
       conveyor.outline = outlines;
 
 #ifdef DEBUG_SHOW
-      if(Parameters::Debug::show_find_holes) // Debug
+      if(Depth::show_find_holes) // Debug
       {
         std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
         msg += STR(" : Initial keypoints");
@@ -187,7 +187,7 @@ namespace pandora_vision
 
 
 #ifdef DEBUG_SHOW
-      if (Parameters::Debug::show_find_holes)
+      if (Depth::show_find_holes)
       {
         msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
         msg += STR(" : Blobs");
@@ -204,10 +204,10 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-      if (Parameters::Debug::show_find_holes)
+      if (Depth::show_find_holes)
       {
         Visualization::multipleShow("Depth node", imgs, msgs,
-            Parameters::Debug::show_find_holes_size, 1);
+            Depth::show_find_holes_size, 1);
       }
 #endif
     }
@@ -242,15 +242,15 @@ namespace pandora_vision
       Visualization::scaleImageForVisualization(
           depthImage,
           0);
-    if(Parameters::Depth::filtering_type == 0)
+    if(Depth::filtering_type == 0)
     {
       cv::threshold(
           visualizableDepthImage, 
           (*filteredImage), 
-          Parameters::Depth::intensity_threshold, 
+          Depth::intensity_threshold, 
           1.0, 
           CV_THRESH_BINARY);
-      int morphologyKernel = Parameters::Depth::morphology_open_kernel_size;
+      int morphologyKernel = Depth::morphology_open_kernel_size;
       cv::Mat structuringElement = 
         cv::getStructuringElement(
             cv::MORPH_ELLIPSE, 
@@ -260,7 +260,7 @@ namespace pandora_vision
           (*filteredImage), 
           cv::MORPH_OPEN, 
           structuringElement );
-      morphologyKernel = Parameters::Depth::morphology_close_kernel_size;
+      morphologyKernel = Depth::morphology_close_kernel_size;
       structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
       cv::morphologyEx((*filteredImage), (*filteredImage), cv::MORPH_CLOSE, structuringElement);
     }
@@ -270,23 +270,23 @@ namespace pandora_vision
       cv::Canny(
           visualizableDepthImage, 
           temp, 
-          Parameters::Depth::canny_low_threshold, 
-          Parameters::Depth::canny_low_threshold * Parameters::Depth::canny_ratio, 
-          Parameters::Depth::canny_kernel_size);
+          Depth::canny_low_threshold, 
+          Depth::canny_low_threshold * Depth::canny_ratio, 
+          Depth::canny_kernel_size);
       //apply canny mask
       visualizableDepthImage.copyTo((*filteredImage), temp);
     }
-    for(int i = 0; i < Parameters::Depth::border_thresh; i ++)
+    for(int i = 0; i < Depth::border_thresh; i ++)
       for(int j = 0; j < (*filteredImage).cols; j ++)
         (*filteredImage).at<uchar>(i, j) = 0;
-    for(int i = (*filteredImage).rows - Parameters::Depth::border_thresh; i < (*filteredImage).rows; i ++)
+    for(int i = (*filteredImage).rows - Depth::border_thresh; i < (*filteredImage).rows; i ++)
       for(int j = 0; j < (*filteredImage).cols; j ++)
         (*filteredImage).at<uchar>(i, j) = 0;
     for(int i = 0; i < (*filteredImage).rows; i ++)
-      for(int j = 0; j < Parameters::Depth::border_thresh; j ++)
+      for(int j = 0; j < Depth::border_thresh; j ++)
         (*filteredImage).at<uchar>(i, j) = 0;
     for(int i = 0; i < (*filteredImage).rows; i ++)
-      for(int j = (*filteredImage).cols - Parameters::Depth::border_thresh; j < (*filteredImage).cols; j ++)
+      for(int j = (*filteredImage).cols - Depth::border_thresh; j < (*filteredImage).cols; j ++)
         (*filteredImage).at<uchar>(i, j) = 0;
   }
 
@@ -302,7 +302,7 @@ namespace pandora_vision
       std::vector<std::vector<cv::Point> >* contours)
   {
     cv::Mat temp;
-    int dilationKernel = Parameters::Depth::dilation_kernel_size;
+    int dilationKernel = Depth::dilation_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(dilationKernel, dilationKernel));
     cv::dilate(filteredImage, filteredImage, structuringElement);
     cv::vector<cv::Vec4i> hierarchy;
@@ -384,8 +384,8 @@ namespace pandora_vision
               contours, 
               realContours);
         if((*realContours).at(i))
-          if((*contourWidth)[i] > Parameters::Depth::rect_diff_thresh * (*contourHeight)[i] 
-              || (*contourHeight)[i] > Parameters::Depth::rect_diff_thresh * (*contourWidth)[i])
+          if((*contourWidth)[i] > Depth::rect_diff_thresh * (*contourHeight)[i] 
+              || (*contourHeight)[i] > Depth::rect_diff_thresh * (*contourWidth)[i])
             (*realContours)[i] = false;
       }
     }
@@ -424,12 +424,12 @@ namespace pandora_vision
       std::vector<bool>* realContours)
   {
     int sumWhites = 0;
-    if(cv::contourArea(contours[ci]) > Parameters::Depth::huge_contour_thresh 
-        || cv::contourArea(contours[ci]) < Parameters::Depth::tiny_contour_thresh)
+    if(cv::contourArea(contours[ci]) > Depth::huge_contour_thresh 
+        || cv::contourArea(contours[ci]) < Depth::tiny_contour_thresh)
       return false;
     else
     {
-      if(Parameters::Depth::shape_validation)
+      if(Depth::shape_validation)
         validateShape(image, contours, boundRect, ci, &(*realContours));
       if((*realContours)[ci])
       {
@@ -438,11 +438,11 @@ namespace pandora_vision
           if(i != ci)
           {
             if((*realContours)[i] 
-                && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Parameters::Depth::neighbor_thresh) 
-                && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Parameters::Depth::neighbor_thresh) 
+                && (std::abs((*mcv)[ci].x - (*mcv)[i].x) < Depth::neighbor_thresh) 
+                && (std::abs((*mcv)[ci].y - (*mcv)[i].y) < Depth::neighbor_thresh) 
                 && (std::abs(static_cast<int>(image.at<uchar>((*mcv)[ci].y, (*mcv)[ci].x)) 
                     - static_cast<int>(image.at<uchar>((*mcv)[i].y, (*mcv)[i].x))) 
-                  < Parameters::Depth::neighbor_value_thresh))
+                  < Depth::neighbor_value_thresh))
             {
               int upperX;
               int upperY;
@@ -467,11 +467,11 @@ namespace pandora_vision
               cv::Mat ROI = image(boundRect[i]);
               cv::Scalar otherAvg = cv::mean(ROI);
               int homogRectWidth = std::abs(lowerX - upperX);
-              if(homogRectWidth < Parameters::Depth::depth_similarity_rect_dims_thresh)
-                homogRectWidth = Parameters::Depth::depth_similarity_rect_dims_thresh;
+              if(homogRectWidth < Depth::depth_similarity_rect_dims_thresh)
+                homogRectWidth = Depth::depth_similarity_rect_dims_thresh;
               int homogRectHeight = std::abs(lowerY - upperY);
-              if(homogRectHeight < Parameters::Depth::depth_similarity_rect_dims_thresh)
-                homogRectHeight = Parameters::Depth::depth_similarity_rect_dims_thresh;
+              if(homogRectHeight < Depth::depth_similarity_rect_dims_thresh)
+                homogRectHeight = Depth::depth_similarity_rect_dims_thresh;
               if(upperX + homogRectWidth > image.cols)
                 homogRectWidth = image.cols - upperX - 1;
               if(upperY + homogRectHeight > image.rows)
@@ -496,7 +496,7 @@ namespace pandora_vision
                       + pow((*mcv)[i].x - (*mcv)[ci].x, 2)));
               float mergeProbability = sumBlacks * 0.5 + euclideanDistance * 0.5;
               //std::cout << mergeProbability << "\n";
-              if(mergeProbability > Parameters::Depth::merge_thresh)
+              if(mergeProbability > Depth::merge_thresh)
               {
                 if((*contourLabel).find(std::make_pair(i, ci)) == (*contourLabel).end())
                 {
@@ -602,11 +602,11 @@ namespace pandora_vision
     float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
 
     if((boundRect[ci].height / avgPixelsInsideY >= 
-          Parameters::Depth::one_direction_rectangle_contour_overlap_thresh 
+          Depth::one_direction_rectangle_contour_overlap_thresh 
           || boundRect[ci].width / avgPixelsInsideX >= 
-          Parameters::Depth::one_direction_rectangle_contour_overlap_thresh)
-        && (maxIntersectionsX > Parameters::Depth::max_intersections_thresh
-          || maxIntersectionsY > Parameters::Depth::max_intersections_thresh))
+          Depth::one_direction_rectangle_contour_overlap_thresh)
+        && (maxIntersectionsX > Depth::max_intersections_thresh
+          || maxIntersectionsY > Depth::max_intersections_thresh))
       (*realContours)[ci] = false;
 
   }
@@ -694,7 +694,7 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_depth_image)
+    if (Depth::show_depth_image)
     {
       Visualization::showScaled("Depth image", input->getImage(), 1);
     }

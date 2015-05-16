@@ -41,14 +41,7 @@
 //#include "utils/defines.h"
 #include "utils/parameters.h"
 #include <dynamic_reconfigure/server.h>
-#include <pandora_vision_hole_exploration/depth_cfgConfig.h>
 #include <pandora_vision_hole_exploration/rgb_cfgConfig.h>
-#include <pandora_vision_hole_exploration/hole_fusion_cfgConfig.h>
-#include <pandora_vision_hole_exploration/debug_cfgConfig.h>
-//#include <pandora_vision_hole/filters_priority_cfgConfig.h>
-//#include <pandora_vision_hole/filters_thresholds_cfgConfig.h>
-#include <pandora_vision_hole_exploration/general_cfgConfig.h>
-#include <pandora_vision_hole_exploration/validity_cfgConfig.h>
 
 /**
   @namespace pandora_vision
@@ -104,27 +97,10 @@ namespace pandora_vision
     static float one_direction_rectangle_contour_overlap_thresh;
     static int max_intersections_thresh;
     
-    // Show the depth image that arrives in the depth node
-    static bool show_depth_image;
-
     //Show the rgb image that arrives in the rgb node
     static bool show_rgb_image;
     //Show the std variance image after rgb image processing
     static bool show_std_variance_image;
-    //
-    //      // Show the holes that each of the depth and RGB nodes transmit to the
-    // hole fusion node, on top of their respective origin images
-    static bool show_respective_holes;
-    //
-    // Show all valid holes, from either the Depth or RGB source, or
-    // the merges between them
-    static bool show_valid_holes;
-    // In the terminal's window, show the probabilities of candidate holes
-    static bool show_probabilities;
-    //
-    //      // Show the texture's watersheded backprojection
-    //      static bool show_texture;
-    //
     static bool show_find_holes;
     static int show_find_holes_size;
   };

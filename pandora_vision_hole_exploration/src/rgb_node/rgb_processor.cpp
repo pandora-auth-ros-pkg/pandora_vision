@@ -50,7 +50,7 @@ namespace pandora_vision
   {
     ROS_INFO_STREAM("["+this->getName()+"] processor nh processor : "+
         this->accessProcessorNh()->getNamespace());
-    ParametersHandler_ = new ParametersHandler();
+    RgbParametersHandler_ = new RgbParametersHandler();
   }
 
 
@@ -87,7 +87,7 @@ namespace pandora_vision
 #endif
     //
 #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if(Rgb::show_find_holes) // Debug
     {
       cv::Mat tmp;
       rgbImage.copyTo(tmp);
@@ -105,7 +105,7 @@ namespace pandora_vision
         &bigVarianceContours);
 
 #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if(Rgb::show_find_holes) // Debug
     {
       cv::Mat tmp;
       bigVarianceContours.copyTo(tmp);
@@ -161,7 +161,7 @@ namespace pandora_vision
     conveyor.outline = outlines;
 
 #ifdef DEBUG_SHOW
-    if(Parameters::Debug::show_find_holes) // Debug
+    if(Rgb::show_find_holes) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Initial keypoints");
@@ -171,7 +171,7 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)
+    if (Rgb::show_find_holes)
     {
       msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += STR(" : Blobs");
@@ -188,10 +188,10 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_find_holes)
+    if (Rgb::show_find_holes)
     {
       Visualization::multipleShow("RGB node", imgs, msgs,
-          Parameters::Debug::show_find_holes_size, 1);
+          Rgb::show_find_holes_size, 1);
     }
 #endif
 
@@ -212,13 +212,13 @@ namespace pandora_vision
    **/
   void RgbProcessor::computeVarianceImage(const cv::Mat& rgbImage, cv::Mat* bigVarianceContours)
   {
-    cv::GaussianBlur(rgbImage, rgbImage, cv::Size(0, 0), Parameters::Rgb::original_image_gaussian_blur);
+    cv::GaussianBlur(rgbImage, rgbImage, cv::Size(0, 0), Rgb::original_image_gaussian_blur);
 
     cv::Mat image32f;
     rgbImage.convertTo(image32f, CV_32F);
 
     cv::Mat mu;
-    int windowSize = Parameters::Rgb::std_variance_kernel_size;
+    int windowSize = Rgb::std_variance_kernel_size;
     cv::blur(image32f, mu, cv::Size(windowSize, windowSize));
 
     cv::Mat mu2;
@@ -239,21 +239,21 @@ namespace pandora_vision
     cv::threshold(
         (*bigVarianceContours), 
         (*bigVarianceContours), 
-        Parameters::Rgb::std_variance_threshold, 
+        Rgb::std_variance_threshold, 
         255, 
         CV_THRESH_BINARY);
 
-    int morphologyKernel = Parameters::Rgb::std_variance_morphology_close_size;
+    int morphologyKernel = Rgb::std_variance_morphology_close_size;
     cv::Mat structuringElement = 
       cv::getStructuringElement(
           cv::MORPH_ELLIPSE, 
           cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx((*bigVarianceContours), (*bigVarianceContours), cv::MORPH_CLOSE, structuringElement);
-    morphologyKernel = Parameters::Rgb::std_variance_morphology_open_size;
+    morphologyKernel = Rgb::std_variance_morphology_open_size;
     structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx((*bigVarianceContours), (*bigVarianceContours), cv::MORPH_OPEN, structuringElement );
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_std_variance_image)
+    if (Rgb::show_std_variance_image)
     {
       Visualization::show("Std variance image", (*bigVarianceContours), 1);
     }
@@ -269,7 +269,7 @@ namespace pandora_vision
    **/
   void RgbProcessor::detectContours(const cv::Mat& bigVarianceContours, std::vector<std::vector<cv::Point> >* contours)
   {
-    int erodeKernel = Parameters::Rgb::contour_erode_kernel_size;
+    int erodeKernel = Rgb::contour_erode_kernel_size;
     cv::Mat structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(erodeKernel, erodeKernel));
     cv::erode(bigVarianceContours, bigVarianceContours, structuringElement);
     cv::vector<cv::Vec4i> hierarchy;
@@ -331,22 +331,22 @@ namespace pandora_vision
   {
     for(int ci = 0; ci < contours.size(); ci ++)
     {
-      if(Parameters::Rgb::shape_validation)
+      if(Rgb::shape_validation)
         validateShape(image, contours, boundRect, ci, &(*realContours));
       if((*realContours)[ci])
 
-        if((contours.size() > Parameters::Rgb::lower_contour_number_to_test_huge 
-              && cv::contourArea(contours[ci]) > Parameters::Rgb::huge_contour_thresh))
+        if((contours.size() > Rgb::lower_contour_number_to_test_huge 
+              && cv::contourArea(contours[ci]) > Rgb::huge_contour_thresh))
         {
           (*realContours)[ci] = false;
           continue;
         }
-        else if(cv::contourArea(contours[ci]) < Parameters::Rgb::tiny_contour_thresh)
+        else if(cv::contourArea(contours[ci]) < Rgb::tiny_contour_thresh)
         {
-          if((*mc)[ci].x < Parameters::Rgb::border_thresh 
-              || (*mc)[ci].y < Parameters::Rgb::border_thresh 
-              || (image.cols - (*mc)[ci].x) < Parameters::Rgb::border_thresh 
-              || (image.rows - (*mc)[ci].y) < Parameters::Rgb::border_thresh)
+          if((*mc)[ci].x < Rgb::border_thresh 
+              || (*mc)[ci].y < Rgb::border_thresh 
+              || (image.cols - (*mc)[ci].x) < Rgb::border_thresh 
+              || (image.rows - (*mc)[ci].y) < Rgb::border_thresh)
           {
             (*realContours)[ci] = false;
             continue;
@@ -362,8 +362,8 @@ namespace pandora_vision
             if(i != ci)
             {
               if((*realContours)[i] 
-                  && (std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_thresh) 
-                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_thresh))
+                  && (std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_thresh) 
+                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_thresh))
               {
                 int upperX;
                 int upperY;
@@ -388,11 +388,11 @@ namespace pandora_vision
                 cv::Mat ROI = image(boundRect[i]);
                 cv::Scalar otherAvg = cv::mean(ROI);
                 int homogRectWidth = std::abs(lowerX - upperX);
-                if(homogRectWidth < Parameters::Rgb::homog_rect_dims_thresh)
-                  homogRectWidth = Parameters::Rgb::homog_rect_dims_thresh;
+                if(homogRectWidth < Rgb::homog_rect_dims_thresh)
+                  homogRectWidth = Rgb::homog_rect_dims_thresh;
                 int homogRectHeight = abs(lowerY - upperY);
-                if(homogRectHeight < Parameters::Rgb::homog_rect_dims_thresh)
-                  homogRectHeight = Parameters::Rgb::homog_rect_dims_thresh;
+                if(homogRectHeight < Rgb::homog_rect_dims_thresh)
+                  homogRectHeight = Rgb::homog_rect_dims_thresh;
                 if(upperX + homogRectWidth > image.cols)
                   homogRectWidth = image.cols - upperX - 1;
                 if(upperY + homogRectHeight > image.rows)
@@ -409,10 +409,10 @@ namespace pandora_vision
                 HaralickFeaturesExtractor haralickFeaturesDetector_;
                 haralickFeaturesDetector_.findHaralickFeatures(ROI);
                 std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
-                if((((std::abs(curAvg[0] - otherAvg[0]) < Parameters::Rgb::neighbor_value_thresh) 
-                        && haralickFeatures[0] > Parameters::Rgb::homogenity_thresh)) 
-                    || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Parameters::Rgb::neighbor_tiny_distance_thresh) 
-                        && (std::abs((*mc)[ci].y - (*mc)[i].y) < Parameters::Rgb::neighbor_tiny_distance_thresh)) 
+                if((((std::abs(curAvg[0] - otherAvg[0]) < Rgb::neighbor_value_thresh) 
+                        && haralickFeatures[0] > Rgb::homogenity_thresh)) 
+                    || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_tiny_distance_thresh) 
+                        && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_tiny_distance_thresh)) 
                       && false))
                 {
                   if(cv::contourArea(contours[i]) > cv::contourArea(contours[ci]))
@@ -454,8 +454,8 @@ namespace pandora_vision
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i])
-        if((*contourWidth)[i] > Parameters::Rgb::rect_diff_thresh * (*contourHeight)[i] 
-            || (*contourHeight)[i] > Parameters::Rgb::rect_diff_thresh * (*contourWidth)[i])
+        if((*contourWidth)[i] > Rgb::rect_diff_thresh * (*contourHeight)[i] 
+            || (*contourHeight)[i] > Rgb::rect_diff_thresh * (*contourWidth)[i])
           (*realContours)[i] = false;
     }
   }
@@ -547,11 +547,11 @@ namespace pandora_vision
     float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
 
     if ((boundRect[ci].height / avgPixelsInsideY >= 
-          Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh 
+          Rgb::one_direction_rectangle_contour_overlap_thresh 
           || boundRect[ci].width / avgPixelsInsideX >= 
-          Parameters::Rgb::one_direction_rectangle_contour_overlap_thresh)
-        && (maxIntersectionsX > Parameters::Rgb::max_intersections_thresh
-          || maxIntersectionsY > Parameters::Rgb::max_intersections_thresh))
+          Rgb::one_direction_rectangle_contour_overlap_thresh)
+        && (maxIntersectionsX > Rgb::max_intersections_thresh
+          || maxIntersectionsY > Rgb::max_intersections_thresh))
       (*realContours)[ci] = false;
   }
   
@@ -568,7 +568,7 @@ namespace pandora_vision
 #endif
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_rgb_image)
+    if (Rgb::show_rgb_image)
     {
       Visualization::show("RGB image", input->getImage(), 1);
     }

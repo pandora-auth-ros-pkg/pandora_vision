@@ -42,7 +42,7 @@
 #include "pandora_vision_common/bbox_poi.h"
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
-#include "utils/parameters.h"
+#include "utils/depth_parameters.h"
 #include "utils/visualization.h"
 
 /**
@@ -192,7 +192,7 @@ namespace pandora_vision
       virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
     private:
-      ParametersHandler* ParametersHandler_;
+      DepthParametersHandler* DepthParametersHandler_;
 
   };
 

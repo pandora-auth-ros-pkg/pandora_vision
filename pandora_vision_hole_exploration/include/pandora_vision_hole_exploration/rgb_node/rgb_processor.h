@@ -43,7 +43,7 @@
 #include "utils/message_conversions.h"
 #include "utils/holes_conveyor.h"
 #include "utils/haralickfeature_extractor.h"
-#include "utils/parameters.h"
+#include "utils/rgb_parameters.h"
 #include "utils/visualization.h"
 
 /**
@@ -139,7 +139,7 @@ namespace pandora_vision
       virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
     private:
-      ParametersHandler* ParametersHandler_;
+      RgbParametersHandler* RgbParametersHandler_;
     
   };
 
