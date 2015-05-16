@@ -55,7 +55,7 @@ class RandomDatasetCreator(object):
     def __init__(self, srcImagePath, srcAnnotationsPath,
                  srcAnnotationsFileName, dstImagePath, dstAnnotationsPath,
                  dstAnnotationsFileName, desiredDatasetSize,
-                 saveRemainingImages = False):
+                 saveRemainingImages =False, positivesPercentage=0):
         """ Initialize class member variables.
 
             Parameters
@@ -74,6 +74,8 @@ class RandomDatasetCreator(object):
             desiredDatasetSize: Size of the desired dataset.
             saveRemainingImages: Flag indicating whether the non chosen images
             from the initial dataset will be saved. Default value = False.
+            positivesPercentage: The percentage of the positives images of the
+            new dataset.
         """
 
         self.annotationsDict = defaultdict(list)
@@ -85,8 +87,8 @@ class RandomDatasetCreator(object):
         self.newNegativeImageNames = []
         self.numPositives = 0
         self.numNegatives = 0
-        self.positivesPercentage = 0
         self.desiredDatasetSize = int(desiredDatasetSize)
+        self.positivesPercentage = float(positivesPercentage)
 
         self.srcImagePath = srcImagePath
         self.srcAnnotationsPath = srcAnnotationsPath
@@ -140,8 +142,9 @@ class RandomDatasetCreator(object):
             print "ERROR: Not enough images to create a dataset"
             print "Available Images:", totalNumImages
             exit(1)
-        self.positivesPercentage = (float(self.numPositives) /
-                                    totalNumImages)
+        if self.positivesPercentage == 0:
+            self.positivesPercentage = (float(self.numPositives) /
+                                        totalNumImages)
         annotationsFile.close()
 
     def createAnnotationsFile(self):
@@ -302,6 +305,16 @@ if __name__ == "__main__":
     dstAnnotationsFileName = raw_input("-->")
     print "Type the desired dataset size"
     desiredDatasetSize = raw_input("-->")
+    print "Would you like to retain the positive/negative image ratio? If "\
+          "so, press [y]."
+    imageRatio = raw_input("-->")
+    if imageRatio != "y":
+        print "Type the ratio of the positive images in regard to the new "\
+                "dataset size"
+        positivesPercentage = raw_input("-->")
+    else:
+        positivesPercentage = 0
+
     print "(Optional) Do you want to save the remaining images?"
     print "If so, press [y]. Every other key will be considered as a no."
     saveRemainingImages = raw_input("-->")
@@ -321,6 +334,7 @@ if __name__ == "__main__":
                                        srcAnnotationsFileName, dstImagePath,
                                        dstAnnotationsPath,
                                        dstAnnotationsFileName,
-                                       desiredDatasetSize, flag)
+                                       desiredDatasetSize, flag,
+                                       positivesPercentage)
     randDataset.createNewDatasetAnnotations()
     print "Process is finished successfully!"
