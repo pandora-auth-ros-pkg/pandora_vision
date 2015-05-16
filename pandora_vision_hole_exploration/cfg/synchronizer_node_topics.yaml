@@ -6,5 +6,5 @@ subscribed_topics:
 
 published_topics:
   point_cloud_internal_topic: synchronized/depth/points
-  depth_image_topic: /pandora_vision_hole_exploration_depth/synchronized/depth/image
-  rgb_image_topic: /pandora_vision_hole_exploration_rgb/synchronized/rgb/image
+  depth_image_topic: pandora_vision_hole_exploration_depth/synchronized/depth/image
+  rgb_image_topic: pandora_vision_hole_exploration_rgb/synchronized/rgb/image

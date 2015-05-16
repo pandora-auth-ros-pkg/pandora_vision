@@ -270,7 +270,6 @@ namespace pandora_vision
     // If the RGB candidate holes and the RGB image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    ROS_INFO("nodesReady %d \n", numNodesReady_);
     if (numNodesReady_ == 2)
     {
       numNodesReady_ = 0;

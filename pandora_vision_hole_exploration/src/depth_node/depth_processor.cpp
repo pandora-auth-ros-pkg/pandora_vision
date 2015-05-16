@@ -723,10 +723,10 @@ namespace pandora_vision
     Timer::printAllMeansTree();
 #endif
 
-    if (output->pois.empty())
-    {
-      return false;
-    }
+    //if (output->pois.empty())
+    //{
+    //  return false;
+    //}
     return true;
   }
 
