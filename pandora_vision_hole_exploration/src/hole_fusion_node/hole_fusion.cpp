@@ -260,6 +260,7 @@ namespace pandora_vision
     // Unpack the message
     MessageConversions::unpackMessage(depthCandidateHolesVector,
         &depthHolesConveyor_,
+        interpolatedDepthImage_,
         sensor_msgs::image_encodings::TYPE_32FC1);
 
     // The candidate holes acquired from the depth node and the interpolated
@@ -396,6 +397,7 @@ namespace pandora_vision
     // Unpack the message
     MessageConversions::unpackMessage(rgbCandidateHolesVector,
         &rgbHolesConveyor_,
+        rgbImage_,
         sensor_msgs::image_encodings::TYPE_8UC3);
 
     // The candidate holes acquired from the rgb node and the rgb image are set

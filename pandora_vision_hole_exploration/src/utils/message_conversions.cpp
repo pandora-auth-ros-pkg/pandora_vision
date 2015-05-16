@@ -164,21 +164,21 @@ namespace pandora_vision
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
-//  void MessageConversions::extractImageFromHoleDetectorMessageContainer(
-//      const pandora_vision_msgs::CandidateHolesVectorMsg& msg,
-//      cv::Mat* image, const std::string& encoding)
-//  {
-//#ifdef DEBUG_TIME
-//    Timer::start("extractDepthImageFromMessageContainer");
-//#endif
-//
-//    sensor_msgs::Image imageMsg = msg.image;
-//    extractImageFromMessage(imageMsg, image, encoding);
-//
-//#ifdef DEBUG_TIME
-//    Timer::tick("extractDepthImageFromMessageContainer");
-//#endif
-//  }
+  //  void MessageConversions::extractImageFromHoleDetectorMessageContainer(
+  //      const pandora_vision_msgs::CandidateHolesVectorMsg& msg,
+  //      cv::Mat* image, const std::string& encoding)
+  //  {
+  //#ifdef DEBUG_TIME
+  //    Timer::start("extractDepthImageFromMessageContainer");
+  //#endif
+  //
+  //    sensor_msgs::Image imageMsg = msg.image;
+  //    extractImageFromMessage(imageMsg, image, encoding);
+  //
+  //#ifdef DEBUG_TIME
+  //    Timer::tick("extractDepthImageFromMessageContainer");
+  //#endif
+  //  }
 
 
   /**
@@ -194,6 +194,7 @@ namespace pandora_vision
   void MessageConversions::fromCandidateHoleMsgToConveyor(
       const std::vector<pandora_vision_msgs::RegionOfInterest>&
       candidateHolesVector,
+      const cv::Mat& image,
       HolesConveyor* conveyor)
   {
 #ifdef DEBUG_TIME
@@ -208,11 +209,24 @@ namespace pandora_vision
       cv::Point2f keypointTemp;
       keypointTemp.x = candidateHolesVector[i].center.x;
       keypointTemp.y = candidateHolesVector[i].center.y;
+      float upperX = 0, upperY = 0, width, height;
+      upperX = (candidateHolesVector[i].center.x - candidateHolesVector[i].width / 2) > 0 ? 
+        (candidateHolesVector[i].center.x - candidateHolesVector[i].width / 2) :
+        0;  
+      upperY = (candidateHolesVector[i].center.y - candidateHolesVector[i].height / 2) > 0 ? 
+        (candidateHolesVector[i].center.y - candidateHolesVector[i].height / 2) : 
+        0;  
+      width = (upperX + candidateHolesVector[i].width) < image.cols ? 
+        (candidateHolesVector[i].width) : 
+        (image.cols - upperX);
+      height = (upperY + candidateHolesVector[i].height) < image.rows ? 
+        (candidateHolesVector[i].height) : 
+        (image.rows - upperY);
       cv::Rect rectTemp(
-          candidateHolesVector[i].center.x - candidateHolesVector[i].width / 2, 
-          candidateHolesVector[i].center.y - candidateHolesVector[i].height / 2, 
-          candidateHolesVector[i].width,
-          candidateHolesVector[i].height);
+          upperX, 
+          upperY, 
+          width,
+          height);
       mc.push_back(keypointTemp);
       boundRect.push_back(rectTemp);
     }
@@ -242,51 +256,51 @@ namespace pandora_vision
     blob's outline
     @return void
    **/
-//  void MessageConversions::fromCandidateHoleDetectorMsgToConveyor(
-//      const std::vector<pandora_vision_msgs::CandidateHoleMsg>&
-//      candidateHolesVector,
-//      HolesConveyor* conveyor,
-//      const cv::Mat& inImage)
-//  {
-//#ifdef DEBUG_TIME
-//    Timer::start("fromCandidateHoleDetectorMsgToConveyor", "unpackHoleDetectorMessage");
-//#endif
-//
-//    std::vector<cv::Point2f> mc;
-//    std::vector<cv::Rect> boundRect;
-//
-//    for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
-//    {
-//      // Recreate the hole's keypoint
-//      cv::Point2f keypointTemp;
-//      keypointTemp.x = candidateHolesVector[i].keypointX;
-//      keypointTemp.y = candidateHolesVector[i].keypointY;
-//
-//      mc.push_back(keypointTemp);
-//
-//      // Recreate the hole's rectangle points
-//      cv::Rect rectTemp(
-//          candidateHolesVector[i].verticesX[0], 
-//          candidateHolesVector[i].verticesY[0], 
-//          (candidateHolesVector[i].verticesX[0] 
-//           + (candidateHolesVector[i].verticesX[2] - candidateHolesVector[i].verticesX[0]) < inImage.cols) ? 
-//          (candidateHolesVector[i].verticesX[2] - candidateHolesVector[i].verticesX[0]) :
-//          (inImage.cols - candidateHolesVector[i].verticesX[0]),
-//          (candidateHolesVector[i].verticesY[0]
-//           + (candidateHolesVector[i].verticesY[1] - candidateHolesVector[i].verticesY[0]) < inImage.rows) ? 
-//          (candidateHolesVector[i].verticesY[1] - candidateHolesVector[i].verticesY[0]) : 
-//          (inImage.rows - candidateHolesVector[i].verticesY[0]));
-//
-//      boundRect.push_back(rectTemp);
-//    }
-//
-//    conveyor -> keypoint = mc;
-//    conveyor -> rectangle = boundRect;
-//
-//#ifdef DEBUG_TIME
-//    Timer::tick("fromCandidateHoleMsgToConveyor");
-//#endif
-//  }
+  //  void MessageConversions::fromCandidateHoleDetectorMsgToConveyor(
+  //      const std::vector<pandora_vision_msgs::CandidateHoleMsg>&
+  //      candidateHolesVector,
+  //      HolesConveyor* conveyor,
+  //      const cv::Mat& inImage)
+  //  {
+  //#ifdef DEBUG_TIME
+  //    Timer::start("fromCandidateHoleDetectorMsgToConveyor", "unpackHoleDetectorMessage");
+  //#endif
+  //
+  //    std::vector<cv::Point2f> mc;
+  //    std::vector<cv::Rect> boundRect;
+  //
+  //    for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
+  //    {
+  //      // Recreate the hole's keypoint
+  //      cv::Point2f keypointTemp;
+  //      keypointTemp.x = candidateHolesVector[i].keypointX;
+  //      keypointTemp.y = candidateHolesVector[i].keypointY;
+  //
+  //      mc.push_back(keypointTemp);
+  //
+  //      // Recreate the hole's rectangle points
+  //      cv::Rect rectTemp(
+  //          candidateHolesVector[i].verticesX[0], 
+  //          candidateHolesVector[i].verticesY[0], 
+  //          (candidateHolesVector[i].verticesX[0] 
+  //           + (candidateHolesVector[i].verticesX[2] - candidateHolesVector[i].verticesX[0]) < inImage.cols) ? 
+  //          (candidateHolesVector[i].verticesX[2] - candidateHolesVector[i].verticesX[0]) :
+  //          (inImage.cols - candidateHolesVector[i].verticesX[0]),
+  //          (candidateHolesVector[i].verticesY[0]
+  //           + (candidateHolesVector[i].verticesY[1] - candidateHolesVector[i].verticesY[0]) < inImage.rows) ? 
+  //          (candidateHolesVector[i].verticesY[1] - candidateHolesVector[i].verticesY[0]) : 
+  //          (inImage.rows - candidateHolesVector[i].verticesY[0]));
+  //
+  //      boundRect.push_back(rectTemp);
+  //    }
+  //
+  //    conveyor -> keypoint = mc;
+  //    conveyor -> rectangle = boundRect;
+  //
+  //#ifdef DEBUG_TIME
+  //    Timer::tick("fromCandidateHoleMsgToConveyor");
+  //#endif
+  //  }
 
 
   /**
@@ -304,15 +318,17 @@ namespace pandora_vision
   void MessageConversions::unpackMessage(
       const pandora_vision_msgs::RegionOfInterestVector& holesMsg,
       HolesConveyor* conveyor,
+      const cv::Mat& image,
       const std::string& encoding)
   {
 #ifdef DEBUG_TIME
     Timer::start("unpackMessage");
 #endif
 
-      // Recreate the conveyor
+    // Recreate the conveyor
     fromCandidateHoleMsgToConveyor(
         holesMsg.regionsOfInterest,
+        image,
         conveyor);
 
 #ifdef DEBUG_TIME
@@ -338,28 +354,28 @@ namespace pandora_vision
     blob's outline
     @return void
    **/
-//  void MessageConversions::unpackHoleDetectorMessage(
-//      const pandora_vision_msgs::CandidateHolesVectorMsg& holesMsg,
-//      HolesConveyor* conveyor,
-//      cv::Mat* image,
-//      const std::string& encoding)
-//  {
-//#ifdef DEBUG_TIME
-//    Timer::start("unpackHoleDetectorMessage");
-//#endif
-//
-//    // Unpack the image
-//    extractImageFromHoleDetectorMessageContainer(holesMsg, image, encoding);
-//
-//    // Recreate the conveyor
-//    fromCandidateHoleDetectorMsgToConveyor(
-//        holesMsg.candidateHoles,
-//        conveyor,
-//        *image);
-//
-//#ifdef DEBUG_TIME
-//    Timer::tick("unpackHoleDetectorMessage");
-//#endif
-//  }
+  //  void MessageConversions::unpackHoleDetectorMessage(
+  //      const pandora_vision_msgs::CandidateHolesVectorMsg& holesMsg,
+  //      HolesConveyor* conveyor,
+  //      cv::Mat* image,
+  //      const std::string& encoding)
+  //  {
+  //#ifdef DEBUG_TIME
+  //    Timer::start("unpackHoleDetectorMessage");
+  //#endif
+  //
+  //    // Unpack the image
+  //    extractImageFromHoleDetectorMessageContainer(holesMsg, image, encoding);
+  //
+  //    // Recreate the conveyor
+  //    fromCandidateHoleDetectorMsgToConveyor(
+  //        holesMsg.candidateHoles,
+  //        conveyor,
+  //        *image);
+  //
+  //#ifdef DEBUG_TIME
+  //    Timer::tick("unpackHoleDetectorMessage");
+  //#endif
+  //  }
 
 } // namespace pandora_vision

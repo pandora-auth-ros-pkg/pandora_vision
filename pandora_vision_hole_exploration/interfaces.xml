@@ -8,8 +8,8 @@
     <subscriber>/unlock_rgb_depth_synchronizer</subscriber>
 
     <publisher>/synchronized/depth/points</publisher>
-    <publisher>/synchronized/depth/image</publisher>
-    <publisher>/synchronized/rgb/image/</publisher>
+    <publisher>/pandora_vision_hole_exploration/synchronized/depth/image</publisher>
+    <publisher>/pandora_vision_hole_exploration/synchronized/rgb/image</publisher>
 
   </node>
 
@@ -40,10 +40,10 @@
     /hole_fusion_node
 
     <subscriber>/synchronized/depth/points</subscriber>
-    <subscriber>/synchronized/rgb/image</subscriber>
-    <subscriber>/synchronized/depth/image</subscriber>
-    <subscriber>/synchronized/depth/candidate_holes</subscriber>
-    <subscriber>/synchronized/depth/candidate_holes</subscriber>
+    <subscriber>/pandora_vision_hole_exploration/synchronized/rgb/image</subscriber>
+    <subscriber>/pandora_vision_hole_exploration/synchronized/depth/image</subscriber>
+    <subscriber>/pandora_vision_hole_exploration/synchronized/depth/candidate_holes</subscriber>
+    <subscriber>/pandora_vision_hole_exploration/synchronized/rgb/candidate_holes</subscriber>
 
     <publisher>/vision/holes_direction_alert</publisher>
     <publisher>/vision/enhanced_holes</publisher>

@@ -494,6 +494,7 @@ namespace pandora_vision
     // for representationMethod 0
     MessageConversions::fromCandidateHoleMsgToConveyor(
         candidateHolesVector,
+        image,
         &extractedConveyor);
 
     // Check the integrity of the extracted conveyor
@@ -598,6 +599,7 @@ namespace pandora_vision
     MessageConversions::unpackMessage(
         candidateHolesVectorMsg,
         &extractedConveyor,
+        image,
         sensor_msgs::image_encodings::TYPE_8UC1);
 
 

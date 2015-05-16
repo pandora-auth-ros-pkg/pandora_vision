@@ -125,6 +125,7 @@ namespace pandora_vision
       static void fromCandidateHoleMsgToConveyor(
           const std::vector<pandora_vision_msgs::RegionOfInterest>&
           candidateHolesVector,
+          const cv::Mat& image,
           HolesConveyor* conveyor);
 
       /**
@@ -166,6 +167,7 @@ namespace pandora_vision
       static void unpackMessage(
           const pandora_vision_msgs::RegionOfInterestVector& holesMsg,
           HolesConveyor* conveyor,
+          const cv::Mat& image,
           const std::string& encoding);
 
       /**
