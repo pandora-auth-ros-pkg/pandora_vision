@@ -37,8 +37,6 @@
 
 #include "pandora_vision_qrcode/qrCode_detector.h"
 
-#define DEBUG_MODE false
-
 namespace pandora_vision
 {
   QrCodeDetector::QrCodeDetector(const std::string& ns, sensor_processor::Handler* handler) :
@@ -48,6 +46,10 @@ namespace pandora_vision
       this->accessProcessorNh()->getNamespace());
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 0);
     scanner.set_config(zbar::ZBAR_QRCODE, zbar::ZBAR_CFG_ENABLE, 1);
+
+    //!< The dynamic reconfigure parameter's callback
+    server.setCallback(boost::bind(&QrCodeDetector::parametersCallback,
+      this, _1, _2));
 
     std::string debugTopic;
 
@@ -75,6 +77,19 @@ namespace pandora_vision
   }
   
   QrCodeDetector::QrCodeDetector() : VisionProcessor() {}
+
+  /**
+    @brief The function called when a parameter is changed
+    @param[in] config [const pandora_vision_qrcode::qrcode_cfgConfig&]
+    @param[in] level [const uint32_t] The level 
+    @return void
+  **/
+  void QrCodeDetector::parametersCallback(
+    const pandora_vision_qrcode::qrcode_cfgConfig& config,
+    const uint32_t& level)
+  {
+    debugQrcode_ = config.debugEnable;
+  }
 
   /**
     @brief Creates view for debugging purposes.
@@ -107,14 +122,15 @@ namespace pandora_vision
       counter++;
     }
 
-    #if DEBUG_MODE
-    if (!debug_frame.empty())
+    if (debugQrcode_)
     {
-      cv::imshow("[QrCodeNode] processed frame", debug_frame);
-      cv::imshow("[QrCodeNode] input frame", input_frame);
-      cv::waitKey(1);
+      if (!debug_frame.empty())
+      {
+        cv::imshow("[QrCodeNode] processed frame", debug_frame);
+        cv::imshow("[QrCodeNode] input frame", input_frame);
+        cv::waitKey(1);
+      }
     }
-    #endif
   }
 
   /**

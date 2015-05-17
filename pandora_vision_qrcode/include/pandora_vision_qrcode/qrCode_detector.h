@@ -44,6 +44,7 @@
 #include <zbar.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <dynamic_reconfigure/server.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -51,6 +52,7 @@
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_processor.h"
 #include "pandora_vision_qrcode/qrcode_poi.h"
+#include "pandora_vision_qrcode/qrcode_cfgConfig.h"
 
 namespace pandora_vision
 {
@@ -101,6 +103,23 @@ namespace pandora_vision
       
       //!< Debug publisher for QrCodeDetector
       image_transport::Publisher debugPublisher_;
+
+      //!< The dynamic reconfigure parameters' server
+      dynamic_reconfigure::Server<pandora_vision_qrcode::qrcode_cfgConfig>
+        server;
+      //!< The dynamic reconfigure parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_qrcode::qrcode_cfgConfig>
+        ::CallbackType f;
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] config [const pandora_vision_qrcode::qrcode_cfgConfig&]
+        @param[in] level [const uint32_t] The level 
+        @return void
+      **/
+      void parametersCallback(
+        const pandora_vision_qrcode::qrcode_cfgConfig& config,
+        const uint32_t& level);
 
       /**
        * @brief Get parameters referring to Qrcode detection algorithm

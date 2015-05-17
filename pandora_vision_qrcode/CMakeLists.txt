@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     state_manager_msgs
     cv_bridge
     image_transport
+    dynamic_reconfigure
     sensor_msgs
     roslint
     urdf
@@ -20,6 +21,10 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(PkgConfig)
 pkg_check_modules(ZBAR zbar)
+
+generate_dynamic_reconfigure_options(
+  config/pandora_vision_qrcode/qrcode_cfg.cfg
+)
 
 catkin_package(
     #DEPENDS
@@ -32,6 +37,7 @@ catkin_package(
       state_manager_msgs
       cv_bridge
       image_transport
+      dynamic_reconfigure
       sensor_msgs
       urdf
     #INCLUDE_DIRS
@@ -51,6 +57,10 @@ target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
   zbar
 )
+add_dependencies(${PROJECT_NAME}_detector
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
 
 ################# qrcode preprocessor #################
 add_library(${PROJECT_NAME}_preprocessor
@@ -59,9 +69,9 @@ add_library(${PROJECT_NAME}_preprocessor
 target_link_libraries(${PROJECT_NAME}_preprocessor
   ${catkin_LIBRARIES}
 )
-
 add_dependencies(${PROJECT_NAME}_preprocessor
   ${catkin_EXPORTED_TARGETS})
+
 ################# qrcode postprocessor #################
 add_library(${PROJECT_NAME}_postprocessor
   src/qrcode_postprocessor.cpp
