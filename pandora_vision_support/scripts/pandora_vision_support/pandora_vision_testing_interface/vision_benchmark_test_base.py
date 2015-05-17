@@ -92,6 +92,9 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             self.images.append(bridge.cv2_to_imgmsg(currentImg, "bgr8"))
             self.names.append(fileName)
 
+            self.imageWidth = currentImg.shape[1]
+            self.imageHeight = currentImg.shape[0]
+
     def readRosBags(self, imagePath):
         self.images = []
         self.names = []
@@ -131,6 +134,9 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 tempPointCloud.is_dense = msg.is_dense
 
                 self.images.append(tempPointCloud)
+
+                self.imageWidth = tempPointCloud.width
+                self.imageHeight = tempPointCloud.height
 
             self.names.append(fileName)
             currentBag.close()
