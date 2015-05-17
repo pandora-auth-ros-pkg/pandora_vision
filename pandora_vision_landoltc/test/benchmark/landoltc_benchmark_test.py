@@ -16,14 +16,12 @@ PKG_PATH = rospkg.RosPack().get_path(PKG)
 class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
     def test_benchmark(self):
         datasetCamera = rospy.get_param("dataset_camera")
-        camerasList = rospy.get_param("camera_sensors")
-        for ii in xrange(len(camerasList)):
-            if datasetCamera == camerasList[ii]["name"]:
-                self.imageWidth = camerasList[ii]["image_width"]
-                self.imageHeight = camerasList[ii]["image_height"]
-                self.imageHFOV = camerasList[ii]["hfov"]
-                self.imageVFOV = camerasList[ii]["vfov"]
-                break
+        if datasetCamera == "kinect":
+            self.imageHFOV = rospy.get_param("/kinect_rgb_optical_frame/hfov")
+            self.imageVFOV = rospy.get_param("/kinect_rgb_optical_frame/vfov")
+        else:
+            self.imageHFOV = rospy.get_param("/left_camera_optical_frame/hfov")
+            self.imageVFOV = rospy.get_param("/left_camera_optical_frame/vfov")
         self.imageHFOV *= math.pi / 180
         self.imageVFOV *= math.pi / 180
 
