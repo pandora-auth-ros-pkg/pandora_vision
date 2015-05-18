@@ -83,6 +83,9 @@ namespace pandora_vision
       int gaussiansharpenblur;
       double gaussiansharpenweight;
 
+      //<! Debug image topic.
+      std::string debugTopic_;
+
       //!< Debug images publisher flag
       bool debugQrcode_;
 
@@ -102,7 +105,7 @@ namespace pandora_vision
       std::vector<POIPtr> qrcode_list;
       
       //!< Debug publisher for QrCodeDetector
-      image_transport::Publisher debugPublisher_;
+      boost::shared_ptr<image_transport::Publisher> debugPublisherPtr_;
 
       //!< The dynamic reconfigure parameters' server
       dynamic_reconfigure::Server<pandora_vision_qrcode::qrcode_cfgConfig>
