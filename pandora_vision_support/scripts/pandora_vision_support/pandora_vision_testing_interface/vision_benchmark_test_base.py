@@ -393,6 +393,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             suffix = "Alerts"
 
         queueIndex = 0
+
         # Publish image files sequentially and wait for an alert.
         # Confirm the authenticity of the alert using the annotator
         # groundtruth set.
@@ -400,15 +401,19 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             rospy.logdebug("Sending Image %s", imageName)
             timeFlag = False
             startTime = time.clock()
-            self.mockPublish(inputTopic, outputTopic, image)
-            while not timeFlag:
-                elapsedTime = time.clock() - startTime
-                timeFlag = (elapsedTime > maxWaitTime or
-                            (self.repliedList[outputTopic] and
-                             len(self.messageList[outputTopic]) >= 1))
+            self.mockPublish(inputTopic, outputTopic[0], image)
+            # self.mockPublish(inputTopic, outputTopic[1], image)
+            elapsedTime = time.clock() - startTime
 
-            if ((self.repliedList[outputTopic]) and
-               (len(self.messageList[outputTopic]) >= 1)):
+            # while not timeFlag:
+                #elapsedTime = time.clock() - startTime
+                #timeFlag = (elapsedTime > maxWaitTime or
+                            #(self.repliedList[outputTopic[0]] and
+                             #len(self.messageList[outputTopic[0]]) >= 1))
+
+            response = self.messageList[outputTopic[0]]
+            # possibleAlert = self.messageList[outputTopic[1]]
+            if response[0].success:
                 rospy.logdebug("Alert found in Image %s", imageName)
                 rospy.logdebug("Time passed: %f seconds", elapsedTime)
                 truePositivesInImage = 0
