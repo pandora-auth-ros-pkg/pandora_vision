@@ -39,6 +39,10 @@ if __name__ == "__main__":
     subscriberMessagePackage = rospy.get_param("subscriberMessagePackage")
     subscriberMessageType = rospy.get_param("subscriberMessageType")
 
+    subscriberAlertTopic = rospy.get_param("subscriberAlertTopic")
+    subscriberAlertMessagePackage = rospy.get_param("subscriberAlertMessagePackage")
+    subscriberAlertMessageType = rospy.get_param("subscriberAlertMessageType")
+
     subscriber_topics = [
         (subscriberTopic, subscriberMessagePackage, subscriberMessageType)]
     publisher_topics = [
