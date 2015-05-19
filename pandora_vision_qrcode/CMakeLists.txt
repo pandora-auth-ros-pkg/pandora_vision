@@ -51,7 +51,7 @@ include_directories(
 
 ################# qrcode detector #################
 add_library(${PROJECT_NAME}_detector
-  src/qrCode_detector.cpp
+  src/qrcode_detector.cpp
 )
 target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
@@ -61,6 +61,18 @@ add_dependencies(${PROJECT_NAME}_detector
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
+
+################# qrcode processor ################### 
+add_library(${PROJECT_NAME}_processor
+  src/qrcode_processor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_detector
+)
+add_dependencies(${PROJECT_NAME}_processor
+  ${PROJECT_NAME}_detector
+  ${catkin_EXPORTED_TARGETS})
 
 ################# qrcode preprocessor #################
 add_library(${PROJECT_NAME}_preprocessor
@@ -88,7 +100,7 @@ add_library(${PROJECT_NAME}_handler
 )
 target_link_libraries(${PROJECT_NAME}_handler
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_detector
+  ${PROJECT_NAME}_processor
   ${PROJECT_NAME}_preprocessor
   ${PROJECT_NAME}_postprocessor
 )
