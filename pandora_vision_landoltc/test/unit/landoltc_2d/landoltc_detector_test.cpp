@@ -71,7 +71,7 @@ namespace pandora_vision
     cv::Mat gray;
    
     if (input.channels() > 1)
-      cv::cvtColor(input, gray, CV_BGR2GRAY );
+      cv::cvtColor(input, gray, CV_BGR2GRAY);
     else
       gray = input;
 
