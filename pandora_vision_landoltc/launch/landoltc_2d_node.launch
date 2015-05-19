@@ -1,7 +1,7 @@
 <launch>
   
   <node name="landoltc_2d_node" type="pandora_vision_landoltc_2d_node" pkg="pandora_vision_landoltc"
-    respawn="False" ns="/pandora_vision" />
+    respawn="False" ns="/pandora_vision"/>
     
   <rosparam file="$(find pandora_vision_landoltc)/config/pandora_vision_landoltc/landoltc_2d_topics.yaml" 
     command="load" ns="/pandora_vision/pandora_vision_landoltc_2d"/>
