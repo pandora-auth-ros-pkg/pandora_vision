@@ -1,7 +1,7 @@
 <launch>
  <arg name="xtion" default= "false"/>
  <arg name="usb_cam" default= "false"/>
- <arg name="frame_id" default="/left_camera_optical_frame"/>
+ <arg name="frame_id" default="kinect_frame"/>
 
 
   <include file="$(find state_manager)/launch/stateManager.launch" />
@@ -12,16 +12,16 @@
     <param name="kinect/topic_name" value="/kinect/rgb/image_raw" />
     <param name="dataset_path" value="/test/benchmark/images/images_480p"/>
     <param name="dataset_camera" value="kinect"/>
-    <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
-    <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
+    <param name="/kinect_optical_frame/hfov" value="58.0" />
+    <param name="/kinect_optical_frame/vfov" value="45.0" />
   </group>
 
  <group if="$(arg usb_cam)">
     <param name="kinect/topic_name" value="/left_camera/image" />
     <param name="dataset_path" value="/test/benchmark/images/images_720p"/>
     <param name="dataset_camera" value="web_camera"/>
-    <param name="$(arg frame_id)/hfov" value="61.14" />
-    <param name="$(arg frame_id)/vfov" value="48" />
+    <param name="kinect_optical_frame/hfov" value="61.14" />
+    <param name="kinect_optical_frame/vfov" value="48" />
   </group>
 
   <param name="publisherMessagePackage" value="sensor_msgs" />

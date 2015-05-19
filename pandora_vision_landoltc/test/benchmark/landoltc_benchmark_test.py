@@ -16,12 +16,8 @@ PKG_PATH = rospkg.RosPack().get_path(PKG)
 class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
     def test_benchmark(self):
         datasetCamera = rospy.get_param("dataset_camera")
-        if datasetCamera == "kinect":
-            self.imageHFOV = rospy.get_param("/kinect_rgb_optical_frame/hfov")
-            self.imageVFOV = rospy.get_param("/kinect_rgb_optical_frame/vfov")
-        else:
-            self.imageHFOV = rospy.get_param("/left_camera_optical_frame/hfov")
-            self.imageVFOV = rospy.get_param("/left_camera_optical_frame/vfov")
+        self.imageHFOV = rospy.get_param("kinect_optical_frame/hfov")
+        self.imageVFOV = rospy.get_param("kinect_optical_frame/vfov")
         self.imageHFOV *= math.pi / 180
         self.imageVFOV *= math.pi / 180
 
@@ -44,7 +40,8 @@ if __name__ == "__main__":
     subscriberAlertMessageType = rospy.get_param("subscriberAlertMessageType")
 
     subscriber_topics = [
-        (subscriberTopic, subscriberMessagePackage, subscriberMessageType)]
+        (subscriberTopic, subscriberMessagePackage, subscriberMessageType),
+        (subscriberAlertTopic, subscriberAlertMessagePackage, subscriberAlertMessageType)]
     publisher_topics = [
         (publisherTopic, publisherMessagePackage, publisherMessageType)]
     rospy.init_node(NAME, anonymous=True, log_level=rospy.DEBUG)
