@@ -61,6 +61,7 @@ namespace pandora_vision
 
       hazmatAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
       hazmatAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
+      hazmatAlert.info.probability = 0.90;
 
       boost::shared_ptr<HazmatPOI> hazmatPOI(boost::dynamic_pointer_cast<HazmatPOI>(input->pois[ii]));
       hazmatAlert.patternType = hazmatPOI->getPattern();
