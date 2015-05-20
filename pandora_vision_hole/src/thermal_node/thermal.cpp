@@ -62,7 +62,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the thermal node
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      <pandora_vision_hole::CandidateHolesVectorMsg>(
       candidateHolesTopic_, 1000);
 
     // The dynamic reconfigure (thermal) parameter's callback
@@ -126,7 +126,7 @@ namespace pandora_vision
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_);
 
     // Create the candidate holes message
-    pandora_vision_msgs::CandidateHolesVectorMsg thermalCandidateHolesMsg;
+    pandora_vision_hole::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.

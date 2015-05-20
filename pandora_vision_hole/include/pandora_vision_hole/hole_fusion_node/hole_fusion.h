@@ -351,7 +351,7 @@ namespace pandora_vision
         @return void
        **/
       void thermalCandidateHolesCallback(
-        const pandora_vision_msgs::CandidateHolesVectorMsg&
+        const pandora_vision_hole::CandidateHolesVectorMsg&
         thermalCandidateHolesVector);
 
       /**

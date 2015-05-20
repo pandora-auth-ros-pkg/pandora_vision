@@ -42,7 +42,7 @@
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/image_matching.h"
-#include "pandora_vision_msgs/CandidateHolesVectorMsg.h"
+#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 
 /**
   @namespace pandora_vision

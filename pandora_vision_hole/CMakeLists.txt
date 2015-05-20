@@ -63,11 +63,8 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS
     roscpp
-<<<<<<< HEAD
     message_runtime
-=======
     rospy
->>>>>>> progress in rgbdt synch with yaml [ci skip]
     pandora_vision_msgs
     state_manager
     state_manager_msgs

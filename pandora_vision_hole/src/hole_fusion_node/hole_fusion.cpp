@@ -306,7 +306,7 @@ namespace pandora_vision
     @return void
    **/
   void HoleFusion::thermalCandidateHolesCallback(
-    const pandora_vision_msgs::CandidateHolesVectorMsg&
+    const pandora_vision_hole::CandidateHolesVectorMsg&
     thermalCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
