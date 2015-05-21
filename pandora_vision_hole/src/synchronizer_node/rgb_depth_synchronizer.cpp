@@ -408,7 +408,6 @@ namespace pandora_vision
   }
 
 
-
   /**
     @brief The callback executed when the Hole Fusion node requests
     from the synchronizer node to leave its subscription to the
