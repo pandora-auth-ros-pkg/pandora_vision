@@ -50,7 +50,8 @@
 
 namespace pandora_vision
 {
-  class VictimImagePreProcessor : public sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, EnhancedImageStamped>
+  class VictimImagePreProcessor : public sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, 
+  EnhancedImageStamped>
   {
     protected:
        typedef boost::shared_ptr<pandora_vision_msgs::EnhancedImage> EnhancedImagePtr;
