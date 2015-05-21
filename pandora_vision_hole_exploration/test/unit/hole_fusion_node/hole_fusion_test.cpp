@@ -744,7 +744,14 @@ namespace pandora_vision
     HolesConveyor thermalConveyor;
     HolesConveyor preValidatedHoles;
     std::map<int, float> validHolesMap;
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    HoleFusion::mergeHoles(
+        &conveyor, 
+        &depthConveyor, 
+        &thermalConveyor, 
+        depthSquares_, 
+        pointCloud_, 
+        &preValidatedHoles, 
+        &validHolesMap);
 
     if(Parameters::HoleFusion::unstuffed_removal_method == 0)
     {
@@ -784,7 +791,14 @@ namespace pandora_vision
     preValidatedHoles.rectangle.clear();
     validHolesMap.clear();
 
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    HoleFusion::mergeHoles(
+        &conveyor, 
+        &depthConveyor, 
+        &thermalConveyor, 
+        depthSquares_, 
+        pointCloud_, 
+        &preValidatedHoles, 
+        &validHolesMap);
 
     // It is expected that there is only one hole with probability 0.6
     EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
@@ -830,7 +844,14 @@ namespace pandora_vision
     preValidatedHoles.rectangle.clear();
     validHolesMap.clear();
 
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    HoleFusion::mergeHoles(
+        &conveyor, 
+        &depthConveyor, 
+        &thermalConveyor, 
+        depthSquares_, 
+        pointCloud_, 
+        &preValidatedHoles, 
+        &validHolesMap);
 
     // It is expected that there is only one hole with probability 1.0
     // and keypoint at (96.875, 96.875)
@@ -897,7 +918,14 @@ namespace pandora_vision
     thermalConveyor.keypoint.clear();
     thermalConveyor.rectangle.clear();
 
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    HoleFusion::mergeHoles(
+        &conveyor, 
+        &depthConveyor, 
+        &thermalConveyor, 
+        depthSquares_, 
+        pointCloud_, 
+        &preValidatedHoles, 
+        &validHolesMap);
     // It is expected that there are two valid holes those inside small and medium depth variance
     EXPECT_EQ ( 2, preValidatedHoles.rectangle.size());
 
@@ -952,7 +980,14 @@ namespace pandora_vision
     depthConveyor.keypoint.clear();
     depthConveyor.rectangle.clear();
 
-    HoleFusion::mergeHoles(&conveyor, &depthConveyor, &thermalConveyor, depthSquares_, pointCloud_, &preValidatedHoles, &validHolesMap);
+    HoleFusion::mergeHoles(
+        &conveyor, 
+        &depthConveyor, 
+        &thermalConveyor, 
+        depthSquares_, 
+        pointCloud_, 
+        &preValidatedHoles, 
+        &validHolesMap);
     // It is expected that there is one valid hole the onee inside the medium variance square
     EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
 

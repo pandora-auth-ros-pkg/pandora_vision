@@ -136,7 +136,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utils/parameters.h
   include/utils/rgb_parameters.h
   include/utils/depth_parameters.h
-  include/utils/timer.h
+  #include/utils/timer.h
   include/utils/visualization.h
   include/utils/message_conversions.h
   include/utils/defines.h
@@ -144,7 +144,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   include/utils/haralickfeature_extractor.h
 
   src/utils/parameters.cpp
-  src/utils/timer.cpp
+  #src/utils/timer.cpp
   src/utils/visualization.cpp
   src/utils/message_conversions.cpp
   src/utils/holes_conveyor.cpp

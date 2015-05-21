@@ -60,7 +60,9 @@ namespace pandora_vision
   {
     public:
       // The constructors
-      DepthProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      DepthProcessor(
+          const std::string& ns, 
+          sensor_processor::Handler* handler);
       
       DepthProcessor();
       

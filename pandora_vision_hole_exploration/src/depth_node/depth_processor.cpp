@@ -46,7 +46,10 @@ namespace pandora_vision
   /**
     @brief Constructor
    **/
-  DepthProcessor::DepthProcessor(const std::string& ns, sensor_processor::Handler* handler) : VisionProcessor(ns, handler)
+  DepthProcessor::DepthProcessor(
+      const std::string& ns, 
+      sensor_processor::Handler* handler) 
+    : VisionProcessor(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
         this->accessProcessorNh()->getNamespace());
