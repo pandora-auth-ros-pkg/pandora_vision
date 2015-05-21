@@ -136,7 +136,8 @@ namespace pandora_vision
     for (int i = 0;  i < final_victims.size() ; i++)
     {
       if (final_victims[i]->getClassLabel() == 1)
-      {
+      {  
+        counter_++;
         //!< Debug purposes
         if (params_.debug_img || params_.debug_img_publisher)
         {
@@ -210,7 +211,18 @@ namespace pandora_vision
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 60),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+      } 
+
+      if(counter_ == params_.positivesCounter)
+      {
+        std::ostringstream convert;
+        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 255), 1, CV_AA);
+
       }
+
       {
         std::ostringstream convert;
         convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
@@ -245,7 +257,11 @@ namespace pandora_vision
       cv::waitKey(30);
     }
     
+    if(counter_ >= params_.positivesCounter)
+    { 
+    counter_ = 0;
     return final_victims;
+    } 
   }
   
   
