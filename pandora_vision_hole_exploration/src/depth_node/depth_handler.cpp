@@ -43,6 +43,9 @@ namespace pandora_vision
     DepthPostProcessor>(ns)
   {
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
+    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
   }
   
   DepthHandler::~DepthHandler() {}
