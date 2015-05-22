@@ -46,6 +46,7 @@ generate_dynamic_reconfigure_options(
   cfg/hole_fusion_node_cfg/general_cfg.cfg
   cfg/hole_fusion_node_cfg/validity_cfg.cfg
   cfg/rgb_node_cfg/rgb_cfg.cfg
+  cfg/temperatures_node_cfg/temperatures_cfg.cfg
   )
 
 add_message_files(

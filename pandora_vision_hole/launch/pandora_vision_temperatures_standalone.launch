@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- ============= The namespace ==================== -->
+
+  <arg name="namespace" default="temperature_detector" />
+
+  <arg name="output" default="screen" />
+
+
+  <node
+    name="thermal_temperatures_node"
+    type="thermal_temperatures_node"
+    pkg="pandora_vision_hole"
+    respawn="False"
+    output="$(arg output)"
+    ns="$(arg namespace)">
+
+    <rosparam file="$(find pandora_vision_hole)/cfg/temperatures_node_topics.yaml"
+    command="load" />    
+
+  </node>
+
+</launch>

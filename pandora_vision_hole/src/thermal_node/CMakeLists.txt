@@ -1,6 +1,7 @@
 add_library(${PROJECT_NAME}_thermal
   thermal.cpp
   hole_detector.cpp
+  temperatures.cpp
   )
 target_link_libraries(${PROJECT_NAME}_thermal
   ${PROJECT_NAME}_utils
@@ -11,7 +12,11 @@ add_dependencies(${PROJECT_NAME}_thermal
 
 
 add_executable(thermal_camera_node thermal_node.cpp)
+add_executable(thermal_temperatures_node temperatures_node.cpp)
 target_link_libraries(thermal_camera_node
   ${PROJECT_NAME}_thermal
   ${catkin_LIBRARIES})
 
+target_link_libraries(thermal_temperatures_node
+  ${PROJECT_NAME}_thermal
+  ${catkin_LIBRARIES})
