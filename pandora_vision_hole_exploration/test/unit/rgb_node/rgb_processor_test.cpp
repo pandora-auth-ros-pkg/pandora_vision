@@ -210,6 +210,7 @@ namespace pandora_vision
     // Synthesize the final squares_ image
     squares_ += lowerRightSquare + upperRightSquare + upperLeftSquare;
 
+    cv::waitKey();
     // Run RgbProcessor::findHoles
     HolesConveyor conveyor =
       RgbProcessor_.findHoles ( squares_ );

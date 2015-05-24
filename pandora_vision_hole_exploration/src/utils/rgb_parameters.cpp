@@ -112,8 +112,20 @@ namespace pandora_vision
       configRgb.shape_validation;
     Rgb::one_direction_rectangle_contour_overlap_thresh =
       configRgb.one_direction_rectangle_contour_overlap_thresh;
-    Rgb::max_intersections_thresh =
-      configRgb.max_intersections_thresh;
+    //Rgb::max_intersections_thresh =
+    //  configRgb.max_intersections_thresh;
+    Rgb::intersections_mean_cost =
+      configRgb.intersections_mean_cost;
+    Rgb::unclosed_contour_punishment =
+      configRgb.unclosed_contour_punishment;
+    Rgb::intersections_stddev_cost =
+      configRgb.intersections_stddev_cost;
+    Rgb::internal_pixels_2d_mean_cost =
+      configRgb.internal_pixels_2d_mean_cost;
+    Rgb::internal_pixels_2d_stddev_cost =
+      configRgb.internal_pixels_2d_mean_cost;
+    Rgb::shape_validity_thresh =
+      configRgb.shape_validity_thresh;
   }
 
 
@@ -137,18 +149,24 @@ namespace pandora_vision
   int Rgb::std_variance_morphology_open_size = 8;
   int Rgb::contour_erode_kernel_size = 4;
   int Rgb::lower_contour_number_to_test_huge = 2;
-  int Rgb::huge_contour_thresh = 8000;
+  int Rgb::huge_contour_thresh = 20000;
   int Rgb::tiny_contour_thresh = 500;
-  int Rgb::border_thresh = 100;
+  int Rgb::border_thresh = 20;
   int Rgb::small_contour_thresh = 100; 
   int Rgb::neighbor_thresh = 100;
   int Rgb::homog_rect_dims_thresh = 50;
   int Rgb::neighbor_value_thresh = 50;
   float Rgb::homogenity_thresh = 0.8;
   int Rgb::neighbor_tiny_distance_thresh = 50;
-  int Rgb::rect_diff_thresh = 2;
-  int Rgb::shape_validation = 0;
+  int Rgb::rect_diff_thresh = 3;
+  int Rgb::shape_validation = 1;
   float Rgb::one_direction_rectangle_contour_overlap_thresh = 40.0;
   int Rgb::max_intersections_thresh = 4;
+  float Rgb::intersections_mean_cost = 0.3;
+  float Rgb::unclosed_contour_punishment = 2.0;
+  float Rgb::intersections_stddev_cost = 0.2;
+  float Rgb::internal_pixels_2d_mean_cost = 0.3;
+  float Rgb::internal_pixels_2d_stddev_cost = 0.2;
+  float Rgb::shape_validity_thresh = 1.5;
 
 }  // namespace pandora_vision

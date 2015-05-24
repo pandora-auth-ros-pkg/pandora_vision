@@ -142,7 +142,7 @@ namespace pandora_vision
   int Depth::canny_ratio = 3;
   int Depth::canny_kernel_size = 3;
   int Depth::filtering_type = 1;
-  float Depth::min_valid_depth = 0.92;
+  float Depth::min_valid_depth = 0.6;
   int Depth::shape_validation = 0;
   float Depth::one_direction_rectangle_contour_overlap_thresh = 40.0;
   int Depth::max_intersections_thresh = 4;

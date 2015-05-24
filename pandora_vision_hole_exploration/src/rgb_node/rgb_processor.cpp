@@ -252,6 +252,19 @@ namespace pandora_vision
     morphologyKernel = Rgb::std_variance_morphology_open_size;
     structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(morphologyKernel, morphologyKernel));
     cv::morphologyEx((*bigVarianceContours), (*bigVarianceContours), cv::MORPH_OPEN, structuringElement );
+    // eliminate borders
+    for(int i = 0; i < Rgb::border_thresh; i ++)
+      for(int j = 0; j < (*bigVarianceContours).cols; j ++)
+        (*bigVarianceContours).at<uchar>(i, j) = 0;
+    for(int i = (*bigVarianceContours).rows - Rgb::border_thresh; i < (*bigVarianceContours).rows; i ++)
+      for(int j = 0; j < (*bigVarianceContours).cols; j ++)
+        (*bigVarianceContours).at<uchar>(i, j) = 0;
+    for(int i = 0; i < (*bigVarianceContours).rows; i ++)
+      for(int j = 0; j < Rgb::border_thresh; j ++)
+        (*bigVarianceContours).at<uchar>(i, j) = 0;
+    for(int i = 0; i < (*bigVarianceContours).rows; i ++)
+      for(int j = (*bigVarianceContours).cols - Rgb::border_thresh; j < (*bigVarianceContours).cols; j ++)
+        (*bigVarianceContours).at<uchar>(i, j) = 0;
 #ifdef DEBUG_SHOW
     if (Rgb::show_std_variance_image)
     {
@@ -343,14 +356,14 @@ namespace pandora_vision
         }
         else if(cv::contourArea(contours[ci]) < Rgb::tiny_contour_thresh)
         {
-          if((*mc)[ci].x < Rgb::border_thresh 
-              || (*mc)[ci].y < Rgb::border_thresh 
-              || (image.cols - (*mc)[ci].x) < Rgb::border_thresh 
-              || (image.rows - (*mc)[ci].y) < Rgb::border_thresh)
-          {
-            (*realContours)[ci] = false;
-            continue;
-          }
+          //if((*mc)[ci].x < Rgb::border_thresh 
+          //    || (*mc)[ci].y < Rgb::border_thresh 
+          //    || (image.cols - (*mc)[ci].x) < Rgb::border_thresh 
+          //    || (image.rows - (*mc)[ci].y) < Rgb::border_thresh)
+          //{
+          (*realContours)[ci] = false;
+          continue;
+          //}
         }
         else
         {
@@ -474,14 +487,39 @@ namespace pandora_vision
     cv::drawContours(canvas, outline, ci, color);
     int intersectionX = 0;
     int intersectionY = 0;
-    int pixelsInside = 0;
     int maxIntersectionsX = 0;
     int maxIntersectionsY = 0;
+
+    // A vector that collects all the intersections numbers, or a sample of
+    // them, from X direction, to check the standard deviation and their
+    // mean
+    std::vector<int> intersectionsX;
+
+    // A vector that collects all the intersections numbers, or a sample of
+    // them, from Y direction, to check the standard deviation and their
+    // mean
+    std::vector<int> intersectionsY;
+
+    // A vector that collects all the pixels met inside a the ROI, by raycasting,
+    // or a sample from the ray casts from X direction,
+    //  to check the standard deviation and their mean
+    std::vector<int> pixelsInsideX;
+
+    // or a sample from the ray casts from Y direction,
+    //  to check the standard deviation and their mean
+    std::vector<int> pixelsInsideY;
+
+
+    // Cost function consisting from mean and std_variance
+    // of intersections, and internal pixels of the contours
+    float shapeValidityFunction = 0;
+
     for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
     {
       bool isInside = false;
       bool isOutline = false;
       int intersectionCurrent = 0;
+      int pixelsInsideCurrent = 0;
       for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
       {
         if(canvas.at<int>(row, col) == 255)
@@ -495,28 +533,32 @@ namespace pandora_vision
         } 
         else
         {
+          // check if by leaving the white border an even or odd number
+          // of boundaries have passed. In the case of odd number it is
+          // most likely that we are at ROI's internal 
           if(intersectionCurrent % 2 != 0)
           {
             isInside = true;
-            pixelsInside++;
+            pixelsInsideCurrent++;
           }
           else
             isInside = false;
           isOutline = false;
         }
       }
+      intersectionsX.push_back(intersectionCurrent);
+      pixelsInsideX.push_back(pixelsInsideCurrent);
       if(intersectionCurrent > maxIntersectionsX)
         maxIntersectionsX = intersectionCurrent;
     }
 
-    float avgPixelsInsideX = pixelsInside / boundRect[ci].height; 
-    pixelsInside = 0;
 
     for(int col = boundRect[ci].x; col < (boundRect[ci].x + boundRect[ci].width); col ++)
     {
       bool isInside = false;
       bool isOutline = false;
       int intersectionCurrent = 0;
+      int pixelsInsideCurrent = 0;
       for(int row = boundRect[ci].y; row < (boundRect[ci].y + boundRect[ci].height); row ++)
       {
         if(canvas.at<int>(row, col) == 255)
@@ -530,39 +572,132 @@ namespace pandora_vision
         } 
         else
         {
+          // check if by leaving the white border an even or odd number
+          // of boundaries have passed. In the case of odd number it is
+          // most likely that we are at ROI's internal 
           if(intersectionCurrent % 2 != 0)
           {
             isInside = true;
-            pixelsInside++;
+            pixelsInsideCurrent++;
           }
           else
             isInside = false;
           isOutline = false;
         }
       }
+      intersectionsY.push_back(intersectionCurrent);
+      pixelsInsideY.push_back(pixelsInsideCurrent);
       if(intersectionCurrent > maxIntersectionsY)
         maxIntersectionsY = intersectionCurrent;
     }
+    double sum = std::accumulate(intersectionsX.begin(), intersectionsX.end(), 0.0);
+    double mean = sum / intersectionsX.size();
+    // Fewer than two intersections alert for an open contour, so punish
+    // them (if unclosed_contour_punishment parameter is selected over 1.0)
+    // Take diferrence between mean and 2, because a normal- valid- contour will have
+    // 2 intersections in avg
+    if(mean >= 2)
+      shapeValidityFunction += (Rgb::intersections_mean_cost / 2) * std::abs(mean - 2);
+    else
+    {
+      shapeValidityFunction += 
+        Rgb::unclosed_contour_punishment * (Rgb::intersections_mean_cost / 2) * std::abs(mean - 2);
+    }
 
-    float avgPixelsInsideY = pixelsInside / boundRect[ci].width; 
+    std::vector<double> diff(intersectionsX.size());
+    std::transform(intersectionsX.begin(), intersectionsX.end(), diff.begin(),
+        std::bind2nd(std::minus<double>(), mean));
+    double sqSum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    float stdDevIntersections = std::sqrt(sqSum / intersectionsX.size());
+    shapeValidityFunction += Rgb::intersections_stddev_cost * stdDevIntersections;
 
-    if ((boundRect[ci].height / avgPixelsInsideY >= 
-          Rgb::one_direction_rectangle_contour_overlap_thresh 
-          || boundRect[ci].width / avgPixelsInsideX >= 
-          Rgb::one_direction_rectangle_contour_overlap_thresh)
-        && (maxIntersectionsX > Rgb::max_intersections_thresh
-          || maxIntersectionsY > Rgb::max_intersections_thresh))
+    sum = 0;
+    sum = std::accumulate(intersectionsY.begin(), intersectionsY.end(), 0.0);
+    mean = sum / intersectionsY.size();
+    // Fewer than two intersections alert for an open contour, so punish
+    // them (if unclosed_contour_punishment parameter is selected over 1.0)
+    // Take diferrence between mean and 2, because a normal- valid- contour will have
+    // 2 intersections in avg
+    if(mean >= 2)
+      shapeValidityFunction += (Rgb::intersections_mean_cost / 2) * std::abs(mean - 2);
+    else
+    {
+      shapeValidityFunction += 
+        Rgb::unclosed_contour_punishment * (Rgb::intersections_mean_cost / 2) * std::abs(mean - 2);
+    }
+    diff.clear();
+    diff.resize(intersectionsY.size());
+    std::transform(intersectionsY.begin(), intersectionsY.end(), diff.begin(),
+        std::bind2nd(std::minus<double>(), mean));
+    sqSum = 0;
+    sqSum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stdDevIntersections = std::sqrt(sqSum / intersectionsY.size());
+    shapeValidityFunction += Rgb::intersections_stddev_cost * stdDevIntersections;
+
+    sum = 0;
+    sum = std::accumulate(pixelsInsideX.begin(), pixelsInsideX.end(), 0.0);
+    mean = sum / pixelsInsideX.size();
+    // take diferrence between mean and 2, because a normal contour will have
+    // 2 intersections in avg
+    shapeValidityFunction += 
+      (Rgb::internal_pixels_2d_mean_cost / 2) * (1 - mean / std::pow(boundRect[ci].width, 2));
+    //diff.clear();
+    diff.clear();
+    diff.resize(pixelsInsideX.size());
+    std::transform(pixelsInsideX.begin(), pixelsInsideX.end(), diff.begin(),
+        std::bind2nd(std::minus<double>(), mean));
+    sqSum = 0;
+    sqSum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    float stdDevInternalPixelsX = std::sqrt(sqSum / pixelsInsideX.size());
+
+    // Normalize 
+    stdDevInternalPixelsX = stdDevInternalPixelsX / boundRect[ci].width; 
+    shapeValidityFunction += (Rgb::internal_pixels_2d_stddev_cost / 2) * stdDevInternalPixelsX;
+
+    sum = 0;
+    sum = std::accumulate(pixelsInsideY.begin(), pixelsInsideY.end(), 0.0);
+    mean = sum / pixelsInsideY.size();
+    shapeValidityFunction += 
+      (Rgb::internal_pixels_2d_mean_cost / 2) * (1 - mean / std::pow(boundRect[ci].height, 2));
+    //diff.clear();
+    diff.clear();
+    diff.resize(pixelsInsideY.size());
+    std::transform(pixelsInsideY.begin(), pixelsInsideY.end(), diff.begin(),
+        std::bind2nd(std::minus<double>(), mean));
+    sqSum = 0;
+    sqSum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    float stdDevInternalPixelsY = std::sqrt(sqSum / pixelsInsideY.size());
+
+    // Normalize 
+    stdDevInternalPixelsY = stdDevInternalPixelsY / boundRect[ci].height; 
+    shapeValidityFunction += (Rgb::internal_pixels_2d_stddev_cost / 2) * stdDevInternalPixelsY;
+
+    if(shapeValidityFunction > Rgb::shape_validity_thresh)
       (*realContours)[ci] = false;
+    //if ((stdDevInternalPixelsX > Rgb::max_internal_pixels_variance_thresh
+    //    || stdDevInternalPixelsY > Rgb::max_internal_pixels_variance_thresh)
+    //  && stdDevIntersections > Rgb::max_intersections_variance_thresh)
+    //{
+    //(*realContours)[ci] = false;
+    //} 
+
+    //if ((boundRect[ci].height / avgPixelsInsideY >= 
+    //      Rgb::one_direction_rectangle_contour_overlap_thresh 
+    //      || boundRect[ci].width / avgPixelsInsideX >= 
+    //      Rgb::one_direction_rectangle_contour_overlap_thresh)
+    //    && (maxIntersectionsX > Rgb::max_intersections_thresh
+    //      || maxIntersectionsY > Rgb::max_intersections_thresh))
+    //  (*realContours)[ci] = false;
   }
-  
-  
-  
+
+
+
   bool RgbProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
     output->frameWidth = input->getImage().cols;
     output->frameHeight = input->getImage().rows;
-    
+
 #ifdef DEBUG_TIME
     Timer::start("rgbProcessor", "", true);
 #endif
@@ -576,7 +711,7 @@ namespace pandora_vision
 
     // Locate potential holes in the rgb image
     HolesConveyor conveyor = findHoles(input->getImage());
-    
+
     for (int ii = 0; ii < conveyor.rectangle.size(); ii++)
     {
       if (ii == 0)

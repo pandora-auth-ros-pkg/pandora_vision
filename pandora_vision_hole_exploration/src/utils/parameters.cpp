@@ -69,7 +69,7 @@ namespace pandora_vision
   float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
   float Parameters::HoleFusion::rgb_small_distance_variance_thresh = 0.2;
   int Parameters::HoleFusion::hole_border_thresh = 10;
-  float Parameters::HoleFusion::depth_difference_thresh = 1.2;
+  float Parameters::HoleFusion::depth_difference_thresh = 2.0;
   int Parameters::HoleFusion::remove_unstuffed_holes = 1;
   int Parameters::HoleFusion::unstuffed_removal_method = 1;
   float Parameters::HoleFusion::difference_scanline_thresh = 1.0;
