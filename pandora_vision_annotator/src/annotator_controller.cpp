@@ -348,6 +348,7 @@ namespace pandora_vision
       cv::Mat temp;
       currentFrameNo_ = initialFrame; 
       connector_.getcurrentFrame(currentFrameNo_, &temp);
+
       if(enableBackwardTracking)
       {
       std::stringstream filename;
@@ -526,30 +527,38 @@ namespace pandora_vision
   **/
   void CController::receiveEnhancedImage(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
-     cv_bridge::CvImagePtr in_msg;
-     cv::Mat temp; 
+     cv_bridge::CvImagePtr rgb_msg, depth_msg;
+     cv::Mat rgb, depth, temp; 
 
-     if(depthVisible_)
+     if(msg->isDepth) 
      {
-        in_msg = cv_bridge::toCvCopy(msg->depthImage,
+        rgb_msg = cv_bridge::toCvCopy(msg->depthImage,
         sensor_msgs::image_encodings::TYPE_8UC1);
-        cv::cvtColor(in_msg->image, temp, CV_GRAY2RGB);
-     }
-     else
-     {
-        in_msg = cv_bridge::toCvCopy(msg->rgbImage,
+        cv::cvtColor(rgb_msg->image, depth, CV_GRAY2RGB);
+     
+        depth_msg = cv_bridge::toCvCopy(msg->rgbImage,
         sensor_msgs::image_encodings::TYPE_8UC3); 
-        cv::cvtColor(in_msg->image, temp, CV_BGR2RGB); 
+        cv::cvtColor(depth_msg->image, rgb, CV_BGR2RGB); 
      }
+     
 
       if(!onlinemode)
       {
-        frames.push_back(temp);
+        if(depthVisible_)
+        {
+          frames.push_back(depth);
+          temp = depth.clone();
+        }
+        else
+        {
+          frames.push_back(rgb);
+          temp = rgb.clone();
+        }
         msgHeader_.push_back(msg->header);
       }
 
       else
-      {
+      { 
         QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
         dest.bits(); // enforce deep copy, see documentation
         connector_.setImage(dest);
