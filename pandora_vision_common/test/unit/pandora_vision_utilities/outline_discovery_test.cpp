@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/outline_discovery.h"
+#include "pandora_vision_common/pandora_vision_utilities/outline_discovery.h"
 #include "gtest/gtest.h"
 
 

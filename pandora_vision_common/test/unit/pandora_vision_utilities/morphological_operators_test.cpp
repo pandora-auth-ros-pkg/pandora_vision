@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Christos Tsirigotis
  *********************************************************************/
 
-#include "utils/morphological_operators.h"
+#include "pandora_vision_common/pandora_vision_utilities/morphological_operators.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

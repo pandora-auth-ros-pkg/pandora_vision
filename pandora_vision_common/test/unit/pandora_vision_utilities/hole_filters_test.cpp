@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/hole_filters.h"
+#include "pandora_vision_common/pandora_vision_utilities/hole_filters.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

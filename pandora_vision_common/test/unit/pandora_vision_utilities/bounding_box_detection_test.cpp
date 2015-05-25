@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/bounding_box_detection.h"
+#include "pandora_vision_common/pandora_vision_utilities/bounding_box_detection.h"
 #include "gtest/gtest.h"
 
 

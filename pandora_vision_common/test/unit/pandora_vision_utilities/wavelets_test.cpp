@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/wavelets.h"
+#include "pandora_vision_common/pandora_vision_utilities/wavelets.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

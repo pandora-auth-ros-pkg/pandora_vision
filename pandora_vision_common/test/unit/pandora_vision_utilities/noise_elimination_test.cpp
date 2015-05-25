@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/noise_elimination.h"
+#include "pandora_vision_common/pandora_vision_utilities/noise_elimination.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

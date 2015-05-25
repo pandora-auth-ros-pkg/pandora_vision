@@ -35,8 +35,8 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/message_conversions.h"
-#include "utils/blob_vector.h"
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
+#include "pandora_vision_common/pandora_vision_utilities/blob_vector.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

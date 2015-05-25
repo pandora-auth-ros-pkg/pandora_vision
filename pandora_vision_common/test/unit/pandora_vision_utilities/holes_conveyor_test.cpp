@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
