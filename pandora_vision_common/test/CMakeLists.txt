@@ -1,0 +1,84 @@
+find_package(roslib REQUIRED)
+find_package(rostest REQUIRED)
+find_package(pandora_testing_tools REQUIRED)
+find_package(pandora_cmake_tools REQUIRED)
+
+include_directories(
+${pandora_testing_tools_INCLUDE_DIRS}
+${roslib_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS})
+
+###############################  Unit Tests ####################################
+
+#################################### utils #####################################
+
+catkin_add_gtest(outline_discovery_test
+  unit/pandora_vision_utilities/outline_discovery_test.cpp)
+target_link_libraries(outline_discovery_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(bounding_box_detection_test
+  unit/pandora_vision_utilities/bounding_box_detection_test.cpp)
+target_link_libraries(bounding_box_detection_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(edge_detection_test
+  unit/pandora_vision_utilities/edge_detection_test.cpp)
+target_link_libraries(edge_detection_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(hole_filters_test
+  unit/pandora_vision_utilities/hole_filters_test.cpp)
+target_link_libraries(hole_filters_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(holes_conveyor_test
+  unit/pandora_vision_utilities/holes_conveyor_test.cpp)
+target_link_libraries(holes_conveyor_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(message_conversions_test
+  unit/pandora_vision_utilities/message_conversions_test.cpp)
+target_link_libraries(message_conversions_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(morphological_operators_test
+  unit/pandora_vision_utilities/morphological_operators_test.cpp)
+target_link_libraries(morphological_operators_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(noise_elimination_test
+  unit/pandora_vision_utilities/noise_elimination_test.cpp)
+target_link_libraries(noise_elimination_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(visualization_test
+  unit/pandora_vision_utilities/visualization_test.cpp)
+target_link_libraries(visualization_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+
+catkin_add_gtest(wavelets_test
+  unit/pandora_vision_utilities/wavelets_test.cpp)
+target_link_libraries(wavelets_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_utils
+  gtest_main)
+

@@ -34,6 +34,7 @@
 *
 * Authors: Despoina Paschalidou
 *********************************************************************/
+
 #ifndef PANDORA_VISION_COMMON_EDGE_DETECTION_PARAMETERS_H
 #define PANDORA_VISION_COMMON_EDGE_DETECTION_PARAMETERS_H
 
@@ -43,5 +44,7 @@ namespace pandora_vision
   {
     
   };
-} // namespace pandora_vision
+
+}  // namespace pandora_vision
+
 #endif // PANDORA_VISION_COMMON_EDGE_DETECTION_PARAMETERS_H
