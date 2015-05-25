@@ -49,7 +49,6 @@ add_library(${PROJECT_NAME}_utils
   src/pandora_vision_utilities/visualization.cpp
   src/pandora_vision_utilities/wavelets.cpp
   )
-
 target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )

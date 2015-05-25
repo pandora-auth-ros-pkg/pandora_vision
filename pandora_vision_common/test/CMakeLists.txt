@@ -12,72 +12,72 @@ ${catkin_INCLUDE_DIRS})
 
 #################################### utils #####################################
 
-catkin_add_gtest(outline_discovery_test
+catkin_add_gtest(${PROJECT_NAME}_outline_discovery_test
   unit/pandora_vision_utilities/outline_discovery_test.cpp)
-target_link_libraries(outline_discovery_test
+target_link_libraries(${PROJECT_NAME}_outline_discovery_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(bounding_box_detection_test
+catkin_add_gtest(${PROJECT_NAME}_bounding_box_detection_test
   unit/pandora_vision_utilities/bounding_box_detection_test.cpp)
-target_link_libraries(bounding_box_detection_test
+target_link_libraries(${PROJECT_NAME}_bounding_box_detection_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(edge_detection_test
+catkin_add_gtest(${PROJECT_NAME}_edge_detection_test
   unit/pandora_vision_utilities/edge_detection_test.cpp)
-target_link_libraries(edge_detection_test
+target_link_libraries(${PROJECT_NAME}_edge_detection_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(hole_filters_test
+catkin_add_gtest(${PROJECT_NAME}_hole_filters_test
   unit/pandora_vision_utilities/hole_filters_test.cpp)
-target_link_libraries(hole_filters_test
+target_link_libraries(${PROJECT_NAME}_hole_filters_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(holes_conveyor_test
+catkin_add_gtest(${PROJECT_NAME}_holes_conveyor_test
   unit/pandora_vision_utilities/holes_conveyor_test.cpp)
-target_link_libraries(holes_conveyor_test
+target_link_libraries(${PROJECT_NAME}_holes_conveyor_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(message_conversions_test
+catkin_add_gtest(${PROJECT_NAME}_message_conversions_test
   unit/pandora_vision_utilities/message_conversions_test.cpp)
-target_link_libraries(message_conversions_test
+target_link_libraries(${PROJECT_NAME}_message_conversions_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(morphological_operators_test
+catkin_add_gtest(${PROJECT_NAME}_morphological_operators_test
   unit/pandora_vision_utilities/morphological_operators_test.cpp)
-target_link_libraries(morphological_operators_test
+target_link_libraries(${PROJECT_NAME}_morphological_operators_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(noise_elimination_test
+catkin_add_gtest(${PROJECT_NAME}_noise_elimination_test
   unit/pandora_vision_utilities/noise_elimination_test.cpp)
-target_link_libraries(noise_elimination_test
+target_link_libraries(${PROJECT_NAME}_noise_elimination_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(visualization_test
+catkin_add_gtest(${PROJECT_NAME}_visualization_test
   unit/pandora_vision_utilities/visualization_test.cpp)
-target_link_libraries(visualization_test
+target_link_libraries(${PROJECT_NAME}_visualization_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(wavelets_test
+catkin_add_gtest(${PROJECT_NAME}_wavelets_test
   unit/pandora_vision_utilities/wavelets_test.cpp)
-target_link_libraries(wavelets_test
+target_link_libraries(${PROJECT_NAME}_wavelets_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
