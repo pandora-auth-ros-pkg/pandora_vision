@@ -37,8 +37,8 @@
 
 #include "hole_fusion_node/rgb_filters.h"
 #include "hole_fusion_node/filters_resources.h"
-#include "utils/histogram.h"
-#include "utils/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/histogram.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
 #include "gtest/gtest.h"
 #include <stdlib.h>
 #include <sys/time.h>

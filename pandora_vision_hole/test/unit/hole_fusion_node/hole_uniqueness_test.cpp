@@ -36,7 +36,7 @@
  *********************************************************************/
 
 #include "hole_fusion_node/hole_uniqueness.h"
-#include "utils/visualization.h"
+#include "pandora_vision_common/pandora_vision_utilities/visualization.h"
 #include "gtest/gtest.h"
 
 
