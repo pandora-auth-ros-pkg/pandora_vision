@@ -40,6 +40,7 @@
 
 #include "pandora_vision_common/pandora_vision_utilities/defines.h"
 
+/
 /**
   @namespace pandora_vision
   @brief The main namespace for PANDORA vision
@@ -75,6 +76,9 @@ namespace pandora_vision
     //! Debug-specific parameters
     struct Debug
     {
+      //publish the enhanced Images
+      static bool publish_enhanced_Images;
+
       // Show the depth image that arrives in the depth node
       static bool show_depth_image;
 
@@ -418,5 +422,6 @@ namespace pandora_vision
   };
 
 }  // namespace pandora_vision
+
 
 #endif  // PANDORA_VISION_COMMON_PARAMETERS_H

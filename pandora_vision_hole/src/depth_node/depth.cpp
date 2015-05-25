@@ -153,7 +153,7 @@ namespace pandora_vision
     // Pack information about holes found and the interpolated depth image
     // inside a message.
     // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(holes,
+    HoleMessageConversions::createCandidateHolesVectorMessage(holes,
       interpolatedDepthImageSent,
       &depthCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_32FC1,

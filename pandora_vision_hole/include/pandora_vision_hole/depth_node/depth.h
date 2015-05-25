@@ -38,12 +38,14 @@
 #ifndef DEPTH_NODE_DEPTH_H
 #define DEPTH_NODE_DEPTH_H
 
-#include "depth_node/hole_detector.h"
-#include "utils/parameters.h"
-#include "utils/message_conversions.h"
-#include "utils/wavelets.h"
+#include <dynamic_reconfigure/server.h>
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
+#include "pandora_vision_common/pandora_vision_utilities/wavelets.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-
+#include "pandora_vision_hole/depth_cfgConfig.h"
+#include "hole_message_conversions.h"
+#include "depth_node/hole_detector.h"
 
 /**
   @namespace pandora_vision

@@ -139,7 +139,7 @@ namespace pandora_vision
 
     // Pack information about holes found and the rgb image inside a message.
     // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(conveyor,
+    HoleMessageConversions::createCandidateHolesVectorMessage(conveyor,
       rgbImageSent,
       &rgbCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_8UC3, msg);

@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   message_generation
   pandora_vision_msgs
+  pandora_vision_common
   state_manager
   state_manager_msgs
   cv_bridge
@@ -28,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   dynamic_reconfigure
-  pcl_ros
+  #~ pcl_ros
   message_filters
   roslint
   urdf
@@ -63,6 +64,7 @@ catkin_package(
     roscpp
     message_runtime
     pandora_vision_msgs
+    pandora_vision_common
     state_manager
     state_manager_msgs
     cv_bridge
@@ -70,7 +72,7 @@ catkin_package(
     std_msgs
     sensor_msgs
     dynamic_reconfigure
-    pcl_ros
+    #~ pcl_ros
     message_filters
     urdf
   INCLUDE_DIRS
@@ -86,30 +88,123 @@ include_directories(
 
 ################################ Utils library #################################
 add_library(${PROJECT_NAME}_utils
-  src/utils/blob_detection.cpp
-  src/utils/bounding_box_detection.cpp
-  src/utils/edge_detection.cpp
-  src/utils/histogram.cpp
-  src/utils/hole_filters.cpp
-  src/utils/holes_conveyor.cpp
-  src/utils/message_conversions.cpp
-  src/utils/morphological_operators.cpp
-  src/utils/noise_elimination.cpp
-  src/utils/outline_discovery.cpp
-  src/utils/parameters.cpp
-  src/utils/timer.cpp
-  src/utils/visualization.cpp
-  src/utils/wavelets.cpp
+  src/utils/hole_message_conversions.cpp
+  src/utils/image_matching.cpp
   )
-
 target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
+add_dependencies(${PROJECT_NAME}_utils
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  )
 
-add_subdirectory(src/depth_node)
-add_subdirectory(src/hole_fusion_node)
-add_subdirectory(src/rgb_node)
-add_subdirectory(src/synchronizer_node)
+################################ Synchronizer Node ###########################
+
+add_executable(${PROJECT_NAME}_synchronizer_node
+  src/synchronizer_node/rgb_depth_synchronizer.cpp
+  src/synchronizer_node/rgb_depth_synchronizer_node.cpp
+  )
+
+target_link_libraries(${PROJECT_NAME}_synchronizer_node
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES}
+  )
+
+add_dependencies(${PROJECT_NAME}_synchronizer_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  )
+
+################################ Depth Node #################################
+
+add_library(${PROJECT_NAME}_depth
+  src/depth_node/depth.cpp
+  src/depth_node/hole_detector.cpp)
+target_link_libraries(${PROJECT_NAME}_depth
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_depth
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+add_executable(${PROJECT_NAME}_depth_node
+  src/depth_node/depth_node.cpp)
+target_link_libraries(${PROJECT_NAME}_depth_node
+  ${PROJECT_NAME}_depth
+  ${catkin_LIBRARIES})
+
+
+################################ Rgb Node #################################
+
+add_library(${PROJECT_NAME}_rgb
+  src/rgb_node/rgb.cpp
+  src/rgb_node/hole_detector.cpp)
+target_link_libraries(${PROJECT_NAME}_rgb
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_rgb
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+
+add_executable(${PROJECT_NAME}_rgb_node
+  src/rgb_node/rgb_node.cpp)
+target_link_libraries(${PROJECT_NAME}_rgb_node
+  ${PROJECT_NAME}_rgb
+  ${catkin_LIBRARIES})
+
+
+################################ Thermal Node #################################
+
+add_library(${PROJECT_NAME}_thermal
+  src/thermal_node/thermal.cpp
+  src/thermal_node/hole_detector.cpp
+  )
+target_link_libraries(${PROJECT_NAME}_thermal
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_thermal
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+add_executable(thermal_camera_node
+  src/thermal_node/thermal_node.cpp)
+target_link_libraries(thermal_camera_node
+  ${PROJECT_NAME}_thermal
+  ${catkin_LIBRARIES})
+
+
+################################ Hole Fusion Node ###########################
+
+add_library(${PROJECT_NAME}_filters
+  src/hole_fusion_node/filters.cpp
+  src/hole_fusion_node/filters_resources.cpp
+  src/hole_fusion_node/rgb_filters.cpp
+  src/hole_fusion_node/depth_filters.cpp
+  src/hole_fusion_node/planes_detection.cpp)
+target_link_libraries(${PROJECT_NAME}_filters
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES})
+
+add_library(${PROJECT_NAME}_hole_fusion
+  src/hole_fusion_node/hole_merger.cpp
+  src/hole_fusion_node/hole_uniqueness.cpp
+  src/hole_fusion_node/hole_validation.cpp
+  src/hole_fusion_node/hole_fusion.cpp)
+target_link_libraries(${PROJECT_NAME}_hole_fusion
+  ${PROJECT_NAME}_filters
+  ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_hole_fusion
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+add_executable(hole_fusion_node
+  src/hole_fusion_node/hole_fusion_node.cpp)
+target_link_libraries(hole_fusion_node
+  ${PROJECT_NAME}_hole_fusion
+  ${catkin_LIBRARIES})
+
+
 
 # Download extra files not needed when building
 # but necessary when running the package.
@@ -158,42 +253,6 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   src/depth_node/depth_node.cpp
   src/depth_node/hole_detector.cpp
 
-
-  ## utils ##
-
-  include/utils/blob_detection.h
-  include/utils/bounding_box_detection.h
-  include/utils/defines.h
-  include/utils/edge_detection.h
-  include/utils/histogram.h
-  include/utils/hole_filters.h
-  include/utils/holes_conveyor.h
-  include/utils/message_conversions.h
-  include/utils/morphological_operators.h
-  include/utils/noise_elimination.h
-  include/utils/outline_discovery.h
-  include/utils/parameters.h
-  #include/utils/timer.h
-  include/utils/visualization.h
-  include/utils/wavelets.h
-
-  src/utils/blob_detection.cpp
-  src/utils/bounding_box_detection.cpp
-  src/utils/defines.h
-  src/utils/edge_detection.cpp
-  src/utils/histogram.cpp
-  src/utils/hole_filters.cpp
-  src/utils/holes_conveyor.cpp
-  src/utils/message_conversions.cpp
-  src/utils/morphological_operators.cpp
-  src/utils/noise_elimination.cpp
-  src/utils/outline_discovery.cpp
-  src/utils/parameters.cpp
-  #src/utils/timer.cpp
-  src/utils/visualization.cpp
-  src/utils/wavelets.cpp
-
-
   ## hole_fusion_node ##
 
   include/hole_fusion_node/depth_filters.h
@@ -236,18 +295,6 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
 
 
   ##################### tests #####################
-
-  ##################### utils #####################
-  test/unit/utils/bounding_box_detection_test.cpp
-  test/unit/utils/blob_detection_test.cpp
-  test/unit/utils/edge_detection_test.cpp
-  test/unit/utils/hole_filters_test.cpp
-  test/unit/utils/holes_conveyor_test.cpp
-  test/unit/utils/message_conversions_test.cpp
-  test/unit/utils/morphological_operators_test.cpp
-  test/unit/utils/noise_elimination_test.cpp
-  test/unit/utils/outline_discovery_test.cpp
-  test/unit/utils/wavelets_test.cpp
 
   ################## depth node ###################
   test/unit/depth_node/hole_detector_test.cpp

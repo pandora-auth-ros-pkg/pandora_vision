@@ -39,10 +39,10 @@
 #define HOLE_FUSION_NODE_DEPTH_FILTERS_H
 
 #include <math.h>
-#include "utils/holes_conveyor.h"
-#include "utils/outline_discovery.h"
-#include "utils/edge_detection.h"
-#include "utils/visualization.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/outline_discovery.h"
+#include "pandora_vision_common/pandora_vision_utilities/edge_detection.h"
+#include "pandora_vision_common/pandora_vision_utilities/visualization.h"
 #include "hole_fusion_node/planes_detection.h"
 
 /**

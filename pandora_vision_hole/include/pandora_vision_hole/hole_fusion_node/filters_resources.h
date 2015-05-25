@@ -38,10 +38,10 @@
 #ifndef HOLE_FUSION_NODE_FILTERS_RESOURCES_H
 #define HOLE_FUSION_NODE_FILTERS_RESOURCES_H
 
-#include "utils/defines.h"
-#include "utils/outline_discovery.h"
-#include "utils/holes_conveyor.h"
-#include "utils/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/defines.h"
+#include "pandora_vision_common/pandora_vision_utilities/outline_discovery.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
 
 /**
   @namespace pandora_vision

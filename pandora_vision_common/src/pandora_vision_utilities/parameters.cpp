@@ -36,7 +36,6 @@
  *********************************************************************/
 
 #include "pandora_vision_common/pandora_vision_utilities/parameters.h"
-
 /**
   @namespace pandora_vision
   @brief The main namespace for PANDORA vision
@@ -60,6 +59,9 @@ namespace pandora_vision
 
 
   ///////////////////////// Debug-specific parameters //////////////////////////
+  
+  //Publish the enhanced Images
+  bool Parameters::Debug::publish_enhanced_Images = false;
 
   // Show the depth image that arrives in the depth node
   bool Parameters::Debug::show_depth_image = false;

@@ -35,12 +35,12 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef UTILS_MESSAGE_CONVERSIONS_H
-#define UTILS_MESSAGE_CONVERSIONS_H
+#ifndef UTILS_HOLE_MESSAGE_CONVERSIONS_H
+#define UTILS_HOLE_MESSAGE_CONVERSIONS_H
 
-#include "utils/defines.h"
-#include "utils/outline_discovery.h"
-#include "utils/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/defines.h"
+#include "pandora_vision_common/pandora_vision_utilities/outline_discovery.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 
 /**
@@ -50,37 +50,13 @@
 namespace pandora_vision
 {
   /**
-    @class MessageConversions
+    @class HoleMessageConversions
     @brief Provides methods for converting images and point clouds
     from and to ROS messages
    **/
-  class MessageConversions
+  class HoleMessageConversions
   {
     public:
-
-      /**
-        @brief Converts a cv::Mat image into a sensor_msgs::Image message
-        @param[in] image [const cv::Mat&] The image
-        @param[in] encoding [const std::string&] The image message's encoding
-        @param[in] msg [const sensor_msgs::Image&] A message needed for
-        setting the output message's header by extracting its header
-        @return [sensor_msgs::Image] The output image message
-       **/
-      static sensor_msgs::Image convertImageToMessage(
-        const cv::Mat& image, const std::string& encoding,
-        const sensor_msgs::Image& msg);
-
-      /**
-        @brief Extracts an image from a point cloud message
-        @param pointCloud[in] [const PointCloudPtr&]
-        The input point cloud message
-        @param[in] id [const int&] The enconding of the converted image.
-        CV_32FC1 for depth image, CV_8UC3 for rgb image
-        @return cv::Mat The output image
-       **/
-      static cv::Mat convertPointCloudMessageToImage(
-        const PointCloudPtr& pointCloud, const int& encoding);
-
       /**
         @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
         message
@@ -118,18 +94,6 @@ namespace pandora_vision
         pandora_vision_hole::CandidateHolesVectorMsg* candidateHolesVectorMsg,
         const std::string& encoding,
         const sensor_msgs::Image& msg);
-
-      /**
-        @brief Extracts a cv::Mat image from a ROS image message
-        @param[in] msg [const sensor_msgs::Image&] The input ROS image
-        message
-        @param[out] image [cv::Mat*] The output image
-        @param[in] encoding [const std::string&] The image encoding
-        @return void
-       **/
-      static void extractImageFromMessage(
-        const sensor_msgs::Image& msg, cv::Mat* image,
-        const std::string& encoding);
 
       /**
         @brief Extracts a cv::Mat image from a custom ROS message  of type
@@ -195,9 +159,8 @@ namespace pandora_vision
         const int& representationMethod,
         const std::string& encoding,
         const int& raycastKeypointPartitions);
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // UTILS_MESSAGE_CONVERSIONS_H
+#endif  // UTILS_HOLE_MESSAGE_CONVERSIONS_H

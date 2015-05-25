@@ -34,15 +34,16 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
+
 #ifndef HOLE_FUSION_NODE_HOLE_MERGER_H
 #define HOLE_FUSION_NODE_HOLE_MERGER_H
 
 #include "hole_fusion_node/filters_resources.h"
 #include "hole_fusion_node/depth_filters.h"
-#include "utils/defines.h"
-#include "utils/holes_conveyor.h"
-#include "utils/outline_discovery.h"
-#include "utils/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/defines.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/outline_discovery.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
 #include <math.h>
 
 //! Available merging operations:

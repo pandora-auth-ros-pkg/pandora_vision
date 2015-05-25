@@ -35,7 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/message_conversions.h"
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
+#include "utils/hole_message_conversions.h"
 
 /**
   @namespace pandora_vision
@@ -43,90 +44,6 @@
  **/
 namespace pandora_vision
 {
-  /**
-    @brief Converts a cv::Mat image into a sensor_msgs::Image message
-    @param[in] image [const cv::Mat&] The image
-    @param[in] encoding [const std::string&] The image message's encoding
-    @param[in] msg [const sensor_msgs::Image&] A message needed for
-    setting the output message's header by extracting its header
-    @return [sensor_msgs::Image] The output image message
-   **/
-  sensor_msgs::Image MessageConversions::convertImageToMessage(
-    const cv::Mat& image, const std::string& encoding,
-    const sensor_msgs::Image& msg)
-  {
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-
-    msgPtr->header = msg.header;
-    msgPtr->encoding = encoding;
-    msgPtr->image = image;
-
-    return *msgPtr->toImageMsg();
-  }
-
-
-
-  /**
-    @brief Extracts an image from a point cloud message
-    @param pointCloud[in] [const PointCloudPtr&]
-    The input point cloud message
-    @param[in] id [const int&] The enconding of the converted image.
-    CV_32FC1 for a depth image, CV_8UC3 for a rgb image
-    @return cv::Mat The output image
-   **/
-  cv::Mat MessageConversions::convertPointCloudMessageToImage(
-    const PointCloudPtr& pointCloud, const int& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("convertPointCloudMessageToImage");
-    #endif
-
-    // Prepare the output image
-    cv::Mat image(pointCloud->height, pointCloud->width, encoding);
-
-    // For the depth image
-    if (encoding == CV_32FC1)
-    {
-      for (unsigned int row = 0; row < pointCloud->height; ++row)
-      {
-        for (unsigned int col = 0; col < pointCloud->width; ++col)
-        {
-          image.at<float>(row, col) =
-            pointCloud->points[col + pointCloud->width * row].z;
-
-          // if element is nan make it a zero
-          if (image.at<float>(row, col) != image.at<float>(row, col))
-          {
-            image.at<float>(row, col) = 0.0;
-          }
-        }
-      }
-    }
-    else if (encoding == CV_8UC3) // For the rgb image
-    {
-      for (unsigned int row = 0; row < pointCloud->height; ++row)
-      {
-        for (unsigned int col = 0; col < pointCloud->width; ++col)
-        {
-          image.at<unsigned char>(row, 3 * col + 2) =
-            pointCloud->points[col + pointCloud->width * row].r;
-          image.at<unsigned char>(row, 3 * col + 1) =
-            pointCloud->points[col + pointCloud->width * row].g;
-          image.at<unsigned char>(row, 3 * col + 0) =
-            pointCloud->points[col + pointCloud->width * row].b;
-        }
-      }
-    }
-
-    #ifdef DEBUG_TIME
-    Timer::tick("convertPointCloudMessageToImage");
-    #endif
-
-    return image;
-  }
-
-
-
   /**
     @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
     message
@@ -139,7 +56,7 @@ namespace pandora_vision
     pandora_vision_hole::CandidateHolesVectorMsg format
     @return void
    **/
-  void MessageConversions::createCandidateHolesVector(
+  void HoleMessageConversions::createCandidateHolesVector(
     const HolesConveyor& conveyor,
     std::vector<pandora_vision_hole::CandidateHoleMsg>* candidateHolesVector)
   {
@@ -180,8 +97,6 @@ namespace pandora_vision
     #endif
   }
 
-
-
   /**
     @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg
     message
@@ -196,7 +111,7 @@ namespace pandora_vision
     its header and place it as the header of the output message
     @return void
    **/
-  void MessageConversions::createCandidateHolesVectorMessage(
+  void HoleMessageConversions::createCandidateHolesVectorMessage(
     const HolesConveyor& conveyor,
     const cv::Mat& image,
     pandora_vision_hole::CandidateHolesVectorMsg* candidateHolesVectorMsg,
@@ -217,7 +132,7 @@ namespace pandora_vision
     // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
     // image
     candidateHolesVectorMsg->image =
-      convertImageToMessage(image, encoding, msg);
+      MessageConversions::convertImageToMessage(image, encoding, msg);
 
     // Fill the pandora_vision_msgs::CandidateHolesVectorMsg's
     // header
@@ -228,38 +143,6 @@ namespace pandora_vision
     #endif
   }
 
-
-
-  /**
-    @brief Extracts a cv::Mat image from a ROS image message
-    @param[in] msg [const sensor_msgs::Image&] The input ROS image
-    message
-    @param[out] image [cv::Mat*] The output image
-    @param[in] encoding [const std::string&] The image encoding
-    @return void
-   **/
-  void MessageConversions::extractImageFromMessage(
-    const sensor_msgs::Image& msg,
-    cv::Mat* image,
-    const std::string& encoding)
-  {
-    #ifdef DEBUG_TIME
-    Timer::start("extractImageFromMessage");
-    #endif
-
-    cv_bridge::CvImagePtr in_msg;
-
-    in_msg = cv_bridge::toCvCopy(msg, encoding);
-
-    *image = in_msg->image.clone();
-
-    #ifdef DEBUG_TIME
-    Timer::tick("extractImageFromMessage");
-    #endif
-  }
-
-
-
   /**
     @brief Extracts a cv::Mat image from a custom ROS message of type
     pandora_vision_hole::CandidateHolesVectorMsg
@@ -269,7 +152,7 @@ namespace pandora_vision
     @param[in] encoding [const std::string&] The image encoding
     @return void
    **/
-  void MessageConversions::extractImageFromMessageContainer(
+  void HoleMessageConversions::extractImageFromMessageContainer(
     const pandora_vision_hole::CandidateHolesVectorMsg& msg,
     cv::Mat* image, const std::string& encoding)
   {
@@ -278,14 +161,12 @@ namespace pandora_vision
     #endif
 
     sensor_msgs::Image imageMsg = msg.image;
-    extractImageFromMessage(imageMsg, image, encoding);
+    MessageConversions::extractImageFromMessage(imageMsg, image, encoding);
 
     #ifdef DEBUG_TIME
     Timer::tick("extractDepthImageFromMessageContainer");
     #endif
   }
-
-
 
   /**
     @brief Recreates the HolesConveyor struct for the candidate holes
@@ -305,7 +186,7 @@ namespace pandora_vision
     blob's outline
     @return void
    **/
-  void MessageConversions::fromCandidateHoleMsgToConveyor(
+  void HoleMessageConversions::fromCandidateHoleMsgToConveyor(
     const std::vector<pandora_vision_hole::CandidateHoleMsg>&
     candidateHolesVector,
     HolesConveyor* conveyor,
@@ -430,8 +311,6 @@ namespace pandora_vision
     #endif
   }
 
-
-
   /**
     @brief Unpacks the the HolesConveyor struct for the
     candidate holes, the interpolated depth image or the RGB image
@@ -450,7 +329,7 @@ namespace pandora_vision
     blob's outline
     @return void
    **/
-  void MessageConversions::unpackMessage(
+  void HoleMessageConversions::unpackMessage(
     const pandora_vision_hole::CandidateHolesVectorMsg& holesMsg,
     HolesConveyor* conveyor,
     cv::Mat* image,
@@ -478,4 +357,4 @@ namespace pandora_vision
     #endif
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

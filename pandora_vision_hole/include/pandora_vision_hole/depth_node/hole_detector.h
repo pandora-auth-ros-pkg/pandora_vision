@@ -38,9 +38,9 @@
 #ifndef DEPTH_NODE_HOLE_DETECTOR_H
 #define DEPTH_NODE_HOLE_DETECTOR_H
 
-#include "utils/blob_detection.h"
-#include "utils/holes_conveyor.h"
-#include "utils/hole_filters.h"
+#include "pandora_vision_common/pandora_vision_utilities/blob_detection.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/hole_filters.h"
 
 /**
   @namespace pandora_vision

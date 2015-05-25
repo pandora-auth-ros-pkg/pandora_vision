@@ -10,78 +10,12 @@ ${catkin_INCLUDE_DIRS})
 
 ###############################  Unit Tests ####################################
 
-#################################### utils #####################################
-
-catkin_add_gtest(outline_discovery_test
-  unit/utils/outline_discovery_test.cpp)
-target_link_libraries(outline_discovery_test
+catkin_add_gtest(hole_message_conversions_test
+  unit/hole_message_conversions_test.cpp)
+target_link_libraries(hole_message_conversions_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
-
-catkin_add_gtest(bounding_box_detection_test
-  unit/utils/bounding_box_detection_test.cpp)
-target_link_libraries(bounding_box_detection_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(edge_detection_test
-  unit/utils/edge_detection_test.cpp)
-target_link_libraries(edge_detection_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(hole_filters_test
-  unit/utils/hole_filters_test.cpp)
-target_link_libraries(hole_filters_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(holes_conveyor_test
-  unit/utils/holes_conveyor_test.cpp)
-target_link_libraries(holes_conveyor_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(message_conversions_test
-  unit/utils/message_conversions_test.cpp)
-target_link_libraries(message_conversions_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(morphological_operators_test
-  unit/utils/morphological_operators_test.cpp)
-target_link_libraries(morphological_operators_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(noise_elimination_test
-  unit/utils/noise_elimination_test.cpp)
-target_link_libraries(noise_elimination_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(visualization_test
-  unit/utils/visualization_test.cpp)
-target_link_libraries(visualization_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
-catkin_add_gtest(wavelets_test
-  unit/utils/wavelets_test.cpp)
-target_link_libraries(wavelets_test
-  ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_utils
-  gtest_main)
-
 
 ################################ depth node ####################################
 catkin_add_gtest(depth_hole_detector_test

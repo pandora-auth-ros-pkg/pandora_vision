@@ -34,16 +34,17 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
+
 #ifndef HOLE_FUSION_NODE_RGB_FILTERS_H
 #define HOLE_FUSION_NODE_RGB_FILTERS_H
 
 #include <math.h>
-#include "utils/edge_detection.h"
-#include "utils/histogram.h"
-#include "utils/holes_conveyor.h"
-#include "utils/morphological_operators.h"
-#include "utils/parameters.h"
-#include "utils/visualization.h"
+#include "pandora_vision_common/pandora_vision_utilities/edge_detection.h"
+#include "pandora_vision_common/pandora_vision_utilities/histogram.h"
+#include "pandora_vision_common/pandora_vision_utilities/holes_conveyor.h"
+#include "pandora_vision_common/pandora_vision_utilities/morphological_operators.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/visualization.h"
 
 /**
   @namespace pandora_vision

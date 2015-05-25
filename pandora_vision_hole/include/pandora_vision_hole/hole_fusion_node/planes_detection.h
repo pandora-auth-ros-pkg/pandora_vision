@@ -38,7 +38,7 @@
 #ifndef HOLE_FUSION_NODE_PLANES_DETECTION_H
 #define HOLE_FUSION_NODE_PLANES_DETECTION_H
 
-#include "utils/parameters.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
 
 /**
   @namespace pandora_vision

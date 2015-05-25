@@ -256,7 +256,7 @@ namespace pandora_vision
     HolesConveyorUtils::clear(&depthHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(depthCandidateHolesVector,
+    HoleMessageConversions::unpackMessage(depthCandidateHolesVector,
       &depthHolesConveyor_,
       &interpolatedDepthImage_,
       Parameters::Image::image_representation_method,
@@ -1888,7 +1888,7 @@ namespace pandora_vision
     HolesConveyorUtils::clear(&rgbHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(rgbCandidateHolesVector,
+    HoleMessageConversions::unpackMessage(rgbCandidateHolesVector,
       &rgbHolesConveyor_,
       &rgbImage_,
       Parameters::Image::image_representation_method,

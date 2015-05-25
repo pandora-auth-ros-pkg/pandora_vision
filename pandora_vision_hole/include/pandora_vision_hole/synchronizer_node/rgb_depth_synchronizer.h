@@ -38,9 +38,9 @@
 #ifndef SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 #define SYNCHRONIZER_NODE_RGB_DEPTH_SYNCHRONIZER_H
 
-#include "utils/message_conversions.h"
-#include <utils/defines.h>
-#include <utils/parameters.h>
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
+#include "pandora_vision_common/pandora_vision_utilities/defines.h"
+#include "pandora_vision_common/pandora_vision_utilities/parameters.h"
 #include <std_msgs/Empty.h>
 
 /**

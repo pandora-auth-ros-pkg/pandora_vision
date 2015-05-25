@@ -36,20 +36,20 @@
  *********************************************************************/
 
 #include <math.h>
-#include "utils/message_conversions.h"
+#include "hole_message_conversions.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision
 {
   /**
-    @class MessageConversionsTest
-    @brief Tests the integrity of methods of class MessageConversions
+    @class HoleMessageConversionsTest
+    @brief Tests the integrity of methods of class HoleMessageConversions
    **/
-  class MessageConversionsTest : public ::testing::Test
+  class HoleMessageConversionsTest : public ::testing::Test
   {
     protected:
 
-      MessageConversionsTest() {}
+      HoleMessageConversionsTest() {}
 
       virtual void SetUp()
       {
@@ -121,240 +121,14 @@ namespace pandora_vision
   };
 
 
-  //! Tests MessageConversions::convertImageToMessage
-  TEST_F ( MessageConversionsTest, convertImageToMessageTest )
-  {
-    // A grayscale image
-    cv::Mat image_8UC1 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
-    // Insert randomness into image
-    unsigned int seed = 0;
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image_8UC1.at< unsigned char >( rows, cols ) =
-          static_cast< unsigned char >(rand_r( &seed ) % 255);
-      }
-    }
-
-    // A dummy message. Needed for its header
-    sensor_msgs::Image msg_8UC1;
-
-    std::string encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-
-    sensor_msgs::Image image_msg = MessageConversions::convertImageToMessage(
-      image_8UC1,
-      encoding,
-      msg_8UC1);
-
-    // Extract the image message and compare this image to the original
-    cv_bridge::CvImagePtr br_8UC1 = cv_bridge::toCvCopy(image_msg, encoding);
-
-    cv::Mat extractedImage_8UC1 = br_8UC1->image.clone();
-
-    // The number of pixels differing between image_8UC1 and extractedImage_8UC1
-    int diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_8UC1.at< unsigned char >( rows, cols ) !=
-          extractedImage_8UC1.at< unsigned char >( rows, cols ) )
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0, diff );
-
-
-    // A RGB image
-    cv::Mat image_8UC3 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
-
-    // Insert randomness into image
-    seed = 0;
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image_8UC3.at< cv::Vec3b>( rows, cols ).val[0] =
-          static_cast< unsigned char >(rand_r( &seed ) % 255);
-
-        image_8UC3.at< cv::Vec3b>( rows, cols ).val[1] =
-          static_cast< unsigned char >(rand_r( &seed ) % 255);
-
-        image_8UC3.at< cv::Vec3b>( rows, cols ).val[2] =
-          static_cast< unsigned char >(rand_r( &seed ) % 255);
-      }
-    }
-
-    // A dummy message. Needed for its header
-    sensor_msgs::Image msg_8UC3;
-
-    encoding = sensor_msgs::image_encodings::TYPE_8UC3;
-
-    image_msg = MessageConversions::convertImageToMessage(
-      image_8UC3,
-      encoding,
-      msg_8UC3);
-
-    // Extract the image message and compare this image to the original
-    cv_bridge::CvImagePtr br_8UC3 = cv_bridge::toCvCopy(image_msg, encoding);
-
-    cv::Mat extractedImage_8UC3 = br_8UC3->image.clone();
-
-    // The number of pixels differing between image_8UC3 and extractedImage_8UC3
-    diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_8UC3.at< unsigned char >( rows, cols ) !=
-          extractedImage_8UC3.at< unsigned char >( rows, cols ) )
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0, diff );
-  }
-
-
-
-  //! Tests MessageConversions::convertPointCloudMessageToImage
-  TEST_F ( MessageConversionsTest, convertPointCloudMessageToImageTest )
-  {
-    // Create a grayscale image
-    cv::Mat image_32FC1 = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
-
-    // Fill it with randomness
-    unsigned int seed = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image_32FC1.at< float >( rows, cols ) =
-          static_cast< float >( rand_r(&seed) % 2 );
-      }
-    }
-
-    // Set some NaNs
-    image_32FC1.at< float >( 10, 10 ) = NAN;
-    image_32FC1.at< float >( 100, 100 ) = NAN;
-
-
-    // Create a RGB image
-    cv::Mat image_8UC3 = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
-
-    // Fill it with randomness
-    seed = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image_8UC3.at< cv::Vec3b >( rows, cols ).val[0] =
-          static_cast< unsigned char >( rand_r(&seed) % 255 );
-
-        image_8UC3.at< cv::Vec3b >( rows, cols ).val[1] =
-          static_cast< unsigned char >( rand_r(&seed) % 255 );
-
-        image_8UC3.at< cv::Vec3b >( rows, cols ).val[2] =
-          static_cast< unsigned char >( rand_r(&seed) % 255 );
-      }
-    }
-
-    // Set some NaNs
-    image_8UC3.at< unsigned char >( 10, 10 ) = NAN;
-    image_8UC3.at< unsigned char >( 100, 100 ) = NAN;
-
-    // Create a point cloud. The extracted depth values result in image_32FC1
-    // The extracted RGB values result in image_8UC3.
-    PointCloudPtr pointCloud ( new PointCloud );
-
-    pointCloud->height = HEIGHT;
-    pointCloud->width= WIDTH;
-    pointCloud->resize( pointCloud->height * pointCloud->width );
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        // Set the depth value for this point
-        pointCloud->points[cols + pointCloud->width * rows].z =
-          image_32FC1.at< float >( rows, cols );
-
-        // Set the RGB values for this point
-        pointCloud->points[cols + pointCloud->width * rows].b =
-          image_8UC3.at< cv::Vec3b >( rows, cols ).val[0];
-        pointCloud->points[cols + pointCloud->width * rows].g =
-          image_8UC3.at< cv::Vec3b >( rows, cols ).val[1];
-        pointCloud->points[cols + pointCloud->width * rows].r =
-          image_8UC3.at< cv::Vec3b >( rows, cols ).val[2];
-      }
-    }
-
-    // The extracted depth image
-    cv::Mat extracted_32FC1 =
-      MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_32FC1);
-
-    // The number of pixels differing between image_32FC1
-    // and extracted_32FC1
-    int diff = 0;
-
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_32FC1.at< float >( rows, cols ) !=
-          extracted_32FC1.at< float >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be 2 pixels different before and after:
-    // The two NaN values
-    ASSERT_EQ ( 2, diff );
-
-    // The extracted RGB image
-    cv::Mat extracted_8UC3 =
-      MessageConversions::convertPointCloudMessageToImage( pointCloud, CV_8UC3 );
-
-    diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image_8UC3.at< unsigned char >( rows, cols ) !=
-          extracted_8UC3.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0, diff );
-  }
-
-
-
-  //! Tests MessageConversions::createCandidateHolesVector
-  TEST_F ( MessageConversionsTest, createCandidateHolesVectorTest )
+  //! Tests HoleMessageConversions::createCandidateHolesVector
+  TEST_F ( HoleMessageConversionsTest, createCandidateHolesVectorTest )
   {
     // The vector of messages of candidate holes
     std::vector<pandora_vision_hole::CandidateHoleMsg> candidateHolesVector;
 
-    // Run MessageConversions::createCandidateHolesVector
-    MessageConversions::createCandidateHolesVector( conveyor,
+    // Run HoleMessageConversions::createCandidateHolesVector
+    HoleMessageConversions::createCandidateHolesVector( conveyor,
       &candidateHolesVector );
 
     for (unsigned int i = 0; i < conveyor.size(); i++)
@@ -387,8 +161,8 @@ namespace pandora_vision
 
 
 
-  //! Tests MessageConversions::createCandidateHolesVectorMessage
-  TEST_F ( MessageConversionsTest, createCandidateHolesVectorMessageTest )
+  //! Tests HoleMessageConversions::createCandidateHolesVectorMessage
+  TEST_F ( HoleMessageConversionsTest, createCandidateHolesVectorMessageTest )
   {
     // Create a grayscale image
     cv::Mat image= cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
@@ -411,8 +185,8 @@ namespace pandora_vision
     sensor_msgs::Image msg;
     msg.header.frame_id = "a";
 
-    // Run MessageConversions::createCandidateHolesVector
-    MessageConversions::createCandidateHolesVectorMessage(
+    // Run HoleMessageConversions::createCandidateHolesVector
+    HoleMessageConversions::createCandidateHolesVectorMessage(
       conveyor,
       image,
       &candidateHolesVectorMsg,
@@ -421,7 +195,7 @@ namespace pandora_vision
 
     // Check the integrity of image
     cv::Mat extracted;
-    MessageConversions::extractImageFromMessageContainer(
+    HoleMessageConversions::extractImageFromMessageContainer(
       candidateHolesVectorMsg,
       &extracted,
       sensor_msgs::image_encodings::TYPE_8UC1);
@@ -476,57 +250,8 @@ namespace pandora_vision
   }
 
 
-
-  //! Tests MessageConversions::extractImageFromMessage
-  TEST_F ( MessageConversionsTest, extractImageFromMessageTest )
-  {
-    // Create a grayscale image
-    cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
-
-    // Fill it with randomness
-    unsigned int seed = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        image.at< unsigned char >( rows, cols ) =
-          static_cast< unsigned char >( rand_r(&seed) % 2 );
-      }
-    }
-
-    cv_bridge::CvImagePtr msgPtr(new cv_bridge::CvImage());
-    msgPtr->encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-    msgPtr->image = image;
-
-    sensor_msgs::Image image_msg = *msgPtr->toImageMsg();
-
-    // Run MessageConversions::extractImageFromMessage
-    cv::Mat extracted;
-    MessageConversions::extractImageFromMessage(image_msg, &extracted,
-      sensor_msgs::image_encodings::TYPE_8UC1);
-
-    // The number of pixels differing between image and extracted
-    int diff = 0;
-    for ( int rows = 0; rows < HEIGHT; rows++ )
-    {
-      for ( int cols = 0; cols < WIDTH; cols++ )
-      {
-        if ( image.at< unsigned char >( rows, cols ) !=
-          extracted.at< unsigned char >( rows, cols ))
-        {
-          diff++;
-        }
-      }
-    }
-
-    // There should be no discrepancies
-    ASSERT_EQ ( 0 , diff );
-  }
-
-
-
-  //! Tests MessageConversions::extractImageFromMessageContainer
-  TEST_F ( MessageConversionsTest, extractImageFromMessageContainerTest )
+  //! Tests HoleMessageConversions::extractImageFromMessageContainer
+  TEST_F ( HoleMessageConversionsTest, extractImageFromMessageContainerTest )
   {
     // Create a grayscale image
     cv::Mat image = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC1 );
@@ -550,9 +275,9 @@ namespace pandora_vision
     pandora_vision_hole::CandidateHolesVectorMsg msg;
     msg.image = *msgPtr->toImageMsg();
 
-    // Run MessageConversions::extractImageFromMessageContainer
+    // Run HoleMessageConversions::extractImageFromMessageContainer
     cv::Mat extracted;
-    MessageConversions::extractImageFromMessageContainer( msg,
+    HoleMessageConversions::extractImageFromMessageContainer( msg,
       &extracted, sensor_msgs::image_encodings::TYPE_8UC1 );
 
     // The number of pixels differing between image and extracted
@@ -575,8 +300,8 @@ namespace pandora_vision
 
 
 
-  //! Tests MessageConversions::fromCandidateHoleMsgToConveyor
-  TEST_F ( MessageConversionsTest, fromCandidateHoleMsgToConveyorTest )
+  //! Tests HoleMessageConversions::fromCandidateHoleMsgToConveyor
+  TEST_F ( HoleMessageConversionsTest, fromCandidateHoleMsgToConveyorTest )
   {
     // The vector of candidate holes
     std::vector<pandora_vision_hole::CandidateHoleMsg> candidateHolesVector;
@@ -609,9 +334,9 @@ namespace pandora_vision
     // The conveyor extracted from the message
     HolesConveyor extractedConveyor;
 
-    // Run MessageConversions::fromCandidateHoleMsgToConveyor
+    // Run HoleMessageConversions::fromCandidateHoleMsgToConveyor
     // for representationMethod 0
-    MessageConversions::fromCandidateHoleMsgToConveyor(
+    HoleMessageConversions::fromCandidateHoleMsgToConveyor(
       candidateHolesVector,
       &extractedConveyor,
       image,
@@ -647,9 +372,9 @@ namespace pandora_vision
     // Clear the conveyor
     HolesConveyorUtils::clear( &extractedConveyor );
 
-    // Run MessageConversions::fromCandidateHoleMsgToConveyor
+    // Run HoleMessageConversions::fromCandidateHoleMsgToConveyor
     // for representationMethod 1
-    MessageConversions::fromCandidateHoleMsgToConveyor(
+    HoleMessageConversions::fromCandidateHoleMsgToConveyor(
       candidateHolesVector,
       &extractedConveyor,
       image,
@@ -675,8 +400,8 @@ namespace pandora_vision
 
 
 
-  //! Tests MessageConversions::unpackMessage
-  TEST_F ( MessageConversionsTest, unpackMessageTest )
+  //! Tests HoleMessageConversions::unpackMessage
+  TEST_F ( HoleMessageConversionsTest, unpackMessageTest )
   {
     // The overall message
     pandora_vision_hole::CandidateHolesVectorMsg candidateHolesVectorMsg;
@@ -740,8 +465,8 @@ namespace pandora_vision
     // The extracted image
     cv::Mat extractedImage;
 
-    // Run MessageConversions::unpackMessage for representationMethod 0
-    MessageConversions::unpackMessage(
+    // Run HoleMessageConversions::unpackMessage for representationMethod 0
+    HoleMessageConversions::unpackMessage(
       candidateHolesVectorMsg,
       &extractedConveyor,
       &extractedImage,
@@ -798,8 +523,8 @@ namespace pandora_vision
     // Clear extractedConveyor
     HolesConveyorUtils::clear( &extractedConveyor );
 
-    // Run MessageConversions::unpackMessage for representationMethod 1
-    MessageConversions::unpackMessage(
+    // Run HoleMessageConversions::unpackMessage for representationMethod 1
+    HoleMessageConversions::unpackMessage(
       candidateHolesVectorMsg,
       &extractedConveyor,
       &extractedImage,

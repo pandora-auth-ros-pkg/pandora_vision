@@ -40,9 +40,9 @@
 
 #define SHOW_DEBUG_IMAGE
 
-#include "utils/blob_detection.h"
-#include "utils/defines.h"
-#include "utils/hole_filters.h"
+#include "pandora_vision_common/pandora_vision_utilities/blob_detection.h"
+#include "pandora_vision_common/pandora_vision_utilities/defines.h"
+#include "pandora_vision_common/pandora_vision_utilities/hole_filters.h"
 
 /**
   @namespace pandora_vision
