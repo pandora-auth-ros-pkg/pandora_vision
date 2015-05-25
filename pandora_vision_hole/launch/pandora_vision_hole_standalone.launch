@@ -61,7 +61,7 @@
 
   <node
     name="synchronizer_node"
-    type="synchronizer_node"
+    type="pandora_vision_hole_synchronizer_node"
     pkg="pandora_vision_hole"
     respawn="False"
     output="$(arg output)"
@@ -80,7 +80,7 @@
 
   <node
     name="depth_node"
-    type="depth_node"
+    type="pandora_vision_hole_depth_node"
     pkg="pandora_vision_hole"
     respawn="False"
     output="$(arg output)"
@@ -95,7 +95,7 @@
 
   <node
     name="rgb_node"
-    type="rgb_node"
+    type="pandora_vision_hole_rgb_node"
     pkg="pandora_vision_hole"
     respawn="False"
     output="$(arg output)"
@@ -110,7 +110,7 @@
 
   <node
     name="hole_fusion_node"
-    type="hole_fusion_node"
+    type="pandora_vision_hole_fusion_node"
     pkg="pandora_vision_hole"
     respawn="False"
     output="$(arg output)"

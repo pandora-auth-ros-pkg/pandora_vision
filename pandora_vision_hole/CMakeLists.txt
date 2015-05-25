@@ -186,22 +186,22 @@ target_link_libraries(${PROJECT_NAME}_filters
   ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES})
 
-add_library(${PROJECT_NAME}_hole_fusion
+add_library(${PROJECT_NAME}_fusion
   src/hole_fusion_node/hole_merger.cpp
   src/hole_fusion_node/hole_uniqueness.cpp
   src/hole_fusion_node/hole_validation.cpp
   src/hole_fusion_node/hole_fusion.cpp)
-target_link_libraries(${PROJECT_NAME}_hole_fusion
+target_link_libraries(${PROJECT_NAME}_fusion
   ${PROJECT_NAME}_filters
   ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_hole_fusion
+add_dependencies(${PROJECT_NAME}_fusion
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-add_executable(hole_fusion_node
+add_executable(${PROJECT_NAME}_fusion_node
   src/hole_fusion_node/hole_fusion_node.cpp)
-target_link_libraries(hole_fusion_node
-  ${PROJECT_NAME}_hole_fusion
+target_link_libraries(${PROJECT_NAME}_fusion_node
+  ${PROJECT_NAME}_fusion
   ${catkin_LIBRARIES})
 
 
