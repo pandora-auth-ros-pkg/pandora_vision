@@ -25,6 +25,8 @@ catkin_package(
     urdf
   INCLUDE_DIRS
     include
+  LIBRARIES
+    ${PROJECT_NAME}_utils
   )
 
 include_directories(
