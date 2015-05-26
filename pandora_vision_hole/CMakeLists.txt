@@ -29,7 +29,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   dynamic_reconfigure
-  #~ pcl_ros
   message_filters
   roslint
   urdf
@@ -72,7 +71,6 @@ catkin_package(
     std_msgs
     sensor_msgs
     dynamic_reconfigure
-    #~ pcl_ros
     message_filters
     urdf
   INCLUDE_DIRS

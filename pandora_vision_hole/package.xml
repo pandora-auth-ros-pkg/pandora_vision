@@ -31,7 +31,6 @@
   <depend>state_manager</depend>
   <depend>state_manager_msgs</depend>
   <depend>dynamic_reconfigure</depend>
-  <depend>pcl_ros</depend>
   <depend>message_filters</depend>
   <depend>urdf</depend>
   
