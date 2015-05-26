@@ -53,6 +53,7 @@ from pandora_testing_tools.testing_interface import test_base
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import PointCloud2
 
+
 class VisionBenchmarkTestBase(test_base.TestBase):
 
     alertEvent = threading.Event()
@@ -91,7 +92,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             # If the tested algorithm is not Victim, there is no need to use
             # depth and thermal images.
             if (("depth" in fileName or "thermal" in fileName) and
-                (self.algorithm != "Victim" and self.algorithm != "Hole")):
+               (self.algorithm != "Victim" and self.algorithm != "Hole")):
 
                 continue
             # Store the image.
@@ -99,6 +100,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             rosimage.header.frame_id = "/kinect_optical_frame"
             rosimage.header.stamp = rospy.Time.now()
             self.images.append(rosimage)
+            self.names.append(fileName)
 
             self.imageWidth = currentImg.shape[1]
             self.imageHeight = currentImg.shape[0]
@@ -330,7 +332,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 self.falsePositives > 0):
             fMeasure = (2.0 * self.truePositives /
                         (2.0 * self.truePositives +
-                        self.falseNegatives + self.falsePositives))
+                         self.falseNegatives + self.falsePositives))
 
         if self.truePositives > 0:
             self.meanSquaredError /= float(self.truePositives)
@@ -351,7 +353,8 @@ class VisionBenchmarkTestBase(test_base.TestBase):
 
     def calculateMeanNumberOfAngles(self):
         if self.algorithm == "LandoltC":
-            rospy.loginfo("Mean Number of Landoltc found for each set of parameters")
+            rospy.loginfo("Mean Number of Landoltc found for each" +
+                          " set of parameters")
             for dictKeyTP, dictValuesTP in self.truePositivesBenchmarkDict.iteritems():
                 if dictKeyTP in self.additionalInfoDict:
                     numOfAngles = self.additionalInfoDict[dictKeyTP]
@@ -381,10 +384,10 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         if "alert" in output_topic:
             cls.alertEvent.set()
 
-    def benchmarkTest(self, imagePath, inputTopic, outputTopic):
+    def benchmarkTest(self, imagePath, inputTopic, outputTopic,
+                      benchmarkFlag=True):
         # Read a Set of Images
         rospy.loginfo("Reading Images")
-        print outputTopic
         if self.algorithm == "Hole" or self.algorithm == "Victim":
             self.readRosBags(imagePath)
         else:
@@ -392,13 +395,9 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         # Read Annotations for a Set of Images
         rospy.loginfo("Reading Annotator File")
         self.readAnnotatorFile(imagePath)
-        # Read Benchmark Parameters for a Set of Images
-        rospy.loginfo("Reading Benchmark File")
-        self.readBenchmarkFile(imagePath)
         # Create Helper Structures for Benchmarking
         self.truePositivesBenchmarkDict = defaultdict(int)
         self.actualPositivesBenchmarkDict = defaultdict(int)
-        self.updateActualPositiveDictionary()
         # Test Parameters and Variables
         self.truePositives = 0
         self.falsePositives = 0
@@ -407,6 +406,13 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         self.meanSquaredError = 0.0
         self.elapsedTimeList = []
         self.additionalInfoDict = defaultdict(int)
+
+        if benchmarkFlag:
+            # Read Benchmark Parameters for a Set of Images
+            rospy.loginfo("Reading Benchmark File")
+            self.readBenchmarkFile(imagePath)
+            self.updateActualPositiveDictionary()
+
         errorThreshold = 3000.0
         maxWaitTime = 1.0
         bridge = CvBridge()
@@ -416,44 +422,30 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             suffix = "Alerts"
 
         queueIndex = 0
-        count  = 0
+        count = 0
 
         # Publish image files sequentially and wait for an alert.
         # Confirm the authenticity of the alert using the annotator
         # groundtruth set.
         for image, imageName in zip(self.images, self.names):
-
             self.alertEvent.clear()
             rospy.logdebug("Sending Image %s", imageName)
             timeFlag = False
             startTime = time.clock()
-            self.mockPublish(inputTopic, outputTopic, image)
-            print outputTopic
-            #self.mockPublish(inputTopic, outputTopic[1], image)
+            self.mockPublish(inputTopic, outputTopic[1], image)
             elapsedTime = time.clock() - startTime
 
-            # while not timeFlag:
-                #elapsedTime = time.clock() - startTime
-                #timeFlag = (elapsedTime > maxWaitTime or
-                            #(self.repliedList[outputTopic[0]] and
-                             #len(self.messageList[outputTopic[0]]) >= 1))
-
-            response = self.messageList[outputTopic[0]]
-            print len(response)
-            print "Object Type : ", response[0].__class__.__name__
-            # possibleAlert = self.messageList[outputTopic[1]]
-            if response[0].success:
+            response = self.messageList[outputTopic[0]][-1]
+            if response.success:
                 # Wait for the alert to arrive.
                 self.alertEvent.wait()
                 rospy.logdebug("Alert found in Image %s", imageName)
                 rospy.logdebug("Time passed: %f seconds", elapsedTime)
                 truePositivesInImage = 0
                 # Estimate alert center point from message parameters
-                print self.messageList.items()
                 alerts = getattr(
-                        self.messageList[outputTopic[1]][queueIndex],
+                        self.messageList[outputTopic[1]][-1],
                         self.algorithm.lower()+suffix)
-                print len(alerts)
                 queueIndex += 1
                 for iiAlert in xrange(len(alerts)):
                     imageYaw = float(alerts[iiAlert].info.yaw)
@@ -475,10 +467,11 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                         truePositivesInImage += 1
                         self.truePositives += 1
                         self.meanSquaredError += minSqrError
-                        self.updateTruePositiveDictionary(imageName)
                         self.elapsedTimeList.append(elapsedTime)
-                        self.updateAdditionalInfoDict(imageName,
-                                alerts[iiAlert])
+                        if benchmarkFlag:
+                            self.updateTruePositiveDictionary(imageName)
+                            self.updateAdditionalInfoDict(imageName,
+                                                          alerts[iiAlert])
                     else:
                         self.falsePositives += 1
 
@@ -492,11 +485,11 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                     self.falseNegatives += numberOfFalseNegatives
                 else:
                     self.trueNegatives += 1
-        
-        
+
         # Calculate the Benchmarking Results.
         self.calculateBenchmarkResults()
-        # Estimate Recall values for each set of
-        # (Distance, Horizontal Angle, Vertical Angle)
-        self.calculateRecallResults()
-        self.calculateMeanNumberOfAngles()
+        if benchmarkFlag:
+            # Estimate Recall values for each set of
+            # (Distance, Horizontal Angle, Vertical Angle)
+            self.calculateRecallResults()
+            self.calculateMeanNumberOfAngles()
