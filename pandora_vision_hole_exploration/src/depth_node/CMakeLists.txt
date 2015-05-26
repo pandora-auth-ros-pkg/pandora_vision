@@ -16,6 +16,9 @@ add_library(${PROJECT_NAME}_depth_postprocessor
   depth_postprocessor.cpp)
 target_link_libraries(${PROJECT_NAME}_depth_postprocessor
   ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_depth_postprocessor
+  ${catkin_EXPORTED_TARGETS}
+  )
 
 add_library(${PROJECT_NAME}_depth_handler
   depth_handler.cpp)

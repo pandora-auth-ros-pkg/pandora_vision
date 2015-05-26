@@ -84,8 +84,11 @@ add_library(${PROJECT_NAME}_utils
    src/utils/haralickfeature_extractor.cpp
   )
 
+
 target_link_libraries(${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
+  )
+add_dependencies(${PROJECT_NAME}_utils  ${catkin_EXPORTED_TARGETS}
   )
 
 add_subdirectory(src/depth_node)
@@ -94,33 +97,6 @@ add_subdirectory(src/rgb_node)
 add_subdirectory(src/synchronizer_node)
 #add_subdirectory(src/thermal_node)
 
-# Download extra files not needed when building
-# but necessary when running the package.
-# If download fails, the build also fails.
-#download_extra_data(
-#  ${PROJECT_NAME}_download_backprojection_images
-#  EXTRA_FILES walls/extra_files.yaml
-#  )
-
-# Download extra files, not needed when building
-# and not necessary to run any executable.
-# To download run: catkin_make download_extra_data
-#download_data(
-#  ${PROJECT_NAME}_simple_pcl_frame.bag
-#  http://downloads.pandora.ee.auth.gr/bags/simple_pcl_frame.bag
-#  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/test/functional
-#  MD5 4304760d90c53b80c3b42a4c148379e5
-#  EXCLUDE_FROM_ALL
-#  )
-#
-#download_data(
-#  ${PROJECT_NAME}_simple_pcl_frame_0.bag
-#  http://downloads.pandora.ee.auth.gr/bags/simple_pcl_frame_0.bag
-#  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/test/functional
-#  MD5 d7d56db4b5d121aa8ffe75c7a41ff690
-#  EXCLUDE_FROM_ALL
-#  OPTIONAL
-#  )
 ################################# ROSLINT ######################################
 # Execute via lint : catkin_make roslint_{PACKAGE_NAME}
 
@@ -204,5 +180,8 @@ roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
 ##################################### Testing ##################################
 if(CATKIN_ENABLE_TESTING)
+  if(${PROJECT_NAME}_download)
+    SET(${PROJECT_NAME}_download_data TRUE)
+  endif()
   add_subdirectory(test)
 endif()

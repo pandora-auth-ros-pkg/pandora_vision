@@ -49,8 +49,8 @@ catkin_add_gtest(hole_fusion_test
   unit/hole_fusion_node/hole_fusion_test.cpp)
 
 target_link_libraries(hole_fusion_test
- ${PROJECT_NAME}_hole_fusion
- gtest_main)
+  ${PROJECT_NAME}_hole_fusion
+  gtest_main)
 
 ############### Functional Tests ###############
 
@@ -68,13 +68,13 @@ find_package(rostest REQUIRED)
 #                               Benchmark Tests                                #
 ################################################################################
 
-#download_extra_data(
-#  ${PROJECT_NAME}_benchmark_images_bags_pcl
-#  EXTRA_FILES test/benchmark/images/bags_pcl/extra_files.yaml
-#  #EXCLUDE_FROM_ALL
-#  )
+if(${PROJECT_NAME}_download_data)
+  download_extra_data(${PROJECT_NAME}_download_benchark_bags
+    EXTRA_FILES test/benchmark/data/bags_pcl/extra_files.yaml)
+endif()
+
 #add_dependencies(${PROJECT_NAME}_benchmark_images_bags_pcl tests)
 
 # add_rostest(benchmark/hole_exploration_benchmark_test.launch)
 # add_rostest(benchmark/hole_benchmark_test.launch DEPENDENCIES
-            # ${PROJECT_NAME}_benchmark_images_bags_pcl)
+# ${PROJECT_NAME}_benchmark_images_bags_pcl)

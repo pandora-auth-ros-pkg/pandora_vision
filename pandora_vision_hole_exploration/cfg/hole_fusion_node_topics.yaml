@@ -8,6 +8,7 @@ subscribed_topics:
 
 published_topics:
   synchronizer_unlock_topic: unlock_rgb_depth_synchronizer
+  processor_log_topic: processor_log
   hole_detector_output_topic: /vision/holes_direction_alert
   enhanced_holes_topic: /vision/enhanced_holes
   make_synchronizer_subscribe_to_input: subscribe_to_input

@@ -40,7 +40,6 @@
 
 #include <dirent.h>
 #include <ros/package.h>
-#include <std_msgs/Empty.h>
 #include <urdf_parser/urdf_parser.h>
 #include <image_transport/image_transport.h>
 #include "state_manager/state_client.h"
@@ -94,6 +93,13 @@ namespace pandora_vision
       // The name of the topic where the Hole Fusion node will publish messages
       // in order to unlock the Synchronizer node
       std::string unlockTopic_;
+
+      // The publisher used to inform the world that the hole fusion node
+      // has finished processing the hole data.
+      ros::Publisher processEndPublisher_;
+
+      // The topic where the process end will be advertised.
+      std::string processEndTopic_;
 
       // The ROS publisher that will be used to publish the final valid holes
       // produced by this package

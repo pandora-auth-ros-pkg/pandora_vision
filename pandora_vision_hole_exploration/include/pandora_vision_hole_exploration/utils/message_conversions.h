@@ -43,9 +43,11 @@
 #include "utils/holes_conveyor.h"
 
 //#include "pandora_vision_hole/CandidateHolesVectorMsg.h"  // TO FIX
+#include <std_msgs/Empty.h>
 #include "pandora_vision_msgs/RegionOfInterestVector.h" 
 #include "pandora_vision_msgs/HoleDirectionAlertVector.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
+#include "sensor_processor/ProcessorLogInfo.h"
 
 /**
   @namespace pandora_vision
