@@ -53,7 +53,7 @@ catkin_add_gtest(hole_merger_test
 target_link_libraries(hole_merger_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_filters
-  ${PROJECT_NAME}_hole_fusion
+  ${PROJECT_NAME}_fusion
   gtest_main)
 
 
@@ -80,7 +80,7 @@ catkin_add_gtest(hole_validation_test
   unit/hole_fusion_node/hole_validation_test.cpp)
 
 target_link_libraries(hole_validation_test
-  ${PROJECT_NAME}_hole_fusion
+  ${PROJECT_NAME}_fusion
   gtest_main)
 
 
@@ -89,7 +89,7 @@ catkin_add_gtest(hole_uniqueness_test
   unit/hole_fusion_node/hole_uniqueness_test.cpp)
 
 target_link_libraries(hole_uniqueness_test
-  ${PROJECT_NAME}_hole_fusion
+  ${PROJECT_NAME}_fusion
   gtest_main)
 
 
