@@ -58,7 +58,7 @@ namespace pandora_vision
   bool Parameters::Debug::show_probabilities = false;
 
 
-  int Parameters::HoleFusion::bin_to_find_mergable_size = 60;
+  int Parameters::HoleFusion::merging_distance_thresh = 60;
   float Parameters::HoleFusion::valid_strong_probability = 1.0;
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
