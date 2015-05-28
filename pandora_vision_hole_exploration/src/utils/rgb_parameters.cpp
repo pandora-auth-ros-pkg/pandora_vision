@@ -144,7 +144,7 @@ namespace pandora_vision
 
   int Rgb::original_image_gaussian_blur = 3;
   int Rgb::std_variance_kernel_size = 5;
-  int Rgb::std_variance_threshold = 48;
+  int Rgb::std_variance_threshold = 32;
   int Rgb::std_variance_morphology_close_size = 8; 
   int Rgb::std_variance_morphology_open_size = 8;
   int Rgb::contour_erode_kernel_size = 4;

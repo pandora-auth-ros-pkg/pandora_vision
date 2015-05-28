@@ -342,6 +342,15 @@ namespace pandora_vision
       std::vector<bool>* realContours, 
       const std::vector<cv::Rect>& boundRect)
   {
+    // Each element of the principal vector will be one contour
+    // and at the secondary vector the id of all other contours
+    // that are eligible for merging will be stored.
+    std::vector<std::vector<int> > mergables(contours.size());
+    // While checking each contour we check for all mergables with it,
+    //  so by checking this flag we shall now if we have already checked
+    //  this contour.
+    std::vector<bool> testedForMergables(contours.size(), false);
+
     for(int ci = 0; ci < contours.size(); ci ++)
     {
       if(Rgb::shape_validation)
@@ -376,7 +385,8 @@ namespace pandora_vision
             {
               if((*realContours)[i] 
                   && (std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_thresh) 
-                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_thresh))
+                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_thresh)
+                  && !testedForMergables[i])
               {
                 int upperX;
                 int upperY;
@@ -426,50 +436,90 @@ namespace pandora_vision
                         && haralickFeatures[0] > Rgb::homogenity_thresh)) 
                     || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_tiny_distance_thresh) 
                         && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_tiny_distance_thresh)) 
-                      && false))
+                      && true))
                 {
-                  if(cv::contourArea(contours[i]) > cv::contourArea(contours[ci]))
-                  {
-                    (*mc)[i].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
-                    (*mc)[i].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].y;
-                    (*contourHeight)[i] = 
-                      (*contourHeight)[i] 
-                      + (*contourHeight)[ci] 
-                      + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
-                    (*contourWidth)[i] = 
-                      (*contourWidth)[i] 
-                      + (*contourWidth)[ci] 
-                      + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
-                    (*realContours)[ci] = false;
-                    continue;
-                  }
-                  else
-                  {
-                    (*mc)[ci].x = 0.5 * (*mc)[i].x + 0.5 * (*mc)[ci].x;
-                    (*mc)[ci].y = 0.5 * (*mc)[i].y + 0.5 * (*mc)[ci].x;
-                    (*contourHeight)[ci] = 
-                      (*contourHeight)[ci] 
-                      + (*contourHeight)[i] 
-                      + static_cast<int>(std::abs((*mc)[ci].y - (*mc)[i].y));
-                    (*contourWidth)[ci] = 
-                      (*contourWidth)[ci] 
-                      + (*contourWidth)[i] 
-                      + static_cast<int>(std::abs((*mc)[ci].x - (*mc)[i].x));
-                    (*realContours)[i] = false;
-                  }
+                  mergables[ci].push_back(i);
+                  //continue;
                 }
               }
             }
           }
-
+          testedForMergables[ci] = true;
         }
     }
+    mergeContours(
+        &mergables,
+        &(*contourWidth), 
+        &(*contourHeight), 
+        &(*mc),
+        boundRect,
+        &(*realContours));
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i])
         if((*contourWidth)[i] > Rgb::rect_diff_thresh * (*contourHeight)[i] 
             || (*contourHeight)[i] > Rgb::rect_diff_thresh * (*contourWidth)[i])
           (*realContours)[i] = false;
+    }
+  }
+
+  void RgbProcessor::mergeContours(
+      std::vector<std::vector<int> >* mergables,
+      std::vector<int>* contourWidth,
+      std::vector<int>* contourHeight,
+      std::vector<cv::Point2f>* mc, 
+      const std::vector<cv::Rect>& boundRect,
+      std::vector<bool>* realContours)
+  {
+    for(int ci = 0; ci < (*mergables).size(); ci ++)
+    {
+      for(int mi = 0; mi < (*mergables)[ci].size(); mi ++)
+      {
+        int mci = (*mergables)[ci][mi];
+        (*mc)[ci].x = 0.5 * (*mc)[ci].x + 0.5 * (*mc)[mci].x;
+        (*mc)[ci].y = 0.5 * (*mc)[ci].y + 0.5 * (*mc)[mci].y;
+        (*contourHeight)[ci] = 
+          std::max(
+              boundRect[ci].y + boundRect[ci].height, 
+              boundRect[mci].y + boundRect[mci].height)
+          - std::min(
+              boundRect[ci].y, 
+              boundRect[mci].y);
+        (*contourWidth)[ci] = 
+          std::max(
+              boundRect[ci].x + boundRect[ci].width, 
+              boundRect[mci].x + boundRect[mci].width)
+          - std::min(
+              boundRect[ci].x, 
+              boundRect[mci].x);
+        (*realContours)[mci] = false;
+        std::vector<int> mergablesEraseable;
+        for(int dmi = 0; dmi < (*mergables)[mci].size(); dmi ++)
+        {
+          int dmci = (*mergables)[mci][dmi];
+          (*mc)[ci].x = 0.5 * (*mc)[ci].x + 0.5 * (*mc)[dmci].x;
+          (*mc)[ci].y = 0.5 * (*mc)[ci].y + 0.5 * (*mc)[dmci].y;
+          (*contourHeight)[ci] = 
+            std::max(
+                boundRect[ci].y + boundRect[ci].height, 
+                boundRect[dmci].y + boundRect[dmci].height)
+            - std::min(
+                boundRect[ci].y, 
+                boundRect[dmci].y);
+          (*contourWidth)[ci] = 
+            std::max(
+                boundRect[ci].x + boundRect[ci].width, 
+                boundRect[dmci].x + boundRect[dmci].width)
+            - std::min(
+                boundRect[ci].x, 
+                boundRect[dmci].x);
+          (*realContours)[dmci] = false;
+          mergablesEraseable.push_back(dmi);
+        }
+        //for(int ei = 0; ei < mergablesEraseable.size(); ei ++)
+        //  (*mergables)[mci].erase((*mergables)[mci].begin() + mergablesEraseable[ei]);
+        (*realContours)[mci] = false;
+      }
     }
   }
 

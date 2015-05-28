@@ -63,7 +63,7 @@ namespace pandora_vision
   float Parameters::HoleFusion::valid_medium_probability = 0.6;
   float Parameters::HoleFusion::valid_light_probability = 0.4;
   float Parameters::HoleFusion::max_depth_to_test_small_thresh = 2.5;
-  float Parameters::HoleFusion::min_depth_to_test_big_thresh = 2.6;
+  float Parameters::HoleFusion::min_depth_to_test_big_thresh = 2.0;
   int Parameters::HoleFusion::small_rect_thresh = 900;
   int Parameters::HoleFusion::big_rect_thresh = 6400;
   float Parameters::HoleFusion::rgb_distance_variance_thresh = 0.5;
@@ -72,7 +72,7 @@ namespace pandora_vision
   float Parameters::HoleFusion::depth_difference_thresh = 2.0;
   int Parameters::HoleFusion::remove_unstuffed_holes = 1;
   int Parameters::HoleFusion::unstuffed_removal_method = 1;
-  float Parameters::HoleFusion::difference_scanline_thresh = 1.0;
+  float Parameters::HoleFusion::difference_scanline_thresh = 0.6;
 
 
   //  ////////////////// Image representation specific parameters //////////////////
