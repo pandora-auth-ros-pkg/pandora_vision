@@ -45,8 +45,7 @@ namespace pandora_vision
 {
   RgbParametersHandler::RgbParametersHandler()
   {
-    serverRgb.setCallback(boost::bind(&RgbParametersHandler::parametersCallbackRgb, this, _1, _2));
-  }
+    serverRgb.setCallback(boost::bind(&RgbParametersHandler::parametersCallbackRgb, this, _1, _2)); }
 
   /**
     @brief The function called when a parameter is changed
@@ -156,17 +155,17 @@ namespace pandora_vision
   int Rgb::neighbor_thresh = 100;
   int Rgb::homog_rect_dims_thresh = 50;
   int Rgb::neighbor_value_thresh = 50;
-  float Rgb::homogenity_thresh = 0.8;
+  float Rgb::homogenity_thresh = 0.5;
   int Rgb::neighbor_tiny_distance_thresh = 50;
   int Rgb::rect_diff_thresh = 3;
   int Rgb::shape_validation = 1;
   float Rgb::one_direction_rectangle_contour_overlap_thresh = 40.0;
   int Rgb::max_intersections_thresh = 4;
   float Rgb::intersections_mean_cost = 0.3;
-  float Rgb::unclosed_contour_punishment = 2.0;
-  float Rgb::intersections_stddev_cost = 0.2;
-  float Rgb::internal_pixels_2d_mean_cost = 0.3;
+  float Rgb::unclosed_contour_punishment = 1.0;
+  float Rgb::intersections_stddev_cost = 0.3;
+  float Rgb::internal_pixels_2d_mean_cost = 0.2;
   float Rgb::internal_pixels_2d_stddev_cost = 0.2;
-  float Rgb::shape_validity_thresh = 1.5;
+  float Rgb::shape_validity_thresh = 1.1;
 
 }  // namespace pandora_vision
