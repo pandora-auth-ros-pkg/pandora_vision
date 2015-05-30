@@ -41,11 +41,12 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <ros/time.h>
-#include <dynamic_reconfigure/server.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <std_msgs/Float32MultiArray.h>
-#include "pandora_vision_hole/temperatures_cfgConfig.h"
+#include "thermal_node/temperatures_parameters.h"
+#include "utils/blob_detection.h"
 
 
 /**
@@ -90,7 +91,7 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole::temperatures_cfgConfig>
         ::CallbackType f_;
 
-      // The variebles that define the temperature range that we search 
+      // The variables that define the temperature range that we search 
       float lowTemperature;
       float highTemperature;
 

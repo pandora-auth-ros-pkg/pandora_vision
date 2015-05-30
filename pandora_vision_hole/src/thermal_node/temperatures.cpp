@@ -137,9 +137,9 @@ namespace pandora_vision
     const std_msgs::Float32MultiArray& msg)
   {
     // Debugging information
-    ROS_INFO("Temperatures Callback called");
     ROS_INFO("=========================================================");
 
+    ROS_INFO("Temperatures Callback called");
     timeNow_ = ros::Time::now().toSec();
     
     processTime_ = timeNow_ - timeBefore_;
@@ -158,11 +158,28 @@ namespace pandora_vision
 
     // Apply double threshold(up and down) in the temperature image.
     // The threshold is set by configuration
-    cv::inRange(
-      temperatureImage, lowTemperature, highTemperature, temperatureImage); 
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    //cv::Mat thresholdImage;
+    //cv::threshold(temperatureImage, thresholdImage, highTemperature, 255, cv::THRESH_TOZERO_INV);
+    //cv::threshold(thresholdImage, thresholdImage, lowTemperature, 255, cv::THRESH_BINARY);
 
+    //cv::resize(thresholdImage, thresholdImage, cvSize(640, 480));
+    //cv::imshow("threshold",thresholdImage);
+    //cv::waitKey(1);
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    cv::inRange(
+      temperatureImage, cv::Scalar(lowTemperature), cv::Scalar(highTemperature), temperatureImage); 
+
+    cv::resize(temperatureImage, temperatureImage, cvSize(640, 480));
     cv::imshow("temperature",temperatureImage);
     cv::waitKey(1);
+
+    // Find blobs in the thresholded image. Each blob is represented as
+    // a keypoint which is the center of the blob found
+    ////////////////////// change the parameters make thermal /////////////////
+    //std::vector<cv::KeyPoint> keyPoints;
+    //BlobDetection::detectBlobs(thresholdImage, &keyPoints);
+
 
   }
 
