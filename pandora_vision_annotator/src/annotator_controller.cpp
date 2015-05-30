@@ -310,6 +310,7 @@ namespace pandora_vision
       }
     } 
     frames.push_back(imageFrame);
+    msgHeader_.push_back(msg->header);
   }
   
   /**
