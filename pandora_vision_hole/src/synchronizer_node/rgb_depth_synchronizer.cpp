@@ -548,7 +548,8 @@ namespace pandora_vision
     @paramp[in] lockMsg [const std_msgs::Empty&] An empty message used to
     trigger the callback for thermal procedure.
    **/
-  void unlockThermalProcessCallback(const std_msgs::Empty& lockMsg)
+  void RgbDepthSynchronizer::unlockThermalProcessCallback(
+    const std_msgs::Empty& lockMsg)
   {
     thermalLocked_ = false;
   }
