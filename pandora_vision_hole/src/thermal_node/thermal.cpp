@@ -215,6 +215,25 @@ namespace pandora_vision
       ROS_ERROR_NAMED(PKG_NAME,
         "[Thermal Node] Could not find topic thermal_data_fusion_topic");
     }
+
+    // Read the name of the topic to which the thermal node will be publishing
+    // information directly to victim node about the candidate holes found 
+    // and store it in a private member variable
+    if (nodeHandle_.getParam(
+        ns + "/thermal_camera_node/published_topics/thermal_victim_node_topic",
+        victimThermalTopic_))
+    {
+      // Make the topic's name absolute
+      victimThermalTopic_ = ns + "/" + holeFusionThermalTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Thermal Node] Advertising to the Thermal-victim node topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Thermal Node] Could not find topic thermal_victim_node_topic");
+    }
   }
 
 

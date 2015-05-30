@@ -82,6 +82,13 @@ namespace pandora_vision
       // directly to Data fusion.
       std::string holeFusionThermalTopic_;
 
+      // Ros publisher for candidate holes POI directly to victim node.
+      ros::Publisher victimThermalPublisher_;
+
+      // The name of the topic where the thermal node publishes 
+      // directly to victim node.
+      std::string victimThermalTopic_;
+
       // The variables used to match the holeConveyor information to the
       // Rgb and Depth images.
       double xThermal_;
