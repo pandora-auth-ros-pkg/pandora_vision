@@ -100,6 +100,13 @@ namespace pandora_vision
       // in order to unlock the synchronizer node
       std::string unlockTopic_;
 
+      // The subscriber to thermal node.
+      ros::Subscriber unlockThermalProcedure_;
+
+      // The name of the topic that thermal node publishes unlock information 
+      // to synchronizer node
+      std::string unlockThermalProcedureTopic_;
+
       // The publishers which will advertise the
       // synchronized point cloud, depth and rgb images extracted from the
       // point cloud
@@ -125,9 +132,9 @@ namespace pandora_vision
       // Here we copy the incoming messages from the Rgbd-T synchronizer node
       PointCloudPtr copiedPc_;
 
-      // A boolean indicating whether the node is publishing through the
-      // above two publishers
+      // Booleans that tell the synchronizer where to publish.
       bool isLocked_;
+      bool thermalLocked_;
 
       // Records the time for each synchronizer invocation
       double invocationTime_;
@@ -222,7 +229,15 @@ namespace pandora_vision
         @return void
        **/
       void unlockCallback(const std_msgs::Empty& lockMsg);
-
+      
+      /**
+        @brief The callback from thermal node. Set's a lock variable that is 
+        responsible for the message that is sent to thermal node from
+        synchronizer node.  
+        @paramp[in] lockMsg [const std_msgs::Empty&] An empty message used to
+        trigger the callback for thermal procedure.
+       **/
+      void unlockThermalProcessCallback(const std_msgs::Empty& lockMsg);
 
     public:
 

@@ -76,11 +76,11 @@ namespace pandora_vision
       std::string candidateHolesTopic_;
 
       // Ros publisher for candidate holes POI directly to Data fusion.
-      ros::Publisher holeFusionThermalPublisher_;
+      ros::Publisher dataFusionThermalPublisher_;
 
       // The name of the topic where the thermal node publishes 
       // directly to Data fusion.
-      std::string holeFusionThermalTopic_;
+      std::string dataFusionThermalTopic_;
 
       // Ros publisher for candidate holes POI directly to victim node.
       ros::Publisher victimThermalPublisher_;
@@ -89,6 +89,14 @@ namespace pandora_vision
       // directly to victim node.
       std::string victimThermalTopic_;
 
+      // Ros Publisher to synchronizer.
+      // Synchronizer dictates thermal standalone process to start.
+      ros::Publisher unlockThermalProcedure_;
+
+      // The name of the topic where the thermal node publishes 
+      // to synchronizer node.
+      std::string unlockThermalProcedureTopic_;
+
       // The variables used to match the holeConveyor information to the
       // Rgb and Depth images.
       double xThermal_;
@@ -96,6 +104,7 @@ namespace pandora_vision
       double cX_;
       double cY_;
 
+   
       // The dynamic reconfigure (thermal) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
         server;

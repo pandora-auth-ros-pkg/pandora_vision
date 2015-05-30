@@ -57,6 +57,13 @@ namespace pandora_vision
    **/
   struct TemperatureParameters
   {
+    //! The variables that define the temperature range that we search 
+    struct TemperatureRange
+    {
+      float lowTemperature;
+      float highTemperature;
+    };
+
     //! Blob detection - specific parameters
     struct Blob
     {

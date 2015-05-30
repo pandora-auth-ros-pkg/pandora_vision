@@ -6,7 +6,7 @@ subscribed_topics:
   unlock_topic: unlock_rgb_depth_synchronizer
   subscribe_to_input: subscribe_to_input
   leave_subscription_to_input: leave_subscription_to_input
-  
+  thermal_unlock_synchronizer_topic: thermal/unlock/synchronizer  
 
 published_topics:
   # Topics in synchronizer node

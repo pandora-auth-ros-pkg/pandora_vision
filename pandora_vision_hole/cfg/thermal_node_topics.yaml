@@ -5,3 +5,4 @@ published_topics:
   candidate_holes_topic: thermal/candidate_holes
   thermal_data_fusion_topic: thermal/data_fusion/poi 
   thermal_victim_node_topic: thermal/victim/poi
+  thermal_unlock_synchronizer_topic: thermal/unlock/synchronizer

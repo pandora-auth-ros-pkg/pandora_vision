@@ -202,10 +202,10 @@ namespace pandora_vision
     // and store it in a private member variable
     if (nodeHandle_.getParam(
         ns + "/thermal_camera_node/published_topics/thermal_data_fusion_topic",
-        holeFusionThermalTopic_))
+        dataFusionThermalTopic_))
     {
       // Make the topic's name absolute
-      holeFusionThermalTopic_ = ns + "/" + holeFusionThermalTopic_;
+      dataFusionThermalTopic_ = ns + "/" + dataFusionThermalTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Advertising to the Thermal-Data fusion topic");
@@ -224,7 +224,7 @@ namespace pandora_vision
         victimThermalTopic_))
     {
       // Make the topic's name absolute
-      victimThermalTopic_ = ns + "/" + holeFusionThermalTopic_;
+      victimThermalTopic_ = ns + "/" + victimThermalTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Advertising to the Thermal-victim node topic");
@@ -233,6 +233,24 @@ namespace pandora_vision
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "[Thermal Node] Could not find topic thermal_victim_node_topic");
+    }
+
+    // Read the name of the topic to which the thermal node will be publishing
+    // information directly to synchronizer node.
+    if (nodeHandle_.getParam(
+        ns + "/thermal_camera_node/published_topics/thermal_unlock_synchronizer_topic",
+        unlockThermalProcedureTopic_))
+    {
+      // Make the topic's name absolute
+      unlockThermalProcedureTopic_ = ns + "/" + unlockThermalProcedureTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Thermal Node] Advertising to the Synchronizer node topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Thermal Node] Could not find topic thermal_unlock_synchronizer_topic");
     }
   }
 

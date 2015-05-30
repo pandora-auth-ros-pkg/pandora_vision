@@ -54,6 +54,10 @@ namespace pandora_vision
     // hole fusion node to unlock him
     isLocked_ = true;
 
+    // The synchronizer node starts off in life locked for thermal standalone 
+    // procedure , waiting for the thermalnode to unlock him.
+    thermalLocked_ = true;
+
     copiedPc_.reset(new PointCloud);
 
     // Acquire the names of topics which the synchronizer node will be having
@@ -82,6 +86,11 @@ namespace pandora_vision
       leaveSubscriptionToInputPointCloudTopic_, 1,
       &RgbDepthSynchronizer::leaveSubscriptionToInputPointCloudCallback, this);
 
+    // Subscribe to the topic where the thermal node requests synchronizer
+    // to act.
+    unlockThermalProcedure_ = nodeHandle_.subscribe(
+      unlockThermalProcedureTopic_, 1,
+      &RgbDepthSynchronizer::unlockThermalProcessCallback, this);
 
     // Advertise the synchronized point cloud
     synchronizedPointCloudPublisher_ = nodeHandle_.advertise
@@ -241,6 +250,24 @@ namespace pandora_vision
       ROS_INFO_NAMED(PKG_NAME,
         "[Synchronizer Node] Subscribed to the Hole Fusion input cloud"
         "subscription leave request topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Synchronizer Node] Could not find topic ");
+    }
+
+    // Read the name of the topic that the synchronizer node uses to publish or
+    // not to thermal standalone node.
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/subscribed_topics/thermal_unlock_synchronizer_topic",
+        unlockThermalProcedureTopic_))
+    {
+      // Make the topic's name absolute
+      unlockThermalProcedureTopic_ =ns + "/" + unlockThermalProcedureTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Synchronizer Node] Subscribed to thermal node for unlock purpose");
     }
     else
     {
@@ -512,6 +539,18 @@ namespace pandora_vision
   void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
   {
     isLocked_ = false;
+  }
+
+  /**
+    @brief The callback from thermal node. Set's a lock variable that is 
+    responsible for the message that is sent to thermal node from
+    synchronizer node.  
+    @paramp[in] lockMsg [const std_msgs::Empty&] An empty message used to
+    trigger the callback for thermal procedure.
+   **/
+  void unlockThermalProcessCallback(const std_msgs::Empty& lockMsg)
+  {
+    thermalLocked_ = false;
   }
 
 } // namespace pandora_vision
