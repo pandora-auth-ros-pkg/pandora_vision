@@ -268,11 +268,15 @@ namespace pandora_vision
       cv::waitKey(30);
     }
     
-    if(counter_ >= params_.positivesCounter)
+    if (counter_ >= params_.positivesCounter)
     { 
-    counter_ = 0;
+      counter_ = 0;
+    }
+    else
+    {
+      final_victims.clear();
+    }
     return final_victims;
-    } 
   }
   
   
