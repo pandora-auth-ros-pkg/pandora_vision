@@ -135,6 +135,20 @@
 
   </node>
 
+  <!-- =========================== Thermal Cropper node ============================ -->
+  <node
+    name="thermal_cropper_node"
+    type="thermal_cropper_node"
+    pkg="pandora_vision_hole"
+    respawn="False"
+    output="$(arg output)"
+    ns="$(arg namespace)">
+
+    <rosparam file="$(find pandora_vision_hole)/cfg/thermal_node_topics.yaml"
+    command="load" />
+
+  </node>
+
   <!-- ========================= Hole Fusion node ========================== -->   
 
   <node

@@ -55,8 +55,13 @@ namespace pandora_vision
     isLocked_ = true;
 
     // The synchronizer node starts off in life locked for thermal standalone 
-    // procedure , waiting for the thermalnode to unlock him.
+    // procedure , waiting for the thermal cropper node to unlock him.
     thermalLocked_ = true;
+
+    // This variable informs thermal node if it must publish to hole fusion
+    // or just to thermal cropper node. Its true only when hole fusion is ready
+    // to restart its process.
+    thermalToHoleFusion_ = false;
 
     copiedPc_.reset(new PointCloud);
 
@@ -88,7 +93,7 @@ namespace pandora_vision
 
     // Subscribe to the topic where the thermal node requests synchronizer
     // to act.
-    unlockThermalProcedure_ = nodeHandle_.subscribe(
+    unlockThermalProcedureSubscriber_ = nodeHandle_.subscribe(
       unlockThermalProcedureTopic_, 1,
       &RgbDepthSynchronizer::unlockThermalProcessCallback, this);
 
@@ -107,6 +112,14 @@ namespace pandora_vision
     // Advertise the synchronized thermal image
     synchronizedThermalImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>(synchronizedThermalImageTopic_, 1000);
+
+    // Advertise the synchronized rgb image to thermal cropper node
+    synchronizedRgbCropperImagePublisher_ = nodeHandle_.advertise
+      <sensor_msgs::Image>(synchronizedRgbCropperImageTopic_, 1000);
+
+    // Advertise the synchronized depth image to thermal cropper node
+    synchronizedDepthCropperImagePublisher_ = nodeHandle_.advertise
+      <sensor_msgs::Image>(synchronizedDepthImageTopic_, 1000);
 
     ROS_INFO_NAMED(PKG_NAME, "[Synchronizer node] Initiated");
   }
@@ -347,6 +360,44 @@ namespace pandora_vision
         "[Synchronizer Node] Could not find topic thermal_image_topic");
     }
 
+    // Read the name of the topic that the synchronizer node will be publishing
+    // the rgb image to thermal cropper node
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/published_topics/rgb_image_cropper_topic",
+        synchronizedRgbCropperImageTopic_))
+    {
+      // Make the topic's name absolute
+      synchronizedRgbCropperImageTopic_ = ns + "/" +
+        synchronizedRgbCropperImageTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Synchronizer Node] Advertising Rgb image to thermal cropper node");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Synchronizer Node] Could not find topic rgb_image_cropper_topic");
+    }
+
+    // Read the name of the topic that the synchronizer node will be publishing
+    // the depth image to thermal cropper node
+    if (nodeHandle_.getParam(
+        ns + "/synchronizer_node/published_topics/depth_image_cropper_topic",
+        synchronizedDepthCropperImageTopic_))
+    {
+      // Make the topic's name absolute
+      synchronizedDepthCropperImageTopic_ = ns + "/" + 
+        synchronizedDepthCropperImageTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Synchronizer Node] Advertising Depth image to thermal cropper node");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Synchronizer Node] Could not find topic depth_image_cropper_topic");
+    }
+
   }
 
 
@@ -361,58 +412,29 @@ namespace pandora_vision
     Then publishes these images 
     to their respective recipients. Finally, the input point cloud is
     published directly to the hole fusion node.
-    @param[in] pointCloudMessage [const PointCloud&]
-    The input point cloud
-    @param[in] thermalMessage [const sensor_msgs::Image&]
-    the input thermal info
+    @param[in] synchronizedMessage [pandora_vision_msgs::SynchronizedMsg&]
+    the input synchronized thermal and pc info
     @return void
    **/
   void RgbDepthSynchronizer::inputPointCloudThermalCallback(
     const pandora_vision_msgs::SynchronizedMsg& synchronizedMessage)
   {
-    if (!isLocked_)
+    // This block is responsible to sent the thermal image to thermal node.
+    // this way thermal node runs autonomusly but it also provides its
+    // information to hole fusion node.
+    if(!thermalLocked_)
     {
-      // Lock the rgb_depth_thermal_synchronizer node; aka prevent
-      // the execution of this if-block without the explicit request
-      // of the hole fusion node
-      isLocked_ = true;
+      // Lock the thermal_node; aka prevent
+      // the execution of this if-block without the explicit request of the 
+      // thermal cropper node. This way we can synchronize the rgb depth 
+      // and thermal images sent to thermal cropper.
+      thermalLocked_ = true;
 
       // Exctract the pointcloud from the message and convert it
       // to PointCloud<T>::Ptr type.
       pcl::PCLPointCloud2 pcl_pc;
       pcl_conversions::toPCL(synchronizedMessage.pc, pcl_pc);
       pcl::fromPCLPointCloud2(pcl_pc, *copiedPc_);
-
-      #ifdef DEBUG_TIME
-      ROS_INFO_NAMED(PKG_NAME, "Synchronizer unlocked");
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "=================================================");
-
-      double t = ros::Time::now().toSec() - invocationTime_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "Previous synchronizer invocation before %fs", t);
-
-      // Increment the number of this node's invocations
-      ticks_++;
-
-      if (ticks_ > 1)
-      {
-        meanProcessingTime_ += t;
-      }     
- 
-      ROS_INFO_NAMED(PKG_NAME,
-        "Mean processing time :                  %fs",
-        (meanProcessingTime_ / (ticks_ - 1)));
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "=================================================");
-      
-      invocationTime_ = ros::Time::now().toSec();
-
-      Timer::start("synchronizedCallback", "", true);
-      #endif
 
       // For simulation purposes, the width and height parameters of the
       // point cloud must be set. Copy the input point cloud message to another
@@ -432,7 +454,6 @@ namespace pandora_vision
         pointCloud->width = Parameters::Image::WIDTH;
       }
 
-
       // Extract the RGB image from the point cloud
       cv::Mat rgbImage = MessageConversions::convertPointCloudMessageToImage(
         pointCloud, CV_8UC3);
@@ -443,9 +464,9 @@ namespace pandora_vision
       rgbImageMessagePtr->encoding = sensor_msgs::image_encodings::BGR8;
       rgbImageMessagePtr->image = rgbImage;
 
-      // Publish the synchronized rgb image
-      synchronizedRGBImagePublisher_.publish(rgbImageMessagePtr->toImageMsg());
-
+      // Publish the synchronized rgb image to thermal cropper node
+      synchronizedRgbCropperImagePublisher_.publish(
+        rgbImageMessagePtr->toImageMsg());
 
       // Extract the depth image from the point cloud
       cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
@@ -457,21 +478,76 @@ namespace pandora_vision
       depthImageMessagePtr->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
       depthImageMessagePtr->image = depthImage;
 
-      // Publish the synchronized depth image
-      synchronizedDepthImagePublisher_.publish(
+      // Publish the synchronized depth image to thermal cropper node
+      synchronizedDepthCropperImagePublisher_.publish(
         depthImageMessagePtr->toImageMsg());
+
+      // fillthermalmessage=thermalToHoleFusion_;
+      // thermalToHoleFusion_ = false;
 
       // Publish the synchronized thermal info
       synchronizedThermalImagePublisher_.publish(
         synchronizedMessage.thermalInfo);
-     
-      // Publish the synchronized point cloud
-      synchronizedPointCloudPublisher_.publish(pointCloud);
 
-      #ifdef DEBUG_TIME
-      Timer::tick("synchronizedCallback");
-      Timer::printAllMeansTree();
-      #endif
+      // This condition is crucial for the synchronization of thermal, rgb and 
+      // depth images to be sent for further processing. This block is 
+      // is responsible for hole exctraction procedure and sends rgb and depth
+      // images to their respective nodes. Messages are sent only if thermal
+      // node is ready to start a new circle.
+      if (!isLocked_)
+      {
+        // Lock the rgb_depth_thermal_synchronizer node; aka prevent
+        // the execution of this if-block without the explicit request
+        // of the hole fusion node.
+        isLocked_ = true;
+
+        #ifdef DEBUG_TIME
+        ROS_INFO_NAMED(PKG_NAME, "Synchronizer unlocked");
+
+        ROS_INFO_NAMED(PKG_NAME,
+          "=================================================");
+
+        double t = ros::Time::now().toSec() - invocationTime_;
+
+        ROS_INFO_NAMED(PKG_NAME,
+          "Previous synchronizer invocation before %fs", t);
+
+        // Increment the number of this node's invocations
+        ticks_++;
+
+        if (ticks_ > 1)
+        {
+          meanProcessingTime_ += t;
+        }     
+ 
+        ROS_INFO_NAMED(PKG_NAME,
+          "Mean processing time :                  %fs",
+          (meanProcessingTime_ / (ticks_ - 1)));
+
+        ROS_INFO_NAMED(PKG_NAME,
+          "=================================================");
+      
+        invocationTime_ = ros::Time::now().toSec();
+
+        Timer::start("synchronizedCallback", "", true);
+        #endif
+
+        // Publish the synchronized rgb image
+        synchronizedRGBImagePublisher_.publish(
+          rgbImageMessagePtr->toImageMsg());
+
+        // Publish the synchronized depth image
+        synchronizedDepthImagePublisher_.publish(
+          depthImageMessagePtr->toImageMsg());
+     
+        // Publish the synchronized point cloud
+        synchronizedPointCloudPublisher_.publish(pointCloud);
+
+        #ifdef DEBUG_TIME
+        Timer::tick("synchronizedCallback");
+        Timer::printAllMeansTree();
+        #endif
+      }
     }
   }
 
@@ -516,8 +592,6 @@ namespace pandora_vision
 
   }
 
-
-
   /**
     @brief The callback for the hole_fusion node request for the
     lock/unlock of the rgb_depth_synchronizer node.
@@ -539,6 +613,11 @@ namespace pandora_vision
   void RgbDepthSynchronizer::unlockCallback(const std_msgs::Empty& lockMsg)
   {
     isLocked_ = false;
+
+    // This variable informs thermal node if it must publish to hole fusion
+    // or just to thermal cropper node. Its true only when hole fusion is ready
+    // to restart its process.
+    thermalToHoleFusion_ = true;
   }
 
   /**

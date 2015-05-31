@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -82,20 +82,12 @@ namespace pandora_vision
       // directly to Data fusion.
       std::string dataFusionThermalTopic_;
 
-      // Ros publisher for candidate holes POI directly to victim node.
-      ros::Publisher victimThermalPublisher_;
+      // Ros publisher for candidate holes POI to thermal cropper node.
+      ros::Publisher thermalToCropperPublisher_;
 
       // The name of the topic where the thermal node publishes 
-      // directly to victim node.
-      std::string victimThermalTopic_;
-
-      // Ros Publisher to synchronizer.
-      // Synchronizer dictates thermal standalone process to start.
-      ros::Publisher unlockThermalProcedure_;
-
-      // The name of the topic where the thermal node publishes 
-      // to synchronizer node.
-      std::string unlockThermalProcedureTopic_;
+      // directly to thermal cropper node
+      std::string thermalToCropperTopic_;
 
       // The variables used to match the holeConveyor information to the
       // Rgb and Depth images.

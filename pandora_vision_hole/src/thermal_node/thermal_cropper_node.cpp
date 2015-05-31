@@ -35,18 +35,18 @@
  * Authors: Angelos Triantafyllidis <aggelostriadafillidis@gmail.com>
  *********************************************************************/
 
-#include "thermal_node/temperatures.h"
+#include "thermal_node/thermal_cropper.h"
 
 /**
-  @brief Main function of the temperatures node
+  @brief Main function of the thermal_cropper node
   @param argc [int] Number of input arguments
   @param argv [char**] The input arguments
   @return int : 0 for success
  **/
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "temperatures_node");
-  pandora_vision::Temperatures temperatures;
+  ros::init(argc, argv, "thermal_cropper_node");
+  pandora_vision::ThermalCropper thermalCropper;
   ros::spin();
   return 0;
 }

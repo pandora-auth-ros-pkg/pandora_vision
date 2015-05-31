@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -60,10 +60,16 @@ namespace pandora_vision
     thermalImageSubscriber_ = nodeHandle_.subscribe(thermalImageTopic_, 1,
       &Thermal::inputThermalImageCallback, this);
 
-    // Advertise the candidate holes found by the thermal node
+    // Advertise the candidate holes found by the thermal node to hole fusion
     candidateHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_hole::CandidateHolesVectorMsg>(
       candidateHolesTopic_, 1000);
+        
+    // Advertise the candidate holes found by the thermal 
+    // node to thermal cropper
+    thermalToCropperPublisher_ = nodeHandle_.advertise
+      <pandora_vision_hole::CandidateHolesVectorMsg>(
+      thermalToCropperTopic_, 1000);
 
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
@@ -137,8 +143,11 @@ namespace pandora_vision
       sensor_msgs::image_encodings::TYPE_8UC1,
       msg);
 
-    // Publish the candidate holes message
+    // Publish the candidate holes message to hole fusion node
     candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+
+    // Publish the candidate holes message to thermal cropper node
+    thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
     Timer::tick("inputThermalImageCallback");
@@ -198,6 +207,25 @@ namespace pandora_vision
     }
 
     // Read the name of the topic to which the thermal node will be publishing
+    // information to thermal cropper about the candidate holes found 
+    // and store it in a private member variable
+    if (nodeHandle_.getParam(
+        ns + "/thermal_camera_node/published_topics/thermal_to_cropper_topic",
+        thermalToCropperTopic_))
+    {
+      // Make the topic's name absolute
+      thermalToCropperTopic_ = ns + "/" + thermalToCropperTopic_;
+
+      ROS_INFO_NAMED(PKG_NAME,
+        "[Thermal Node] Advertising to the Thermal-Therma Cropper topic");
+    }
+    else
+    {
+      ROS_ERROR_NAMED(PKG_NAME,
+        "[Thermal Node] Could not find topic thermal_to_cropper_topic");
+    }
+
+    // Read the name of the topic to which the thermal node will be publishing
     // information directly to Data fusion about the candidate holes found 
     // and store it in a private member variable
     if (nodeHandle_.getParam(
@@ -216,42 +244,6 @@ namespace pandora_vision
         "[Thermal Node] Could not find topic thermal_data_fusion_topic");
     }
 
-    // Read the name of the topic to which the thermal node will be publishing
-    // information directly to victim node about the candidate holes found 
-    // and store it in a private member variable
-    if (nodeHandle_.getParam(
-        ns + "/thermal_camera_node/published_topics/thermal_victim_node_topic",
-        victimThermalTopic_))
-    {
-      // Make the topic's name absolute
-      victimThermalTopic_ = ns + "/" + victimThermalTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "[Thermal Node] Advertising to the Thermal-victim node topic");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "[Thermal Node] Could not find topic thermal_victim_node_topic");
-    }
-
-    // Read the name of the topic to which the thermal node will be publishing
-    // information directly to synchronizer node.
-    if (nodeHandle_.getParam(
-        ns + "/thermal_camera_node/published_topics/thermal_unlock_synchronizer_topic",
-        unlockThermalProcedureTopic_))
-    {
-      // Make the topic's name absolute
-      unlockThermalProcedureTopic_ = ns + "/" + unlockThermalProcedureTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "[Thermal Node] Advertising to the Synchronizer node topic");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "[Thermal Node] Could not find topic thermal_unlock_synchronizer_topic");
-    }
   }
 
 

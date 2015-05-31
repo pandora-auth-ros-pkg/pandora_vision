@@ -101,7 +101,7 @@ namespace pandora_vision
       std::string unlockTopic_;
 
       // The subscriber to thermal node.
-      ros::Subscriber unlockThermalProcedure_;
+      ros::Subscriber unlockThermalProcedureSubscriber_;
 
       // The name of the topic that thermal node publishes unlock information 
       // to synchronizer node
@@ -113,6 +113,11 @@ namespace pandora_vision
       ros::Publisher synchronizedPointCloudPublisher_;
       ros::Publisher synchronizedDepthImagePublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
+      
+      // The publishers whitch will advertise the synchronized rgb and depth
+      // images extracted from the point cloud to thermal cropper node.
+      ros::Publisher synchronizedDepthCropperImagePublisher_;
+      ros::Publisher synchronizedRgbCropperImagePublisher_;
 
       // The publisher which will advertise the
       // synchronized thermal information from flir camera
@@ -124,6 +129,11 @@ namespace pandora_vision
       std::string synchronizedPointCloudTopic_;
       std::string synchronizedDepthImageTopic_;
       std::string synchronizedRgbImageTopic_;
+
+      // The names of the topics to which the synchronizer node publishes ths
+      // synchronized rgb and depth images to thermal cropper node.
+      std::string synchronizedDepthCropperImageTopic_;
+      std::string synchronizedRgbCropperImageTopic_;
 
       // The name of the topic to which the synchronizer node publisher the
       // synchronized thermal images
@@ -144,6 +154,11 @@ namespace pandora_vision
 
       // Amount of synchronizer's invocations
       int ticks_;
+
+      // This variable informs thermal node if it must publish to hole fusion
+      // or just to thermal cropper node. Its true only when hole fusion is 
+      // ready to restart its process.
+      bool thermalToHoleFusion_;
 
 
       /**
@@ -174,10 +189,8 @@ namespace pandora_vision
         Then publishes these images and thermal info
         to their respective recipients. Finally, the input point cloud is
         published directly to the hole fusion node.
-        @param[in] pointCloudMessage [const PointCloudPtr&]
-        The input point cloud
-        @param[in] thermalMessage [const sensor_msgs::Image&]
-        The input thermal info
+        @param[in] synchronizedMessage [const pandora_vision_msgs::SynchronizedMsg&]
+        The input synchronized thermal and pc info
         @return void
        **/
       void inputPointCloudThermalCallback(

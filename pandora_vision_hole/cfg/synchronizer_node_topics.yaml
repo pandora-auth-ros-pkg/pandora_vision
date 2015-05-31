@@ -14,5 +14,8 @@ published_topics:
   depth_image_topic: synchronized/depth/image
   rgb_image_topic: synchronized/rgb/image
   thermal_info_topic: synchronized/thermal/image
+  rgb_image_cropper_topic: rgb/image/cropper
+  depth_image_cropper_topic: depth/image/cropper
+
   # Topics in Rgbd-T synchronizer node
   synchronized_topic: synchronized/message/info
