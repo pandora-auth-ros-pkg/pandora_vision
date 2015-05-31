@@ -90,7 +90,7 @@ namespace pandora_vision
     }
 
     DetectionImages imgs;
-    int stateIndicator = 2 * input->getDepth() + (input->getRegions().size() > 0) + 1;
+    int stateIndicator = 2;// * input->getDepth() + (input->getRegions().size() > 0) + 1;
 
     DetectionMode detectionMode;
     switch (stateIndicator)
