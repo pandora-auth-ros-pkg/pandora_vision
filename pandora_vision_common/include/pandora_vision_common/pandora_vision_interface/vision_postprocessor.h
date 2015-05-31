@@ -95,7 +95,8 @@ namespace pandora_vision
   template <class VisionAlertMsg>
     VisionPostProcessor<VisionAlertMsg>::
     VisionPostProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-      sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler)
+      sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(ns, handler),
+      converter_(new GeneralAlertConverter)
     {
     }
 
