@@ -614,7 +614,7 @@ namespace pandora_vision
         cv::Point2f ( 80, 80 ),
         70,
         70,
-        3,
+          3,
         &depthMedVarSquare );
 
     cv::Mat depthBigVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
@@ -663,7 +663,7 @@ namespace pandora_vision
 
     /////////////////////// Construct the rgb image ////////////////////////
 
-    // Construct the square inside the medium depth variance area
+    // Construct the square inside the small depth variance area
     cv::Mat rgbInsideMedDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
     HoleFusionTest::generateRgbRectangle
@@ -674,7 +674,7 @@ namespace pandora_vision
         &rgbInsideMedDepthVarSquare );
 
 
-    // Construct the square inside the small depth variance area
+    // Construct the square inside the medium depth variance area
     cv::Mat rgbInsideSmallDepthVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3 );
 
     HoleFusionTest::generateRgbRectangle
@@ -774,16 +774,16 @@ namespace pandora_vision
     cv::Mat depthOverlappingSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
     HoleFusionTest::generateDepthRectangle
-      ( cv::Point2f ( 70, 70 ),
-        60,
-        60,
+      ( cv::Point2f ( 118, 118 ),
+        32,
+        32,
         1.9,
         &depthOverlappingSquare );
 
     conveyorTemp = getConveyor(
-        cv::Point2f ( 70, 70 ),
-        60,
-        60 );
+        cv::Point2f ( 118, 118 ),
+        32,
+        32 );
     depthConveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
     depthConveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
 
@@ -857,8 +857,8 @@ namespace pandora_vision
     // and keypoint at (96.875, 96.875)
     EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
     EXPECT_EQ ( 1.0, validHolesMap[0]);
-    EXPECT_NEAR(96.875, preValidatedHoles.keypoint[0].x, 5);
-    EXPECT_NEAR(96.875, preValidatedHoles.keypoint[0].y, 5);
+    EXPECT_NEAR(105.375, preValidatedHoles.keypoint[0].x, 6);
+    EXPECT_NEAR(105.375, preValidatedHoles.keypoint[0].y, 6);
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();
