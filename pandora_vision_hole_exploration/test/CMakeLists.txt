@@ -1,25 +1,36 @@
+find_package(roslib REQUIRED)
+find_package(rostest REQUIRED)
+find_package(pandora_testing_tools REQUIRED)
+find_package(pandora_cmake_tools REQUIRED)
+
+include_directories(
+${pandora_testing_tools_INCLUDE_DIRS}
+${roslib_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS})
+
+
 ###############################  Unit Tests ####################################
 
 #################################### utils #####################################
 
 
-catkin_add_gtest(holes_conveyor_test
+catkin_add_gtest(${PROJECT_NAME}_holes_conveyor_test
   unit/utils/holes_conveyor_test.cpp)
-target_link_libraries(holes_conveyor_test
+target_link_libraries(${PROJECT_NAME}_holes_conveyor_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(message_conversions_test
+catkin_add_gtest(${PROJECT_NAME}_message_conversions_test
   unit/utils/message_conversions_test.cpp)
-target_link_libraries(message_conversions_test
+target_link_libraries(${PROJECT_NAME}_message_conversions_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
 
-catkin_add_gtest(visualization_test
+catkin_add_gtest(${PROJECT_NAME}_visualization_test
   unit/utils/visualization_test.cpp)
-target_link_libraries(visualization_test
+target_link_libraries(${PROJECT_NAME}_visualization_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils
   gtest_main)
@@ -45,10 +56,10 @@ target_link_libraries(rgb_processor_test
   gtest_main)
 
 ############################# hole fusion node #################################
-catkin_add_gtest(hole_fusion_test
+catkin_add_gtest(${PROJECT_NAME}_hole_fusion_test
   unit/hole_fusion_node/hole_fusion_test.cpp)
 
-target_link_libraries(hole_fusion_test
+target_link_libraries(${PROJECT_NAME}_hole_fusion_test
   ${PROJECT_NAME}_hole_fusion
   gtest_main)
 

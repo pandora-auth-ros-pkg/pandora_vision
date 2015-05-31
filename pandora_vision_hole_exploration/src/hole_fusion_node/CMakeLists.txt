@@ -7,9 +7,9 @@ add_dependencies(${PROJECT_NAME}_hole_fusion
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-add_executable(hole_fusion_node
+add_executable(${PROJECT_NAME}_hole_fusion_node
   hole_fusion_node.cpp)
-target_link_libraries(hole_fusion_node
+target_link_libraries(${PROJECT_NAME}_hole_fusion_node
   ${PROJECT_NAME}_hole_fusion
   ${catkin_LIBRARIES})
 

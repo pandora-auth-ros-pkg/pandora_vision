@@ -58,7 +58,7 @@
 
   <node
     name="synchronizer_node"
-    type="synchronizer_node"
+    type="pandora_vision_hole_exploration_synchronizer_node"
     pkg="pandora_vision_hole_exploration"
     respawn="False"
     output="$(arg output)"
@@ -107,7 +107,7 @@
 
   <node
     name="hole_fusion_node"
-    type="hole_fusion_node"
+    type="pandora_vision_hole_exploration_hole_fusion_node"
     pkg="pandora_vision_hole_exploration"
     respawn="False"
     output="$(arg output)"
