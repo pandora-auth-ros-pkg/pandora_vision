@@ -185,7 +185,7 @@ namespace pandora_vision
 
     // Construct the nonMergable image
     RgbProcessorTest::generateRgbRectangle
-      ( cv::Point2f ( 130, 130 ),
+      ( cv::Point2f ( 80, 80 ),
         40,
         40,
         200,
@@ -310,9 +310,9 @@ namespace pandora_vision
       //EXPECT_EQ ( 4, conveyor.holes[k].rectangle.size() );
 
       // Rectangle's perimeter must be near 28900 due to the merge. 
-      // Due to dilations it could be an offset up to 20 pixels 
-      // at each of the two directions (needs to fix)
-      EXPECT_NEAR ( 28900, conveyor.rectangle[0].width * conveyor.rectangle[0].height, 8000  );
+      // Due to dilations it could be an offset up to around 10 pixels 
+      // at each of the two directions(horizontal + vertical) (needs to fix)
+      EXPECT_NEAR ( 14400, conveyor.rectangle[0].width * conveyor.rectangle[0].height, 3000  );
 
 
   }

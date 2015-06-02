@@ -1593,7 +1593,9 @@ namespace pandora_vision
     std::vector<std::vector<float> > 
       edMatrix22(depthHolesConveyor -> rectangle.size(), std::vector<float>(depthHolesConveyor -> rectangle.size()));
     std::vector<std::vector<float> > 
-      edMatrix33(thermalHolesConveyor -> rectangle.size(), std::vector<float>(thermalHolesConveyor -> rectangle.size()));
+      edMatrix33(
+          thermalHolesConveyor -> rectangle.size(), 
+          std::vector<float>(thermalHolesConveyor -> rectangle.size()));
     // first step of contour merging; merge contours of the same kind
     for(int contouri = 0; contouri < rgbHolesConveyor -> rectangle.size(); contouri ++)
 
@@ -1646,16 +1648,25 @@ namespace pandora_vision
         float keypointDistance = 
           std::sqrt(
               std::pow(thermalHolesConveyor -> keypoint[contouri].x - thermalHolesConveyor -> keypoint[contourj].x, 2 )
-              + std::pow(thermalHolesConveyor -> keypoint[contouri].y - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
+              + std::pow(thermalHolesConveyor -> keypoint[contouri].y 
+                - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
         float minBorderDistanceX = 
-          std::min(std::abs(thermalHolesConveyor -> rectangle[contouri].x - thermalHolesConveyor -> rectangle[contourj].x 
+          std::min(
+              std::abs(thermalHolesConveyor -> rectangle[contouri].x 
+                - thermalHolesConveyor -> rectangle[contourj].x 
                 - thermalHolesConveyor -> rectangle[contourj].width),
-              std::abs(thermalHolesConveyor -> rectangle[contouri].x + thermalHolesConveyor -> rectangle[contouri].width 
+              std::abs(
+                thermalHolesConveyor -> rectangle[contouri].x + 
+                thermalHolesConveyor -> rectangle[contouri].width 
                 - thermalHolesConveyor -> rectangle[contourj].x));
         float minBorderDistanceY = 
-          std::min(std::abs(thermalHolesConveyor -> rectangle[contouri].y - thermalHolesConveyor -> rectangle[contourj].y 
+          std::min(
+              std::abs(thermalHolesConveyor -> rectangle[contouri].y 
+                - thermalHolesConveyor -> rectangle[contourj].y 
                 - thermalHolesConveyor -> rectangle[contourj].height),
-              std::abs(thermalHolesConveyor -> rectangle[contouri].y + thermalHolesConveyor -> rectangle[contouri].height 
+              std::abs(
+                thermalHolesConveyor -> rectangle[contouri].y 
+                + thermalHolesConveyor -> rectangle[contouri].height 
                 - thermalHolesConveyor -> rectangle[contourj].y));
         float bordersDistance = 
           std::sqrt(std::pow(minBorderDistanceX, 2) + std::pow(minBorderDistanceY, 2));
@@ -1683,8 +1694,12 @@ namespace pandora_vision
           sumKY += rgbHolesConveyor -> keypoint[contourj].y;
           upperX = std::min(upperX, rgbHolesConveyor -> rectangle[contourj].x);
           upperY = std::min(upperY, rgbHolesConveyor -> rectangle[contourj].y);
-          lowerX = std::max(lowerX, rgbHolesConveyor -> rectangle[contourj].x + rgbHolesConveyor -> rectangle[contourj].width);
-          lowerY = std::max(lowerY, rgbHolesConveyor -> rectangle[contourj].y + rgbHolesConveyor -> rectangle[contourj].height);
+          lowerX = 
+            std::max(lowerX, rgbHolesConveyor -> rectangle[contourj].x 
+                + rgbHolesConveyor -> rectangle[contourj].width);
+          lowerY = 
+            std::max(lowerY, rgbHolesConveyor -> rectangle[contourj].y 
+                + rgbHolesConveyor -> rectangle[contourj].height);
           realRgbContours[contourj] = false;
         }
       }
@@ -1726,8 +1741,12 @@ namespace pandora_vision
           sumKY += depthHolesConveyor -> keypoint[contourj].y;
           upperX = std::min(upperX, depthHolesConveyor -> rectangle[contourj].x);
           upperY = std::min(upperY, depthHolesConveyor -> rectangle[contourj].y);
-          lowerX = std::max(lowerX, depthHolesConveyor -> rectangle[contourj].x + depthHolesConveyor -> rectangle[contourj].width);
-          lowerY = std::max(lowerY, depthHolesConveyor -> rectangle[contourj].y + depthHolesConveyor -> rectangle[contourj].height);
+          lowerX = 
+            std::max(lowerX, depthHolesConveyor -> rectangle[contourj].x 
+                + depthHolesConveyor -> rectangle[contourj].width);
+          lowerY = 
+            std::max(lowerY, depthHolesConveyor -> rectangle[contourj].y 
+                + depthHolesConveyor -> rectangle[contourj].height);
           realDepthContours[contourj] = false;
         }
       }
@@ -1768,8 +1787,12 @@ namespace pandora_vision
           sumKY += thermalHolesConveyor -> keypoint[contourj].y;
           upperX = std::min(upperX, thermalHolesConveyor -> rectangle[contourj].x);
           upperY = std::min(upperY, thermalHolesConveyor -> rectangle[contourj].y);
-          lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x + thermalHolesConveyor -> rectangle[contourj].width);
-          lowerY = std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y + thermalHolesConveyor -> rectangle[contourj].height);
+          lowerX = 
+            std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x 
+                + thermalHolesConveyor -> rectangle[contourj].width);
+          lowerY = 
+            std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y 
+                + thermalHolesConveyor -> rectangle[contourj].height);
           realThermalContours[contourj] = false;
         }
       }
@@ -1791,8 +1814,10 @@ namespace pandora_vision
     for(int i = 0; i < (*thermalHolesConveyor).rectangle.size(); i ++)
       realThermalContours[i] = true;
 
-    // merge overlapping contours. Firstly, store in 2D vectors the euclidean distance of all contours of one type, against
-    // the contours of all other types. Finally, find the contours with small distance and merge them.
+    // merge overlapping contours. Firstly, store in 2D vectors 
+    // the euclidean distance of all contours of one type, against
+    // the contours of all other types. Finally, 
+    // find the contours with small distance and merge them.
     std::vector<std::vector<float> > 
       edMatrix12(rgbHolesConveyor -> rectangle.size(), std::vector<float>(depthHolesConveyor -> rectangle.size()));
     std::vector<std::vector<float> > 
@@ -1848,7 +1873,8 @@ namespace pandora_vision
           float keypointDistance = 
             std::sqrt(
                 std::pow(rgbHolesConveyor -> keypoint[contouri].x - thermalHolesConveyor -> keypoint[contourj].x, 2 )
-                + std::pow(rgbHolesConveyor -> keypoint[contouri].y - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
+                + std::pow(rgbHolesConveyor -> keypoint[contouri].y 
+                  - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
           float minBorderDistanceX = 
             std::min(std::abs(rgbHolesConveyor -> rectangle[contouri].x - thermalHolesConveyor -> rectangle[contourj].x 
                   - thermalHolesConveyor -> rectangle[contourj].width),
@@ -1882,14 +1908,17 @@ namespace pandora_vision
           float keypointDistance = 
             std::sqrt(
                 std::pow(depthHolesConveyor -> keypoint[contouri].x - thermalHolesConveyor -> keypoint[contourj].x, 2 )
-                + std::pow(depthHolesConveyor -> keypoint[contouri].y - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
+                + std::pow(depthHolesConveyor -> keypoint[contouri].y 
+                  - thermalHolesConveyor -> keypoint[contourj].y, 2 ));
           float minBorderDistanceX = 
-            std::min(std::abs(depthHolesConveyor -> rectangle[contouri].x - thermalHolesConveyor -> rectangle[contourj].x 
+            std::min(std::abs(depthHolesConveyor -> rectangle[contouri].x 
+                  - thermalHolesConveyor -> rectangle[contourj].x 
                   - thermalHolesConveyor -> rectangle[contourj].width),
                 std::abs(depthHolesConveyor -> rectangle[contouri].x + depthHolesConveyor -> rectangle[contouri].width 
                   - thermalHolesConveyor -> rectangle[contourj].x));
           float minBorderDistanceY = 
-            std::min(std::abs(depthHolesConveyor -> rectangle[contouri].y - thermalHolesConveyor -> rectangle[contourj].y 
+            std::min(std::abs(depthHolesConveyor -> rectangle[contouri].y 
+                  - thermalHolesConveyor -> rectangle[contourj].y 
                   - thermalHolesConveyor -> rectangle[contourj].height),
                 std::abs(depthHolesConveyor -> rectangle[contouri].y + depthHolesConveyor -> rectangle[contouri].height 
                   - thermalHolesConveyor -> rectangle[contourj].y));
@@ -1929,8 +1958,10 @@ namespace pandora_vision
           sumKY += depthHolesConveyor -> keypoint[contourj].y;
           upperX = std::min(upperX, depthHolesConveyor -> rectangle[contourj].x);
           upperY = std::min(upperY, depthHolesConveyor -> rectangle[contourj].y);
-          lowerX = std::max(lowerX, depthHolesConveyor -> rectangle[contourj].x + depthHolesConveyor -> rectangle[contourj].width);
-          lowerY = std::max(lowerY, depthHolesConveyor -> rectangle[contourj].y + depthHolesConveyor -> rectangle[contourj].height);
+          lowerX = std::max(lowerX, depthHolesConveyor -> rectangle[contourj].x
+              + depthHolesConveyor -> rectangle[contourj].width);
+          lowerY = std::max(lowerY, depthHolesConveyor -> rectangle[contourj].y
+              + depthHolesConveyor -> rectangle[contourj].height);
           for(int contourk = 0; contourk < thermalHolesConveyor -> rectangle.size(); contourk ++)
             if(edMatrix13[contouri][contourk] < Parameters::HoleFusion::merging_distance_thresh)
             {
@@ -1942,8 +1973,11 @@ namespace pandora_vision
               foundOne = true;
               upperX = std::min(upperX, thermalHolesConveyor -> rectangle[contourk].x);
               upperY = std::min(upperY, thermalHolesConveyor -> rectangle[contourk].y);
-              lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourk].x + thermalHolesConveyor -> rectangle[contourk].width);
-              lowerY = std::max(lowerY, thermalHolesConveyor -> rectangle[contourk].y + thermalHolesConveyor -> rectangle[contourk].height);
+              lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourk].x 
+                  + thermalHolesConveyor -> rectangle[contourk].width);
+              lowerY = 
+                std::max(lowerY, thermalHolesConveyor -> rectangle[contourk].y 
+                    + thermalHolesConveyor -> rectangle[contourk].height);
               // TO CHANGE ASAP
               edMatrix13[contouri][contourk] = Parameters::HoleFusion::merging_distance_thresh;
             }
@@ -1959,8 +1993,12 @@ namespace pandora_vision
                 foundOne = true;
                 upperX = std::min(upperX, thermalHolesConveyor -> rectangle[contourk].x);
                 upperY = std::min(upperY, thermalHolesConveyor -> rectangle[contourk].y);
-                lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourk].x + thermalHolesConveyor -> rectangle[contourk].width);
-                lowerY = std::max(lowerY, thermalHolesConveyor -> rectangle[contourk].y + thermalHolesConveyor -> rectangle[contourk].height);
+                lowerX = 
+                  std::max(lowerX, thermalHolesConveyor -> rectangle[contourk].x 
+                      + thermalHolesConveyor -> rectangle[contourk].width);
+                lowerY = 
+                  std::max(lowerY, thermalHolesConveyor -> rectangle[contourk].y 
+                      + thermalHolesConveyor -> rectangle[contourk].height);
                 // TO CHANGE ASAP
                 edMatrix23[contourj][contourk] = Parameters::HoleFusion::merging_distance_thresh;
               }
@@ -2004,8 +2042,12 @@ namespace pandora_vision
             sumKY += thermalHolesConveyor -> keypoint[contourj].y;
             upperX = std::min(upperX, thermalHolesConveyor -> rectangle[contourj].x);
             upperY = std::min(upperY, thermalHolesConveyor -> rectangle[contourj].y);
-            lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x + thermalHolesConveyor -> rectangle[contourj].width);
-            lowerY = std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y + thermalHolesConveyor -> rectangle[contourj].height);
+            lowerX = 
+              std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x 
+                  + thermalHolesConveyor -> rectangle[contourj].width);
+            lowerY = 
+              std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y 
+                  + thermalHolesConveyor -> rectangle[contourj].height);
             for(int contourk = 0; contourk < depthHolesConveyor -> rectangle.size(); contourk ++)
               if(edMatrix23[contourk][contourj] < Parameters::HoleFusion::merging_distance_thresh)
               {
@@ -2017,8 +2059,12 @@ namespace pandora_vision
                 foundOne = true;
                 upperX = std::min(upperX, depthHolesConveyor -> rectangle[contourk].x);
                 upperY = std::min(upperY, depthHolesConveyor -> rectangle[contourk].y);
-                lowerX = std::max(lowerX, depthHolesConveyor -> rectangle[contourk].x + depthHolesConveyor -> rectangle[contourk].width);
-                lowerY = std::max(lowerY, depthHolesConveyor -> rectangle[contourk].y + depthHolesConveyor -> rectangle[contourk].height);
+                lowerX = 
+                  std::max(lowerX, depthHolesConveyor -> rectangle[contourk].x 
+                      + depthHolesConveyor -> rectangle[contourk].width);
+                lowerY = 
+                  std::max(lowerY, depthHolesConveyor -> rectangle[contourk].y 
+                      + depthHolesConveyor -> rectangle[contourk].height);
                 // TO CHANGE ASAP
                 edMatrix23[contourk][contourj] = Parameters::HoleFusion::merging_distance_thresh;
                 cv::Point2f mergedKeypoint(sumKX / overlapsSum, sumKY / overlapsSum);
@@ -2075,8 +2121,12 @@ namespace pandora_vision
             foundOne = true;
             int upperX = std::min(upperX, thermalHolesConveyor -> rectangle[contourj].x);
             int upperY = std::min(upperY, thermalHolesConveyor -> rectangle[contourj].y);
-            int lowerX = std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x + thermalHolesConveyor -> rectangle[contourj].width);
-            int lowerY = std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y + thermalHolesConveyor -> rectangle[contourj].height);
+            int lowerX = 
+              std::max(lowerX, thermalHolesConveyor -> rectangle[contourj].x 
+                  + thermalHolesConveyor -> rectangle[contourj].width);
+            int lowerY = 
+              std::max(lowerY, thermalHolesConveyor -> rectangle[contourj].y 
+                  + thermalHolesConveyor -> rectangle[contourj].height);
             (*validHolesMap)[vi] = Parameters::HoleFusion::valid_medium_probability;
           }
         }
