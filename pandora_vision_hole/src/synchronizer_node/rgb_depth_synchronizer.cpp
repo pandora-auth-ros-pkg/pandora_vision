@@ -466,9 +466,10 @@ namespace pandora_vision
         // Thermal cropper is responsible to fill the rest of ther message
         pandora_vision_msgs::EnhancedImage enhancedCropperMsg;
 
-        enhancedCropperMsg.header.stamp = ros::Time::now();
+        enhancedCropperMsg.header.stamp = synchronizedMessage.header.stamp;
         enhancedCropperMsg.depthImage = *depthImageMessagePtr->toImageMsg();
         enhancedCropperMsg.rgbImage = *rgbImageMessagePtr->toImageMsg();
+        enhancedCropperMsg.thermalImage = synchronizedMessage.thermalInfo;
         enhancedCropperMsg.isDepth = true;
 
         // Publish the synchronized depth and rgb images to thermal cropper node
@@ -543,8 +544,13 @@ namespace pandora_vision
       // Fill the thermal message
       pandora_vision_msgs::IndexedThermal thermalMsg;
 
-      thermalMsg.header.stamp = ros::Time::now();
+      thermalMsg.header.stamp = synchronizedMessage.header.stamp;
       thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
+
+      // Fill the header of the thermal image
+      thermalMsg.thermalImage.header.stamp = 
+        synchronizedMessage.thermalInfo.header.stamp;
+
       thermalMsg.thermalIndex = thermalIndex;
 
       // Publish the synchronized thermal message to thermal node

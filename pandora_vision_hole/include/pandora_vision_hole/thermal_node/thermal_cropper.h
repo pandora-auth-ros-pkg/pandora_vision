@@ -96,6 +96,16 @@ namespace pandora_vision
       // and enhanced from synchronizer node messages arrived
       int counter_;
 
+      // The conveyor of hole candidates received by the thermal node
+      HolesConveyor thermalHolesConveyor_;
+
+      // The information received by the synchronizer node
+      ros::Time headerStamp_;
+      sensor_msgs::Image depthImage_;
+      sensor_msgs::Image rgbImage_;
+      sensor_msgs::Image thermalImage_;
+      bool isDepth_;
+
       /**
         @brief Acquires topics' names needed to be subscribed by the
         the thermal_cropper node.
@@ -140,6 +150,60 @@ namespace pandora_vision
        **/
       void inputRgbDepthImagesCallback(
         const pandora_vision_msgs::EnhancedImage& msg);
+
+      /**
+        @brief When both messages arrive this function is called, fills the 
+        final EnhancedMsg and publishes it to victim node.
+        @param void
+        @return void
+       **/
+      void publishEnhancedMsg();
+
+      /**
+        @brief When EnhancedMsg arrives from synchronizer node it must be unpacked, 
+        in order to be further used. The message that arrives consists of a depth
+        image, an rgb image and a boolean variable. These information is stored in
+        private member variables for further use.
+        @param[in] msg [const pandora_vision_msgs::EnhancedImage&] the input message
+        from synchronizer node.
+        @return void
+       **/
+      void unpackEnhancedMsgFromSynchronizer(
+        const pandora_vision_msgs:: EnhancedImage& msg);
+
+      /**
+        @brief When CandidateHolesMsg arrives from thermal node it must be unpacked, 
+        in order to be further used. These information is stored in
+        private member variable for further use.
+        @param[in] msg [const std::vector<pandora_vision_hole::CandidateHoleMsg>&]
+        the input candidate holes
+        @return void
+       **/
+      void unpackThermalMsg(
+        const std::vector<pandora_vision_hole::CandidateHoleMsg>&
+        candidateHolesVector);
+
+      /**
+        @brief This function finds the keypoint, the width and height of each region
+        of interest found by the thermal node.
+        @param[in] thermalHoles [const HolesConveyor&] The thermal holes from
+        thermal node.
+        @return [std::vector<pandora_vision_msgs::RegionOfInterest>]
+        The vector of the regions of interest of each hole.
+       **/
+      std::vector<pandora_vision_msgs::RegionOfInterest> findRegionsOfInterest(
+          const HolesConveyor& thermalHoles);
+
+      /**
+        @brief The enhanced messages that is sent to victim node must have the 
+        interpolated depth image. So this fuction must extract the image from the 
+        message, interpolate it and convert it again to sensor_msgs/Image type.
+        @param[in] depthImage [const sensor_msgs::Image&] The input depthImage
+        @return [sensor_msgs::Image]
+        The interpolated depth image.
+       **/
+      sensor_msgs::Image interpolateDepthImage(
+        const sensor_msgs::Image& depthImage);
 
     public:
 

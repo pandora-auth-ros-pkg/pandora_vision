@@ -3,7 +3,7 @@ subscribed_topics:
   
   # thermal cropper node
   thermal_poi_topic: thermal/cropper/poi
-  rgbi_depth_images_topic: rgb/depth/images/cropper
+  rgb_depth_images_topic: rgb/depth/images/cropper
 
 published_topics:
   candidate_holes_topic: thermal/candidate_holes

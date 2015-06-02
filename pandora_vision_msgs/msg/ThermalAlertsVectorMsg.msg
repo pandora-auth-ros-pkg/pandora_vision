@@ -1,2 +1,5 @@
 Header header
-pandora_vision_msgs/ThermalAlert[] thermalAlerts
+
+pandora_common_msgs/GeneralAlertVector thermalAlerts
+
+float32[] temperature

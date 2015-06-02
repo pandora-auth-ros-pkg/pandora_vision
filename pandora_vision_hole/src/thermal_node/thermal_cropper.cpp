@@ -102,17 +102,26 @@ namespace pandora_vision
   void ThermalCropper::inputThermalPoiCallback(
     const pandora_vision_hole::CandidateHolesVectorMsg& msg)
   {
-    counter_ = counter_ + 1;
+    ROS_INFO("[ThermalCropper node], ThermalPoi callback called");
 
-    if(counter_ = 2)
+    // Clear the current thermalHolesConveyor struct
+    // (or else keyPoints, rectangles and outlines accumulate)
+    HolesConveyorUtils::clear(&thermalHolesConveyor_);
+
+    // Unpack the message and store the acquired information in private variable
+    unpackThermalMsg(msg.candidateHoles);
+
+    counter_++;
+
+    if(counter_ == 2)
     {
       // Set counter to zero to restart the process
       counter_ = 0;
  
       unlockThermalProcedure();
 
-      // Fill enhanced message
-
+      // Fill and publish enhanced message to victim node
+      publishEnhancedMsg();
     }
   }
 
@@ -131,18 +140,192 @@ namespace pandora_vision
   void ThermalCropper::inputRgbDepthImagesCallback(
     const pandora_vision_msgs::EnhancedImage& msg)
   {
-    counter_ = counter_ + 1;
+    ROS_INFO("[ThermalCropper node], EnhancedImage callback called");
 
-    if(counter_ = 2)
+    // Unpack the message and store the acquired information in private variable
+    unpackEnhancedMsgFromSynchronizer(msg);
+
+    counter_++;
+
+    if(counter_ == 2)
     {
       // Set counter to zero to restart the process
       counter_ = 0;
  
       unlockThermalProcedure();
 
-      // Fill enhanced message
-
+      // Fill and publish enhanced message to victim node
+      publishEnhancedMsg();
     }
+  }
+
+  /**
+    @brief When CandidateHolesMsg arrives from thermal node it must be unpacked, 
+    in order to be further used. These information is stored in
+    private member variable for further use.
+    @param[in] msg [const std::vector<pandora_vision_hole::CandidateHoleMsg>&]
+    the input candidate holes
+    @return void
+   **/
+  void ThermalCropper::unpackThermalMsg(
+    const std::vector<pandora_vision_hole::CandidateHoleMsg>&
+    candidateHolesVector)
+  {
+    for(unsigned int i = 0; i < candidateHolesVector.size(); i++)
+    {
+      // A singe hole
+      HoleConveyor hole;
+
+      // The hole's keypoint
+      hole.keypoint.pt.x = candidateHolesVector[i].keypointX;
+      hole.keypoint.pt.y = candidateHolesVector[i].keypointY;
+
+      // The hole's rectangle points 
+      std::vector<cv::Point2f> renctangleVertices;
+
+      for (unsigned int v = 0;
+        v < candidateHolesVector[i].verticesX.size(); v++)
+      {
+        cv::Point2f vertex;
+        vertex.x = candidateHolesVector[i].verticesX[v];
+        vertex.y = candidateHolesVector[i].verticesY[v];
+        renctangleVertices.push_back(vertex);
+      }
+
+      hole.rectangle = renctangleVertices;
+
+      // Push hole back into conveyor
+      thermalHolesConveyor_.holes.push_back(hole);
+    }
+  }
+
+  /**
+    @brief When EnhancedMsg arrives from synchronizer node it must be unpacked, 
+    in order to be further used. The message that arrives consists of a depth
+    image, an rgb image, a thermal image and a boolean variable. 
+    These information is stored in private member variables for further use.
+    @param[in] msg [const pandora_vision_msgs::EnhancedImage&] the input message
+    from synchronizer node.
+    @return void
+   **/
+  void ThermalCropper::unpackEnhancedMsgFromSynchronizer(
+    const pandora_vision_msgs:: EnhancedImage& msg)
+  {
+    headerStamp_ = msg.header.stamp;
+    depthImage_ = msg.depthImage;
+    rgbImage_ = msg.rgbImage;
+    thermalImage_ = msg.thermalImage;
+    isDepth_ = msg.isDepth;
+
+  }
+
+  /**
+    @brief When both messages arrive this function is called,fills the 
+    final EnhancedMsg and publishes it to victim node.
+    @param void
+    @return void
+   **/
+  void ThermalCropper::publishEnhancedMsg()
+  {
+    // The enhanced message 
+    pandora_vision_msgs::EnhancedImage enhancedMsg;
+
+    enhancedMsg.header.stamp = headerStamp_;
+
+    // Victim node needs the interpolated depth image
+    enhancedMsg.depthImage = interpolateDepthImage(depthImage_);
+    enhancedMsg.rgbImage = rgbImage_;
+    enhancedMsg.thermalImage = thermalImage_;
+    enhancedMsg.isDepth = isDepth_; 
+
+    // Find keypoint, width and height of each region of interest
+    enhancedMsg.regionsOfInterest = 
+      findRegionsOfInterest(thermalHolesConveyor_);
+
+    // Publish the enhanced message to victim node
+    victimThermalPublisher_.publish(enhancedMsg); 
+  }
+
+  /**
+    @brief The enhanced messages that is sent to victim node must have the 
+    interpolated depth image. So this fuction must extract the image from the 
+    message, interpolate it and convert it again to sensor_msgs/Image type.
+    @param[in] depthImage [const sensor_msgs::Image&] The input depthImage
+    @return [sensor_msgs::Image]
+    The interpolated depth image.
+   **/
+  sensor_msgs::Image ThermalCropper::interpolateDepthImage(
+    const sensor_msgs::Image& depthImage)
+  {
+    cv::Mat depthImageMat;
+
+    // Obtain the depth image. Since the image is in a format of
+    // // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // // to be processed. Its cv format will be CV_32FC1.
+    MessageConversions::extractImageFromMessage(depthImage, &depthImageMat,
+      sensor_msgs::image_encodings::TYPE_32FC1);
+
+    // Perform noise elimination on the depth image.
+    // Every pixel of noise will be eliminated and substituted by an
+    // appropriate non-zero value, depending on the amount of noise present
+    // in the input depth image.
+    cv::Mat interpolatedDepthImage;
+    NoiseElimination::performNoiseElimination(depthImageMat,
+      &interpolatedDepthImage);
+
+    // Convert the cv::Mat to sensor_msgs/Image type
+    return MessageConversions::convertImageToMessage(interpolatedDepthImage, 
+      sensor_msgs::image_encodings::TYPE_32FC1, depthImage);
+
+  }
+
+  /**
+    @brief This function finds the keypoint, the width and height of each region
+    of interest found by the thermal node.
+    @param[in] thermalHoles [const HolesConveyor&] The thermal holes from
+    thermal node.
+    @return [std::vector<pandora_vision_msgs::RegionOfInterest>]
+    The vector of the regions of interest of each hole.
+   **/
+  std::vector<pandora_vision_msgs::RegionOfInterest> 
+    ThermalCropper::findRegionsOfInterest(const HolesConveyor& thermalHoles)
+  {
+    // The vector of regions of interest that is going to be returned
+    std::vector<pandora_vision_msgs::RegionOfInterest> regions;
+
+    for(unsigned int i = 0; i < thermalHoles.size(); i++)
+    {
+      // The enhanced hole message. Used for one hole only
+      pandora_vision_msgs::RegionOfInterest enhancedHoleMsg;
+
+      // Set the keypoint
+      enhancedHoleMsg.center.x = thermalHoles.holes[i].keypoint.pt.x;
+      enhancedHoleMsg.center.y = thermalHoles.holes[i].keypoint.pt.y;
+
+      // Set the bounding box width and height
+      int minx = thermalHoles.holes[i].rectangle[0].x;
+      int maxx = thermalHoles.holes[i].rectangle[0].x;
+      int miny = thermalHoles.holes[i].rectangle[0].y;
+      int maxy = thermalHoles.holes[i].rectangle[0].y;
+
+      for (unsigned int r = 1; r < thermalHoles.holes[i].rectangle.size(); r++)
+      {
+        int xx = thermalHoles.holes[i].rectangle[r].x;
+        int yy = thermalHoles.holes[i].rectangle[r].y;
+
+        minx = xx < minx ? xx : minx;
+        maxx = xx > maxx ? xx : maxx;
+        miny = yy < miny ? yy : miny;
+        maxy = yy > maxy ? yy : maxy;
+      }
+
+      enhancedHoleMsg.width = maxx - minx;
+      enhancedHoleMsg.height = maxy - miny;
+
+      // Push back into the vector
+      regions.push_back(enhancedHoleMsg);
+    }
+    return regions;
   }
 
   /**
@@ -192,7 +375,7 @@ namespace pandora_vision
     else
     {
       ROS_ERROR_NAMED(PKG_NAME,
-        "[ThermalCropper Node] Could not find topic rgb__depth_images_topic");
+        "[ThermalCropper Node] Could not find topic rgb_depth_images_topic");
     }
 
      //Read the name of the topic to which the thermal node will be publishing

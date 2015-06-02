@@ -73,7 +73,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     dataFusionThermalPublisher_ = nodeHandle_.advertise
-      <pandora_vision_hole::CandidateHolesVectorMsg>
+      <pandora_vision_msgs::ThermalAlertsVectorMsg>
       (dataFusionThermalTopic_, 1000);
 
     // The dynamic reconfigure (thermal) parameter's callback
@@ -172,8 +172,52 @@ namespace pandora_vision
     }
 
     // Finally find the yaw and pitch of each candidate hole found and
-    // send it to data fusion
-    dataFusionThermalPublisher_.publish(thermalCandidateHolesMsg);
+    // send it to data fusion if a hole exists. The message to be sent is 
+    // ThermalAlertsVectorMsg type.
+    if(holes.size() > 0)
+    {
+      // Fill the thermal message to be sent
+      pandora_vision_msgs::ThermalAlertsVectorMsg thermalMsg;
+
+      POIsStamped poisStamped;  
+
+      poisStamped.header.stamp = msg.header.stamp;
+      poisStamped.frameWidth = msg.thermalImage.width;
+      poisStamped.frameHeight = msg.thermalImage.height;
+
+      // For each hole found by thermal node
+      for(unsigned int i = 0; i < holes.size(); i++)
+      {
+        // Fill the temperature of the thermal message for each hole
+        // ------------------------------------------------------------
+        thermalMsg.temperature.push_back(3.0);
+
+        POIPtr poi(new POI);  
+
+        // Set the keypoint
+        poi->point.x = holes.holes[i].keypoint.pt.x;
+        poi->point.y = holes.holes[i].keypoint.pt.y;
+        //----------------------- fill probability---------------------->
+        poi->probability = 1;
+        
+        poisStamped.pois.push_back(poi);
+      }
+
+      POIsStampedConstPtr poisStampedPtr(&poisStamped);
+      
+      GeneralAlertConverter converter;
+
+      pandora_common_msgs::GeneralAlertVector alert = 
+        converter.getGeneralAlertInfo(ros::this_node::getName(),
+          nodeHandle_, poisStampedPtr);
+
+      // Fill the thermal message to be sent
+      thermalMsg.header.stamp = alert.header.stamp;
+      thermalMsg.thermalAlerts = alert;
+
+      // Publish the thermal message
+      dataFusionThermalPublisher_.publish(thermalMsg);
+    }
 
     #ifdef DEBUG_TIME
     Timer::tick("inputThermalImageCallback");
@@ -202,7 +246,7 @@ namespace pandora_vision
     {
     
       // Make topic's name absolute  
-      //thermalImageTopic_ = ns + "/" + thermalImageTopic_;
+      thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Subscribed to the input thermal image");

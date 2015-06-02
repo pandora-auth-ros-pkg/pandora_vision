@@ -67,6 +67,7 @@ def callback(pointCloud, image):
 
     # Pack the message to be sent.
     msg = SynchronizedMsg()
+    msg.header.stamp = rospy.get_rostime()
     msg.pc = pointCloud
     msg.thermalInfo = image
 

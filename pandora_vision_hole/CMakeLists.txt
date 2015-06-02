@@ -22,6 +22,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   rospy
   pandora_vision_msgs
+  pandora_vision_common
+  pandora_common_msgs
   state_manager
   state_manager_msgs
   cv_bridge
@@ -67,6 +69,8 @@ catkin_package(
     message_runtime
     rospy
     pandora_vision_msgs
+    pandora_vision_common
+    pandora_common_msgs
     state_manager
     state_manager_msgs
     cv_bridge

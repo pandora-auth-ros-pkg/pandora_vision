@@ -3,10 +3,18 @@ add_library(${PROJECT_NAME}_thermal
   hole_detector.cpp
   temperatures.cpp
   temperatures_parameters.cpp
+  )
+
+add_library(${PROJECT_NAME}_thermalcropper
   thermal_cropper.cpp
   )
+
 target_link_libraries(${PROJECT_NAME}_thermal
   ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME}_thermalcropper
+  ${PROJECT_NAME}_thermal
   ${catkin_LIBRARIES})
 
 add_dependencies(${PROJECT_NAME}_thermal
@@ -26,5 +34,5 @@ target_link_libraries(thermal_temperatures_node
   ${catkin_LIBRARIES})
 
 target_link_libraries(thermal_cropper_node
-  ${PROJECT_NAME}_thermal
+  ${PROJECT_NAME}_thermalcropper
   ${catkin_LIBRARIES})
