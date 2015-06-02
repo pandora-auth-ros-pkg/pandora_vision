@@ -43,6 +43,7 @@
 #include "utils/message_conversions.h"
 #include "utils/image_matching.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
+#include "pandora_vision_msgs/IndexedThermal.h"
 
 /**
   @namespace pandora_vision
@@ -106,15 +107,18 @@ namespace pandora_vision
        ::CallbackType f;
 
       /**
-        @brief Callback for the thermal image received by the thermal camera
+        @brief Callback for the thermal image received by the camera.
 
-        The thermal image message received by the thermal camera is unpacked
+        The thermal image message received by the camera is unpacked
         in a cv::Mat image.
-        Holes are then located inside this image.
-        @param msg [const sensor_msgs::Image&] The thermal image message
+        Holes are then located inside this image and information about them,
+        along with the denoised image, is then sent to the hole fusion node
+        @param msg [const pandora_vision_msgs::IndexedThermal&]
+        The thermal image message
         @return void
        **/
-      void inputThermalImageCallback(const sensor_msgs::Image& msg);
+      void inputThermalImageCallback(
+        const pandora_vision_msgs::IndexedThermal& msg);
 
       /**
         @brief Acquires topics' names needed to be subscribed by the thermal node.

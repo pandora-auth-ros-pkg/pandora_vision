@@ -45,6 +45,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include "pandora_vision_msgs/SynchronizedMsg.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
+#include "pandora_vision_msgs/IndexedThermal.h"
 
 /**
   @namespace pandora_vision
@@ -114,10 +116,9 @@ namespace pandora_vision
       ros::Publisher synchronizedDepthImagePublisher_;
       ros::Publisher synchronizedRGBImagePublisher_;
       
-      // The publishers whitch will advertise the synchronized rgb and depth
+      // The publisher which will advertise the synchronized rgb and depth
       // images extracted from the point cloud to thermal cropper node.
-      ros::Publisher synchronizedDepthCropperImagePublisher_;
-      ros::Publisher synchronizedRgbCropperImagePublisher_;
+      ros::Publisher synchronizedRgbDepthCropperImagesPublisher_;
 
       // The publisher which will advertise the
       // synchronized thermal information from flir camera
@@ -130,10 +131,9 @@ namespace pandora_vision
       std::string synchronizedDepthImageTopic_;
       std::string synchronizedRgbImageTopic_;
 
-      // The names of the topics to which the synchronizer node publishes ths
+      // The name of the topic to which the synchronizer node publishes the
       // synchronized rgb and depth images to thermal cropper node.
-      std::string synchronizedDepthCropperImageTopic_;
-      std::string synchronizedRgbCropperImageTopic_;
+      std::string synchronizedRgbDepthCropperImagesTopic_;
 
       // The name of the topic to which the synchronizer node publisher the
       // synchronized thermal images
@@ -154,12 +154,6 @@ namespace pandora_vision
 
       // Amount of synchronizer's invocations
       int ticks_;
-
-      // This variable informs thermal node if it must publish to hole fusion
-      // or just to thermal cropper node. Its true only when hole fusion is 
-      // ready to restart its process.
-      bool thermalToHoleFusion_;
-
 
       /**
         @brief Variables regarding the point cloud are needed to be set in

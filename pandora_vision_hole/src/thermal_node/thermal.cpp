@@ -71,6 +71,11 @@ namespace pandora_vision
       <pandora_vision_hole::CandidateHolesVectorMsg>(
       thermalToCropperTopic_, 1000);
 
+    // Advertise the candidate holes found by the thermal node to hole fusion
+    dataFusionThermalPublisher_ = nodeHandle_.advertise
+      <pandora_vision_hole::CandidateHolesVectorMsg>
+      (dataFusionThermalTopic_, 1000);
+
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
 
@@ -97,11 +102,12 @@ namespace pandora_vision
     in a cv::Mat image.
     Holes are then located inside this image and information about them,
     along with the denoised image, is then sent to the hole fusion node
-    @param msg [const sensor_msgs::Image&]
+    @param msg [const pandora_vision_msgs::IndexedThermal&]
     The thermal image message
     @return void
    **/
-  void Thermal::inputThermalImageCallback(const sensor_msgs::Image&  msg)
+  void Thermal::inputThermalImageCallback(
+    const pandora_vision_msgs::IndexedThermal&  msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputThermalImageCallback", "", true);
@@ -114,7 +120,7 @@ namespace pandora_vision
     // to be processed. Its cv format will be CV_8UC1.
 
     cv::Mat thermalImage;
-    MessageConversions::extractImageFromMessage(msg, &thermalImage, 
+    MessageConversions::extractImageFromMessage(msg.thermalImage, &thermalImage, 
       sensor_msgs::image_encodings::TYPE_8UC1);
 
     #ifdef DEBUG_SHOW
@@ -134,20 +140,40 @@ namespace pandora_vision
     // Create the candidate holes message
     pandora_vision_hole::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
-    // Pack information about holes found and the interpolated depth image
+    // Pack information about holes found and the thermal image 
     // inside a message.
-    // This message will be published to and received by the hole fusion node
+    // This message will be published to and received by the hole fusion 
+    // or thermal cropper node based on the index of thermal message acquired
+    // from the synchronizer node
     MessageConversions::createCandidateHolesVectorMessage(holes,
       thermalImage,
       &thermalCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_8UC1,
-      msg);
+      msg.thermalImage);
 
-    // Publish the candidate holes message to hole fusion node
-    candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+    // Check the index and send the message to its proper receiver
+    // The index takes only three values from synchronized node
+    // "thermal", "hole" or "thermalhole".
+    if(msg.thermalIndex == "thermal")
+    {
+      // Publish the candidate holes message to thermal cropper node
+      thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
+    }
+    else if (msg.thermalIndex == "hole")
+    {
+      // Publish the candidate holes message to hole fusion node
+      candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+    }
+    else
+    {
+      // Publish to both thermal cropper and hole fusion nodes
+      thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
+      candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+    }
 
-    // Publish the candidate holes message to thermal cropper node
-    thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
+    // Finally find the yaw and pitch of each candidate hole found and
+    // send it to data fusion
+    dataFusionThermalPublisher_.publish(thermalCandidateHolesMsg);
 
     #ifdef DEBUG_TIME
     Timer::tick("inputThermalImageCallback");

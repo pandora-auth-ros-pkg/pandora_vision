@@ -49,6 +49,9 @@ namespace pandora_vision
    **/
   ThermalCropper::ThermalCropper(void)
   {
+    // Set counter to zero when the node starts
+    counter_ = 0;
+
     // Acquire the names of topics which the thermal_cropper node will be having
     // transactionary affairs with
     getTopicNames();
@@ -57,14 +60,11 @@ namespace pandora_vision
     thermalPoiSubscriber_ = nodeHandle_.subscribe(thermalPoiTopic_, 1,
       &ThermalCropper::inputThermalPoiCallback, this);
 
-    // Subscribe to rgb image published by synchronizer node.
-    rgbImageSubscriber_ = nodeHandle_.subscribe(rgbImageTopic_, 1,
-      &ThermalCropper::inputRgbImageCallback, this);
+    // Subscribe to rgb and depth images published by synchronizer node.
+    rgbDepthImagesSubscriber_ = nodeHandle_.subscribe(rgbDepthImagesTopic_, 1,
+      &ThermalCropper::inputRgbDepthImagesCallback, this);
 
-    // Subscribe to rgb image published by synchronizer node.
-    depthImageSubscriber_ = nodeHandle_.subscribe(depthImageTopic_, 1,
-      &ThermalCropper::inputDepthImageCallback, this);
-
+    // Advertise enhanced message to victim node
     victimThermalPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>(victimThermalTopic_, 1000);
 
@@ -72,11 +72,9 @@ namespace pandora_vision
     // circle will start again
     unlockThermalProcedurePublisher_ = nodeHandle_.advertise
       <std_msgs::Empty>(unlockThermalProcedureTopic_, 1000);
-    
-    // When this node starts by the launch file, sends message to synchronizer
-    // in order for thermal procedure to start.
-    std_msgs::Empty unlockThermalProcedure;
-    unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
+
+    // When the node starts from launch file dictates thermal procedure to start
+    unlockThermalProcedure();
 
     ROS_INFO_NAMED(PKG_NAME, "[ThermalCropper node] Initiated");
   }
@@ -95,7 +93,7 @@ namespace pandora_vision
     by the thermal node.
 
     The thermal poi message received by the thermal node is unpacked.
-    A counter is set. When this counter reach 2 it means both rgbDepth and
+    A counter is set. When this counter reach 2 it means both rgb Depth and
     thermal poi message have been subscribed and are ready to be sent to victim. 
     @param msg [const pandora_vision_hole::CandidateHolesVectorMsg&]
     The thermal image message
@@ -104,37 +102,47 @@ namespace pandora_vision
   void ThermalCropper::inputThermalPoiCallback(
     const pandora_vision_hole::CandidateHolesVectorMsg& msg)
   {
+    counter_ = counter_ + 1;
+
+    if(counter_ = 2)
+    {
+      // Set counter to zero to restart the process
+      counter_ = 0;
+ 
+      unlockThermalProcedure();
+
+      // Fill enhanced message
+
+    }
   }
 
 
   /**
-    @brief Callback for the rgb image message received by 
-    synchronizer node.
+    @brief Callback for the synchronized rgb and depth images message 
+    received by synchronizer node.
 
     The message received by the synchronizer node is stored in private variable.
-    A counter is set. When this counter reaches 3 it means both rgb Depth and
+    A counter is set. When this counter reaches 2 it means both rgb Depth and
     thermal poi message have been subscribed and are ready to be sent to victim. 
-    @param msg [const sensor_msgs::Image&]
-    The input rgb image message
+    @param msg [const pandora_vision_msgs::EnhancedImage&]
+    The input synchronized rgb and depth images message
     @return void
    **/
-  void ThermalCropper::inputRgbImageCallback(const sensor_msgs::Image& msg)
+  void ThermalCropper::inputRgbDepthImagesCallback(
+    const pandora_vision_msgs::EnhancedImage& msg)
   {
-  }
+    counter_ = counter_ + 1;
 
-  /**
-    @brief Callback for the depth image message received by 
-    synchronizer node.
+    if(counter_ = 2)
+    {
+      // Set counter to zero to restart the process
+      counter_ = 0;
+ 
+      unlockThermalProcedure();
 
-    The message received by the synchronizer node is stored in private variable.
-    A counter is set. When this counter reaches 3 it means both rgb Depth and
-    thermal poi message have been subscribed and are ready to be sent to victim. 
-    @param msg [const sensor_msgs::Image&]
-    The input depth image message
-    @return void
-   **/
-  void ThermalCropper::inputDepthImageCallback(const sensor_msgs::Image& msg)
-  {
+      // Fill enhanced message
+
+    }
   }
 
   /**
@@ -168,41 +176,23 @@ namespace pandora_vision
     }
 
     // Read the name of the topic from where the thermalcropper node acquires
-    // the rgb image and store it in a private member variable
+    // the synchronized rgb and depth images and store it in 
+    // a private member variable
     if (nodeHandle_.getParam(
-        ns + "/thermal_cropper_node/subscribed_topics/rgb_image_topic",
-        rgbImageTopic_ ))
+        ns + "/thermal_cropper_node/subscribed_topics/rgb_depth_images_topic",
+        rgbDepthImagesTopic_ ))
     {
     
       // Make topic's name absolute  
-      rgbImageTopic_ = ns + "/" + rgbImageTopic_;
+      rgbDepthImagesTopic_ = ns + "/" + rgbDepthImagesTopic_;
 
       ROS_INFO_NAMED(PKG_NAME,
-        "[ThermalCropper Node] Subscribed to the input Rgb image");
+        "[ThermalCropper Node] Subscribed to the input Rgb and depth images");
     }
     else
     {
       ROS_ERROR_NAMED(PKG_NAME,
-        "[ThermalCropper Node] Could not find topic rgb_image_topic");
-    }
-
-    // Read the name of the topic from where the thermalcropper node acquires
-    // the depth image and store it in a private member variable
-    if (nodeHandle_.getParam(
-        ns + "/thermal_cropper_node/subscribed_topics/depth_image_topic",
-        rgbImageTopic_ ))
-    {
-    
-      // Make topic's name absolute  
-      depthImageTopic_ = ns + "/" + depthImageTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "[ThermalCropper Node] Subscribed to the input Depth image");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "[ThermalCropper Node] Could not find topic depth_image_topic");
+        "[ThermalCropper Node] Could not find topic rgb__depth_images_topic");
     }
 
      //Read the name of the topic to which the thermal node will be publishing
@@ -241,6 +231,19 @@ namespace pandora_vision
       ROS_ERROR_NAMED(PKG_NAME,
         "[ThermalCropper Node] Could not find topic thermal_unlock_synchronizer_topic");
     }
+  }
+
+  /**
+    @brief Sends an empty message to dictate synchronizer node to unlock 
+    the thermal procedure.
+    @param void
+    @return void
+   **/
+  void ThermalCropper::unlockThermalProcedure()
+  {
+    // Send message to synchronizer in order for thermal procedure to start.
+    std_msgs::Empty unlockThermalProcedure;
+    unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
   }
 
 } // namespace pandora_vision

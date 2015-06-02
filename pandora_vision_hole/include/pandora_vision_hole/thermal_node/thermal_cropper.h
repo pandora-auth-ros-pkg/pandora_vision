@@ -64,22 +64,18 @@ namespace pandora_vision
       ros::NodeHandle nodeHandle_;
 
       // Subscriber of thermal node result ( the exctracted point of interest)
+      // and the thermal image
       ros::Subscriber thermalPoiSubscriber_;
 
       // The name of the topic where the thermal poi is acquired from
       std::string thermalPoiTopic_;
 
-      // Subscriber of synchronizer node from where we acquire the rgb image.
-      ros::Subscriber rgbImageSubscriber_;
+      // Subscriber of synchronizer node from where we acquire the synchronized
+      // rgb and depth image
+      ros::Subscriber rgbDepthImagesSubscriber_;
 
-      // The name of the topic where rgb image is acquired from
-      std::string rgbImageTopic_;
-
-      // Subscriber of synchronizer node from where we acquire the depth image.
-      ros::Subscriber depthImageSubscriber_;
-
-      // The name of the topic where depth image is acquired from
-      std::string depthImageTopic_;
+      // The name of the topic where rgb and depth images are acquired from
+      std::string rgbDepthImagesTopic_;
 
       // Ros publisher for enchanced message directly to victim node.
       ros::Publisher victimThermalPublisher_;
@@ -96,6 +92,10 @@ namespace pandora_vision
       // to synchronizer node.
       std::string unlockThermalProcedureTopic_;
 
+      // Counter to check if both thermalCandidateHoles from thermal node
+      // and enhanced from synchronizer node messages arrived
+      int counter_;
+
       /**
         @brief Acquires topics' names needed to be subscribed by the
         the thermal_cropper node.
@@ -105,11 +105,19 @@ namespace pandora_vision
       void getTopicNames();
 
       /**
+        @brief Sends an empty message to dictate synchronizer node to unlock 
+        the thermal procedure.
+        @param void
+        @return void
+       **/
+      void unlockThermalProcedure();
+
+      /**
         @brief Callback for the thermal point of interest received 
         by the thermal node.
 
         The thermal poi message received by the thermal node is unpacked.
-        A counter is set. When this counter reaches 3 it means both rgb Depth and
+        A counter is set. When this counter reaches 2 it means both rgb Depth and
         thermal poi message have been subscribed and are ready to be sent to victim. 
         @param msg [const pandora_vision_hole::CandidateHolesVectorMsg&]
         The thermal image message
@@ -120,30 +128,18 @@ namespace pandora_vision
 
 
       /**
-        @brief Callback for the rgb image message received by 
-        synchronizer node.
+        @brief Callback for the synchronized rgb and depth images message 
+        received by synchronizer node.
 
         The message received by the synchronizer node is stored in private variable.
-        A counter is set. When this counter reaches 3 it means both rgb Depth and
-        thermal poi message have been subscribed and are ready to be sent to victim. 
-        @param msg [const sensor_msgs::Image&]
-        The input rgb image message
+        A counter is set. When this counter reaches 2 it means both rgb Depth and
+        thermal poi messages have been subscribed and are ready to be sent to victim. 
+        @param msg [const pandora_vision_msgs::EnhancedImage&]
+        The input synchronized rgb and depth images message
         @return void
        **/
-      void inputRgbImageCallback(const sensor_msgs::Image& msg);
-
-      /**
-        @brief Callback for the depth image message received by 
-        synchronizer node.
-
-        The message received by the synchronizer node is stored in private variable.
-        A counter is set. When this counter reaches 3 it means both rgb Depth and
-        thermal poi message have been subscribed and are ready to be sent to victim. 
-        @param msg [const sensor_msgs::Image&]
-        The input depth image message
-        @return void
-       **/
-      void inputDepthImageCallback(const sensor_msgs::Image& msg);
+      void inputRgbDepthImagesCallback(
+        const pandora_vision_msgs::EnhancedImage& msg);
 
     public:
 

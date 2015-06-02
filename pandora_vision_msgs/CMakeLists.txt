@@ -31,6 +31,7 @@ add_message_files(
   RegionOfInterest.msg
   RegionOfInterestVector.msg
   SynchronizedMsg.msg
+  IndexedThermal.msg
   )
 
 generate_messages(
