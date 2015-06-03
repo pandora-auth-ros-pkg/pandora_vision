@@ -44,10 +44,11 @@ from camera_calibration import approxsync
 from sensor_msgs.msg import Image, PointCloud2
 import rospy
 from pandora_vision_msgs.msg import SynchronizedMsg
+from pandora_common import flirLeptonMsg
 
 # Here the synchronized messages from kinect and flir are sent
 # to the synchronizer node as one united message.
-def callback(pointCloud, image):
+def callback(pointCloud, flirLeptonMsg):
 
     ns = rospy.get_namespace()
 
@@ -62,14 +63,15 @@ def callback(pointCloud, image):
         rospy.logerr( "No synchronized topic found")
         rospy.signal_shutdown("shutdown RGBDT synchronizer")
 
-    # Publisher of PointCloud2 and Image messages
+    # Publisher of PointCloud2 and flirLeptonMsg messages
     synch_pub = rospy.Publisher(synch_topic, SynchronizedMsg)
 
     # Pack the message to be sent.
     msg = SynchronizedMsg()
     msg.header.stamp = rospy.get_rostime()
     msg.pc = pointCloud
-    msg.thermalInfo = image
+    msg.thermalInfo = flirLeptonMsg.thermalImage
+    msg.temperatures = flirLepton.temperatures
 
     # Publish the message to the synchronizer node
     synch_pub.publish(msg)
@@ -100,7 +102,7 @@ if __name__=='__main__':
 
     # Subscribers of kinect and flir messages
     kinect_subscriber = message_filters.Subscriber(kinect_topic, PointCloud2)
-    flir_subscriber = message_filters.Subscriber(flir_topic, Image)
+    flir_subscriber = message_filters.Subscriber(flir_topic, flirLeptonMsg)
 
     # Synchronize kinect and flir topics
     sync = approxsync.ApproximateSynchronizer(0.5, [kinect_subscriber, flir_subscriber], 5000)

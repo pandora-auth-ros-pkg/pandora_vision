@@ -546,6 +546,7 @@ namespace pandora_vision
 
       thermalMsg.header.stamp = synchronizedMessage.header.stamp;
       thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
+      thermalMsg.temperatures = synchronizedMessage.temperatures;
 
       // Fill the header of the thermal image
       thermalMsg.thermalImage.header.stamp = 

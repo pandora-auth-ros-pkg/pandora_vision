@@ -150,7 +150,25 @@ namespace pandora_vision
       static int interpolation_method;
     };
 
+    //! Parameters specific to the Thermal node
+    struct Thermal
+    {
+      // The probability extraction method
+      // 0 for Gaussian function
+      // 1 for Logistic function
+      static int probability_method;
 
+      // Gausian variables
+      static float optimal_temperature;
+      static float tolerance;
+
+      // Logistic variables
+      static float low_acceptable_temperature;
+      static float high_acceptable_temperature;
+
+      static float left_tolerance;
+      static float right_tolerance;
+    };
 
     //! Edge detection specific parameters
     struct Edge

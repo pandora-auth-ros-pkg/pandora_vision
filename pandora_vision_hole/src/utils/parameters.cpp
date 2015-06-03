@@ -121,6 +121,24 @@ namespace pandora_vision
   // 2 for brushfire far
   int Parameters::Depth::interpolation_method = 0;
 
+  ////////////////// Parameters pecific to the Thermal node ////////////////////
+  
+  // The probability extraction method
+  // 0 for Gaussian function
+  // 1 for Logistic function
+  
+  int Parameters::Thermal::probability_method = 1;
+
+  // Gausian variables
+  float Parameters::Thermal::optimal_temperature = 35;
+  float Parameters::Thermal::tolerance = 10;
+
+  // Logistic variables
+  float Parameters::Thermal::low_acceptable_temperature = 32;
+  float Parameters::Thermal::high_acceptable_temperature = 38;
+
+  float Parameters::Thermal::left_tolerance = 4;
+  float Parameters::Thermal::right_tolerance = 8;
 
   ///////////////////// Edge detection specific parameters /////////////////////
 

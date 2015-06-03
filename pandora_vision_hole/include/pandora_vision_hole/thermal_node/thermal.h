@@ -48,6 +48,7 @@
 #include "pandora_vision_common/pandora_vision_interface/general_alert_converter.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlertsVectorMsg.h"
+#include "std_msgs/Float32MultiArray.h"
 
 /**
   @namespace pandora_vision
@@ -141,6 +142,24 @@ namespace pandora_vision
         const pandora_vision_hole::thermal_cfgConfig& config,
         const uint32_t& level);
 
+
+      /**
+        @brief This function finds for each point of interest found it's 
+        probability based on the keypoint's average temperature.
+        @param[in] holes [const HolesConveyor&] The points of interest found
+        @param[in] temperatures [const Float32MultiArray&] The multiArray with
+        the temperatures of the image.
+        @param[out] holesProbability [std::vector<float>] Each holes probability
+        @param[out] averageTemperature [std::vector<float>] 
+        Each holes average temperature
+        @param[in] method [const int&] Denotes the probabilities extraction
+        method.
+        @return void
+       **/
+      void findHolesProbability(const HolesConveyor& holes,
+        const std_msgs::Float32MultiArray& temperatures, 
+        std::vector<float>* holesProbability, 
+        std::vector<float>* averageTemperature, const int& method);
 
     public:
 

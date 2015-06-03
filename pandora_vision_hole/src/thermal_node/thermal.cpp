@@ -133,6 +133,16 @@ namespace pandora_vision
     // Locate potential holes in the thermal image
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
+    // Find the average temperature of the point of interest that we found
+    // and its probability
+    std::vector<float> holesProbability;
+    std::vector<float> averageTemperature;
+      
+    //////////////////////////////////////////////////////////////////////
+    findHolesProbability(
+      holes, msg.temperatures, &holesProbability, &averageTemperature, 
+      Parameters::Thermal::probability_method);
+
     // Convert the conveyors information so it can match with the
     //  Rgb and Depth images
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_);
@@ -189,8 +199,7 @@ namespace pandora_vision
       for(unsigned int i = 0; i < holes.size(); i++)
       {
         // Fill the temperature of the thermal message for each hole
-        // ------------------------------------------------------------
-        thermalMsg.temperature.push_back(3.0);
+        thermalMsg.temperature.push_back(averageTemperature.at(i));
 
         POIPtr poi(new POI);  
 
@@ -198,8 +207,8 @@ namespace pandora_vision
         poi->point.x = holes.holes[i].keypoint.pt.x;
         poi->point.y = holes.holes[i].keypoint.pt.y;
       
-        // The hole found gives probability = 1
-        poi->probability = 1;
+        // Fill the probabilities 
+        poi->probability = holesProbability.at(i);
         
         poisStamped.pois.push_back(poi);
       }
@@ -318,6 +327,86 @@ namespace pandora_vision
   }
 
 
+  /**
+    @brief This function finds for each point of interest found it's 
+    probability based on the keypoint's average temperature.
+    @param[in] holes [const HolesConveyor&] The points of interest found
+    @param[in] temperatures [const Float32MultiArray&] The multiArray with
+    the temperatures of the image.
+    @param[out] holesProbability [std::vector<float>] Each holes probability
+    @param[out] averageTemperature [std::vector<float>] 
+    Each holes average temperature
+    @param[in] method [const int&] Denotes the probabilities extraction
+    method.
+    @return void
+   **/
+  void Thermal::findHolesProbability(const HolesConveyor& holes,
+    const std_msgs::Float32MultiArray& temperatures, 
+    std::vector<float>* holesProbability, 
+    std::vector<float>* averageTemperature, const int& method)
+  {
+    // The width and height of the input temperature multiarray
+    int width = temperatures.layout.dim[1].size;
+    int height = temperatures.layout.dim[0].size; 
+
+    // For each hole find its probability
+    for(unsigned int i = 0; i < holes.size(); i++)
+    {
+      float average = 0;
+
+      // Find the keypoint coordinates
+      float temperatureX = holes.holes[i].keypoint.pt.x;
+      float temperatureY = holes.holes[i].keypoint.pt.y;
+
+      // Find the average temperature around the keypoint
+
+      // Check if the keypoint is on the edges of the image
+      if(temperatureX > 0 && temperatureX < 60 && temperatureY > 0 && temperatureY < 80)
+      {
+        int counter = 0;
+
+        for(unsigned int k = (temperatureX - 1); k < (temperatureX + 2); k++)
+        {
+          for(unsigned int o = (temperatureY - 1); o < (temperatureY + 2); o++)
+          {
+            average += temperatures.data[k * width + o];
+            counter++;
+          }
+        }
+        average = average / counter;
+      }
+      else
+      {
+        // If it is on the edges it take the temperature of the keypoint it self
+        average = temperatures.data[temperatureX * width + temperatureY];
+      }      
+
+      // Fill the average temperature vector
+      averageTemperature->at(i) = average;
+
+      // Apply gaussian function on the average temperature found
+      if(method == 0)
+      {
+        float probability = exp(
+          - pow((average - Parameters::Thermal::optimal_temperature), 2)
+          / (2 * pow(Parameters::Thermal::tolerance , 2)));
+
+        // Push the probability in the vector
+        holesProbability->push_back(probability);
+      }
+      // Apply logistic function on the average temperature found
+      else if(method == 1)
+      {
+        float probability = 1/(1 + exp( -Parameters::Thermal::left_tolerance * 
+            (average - Parameters::Thermal::low_acceptable_temperature ) )) 
+            - 1/(1 + exp(- Parameters::Thermal::right_tolerance *
+            (average - Parameters::Thermal::high_acceptable_temperature)));
+
+        // Push the probability in the vector 
+        holesProbability->push_back(probability);
+      }
+    }
+  }
 
   /**
     @brief The function called when a parameter is changed
@@ -453,6 +542,36 @@ namespace pandora_vision
       Parameters::Outline::minimum_curve_points =
         static_cast<int>(config.minimum_curve_points / 4);
     }
+
+    //-------------------- Probability extraction Parameters -------------------
+    
+    // The interpolation method for noise removal
+    // 0 for averaging the pixel's neighbor values
+    // 1 for brushfire near
+    // 2 for brushfire far
+    Parameters::Thermal::probability_method = config.probability_method;
+
+    //-------------------- Gausian variables ---------------------
+    Parameters::Thermal::optimal_temperature = config.optimal_temperature;
+
+    // As the standard deviation(tolerance) is higher we consider 
+    // more temperatures as valid. We handle the tolerance.
+    Parameters::Thermal::tolerance = config.tolerance;
+
+    //-------------------- Logistic variables ---------------------
+
+    // These temperatures have 50% probability.
+    // Inside their range the probability grows.
+    Parameters::Thermal::low_acceptable_temperature = 
+      config.low_acceptable_temperature;
+    Parameters::Thermal::high_acceptable_temperature =  
+      config.high_acceptable_temperature;
+
+    // These variables handle the tolerance of the temperatures.
+    // left is for the left side of the destributions curve
+    // right is for the right side of the destributions curve
+    Parameters::Thermal::left_tolerance = config.left_tolerance;
+    Parameters::Thermal::right_tolerance = config.right_tolerance;
   }
 
 } // namespace pandora_vision
