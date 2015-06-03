@@ -1,0 +1,3 @@
+subscribed_topics: 
+  [synchronized/depth/image, synchronized/rgb/image]
+published_topics: /vision/obstacle_alert
