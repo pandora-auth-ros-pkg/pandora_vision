@@ -1,0 +1,5 @@
+pandora_common_msgs/GeneralAlertInfo info
+pandora_vision_msgs/RegionOfInterest roi
+
+float32 depth
+string tag
