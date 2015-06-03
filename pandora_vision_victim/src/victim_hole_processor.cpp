@@ -272,10 +272,10 @@ namespace pandora_vision
     { 
       counter_ = 0;
     }
-    else
-    {
-      final_victims.clear();
-    }
+    /*else*/
+    //{
+      //final_victims.clear();
+    /*}*/
     return final_victims;
   }
   
