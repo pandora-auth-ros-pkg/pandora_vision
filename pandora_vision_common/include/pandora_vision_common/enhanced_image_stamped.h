@@ -33,66 +33,75 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Tsirigotis Christos <tsirif@gmail.com>
+ *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
-#define PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
+#ifndef PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H
+#define PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H
 
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
-#include "std_msgs/Header.h"
+#include "pandora_vision_common/images_stamped.h"
 
 namespace pandora_vision
 {
-  class CVMatStamped {
+  class EnhancedImageStamped : public ImagesStamped
+  {
     public:
-      typedef boost::shared_ptr<CVMatStamped> Ptr;
-      typedef boost::shared_ptr<CVMatStamped const> ConstPtr;
-
+      typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
+      typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
+      typedef cv::Rect_<float> Rect2f;
+      
     public:
-      virtual ~CVMatStamped() {}
-
+      bool isDepth;
+      std::vector<Rect2f> regionsOfInterest;
+      
     public:
+      void setDepth(bool depth);
+      bool getDepth() const;
 
-    /// Message Header referring to the openCV matrix that corresponds
-    /// to a frame
-    std_msgs::Header header;
-    
-    /// OpenCV matrix that corresponds to the current frame to be processed
-    cv::Mat image;
-
-    public:
-    void setHeader(const std_msgs::Header&);
-    const std_msgs::Header& getHeader() const;
-
-    void setImage(const cv::Mat&);
-    cv::Mat getImage() const;
+      void setRegions(const std::vector<Rect2f>&);
+      std::vector<Rect2f> getRegions() const;
+      
+      void setRegion(int , const Rect2f&);
+      Rect2f getRegion(int it) const;
   };
 
-  void CVMatStamped::setHeader(const std_msgs::Header& headerArg)
+  void EnhancedImageStamped::setDepth(bool depth)
   {
-    header = headerArg;
+    isDepth = depth;
+  }
+  bool EnhancedImageStamped::getDepth() const
+  {
+    return isDepth;
   }
 
-  // mby delete
-  const std_msgs::Header& CVMatStamped::getHeader() const
+  void EnhancedImageStamped::setRegions(const std::vector<EnhancedImageStamped::Rect2f>& regions)
   {
-    return header;
+    regionsOfInterest = regions;
   }
-
-  void CVMatStamped::setImage(const cv::Mat& imageArg)
+  std::vector<EnhancedImageStamped::Rect2f> EnhancedImageStamped::getRegions() const
   {
-    image = imageArg;
+    return regionsOfInterest;
   }
-
-  cv::Mat CVMatStamped::getImage() const
+  
+  void EnhancedImageStamped::setRegion(int it, const Rect2f& region)
   {
-    return image;
+    if (it == 0)
+    {
+      regionsOfInterest.clear();
+    }
+    regionsOfInterest.push_back(region);
   }
-
-  typedef CVMatStamped::Ptr CVMatStampedPtr;
-  typedef CVMatStamped::ConstPtr CVMatStampedConstPtr;
+  EnhancedImageStamped::Rect2f EnhancedImageStamped::getRegion(int it) const
+  {
+    return regionsOfInterest[it];
+  }
+  
+  typedef EnhancedImageStamped::Rect2f Rect2f;
+  typedef EnhancedImageStamped::Ptr EnhancedImageStampedPtr;
+  typedef EnhancedImageStamped::ConstPtr EnhancedImageStampedConstPtr;
+  
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
+#endif  // PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H

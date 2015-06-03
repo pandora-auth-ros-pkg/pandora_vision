@@ -33,11 +33,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Tsirigotis Christos <tsirif@gmail.com>
+ *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
-#define PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
+#ifndef PANDORA_VISION_COMMON_IMAGES_STAMPED_H
+#define PANDORA_VISION_COMMON_IMAGES_STAMPED_H
 
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
@@ -45,54 +45,72 @@
 
 namespace pandora_vision
 {
-  class CVMatStamped {
+  class ImagesStamped
+  {
     public:
-      typedef boost::shared_ptr<CVMatStamped> Ptr;
-      typedef boost::shared_ptr<CVMatStamped const> ConstPtr;
-
+      typedef boost::shared_ptr<ImagesStamped> Ptr;
+      typedef boost::shared_ptr<ImagesStamped const> ConstPtr;
+      
     public:
-      virtual ~CVMatStamped() {}
+      std_msgs::Header header;
 
+      cv::Mat depthImage;
+      cv::Mat rgbImage;
+      cv::Mat thermalImage;
+      
     public:
+      void setHeader(const std_msgs::Header&);
+      const std_msgs::Header& getHeader() const;
 
-    /// Message Header referring to the openCV matrix that corresponds
-    /// to a frame
-    std_msgs::Header header;
-    
-    /// OpenCV matrix that corresponds to the current frame to be processed
-    cv::Mat image;
+      void setRgbImage(const cv::Mat&);
+      cv::Mat getRgbImage() const;
+      
+      void setDepthImage(const cv::Mat&);
+      cv::Mat getDepthImage() const;
 
-    public:
-    void setHeader(const std_msgs::Header&);
-    const std_msgs::Header& getHeader() const;
-
-    void setImage(const cv::Mat&);
-    cv::Mat getImage() const;
+      void setThermalImage(const cv::Mat&);
+      cv::Mat getThermalImage() const;
   };
-
-  void CVMatStamped::setHeader(const std_msgs::Header& headerArg)
+  
+  void ImagesStamped::setHeader(const std_msgs::Header& headerArg)
   {
     header = headerArg;
   }
-
-  // mby delete
-  const std_msgs::Header& CVMatStamped::getHeader() const
+  const std_msgs::Header& ImagesStamped::getHeader() const
   {
     return header;
   }
-
-  void CVMatStamped::setImage(const cv::Mat& imageArg)
+  
+  void ImagesStamped::setRgbImage(const cv::Mat& imageArg)
   {
-    image = imageArg;
+    rgbImage = imageArg;
+  }
+  cv::Mat ImagesStamped::getRgbImage() const
+  {
+    return rgbImage;
+  }
+  
+  void ImagesStamped::setDepthImage(const cv::Mat& imageArg)
+  {
+    depthImage = imageArg;
+  }
+  cv::Mat ImagesStamped::getDepthImage() const
+  {
+    return depthImage;
   }
 
-  cv::Mat CVMatStamped::getImage() const
+  void ImagesStamped::setThermalImage(const cv::Mat& imageArg)
   {
-    return image;
+    thermalImage = imageArg;
+  }
+  cv::Mat ImagesStamped::getThermalImage() const
+  {
+    return thermalImage;
   }
 
-  typedef CVMatStamped::Ptr CVMatStampedPtr;
-  typedef CVMatStamped::ConstPtr CVMatStampedConstPtr;
+  typedef ImagesStamped::Ptr ImagesStampedPtr;
+  typedef ImagesStamped::ConstPtr ImagesStampedConstPtr;
+  
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_COMMON_CV_MAT_STAMPED_H
+#endif  // PANDORA_VISION_COMMON_IMAGES_STAMPED_H
