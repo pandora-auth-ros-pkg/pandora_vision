@@ -197,7 +197,8 @@ namespace pandora_vision
         // Set the keypoint
         poi->point.x = holes.holes[i].keypoint.pt.x;
         poi->point.y = holes.holes[i].keypoint.pt.y;
-        //----------------------- fill probability---------------------->
+      
+        // The hole found gives probability = 1
         poi->probability = 1;
         
         poisStamped.pois.push_back(poi);
