@@ -522,6 +522,21 @@ namespace pandora_vision
       }
     }
 
+    cv::Mat rgbImage_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
+    // Construct the rgb image. The entire image is at a colour of
+    // value approximate the the colour value of the images of walls
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
+        }
+      }
+    }
     // Construct the big depth value square area
     cv::Mat depthBigValSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
 
@@ -749,6 +764,7 @@ namespace pandora_vision
         &depthConveyor, 
         &thermalConveyor, 
         depthSquares_, 
+        rgbImage_,
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);
@@ -796,6 +812,7 @@ namespace pandora_vision
         &depthConveyor, 
         &thermalConveyor, 
         depthSquares_, 
+        rgbImage_, 
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);
@@ -849,6 +866,7 @@ namespace pandora_vision
         &depthConveyor, 
         &thermalConveyor, 
         depthSquares_, 
+        rgbImage_, 
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);
@@ -923,6 +941,7 @@ namespace pandora_vision
         &depthConveyor, 
         &thermalConveyor, 
         depthSquares_, 
+        rgbImage_, 
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);
@@ -985,6 +1004,7 @@ namespace pandora_vision
         &depthConveyor, 
         &thermalConveyor, 
         depthSquares_, 
+        rgbImage_, 
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);

@@ -377,83 +377,83 @@ namespace pandora_vision
         else
         {
 
-          cv::Mat ROI = image(boundRect[ci]);
-          cv::Scalar curAvg = cv::mean(ROI);
-          for(int i = 0; i < contours.size(); i ++)
-          {
-            if(i != ci)
-            {
-              if((*realContours)[i] 
-                  && (std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_thresh) 
-                  && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_thresh)
-                  && !testedForMergables[i])
-              {
-                int upperX;
-                int upperY;
-                int lowerX;
-                int lowerY;
-                if((*mc)[ci].x - (boundRect[ci].width / 2) > (*mc)[i].x - (boundRect[i].width / 2))
-                  upperX = (*mc)[i].x - (boundRect[i].width / 2);
-                else
-                  upperX = (*mc)[ci].x - (boundRect[ci].width / 2);
-                if((*mc)[ci].y - (boundRect[ci].height / 2) > (*mc)[i].y - (boundRect[i].height / 2))
-                  upperY = (*mc)[i].y - (boundRect[i].height / 2);
-                else
-                  upperY = (*mc)[ci].y - (boundRect[ci].height / 2);
-                if((*mc)[ci].x + (boundRect[ci].width / 2) > (*mc)[i].x + (boundRect[i].width / 2))
-                  lowerX = (*mc)[ci].x + (boundRect[ci].width / 2);
-                else
-                  lowerX = (*mc)[i].x + (boundRect[i].width / 2);
-                if((*mc)[ci].y + (boundRect[ci].height / 2) > (*mc)[i].y + (boundRect[i].height / 2))
-                  lowerY = (*mc)[ci].y + (boundRect[ci].height / 2);
-                else
-                  lowerY = (*mc)[i].y + (boundRect[i].height / 2);
-                cv::Mat ROI = image(boundRect[i]);
-                cv::Scalar otherAvg = cv::mean(ROI);
-                int homogRectWidth = std::abs(lowerX - upperX);
-                if(homogRectWidth < Rgb::homog_rect_dims_thresh)
-                  homogRectWidth = Rgb::homog_rect_dims_thresh;
-                int homogRectHeight = abs(lowerY - upperY);
-                if(homogRectHeight < Rgb::homog_rect_dims_thresh)
-                  homogRectHeight = Rgb::homog_rect_dims_thresh;
-                if(upperX + homogRectWidth > image.cols)
-                  homogRectWidth = image.cols - upperX - 1;
-                if(upperY + homogRectHeight > image.rows)
-                  homogRectHeight = image.rows - upperY - 1;
-                if(upperX < 0)
-                  upperX = 0;
-                if(upperY < 0)
-                  upperY = 0;
-                if(lowerX > image.cols)
-                  lowerX = image.cols;
-                if(lowerY > image.rows)
-                  lowerY = image.rows;
-                ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
-                HaralickFeaturesExtractor haralickFeaturesDetector_;
-                haralickFeaturesDetector_.findHaralickFeatures(ROI);
-                std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
-                if((((std::abs(curAvg[0] - otherAvg[0]) < Rgb::neighbor_value_thresh) 
-                        && haralickFeatures[0] > Rgb::homogenity_thresh)) 
-                    || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_tiny_distance_thresh) 
-                        && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_tiny_distance_thresh)) 
-                      && true))
-                {
-                  mergables[ci].push_back(i);
-                  //continue;
-                }
-              }
-            }
-          }
-          testedForMergables[ci] = true;
+          //cv::Mat ROI = image(boundRect[ci]);
+          //cv::Scalar curAvg = cv::mean(ROI);
+          //for(int i = 0; i < contours.size(); i ++)
+          //{
+          //  if(i != ci)
+          //  {
+          //    if((*realContours)[i] 
+          //        && (std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_thresh) 
+          //        && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_thresh)
+          //        && !testedForMergables[i])
+          //    {
+          //      int upperX;
+          //      int upperY;
+          //      int lowerX;
+          //      int lowerY;
+          //      if((*mc)[ci].x - (boundRect[ci].width / 2) > (*mc)[i].x - (boundRect[i].width / 2))
+          //        upperX = (*mc)[i].x - (boundRect[i].width / 2);
+          //      else
+          //        upperX = (*mc)[ci].x - (boundRect[ci].width / 2);
+          //      if((*mc)[ci].y - (boundRect[ci].height / 2) > (*mc)[i].y - (boundRect[i].height / 2))
+          //        upperY = (*mc)[i].y - (boundRect[i].height / 2);
+          //      else
+          //        upperY = (*mc)[ci].y - (boundRect[ci].height / 2);
+          //      if((*mc)[ci].x + (boundRect[ci].width / 2) > (*mc)[i].x + (boundRect[i].width / 2))
+          //        lowerX = (*mc)[ci].x + (boundRect[ci].width / 2);
+          //      else
+          //        lowerX = (*mc)[i].x + (boundRect[i].width / 2);
+          //      if((*mc)[ci].y + (boundRect[ci].height / 2) > (*mc)[i].y + (boundRect[i].height / 2))
+          //        lowerY = (*mc)[ci].y + (boundRect[ci].height / 2);
+          //      else
+          //        lowerY = (*mc)[i].y + (boundRect[i].height / 2);
+          //      cv::Mat ROI = image(boundRect[i]);
+          //      cv::Scalar otherAvg = cv::mean(ROI);
+          //      int homogRectWidth = std::abs(lowerX - upperX);
+          //      if(homogRectWidth < Rgb::homog_rect_dims_thresh)
+          //        homogRectWidth = Rgb::homog_rect_dims_thresh;
+          //      int homogRectHeight = abs(lowerY - upperY);
+          //      if(homogRectHeight < Rgb::homog_rect_dims_thresh)
+          //        homogRectHeight = Rgb::homog_rect_dims_thresh;
+          //      if(upperX + homogRectWidth > image.cols)
+          //        homogRectWidth = image.cols - upperX - 1;
+          //      if(upperY + homogRectHeight > image.rows)
+          //        homogRectHeight = image.rows - upperY - 1;
+          //      if(upperX < 0)
+          //        upperX = 0;
+          //      if(upperY < 0)
+          //        upperY = 0;
+          //      if(lowerX > image.cols)
+          //        lowerX = image.cols;
+          //      if(lowerY > image.rows)
+          //        lowerY = image.rows;
+          //      ROI = image(cv::Rect(upperX, upperY, homogRectWidth, homogRectHeight));
+          //      HaralickFeaturesExtractor haralickFeaturesDetector_;
+          //      haralickFeaturesDetector_.findHaralickFeatures(ROI);
+          //      std::vector<double> haralickFeatures = haralickFeaturesDetector_.getFeatures();
+          //      if((((std::abs(curAvg[0] - otherAvg[0]) < Rgb::neighbor_value_thresh) 
+          //              && haralickFeatures[0] > Rgb::homogenity_thresh)) 
+          //          || (((std::abs((*mc)[ci].x - (*mc)[i].x) < Rgb::neighbor_tiny_distance_thresh) 
+          //              && (std::abs((*mc)[ci].y - (*mc)[i].y) < Rgb::neighbor_tiny_distance_thresh)) 
+          //            && true))
+          //      {
+          //        mergables[ci].push_back(i);
+          //        //continue;
+          //      }
+          //    }
+          //  }
+          //}
+          //testedForMergables[ci] = true;
         }
     }
-    mergeContours(
-        &mergables,
-        &(*contourWidth), 
-        &(*contourHeight), 
-        &(*mc),
-        boundRect,
-        &(*realContours));
+    //mergeContours(
+    //    &mergables,
+    //    &(*contourWidth), 
+    //    &(*contourHeight), 
+    //    &(*mc),
+    //    boundRect,
+    //    &(*realContours));
     for( int i = 0; i < contours.size(); i++ )
     {
       if((*realContours)[i])
