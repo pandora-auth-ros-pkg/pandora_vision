@@ -141,18 +141,18 @@ namespace pandora_vision
 
 
 
-  int Rgb::original_image_gaussian_blur = 3;
+  int Rgb::original_image_gaussian_blur = 4;
   int Rgb::std_variance_kernel_size = 5;
   int Rgb::std_variance_threshold = 32;
-  int Rgb::std_variance_morphology_close_size = 8; 
+  int Rgb::std_variance_morphology_close_size = 4; 
   int Rgb::std_variance_morphology_open_size = 8;
-  int Rgb::contour_erode_kernel_size = 4;
+  int Rgb::contour_erode_kernel_size = 8;
   int Rgb::lower_contour_number_to_test_huge = 2;
-  int Rgb::huge_contour_thresh = 20000;
+  int Rgb::huge_contour_thresh = 40000;
   int Rgb::tiny_contour_thresh = 500;
-  int Rgb::border_thresh = 20;
+  int Rgb::border_thresh = 10;
   int Rgb::small_contour_thresh = 100; 
-  int Rgb::neighbor_thresh = 100;
+  int Rgb::neighbor_thresh = 50;
   int Rgb::homog_rect_dims_thresh = 50;
   int Rgb::neighbor_value_thresh = 50;
   float Rgb::homogenity_thresh = 0.5;
@@ -166,6 +166,6 @@ namespace pandora_vision
   float Rgb::intersections_stddev_cost = 0.3;
   float Rgb::internal_pixels_2d_mean_cost = 0.2;
   float Rgb::internal_pixels_2d_stddev_cost = 0.2;
-  float Rgb::shape_validity_thresh = 1.1;
+  float Rgb::shape_validity_thresh = 1.2;
 
 }  // namespace pandora_vision

@@ -618,7 +618,7 @@ namespace pandora_vision
       ( cv::Point2f ( WIDTH - 150, HEIGHT - 150 ),
         70,
         70,
-        2,
+        1,
         &depthSmallVarSquare );
 
 
@@ -945,8 +945,9 @@ namespace pandora_vision
         pointCloud_, 
         &preValidatedHoles, 
         &validHolesMap);
-    // It is expected that there are two valid holes those inside small and medium depth variance
-    EXPECT_EQ ( 2, preValidatedHoles.rectangle.size());
+    // It is expected that there is one valid hole inside medium depth variance
+    // area
+    EXPECT_EQ ( 1, preValidatedHoles.rectangle.size());
 
     conveyor.keypoint.clear();
     conveyor.rectangle.clear();

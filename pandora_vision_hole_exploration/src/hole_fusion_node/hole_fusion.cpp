@@ -1620,8 +1620,8 @@ namespace pandora_vision
         &realDepthContours, 
         &realRgbContours, 
         &realThermalContours, 
-        (*rgbHolesConveyor),
         (*depthHolesConveyor),
+        (*rgbHolesConveyor),
         (*thermalHolesConveyor),
         &(*preValidatedHoles),
         &(*validHolesMap),
@@ -1634,9 +1634,9 @@ namespace pandora_vision
         &realThermalContours, 
         &realDepthContours, 
         &realRgbContours, 
-        (*rgbHolesConveyor),
-        (*depthHolesConveyor),
         (*thermalHolesConveyor),
+        (*depthHolesConveyor),
+        (*rgbHolesConveyor),
         &(*preValidatedHoles),
         &(*validHolesMap),
         &vi);
@@ -1865,7 +1865,7 @@ namespace pandora_vision
               holesConveyor2.rectangle[contourj],
               &mergable);
           if(edMatrix12[contouri][contourj] < Parameters::HoleFusion::merging_distance_thresh
-              && (*realContours2)[contourj] && mergable)
+              && (*realContours2)[contourj] && true)
           {
             mergable = false;
             (*realContours2)[contourj] = false;
