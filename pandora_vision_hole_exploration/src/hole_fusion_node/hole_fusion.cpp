@@ -1720,7 +1720,6 @@ namespace pandora_vision
       edMatrix(holesConveyor -> rectangle.size(), std::vector<float>(holesConveyor -> rectangle.size()));
     // first step of contour merging; merge contours of the same kind
     for(int contouri = 0; contouri < holesConveyor -> rectangle.size(); contouri ++)
-
       for(int contourj = 0; contourj < holesConveyor -> rectangle.size(); contourj ++)
       {
         float keypointDistance = 
@@ -1777,6 +1776,7 @@ namespace pandora_vision
         conveyorTemp.keypoint.push_back(mergedKeypoint);
         cv::Rect mergedRect(upperX, upperY, lowerX - upperX, lowerY - upperY);
         conveyorTemp.rectangle.push_back(mergedRect);
+        
       }
     }
     // Replace conveyor with the merged holes
@@ -1787,7 +1787,7 @@ namespace pandora_vision
 
     (*realContours).clear();
     for(int i = 0; i < (*holesConveyor).rectangle.size(); i ++)
-      (*realContours)[i] = true;
+      (*realContours).push_back(true);
 
   }
 

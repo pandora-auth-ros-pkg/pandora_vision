@@ -499,6 +499,225 @@ namespace pandora_vision
   }
 
 
+  //! Tests HoleFusion::mergeSameNeighbors
+  TEST_F ( HoleFusionTest, mergeSameNeighborsTest )
+  {
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+
+    cv::Mat rgbImage_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
+    // Construct the rgb image. The entire image is at a colour of
+    // value approximate the the colour value of the images of walls
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
+        }
+      }
+    }
+    // Construct the homogeneous rgb square area
+    for ( int rows = 100; rows < 300; rows++ )
+    {
+      for ( int cols = 100; cols < 300; cols++ )
+      {
+        if ( rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] = 200;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[1] = 140;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[2] = 99;
+        }
+      }
+    }
+    // set the holes over the homogeneous region and in close distance
+    HolesConveyor conveyorTemp;
+    HolesConveyor initialConveyor;
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 150, 150 ),
+        50,
+        50 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 205, 205 ),
+        40,
+        40 );
+    conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+    // Store because conveyor will change
+    initialConveyor = conveyor;
+
+    std::vector<bool> realContours(2, true);
+    HoleFusion::mergeSameNeighbors(
+        rgbImage_,
+        &realContours,
+        &conveyor);
+    int counter = 0;
+    for(int i = 0; i < realContours.size(); i++)
+      if(realContours[i])
+      {
+        counter++;
+      }
+    // We expect one hole, the merged one
+    EXPECT_EQ(1, conveyor.rectangle.size());
+    EXPECT_EQ(1, counter);
+    // Keypoint is at the avg
+    EXPECT_NEAR ( 200, conveyor.keypoint[0].x, 5);
+    EXPECT_NEAR ( 200, conveyor.keypoint[0].y, 5);
+    // Rectangle upper left corner is the corner of the rectangle with
+    // the smallest upper left coordinates
+    EXPECT_NEAR ( 150, conveyor.rectangle[0].x, 5);
+    EXPECT_NEAR ( 150, conveyor.rectangle[0].y, 5);
+    // Rectangle below right corner is the corner of the rectangle with
+    // the biggest below right coordinates
+    EXPECT_NEAR ( 245, conveyor.rectangle[0].x + conveyor.rectangle[0].width, 5);
+    EXPECT_NEAR ( 245, conveyor.rectangle[0].y + conveyor.rectangle[0].height, 5);
+    // Restore conveyor with the two initial holes
+    conveyor = initialConveyor;
+
+    // Add a third hole
+    //conveyorTemp = getConveyor(
+    //    cv::Point2f ( 120, 120 ),
+    //    25,
+    //    50 );
+    //conveyor.keypoint.push_back(conveyorTemp.keypoint[0]);
+    //conveyor.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    //realContours.clear();
+    //for(int i = 0; i < 3; i ++)
+    //  realContours.push_back(true);
+
+    //HoleFusion::mergeSameNeighbors(
+    //    rgbImage_,
+    //    &realContours,
+    //    &conveyor);
+
+    //counter = 0;
+    //for(int i = 0; i < realContours.size(); i++)
+    //  if(realContours[i])
+    //  {
+    //    counter++;
+    //  }
+    //// We expect one hole, the merged one
+    //EXPECT_EQ(1, conveyor.rectangle.size());
+    //EXPECT_EQ(1, counter);
+    //// Keypoint is at the avg
+    //EXPECT_NEAR ( 177.5, conveyor.keypoint[0].x, 5);
+    //EXPECT_NEAR ( 177.5, conveyor.keypoint[0].y, 5);
+    //// Rectangle upper left corner is the corner of the rectangle with
+    //// the smallest upper left coordinates
+    //EXPECT_NEAR ( 120, conveyor.rectangle[0].x, 5);
+    //EXPECT_NEAR ( 120, conveyor.rectangle[0].y, 5);
+    //// Rectangle below right corner is the corner of the rectangle with
+    //// the biggest below right coordinates
+    //EXPECT_NEAR ( 245, conveyor.rectangle[0].x + conveyor.rectangle[0].width, 5);
+    //EXPECT_NEAR ( 245, conveyor.rectangle[0].y + conveyor.rectangle[0].height, 5);
+
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+
+  }
+
+  
+  //! Tests HoleFusion::mergeDifferentNeighbors
+  TEST_F ( HoleFusionTest, mergeDifferentNeighborsTest )
+  {
+
+    cv::Mat rgbImage_ = cv::Mat::zeros( HEIGHT, WIDTH, CV_8UC3 );
+    // Construct the rgb image. The entire image is at a colour of
+    // value approximate the the colour value of the images of walls
+    for ( int rows = 0; rows < HEIGHT; rows++ )
+    {
+      for ( int cols = 0; cols < WIDTH; cols++ )
+      {
+        if ( rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] = 116;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[1] = 163;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[2] = 171;
+        }
+      }
+    }
+    // Construct the homogeneous rgb square area
+    for ( int rows = 100; rows < 300; rows++ )
+    {
+      for ( int cols = 100; cols < 300; cols++ )
+      {
+        if ( rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] == 0)
+        {
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[0] = 200;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[1] = 140;
+          rgbImage_.at< cv::Vec3b >( rows, cols ).val[2] = 99;
+        }
+      }
+    }
+    // set the holes over the homogeneous region and in close distance
+    HolesConveyor conveyorTemp;
+    HolesConveyor initialConveyor;
+    HolesConveyor conveyor1;
+    HolesConveyor conveyor2;
+    HolesConveyor conveyor3;
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 150, 150 ),
+        50,
+        50 );
+    conveyor1.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor1.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    conveyorTemp = getConveyor(
+        cv::Point2f ( 205, 205 ),
+        40,
+        40 );
+    conveyor2.keypoint.push_back(conveyorTemp.keypoint[0]);
+    conveyor2.rectangle.push_back(conveyorTemp.rectangle[0]);
+
+    std::vector<bool> realContours(1, true);
+    std::vector<bool> realContours2(1, true);
+    std::vector<bool> realContours3;
+
+    HolesConveyor preValidatedHoles;
+    std::map<int, float> validHolesMap;
+    int vi = 0;
+
+    HoleFusion::mergeDifferentNeighbors(
+        rgbImage_,
+        &realContours,
+        &realContours2,
+        &realContours3,
+        conveyor1,
+        conveyor2,
+        conveyor3,
+        &preValidatedHoles,
+        &validHolesMap,
+        &vi);
+
+    // We expect one hole, the merged one
+    EXPECT_EQ(1, preValidatedHoles.rectangle.size());
+    // Keypoint is at the avg
+    EXPECT_NEAR ( 200, preValidatedHoles.keypoint[0].x, 5);
+    EXPECT_NEAR ( 200, preValidatedHoles.keypoint[0].y, 5);
+    // Rectangle upper left corner is the corner of the rectangle with
+    // the smallest upper left coordinates
+    EXPECT_NEAR ( 150, preValidatedHoles.rectangle[0].x, 5);
+    EXPECT_NEAR ( 150, preValidatedHoles.rectangle[0].y, 5);
+    // Rectangle below right corner is the corner of the rectangle with
+    // the biggest below right coordinates
+    EXPECT_NEAR ( 245, preValidatedHoles.rectangle[0].x + preValidatedHoles.rectangle[0].width, 5);
+    EXPECT_NEAR ( 245, preValidatedHoles.rectangle[0].y + preValidatedHoles.rectangle[0].height, 5);
+
+    conveyor.keypoint.clear();
+    conveyor.rectangle.clear();
+
+  }
+
+
   //! Tests HoleFusion::mergeHoles
   TEST_F ( HoleFusionTest, mergeHolesTest )
   {
@@ -629,7 +848,7 @@ namespace pandora_vision
         cv::Point2f ( 80, 80 ),
         70,
         70,
-          3,
+        3,
         &depthMedVarSquare );
 
     cv::Mat depthBigVarSquare = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
