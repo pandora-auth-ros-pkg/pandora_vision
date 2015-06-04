@@ -42,12 +42,12 @@
 #include <cv_bridge/cv_bridge.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_obstacle/cv_mat_indexed.h"
+#include "pandora_vision_common/images_stamped.h"
 #include "pandora_vision_obstacle/barrel_detection/barrel_poi.h"
 
 namespace pandora_vision
 {
-  class BarrelProcessor : public sensor_processor::Processor<CVMatIndexed, POIsStamped>
+  class BarrelProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
   {
     public:
       typedef boost::shared_ptr<BarrelPOI> BarrelPOIPtr;
@@ -57,7 +57,7 @@ namespace pandora_vision
 
       virtual ~BarrelProcessor() {}
 
-      virtual bool process(const CVMatIndexedConstPtr& input,
+      virtual bool process(const ImagesStampedConstPtr& input,
         const POIsStampedPtr& output);
   };
 }  // namespace pandora_vision

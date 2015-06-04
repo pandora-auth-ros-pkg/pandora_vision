@@ -40,24 +40,24 @@
 #define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PREPROCESSOR_H
 
 #include <string>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
 #include "sensor_processor/preprocessor.h"
-#include "pandora_vision_obstacle/cv_mat_indexed.h"
+#include "pandora_vision_common/images_stamped.h"
 
 namespace pandora_vision
 {
-  class BarrelPreProcessor : public sensor_processor::PreProcessor<sensor_msgs::Image,
-    CVMatIndexed>
+  class BarrelPreProcessor : public sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
+    ImagesStamped>
   {
     public:
-      typedef boost::shared_ptr<sensor_msgs::Image> ImagePtr;
-      typedef boost::shared_ptr<sensor_msgs::Image const> ImageConstPtr;
+      typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+      typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
 
     public:
       BarrelPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
       virtual ~BarrelPreProcessor();
 
-      virtual bool preProcess(const ImageConstPtr& input, const CVMatIndexedPtr& output);
+      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
   };
 }  // namespace pandora_vision
 
