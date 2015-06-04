@@ -41,22 +41,22 @@
 namespace pandora_vision
 {
   BarrelProcessor::BarrelProcessor(const std::string& ns,
-    sensor_processor::Handler* handler) : sensor_processor::Processor<CVMatIndexed, 
+    sensor_processor::Handler* handler) : sensor_processor::Processor<ImagesStamped, 
     POIsStamped>(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
   }
 
-  BarrelProcessor::BarrelProcessor() : sensor_processor::Processor<CVMatIndexed, 
+  BarrelProcessor::BarrelProcessor() : sensor_processor::Processor<ImagesStamped, 
     POIsStamped>() {}
 
-  bool BarrelProcessor::process(const CVMatIndexedConstPtr& input,
+  bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
     const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
-    output->frameWidth = input->getImage().cols;
-    output->frameHeight = input->getImage().rows;
+    output->frameWidth = input->getRgbImage().cols;
+    output->frameHeight = input->getRgbImage().rows;
     
     // output->pois = ...(input->getImage());
 

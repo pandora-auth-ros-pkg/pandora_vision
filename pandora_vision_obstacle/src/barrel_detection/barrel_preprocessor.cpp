@@ -38,13 +38,14 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
 #include "pandora_vision_obstacle/barrel_detection/barrel_preprocessor.h"
 
 namespace pandora_vision
 {
   BarrelPreProcessor::BarrelPreProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::Image,
-    CVMatIndexed>(ns, handler)
+    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
+    ImagesStamped>(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
       this->accessProcessorNh()->getNamespace());
@@ -52,40 +53,18 @@ namespace pandora_vision
   
   BarrelPreProcessor::~BarrelPreProcessor() {}
 
-  bool BarrelPreProcessor::preProcess(const ImageConstPtr& input, const CVMatIndexedPtr& output)
+  bool BarrelPreProcessor::preProcess(const PointCloud2ConstPtr& input,
+    const ImagesStampedPtr& output)
   {
     output->setHeader(input->header);
-//    output->setImageType(true);  //TO FILL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    cv_bridge::CvImagePtr inMsg;
+    PointCloudPtr pointCloud(new PointCloud);
+    pcl::fromROSMsg<pcl::PointXYZRGB>(*input, *pointCloud);
 
-    inMsg = cv_bridge::toCvCopy(*input, input->encoding);
-    if (input->encoding.compare(sensor_msgs::image_encodings::TYPE_32FC1))
-    {
-      output->setImageType(true);
-      ROS_INFO("rgb");
-    }
-    else if (input->encoding.compare(sensor_msgs::image_encodings::BGR8))
-    {
-      output->setImageType(false);
-      ROS_INFO("depth");
-    }
-    else
-    {
-      ROS_INFO("Error");
-    }
+    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_8UC3));
+    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_32FC1));
 
-    //~ if (output->getImageType())  //!< If the image type is depth
-    //~ {
-      //~ inMsg = cv_bridge::toCvCopy(*input, sensor_msgs::image_encodings::TYPE_32FC1);
-    //~ }
-    //~ else
-    //~ {
-      //~ inMsg = cv_bridge::toCvCopy(*input, sensor_msgs::image_encodings::BGR8);
-    //~ }
-    output->setImage(inMsg->image.clone());
-
-    if (output->image.empty())
+    if (output->rgbImage.empty() || output->depthImage.empty())
     {
       ROS_ERROR("[Node] No more Frames or something went wrong with bag file");
       // ros::shutdown();
