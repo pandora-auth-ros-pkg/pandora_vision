@@ -1865,7 +1865,7 @@ namespace pandora_vision
               holesConveyor2.rectangle[contourj],
               &mergable);
           if(edMatrix12[contouri][contourj] < Parameters::HoleFusion::merging_distance_thresh
-              && (*realContours2)[contourj] && true)
+              && (*realContours2)[contourj] && mergable)
           {
             mergable = false;
             (*realContours2)[contourj] = false;
