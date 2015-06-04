@@ -99,7 +99,7 @@ namespace pandora_vision
         }
       default:
         {
-          ROS_ERROR_NAMED(PKG_NAME,
+          ROS_ERROR_NAMED(ros::this_node::getName(),
             "[Hole Fusion node] Invalid validation process selected.");
 
           break;
@@ -404,7 +404,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED(PKG_NAME,
+        ROS_ERROR_NAMED(ros::this_node::getName(),
           "[Hole Fusion node] Validation process failure");
       }
 
@@ -424,7 +424,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED(PKG_NAME,
+        ROS_ERROR_NAMED(ros::this_node::getName(),
           "[Hole Fusion node] Validation process failure");
       }
 
@@ -695,7 +695,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED(PKG_NAME,
+        ROS_ERROR_NAMED(ros::this_node::getName(),
           "[Hole Fusion node] Validation process failure");
       }
 
@@ -892,7 +892,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED(PKG_NAME,
+        ROS_ERROR_NAMED(ros::this_node::getName(),
           "[Hole Fusion node] Validation process failure");
       }
 
@@ -912,7 +912,7 @@ namespace pandora_vision
       }
       else
       {
-        ROS_ERROR_NAMED(PKG_NAME,
+        ROS_ERROR_NAMED(ros::this_node::getName(),
           "[Hole Fusion node] Validation process failure");
       }
 

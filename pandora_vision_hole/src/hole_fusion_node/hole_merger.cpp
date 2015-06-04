@@ -1213,7 +1213,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED(PKG_NAME, "[Hole Fusion node] Merging process failure");
+      ROS_ERROR_NAMED(ros::this_node::getName(), "[Hole Fusion node] Merging process failure");
     }
 
     #ifdef DEBUG_SHOW

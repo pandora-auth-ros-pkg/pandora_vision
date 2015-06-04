@@ -332,7 +332,7 @@ namespace pandora_vision
 
     if (image.type() != CV_8UC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "OutlineDiscovery::getOutlineFromMask : Inappropriate image type.");
 
       return;
@@ -381,7 +381,7 @@ namespace pandora_vision
   {
     if (inImage->type() != CV_8UC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "OutlineDiscovery::getShapesClearBorder : Inappropriate image type.");
 
       return;
@@ -609,7 +609,7 @@ namespace pandora_vision
   {
     if (inImage->type() != CV_8UC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "OutlineDiscovery::getShapesClearBorderSimple : Inappropriate image type.");
 
       return;

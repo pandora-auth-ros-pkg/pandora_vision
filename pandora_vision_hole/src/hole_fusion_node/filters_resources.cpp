@@ -245,7 +245,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED(PKG_NAME, "[Hole Fusion node] Resource creation failure");
+      ROS_ERROR_NAMED(ros::this_node::getName(), "[Hole Fusion node] Resource creation failure");
     }
 
     // Create the necessary resources

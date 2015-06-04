@@ -197,7 +197,7 @@ namespace pandora_vision
 
       if (inliers->indices.size () == 0)
       {
-        ROS_DEBUG_NAMED(PKG_NAME,
+        ROS_DEBUG_NAMED(ros::this_node::getName(),
           "Could not estimate a planar model for the given dataset.");
 
         break;

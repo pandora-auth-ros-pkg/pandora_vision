@@ -170,7 +170,7 @@ namespace pandora_vision
     // The walls directory should exist; otherwise abort.
     if (directory == NULL)
     {
-      ROS_FATAL_NAMED(PKG_NAME, "/walls not found. Create it, fill it with "
+      ROS_FATAL_NAMED(ros::this_node::getName(), "/walls not found. Create it, fill it with "
         "images of walls and continue..");
 
       ros::shutdown();
@@ -243,7 +243,7 @@ namespace pandora_vision
       // If no images are found in the "texture_X" directory, shutdown.
       if (numPictures == 0)
       {
-        ROS_FATAL_NAMED(PKG_NAME, "one of the textures directory is empty."
+        ROS_FATAL_NAMED(ros::this_node::getName(), "one of the textures directory is empty."
           "Fill it with images of walls and continue. Shutting down..");
 
         ros::shutdown();

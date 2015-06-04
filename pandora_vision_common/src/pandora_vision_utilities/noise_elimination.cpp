@@ -55,7 +55,7 @@ namespace pandora_vision
   {
     if (inImage.type() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::brushfireNear : Inappropriate image type.");
 
       return;
@@ -111,7 +111,7 @@ namespace pandora_vision
   {
     if (image->type() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::brushfireNearStep : Inappropriate image type.");
 
       return;
@@ -231,7 +231,7 @@ namespace pandora_vision
   {
     if (image.type() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::chooseInterpolationMethod : Inappropriate image type.");
 
       return;
@@ -298,7 +298,7 @@ namespace pandora_vision
   {
     if (inImage->type() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::interpolateImageBorders : Inappropriate image type.");
 
       return;
@@ -367,7 +367,7 @@ namespace pandora_vision
   {
     if (inImage.type() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::interpolateZeroPixel : Inappropriate image type.");
 
       return 0.0;
@@ -376,7 +376,7 @@ namespace pandora_vision
     if (row < 1 || row >= inImage.rows - 1
       || col < 1 || col >= inImage.cols - 1)
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "NoiseElimination::interpolateZeroPixel : Input row or col not valid.");
 
       *endFlag = true;

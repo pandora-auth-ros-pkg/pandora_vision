@@ -66,7 +66,7 @@ namespace pandora_vision
     // The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));
 
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Initiated");
+    ROS_INFO_NAMED(ros::this_node::getName(), "[Depth node] Initiated");
   }
 
 
@@ -77,7 +77,7 @@ namespace pandora_vision
    **/
   Depth::~Depth(void)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Terminated");
+    ROS_INFO_NAMED(ros::this_node::getName(), "[Depth node] Terminated");
   }
 
 
@@ -98,7 +98,7 @@ namespace pandora_vision
     Timer::start("inputDepthImageCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Depth node callback");
+    ROS_INFO_NAMED(ros::this_node::getName(), "Depth node callback");
 
     // Obtain the depth image. Since the image is in a format of
     // sensor_msgs::Image, it has to be transformed into a cv format in order
@@ -192,12 +192,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       depthImageTopic_ = ns + "/" + depthImageTopic_;
 
-      ROS_INFO_NAMED(PKG_NAME,
+      ROS_INFO_NAMED(ros::this_node::getName(),
         "[Depth Node] Subscribed to the input depth image");
     }
     else
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "[Depth Node] Could not find topic depth_image_topic");
     }
 
@@ -211,12 +211,12 @@ namespace pandora_vision
       // Make the topic's name absolute
       candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
 
-      ROS_INFO_NAMED(PKG_NAME,
+      ROS_INFO_NAMED(ros::this_node::getName(),
         "[Depth Node] Advertising to the candidate holes topic");
     }
     else
     {
-      ROS_ERROR_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(ros::this_node::getName(),
         "[Depth Node] Could not find topic candidate_holes_topic");
     }
   }
@@ -233,7 +233,7 @@ namespace pandora_vision
     const pandora_vision_hole::depth_cfgConfig& config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Parameters callback called");
+    ROS_INFO_NAMED(ros::this_node::getName(), "[Depth node] Parameters callback called");
 
     //////////////////// Blob detection - specific parameters //////////////////
 
