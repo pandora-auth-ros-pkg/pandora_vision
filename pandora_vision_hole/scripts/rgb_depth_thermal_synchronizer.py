@@ -71,7 +71,7 @@ def callback(pointCloud, flirLeptonMsg):
     msg.header.stamp = rospy.get_rostime()
     msg.pc = pointCloud
     msg.thermalInfo = flirLeptonMsg.thermalImage
-    msg.temperatures = flirLepton.temperatures
+    msg.temperatures = flirLeptonMsg.temperatures
 
     # Publish the message to the synchronizer node
     synch_pub.publish(msg)
