@@ -65,10 +65,22 @@ namespace pandora_vision
       obstacleAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
       obstacleAlert.info.probability = 1;
 
-      // boost::shared_ptr<BarrelPOI> barrelPOI(boost::dynamic_pointer_cast<BarrelPOI>(input->pois[ii]));
-      // obstacleAlert.tag = barrelPOI->getTag();
+      boost::shared_ptr<BarrelPOI> barrelPOI(boost::dynamic_pointer_cast<BarrelPOI>(
+        input->pois[ii]));
+      obstacleAlert.tag = barrelPOI->getTag();
+      obstacleAlert.depth = barrelPOI->getDepth();
+      
+      obstacleAlert.roi.center.x = barrelPOI->getPoint().x;
+      obstacleAlert.roi.center.y = barrelPOI->getPoint().y;
+      obstacleAlert.roi.width = barrelPOI->getWidth();
+      obstacleAlert.roi.height = barrelPOI->getHeight();
 
       output->obstacleAlerts.push_back(obstacleAlert);
+    }
+    
+    if (output->obstacleAlerts.empty())
+    {
+      return false;
     }
     return true;
   }
