@@ -57,7 +57,6 @@ from sensor_msgs.msg import PointCloud2
 class VisionBenchmarkTestBase(test_base.TestBase):
 
     alertEvent = threading.Event()
-    datasetCamera = ""
 
     def readImages(self, imagePath, fileName):
         rosimage = Image()
@@ -174,7 +173,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             if line.startswith("#"):
                 continue
             (frameName, objectType, xTopLeftPoint, yTopLeftPoint,
-                xBottomRightPoint, yBottomRightPoint) = line.split(",")
+                xBottomRightPoint, yBottomRightPoint) = line.split(", ")
             if self.algorithm != "Victim" and "depth" in frameName:
                 continue
             yBottomRightPoint = yBottomRightPoint.replace("\n", "")
@@ -399,18 +398,14 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             self.readBenchmarkFile(imagePath)
 
         errorThreshold = 900.0
-        maxWaitTime = 1.0
         bridge = CvBridge()
         if self.algorithm == "Hole":
             suffix = "sDirections"
         else:
-            suffix = "Alerts"
+            suffix = "generalAlerts"
 
         queueIndex = 0
         count = 0
-
-        # Read Images Sequentially
-        rospy.loginfo("Reading Images")
 
         if not os.path.isdir(imagePath):
             rospy.logerr("ERROR : Incorrect Path for image dataset")
@@ -421,6 +416,10 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         for fileName in sorted(os.listdir(imagePath)):
             self.images = []
             self.names = []
+            
+            # Read Images Sequentially
+            rospy.loginfo("Reading Images")
+            
             if self.algorithm == "Hole" or self.algorithm == "Victim":
                 self.readRosBags(imagePath, fileName)
             else:
@@ -441,21 +440,42 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                 self.mockPublish(inputTopic, outputTopic[1], image)
                 elapsedTime = time.time() - startTime
 
-                response = self.messageList[outputTopic[0]][-1]
-                if response.success:
+                responseFlag = True
+                for topic in outputTopic:
+                    if "processor_log" in topic:
+                        if responseFlag and len(self.messageList[topic]) > 0:
+                            response = self.messageList[topic][-1].success
+                            responseFlag = responseFlag and response
+                        else:
+                            continue
+                print responseFlag
+                if responseFlag:
+                    print "Wait for the alert to arrive"
                     # Wait for the alert to arrive.
                     self.alertEvent.wait()
                     rospy.logdebug("Alert found in Image %s", imageName)
                     rospy.logdebug("Time passed: %f seconds", elapsedTime)
                     truePositivesInImage = 0
                     # Estimate alert center point from message parameters
-                    alerts = getattr(
+                    print self.messageList[outputTopic[1]][-1]
+                    if self.algorithm == "Victim":
+                        alerts = getattr(
+                            self.messageList[outputTopic[1]][-1],
+                            suffix)
+                    else:
+                        alerts = getattr(
                             self.messageList[outputTopic[1]][-1],
                             self.algorithm.lower()+suffix)
                     queueIndex += 1
+                    print alerts
                     for iiAlert in xrange(len(alerts)):
-                        imageYaw = float(alerts[iiAlert].info.yaw)
-                        imagePitch = float(alerts[iiAlert].info.pitch)
+                        if self.algorithm == "Victim":
+                            imageYaw = float(alerts[iiAlert].yaw)
+                            imagePitch = float(alerts[iiAlert].pitch)
+                        else:
+                            imageYaw = float(alerts[iiAlert].info.yaw)
+                            imagePitch = float(alerts[iiAlert].info.pitch)
+
                         rospy.logdebug("Yaw: %f Degrees",
                                        imageYaw * 180 / math.pi)
                         rospy.logdebug("Pitch: %f Degrees",
