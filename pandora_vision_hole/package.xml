@@ -30,6 +30,7 @@
   <depend>pandora_vision_msgs</depend>
   <depend>pandora_vision_common</depend>
   <depend>pandora_common_msgs</depend>
+  <depend>distrib_msgs</depend>
   <depend>state_manager</depend>
   <depend>state_manager_msgs</depend>
   <depend>dynamic_reconfigure</depend>

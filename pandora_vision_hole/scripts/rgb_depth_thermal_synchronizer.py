@@ -44,7 +44,7 @@ from camera_calibration import approxsync
 from sensor_msgs.msg import Image, PointCloud2
 import rospy
 from pandora_vision_msgs.msg import SynchronizedMsg
-from pandora_common import flirLeptonMsg
+from distrib_msgs.msg import flirLeptonMsg
 
 # Here the synchronized messages from kinect and flir are sent
 # to the synchronizer node as one united message.
