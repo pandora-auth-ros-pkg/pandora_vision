@@ -26,7 +26,7 @@
   <param name="subscriberAlertTopic" value="/vision/victim_direction_alert" />
   <param name="subscriberAlertMessagePackage" value="pandora_common_msgs" />
   <param name="subscriberAlertMessageType" value="GeneralAlertVector"/>
-  
+
   <param name="holeSubscriberTopic" value="/hole_detector/processor_log" />
   <param name="holeSubscriberMessagePackage" value="sensor_processor" />
   <param name="holeSubscriberMessageType" value="ProcessorLogInfo"/>
@@ -35,5 +35,5 @@
 
   <test test-name="VictimBenchmarkTest" pkg="pandora_vision_victim"
     type="victim_benchmark_test.py" time-limit="6000.0"/>
-  
+
 </launch>
