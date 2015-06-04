@@ -470,7 +470,6 @@ namespace pandora_vision
         enhancedCropperMsg.depthImage = *depthImageMessagePtr->toImageMsg();
         enhancedCropperMsg.rgbImage = *rgbImageMessagePtr->toImageMsg();
         enhancedCropperMsg.thermalImage = synchronizedMessage.thermalInfo;
-        enhancedCropperMsg.isDepth = true;
 
         // Publish the synchronized depth and rgb images to thermal cropper node
         synchronizedRgbDepthCropperImagesPublisher_.publish(enhancedCropperMsg);

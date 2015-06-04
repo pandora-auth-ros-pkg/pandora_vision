@@ -215,7 +215,6 @@ namespace pandora_vision
     depthImage_ = msg.depthImage;
     rgbImage_ = msg.rgbImage;
     thermalImage_ = msg.thermalImage;
-    isDepth_ = msg.isDepth;
 
   }
 
@@ -233,6 +232,7 @@ namespace pandora_vision
     enhancedMsg.header.stamp = headerStamp_;
 
     // Victim node needs the interpolated depth image
+    // From interpolation we also acquire the isDepth boolean
     enhancedMsg.depthImage = interpolateDepthImage(depthImage_);
     enhancedMsg.rgbImage = rgbImage_;
     enhancedMsg.thermalImage = thermalImage_;
@@ -272,6 +272,17 @@ namespace pandora_vision
     cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImageMat,
       &interpolatedDepthImage);
+
+    // When the depth image is interpolated, we also acquire the interpolation
+    // method. Check if depth analysis is applicable.
+    if(Parameters::Depth::interpolation_method == 0)
+    {
+      isDepth_ = true;
+    }
+    else
+    {
+      isDepth_ = false;
+    }
 
     // Convert the cv::Mat to sensor_msgs/Image type
     return MessageConversions::convertImageToMessage(interpolatedDepthImage, 
