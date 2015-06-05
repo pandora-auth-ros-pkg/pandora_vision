@@ -35,11 +35,19 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
-############################### barrel preprocessor ##############################
-add_library(${PROJECT_NAME}_barrel_preprocessor
-  src/barrel_detection/barrel_preprocessor.cpp
+############################### obstacle preprocessor ##############################
+add_library(${PROJECT_NAME}_obstacle_preprocessor
+  src/obstacle_preprocessor.cpp
 )
-target_link_libraries(${PROJECT_NAME}_barrel_preprocessor
+target_link_libraries(${PROJECT_NAME}_obstacle_preprocessor
+  ${catkin_LIBRARIES}
+)
+
+############################### obstacle postprocessor ##############################
+add_library(${PROJECT_NAME}_obstacle_postprocessor
+  src/obstacle_postprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_obstacle_postprocessor
   ${catkin_LIBRARIES}
 )
 
@@ -51,23 +59,15 @@ target_link_libraries(${PROJECT_NAME}_barrel_processor
   ${catkin_LIBRARIES}
 )
 
-############################### barrel postprocessor ##############################
-add_library(${PROJECT_NAME}_barrel_postprocessor
-  src/barrel_detection/barrel_postprocessor.cpp
-)
-target_link_libraries(${PROJECT_NAME}_barrel_postprocessor
-  ${catkin_LIBRARIES}
-)
-
 ############################### barrel handler ##############################
 add_library(${PROJECT_NAME}_barrel_handler
   src/barrel_detection/barrel_handler.cpp
 )
 target_link_libraries(${PROJECT_NAME}_barrel_handler
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_barrel_preprocessor
+  ${PROJECT_NAME}_obstacle_preprocessor
+  ${PROJECT_NAME}_obstacle_postprocessor
   ${PROJECT_NAME}_barrel_processor
-  ${PROJECT_NAME}_barrel_postprocessor
 )
 
 ############################ barrel node ###############################

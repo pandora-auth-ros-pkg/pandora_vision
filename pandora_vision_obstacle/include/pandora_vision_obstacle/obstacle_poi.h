@@ -36,29 +36,42 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PREPROCESSOR_H
-#define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PREPROCESSOR_H
+#ifndef PANDORA_VISION_OBSTACLE_OBSTACLE_POI_H
+#define PANDORA_VISION_OBSTACLE_OBSTACLE_POI_H
 
 #include <string>
-#include <sensor_msgs/PointCloud2.h>
-#include "sensor_processor/preprocessor.h"
-#include "pandora_vision_common/images_stamped.h"
+#include "pandora_vision_common/bbox_poi.h"
 
 namespace pandora_vision
 {
-  class BarrelPreProcessor : public sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-    ImagesStamped>
+  class ObstaclePOI : public BBoxPOI
   {
     public:
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
+      virtual ~ObstaclePOI() {}
 
     public:
-      BarrelPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~BarrelPreProcessor();
+      std::string tag;
+      float depthDistance;
 
-      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
+    public:
+      void setTag(const std::string& tagArg)
+      {
+        tag = tagArg;
+      }
+      std::string getTag() const
+      {
+        return tag;
+      }
+      
+      void setDepth(float distance)
+      {
+        depthDistance = distance;
+      }
+      float getDepth() const
+      {
+        return depthDistance;
+      }
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PREPROCESSOR_H
+#endif  // PANDORA_VISION_OBSTACLE_OBSTACLE_POI_H

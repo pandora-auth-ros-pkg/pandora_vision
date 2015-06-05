@@ -36,52 +36,29 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_common_msgs/GeneralAlertVector.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_postprocessor.h"
+#ifndef PANDORA_VISION_OBSTACLE_OBSTACLE_PREPROCESSOR_H
+#define PANDORA_VISION_OBSTACLE_OBSTACLE_PREPROCESSOR_H
+
+#include <string>
+#include <sensor_msgs/PointCloud2.h>
+#include "sensor_processor/preprocessor.h"
+#include "pandora_vision_common/images_stamped.h"
 
 namespace pandora_vision
 {
-  BarrelPostProcessor::BarrelPostProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : VisionPostProcessor<
-    pandora_vision_msgs::ObstacleAlertVector>(ns, handler)
+  class ObstaclePreProcessor : public sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
+    ImagesStamped>
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
-        this->accessProcessorNh()->getNamespace());
-  }
+    public:
+      typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+      typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
 
-  BarrelPostProcessor::~BarrelPostProcessor() {}
+    public:
+      ObstaclePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~ObstaclePreProcessor();
 
-  bool BarrelPostProcessor::postProcess(const POIsStampedConstPtr& input,
-    const ObstacleAlertVectorPtr& output)
-  {
-    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
-    output->header = alertVector.header;
-
-    for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
-    {
-      pandora_vision_msgs::ObstacleAlert obstacleAlert;
-
-      obstacleAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
-      obstacleAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
-      obstacleAlert.info.probability = 1;
-
-      boost::shared_ptr<BarrelPOI> barrelPOI(boost::dynamic_pointer_cast<BarrelPOI>(
-        input->pois[ii]));
-      obstacleAlert.tag = barrelPOI->getTag();
-      obstacleAlert.depth = barrelPOI->getDepth();
-      
-      obstacleAlert.roi.center.x = barrelPOI->getPoint().x;
-      obstacleAlert.roi.center.y = barrelPOI->getPoint().y;
-      obstacleAlert.roi.width = barrelPOI->getWidth();
-      obstacleAlert.roi.height = barrelPOI->getHeight();
-
-      output->obstacleAlerts.push_back(obstacleAlert);
-    }
-    
-    if (output->obstacleAlerts.empty())
-    {
-      return false;
-    }
-    return true;
-  }
+      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
+  };
 }  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_OBSTACLE_OBSTACLE_PREPROCESSOR_H

@@ -41,14 +41,14 @@
 
 #include <string>
 #include "pandora_vision_common/vision_handler.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_preprocessor.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_postprocessor.h"
+#include "pandora_vision_obstacle/obstacle_preprocessor.h"
+#include "pandora_vision_obstacle/obstacle_postprocessor.h"
 #include "pandora_vision_obstacle/barrel_detection/barrel_processor.h"
 
 namespace pandora_vision
 {
-  class BarrelHandler : public VisionHandler<BarrelPreProcessor, BarrelProcessor, 
-    BarrelPostProcessor>
+  class BarrelHandler : public VisionHandler<ObstaclePreProcessor, BarrelProcessor, 
+    ObstaclePostProcessor>
   {
     public:
       explicit BarrelHandler(const std::string& ns);
