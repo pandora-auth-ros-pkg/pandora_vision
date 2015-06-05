@@ -47,7 +47,7 @@ namespace pandora_vision
     @brief The HoleFusion constructor
    **/
   HoleFusion::HoleFusion(void):
-    //pointCloud_(new PointCloud),
+    pointCloud_(new PointCloud),
     nodeHandle_(""),
     generalNodeHandle_("~/general"),
     debugNodeHandle_("~/debug"),
@@ -58,7 +58,7 @@ namespace pandora_vision
     imageTransport_(nodeHandle_)
   {
     // Initialize the parent frame_id to an empty string
-    //parent_frame_id_ = "";
+    parent_frame_id_ = "";
 
     // Acquire the names of topics which the Hole Fusion node will be having
     // transactionary affairs with
@@ -153,9 +153,9 @@ namespace pandora_vision
 
     // Subscribe to the topic where the synchronizer node publishes
     // the point cloud
-    //pointCloudSubscriber_= nodeHandle_.subscribe(
-    //    pointCloudTopic_, 1,
-    //    &HoleFusion::pointCloudCallback, this);
+    pointCloudSubscriber_= nodeHandle_.subscribe(
+        pointCloudTopic_, 1,
+        &HoleFusion::pointCloudCallback, this);
 
 
     // The dynamic reconfigure server for debugging parameters
@@ -276,7 +276,7 @@ namespace pandora_vision
     // If the RGB candidate holes and the RGB image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 2)
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
@@ -411,7 +411,7 @@ namespace pandora_vision
     // If the depth candidate holes and the interpolated depth image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 2)
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
@@ -955,7 +955,7 @@ namespace pandora_vision
     // If the depth and RGB candidate holes, the interpolated depth image
     // and the RGB image are set,
     // unlock the synchronizer and process the candidate holes from all sources
-    if (numNodesReady_ == 2)
+    if (numNodesReady_ == 3)
     {
       numNodesReady_ = 0;
 
