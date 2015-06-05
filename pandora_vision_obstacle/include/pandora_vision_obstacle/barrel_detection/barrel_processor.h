@@ -43,14 +43,14 @@
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/images_stamped.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_poi.h"
+#include "pandora_vision_obstacle/obstacle_poi.h"
 
 namespace pandora_vision
 {
   class BarrelProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
   {
     public:
-      typedef boost::shared_ptr<BarrelPOI> BarrelPOIPtr;
+      typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
 
       BarrelProcessor(const std::string& ns, sensor_processor::Handler* handler);
       BarrelProcessor();

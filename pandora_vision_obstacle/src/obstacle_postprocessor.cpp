@@ -36,41 +36,53 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_preprocessor.h"
+#include "pandora_common_msgs/GeneralAlertVector.h"
+#include "pandora_vision_obstacle/obstacle_poi.h"
+#include "pandora_vision_obstacle/obstacle_postprocessor.h"
 
 namespace pandora_vision
 {
-  BarrelPreProcessor::BarrelPreProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-    ImagesStamped>(ns, handler)
+  ObstaclePostProcessor::ObstaclePostProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : VisionPostProcessor<
+    pandora_vision_msgs::ObstacleAlertVector>(ns, handler)
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
+    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
+        this->accessProcessorNh()->getNamespace());
   }
-  
-  BarrelPreProcessor::~BarrelPreProcessor() {}
 
-  bool BarrelPreProcessor::preProcess(const PointCloud2ConstPtr& input,
-    const ImagesStampedPtr& output)
+  ObstaclePostProcessor::~ObstaclePostProcessor() {}
+
+  bool ObstaclePostProcessor::postProcess(const POIsStampedConstPtr& input,
+    const ObstacleAlertVectorPtr& output)
   {
-    output->setHeader(input->header);
+    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
+    output->header = alertVector.header;
 
-    PointCloudPtr pointCloud(new PointCloud);
-    pcl::fromROSMsg<pcl::PointXYZRGB>(*input, *pointCloud);
-
-    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_8UC3));
-    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_32FC1));
-
-    if (output->rgbImage.empty() || output->depthImage.empty())
+    for (int ii = 0; ii < alertVector.generalAlerts.size(); ii++)
     {
-      ROS_ERROR("[Node] No more Frames or something went wrong with bag file");
-      // ros::shutdown();
+      pandora_vision_msgs::ObstacleAlert obstacleAlert;
+
+      obstacleAlert.info.yaw = alertVector.generalAlerts[ii].yaw;
+      obstacleAlert.info.pitch = alertVector.generalAlerts[ii].pitch;
+      obstacleAlert.info.probability = 1;
+
+      boost::shared_ptr<ObstaclePOI> obstaclePOI(boost::dynamic_pointer_cast<ObstaclePOI>(
+        input->pois[ii]));
+      obstacleAlert.tag = obstaclePOI->getTag();
+      obstacleAlert.depth = obstaclePOI->getDepth();
+      
+      obstacleAlert.roi.center.x = obstaclePOI->getPoint().x;
+      obstacleAlert.roi.center.y = obstaclePOI->getPoint().y;
+      obstacleAlert.roi.width = obstaclePOI->getWidth();
+      obstacleAlert.roi.height = obstaclePOI->getHeight();
+
+      output->obstacleAlerts.push_back(obstacleAlert);
+    }
+    
+    if (output->obstacleAlerts.empty())
+    {
       return false;
     }
     return true;
   }
-
 }  // namespace pandora_vision

@@ -36,28 +36,27 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POSTPROCESSOR_H
-#define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POSTPROCESSOR_H
+#ifndef PANDORA_VISION_OBSTACLE_OBSTACLE_POSTPROCESSOR_H
+#define PANDORA_VISION_OBSTACLE_OBSTACLE_POSTPROCESSOR_H
 
 #include <string>
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_msgs/ObstacleAlertVector.h"
 #include "pandora_vision_common/pandora_vision_interface/vision_postprocessor.h"
-#include "pandora_vision_obstacle/barrel_detection/barrel_poi.h"
 
 namespace pandora_vision
 {
-  class BarrelPostProcessor : public VisionPostProcessor<pandora_vision_msgs::ObstacleAlertVector>
+  class ObstaclePostProcessor : public VisionPostProcessor<pandora_vision_msgs::ObstacleAlertVector>
   {
     public:
       typedef boost::shared_ptr<pandora_vision_msgs::ObstacleAlertVector> ObstacleAlertVectorPtr;
 
-      BarrelPostProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~BarrelPostProcessor();
+      ObstaclePostProcessor(const std::string& ns, sensor_processor::Handler* handler);
+      virtual ~ObstaclePostProcessor();
 
     virtual bool
       postProcess(const POIsStampedConstPtr& input, const ObstacleAlertVectorPtr& output);
   };
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POSTPROCESSOR_H
+#endif  // PANDORA_VISION_OBSTACLE_OBSTACLE_POSTPROCESSOR_H

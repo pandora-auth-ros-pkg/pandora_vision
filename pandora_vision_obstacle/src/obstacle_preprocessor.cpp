@@ -36,42 +36,42 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POI_H
-#define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POI_H
-
-#include <string>
-#include "pandora_vision_common/bbox_poi.h"
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
+#include "pandora_vision_obstacle/obstacle_preprocessor.h"
 
 namespace pandora_vision
 {
-  class BarrelPOI : public BBoxPOI
+  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns, 
+    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
+    ImagesStamped>(ns, handler)
   {
-    public:
-      virtual ~BarrelPOI() {}
+    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
+      this->accessProcessorNh()->getNamespace());
+  }
+  
+  ObstaclePreProcessor::~ObstaclePreProcessor() {}
 
-    public:
-      std::string tag;
-      float depthDistance;
+  bool ObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
+    const ImagesStampedPtr& output)
+  {
+    output->setHeader(input->header);
 
-    public:
-      void setTag(const std::string& tagArg)
-      {
-        tag = tagArg;
-      }
-      std::string getTag() const
-      {
-        return tag;
-      }
-      
-      void setDepth(float distance)
-      {
-        depthDistance = distance;
-      }
-      float getDepth() const
-      {
-        return depthDistance;
-      }
-  };
+    PointCloudPtr pointCloud(new PointCloud);
+    pcl::fromROSMsg<pcl::PointXYZRGB>(*input, *pointCloud);
+
+    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_8UC3));
+    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(pointCloud,
+      CV_32FC1));
+
+    if (output->rgbImage.empty() || output->depthImage.empty())
+    {
+      ROS_ERROR("[Node] No more Frames or something went wrong with bag file");
+      // ros::shutdown();
+      return false;
+    }
+    return true;
+  }
+
 }  // namespace pandora_vision
-
-#endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_POI_H
