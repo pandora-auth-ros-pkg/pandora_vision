@@ -70,6 +70,25 @@ target_link_libraries(${PROJECT_NAME}_barrel_handler
   ${PROJECT_NAME}_barrel_processor
 )
 
+############################### soft obstacle processor ##############################
+add_library(${PROJECT_NAME}_soft_obstacle_processor
+  src/soft_obstacle_detection/soft_obstacle_processor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_soft_obstacle_processor
+  ${catkin_LIBRARIES}
+)
+
+############################### soft obstacle handler ##############################
+add_library(${PROJECT_NAME}_soft_obstacle_handler
+  src/soft_obstacle_detection/soft_obstacle_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_soft_obstacle_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_obstacle_preprocessor
+  ${PROJECT_NAME}_obstacle_postprocessor
+  ${PROJECT_NAME}_soft_obstacle_processor
+)
+
 ############################ barrel node ###############################
 add_executable(${PROJECT_NAME}_barrel_node
   src/barrel_detection/barrel_node.cpp
@@ -83,6 +102,18 @@ target_link_libraries(${PROJECT_NAME}_barrel_node
   ${PROJECT_NAME}_barrel_handler
 )
 
+############################ soft obstacle node ###############################
+add_executable(${PROJECT_NAME}_soft_obstacle_node
+  src/soft_obstacle_detection/soft_obstacle_node.cpp
+)
+add_dependencies(${PROJECT_NAME}_soft_obstacle_node
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_soft_obstacle_node 
+  ${catkin_LIBRARIES} 
+  ${PROJECT_NAME}_soft_obstacle_handler
+)
 
 #~ To check lint : catkin_make roslint_pandora_vision_obstacle
 set(ROSLINT_CPP_OPTS
