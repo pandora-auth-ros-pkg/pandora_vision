@@ -191,7 +191,7 @@ namespace pandora_vision
     // Read the name of the topic from where the synchronizer node acquires the
     // input synchronized thermal and pointcloud info
     if (nodeHandle_.getParam(
-        ns + "/synchronizer_node/published_topics/synchronized_topic",
+        ns + "/synchronizer_node/subscribed_topics/synchronized_topic",
         inputSynchronizedTopic_ ))
     {
       // Make the topic's name absolute

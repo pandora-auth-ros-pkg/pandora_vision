@@ -3,6 +3,7 @@ subscribed_topics:
   input_topic: /kinect/depth_registered/points
   input_thermal_topic: /flir_raspberry/image
   # Topics in synchronizer node
+  synchronized_topic: synchronized/message/info
   unlock_topic: unlock_rgb_depth_synchronizer
   subscribe_to_input: subscribe_to_input
   leave_subscription_to_input: leave_subscription_to_input
