@@ -1,7 +1,7 @@
 subscribed_topics:
   # Topics in Rgbd-T synchronizer node
   input_topic: /kinect/depth_registered/points
-  input_thermal_topic: /flir_raspberry/image
+  input_thermal_topic: /flir_lepton/fused_msg
   # Topics in synchronizer node
   synchronized_topic: synchronized/message/info
   unlock_topic: unlock_rgb_depth_synchronizer
