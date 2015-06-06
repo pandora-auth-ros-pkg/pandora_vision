@@ -322,8 +322,7 @@ namespace pandora_vision
     // Unpack the message
     MessageConversions::unpackMessage(thermalCandidateHolesVector,
       &thermalHolesConveyor_,
-      &thermalImage_,
-      Parameters::Image::image_representation_method,
+      &thermalImage_, 0,
       sensor_msgs::image_encodings::TYPE_8UC1,
       Parameters::Outline::raycast_keypoint_partitions);
 
@@ -406,7 +405,6 @@ namespace pandora_vision
       &inflatedRectanglesIndices,
       &intermediatePointsImageVector,
       &intermediatePointsSetVector);
-
 
     // Initialize the probabilities 2D vector.
 
@@ -497,7 +495,6 @@ namespace pandora_vision
       ROS_ERROR_NAMED(PKG_NAME,
         "[Hole Fusion node] Pre filtering process failure");
     }
-
 
     // The 2D vector that contains the probabilities from the rgb filtering
     // regime.
@@ -1483,7 +1480,6 @@ namespace pandora_vision
       HolesConveyorUtils::copyTo(rgbdHolesConveyor, &preValidatedHoles);
     }
 
-
     // Because mergers may have not been deemed valid, the preValidatedHoles
     // container may include duplicate holes. Delete them, so that resources
     // are not generated for them, and time is not wastefully consumed.
@@ -1844,28 +1840,16 @@ namespace pandora_vision
         -1,
         msgs);
 
-    // Holes originated from analysis on the thermal image,
-    // on top of the thermal image
-    cv::Mat thermalHolesOnThermalImage =
-      Visualization::showHoles(
-        "Holes originated from Thermal analysis, on the Thermal image",
-        thermalImage_,
-        thermalHolesConveyor_,
-        -1,
-        msgs);
-
     // The four images
     std::vector<cv::Mat> imgs;
     imgs.push_back(depthHolesOnDepthImage);
     imgs.push_back(rgbHolesOnRgbImage);
-    imgs.push_back(thermalHolesOnThermalImage);
 
     // The titles of the images
     std::vector<std::string> titles;
 
     titles.push_back("Holes originated from Depth analysis, on the Depth image");
     titles.push_back("Holes originated from RGB analysis, on the RGB image");
-    titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
 
     cv::Mat respectiveHolesImage =
       Visualization::multipleShow("Respective keypoints",

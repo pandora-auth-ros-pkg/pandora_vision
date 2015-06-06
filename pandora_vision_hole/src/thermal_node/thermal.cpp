@@ -147,6 +147,11 @@ namespace pandora_vision
     //  Rgb and Depth images
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_);
 
+    // Resize the thermal image to match the rgb-d images, of course the thermal
+    // image will not be further processed.
+    cv::resize(thermalImage, thermalImage, cvSize(
+        Parameters::Image::WIDTH, Parameters::Image::HEIGHT));
+
     // Create the candidate holes message
     pandora_vision_hole::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
@@ -184,7 +189,7 @@ namespace pandora_vision
     // Finally find the yaw and pitch of each candidate hole found and
     // send it to data fusion if a hole exists. The message to be sent is 
     // ThermalAlertsVectorMsg type.
-    if(holes.size() > 0)
+    if(holes.size() > 20)
     {
       // Fill the thermal message to be sent
       pandora_vision_msgs::ThermalAlertsVectorMsg thermalMsg;
