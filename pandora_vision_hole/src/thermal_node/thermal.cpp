@@ -382,7 +382,7 @@ namespace pandora_vision
       }      
 
       // Fill the average temperature vector
-      averageTemperature->at(i) = average;
+      averageTemperature->push_back(average);
 
       // Apply gaussian function on the average temperature found
       if(method == 0)
