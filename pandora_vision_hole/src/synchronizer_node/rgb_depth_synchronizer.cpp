@@ -546,12 +546,15 @@ namespace pandora_vision
       thermalMsg.header.stamp = synchronizedMessage.header.stamp;
       thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
       thermalMsg.temperatures = synchronizedMessage.temperatures;
-
       // Fill the header of the thermal image
       thermalMsg.thermalImage.header.stamp = 
         synchronizedMessage.thermalInfo.header.stamp;
 
       thermalMsg.thermalIndex = thermalIndex;
+      thermalMsg.thermalImage.encoding = "mono8";
+      thermalMsg.thermalImage.height = 60;
+      thermalMsg.thermalImage.width = 80;
+      thermalMsg.thermalImage.step = 80 * sizeof(uint8_t);
 
       // Publish the synchronized thermal message to thermal node
       synchronizedThermalImagePublisher_.publish(thermalMsg);
