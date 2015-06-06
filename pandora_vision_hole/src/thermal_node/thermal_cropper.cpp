@@ -71,7 +71,7 @@ namespace pandora_vision
     // Advertise empty message to synchronizer node so the thermal process
     // circle will start again
     unlockThermalProcedurePublisher_ = nodeHandle_.advertise
-      <std_msgs::Empty>(unlockThermalProcedureTopic_, 1000);
+      <std_msgs::Empty>(unlockThermalProcedureTopic_, 1000, true);
 
     // When the node starts from launch file dictates thermal procedure to start
     unlockThermalProcedure();

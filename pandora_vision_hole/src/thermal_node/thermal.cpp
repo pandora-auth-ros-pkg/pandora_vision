@@ -138,7 +138,7 @@ namespace pandora_vision
     std::vector<float> holesProbability;
     std::vector<float> averageTemperature;
       
-    //////////////////////////////////////////////////////////////////////
+    // Find the probability of each point of interest
     findHolesProbability(
       holes, msg.temperatures, &holesProbability, &averageTemperature, 
       Parameters::Thermal::probability_method);
