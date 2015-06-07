@@ -42,6 +42,7 @@
 #include "utils/outline_discovery.h"
 #include "utils/holes_conveyor.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
+#include "std_msgs/Float32MultiArray.h"
 
 /**
   @namespace pandora_vision
@@ -196,6 +197,16 @@ namespace pandora_vision
         const std::string& encoding,
         const int& raycastKeypointPartitions);
 
+      /**
+       @brief Convert the temperature data which is 
+       in std_msgs::Float32MultiArray format to cv::Mat. Its cv format 
+       will be CV_8UC1.
+       @param[in] msg [const std_msgs::Float32MultiArray&] 
+       The temperature data MultiArray
+       @return cv::Mat
+       **/
+      static cv::Mat convertTemperatureToMat(
+        const std_msgs::Float32MultiArray& temperatures);
   };
 
 } // namespace pandora_vision

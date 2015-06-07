@@ -48,6 +48,7 @@
 #include "thermal_node/temperatures_parameters.h"
 #include "utils/blob_detection.h"
 #include "distrib_msgs/flirLeptonMsg.h"
+#include "utils/message_conversions.h"
 
 
 /**
@@ -124,17 +125,6 @@ namespace pandora_vision
       void parametersCallback(
         const pandora_vision_hole::temperatures_cfgConfig& config,
         const uint32_t& level);
-
-      /**
-       @brief Convert the temperature data which is 
-       in std_msgs::Float32MultiArray format to cv::Mat. Its cv format 
-       will be CV_8UC1.
-       @param[in] msg [const std_msgs::Float32MultiArray&] 
-       The temperature data MultiArray
-       @return cv::Mat
-       **/
-      cv::Mat convertTemperatureToMat(
-        const std_msgs::Float32MultiArray& temperatures);
 
     public:
 
