@@ -44,7 +44,7 @@
 #include "pandora_vision_common/pandora_vision_utilities/wavelets.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "pandora_vision_hole/depth_cfgConfig.h"
-#include "hole_message_conversions.h"
+#include "utils/hole_message_conversions.h"
 #include "depth_node/hole_detector.h"
 
 /**

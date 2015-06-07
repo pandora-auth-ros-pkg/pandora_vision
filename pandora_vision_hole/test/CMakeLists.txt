@@ -11,7 +11,7 @@ ${catkin_INCLUDE_DIRS})
 ###############################  Unit Tests ####################################
 
 catkin_add_gtest(hole_message_conversions_test
-  unit/hole_message_conversions_test.cpp)
+  unit/utils/hole_message_conversions_test.cpp)
 target_link_libraries(hole_message_conversions_test
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_utils

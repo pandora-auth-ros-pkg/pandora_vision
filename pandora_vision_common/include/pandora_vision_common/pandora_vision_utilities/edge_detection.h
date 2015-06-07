@@ -85,6 +85,7 @@ namespace pandora_vision
   class EdgeDetection
   {
     public:
+
       /**
         @brief Applies the Canny edge detector
         @param[in] inImage [const cv::Mat&] Input image in CV_8U depth
@@ -145,6 +146,24 @@ namespace pandora_vision
       static void computeDepthEdges(const cv::Mat& inImage, cv::Mat* edges);
 
       /**
+        @brief Takes as input a thermal image containing unsigned chars,
+        locates the edges in it and tries to clear as much noise as possible
+        in the edges image. As noise we identify everything that is not,
+        or does not look like, hole-like shapes,
+        with the knowledge that these shapes might be open curves, or that
+        holes-like shapes in an image of edges are not connected to
+        anything else, ergo they are standalone shapes in it.
+        It outputs a binary image that contains areas that we wish to validate
+        as holes.
+        @param[in] inImage [const cv::Mat&] The thermal image extracted from the
+        thermal camera, of type CV_8UC1
+        @param[out] edges [cv::Mat*] The final denoised edges image that
+        corresponds to the input image
+        @return void
+       **/
+      static void computeThermalEdges(const cv::Mat& inImage, cv::Mat* edges);
+
+      /**
         @brief Takes as input a RGB image of type CV_8UC3,
         locates the edges in it and tries to clear as much noise as possible
         in the edges image. As noise we identify everything that is not,
@@ -190,7 +209,6 @@ namespace pandora_vision
         @brief Takes an input image of edges of CV_8U depth
         and tries to isolate hole-like shapes so as to facilitate
         the blob detection process.
-
         The execution flow is as follows: first, all pixels connected
         directly or indirectly to the image's borders are eliminated,
         leaving behind all standalone shapes and curves.

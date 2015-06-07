@@ -83,6 +83,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Applies the Scharr edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
@@ -136,6 +138,8 @@ namespace pandora_vision
     Timer::tick("applyScharr");
     #endif
   }
+
+
 
   /**
     @brief Applies the Sobel edge transform
@@ -191,6 +195,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Applies the Laplacian edge transform
     @param[in] inImage [const cv::Mat&] Input image in CV_8UC1 format
@@ -230,6 +236,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Applies contamination to an image of edges.
     It keeps only the edges that are not iteratively neighbors
@@ -248,28 +256,28 @@ namespace pandora_vision
     std::set<unsigned int> current, next, visited;
 
     // Make the vertical borders of the image black
-    for (unsigned int i = 0 ; i < rows ; i++)
+    for(unsigned int i = 0 ; i < rows ; i++)
     {
       inImage->data[i * inImage->cols] = 0;
       inImage->data[i * inImage->cols + cols - 1] = 0;
     }
 
     // Make the horizontal borders of the image black
-    for (unsigned int j = 0 ; j < cols ; j++)
+    for(unsigned int j = 0 ; j < cols ; j++)
     {
       inImage->data[j] = 0;
       inImage->data[(rows - 1) * inImage->cols + j] = 0;
     }
 
     // Vertically, find the outer white borders
-    for (unsigned int i = 1 ; i < rows - 1 ; i++)
+    for(unsigned int i = 1 ; i < rows - 1 ; i++)
     {
-      if (inImage->data[i * inImage->cols + 1] > 0)
+      if(inImage->data[i * inImage->cols + 1] > 0)
       {
         current.insert(i * cols + 1);
         inImage->data[i * inImage->cols + 1] = 0;
       }
-      if (inImage->data[i * inImage->cols + cols - 2] > 0)
+      if(inImage->data[i * inImage->cols + cols - 2] > 0)
       {
         current.insert(i * cols + cols - 2);
         inImage->data[i * inImage->cols + cols - 2] = 0;
@@ -277,15 +285,15 @@ namespace pandora_vision
     }
 
     // Horizontally, find the outer white borders
-    for (unsigned int j = 1 ; j < cols - 1 ; j++)
+    for(unsigned int j = 1 ; j < cols - 1 ; j++)
     {
-      if (inImage->data[1 * inImage->cols + j] > 0)
+      if(inImage->data[1 * inImage->cols + j] > 0)
       {
         current.insert(1 * cols + j);
         inImage->data[1 * inImage->cols + j] = 0;
       }
 
-      if (inImage->data[(rows - 2) * inImage->cols + j] > 0)
+      if(inImage->data[(rows - 2) * inImage->cols + j] > 0)
       {
         current.insert((rows - 2) * cols + j);
         inImage->data[(rows - 2) * inImage->cols + j] = 0;
@@ -295,57 +303,57 @@ namespace pandora_vision
     // Iterative contamination.
     // Find all the pixels that are iteratively neighboring non-zero value
     // pixels that lie next to the borders of the image
-    while (current.size() != 0)
+    while(current.size() != 0)
     {
-      for (std::set<unsigned int>::iterator i = current.begin() ;
+      for(std::set<unsigned int>::iterator i = current.begin() ;
         i != current.end() ; i++)
       {
         int x = *i / cols;
         int y = *i % cols;
 
-        if (inImage->data[(x - 1) * inImage->cols + y - 1] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y - 1] != 0)
         {
           next.insert((x - 1) * cols + y - 1);
           inImage->data[(x - 1) * inImage->cols + y - 1] = 0;
         }
 
-        if (inImage->data[(x - 1) * inImage->cols + y] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y] != 0)
         {
           next.insert((x - 1) * cols + y);
           inImage->data[(x - 1) * inImage->cols + y] = 0;
         }
 
-        if (inImage->data[(x - 1) * inImage->cols + y + 1] != 0)
+        if(inImage->data[(x - 1) * inImage->cols + y + 1] != 0)
         {
           next.insert((x - 1) * cols + y + 1);
           inImage->data[(x - 1) * inImage->cols + y + 1] = 0;
         }
 
-        if (inImage->data[x * inImage->cols + y + 1] != 0)
+        if(inImage->data[x * inImage->cols + y + 1] != 0)
         {
           next.insert(x * cols + y + 1);
           inImage->data[x * inImage->cols + y + 1] = 0;
         }
 
-        if (inImage->data[x * inImage->cols + y - 1] != 0)
+        if(inImage->data[x * inImage->cols + y - 1] != 0)
         {
           next.insert(x * cols + y - 1);
           inImage->data[x * inImage->cols + y - 1] = 0;
         }
 
-        if (inImage->data[(x + 1) * inImage->cols + y - 1] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y - 1] != 0)
         {
           next.insert((x + 1) * cols + y - 1);
           inImage->data[(x + 1) * inImage->cols + y - 1] = 0;
         }
 
-        if (inImage->data[(x + 1) * inImage->cols + y] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y] != 0)
         {
           next.insert((x + 1) * cols + y);
           inImage->data[(x + 1) * inImage->cols + y] = 0;
         }
 
-        if (inImage->data[(x + 1) * inImage->cols + y + 1] != 0)
+        if(inImage->data[(x + 1) * inImage->cols + y + 1] != 0)
         {
           next.insert((x + 1) * cols + y + 1);
           inImage->data[(x + 1) * inImage->cols + y + 1] = 0;
@@ -359,6 +367,8 @@ namespace pandora_vision
     Timer::tick("applyEdgeContamination");
     #endif
   }
+
+
 
   /**
     @brief Takes as input a depth image containing floats,
@@ -395,6 +405,65 @@ namespace pandora_vision
       inImage, Parameters::Image::scale_method);
 
     // The image of edges of the denoised depth image, in CV_32FC1 format
+    cv::Mat denoisedDepthImageEdges;
+
+    // Detect edges in the visualizableDepthImage
+    detectEdges(visualizableDepthImage, &denoisedDepthImageEdges,
+      Parameters::Edge::edge_detection_method);
+
+    // Apply a threshold to the image of edges
+    // to get rid of low value - insignificant - edges
+    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
+      Parameters::Edge::denoised_edges_threshold, 255, 3);
+
+    // Make all non zero pixels have a value of 255
+    cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges, 0, 255,
+      cv::THRESH_BINARY);
+
+    // Denoise the edges found
+    denoisedDepthImageEdges.copyTo(*edges);
+    denoiseEdges(edges);
+
+    #ifdef DEBUG_TIME
+    Timer::tick("computeEdges");
+    #endif
+  }
+
+  /**
+    @brief Takes as input a thermal image containing unsigned chars,
+    locates the edges in it and tries to clear as much noise as possible
+    in the edges image. As noise we identify everything that is not,
+    or does not look like, hole-like shapes,
+    with the knowledge that these shapes might be open curves, or that
+    holes-like shapes in an image of edges are not connected to
+    anything else, ergo they are standalone shapes in it.
+    It outputs a binary image that contains areas that we wish to validate
+    as holes.
+    @param[in] inImage [const cv::Mat&] The thermal image extracted from the
+    thermal camera, of type CV_8UC1
+    @param[out] edges [cv::Mat*] The final denoised edges image that
+    corresponds to the input image
+    @return void
+   **/
+  void EdgeDetection::computeThermalEdges(const cv::Mat& inImage, cv::Mat* edges)
+  {
+    if (inImage.type() != CV_8UC1)
+    {
+      ROS_ERROR_NAMED(ros::this_node::getName(),
+        "EdgeDetection::computeEdges : Inappropriate thermal image type.");
+
+      return;
+    }
+
+    #ifdef DEBUG_TIME
+    Timer::start("computeEdges", "findHoles");
+    #endif
+
+    // The input thermal image, in CV_8UC1 format
+    cv::Mat visualizableDepthImage = Visualization::scaleImageForVisualization(
+      inImage, Parameters::Image::scale_method);
+
+    // The image of edges of the denoised thermal image, in CV_8UC1 format
     cv::Mat denoisedDepthImageEdges;
 
     // Detect edges in the visualizableDepthImage
@@ -484,6 +553,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Connects each point of a number of pair of points with a line
     or an elliptic arc
@@ -511,7 +582,7 @@ namespace pandora_vision
     #ifdef DEBUG_SHOW
     std::vector<cv::Mat> imgs;
     std::vector<std::string> msgs;
-    if (Parameters::Debug::show_connect_pairs) // Debug
+    if(Parameters::Debug::show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection before";
@@ -587,7 +658,7 @@ namespace pandora_vision
         bool inLimitsOne = true;
         bool inLimitsTwo = true;
 
-        while (!foundOutlinePoint)
+        while(!foundOutlinePoint)
         {
           counter++;
 
@@ -829,7 +900,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_connect_pairs) // Debug
+    if(Parameters::Debug::show_connect_pairs) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Connection after";
@@ -838,18 +909,19 @@ namespace pandora_vision
       inImage->copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if (Parameters::Debug::show_connect_pairs)  // Debug
+    if(Parameters::Debug::show_connect_pairs) // Debug
     {
       Visualization::multipleShow("connectPairs function", imgs, msgs, 1200, 1);
     }
     #endif
   }
 
+
+
   /**
     @brief Takes an input image of edges of CV_8U depth
     and tries to isolate hole-like shapes so as to facilitate
     the blob detection process.
-
     The execution flow is as follows: first, all pixels connected
     directly or indirectly to the image's borders are eliminated,
     leaving behind all standalone shapes and curves.
@@ -897,7 +969,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Initial Edges";
@@ -924,7 +996,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After edge contamination";
@@ -936,12 +1008,12 @@ namespace pandora_vision
     #endif
 
     // Eliminate closed shapes
-    for (unsigned int i = 0 ; i < img->rows ; i++)
+    for(unsigned int i = 0 ; i < img->rows ; i++)
     {
       contaminatedEdges.at<unsigned char>(i, 0) = 0;
       contaminatedEdges.at<unsigned char>(i, img->cols - 1) = 0;
     }
-    for (unsigned int i = 0 ; i < img->cols ; i++)
+    for(unsigned int i = 0 ; i < img->cols ; i++)
     {
       contaminatedEdges.at<unsigned char>(0, i) = 0;
       contaminatedEdges.at<unsigned char>(img->rows - 1, i) = 0;
@@ -954,7 +1026,7 @@ namespace pandora_vision
     Morphology::thinning(contaminatedEdges, &thinnedImage, 100);
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After thinning";
@@ -974,7 +1046,7 @@ namespace pandora_vision
     Morphology::pruningStrictIterative(&thinnedClosedLines, 1000);
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After pruning";
@@ -998,7 +1070,7 @@ namespace pandora_vision
 
     bool finished = false;
 
-    while (!finished)
+    while(!finished)
     {
       cv::Mat marker;
       closedLines.copyTo(marker);
@@ -1034,7 +1106,7 @@ namespace pandora_vision
     }
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : The origninal closed shapes";
@@ -1046,7 +1118,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : Without closed shapes";
@@ -1076,9 +1148,9 @@ namespace pandora_vision
 
     // Because the thinnedOpenLines image was wiped clean via the execution
     // of the identifyCurvesAndEndpoints method, re-paint the lines found on it
-    for (unsigned int i = 0 ; i < lines.size() ; i++)
+    for(unsigned int i = 0 ; i < lines.size() ; i++)
     {
-      for (std::set<unsigned int>::iterator it = lines[i].begin() ;
+      for(std::set<unsigned int>::iterator it = lines[i].begin() ;
         it != lines[i].end() ; it++)
       {
         thinnedOpenLines.data[*it] = 255;
@@ -1102,7 +1174,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After connection of distant edges";
@@ -1117,7 +1189,7 @@ namespace pandora_vision
     *img = thinnedOpenLines + closedLines;
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After re-insertion of closed shapes";
@@ -1136,7 +1208,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       std::string msg = LPATH( STR(__FILE__)) + STR(" ") + TOSTR(__LINE__);
       msg += " : After clear borders";
@@ -1145,7 +1217,7 @@ namespace pandora_vision
       img->copyTo(tmp);
       imgs.push_back(tmp);
     }
-    if (Parameters::Debug::show_denoise_edges) // Debug
+    if(Parameters::Debug::show_denoise_edges) // Debug
     {
       Visualization::multipleShow("denoiseEdges function", imgs, msgs,
         Parameters::Debug::show_denoise_edges_size, 1);
@@ -1156,6 +1228,8 @@ namespace pandora_vision
     Timer::tick("denoiseEdges");
     #endif
   }
+
+
 
   /**
     @brief Detects edges depending on a edge detection selection method.
@@ -1209,6 +1283,8 @@ namespace pandora_vision
     }
   }
 
+
+
   /**
     @brief Fills an image with random colours per image segment
     @param[in,out] image [cv::Mat*] The image to be processed
@@ -1258,6 +1334,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Identifies in which curve a point lies on and returns the
     curve's two end-points.
@@ -1289,18 +1367,18 @@ namespace pandora_vision
     nodes.push_back(father);
     father->dist = 0;
     unsigned int stepCounter = 0;
-    while (current.size() != 0)
+    while(current.size() != 0)
     {
       next.clear();
       originNext.clear();
-      for (unsigned int i = 0 ; i < current.size() ; i++)
+      for(unsigned int i = 0 ; i < current.size() ; i++)
       {
         std::vector<unsigned int> currNext;
         int x = current[i] / img->cols;
         int y = current[i] % img->cols;
         img->at<unsigned char>(x, y) = 0;
         unsigned int counter = 0;
-        if (img->at<unsigned char>(x - 1, y - 1) != 0 &&
+        if(img->at<unsigned char>(x - 1, y - 1) != 0 &&
           currs.find((x-1) * img->cols + y - 1) == currs.end() &&
           ret->find((x-1) * img->cols + y - 1) == ret->end())
         {
@@ -1310,7 +1388,7 @@ namespace pandora_vision
           ret->insert((x-1) * img->cols + y - 1);
           counter++;
         }
-        if (img->at<unsigned char>(x - 1, y) != 0 &&
+        if(img->at<unsigned char>(x - 1, y) != 0 &&
           currs.find((x-1) * img->cols + y) == currs.end() &&
           ret->find((x-1) * img->cols + y) == ret->end())
         {
@@ -1320,7 +1398,7 @@ namespace pandora_vision
           ret->insert((x-1) * img->cols + y);
           counter++;
         }
-        if (img->at<unsigned char>(x - 1, y + 1) != 0 &&
+        if(img->at<unsigned char>(x - 1, y + 1) != 0 &&
           currs.find((x-1) * img->cols + y + 1) == currs.end() &&
           ret->find((x-1) * img->cols + y + 1) == ret->end())
         {
@@ -1331,7 +1409,7 @@ namespace pandora_vision
           counter++;
         }
 
-        if (img->at<unsigned char>(x, y - 1) != 0 &&
+        if(img->at<unsigned char>(x, y - 1) != 0 &&
           currs.find((x) * img->cols + y - 1) == currs.end() &&
           ret->find((x) * img->cols + y - 1) == ret->end())
         {
@@ -1341,7 +1419,7 @@ namespace pandora_vision
           ret->insert((x) * img->cols + y - 1);
           counter++;
         }
-        if (img->at<unsigned char>(x, y + 1) != 0 &&
+        if(img->at<unsigned char>(x, y + 1) != 0 &&
           currs.find((x) * img->cols + y + 1) == currs.end() &&
           ret->find((x) * img->cols + y + 1) == ret->end())
         {
@@ -1352,7 +1430,7 @@ namespace pandora_vision
           counter++;
         }
 
-        if (img->at<unsigned char>(x + 1, y - 1) != 0 &&
+        if(img->at<unsigned char>(x + 1, y - 1) != 0 &&
           currs.find((x+1) * img->cols + y - 1) == currs.end() &&
           ret->find((x+1) * img->cols + y - 1) == ret->end())
         {
@@ -1362,7 +1440,7 @@ namespace pandora_vision
           ret->insert((x+1) * img->cols + y - 1);
           counter++;
         }
-        if (img->at<unsigned char>(x + 1, y) != 0 &&
+        if(img->at<unsigned char>(x + 1, y) != 0 &&
           currs.find((x+1) * img->cols + y) == currs.end() &&
           ret->find((x+1) * img->cols + y) == ret->end())
         {
@@ -1372,7 +1450,7 @@ namespace pandora_vision
           ret->insert((x+1) * img->cols + y);
           counter++;
         }
-        if (img->at<unsigned char>(x + 1, y + 1) != 0 &&
+        if(img->at<unsigned char>(x + 1, y + 1) != 0 &&
           currs.find((x+1) * img->cols + y + 1) == currs.end() &&
           ret->find((x+1) * img->cols + y + 1) == ret->end())
         {
@@ -1383,7 +1461,7 @@ namespace pandora_vision
           counter++;
         }
 
-        if (counter == 0)  // This is edge
+        if(counter == 0)  // This is edge
         {
           GraphNode* temp = new GraphNode(x, y);
           nodes.push_back(temp);
@@ -1396,7 +1474,7 @@ namespace pandora_vision
           originCurr[i]->dists.push_back(temp->dist);
           temp->dists.push_back(temp->dist);
         }
-        else if (counter >= 2) // This is joint
+        else if(counter >= 2) // This is joint
         {
           GraphNode* temp = new GraphNode(x, y);
           nodes.push_back(temp);
@@ -1405,7 +1483,7 @@ namespace pandora_vision
           temp->dist = stepCounter - originCurr[i]->dist;
           originCurr[i]->dists.push_back(temp->dist);
           temp->dists.push_back(temp->dist);
-          for (unsigned int j = 0 ; j < currNext.size() ; j++)
+          for(unsigned int j = 0 ; j < currNext.size() ; j++)
           {
             originNext[currNext[j]] = temp;
           }
@@ -1416,7 +1494,7 @@ namespace pandora_vision
       stepCounter++;
       current.swap(next);
       currs.clear();
-      for (unsigned int k = 0 ; k < current.size() ; k++)
+      for(unsigned int k = 0 ; k < current.size() ; k++)
       {
         currs.insert(current[k]);
       }
@@ -1428,7 +1506,7 @@ namespace pandora_vision
     // Find larger dist between nodes
     int maxDist = 0;
 
-    for (unsigned int i = 0 ; i < nodes.size(); i++)
+    for(unsigned int i = 0 ; i < nodes.size(); i++)
     {
       std::vector<GraphNode*> current, next;
       std::map<GraphNode*, int> dists;
@@ -1436,18 +1514,18 @@ namespace pandora_vision
 
       current.push_back(nodes[i]);
       visited.insert(nodes[i]);
-      for (unsigned int kk = 0 ; kk < nodes.size() ; kk++)
+      for(unsigned int kk = 0 ; kk < nodes.size() ; kk++)
       {
         dists.insert(std::pair<GraphNode*, int>(nodes[i], 0));
       }
-      while (current.size() != 0)
+      while(current.size() != 0)
       {
         next.clear();
-        for (unsigned int c = 0 ; c < current.size() ; c++)
+        for(unsigned int c = 0 ; c < current.size() ; c++)
         {
-          for (unsigned int n = 0 ; n < current[c]->connections.size(); n++)
+          for(unsigned int n = 0 ; n < current[c]->connections.size(); n++)
           {
-            if (visited.find(current[c]->connections[n]) == visited.end())
+            if(visited.find(current[c]->connections[n]) == visited.end())
             {
               visited.insert(current[c]->connections[n]);
               dists[current[c]->connections[n]] +=
@@ -1458,9 +1536,9 @@ namespace pandora_vision
         }
         current.swap(next);
       }
-      for (unsigned int d = 0 ; d < nodes.size(); d++)
+      for(unsigned int d = 0 ; d < nodes.size(); d++)
       {
-        if (dists[nodes[d]] > maxDist)
+        if(dists[nodes[d]] > maxDist)
         {
           maxDist = dists[nodes[d]];
           edgePoints.first.x = nodes[i]->x;
@@ -1472,7 +1550,7 @@ namespace pandora_vision
     }
 
     // Delete pointers inside nodes
-    for (unsigned int d = 0 ; d < nodes.size(); d++)
+    for(unsigned int d = 0 ; d < nodes.size(); d++)
     {
       delete nodes[d];
     }
@@ -1483,6 +1561,8 @@ namespace pandora_vision
 
     return edgePoints;
   }
+
+
 
   /**
     @brief Given an image of CV_8UC1 format, this method locates and
@@ -1507,16 +1587,16 @@ namespace pandora_vision
 
     bool hasFinished = false;
 
-    while (!hasFinished)
+    while(!hasFinished)
     {
       hasFinished = true;
-      for (unsigned int i = 1 ; i < image->rows - 1; i++)
+      for(unsigned int i = 1 ; i < image->rows - 1; i++)
       {
-        for (unsigned int j = 1 ; j < image->cols - 1; j++)
+        for(unsigned int j = 1 ; j < image->cols - 1; j++)
         {
           // A point is potentially located along a curve only if its value
           // is non-zero; otherwise it is not a point!
-          if (image->at<unsigned char> (i, j) != 0)
+          if(image->at<unsigned char> (i, j) != 0)
           {
             // Locate the indices of the points that constitute the curve on
             // which point (i, j) is located, along with the end points of it.
@@ -1524,7 +1604,7 @@ namespace pandora_vision
             std::pair<GraphNode, GraphNode> pts =
               identifyCurveAndEndpoints(image, i, j, &ret);
 
-            if (ret.size() > Parameters::Outline::minimum_curve_points)
+            if(ret.size() > Parameters::Outline::minimum_curve_points)
             {
               // Push the indices of the points constituting the curve on which
               // point (i, j) is located, into the overall curves' indices vector.
@@ -1540,7 +1620,7 @@ namespace pandora_vision
           }
         }
 
-        if (!hasFinished)
+        if(!hasFinished)
         {
           break;
         }
@@ -1551,6 +1631,8 @@ namespace pandora_vision
     Timer::tick("identifyCurvesAndEndpoints");
     #endif
   }
+
+
 
   /**
     @brief This method takes as input a RGB image and uses
@@ -1601,6 +1683,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief This method takes as input a RGB image, segments it,
     and extracts its edges.
@@ -1632,7 +1716,7 @@ namespace pandora_vision
     #endif
 
     #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_produce_edges)  // Debug
+    if(Parameters::Debug::show_produce_edges) // Debug
     {
       cv::Mat tmp;
       inImage.copyTo(tmp);
@@ -1730,6 +1814,8 @@ namespace pandora_vision
     #endif
   }
 
+
+
   /**
     @brief Segments a RGB image
     @param[in] inImage [const cv::Mat&] The RGB image to be segmented
@@ -1767,6 +1853,7 @@ namespace pandora_vision
       Timer::tick("segmentation");
       #endif
   }
+
 
   /**
     @brief Watersheds a RGB image based on its backprojection.

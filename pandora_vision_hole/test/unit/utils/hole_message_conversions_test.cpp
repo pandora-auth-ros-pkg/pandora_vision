@@ -36,7 +36,7 @@
  *********************************************************************/
 
 #include <math.h>
-#include "hole_message_conversions.h"
+#include "utils/hole_message_conversions.h"
 #include "gtest/gtest.h"
 
 namespace pandora_vision

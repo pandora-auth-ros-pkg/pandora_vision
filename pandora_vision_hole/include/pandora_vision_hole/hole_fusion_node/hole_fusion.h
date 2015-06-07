@@ -63,7 +63,7 @@
 #include "pandora_vision_hole/filters_thresholds_cfgConfig.h"
 #include "pandora_vision_hole/general_cfgConfig.h"
 #include "pandora_vision_hole/validity_cfgConfig.h"
-#include "hole_message_conversions.h"
+#include "utils/hole_message_conversions.h"
 #include "hole_fusion_node/depth_filters.h"
 #include "hole_fusion_node/filters.h"
 #include "hole_fusion_node/filters_resources.h"

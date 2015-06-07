@@ -66,6 +66,9 @@ namespace pandora_vision
   // Show the depth image that arrives in the depth node
   bool Parameters::Debug::show_depth_image = false;
 
+  // Show the thermal image that arrives in the thermal node
+  bool Parameters::Debug::show_thermal_image=false;
+
   // Show the rgb image that arrives in the rgb node
   bool Parameters::Debug::show_rgb_image = false;
 

@@ -41,7 +41,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "pandora_vision_hole/rgb_cfgConfig.h"
-#include "hole_message_conversions.h"
+#include "utils/hole_message_conversions.h"
 #include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
 #include "pandora_vision_common/pandora_vision_utilities/histogram.h"
 #include "pandora_vision_common/pandora_vision_utilities/parameters.h"

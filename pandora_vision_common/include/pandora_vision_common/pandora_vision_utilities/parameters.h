@@ -40,7 +40,6 @@
 
 #include "pandora_vision_common/pandora_vision_utilities/defines.h"
 
-/
 /**
   @namespace pandora_vision
   @brief The main namespace for PANDORA vision
@@ -81,6 +80,9 @@ namespace pandora_vision
 
       // Show the depth image that arrives in the depth node
       static bool show_depth_image;
+
+      //Show the thermal image that arrives in the thermal node
+      static bool show_thermal_image;
 
       // Show the rgb image that arrives in the rgb node
       static bool show_rgb_image;
