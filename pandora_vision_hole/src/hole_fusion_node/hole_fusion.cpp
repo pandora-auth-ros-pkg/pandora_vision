@@ -1403,7 +1403,7 @@ namespace pandora_vision
       // on top of the depth image
       cv::Mat thermalHolesOnDepthImage =
         Visualization::showHoles(
-          "Holes originated from Thermal analysis, on the Thermal image",
+          "Holes originated from Thermal analysis, on the Depth image",
           interpolatedDepthImage_,
           thermalHolesConveyor_,
           -1,
@@ -1413,8 +1413,18 @@ namespace pandora_vision
       // on top of the rgb image
       cv::Mat thermalHolesOnRgbImage =
         Visualization::showHoles(
-          "Holes originated from Thermal analysis, on the Thermal image",
+          "Holes originated from Thermal analysis, on the Rgb image",
           rgbImage_,
+          thermalHolesConveyor_,
+          -1,
+          msgs);
+
+      // Holes originated from analysis on the thermal image,
+      // on top of the resized Thermal image
+      cv::Mat thermalHolesOnThermalImage =
+        Visualization::showHoles(
+          "Holes originated from Thermal analysis, on the Thermal image",
+          thermalImage_,
           thermalHolesConveyor_,
           -1,
           msgs);
@@ -1427,6 +1437,7 @@ namespace pandora_vision
       imgs.push_back(rgbHolesOnDepthImage);
       imgs.push_back(thermalHolesOnDepthImage);
       imgs.push_back(thermalHolesOnRgbImage);
+      imgs.push_back(thermalHolesOnThermalImage);
 
       // The titles of the images
       std::vector<std::string> titles;
@@ -1437,6 +1448,7 @@ namespace pandora_vision
       titles.push_back("Holes originated from RGB analysis, on the Depth image");
       titles.push_back("Holes originated from Thermal analysis, on the Depth image");
       titles.push_back("Holes originated from Thermal analysis, on the Rgb image");
+      titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
 
       Visualization::multipleShow("Respective keypoints", imgs, titles, 1280, 1);
     }

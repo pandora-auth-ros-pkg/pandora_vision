@@ -47,6 +47,7 @@
 #include <std_msgs/Float32MultiArray.h>
 #include "thermal_node/temperatures_parameters.h"
 #include "utils/blob_detection.h"
+#include "distrib_msgs/flirLeptonMsg.h"
 
 
 /**
@@ -112,7 +113,7 @@ namespace pandora_vision
        @return void
        **/
       void inputThermalMsgCallback(
-        const std_msgs::Float32MultiArray& msg);
+        const distrib_msgs::flirLeptonMsg& msg);
 
       /**
        @brief The function called when a parameter is changed
