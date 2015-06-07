@@ -174,7 +174,7 @@ namespace pandora_vision
     {
       // Push the first point in the new vector and erase it from the old vector
       newVector.push_back(conveyor->holes[i].outline[0]);
-      cv::Point currp = newVector[0];
+      cv::Point2f currp = newVector[0];
       conveyor->holes[i].outline.erase(conveyor->holes[i].outline.begin());
       
       while (conveyor->holes[i].outline.size() > 0)
@@ -193,7 +193,7 @@ namespace pandora_vision
           double dx = std::pow(conveyor->holes[i].outline[j].x - currp.x, 2);  
         
           // Find the y distance between two points and square it.
-          double dy = std::pow(conveyor->holes[i].outline[j+1].y - currp.y, 2);
+          double dy = std::pow(conveyor->holes[i].outline[j].y - currp.y, 2);
 
           // Find the euclidean distance between two points.
           double distance = std::sqrt(dx + dy);
