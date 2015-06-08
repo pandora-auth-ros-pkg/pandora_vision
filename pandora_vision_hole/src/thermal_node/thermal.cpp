@@ -73,7 +73,7 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     dataFusionThermalPublisher_ = nodeHandle_.advertise
-      <pandora_vision_msgs::ThermalAlertsVectorMsg>
+      <pandora_vision_msgs::ThermalAlertVector>
       (dataFusionThermalTopic_, 1000);
 
     // The dynamic reconfigure (thermal) parameter's callback
@@ -189,22 +189,22 @@ namespace pandora_vision
     // Finally find the yaw and pitch of each candidate hole found and
     // send it to data fusion if a hole exists. The message to be sent is 
     // ThermalAlertsVectorMsg type.
-    if(holes.size() > 20)
+    if(holes.size() > 0)
     {
       // Fill the thermal message to be sent
-      pandora_vision_msgs::ThermalAlertsVectorMsg thermalMsg;
+      pandora_vision_msgs::ThermalAlert thermalMsg;
+      pandora_vision_msgs::ThermalAlertVector thermalMsgVector;
 
-      POIsStamped poisStamped;  
+      POIsStampedPtr poisStamped(new POIsStamped);  
 
-      poisStamped.header.stamp = msg.header.stamp;
-      poisStamped.frameWidth = msg.thermalImage.width;
-      poisStamped.frameHeight = msg.thermalImage.height;
+      poisStamped->header.stamp = msg.header.stamp;
+      poisStamped->header.frame_id = "/kinect_rgb_optical_frame";
+      poisStamped->frameWidth = msg.thermalImage.width;
+      poisStamped->frameHeight = msg.thermalImage.height;
 
       // For each hole found by thermal node
       for(unsigned int i = 0; i < holes.size(); i++)
       {
-        // Fill the temperature of the thermal message for each hole
-        thermalMsg.temperature.push_back(averageTemperature.at(i));
 
         POIPtr poi(new POI);  
 
@@ -215,23 +215,30 @@ namespace pandora_vision
         // Fill the probabilities 
         poi->probability = holesProbability.at(i);
         
-        poisStamped.pois.push_back(poi);
+        poisStamped->pois.push_back(poi);
       }
 
-      POIsStampedConstPtr poisStampedPtr(&poisStamped);
-      
       GeneralAlertConverter converter;
 
       pandora_common_msgs::GeneralAlertVector alert = 
         converter.getGeneralAlertInfo(ros::this_node::getName(),
-          nodeHandle_, poisStampedPtr);
+          nodeHandle_, poisStamped);
 
-      // Fill the thermal message to be sent
-      thermalMsg.header.stamp = alert.header.stamp;
-      thermalMsg.thermalAlerts = alert;
+      for(unsigned int i = 0; i < alert.generalAlerts.size(); i++)
+      {
+        // Fill the temperature of the thermal message for each hole
+        thermalMsg.temperature = averageTemperature.at(i);
+
+        thermalMsg.info = alert.generalAlerts.at(i);
+
+        // Push back into vector of messages
+        thermalMsgVector.thermalAlerts.push_back(thermalMsg);
+      }
+      // Fill the thermal message header to be sent
+      thermalMsgVector.header = alert.header;
 
       // Publish the thermal message
-      dataFusionThermalPublisher_.publish(thermalMsg);
+      dataFusionThermalPublisher_.publish(thermalMsgVector);
     }
 
     #ifdef DEBUG_TIME

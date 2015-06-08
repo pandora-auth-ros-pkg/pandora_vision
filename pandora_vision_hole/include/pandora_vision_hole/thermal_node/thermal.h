@@ -47,7 +47,8 @@
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/pandora_vision_interface/general_alert_converter.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
-#include "pandora_vision_msgs/ThermalAlertsVectorMsg.h"
+#include "pandora_vision_msgs/ThermalAlert.h"
+#include "pandora_vision_msgs/ThermalAlertVector.h"
 #include "std_msgs/Float32MultiArray.h"
 
 /**
