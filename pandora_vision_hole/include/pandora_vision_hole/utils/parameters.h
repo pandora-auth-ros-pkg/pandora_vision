@@ -170,6 +170,14 @@ namespace pandora_vision
       static float right_tolerance;
     };
 
+    //! Thermal image parameters
+    struct ThermalImage
+    {
+      // Thermal image width and height
+      static int WIDTH;
+      static int HEIGHT;
+    };
+
     //! Edge detection specific parameters
     struct Edge
     {

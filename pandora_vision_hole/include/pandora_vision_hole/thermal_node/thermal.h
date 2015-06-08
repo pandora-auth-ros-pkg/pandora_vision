@@ -102,8 +102,8 @@ namespace pandora_vision
       double yThermal_;
       double cX_;
       double cY_;
+      double angle_;
 
-   
       // The dynamic reconfigure (thermal) parameters' server
       dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
         server;

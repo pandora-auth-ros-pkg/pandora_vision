@@ -32,7 +32,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Angelos Triantafyllidis, Manos Tsardoulias
+ * Authors: Angelos Triantafyllidis<aggelostriadafillidis@gmail.com>,
+ * Manos Tsardoulias
  *********************************************************************/
 
 #include "utils/image_matching.h"
@@ -56,36 +57,40 @@ namespace pandora_vision
     Found as matchedthermal_x/rgb_x
     @param[in] c_y [double] The c factor on y-axis.
     Found as matchedthermal_y/rgb_y
+    @param[in] angle [double] The rotation of thermal image in rads. 
+    Clockwise is positive. Point of reference is he center of thermal image.
     @return void
    **/
   void ImageMatching::conveyorMatching(HolesConveyor* conveyor, double x_th,
-    double y_th, double c_x, double c_y)
+    double y_th, double c_x, double c_y, double angle)
   {
     for(unsigned int i = 0; i < conveyor->size(); i++)
     {
+      cv::Point2f keypoint;
+      keypoint.x = conveyor->holes[i].keypoint.pt.x;
+      keypoint.y = conveyor->holes[i].keypoint.pt.y;
+
       // Match the keypoint of each Hole found
-      conveyor->holes[i].keypoint.pt.x = matchingFunction(
-        conveyor->holes[i].keypoint.pt.x, x_th, c_x);
-      conveyor->holes[i].keypoint.pt.y = matchingFunction(
-        conveyor->holes[i].keypoint.pt.y, y_th, c_y); 
+      keypoint = matchingFunction(
+        keypoint, x_th, y_th, c_x, c_y, angle);
+
+      conveyor->holes[i].keypoint.pt.x = keypoint.x;
+      conveyor->holes[i].keypoint.pt.y = keypoint.y;
 
       // Match the bounding box
       for(unsigned int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
       {
-        conveyor->holes[i].rectangle[j].x = matchingFunction(
-          conveyor->holes[i].rectangle[j].x, x_th, c_x);
-        conveyor->holes[i].rectangle[j].y = matchingFunction(
-          conveyor->holes[i].rectangle[j].y, y_th, c_y);
+        conveyor->holes[i].rectangle[j] = matchingFunction(
+          conveyor->holes[i].rectangle[j], x_th, y_th, c_x, c_y, angle);
       }
 
       // Match the blobs outline points
       for(unsigned int o = 0; o < conveyor->holes[i].outline.size(); o++)
       {
-        conveyor->holes[i].outline[o].x = matchingFunction(
-          conveyor->holes[i].outline[o].x, x_th, c_x);
-        conveyor->holes[i].outline[o].y = matchingFunction(
-          conveyor->holes[i].outline[o].y, y_th, c_y);
+        conveyor->holes[i].outline[o] = matchingFunction(
+          conveyor->holes[i].outline[o], x_th, y_th, c_x, c_y, angle);
       }
+
       // Put the outline points in order for each hole
       outlinePointsInOrder(conveyor);
 
@@ -96,20 +101,41 @@ namespace pandora_vision
   }
 
   /**
-    @brief The function that converts each point coordinates.
-    @param[in] point [double]. The input point coordinates to be converted.
+    @brief The function that is responsible for the linear and rotational 
+    transformation of the points given as arguments.
+    @param[in] point [const cv::Point2f&]. 
+    The input point coordinates to be converted.
     @return float. The final point in Rgb or Depth image.
-    @param[in] arg1 [double] The x or y coordinate of thermal image in rgb image
-    @param[in] arg2 [double] The c factor on x-axis or y-axis.
+    @param[in] xInit [double] The initial x coordinate of thermal image in rgb image
+    @param[in] yInit [double] The initial y coordinate of thermal image in rgb image
+    @param[in] c_x [double] The c factor on x-axis.
+    @param[in] c_y [double] The c factor on y-axis.
     Found as matchedthermal_x/rgb_x same for y.
-    return double. The final point coordinate in Rgb or Depth image.
+    @param[in] angle [double] The rotation of thermal image in rads.
+    return cv::Point2f. The final point coordinates in Rgb or Depth image.
   **/
-  double ImageMatching::matchingFunction(double point, double arg1, double arg2)
+  cv::Point2f ImageMatching::matchingFunction(const cv::Point2f& point, 
+    double xInit, double yInit, double c_x, double c_y, double angle)
   {
-    // The value of thermal image point.x or point.y in Rgb image
-    double coordinates_rgb = arg1 + arg2 * point;
+    cv::Point2f linear;
+    // The value of thermal image point.x or point.y in Rgb image after
+    // linear transformation.
+    linear.x = xInit + c_x * point.x;
+    linear.y = yInit + c_y * point.y;
 
-    return coordinates_rgb;
+    cv::Point2f rotation;
+    cv::Point2f newCenter;
+    // Rotational transformation
+    newCenter.x = c_x * Parameters::ThermalImage::WIDTH / 2; 
+    newCenter.y = c_y * Parameters::ThermalImage::HEIGHT / 2; 
+
+    rotation.x = newCenter.x + cos(angle) * (linear.x - newCenter.x) - 
+      sin(angle) * (linear.y - newCenter.y);
+
+    rotation.y = newCenter.y + sin(angle) * (linear.x - newCenter.x) + 
+      cos(angle) * (linear.y - newCenter.y);
+
+    return rotation;
   }
 
 
@@ -229,16 +255,18 @@ namespace pandora_vision
     on the robot they can be changed too.
     @param[in] nh [ros::Nodehandle&] The nodehandle of the class that calls 
     the function.
-    @param[in] x_th [double] The x coordinate of thermal image in rgb image
-    @param[in] y_th [double] The y coordinate of thermal image in rgb image
-    @param[in] c_x [double] The c factor on x-axis.
+    @param[out] x_th [double] The x coordinate of thermal image in rgb image
+    @param[out] y_th [double] The y coordinate of thermal image in rgb image
+    @param[out] c_x [double] The c factor on x-axis.
     Found as matchedthermal_x/rgb_x
-    @param[in] c_y [double] The c factor on y-axis. 
+    @param[out] c_y [double] The c factor on y-axis. 
     Found as matchedthermal_y/rgb_y
+    @param[out] angle [double] The angle in rads that thermal image been rotated
+    Point of reference is the center of thermal image.
     @return void
   **/
   void ImageMatching::variableSetUp(ros::NodeHandle& nh, double* x_th, 
-    double* y_th, double* c_x, double* c_y)
+    double* y_th, double* c_x, double* c_y, double* angle)
   {
     // The namespace dictated in the launch file
     std::string ns = nh.getNamespace();
@@ -282,6 +310,19 @@ namespace pandora_vision
     else
     {
       ROS_ERROR("[Thermal_node], Could not find c_y variable");
+    }
+
+    // The angle that thermal image been rotated.
+    if(nh.getParam(ns + "/thermal_camera_node/matching_values/angle", *angle))
+    {
+      // Convert angle in degrees to rads.
+      *angle = *angle * 3.14159265 / 180;
+
+      ROS_INFO("[Thermal_node], angle variable is loaded for matching");
+    }
+    else
+    {
+      ROS_ERROR("[Thermal_node], Could not find angle variable");
     }
   }
 

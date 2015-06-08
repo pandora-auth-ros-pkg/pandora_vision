@@ -140,6 +140,10 @@ namespace pandora_vision
   float Parameters::Thermal::left_tolerance = 4;
   float Parameters::Thermal::right_tolerance = 8;
 
+  ////////////////////// Parameters of the thermal image ///////////////////////
+  int Parameters::ThermalImage::WIDTH = 80;
+  int Parameters::ThermalImage::HEIGHT =60;
+
   ///////////////////// Edge detection specific parameters /////////////////////
 
   // canny parameters

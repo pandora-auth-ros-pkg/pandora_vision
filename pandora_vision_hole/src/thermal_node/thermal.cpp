@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Alexandros Philotheou, Manos Tsardoulias,Angelos Triantafyllidis
+ * Authors: Alexandros Philotheou, Manos Tsardoulias, Angelos Triantafyllidis
  *********************************************************************/
 
 #include "thermal_node/thermal.h"
@@ -54,7 +54,8 @@ namespace pandora_vision
     getTopicNames();
 
     // Get the values of the variables used to match the final holeConveyors
-    ImageMatching::variableSetUp(nodeHandle_, &xThermal_, &yThermal_, &cX_, &cY_);
+    ImageMatching::variableSetUp(nodeHandle_, &xThermal_, &yThermal_,
+      &cX_, &cY_, &angle_);
 
     // Subscribe to the thermal image published by raspberry
     thermalImageSubscriber_ = nodeHandle_.subscribe(thermalImageTopic_, 1,
@@ -145,7 +146,8 @@ namespace pandora_vision
 
     // Convert the conveyors information so it can match with the
     //  Rgb and Depth images
-    ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_);
+    ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_,
+      cY_, angle_);
 
     // Resize the thermal image to match the rgb-d images, of course the thermal
     // image will not be further processed.

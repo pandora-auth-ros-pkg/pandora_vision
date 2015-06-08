@@ -32,7 +32,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Angelos Triantafyllidis, Manos Tsardoulias
+ * Authors: Angelos Triantafyllidis<aggelostriadafillidis@gmail.com>, 
+ * Manos Tsardoulias
  *********************************************************************/
 
 
@@ -68,22 +69,29 @@ namespace pandora_vision
         Found as matchedthermal_x/rgb_x
         @param[in] c_y [double] The c factor on y-axis.
         Found as matchedthermal_y/rgb_y
+        @param[in] angle [double] The rotation of thermal image in rads. 
+        Clockwise is positive. Point of reference is he center of thermal image.
         @return void
        **/
       static void conveyorMatching(HolesConveyor* conveyor, double x_th,
-        double y_th, double c_x, double c_y);
+        double y_th, double c_x, double c_y, double angle);
 
       /**
-        @brief The function that converts each point coordinates.
-        @param[in] point [double].
+        @brief The function that is responsible for the linear and rotational 
+        transformation of the points given as arguments.
+        @param[in] point [const cv::Point2f&]. 
         The input point coordinates to be converted.
-        @param[in] arg1 [double] The x or y coordinate of thermal 
-        image in rgb image.
-        @param[in] arg2 [double] The c factor on x-axis or y-axis.
+        @return float. The final point in Rgb or Depth image.
+        @param[in] xInit [double] The initial x coordinate of thermal image in rgb image
+        @param[in] yInit [double] The initial y coordinate of thermal image in rgb image
+        @param[in] c_x [double] The c factor on x-axis.
+        @param[in] c_y [double] The c factor on y-axis.
         Found as matchedthermal_x/rgb_x same for y.
-        @return float. The final point coordinate in Rgb or Depth image.
+        @param[in] angle [double] The rotation of thermal image in rads.
+        return cv::Point2f. The final point coordinates in Rgb or Depth image.
        **/
-      static double matchingFunction(double point, double arg1, double arg2);
+      static cv::Point2f matchingFunction(const cv::Point2f& point,
+        double xInit, double yInit, double c_x, double c_y, double angle);
 
       /**
         @brief Set up the variables needed to convert the points.Takes variables
@@ -97,10 +105,12 @@ namespace pandora_vision
         Found as matchedthermal_x/rgb_x
         @param[in] c_y [double] The c factor on y-axis.
         Found as matchedthermal_y/rgb_y
+        @param[out] angle [double] The angle in rads that thermal image been 
+        rotated.Point of reference is the center of thermal image.
         @return void
         **/
       static void variableSetUp(ros::NodeHandle& nh, double* x_th, double* y_th,
-        double* c_x, double* c_y);
+        double* c_x, double* c_y, double* angle);
 
       /**
         @brief When the outline points of the thermal image are matched on 
