@@ -479,29 +479,29 @@ namespace pandora_vision
   }
 
   /**
-    @brief Convert the temperature data which is in std_msgs::Float32Multiarray 
-    format to cv::Mat. Its cv format will be CV_8UC1.
-    @param[in] msg [const std_msgs::Float32MultiArray&] 
-    The temperature data MultiArray
+    @brief Convert the Float32MultiArray data to cv::Mat.
+    Its cv format  will be CV_8UC1.
+    @param[in] inArray [const std_msgs::Float32MultiArray&] 
+    The input MultiArray
     @return cv::Mat
    **/
-  cv::Mat MessageConversions::convertTemperatureToMat(
-    const std_msgs::Float32MultiArray& temperatures)
+  cv::Mat MessageConversions::convertFloat32MultiArrayToMat(
+    const std_msgs::Float32MultiArray& inArray)
   {
     // The width and height of the input temperature multiarray
-    int width = temperatures.layout.dim[1].size;
-    int height = temperatures.layout.dim[0].size; 
+    int width = inArray.layout.dim[1].size;
+    int height = inArray.layout.dim[0].size; 
 
-    cv::Mat temperatureImage = cv::Mat::zeros(height, width, CV_8UC1);
+    cv::Mat image = cv::Mat::zeros(height, width, CV_8UC1);
 
     for(unsigned int i = 0; i < height; i++)
     {
       for(unsigned int j = 0; j < width; j++)
       {
-        temperatureImage.data[i * width + j] = temperatures.data[i * width + j];
+        image.data[i * width + j] = inArray.data[i * width + j];
       }
     }
-    return temperatureImage;
+    return image;
   }
 
 } // namespace pandora_vision

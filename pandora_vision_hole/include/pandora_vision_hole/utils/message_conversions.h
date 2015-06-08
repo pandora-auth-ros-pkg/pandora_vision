@@ -198,15 +198,14 @@ namespace pandora_vision
         const int& raycastKeypointPartitions);
 
       /**
-       @brief Convert the temperature data which is 
-       in std_msgs::Float32MultiArray format to cv::Mat. Its cv format 
-       will be CV_8UC1.
-       @param[in] msg [const std_msgs::Float32MultiArray&] 
-       The temperature data MultiArray
+       @brief Convert the Float32MultiArray data to cv::Mat.
+       Its cv format  will be CV_8UC1.
+       @param[in] inArray [const std_msgs::Float32MultiArray&] 
+       The input MultiArray
        @return cv::Mat
        **/
-      static cv::Mat convertTemperatureToMat(
-        const std_msgs::Float32MultiArray& temperatures);
+      static cv::Mat convertFloat32MultiArrayToMat(
+        const std_msgs::Float32MultiArray& inArray);
   };
 
 } // namespace pandora_vision
