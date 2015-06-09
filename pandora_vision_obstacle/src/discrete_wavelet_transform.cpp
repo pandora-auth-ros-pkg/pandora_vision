@@ -41,6 +41,11 @@
 
 namespace pandora_vision
 {
+  DiscreteWaveletTransform::DiscreteWaveletTransform(int kernelSize)
+  {
+
+  }
+
   DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& kernel)
   {
     if (kernel.rows == 1)

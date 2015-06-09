@@ -47,14 +47,40 @@ namespace pandora_vision
   class DiscreteWaveletTransform
   {
     public:
+      /**
+       * @brief Constructor used to implement the Ingrid Daubechies
+       * Wavelets
+       * @param kernelSize [int] The size of the kernel used to
+       * perform the transform
+       **/
+      explicit DiscreteWaveletTransform(int kernelSize);
+      /**
+       * @brief Constructor used to implement the DWT with a user
+       * defined kernel
+       * @param kernel [cost cv::Mat&] The kernel used to perform
+       * the transform
+       **/
       explicit DiscreteWaveletTransform(const cv::Mat& kernel);
-      ~DiscreteWaveletTransform();
+
+      /**
+       * @brief Virtual Destructor
+       **/ 
+      virtual ~DiscreteWaveletTransform();
 
     private:
+      /**
+       * @brief Perform convolution with a column vector kernel
+       * @param inImage [const cv::Mat&]
+       **/
       cv::Mat convCols(const cv::Mat& inImage);
+      /**
+       * @brief Perform convolution with a row vector kernel
+       * @param inImage [const cv::Mat&]
+       **/
       cv::Mat convRows(const cv::Mat& inImage);
 
     private:
+      /// The kernel used to perform the DWT
       cv::Mat kernel_;
   };
 
