@@ -85,10 +85,11 @@ namespace pandora_vision
     }
 
     std::string filesDirectory = package_path + "/data/";
-    std::string normalizationParamOne = imageType_ + "mean_values.xml";
-    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
-    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
-    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+    std::string normalizationParamOne;
+    std::string normalizationParamTwo;
+
+    std::string normalizationParamOneTag;
+    std::string normalizationParamTwoTag;
 
     std::vector<double> normalizationParamOneVector;
     std::vector<double> normalizationParamTwoVector;
@@ -100,16 +101,33 @@ namespace pandora_vision
       featureExtractionUtilities_->findMinMaxParameters(newMax, newMin,
           featuresMatrix, &normalizationParamOneVector,
           &normalizationParamTwoVector);
+
+      normalizationParamOneTag = "min";
+      normalizationParamTwoTag = "max";
+
+      normalizationParamOne = imageType_ + "min_values";
+      normalizationParamTwo = imageType_ + "max_values";
     }
     else
     {
       featureExtractionUtilities_->findZScoreParameters(featuresMatrix,
           &normalizationParamOneVector, &normalizationParamTwoVector);
+
+      normalizationParamOneTag = "mean";
+      normalizationParamTwoTag = "std_dev";
+
+      normalizationParamOne = imageType_ + "mean_values.xml";
+      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
     }
 
-    file_utilities::saveToFile(normalizationParamOnePath, "mean",
+    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+    file_utilities::saveToFile(normalizationParamOnePath,
+        normalizationParamOneTag,
         cv::Mat(normalizationParamOneVector));
-    file_utilities::saveToFile(normalizationParamTwoPath, "std_dev",
+    file_utilities::saveToFile(normalizationParamTwoPath,
+        normalizationParamTwoTag,
         cv::Mat(normalizationParamTwoVector));
   }
 
@@ -127,26 +145,54 @@ namespace pandora_vision
     }
 
     std::string filesDirectory = package_path + "/data/";
-    std::string normalizationParamOne = imageType_ + "mean_values.xml";
-    std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
-    std::string normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
-    std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+    std::string normalizationParamOne;
+    std::string normalizationParamOnePath;
+    std::string normalizationParamTwo;
+    std::string normalizationParamTwoPath;
 
-    std::vector<double> normalizationParamOneVector = file_utilities::loadFiles(
-          normalizationParamOnePath, "mean");
-    std::vector<double> normalizationParamTwoVector = file_utilities::loadFiles(
-          normalizationParamTwoPath, "std_dev");
+    std::string normalizationParamOneTag;
+    std::string normalizationParamTwoTag;
+
+    std::vector<double> normalizationParamOneVector;
+    std::vector<double> normalizationParamTwoVector;
 
     if (typeOfNormalization_ == 1)
     {
       double newMax = 1.0;
       double newMin = -1.0;
+
+      normalizationParamOne = imageType_ + "min_values.xml";
+      normalizationParamOnePath = filesDirectory + normalizationParamOne;
+      normalizationParamTwo = imageType_ + "max_values.xml";
+      normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+      normalizationParamOneTag = "min";
+      normalizationParamTwoTag = "max";
+      normalizationParamOneVector = file_utilities::loadFiles(
+          normalizationParamOnePath,
+          normalizationParamOneTag);
+      normalizationParamTwoVector = file_utilities::loadFiles(
+          normalizationParamTwoPath,
+          normalizationParamTwoTag);
       featureExtractionUtilities_->performMinMaxNormalization(newMax, newMin,
           featuresMatrix, normalizationParamOneVector,
           normalizationParamTwoVector);
     }
     else
     {
+      normalizationParamOne = imageType_ + "mean_values.xml";
+      normalizationParamOnePath = filesDirectory + normalizationParamOne;
+      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+      normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+      normalizationParamOneTag = "mean";
+      normalizationParamTwoTag = "std_dev";
+      normalizationParamOneVector = file_utilities::loadFiles(
+          normalizationParamOnePath,
+          normalizationParamOneTag);
+      normalizationParamTwoVector = file_utilities::loadFiles(
+          normalizationParamTwoPath,
+          normalizationParamTwoTag);
       featureExtractionUtilities_->performZScoreNormalization(
           featuresMatrix, normalizationParamOneVector,
           normalizationParamTwoVector);

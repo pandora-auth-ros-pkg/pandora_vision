@@ -75,20 +75,7 @@ namespace pandora_vision
     svmParams_.svm_type = CvSVM::C_SVC;
     svmParams_.kernel_type = CvSVM::RBF; 
 
-
     std::string filesDirectory = packagePath_ + "/data/";
-
-    std::string normalizationParamOne = "rgb_mean_values.xml";
-    std::stringstream normalizationParamOnePath;
-    normalizationParamOnePath << filesDirectory << normalizationParamOne;
-    std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
-    std::stringstream normalizationParamTwoPath;
-    normalizationParamTwoPath << filesDirectory << normalizationParamTwo;
-
-    normalizationParamOneVec_ = file_utilities::loadFiles(
-        normalizationParamOnePath.str(), "mean");
-    normalizationParamTwoVec_ = file_utilities::loadFiles(
-        normalizationParamTwoPath.str(), "std_dev");
 
     std::string paramFile = packagePath_ + "/config/rgb_svm_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
@@ -97,6 +84,35 @@ namespace pandora_vision
     typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
 
     fs.release();
+
+    if (typeOfNormalization_ == 1)
+    {
+      std::string normalizationParamOne = "rgb_min_values.xml";
+      std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+      std::string normalizationParamTwo = "rgb_max_values.xml";
+      std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+      std::string normalizationParamOneTag = "min";
+      std::string normalizationParamTwoTag = "max";
+      normalizationParamOneVec_ = file_utilities::loadFiles(
+          normalizationParamOnePath, normalizationParamOneTag);
+      normalizationParamTwoVec_ = file_utilities::loadFiles(
+          normalizationParamTwoPath, normalizationParamTwoTag);
+    }
+    else if (typeOfNormalization_ == 2)
+    {
+      std::string normalizationParamOne = "rgb_mean_values.xml";
+      std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
+      std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
+      std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
+
+      std::string normalizationParamOneTag = "mean";
+      std::string normalizationParamTwoTag = "std_dev";
+      normalizationParamOneVec_ = file_utilities::loadFiles(
+          normalizationParamOnePath, normalizationParamOneTag);
+      normalizationParamTwoVec_ = file_utilities::loadFiles(
+          normalizationParamTwoPath, normalizationParamTwoTag);
+    }
 
     featureExtraction_ = new RgbFeatureExtraction();
     bool vocabularyNeeded = featureExtraction_->bagOfWordsVocabularyNeeded();
