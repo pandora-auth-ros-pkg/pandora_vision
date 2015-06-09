@@ -35,6 +35,14 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
+############################# discrete wavelet transform #########################
+add_library(${PROJECT_NAME}_discrete_wavelet_transform
+  src/discrete_wavelet_transform.cpp
+)
+target_link_libraries(${PROJECT_NAME}_discrete_wavelet_transform
+  ${catkin_LIBRARIES}
+)
+
 ############################### obstacle preprocessor ##############################
 add_library(${PROJECT_NAME}_obstacle_preprocessor
   src/obstacle_preprocessor.cpp
