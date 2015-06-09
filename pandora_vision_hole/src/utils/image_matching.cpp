@@ -127,34 +127,33 @@ namespace pandora_vision
 
           // The easiest and most efficient way to obtain the new outline is to
           // apply the raycast algorithm
-          cv::Mat canvas = cv::Mat::zeros(Parameters::Image::HEIGHT,
-            Parameters::Image::WIDTH, CV_8UC1);
+          //cv::Mat canvas = cv::Mat::zeros(Parameters::Image::HEIGHT,
+            //Parameters::Image::WIDTH, CV_8UC1);
 
-          unsigned char* ptr = canvas.ptr();
-          for(unsigned int a = 0; a < conveyor->holes[i].outline.size(); a++)
-          {
-            unsigned int ind =
-              conveyor->holes[i].outline[a].x + canvas.cols * 
-              conveyor->holes[i].outline[a].y;
-            ptr[ind] = 255;
-          }
+          //unsigned char* ptr = canvas.ptr();
+          //for(unsigned int a = 0; a < conveyor->holes[i].outline.size(); a++)
+          //{
+            //unsigned int ind =
+              //conveyor->holes[i].outline[a].x + canvas.cols * conveyor->holes[i].outline[a].y;
+            //ptr[ind] = 255;
+          //}
 
-           float area = 0.0;
-           OutlineDiscovery::raycastKeypoint(conveyor->holes[i].keypoint,
-           &canvas,
-           Parameters::Outline::raycast_keypoint_partitions,
-           false,
-           &conveyor->holes[i].outline,
-           &area);
+           //float area = 0.0;
+           //OutlineDiscovery::raycastKeypoint(conveyor->holes[i].keypoint,
+           //&canvas,
+           //Parameters::Outline::raycast_keypoint_partitions,
+           //false,
+           //&conveyor->holes[i].outline,
+           //&area);
 
           // Second method to connect the new outlines
 
           // Put the outline points in order for each hole
-          //outlinePointsInOrder(conveyor);
+          outlinePointsInOrder(conveyor);
 
           // Connect the points in order to have a coherent set of points 
           // as the hole's outline. For each hole.
-          //outlinePointsConnector(conveyor);
+          outlinePointsConnector(conveyor);
         }
       }
     }
