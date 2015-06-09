@@ -12,6 +12,7 @@
   <url type="repository">https://github.com/pandora-auth-ros-pkg/pandora_vision</url>
 
   <author>Eirini Chatzieleftheriou</author>
+  <author>Miltiadis Kofinas</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
