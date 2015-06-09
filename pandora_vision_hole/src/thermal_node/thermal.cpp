@@ -124,6 +124,17 @@ namespace pandora_vision
     MessageConversions::extractImageFromMessage(msg.thermalImage, &thermalImage, 
       sensor_msgs::image_encodings::TYPE_8UC1);
 
+    // Obtain the thermal message and extract the temperature information.
+    // Convert this information to cv::Mat in order to be processed.
+    // It's format will be CV_8UC1
+    //cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
+      //(msg.temperatures);
+
+    // Apply double threshold(up and down) in the temperature image.
+    // The threshold is set by configuration
+    //cv::inRange(
+      //thermalImage, cv::Scalar(30), cv::Scalar(40), thermalImage); 
+
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
     {

@@ -42,6 +42,7 @@
 
 #include "utils/holes_conveyor.h"
 #include "utils/parameters.h"
+#include "utils/outline_discovery.h"
 
 /**
   @namespace pandora_vision

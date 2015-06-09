@@ -66,7 +66,10 @@ namespace pandora_vision
   void ImageMatching::conveyorMatching(HolesConveyor* conveyor, double x_th,
     double y_th, double c_x, double c_y, double angle)
   {
-    for(unsigned int i = 0; i < conveyor->size(); i++)
+    // Counter of holes deleted
+    unsigned int deleted = 0 , i = 0;
+
+    for((i - deleted); (i - deleted) < conveyor->size(); i++)
     {
       bool skip = false;
       cv::Point2f keypoint;
@@ -83,6 +86,7 @@ namespace pandora_vision
         || keypoint.y < 1 || keypoint.y > (Parameters::Image::HEIGHT -1))
       {
         conveyor->holes.erase(conveyor->holes.begin() + i);
+        deleted++;
       }
       else
       {
@@ -105,6 +109,7 @@ namespace pandora_vision
           {
             conveyor->holes.erase(conveyor->holes.begin() + i);
             skip = true;
+            deleted++;
             break;
           }
         }
@@ -119,12 +124,37 @@ namespace pandora_vision
               conveyor->holes[i].outline[o], x_th, y_th, c_x, c_y, angle);
           }
 
+
+          // The easiest and most efficient way to obtain the new outline is to
+          // apply the raycast algorithm
+          cv::Mat canvas = cv::Mat::zeros(Parameters::Image::HEIGHT,
+            Parameters::Image::WIDTH, CV_8UC1);
+
+          unsigned char* ptr = canvas.ptr();
+          for(unsigned int a = 0; a < conveyor->holes[i].outline.size(); a++)
+          {
+            unsigned int ind =
+              conveyor->holes[i].outline[a].x + canvas.cols * 
+              conveyor->holes[i].outline[a].y;
+            ptr[ind] = 255;
+          }
+
+           float area = 0.0;
+           OutlineDiscovery::raycastKeypoint(conveyor->holes[i].keypoint,
+           &canvas,
+           Parameters::Outline::raycast_keypoint_partitions,
+           false,
+           &conveyor->holes[i].outline,
+           &area);
+
+          // Second method to connect the new outlines
+
           // Put the outline points in order for each hole
-          outlinePointsInOrder(conveyor);
+          //outlinePointsInOrder(conveyor);
 
           // Connect the points in order to have a coherent set of points 
           // as the hole's outline. For each hole.
-          outlinePointsConnector(conveyor);
+          //outlinePointsConnector(conveyor);
         }
       }
     }
@@ -272,6 +302,7 @@ namespace pandora_vision
           conveyor->holes[i].outline.begin() + minIndex);
       }
       // Pass the points found in order to the holesconveyor struct
+      conveyor->holes[i].outline.clear();
       conveyor->holes[i].outline = newVector;
 
       // Clear the newVector so it can be used for the next hole
