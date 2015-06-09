@@ -61,6 +61,8 @@ namespace pandora_vision
       /**
         @brief Converts Conveyors which represent each hole and include all
         necessary information about it to match with rgb and depth images.
+        After transformation checks if the point of interest is outside of rgb 
+        image borders. If so that hole will be rejected.
         @param[out] conveyor [HolesConveyor* conveyor] 
         The input conveyor to be converted and sent back as output.
         @param[in] x_th [double] The x coordinate of thermal image in rgb image

@@ -49,6 +49,8 @@ namespace pandora_vision
   /**
     @brief Converts Conveyors which represent each hole and include all 
     necessary information about it to match with rgb and depth images.
+    After transformation checks if the point of interest is outside of rgb image
+    borders. If so that hole will be rejected.
     @param[out] conveyor [HolesConveyor*]
     The input conveyor to be converted and sent back as output.
     @param[in] x_th [double] The x coordinate of thermal image in rgb image
@@ -66,6 +68,7 @@ namespace pandora_vision
   {
     for(unsigned int i = 0; i < conveyor->size(); i++)
     {
+      bool skip = false;
       cv::Point2f keypoint;
       keypoint.x = conveyor->holes[i].keypoint.pt.x;
       keypoint.y = conveyor->holes[i].keypoint.pt.y;
@@ -74,29 +77,56 @@ namespace pandora_vision
       keypoint = matchingFunction(
         keypoint, x_th, y_th, c_x, c_y, angle);
 
-      conveyor->holes[i].keypoint.pt.x = keypoint.x;
-      conveyor->holes[i].keypoint.pt.y = keypoint.y;
-
-      // Match the bounding box
-      for(unsigned int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
+      // If the keypoint is out of or on rbg image borders reject 
+      // that hole immediately.
+      if(keypoint.x < 1 || keypoint.x > (Parameters::Image::WIDTH - 1) 
+        || keypoint.y < 1 || keypoint.y > (Parameters::Image::HEIGHT -1))
       {
-        conveyor->holes[i].rectangle[j] = matchingFunction(
-          conveyor->holes[i].rectangle[j], x_th, y_th, c_x, c_y, angle);
+        conveyor->holes.erase(conveyor->holes.begin() + i);
       }
-
-      // Match the blobs outline points
-      for(unsigned int o = 0; o < conveyor->holes[i].outline.size(); o++)
+      else
       {
-        conveyor->holes[i].outline[o] = matchingFunction(
-          conveyor->holes[i].outline[o], x_th, y_th, c_x, c_y, angle);
+        // Continue the process
+        conveyor->holes[i].keypoint.pt.x = keypoint.x;
+        conveyor->holes[i].keypoint.pt.y = keypoint.y;
+
+        // Match the bounding box and check if it is outside rgb image, if so
+        // reject that hole. Bounding box check is enough, we dont need to check
+        // outlines, because they reside entirely inside it.
+        for(unsigned int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
+        {
+          conveyor->holes[i].rectangle[j] = matchingFunction(
+            conveyor->holes[i].rectangle[j], x_th, y_th, c_x, c_y, angle);
+
+          if(conveyor->holes[i].rectangle[j].x < 0 
+            || conveyor->holes[i].rectangle[j].x > (Parameters::Image::WIDTH) 
+            || conveyor->holes[i].rectangle[j].y < 0 
+            || conveyor->holes[i].rectangle[j].y > (Parameters::Image::HEIGHT))
+          {
+            conveyor->holes.erase(conveyor->holes.begin() + i);
+            skip = true;
+            break;
+          }
+        }
+        
+        // If hole rejected skip next process step
+        if(!skip)
+        {
+          // Match the blobs outline points
+          for(unsigned int o = 0; o < conveyor->holes[i].outline.size(); o++)
+          {
+            conveyor->holes[i].outline[o] = matchingFunction(
+              conveyor->holes[i].outline[o], x_th, y_th, c_x, c_y, angle);
+          }
+
+          // Put the outline points in order for each hole
+          outlinePointsInOrder(conveyor);
+
+          // Connect the points in order to have a coherent set of points 
+          // as the hole's outline. For each hole.
+          outlinePointsConnector(conveyor);
+        }
       }
-
-      // Put the outline points in order for each hole
-      outlinePointsInOrder(conveyor);
-
-      // Connect the points in order to have a coherent set of points 
-      // as the hole's outline. For each hole.
-      outlinePointsConnector(conveyor);
     }
   }
 
