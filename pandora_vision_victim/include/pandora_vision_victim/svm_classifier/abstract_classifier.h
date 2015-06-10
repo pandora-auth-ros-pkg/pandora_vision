@@ -2,43 +2,43 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
-*  All rights reserved.
+* Copyright (c) 2015, P.A.N.D.O.R.A. Team.
+* All rights reserved.
 *
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
 *
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
+* * Redistributions of source code must retain the above copyright
+* notice, this list of conditions and the following disclaimer.
+* * Redistributions in binary form must reproduce the above
+* copyright notice, this list of conditions and the following
+* disclaimer in the documentation and/or other materials provided
+* with the distribution.
+* * Neither the name of the P.A.N.D.O.R.A. Team nor the names of its
+* contributors may be used to endorse or promote products derived
+* from this software without specific prior written permission.
 *
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+* ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors:
-*   Kofinas Miltiadis <mkofinas@gmail.com>
+* Author:  Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H
 
+#include <cmath>
 #include <string>
 
 #include <opencv2/opencv.hpp>
@@ -48,37 +48,26 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
+#include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/utilities/feature_extraction_utilities.h"
 
 namespace pandora_vision
 {
   class AbstractClassifier
-
-#include "pandora_vision_victim/svm_classifier/abstract_classifier.h"
-
-namespace pandora_vision
-{
   {
     public:
       /**
        * @brief The Constructor
        */
-      AbstractClassifier(const std::string& ns, const std::string& datasetPath,
-          const std::string& classifierType, const std::string& imageType);
+      AbstractClassifier(const std::string& ns, int numFeatures,
+          const std::string& datasetPath, const std::string& classifierType,
+          const std::string& imageType);
 
       /**
        * @brief The Destructor
        */
       virtual ~AbstractClassifier();
-
-      /**
-       * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies a classification
-       * algorithm and extracts a suitable model.
-       * @return void
-       */
-      virtual void trainAndValidate();
 
       /**
        * @brief This function normalizes the features and saves normalization
@@ -120,6 +109,14 @@ namespace pandora_vision
                                    cv::Mat* featuresMat, cv::Mat* labelsMat);
 
       /**
+       * @brief Function that implements the training for the subsystems
+       * according to the given training sets. It applies a classification
+       * algorithm and extracts a suitable model.
+       * @return void
+       */
+      virtual void trainSubSystem();
+
+      /**
        * @brief This function evaluates the classifier model, based on the
        * predicted and the actual class attributes.
        * @param predicted [const cv::Mat&] The predicted class attributes.
@@ -128,40 +125,26 @@ namespace pandora_vision
        */
       void evaluate(const cv::Mat& predicted, const cv::Mat& actual);
 
+      // Platt's binary SVM Probablistic Output: an improvement from Lin et al.
       /**
-       * @brief Trains the corresponding classifier using the input features and training labels.
-       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the
-       * training set
-       * @param trainingSetLabels[const cv::Mat&] The corresponding labels that define the class of each
-       * training sample.
-       * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
-       * @return bool True on successfull completions, false otherwise.
-       */
-      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
-          const std::string& classifierFileDest) = 0;
-
-      /**
-       * @brief Validates the resulting classifier using the given features
-       * extracted from the test set.
-       * @param testSetFeatures[const cv::Mat&] The test set features matrix
-       * @param validationResults[cv::Mat*] The results for the test set.
+       * @brief Function that computes the vectors A,B necessary for the
+       * computation of the probablistic output of the SVM bases on Platt's
+       * binary SVM probablistic Output
+       * @param dec_values [cv::Mat] the distance from the hyperplane of the
+       * predicted results of the given test dataset
+       * @param labels [cv::Mat] the true labels of the dataset
+       * @param A [double*] the vector A to be computed
+       * @param B [double*] the vector B to be computed
        * @return void
        */
-      virtual void validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults) = 0;
-
-      /**
-       * @brief Saves the classifier to a file
-       * @param classifierFile[const std::string&] The name of the file where the classifier will be stored
-       * @return void
-       */
-      virtual void load(const std::string& classifierFile) = 0;
+      void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A,
+                         double* B);
 
     protected:
-      /// String used in node messages.
-      std::string nodeMessagePrefix_;
-
       /// The NodeHandle
       ros::NodeHandle nh_;
+
+      VictimParameters vparams;
 
       /// String containing the type of the images used in the feature
       /// extraction process.
@@ -256,4 +239,4 @@ namespace pandora_vision
       FeatureExtractionUtilities* featureExtractionUtilities_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H

@@ -32,20 +32,11 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors:
-*   Kofinas Miltiadis <mkofinas@gmail.com>
+* Author:  Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#include <vector>
-#include <string>
-#include <boost/algorithm/string.hpp>
-
 #include "pandora_vision_victim/utilities/file_utilities.h"
-#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
-#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
-#include "pandora_vision_victim/classifiers/abstract_classifier.h"
-#include <ros/ros.h>
-
+#include "pandora_vision_victim/svm_classifier/abstract_classifier.h"
 
 namespace pandora_vision
 {
@@ -57,73 +48,43 @@ namespace pandora_vision
       const std::string& classifierType, const std::string& imageType) :
       nh_(ns)
   {
+    vparams.configVictim(nh_);
+
     datasetPath_ = datasetPath;
     numFeatures_ = numFeatures;
     imageType_ = imageType;
     classifierType_ = classifierType;
 
-    nodeMessagePrefix_ = "[PANDORA_VISION_VICTIM_" + boost::to_upper_copy<std::string>(imageType)
-        + "_" + boost::to_upper_copy<std::string>(classifierType) + "]";
-
     packagePath_ = ros::package::getPath("pandora_vision_victim");
+    ROS_INFO("[victim_node] : Created Abstract Classifier instance");
 
-    // featureExtractionUtilities_ = new FeatureExtractionUtilities();
+    featureExtractionUtilities_ = new FeatureExtractionUtilities();
+    featureExtraction_ = new FeatureExtraction();
 
     filesDirectory_ = packagePath_ + "/data/";
 
-    const std::string filePrefix = filesDirectory_ + imageType_ + "_";
-
+    const std::string filePrefix = filesDirectory_ + imageType_ + classifierType_;
     trainingFeaturesMatrixFile_ = filePrefix + "training_features_matrix.xml";
     testFeaturesMatrixFile_ = filePrefix + "test_features_matrix.xml";
     trainingLabelsMatrixFile_ = filePrefix + "training_labels_matrix.xml";
     testLabelsMatrixFile_ = filePrefix + "test_labels_matrix.xml";
-    resultsFile_ = filePrefix + classifierType_ + "_results.xml";
-    classifierFile_ = filePrefix + classifierType_ +  "_classifier.xml";
+    resultsFile_ = filePrefix + "results.xml";
+    classifierFile_ = filePrefix + "classifier.xml";
 
     const std::string trainingDatasetPath = datasetPath_ + "/Training_Images";
     boost::filesystem::path trainingDirectory(trainingDatasetPath);
     trainingDirectory_ = trainingDirectory;
 
     trainingAnnotationsFile_ = filePrefix + "training_annotations.txt";
-    std::cout << trainingAnnotationsFile_ << std::endl;
-    int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
+    // int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
 
     const std::string testDatasetPath = datasetPath_ + "/Test_Images";
     boost::filesystem::path testDirectory(testDatasetPath);
     testDirectory_ = testDirectory;
 
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
-    int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
+    // int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
 
-    std::string paramFile = packagePath_ + "/config/" + imageType + "_" + classifierType + "_training_params.yaml";
-    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
-    fs.open(paramFile, cv::FileStorage::READ);
-
-    std::string trainingSetExtraction = fs["training_set_feature_extraction"];
-    std::string testSetExtraction = fs["test_set_feature_extraction"];
-    std::string loadModel = fs["load_classifier_model"];
-    std::string pcaAnalysis = fs["do_pca_analysis"];
-
-    trainingSetFeatureExtraction_ = trainingSetExtraction.compare("true") == 0;
-    testSetFeatureExtraction_ = testSetExtraction.compare("true") == 0;
-    loadClassifierModel_ = loadModel.compare("true") == 0;
-    doPcaAnalysis_ = pcaAnalysis.compare("true") == 0;
-    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
-
-    fs.release();
-
-    if (imageType_.compare("rgb") == 0)
-      featureExtraction_ = new RgbFeatureExtraction();
-    else if (imageType_.compare("depth") == 0)
-      featureExtraction_ = new DepthFeatureExtraction();
-    else
-    {
-      ROS_ERROR("Invalid image type provided!");
-      ROS_ERROR("The system will now shut down!");
-      ROS_BREAK();
-    }
-
-    ROS_INFO("[victim_node] : Created Abstract Classifier instance");
   }
 
   /**
@@ -167,8 +128,8 @@ namespace pandora_vision
       normalizationParamOneTag = "min";
       normalizationParamTwoTag = "max";
 
-      normalizationParamOne = imageType_ + "_" + classifierType_ + "_min_values.xml";
-      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_max_values.xml";
+      normalizationParamOne = imageType_ + "min_values";
+      normalizationParamTwo = imageType_ + "max_values";
     }
     else
     {
@@ -178,8 +139,8 @@ namespace pandora_vision
       normalizationParamOneTag = "mean";
       normalizationParamTwoTag = "std_dev";
 
-      normalizationParamOne = imageType_ + "_" + classifierType_ + "_mean_values.xml";
-      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_standard_deviation_values.xml";
+      normalizationParamOne = imageType_ + "mean_values.xml";
+      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
     }
 
     std::string normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
@@ -222,9 +183,9 @@ namespace pandora_vision
       double newMax = 1.0;
       double newMin = -1.0;
 
-      normalizationParamOne = imageType_ + "_" + classifierType_ + "_min_values.xml";
+      normalizationParamOne = imageType_ + "min_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_max_values.xml";
+      normalizationParamTwo = imageType_ + "max_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "min";
@@ -241,9 +202,9 @@ namespace pandora_vision
     }
     else
     {
-      normalizationParamOne = imageType_ + "_" + classifierType_ + "_mean_values.xml";
+      normalizationParamOne = imageType_ + "mean_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_standard_deviation_values.xml";
+      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "mean";
@@ -292,6 +253,10 @@ namespace pandora_vision
         annotationsFile, featuresMat, labelsMat);
   }
 
+  void AbstractClassifier::trainSubSystem()
+  {
+  }
+
   /**
    * @brief This function evaluates the classifier model, based on the predicted
    * and the actual class attributes.
@@ -334,116 +299,144 @@ namespace pandora_vision
     std::cout << "False Positives = " << falsePositives << std::endl;
     std::cout << "False Negatives = " << falseNegatives << std::endl;
 
-    std::cout << classifierType_ << " Accuracy = " << accuracy_ << std::endl;
-    std::cout << classifierType_ << " Precision = " << precision_ << std::endl;
-    std::cout << classifierType_ << " Recall = " << recall_ << std::endl;
-    std::cout << classifierType_ << " F-Measure = " << fmeasure_ << std::endl;
+    std::cout << "SVM Accuracy = " << accuracy_ << std::endl;
+    std::cout << "SVM Precision = " << precision_ << std::endl;
+    std::cout << "SVM Recall = " << recall_ << std::endl;
+    std::cout << "SVM F-Measure = " << fmeasure_ << std::endl;
   }
 
+  // Platt's binary SVM Probablistic Output: an improvement from Lin et al.
   /**
-   * @brief Function that implements the training for the subsystems
-   * according to the given training sets. It applies a classification
-   * algorithm and extracts a suitable model.
+   * @brief Function that computes the vectors A,B necessary for the
+   * computation of the probablistic output of the SVM bases on Platt's binary
+   * SVM probablistic Output
+   * @param dec_values [cv::Mat] the distance from the hyperplane of the
+   * predicted results of the given test dataset
+   * @param labels [cv::Mat] the true labels of the dataset
+   * @param A [double*] the vector A to be computed
+   * @param B [double*] the vector B to be computed
    * @return void
    */
-  void AbstractClassifier::trainAndValidate(void)
+  void AbstractClassifier::sigmoid_train(cv::Mat dec_values, cv::Mat labels,
+                                  double* A, double* B)
   {
-    ROS_INFO("Starting the Training Procedure for the %s Classifier!",
-        boost::to_upper_copy<std::string>(classifierType_).c_str());
+    double prior1 = 0, prior0 = 0;
 
-    int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
-    int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
-
-    cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, numFeatures_, CV_64FC1);
-    cv::Mat trainingLabelsMat = cv::Mat::zeros(numTrainingFiles, 1, CV_64FC1);
-    cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
-    cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
-
-    if (loadClassifierModel_ && file_utilities::exist(classifierFile_.c_str()))
-    {
-      this->load(classifierFile_);
-    }
-    else
-    {
-      if (file_utilities::exist(trainingFeaturesMatrixFile_.c_str()) == false ||
-          trainingSetFeatureExtraction_)
-      {
-        std::cout << "Create necessary training matrix" << std::endl;
-        std::string prefix = "training_";
-
-        bool vocabularyNeeded = constructBagOfWordsVocabulary(trainingDirectory_,
-            trainingAnnotationsFile_);
-
-        constructFeaturesMatrix(trainingDirectory_, trainingAnnotationsFile_,
-            &trainingFeaturesMat, &trainingLabelsMat);
-
-        std::cout << "Normalize features" << std::endl;
-        normalizeFeaturesAndSaveNormalizationParameters(&trainingFeaturesMat);
-
-        trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
-        trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
-
-        file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
-            prefix, trainingFeaturesMatrixFile_, trainingLabelsMatrixFile_,
-            imageType_);
-
-        if (vocabularyNeeded)
-        {
-          std::cout << "Save bag of words vocabulary" << std::endl;
-          const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
-          const std::string bagOfWordsFilePath = filesDirectory_ + bagOfWordsFile;
-          file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
-              featureExtraction_->getBagOfWordsVocabulary());
-        }
-      }
+    for (int ii = 0; ii < dec_values.rows; ii++)
+      if (labels.at<double>(ii, 0) > 0)
+        prior1 += 1;
       else
+        prior0+= 1;
+
+    int max_iter = 100;  // Maximal number of iterations
+    double min_step = 1e-10;  // Minimal step taken in line search
+    double sigma = 1e-12;  // For numerically strict PD of Hessian
+    double eps = 1e-5;
+    double hiTarget = (prior1 + 1.0) / (prior1 + 2.0);
+    double loTarget = 1 / (prior0 + 2.0);
+    double* t = new double[labels.rows];
+    double fApB, p, q, h11, h22, h21, g1, g2, det, dA, dB, gd, stepsize;
+    double newA, newB, newf, d1, d2, Avector, Bvector;
+    int iter;
+
+    // Initial Point and Initial Fun Value
+    Avector = 0.0;
+    Bvector = log((prior0 + 1.0) / (prior1 + 1.0));
+    double fval = 0.0;
+
+    for (int ii = 0; ii <labels.rows; ii++)
+    {
+      if (labels.at<double>(ii, 0) > 0)
+        t[ii] = hiTarget;
+      else
+        t[ii]=loTarget;
+      fApB = dec_values.at<double>(ii, 0) * Avector + Bvector;
+      if (fApB >= 0)
+        fval += t[ii] * fApB + log(1 + exp(-fApB));
+      else
+        fval += (t[ii] - 1) * fApB + log(1 + exp(fApB));
+    }
+    for (iter = 0; iter < max_iter; iter++)
+    {
+      // Update Gradient and Hessian (use H' = H + sigma I)
+      h11 = sigma;  // numerically ensures strict PD
+      h22 = sigma;
+      h21 = 0.0;
+      g1 = 0.0;
+      g2 = 0.0;
+      for (int ii = 0; ii < dec_values.rows; ii++)
       {
-        trainingFeaturesMat = file_utilities::loadFiles(
-            trainingFeaturesMatrixFile_, "training_features_mat");
-        trainingLabelsMat = file_utilities::loadFiles(
-            trainingLabelsMatrixFile_, "training_labels_mat");
+        fApB = dec_values.at<double>(ii, 0) * Avector + Bvector;
+        if (fApB >= 0)
+        {
+          p = exp(-fApB) / (1.0 + exp(-fApB));
+          q = 1.0 / (1.0 + exp(-fApB));
+        }
+        else
+        {
+          p = 1.0 / (1.0 + exp(fApB));
+          q = exp(fApB) / (1.0 + exp(fApB));
+        }
+        d2 = p * q;
+        h11 += dec_values.at<double>(ii, 0) * dec_values.at<double>(ii, 0) * d2;
+        h22 += d2;
+        h21 += dec_values.at<double>(ii, 0) * d2;
+        d1 = t[ii] - p;
+        g1 += dec_values.at<double>(ii, 0) * d1;
+        g2 += d1;
       }
 
-      // Start Training Process
-      std::cout << "Starting training process for the " << boost::to_upper_copy<std::string>(imageType_)
-        << " images" << std::endl;
+      // Stopping Criteria
+      if (fabs(g1) < eps && fabs(g2) < eps)
+        break;
 
-      this->train(trainingFeaturesMat, trainingLabelsMat, classifierFile_);
+      // Finding Newton direction: -inv(H') * g
+      det= h11 * h22 - h21 * h21;
+      dA =- (h22 * g1 - h21 * g2) / det;
+      dB=-(-h21 * g1 + h11 * g2) / det;
+      gd = g1 * dA + g2 * dB;
 
-      std::cout << "Finished training process" << std::endl;
+
+      stepsize = 1;  // Line Search
+      while (stepsize >= min_step)
+      {
+        newA = Avector + stepsize * dA;
+        newB = Bvector + stepsize * dB;
+
+        // New function value
+        newf = 0.0;
+        for (int ii = 0; ii < labels.rows; ii++)
+        {
+          fApB = dec_values.at<double>(ii, 0) * newA + newB;
+          if (fApB >= 0)
+            newf += t[ii] * fApB + log(1 + exp(-fApB));
+          else
+            newf += (t[ii] - 1) * fApB +log(1 + exp(fApB));
+        }
+        // Check sufficient decrease
+        if (newf < fval + 0.0001 * stepsize * gd)
+        {
+          Avector = newA;
+          Bvector = newB;
+          fval = newf;
+          break;
+        }
+        else
+          stepsize = stepsize / 2.0;
+      }
+
+      if (stepsize < min_step)
+      {
+        std::cout << "Line search fails in two-class probability estimates" << std::endl;
+        break;
+      }
     }
-    if (file_utilities::exist(testFeaturesMatrixFile_.c_str()) == false ||
-        testSetFeatureExtraction_)
-    {
-      std::cout << "Create necessary test matrix" << std::endl;
-      std::string prefix = "test_";
 
-      constructFeaturesMatrix(testDirectory_, testAnnotationsFile_,
-          &testFeaturesMat, &testLabelsMat);
-
-      loadNormalizationParametersAndNormalizeFeatures(&testFeaturesMat);
-
-      testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
-      testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
-
-      file_utilities::saveFeaturesInFile(testFeaturesMat, testLabelsMat,
-          prefix, testFeaturesMatrixFile_, testLabelsMatrixFile_, imageType_);
-    }
-    else
-    {
-      testFeaturesMat = file_utilities::loadFiles(
-          testFeaturesMatrixFile_, "test_features_mat");
-      testLabelsMat = file_utilities::loadFiles(
-          testLabelsMatrixFile_, "test_labels_mat");
-    }
-
-    cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_32FC1);
-
-    validate(testFeaturesMat, &results);
-
-    file_utilities::saveToFile(resultsFile_, "results", results);
-    evaluate(results, testLabelsMat);
+    if (iter >= max_iter)
+      std::cout << "Reaching maximal iterations in two-class probability estimates" << std::endl;
+    free(t);
+    *A = Avector;
+    *B = Bvector;
   }
-
 }  // namespace pandora_vision
 
