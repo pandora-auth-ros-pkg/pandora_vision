@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslint
     cv_bridge
-    pcl_conversions
     sensor_msgs
     pandora_vision_msgs
     pandora_vision_common
@@ -20,7 +19,6 @@ catkin_package(
     CATKIN_DEPENDS
       roscpp
       cv_bridge
-      pcl_conversions
       sensor_msgs
       pandora_vision_msgs
       pandora_vision_common

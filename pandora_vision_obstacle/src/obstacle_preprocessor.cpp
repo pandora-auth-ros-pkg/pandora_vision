@@ -38,19 +38,18 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include "pandora_vision_common/pandora_vision_utilities/message_conversions.h"
 #include "pandora_vision_obstacle/obstacle_preprocessor.h"
 
 namespace pandora_vision
 {
   ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns, 
     sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-    ImagesStamped>(ns, handler)
+    ImagesStamped>(ns, handler), converterPtr_(new PointCloudToImageConverter)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
       this->accessProcessorNh()->getNamespace());
   }
-  
+
   ObstaclePreProcessor::~ObstaclePreProcessor() {}
 
   bool ObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
@@ -58,12 +57,10 @@ namespace pandora_vision
   {
     output->setHeader(input->header);
 
-    PointCloudPtr pointCloud(new PointCloud);
-    pcl::fromROSMsg<pcl::PointXYZRGB>(*input, *pointCloud);
-
-    output->setRgbImage(MessageConversions::convertPointCloudMessageToImage(pointCloud, CV_8UC3));
-    output->setDepthImage(MessageConversions::convertPointCloudMessageToImage(pointCloud,
-      CV_32FC1));
+    output->setRgbImage(converterPtr_->convertPclToImage(input,
+          sensor_msgs::image_encodings::TYPE_8UC3));
+    output->setDepthImage(converterPtr_->convertPclToImage(input,
+          sensor_msgs::image_encodings::TYPE_32FC1));
 
     if (output->rgbImage.empty() || output->depthImage.empty())
     {
