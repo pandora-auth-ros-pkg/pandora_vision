@@ -60,28 +60,57 @@ namespace pandora_vision
        * @param kernel [cost cv::Mat&] The kernel used to perform
        * the transform
        **/
-      explicit DiscreteWaveletTransform(const cv::Mat& kernel);
+      DiscreteWaveletTransform(const cv::Mat& kernelLow,
+          const cv::Mat& kernelHigh);
 
       /**
        * @brief Virtual Destructor
-       **/ 
+       **/
       virtual ~DiscreteWaveletTransform();
 
     private:
       /**
-       * @brief Perform convolution with a column vector kernel
-       * @param inImage [const cv::Mat&]
+       * @brief Perform convolution with a vector kernel
+       * @param inImage [const cv::Mat&] The image to be convolved
+       * @param kernel [const cv::Mat&] The filter used
+       * @param cols [bool] Whether the type of convolution will
+       * be performed column-wise
        **/
-      cv::Mat convCols(const cv::Mat& inImage);
+      cv::Mat optionalConv(const cv::Mat& inImage,
+          const cv::Mat& kernel, bool cols);
+      /**
+       * @brief Perform convolution with a column vector kernel
+       * @param inImage [const cv::Mat&] The image to be convolved
+       * @param kernel [const cv::Mat&] The filter used
+       **/
+      cv::Mat convCols(const cv::Mat& inImage,
+          const cv::Mat& kernel);
       /**
        * @brief Perform convolution with a row vector kernel
-       * @param inImage [const cv::Mat&]
+       * @param inImage [const cv::Mat&] The image to be convolved
+       * @param kernel [const cv::Mat&] The filter used
        **/
-      cv::Mat convRows(const cv::Mat& inImage);
+      cv::Mat convRows(const cv::Mat& inImage,
+          const cv::Mat& kernel);
+
+      /**
+       * @brief Return the final result of the DWT
+       * @param inImage [const cv::Mat& inImage]
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<cv::Mat>] The list of images that are
+       * the result of the transform with order LL, LH, HL, HH and
+       * so on according to the level
+       **/
+      std::vector<cv::Mat> getTransformedImage(const cv::Mat& inImage,
+          int level = 1);
 
     private:
-      /// The kernel used to perform the DWT
-      cv::Mat kernel_;
+      /// The kernel used to perform the DWT that represents the
+      /// low - pass filter used
+      cv::Mat kernelLow_;
+      /// The kernel used to perform the DWT that represents the
+      /// band - pass filter used for high frequencies
+      cv::Mat kernelHigh_;
   };
 
 }  // namespace pandora_vision

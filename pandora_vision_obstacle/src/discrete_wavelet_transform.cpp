@@ -43,18 +43,27 @@ namespace pandora_vision
 {
   DiscreteWaveletTransform::DiscreteWaveletTransform(int kernelSize)
   {
-
   }
 
-  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& kernel)
+  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& kernelLow,
+      const cv::Mat& kernelHigh)
   {
-    if (kernel.rows == 1)
+    if (kernelLow.rows == 1)
     {
-      kernel_ = kernel;
+      kernelLow_ = kernelLow;
     }
     else
     {
-      cv::transpose(kernel, kernel_);
+      cv::transpose(kernelLow, kernelLow_);
+    }
+
+    if (kernelHigh.rows == 1)
+    {
+      kernelHigh_ = kernelHigh;
+    }
+    else
+    {
+      cv::transpose(kernelHigh, kernelHigh_);
     }
   }
 
@@ -62,13 +71,17 @@ namespace pandora_vision
   {
   }
 
-  cv::Mat DiscreteWaveletTransform::convCols(const cv::Mat& inImage)
+  cv::Mat DiscreteWaveletTransform::optionalConv(const cv::Mat& inImage,
+      const cv::Mat& kernel, bool cols)
   {
     cv::Mat paddedImage;
     cv::copyMakeBorder(inImage, paddedImage, 0, 1, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0));
 
-    cv::Mat transKernel;
-    cv::transpose(kernel_, transKernel);
+    cv::Mat transKernel = kernel.clone();
+    if (cols)
+    {
+      cv::transpose(kernel, transKernel);
+    }
 
     cv::Mat result;
     cv::filter2D(paddedImage, result, -1, transKernel, cv::Point(-1, -1), cv::BORDER_CONSTANT);
@@ -76,15 +89,53 @@ namespace pandora_vision
     return result;
   }
 
-  cv::Mat DiscreteWaveletTransform::convRows(const cv::Mat& inImage)
+  cv::Mat DiscreteWaveletTransform::convCols(const cv::Mat& inImage,
+      const cv::Mat& kernel)
   {
-    cv::Mat paddedImage;
-    cv::copyMakeBorder(inImage, paddedImage, 0, 0, 0, 1, cv::BORDER_CONSTANT, cv::Scalar(0));
+    return optionalConv(inImage, kernel, true);
+  }
 
-    cv::Mat result;
-    cv::filter2D(paddedImage, result, -1, kernel_, cv::Point(-1, -1), cv::BORDER_CONSTANT);
+  cv::Mat DiscreteWaveletTransform::convRows(const cv::Mat& inImage,
+      const cv::Mat& kernel)
+  {
+    return optionalConv(inImage, kernel, false);
+  }
 
-    return result;
+  std::vector<cv::Mat> DiscreteWaveletTransform::getTransformedImage(const cv::Mat& inImage, int level)
+  {
+    std::vector<cv::Mat> dwtImages;
+    cv::Mat input = inImage.clone();
+
+    for (int ii = 0; ii < level; ii++)
+    {
+      cv::Mat imageConvH0 = convCols(input, kernelLow_);
+      cv::Mat imageConvH1 = convCols(input, kernelHigh_);
+
+      cv::Mat subImage0, subImage1;
+      // Downsample
+
+      imageConvH0 = convRows(subImage0, kernelLow_);
+      imageConvH1 = convRows(subImage0, kernelHigh_);
+
+      cv::Mat subImage00, subImage01;
+      // Downsample
+
+      dwtImages.push_back(subImage00);
+      dwtImages.push_back(subImage01);
+
+      imageConvH0 = convRows(subImage1, kernelLow_);
+      imageConvH1 = convRows(subImage1, kernelHigh_);
+
+      cv::Mat subImage10, subImage11;
+      // Downsample
+
+      dwtImages.push_back(subImage10);
+      dwtImages.push_back(subImage11);
+
+      input = subImage00.clone();
+    }
+
+    return dwtImages;
   }
 
 }  // namespace pandora_vision
