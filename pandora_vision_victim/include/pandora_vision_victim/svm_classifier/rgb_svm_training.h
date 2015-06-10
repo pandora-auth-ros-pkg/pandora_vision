@@ -67,7 +67,9 @@ namespace pandora_vision
       /**
        * @brief The Constructor
        */
-      RgbSvmTraining(const std::string& ns, int _num_feat, const std::string& datasetPath);
+      RgbSvmTraining(const std::string& ns, int numFeatures,
+          const std::string& datasetPath, const std::string& classifierType,
+          const std::string& imageType);
 
       /**
        * @brief The Destructor

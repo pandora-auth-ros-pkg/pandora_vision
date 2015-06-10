@@ -103,6 +103,7 @@ target_link_libraries(${PROJECT_NAME}_feature_extractors
 
 ########################## SVM Classifier Library ##############################
 add_library(${PROJECT_NAME}_svm_classifier
+    src/svm_classifier/abstract_classifier.cpp
     src/svm_classifier/svm_training.cpp
     src/svm_classifier/rgb_svm_training.cpp
     src/svm_classifier/depth_svm_training.cpp

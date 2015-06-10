@@ -68,7 +68,8 @@ namespace pandora_vision
        * @brief The Constructor
        */
       DepthSvmTraining(const std::string& ns, int numFeatures,
-          const std::string& datasetPath);
+          const std::string& datasetPath, const std::string& classifierType,
+          const std::string& imageType);
 
       /**
        * @brief The Destructor
