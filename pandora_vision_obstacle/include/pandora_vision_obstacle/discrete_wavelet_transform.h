@@ -101,7 +101,7 @@ namespace pandora_vision
        * the result of the transform with order LL, LH, HL, HH and
        * so on according to the level
        **/
-      std::vector<cv::Mat> getTransformedImage(const cv::Mat& inImage,
+      std::vector<cv::Mat> dwt2D(const cv::Mat& inImage,
           int level = 1);
 
     private:
