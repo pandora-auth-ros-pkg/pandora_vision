@@ -41,7 +41,7 @@
   <group unless="$(arg openni)">
     <group unless="$(arg openni2)">
 
-      <arg name="path" default="/media/INTENSO/pandora/thermal2.bag" />
+      <arg name="path" default="/home/aggelos/Desktop/pcl_thermal_bags/thermal2.bag" />
 
       <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
         <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />

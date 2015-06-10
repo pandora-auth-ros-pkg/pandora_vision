@@ -156,7 +156,7 @@ namespace pandora_vision
       Parameters::Thermal::probability_method);
 
     // Convert the conveyors information so it can match with the
-    //  Rgb and Depth images
+    //  Rgb and Depth images. If its outside of limits discart that conveyor.
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_,
       cY_, angle_);
 
@@ -390,9 +390,9 @@ namespace pandora_vision
       {
         int counter = 0;
 
-        for(unsigned int k = (temperatureX - 1); k < (temperatureX + 2); k++)
+        for(unsigned int k = (temperatureY - 1); k < (temperatureY + 2); k++)
         {
-          for(unsigned int o = (temperatureY - 1); o < (temperatureY + 2); o++)
+          for(unsigned int o = (temperatureX - 1); o < (temperatureX + 2); o++)
           {
             average += temperatures.data[k * width + o];
             counter++;
@@ -403,7 +403,7 @@ namespace pandora_vision
       else
       {
         // If it is on the edges it take the temperature of the keypoint it self
-        average = temperatures.data[temperatureX * width + temperatureY];
+        average = temperatures.data[temperatureY * width + temperatureX];
       }      
 
       // Fill the average temperature vector
