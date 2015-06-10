@@ -36,6 +36,7 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
+
 #ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
 #define PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
 

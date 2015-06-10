@@ -32,7 +32,8 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author:  Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
 #include "pandora_vision_victim/utilities/file_utilities.h"

@@ -33,57 +33,40 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
-
-#include <math.h>
-
-#include <iostream>
-#include <fstream>
 #include <string>
 
-#include <opencv2/opencv.hpp>
-#include <boost/filesystem.hpp>
 #include <ros/ros.h>
-#include <ros/package.h>
 
-#include "pandora_vision_victim/classifiers/svm_training.h"
-#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
-#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
-#include "pandora_vision_victim/utilities/file_utilities.h"
-
-#define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
+#include "pandora_vision_victim/classifiers/random_forests_classifier.h"
 
 namespace pandora_vision
 {
-  class DepthSvmTraining : public SvmTraining
+  /**
+   * @brief Constructor
+   */
+  RandomForestsClassifier::RandomForestsClassifier(const std::string& ns,
+      int numFeatures, const std::string& datasetPath,
+      const std::string& classifierType,
+      const std::string& imageType)
+      : AbstractClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
   {
-    public:
-      /**
-       * @brief The Constructor
-       */
-      DepthSvmTraining(const std::string& ns, int numFeatures,
-          const std::string& datasetPath, const std::string& classifierType,
-          const std::string& imageType);
+    ROS_INFO("[victim_node] : Created Random Forests training instance");
+  }
 
-      /**
-       * @brief The Destructor
-       */
-      virtual ~DepthSvmTraining();
+  /**
+   * @brief Destructor
+   */
+  RandomForestsClassifier::~RandomForestsClassifier()
+  {
+    ROS_DEBUG("[victim_node] : Destroying Random Forests training instance");
+  }
 
-      /**
-       * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies SVM and extracts
-       * a suitable model.
-       * @return void
-       */
-      virtual void trainSubSystem();
-  };
+  void RandomForestsClassifier::trainSubSystem()
+  {
+  }
+
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
 

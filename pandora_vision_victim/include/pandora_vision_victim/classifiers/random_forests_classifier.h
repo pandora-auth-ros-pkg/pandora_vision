@@ -33,48 +33,34 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
 
-#include <math.h>
-
-#include <iostream>
-#include <fstream>
 #include <string>
 
 #include <opencv2/opencv.hpp>
-#include <boost/filesystem.hpp>
-#include <ros/ros.h>
-#include <ros/package.h>
 
-#include "pandora_vision_victim/classifiers/svm_training.h"
-#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
-#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
-#include "pandora_vision_victim/utilities/file_utilities.h"
-
-#define USE_OPENCV_GRID_SEARCH_AUTOTRAIN 1
+#include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
 namespace pandora_vision
 {
-  class DepthSvmTraining : public SvmTraining
+  class RandomForestsClassifier : public AbstractClassifier
   {
     public:
       /**
        * @brief The Constructor
        */
-      DepthSvmTraining(const std::string& ns, int numFeatures,
+      RandomForestsClassifier(const std::string& ns, int numFeatures,
           const std::string& datasetPath, const std::string& classifierType,
           const std::string& imageType);
 
       /**
        * @brief The Destructor
        */
-      virtual ~DepthSvmTraining();
+      virtual ~RandomForestsClassifier();
 
       /**
        * @brief Function that implements the training for the subsystems
@@ -83,7 +69,12 @@ namespace pandora_vision
        * @return void
        */
       virtual void trainSubSystem();
+
+    protected:
+      /// Parameters of the Random Forests Classifier.
+      CvRTParams randomForestsParams_;
+      /// Train the Random Forests
+      CvRTrees randomForestsClassifier_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
-
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
