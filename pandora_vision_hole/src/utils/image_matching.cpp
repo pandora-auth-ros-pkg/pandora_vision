@@ -73,8 +73,8 @@ namespace pandora_vision
     {
       bool skip = false;
       cv::Point2f keypoint;
-      keypoint.x = conveyor->holes[i].keypoint.pt.x;
-      keypoint.y = conveyor->holes[i].keypoint.pt.y;
+      keypoint.x = conveyor->holes[i - deleted].keypoint.pt.x;
+      keypoint.y = conveyor->holes[i - deleted].keypoint.pt.y;
 
       // Match the keypoint of each Hole found
       keypoint = matchingFunction(
@@ -85,29 +85,29 @@ namespace pandora_vision
       if(keypoint.x < 1 || keypoint.x > (Parameters::Image::WIDTH - 1) 
         || keypoint.y < 1 || keypoint.y > (Parameters::Image::HEIGHT -1))
       {
-        conveyor->holes.erase(conveyor->holes.begin() + i);
+        conveyor->holes.erase(conveyor->holes.begin() + i - deleted);
         deleted++;
       }
       else
       {
         // Continue the process
-        conveyor->holes[i].keypoint.pt.x = keypoint.x;
-        conveyor->holes[i].keypoint.pt.y = keypoint.y;
+        conveyor->holes[i - deleted].keypoint.pt.x = keypoint.x;
+        conveyor->holes[i - deleted].keypoint.pt.y = keypoint.y;
 
         // Match the bounding box and check if it is outside rgb image, if so
         // reject that hole. Bounding box check is enough, we dont need to check
         // outlines, because they reside entirely inside it.
-        for(unsigned int j = 0; j < conveyor->holes[i].rectangle.size(); j++)
+        for(unsigned int j = 0; j < conveyor->holes[i - deleted].rectangle.size(); j++)
         {
-          conveyor->holes[i].rectangle[j] = matchingFunction(
-            conveyor->holes[i].rectangle[j], x_th, y_th, c_x, c_y, angle);
+          conveyor->holes[i - deleted].rectangle[j] = matchingFunction(
+            conveyor->holes[i - deleted].rectangle[j], x_th, y_th, c_x, c_y, angle);
 
-          if(conveyor->holes[i].rectangle[j].x < 0 
-            || conveyor->holes[i].rectangle[j].x > (Parameters::Image::WIDTH) 
-            || conveyor->holes[i].rectangle[j].y < 0 
-            || conveyor->holes[i].rectangle[j].y > (Parameters::Image::HEIGHT))
+          if(conveyor->holes[i - deleted].rectangle[j].x < 0 
+            || conveyor->holes[i - deleted].rectangle[j].x > (Parameters::Image::WIDTH) 
+            || conveyor->holes[i - deleted].rectangle[j].y < 0 
+            || conveyor->holes[i - deleted].rectangle[j].y > (Parameters::Image::HEIGHT))
           {
-            conveyor->holes.erase(conveyor->holes.begin() + i);
+            conveyor->holes.erase(conveyor->holes.begin() + i - deleted);
             skip = true;
             deleted++;
             break;
@@ -118,10 +118,10 @@ namespace pandora_vision
         if(!skip)
         {
           // Match the blobs outline points
-          for(unsigned int o = 0; o < conveyor->holes[i].outline.size(); o++)
+          for(unsigned int o = 0; o < conveyor->holes[i - deleted].outline.size(); o++)
           {
-            conveyor->holes[i].outline[o] = matchingFunction(
-              conveyor->holes[i].outline[o], x_th, y_th, c_x, c_y, angle);
+            conveyor->holes[i - deleted].outline[o] = matchingFunction(
+              conveyor->holes[i - deleted].outline[o], x_th, y_th, c_x, c_y, angle);
           }
 
 
@@ -148,15 +148,15 @@ namespace pandora_vision
 
           // Second method to connect the new outlines
 
-          // Put the outline points in order for each hole
-          outlinePointsInOrder(conveyor);
-
-          // Connect the points in order to have a coherent set of points 
-          // as the hole's outline. For each hole.
-          outlinePointsConnector(conveyor);
         }
       }
     }
+    // Put the outline points in order for each hole
+    outlinePointsInOrder(conveyor);
+
+    // Connect the points in order to have a coherent set of points 
+    // as the hole's outline. For each hole.
+    outlinePointsConnector(conveyor);
   }
 
   /**
@@ -185,8 +185,8 @@ namespace pandora_vision
     cv::Point2f rotation;
     cv::Point2f newCenter;
     // Rotational transformation
-    newCenter.x = c_x * Parameters::ThermalImage::WIDTH / 2; 
-    newCenter.y = c_y * Parameters::ThermalImage::HEIGHT / 2; 
+    newCenter.x = c_x * Parameters::ThermalImage::WIDTH / 2 + xInit; 
+    newCenter.y = c_y * Parameters::ThermalImage::HEIGHT / 2 + yInit; 
 
     rotation.x = newCenter.x + cos(angle) * (linear.x - newCenter.x) - 
       sin(angle) * (linear.y - newCenter.y);
@@ -208,12 +208,13 @@ namespace pandora_vision
   **/
   void ImageMatching::outlinePointsConnector(HolesConveyor* conveyor)
   {
-    cv::Mat outlineImage = cv::Mat::zeros(Parameters::Image::HEIGHT,
-      Parameters::Image::WIDTH, CV_8UC1);
 
     // Draw the outline of the new ordered points for each hole
     for(unsigned int i = 0; i < conveyor->size(); i++)
     {
+      cv::Mat outlineImage = cv::Mat::zeros(Parameters::Image::HEIGHT,
+        Parameters::Image::WIDTH, CV_8UC1);
+
       for(unsigned int j = 0; j < conveyor->holes[i].outline.size(); j++)
       {
         cv::line(outlineImage, conveyor->holes[i].outline[j], 
