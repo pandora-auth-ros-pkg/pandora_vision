@@ -37,8 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
 
 #include <math.h>
 
@@ -51,7 +51,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#include "pandora_vision_victim/svm_classifier/svm_training.h"
+#include "pandora_vision_victim/classifiers/svm_training.h"
 #include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
@@ -85,5 +85,5 @@ namespace pandora_vision
       virtual void trainSubSystem();
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_TRAINING_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_TRAINING_H
 

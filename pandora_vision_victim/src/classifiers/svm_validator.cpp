@@ -41,7 +41,7 @@
 
 #include <ros/console.h>
 
-#include "pandora_vision_victim/svm_classifier/svm_validator.h"
+#include "pandora_vision_victim/classifiers/svm_validator.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**

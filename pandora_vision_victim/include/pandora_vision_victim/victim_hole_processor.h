@@ -45,8 +45,8 @@
 #include "pandora_vision_victim/enhanced_image_stamped.h"
 #include "pandora_vision_victim/victim_poi.h"
 #include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/svm_classifier/rgb_svm_validator.h"
-#include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
+#include "pandora_vision_victim/classifiers/rgb_svm_validator.h"
+#include "pandora_vision_victim/classifiers/depth_svm_validator.h"
 
 namespace pandora_vision
 {

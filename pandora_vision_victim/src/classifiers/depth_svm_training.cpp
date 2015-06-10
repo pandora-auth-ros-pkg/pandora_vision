@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-#include "pandora_vision_victim/svm_classifier/depth_svm_training.h"
+#include "pandora_vision_victim/classifiers/depth_svm_training.h"
 
 namespace pandora_vision
 {

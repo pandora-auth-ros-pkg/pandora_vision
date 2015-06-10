@@ -36,8 +36,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_VALIDATOR_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
 
 #include <vector>
 #include <string>
@@ -142,4 +142,4 @@ namespace pandora_vision
       std::vector<double> normalizationParamTwoVec_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_SVM_VALIDATOR_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H

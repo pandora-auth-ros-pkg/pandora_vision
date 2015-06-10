@@ -40,7 +40,7 @@
 #include <vector>
 #include <string>
 
-#include "pandora_vision_victim/svm_classifier/rgb_svm_training.h"
+#include "pandora_vision_victim/classifiers/rgb_svm_training.h"
 
 namespace pandora_vision
 {

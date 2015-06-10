@@ -35,8 +35,8 @@
 * Author:  Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H
-#define PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
 
 #include <cmath>
 #include <string>
@@ -239,4 +239,4 @@ namespace pandora_vision
       FeatureExtractionUtilities* featureExtractionUtilities_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIER_ABSTRACT_CLASSIFIER_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H

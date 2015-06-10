@@ -32,45 +32,33 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Authors:
-*   Kofinas Miltiadis <mkofinas@gmail.com>
-*   Protopapas Marios <protopapas_marios@hotmail.com>
+* Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_VALIDATOR_H
 
 #include <string>
+#include <iostream>
 
-#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/svm_classifier/svm_validator.h"
+#include "pandora_vision_victim/classifiers/depth_svm_training.h"
 
-/**
- * @namespace pandora_vision
- * @brief The main namespace for PANDORA vision
- */
-namespace pandora_vision
+int main(int argc, char** argv)
 {
-  /**
-   * @class DepthSvmValidator
-   * @brief This class classifies Depth images using an SVM classifier model.
-   */
-  class DepthSvmValidator : public SvmValidator
-  {
-    public:
-      /**
-       * @brief Constructor. Initializes SVM classifier parameters and loads
-       * classifier model. The classifier is to be used with Depth images.
-       * @param classifierPath [const std::string&] The path to the classifier
-       * model.
-       */
-      explicit DepthSvmValidator(const VictimParameters& params);
+  ros::init(argc, argv, "victim_depth_svm_training_node");
 
-      /**
-       * @brief Default Destructor.
-       */
-      virtual ~DepthSvmValidator();
-  };
-}  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_SVM_CLASSIFIER_DEPTH_SVM_VALIDATOR_H
+  // Number of features for RGB Training = 121
+  // Number of features for Depth Training = 103
+  int numFeatures;
+  std::cout << "Add total number of features required for your subsystem:" << std::endl;
+  std::cin >> numFeatures;
+  std::string datasetPath;
+  std::cout << "Add absolute path, where your samples are stored " << std::endl;
+  std::cin >> datasetPath;
 
+  std::string classifierType = "svm_";
+  std::string imageType = "rgb_";
+  pandora_vision::DepthSvmTraining victim_depth_svm_trainer("victim",
+      numFeatures, datasetPath, classifierType, imageType);
+  victim_depth_svm_trainer.trainSubSystem();
+
+  return 0;
+}
 

@@ -101,15 +101,15 @@ target_link_libraries(${PROJECT_NAME}_feature_extractors
     ${PROJECT_NAME}_utilities
 )
 
-########################## SVM Classifier Library ##############################
-add_library(${PROJECT_NAME}_svm_classifier
-    src/svm_classifier/abstract_classifier.cpp
-    src/svm_classifier/svm_training.cpp
-    src/svm_classifier/rgb_svm_training.cpp
-    src/svm_classifier/depth_svm_training.cpp
+########################### Classifiers Library ###############################
+add_library(${PROJECT_NAME}_classifiers
+    src/classifiers/abstract_classifier.cpp
+    src/classifiers/svm_training.cpp
+    src/classifiers/rgb_svm_training.cpp
+    src/classifiers/depth_svm_training.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_svm_classifier
+target_link_libraries(${PROJECT_NAME}_classifiers
     ${catkin_LIBRARIES}
     ${PROJECT_NAME}_feature_extractors
     ${PROJECT_NAME}_victim_parameters
@@ -117,12 +117,12 @@ target_link_libraries(${PROJECT_NAME}_svm_classifier
 )
 
 
-################# victim hole processor #################
+########################## Victim Hole Processor ##############################
 add_library(${PROJECT_NAME}_hole_processor
   src/victim_hole_processor.cpp
-  src/svm_classifier/svm_validator.cpp
-  src/svm_classifier/rgb_svm_validator.cpp
-  src/svm_classifier/depth_svm_validator.cpp
+  src/classifiers/svm_validator.cpp
+  src/classifiers/rgb_svm_validator.cpp
+  src/classifiers/depth_svm_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_hole_processor
   ${catkin_LIBRARIES}
@@ -130,7 +130,7 @@ target_link_libraries(${PROJECT_NAME}_hole_processor
   ${PROJECT_NAME}_feature_extractors
 )
 
-################# victim hole preprocessor #################
+######################## Victim Hole Preprocessor #############################
 add_library(${PROJECT_NAME}_hole_preprocessor
   src/victim_hole_preprocessor.cpp
 )
@@ -141,36 +141,34 @@ target_link_libraries(${PROJECT_NAME}_hole_preprocessor
 
 add_dependencies(${PROJECT_NAME}_hole_preprocessor
   ${catkin_EXPORTED_TARGETS})
-################# victim image processor #################
+
+########################## Victim Image Processor #############################
 add_library(${PROJECT_NAME}_image_processor
   src/victim_image_processor.cpp
-  src/svm_classifier/svm_validator.cpp
-  src/svm_classifier/rgb_svm_validator.cpp
-  src/svm_classifier/depth_svm_validator.cpp
-
+  src/classifiers/svm_validator.cpp
+  src/classifiers/rgb_svm_validator.cpp
+  src/classifiers/depth_svm_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_image_processor
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_victim_parameters
   ${PROJECT_NAME}_feature_extractors
-
 )
 
-################# victim image preprocessor #################
+######################## Victim Image Preprocessor ############################
 add_library(${PROJECT_NAME}_image_preprocessor
   src/victim_image_preprocessor.cpp
 )
 target_link_libraries(${PROJECT_NAME}_image_preprocessor
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_victim_parameters
-
-  )
+)
 
 add_dependencies(${PROJECT_NAME}_image_preprocessor
   ${catkin_EXPORTED_TARGETS}
 )
 
-################# victim postprocessor #################
+########################## Victim Postprocessor ###############################
 add_library(${PROJECT_NAME}_postprocessor
   src/victim_postprocessor.cpp
 )
@@ -180,7 +178,8 @@ target_link_libraries(${PROJECT_NAME}_postprocessor
 
 add_dependencies(${PROJECT_NAME}_postprocessor
   ${catkin_EXPORTED_TARGETS})
-################# victim handler #################
+
+############################## Victim Handler #################################
 add_library(${PROJECT_NAME}_handler
   src/victim_handler.cpp
 )
@@ -188,12 +187,12 @@ target_link_libraries(${PROJECT_NAME}_handler
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_hole_processor
   ${PROJECT_NAME}_hole_preprocessor
-   ${PROJECT_NAME}_image_processor
-   ${PROJECT_NAME}_image_preprocessor
+  ${PROJECT_NAME}_image_processor
+  ${PROJECT_NAME}_image_preprocessor
   ${PROJECT_NAME}_postprocessor
 )
 
-################# victim node #################
+################################ Victim Node ##################################
 add_executable(${PROJECT_NAME}_node
   src/victim_node.cpp
 )
@@ -206,17 +205,16 @@ target_link_libraries(${PROJECT_NAME}_node
   ${PROJECT_NAME}_handler
 )
 
-
-############################## Victim SVM Trainer ##############################
+############################# Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)
 
   add_executable(victim_rgb_svm_training_node
-      src/svm_classifier/victim_rgb_svm_training_node.cpp
+      src/classifiers/victim_rgb_svm_training_node.cpp
   )
 
   target_link_libraries(victim_rgb_svm_training_node
       ${catkin_LIBRARIES}
-      ${PROJECT_NAME}_svm_classifier
+      ${PROJECT_NAME}_classifiers
   )
 
   add_dependencies(victim_rgb_svm_training_node
@@ -225,12 +223,12 @@ if(VICTIM_ENABLE_TRAIN)
   )
 
   add_executable(victim_depth_svm_training_node
-      src/svm_classifier/victim_depth_svm_training_node.cpp
+      src/classifiers/victim_depth_svm_training_node.cpp
   )
 
   target_link_libraries(victim_depth_svm_training_node
       ${catkin_LIBRARIES}
-      ${PROJECT_NAME}_svm_classifier
+      ${PROJECT_NAME}_classifiers
   )
 
   add_dependencies(victim_depth_svm_training_node
@@ -239,7 +237,7 @@ if(VICTIM_ENABLE_TRAIN)
   )
 endif()
 
-################################ Model Trainer #################################
+############################### Model Trainer #################################
 if(MODEL_ENABLE_TRAIN)
   add_executable(model_train
       src/model_trainer.cpp

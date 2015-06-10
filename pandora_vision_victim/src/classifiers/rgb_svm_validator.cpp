@@ -41,9 +41,9 @@
 
 #include <ros/console.h>
 
-#include "pandora_vision_victim/svm_classifier/depth_svm_validator.h"
+#include "pandora_vision_victim/classifiers/rgb_svm_validator.h"
 #include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
 #include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
@@ -54,29 +54,30 @@ namespace pandora_vision
 {
   /**
    * @brief Constructor. Initializes SVM classifier parameters and loads
-   * classifier model. The classifier is to be used with Depth images.
+   * classifier model. The classifier is to be used with RGB images.
    * @param classifierPath [const std::string&] The path to the classifier
    * model.
    */
-  DepthSvmValidator::DepthSvmValidator(const VictimParameters& params)
+  RgbSvmValidator::RgbSvmValidator(const VictimParameters& params)
     : SvmValidator()
   {
-    ROS_INFO("Enter Depth SVM Validator");
-    classifierPath_ = params.depth_classifier_path;
+    ROS_INFO("Enter RGB SVM Validator");
+    classifierPath_ = params.rgb_classifier_path;
 
-    ROS_INFO_STREAM(params.depth_classifier_path.c_str());
-    svmValidator_.load(params.depth_classifier_path.c_str());
-    
-    probabilityScaling_ = params.depth_svm_prob_scaling;
-    probabilityTranslation_ = params.depth_svm_prob_translation;
-    svmParams_.C = params.depth_svm_C;
-    svmParams_.gamma = params.depth_svm_gamma;
+    ROS_INFO_STREAM(params.rgb_classifier_path.c_str());
+    svmValidator_.load(params.rgb_classifier_path.c_str());
+
+    probabilityScaling_ = params.rgb_svm_prob_scaling;
+    probabilityTranslation_ = params.rgb_svm_prob_translation;
+
+    svmParams_.C = params.rgb_svm_C;
+    svmParams_.gamma = params.rgb_svm_gamma;
     svmParams_.svm_type = CvSVM::C_SVC;
     svmParams_.kernel_type = CvSVM::RBF; 
 
     std::string filesDirectory = packagePath_ + "/data/";
 
-    std::string paramFile = packagePath_ + "/config/depth_svm_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/rgb_svm_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
@@ -86,9 +87,9 @@ namespace pandora_vision
 
     if (typeOfNormalization_ == 1)
     {
-      std::string normalizationParamOne = "depth_min_values.xml";
+      std::string normalizationParamOne = "rgb_min_values.xml";
       std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
-      std::string normalizationParamTwo = "depth_max_values.xml";
+      std::string normalizationParamTwo = "rgb_max_values.xml";
       std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
 
       std::string normalizationParamOneTag = "min";
@@ -100,9 +101,9 @@ namespace pandora_vision
     }
     else if (typeOfNormalization_ == 2)
     {
-      std::string normalizationParamOne = "depth_mean_values.xml";
+      std::string normalizationParamOne = "rgb_mean_values.xml";
       std::string normalizationParamOnePath = filesDirectory + normalizationParamOne;
-      std::string normalizationParamTwo = "depth_standard_deviation_values.xml";
+      std::string normalizationParamTwo = "rgb_standard_deviation_values.xml";
       std::string normalizationParamTwoPath = filesDirectory + normalizationParamTwo;
 
       std::string normalizationParamOneTag = "mean";
@@ -113,24 +114,23 @@ namespace pandora_vision
           normalizationParamTwoPath, normalizationParamTwoTag);
     }
 
-    featureExtraction_ = new DepthFeatureExtraction();
-
+    featureExtraction_ = new RgbFeatureExtraction();
     bool vocabularyNeeded = featureExtraction_->bagOfWordsVocabularyNeeded();
     if (vocabularyNeeded)
     {
-      const std::string bagOfWordsFile = "depth_bag_of_words.xml";
+      const std::string bagOfWordsFile = "rgb_bag_of_words.xml";
       const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
       cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
           "bag_of_words");
       featureExtraction_->setBagOfWordsVocabulary(vocabulary);
     }
-    ROS_INFO("Initialized Depth SVM Validator");
+    ROS_INFO("Initialized RGB SVM Validator");
   }
 
   /**
    * @brief Default Destructor.
    */
-  DepthSvmValidator::~DepthSvmValidator()
+  RgbSvmValidator::~RgbSvmValidator()
   {
   }
 }  // namespace pandora_vision

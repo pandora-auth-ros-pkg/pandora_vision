@@ -32,31 +32,42 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Marios Protopapas
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
 #include <string>
-#include <iostream>
 
-#include "pandora_vision_victim/svm_classifier/rgb_svm_training.h"
+#include <ros/ros.h>
 
-int main(int argc, char** argv)
+#include "pandora_vision_victim/classifiers/svm_training.h"
+
+namespace pandora_vision
 {
-  ros::init(argc, argv, "victim_rgb_svm_training_node");
+  /**
+   * @brief Constructor
+   */
+  SvmTraining::SvmTraining(const std::string& ns,
+      int numFeatures, const std::string& datasetPath,
+      const std::string& classifierType,
+      const std::string& imageType)
+      : AbstractClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+  {
+    ROS_INFO("[victim_node] : Created Svm training instance");
+  }
 
-  // Number of features for RGB Training = 121
-  // Number of features for Depth Training = 103
-  int numFeatures;
-  std::cout << "Add total number of features required for your subsystem:" << std::endl;
-  std::cin >> numFeatures;
-  std::string datasetPath;
-  std::cout << "Add absolute path, where your samples are stored " << std::endl;
-  std::cin >> datasetPath;
+  /**
+   * @brief Destructor
+   */
+  SvmTraining::~SvmTraining()
+  {
+    ROS_DEBUG("[victim_node] : Destroying Svm training instance");
+  }
 
-  pandora_vision::RgbSvmTraining victim_rgb_svm_trainer("victim",
-      numFeatures, datasetPath);
-  victim_rgb_svm_trainer.trainSubSystem();
+  void SvmTraining::trainSubSystem()
+  {
+  }
 
-  return 0;
-}
+}  // namespace pandora_vision
 

@@ -36,7 +36,7 @@
 *********************************************************************/
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
-#include "pandora_vision_victim/svm_classifier/abstract_classifier.h"
+#include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
 namespace pandora_vision
 {

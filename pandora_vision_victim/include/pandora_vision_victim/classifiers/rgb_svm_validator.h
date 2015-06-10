@@ -33,41 +33,43 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
-*   Marios Protopapas
 *   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
 
 #include <string>
 
-#include <ros/ros.h>
+#include "pandora_vision_victim/victim_parameters.h"
+#include "pandora_vision_victim/classifiers/svm_validator.h"
 
-#include "pandora_vision_victim/svm_classifier/svm_training.h"
-
+/**
+ * @namespace pandora_vision
+ * @brief The main namespace for PANDORA vision
+ */
 namespace pandora_vision
 {
   /**
-   * @brief Constructor
+   * @class RgbSvmValidator
+   * @brief This class classifies RGB images using an SVM classifier model.
    */
-  SvmTraining::SvmTraining(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
-      const std::string& classifierType,
-      const std::string& imageType)
-      : AbstractClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+  class RgbSvmValidator : public SvmValidator
   {
-    ROS_INFO("[victim_node] : Created Svm training instance");
-  }
+    public:
+      /**
+       * @brief Constructor. Initializes SVM classifier parameters and loads
+       * classifier model. The classifier is to be used with RGB images.
+       * @param classifierPath [const std::string&] The path to the classifier
+       * model.
+       */
+      explicit RgbSvmValidator(const VictimParameters& params);
 
-  /**
-   * @brief Destructor
-   */
-  SvmTraining::~SvmTraining()
-  {
-    ROS_DEBUG("[victim_node] : Destroying Svm training instance");
-  }
-
-  void SvmTraining::trainSubSystem()
-  {
-  }
-
+      /**
+       * @brief Default Destructor.
+       */
+      virtual ~RgbSvmValidator();
+  };
 }  // namespace pandora_vision
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
 
