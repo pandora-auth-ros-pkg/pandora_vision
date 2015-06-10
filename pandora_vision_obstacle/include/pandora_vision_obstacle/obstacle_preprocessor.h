@@ -43,6 +43,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include "sensor_processor/preprocessor.h"
 #include "pandora_vision_common/images_stamped.h"
+#include "pandora_vision_common/pandora_vision_utilities/pointcloud_to_image_converter.h"
 
 namespace pandora_vision
 {
@@ -58,6 +59,9 @@ namespace pandora_vision
       virtual ~ObstaclePreProcessor();
 
       virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
+
+    private:
+      PointCloudToImageConverterPtr converterPtr_;
   };
 }  // namespace pandora_vision
 
