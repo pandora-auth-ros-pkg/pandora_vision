@@ -104,6 +104,52 @@ namespace pandora_vision
     return optionalConv(inImage, kernel, false);
   }
 
+  void DiscreteWaveletTransform::subSample(const cv::Mat& imageLow,
+      const cv::Mat& imageHigh, bool rows, const MatPtr& subImageLow,
+      const MatPtr& subImageHigh)
+  {
+    if (rows)
+    {
+      for (int jj = 0; jj < imageLow.rows; jj++)
+      {
+        if (jj % 2)
+        {
+          subImageLow->push_back(imageLow.row(jj));
+        }
+        else
+        {
+          subImageHigh->push_back(imageHigh.row(jj));
+        }
+      }
+    }
+    else
+    {
+      *subImageLow = cv::Mat(cv::Mat::zeros(imageLow.rows, static_cast<int>(std::ceil(
+          imageLow.cols / 2.0f)), CV_32FC1));
+      *subImageHigh = cv::Mat::zeros(imageHigh.rows, static_cast<int>(
+          std::floor(imageHigh.cols / 2.0f)), CV_32FC1);
+      int imageIndex = 0;
+      for (int jj = 0; jj < imageLow.cols; jj += 2)
+      {
+        imageLow.col(jj).copyTo(subImageLow->col(imageIndex));
+        if (jj < imageLow.cols - 1)
+        {
+          imageHigh.col(jj + 1).copyTo(subImageHigh->col(imageIndex));
+        }
+        imageIndex += 1;
+      }
+    }
+  }
+
+  void DiscreteWaveletTransform::convAndSubSample(const cv::Mat& inImage, bool rows,
+      const MatPtr& subImageLow, const MatPtr& subImageHigh)
+  {
+    cv::Mat imageConvLow = optionalConv(inImage, kernelLow_, !rows);
+    cv::Mat imageConvHigh = optionalConv(inImage, kernelHigh_, !rows);
+
+    subSample(imageConvLow, imageConvHigh, rows, subImageLow, subImageHigh);
+  }
+
   std::vector<cv::Mat> DiscreteWaveletTransform::dwt2D(const cv::Mat& inImage, int level)
   {
     std::vector<cv::Mat> dwtImages;
@@ -111,36 +157,26 @@ namespace pandora_vision
 
     for (int ii = 0; ii < level; ii++)
     {
-      cv::Mat imageConvLow = convCols(input, kernelLow_);
-      cv::Mat imageConvHigh = convCols(input, kernelHigh_);
+      MatPtr subImageL(new cv::Mat), subImageH(new cv::Mat);
+      convAndSubSample(input, false, subImageL, subImageH);
 
-      cv::Mat subImage0, subImage1;
-      // Downsample
+      MatPtr subImageLL(new cv::Mat), subImageLH(new cv::Mat);
+      convAndSubSample(*subImageL, true, subImageLL, subImageLH);
 
-      imageConvLow = convRows(subImage0, kernelLow_);
-      imageConvHigh = convRows(subImage0, kernelHigh_);
+      dwtImages.push_back(*subImageLL);
+      dwtImages.push_back(*subImageLH);
 
-      cv::Mat subImage00, subImage01;
-      // Downsample
+      MatPtr subImageHL(new cv::Mat), subImageHH(new cv::Mat);
+      convAndSubSample(*subImageH, true, subImageHL, subImageHH);
 
-      dwtImages.push_back(subImage00);
-      dwtImages.push_back(subImage01);
-
-      imageConvLow = convRows(subImage1, kernelLow_);
-      imageConvHigh = convRows(subImage1, kernelHigh_);
-
-      cv::Mat subImage10, subImage11;
-      // Downsample
-
-      dwtImages.push_back(subImage10);
-      dwtImages.push_back(subImage11);
+      dwtImages.push_back(*subImageHL);
+      dwtImages.push_back(*subImageHH);
 
       if (ii < level - 1)
       {
-        input = subImage00.clone();
+        input = subImageLL->clone();
       }
     }
-
     return dwtImages;
   }
 
