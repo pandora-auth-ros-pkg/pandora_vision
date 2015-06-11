@@ -150,9 +150,9 @@ namespace pandora_vision
     subSample(imageConvLow, imageConvHigh, rows, subImageLow, subImageHigh);
   }
 
-  std::vector<cv::Mat> DiscreteWaveletTransform::dwt2D(const cv::Mat& inImage, int level)
+  std::vector<MatPtr> DiscreteWaveletTransform::dwt2D(const cv::Mat& inImage, int level)
   {
-    std::vector<cv::Mat> dwtImages;
+    std::vector<MatPtr> dwtImages;
     cv::Mat input = inImage.clone();
 
     for (int ii = 0; ii < level; ii++)
@@ -163,14 +163,14 @@ namespace pandora_vision
       MatPtr subImageLL(new cv::Mat), subImageLH(new cv::Mat);
       convAndSubSample(*subImageL, true, subImageLL, subImageLH);
 
-      dwtImages.push_back(*subImageLL);
-      dwtImages.push_back(*subImageLH);
+      dwtImages.push_back(subImageLL);
+      dwtImages.push_back(subImageLH);
 
       MatPtr subImageHL(new cv::Mat), subImageHH(new cv::Mat);
       convAndSubSample(*subImageH, true, subImageHL, subImageHH);
 
-      dwtImages.push_back(*subImageHL);
-      dwtImages.push_back(*subImageHH);
+      dwtImages.push_back(subImageHL);
+      dwtImages.push_back(subImageHH);
 
       if (ii < level - 1)
       {

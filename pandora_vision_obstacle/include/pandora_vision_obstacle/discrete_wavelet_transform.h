@@ -80,6 +80,7 @@ namespace pandora_vision
        * @param kernel [const cv::Mat&] The filter used
        * @param cols [bool] Whether the type of convolution will
        * be performed column-wise
+       * @return [cv::Mat] The result of the convolution
        **/
       cv::Mat optionalConv(const cv::Mat& inImage,
           const cv::Mat& kernel, bool cols);
@@ -87,6 +88,8 @@ namespace pandora_vision
        * @brief Perform convolution with a column vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
        * @param kernel [const cv::Mat&] The filter used
+       * @return [cv::Mat] The result of the convolution performed
+       * column-wise
        **/
       cv::Mat convCols(const cv::Mat& inImage,
           const cv::Mat& kernel);
@@ -94,6 +97,8 @@ namespace pandora_vision
        * @brief Perform convolution with a row vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
        * @param kernel [const cv::Mat&] The filter used
+       * @return [cv::Mat] The result of the convolution performed
+       * row-wise
        **/
       cv::Mat convRows(const cv::Mat& inImage,
           const cv::Mat& kernel);
@@ -126,12 +131,11 @@ namespace pandora_vision
        * @brief Return the final result of the DWT
        * @param inImage [const cv::Mat& inImage]
        * @param level [int] The number of stages of the DWT
-       * @return [std::vector<cv::Mat>] The list of images that are
+       * @return [std::vector<MatPtr>] The list of images that are
        * the result of the transform with order LL, LH, HL, HH and
        * so on according to the level
        **/
-      std::vector<cv::Mat> dwt2D(const cv::Mat& inImage,
-          int level = 1);
+      std::vector<MatPtr> dwt2D(const cv::Mat& inImage, int level = 1);
 
     private:
       /// The kernel used to perform the DWT that represents the
@@ -141,6 +145,8 @@ namespace pandora_vision
       /// band - pass filter used for high frequencies
       cv::Mat kernelHigh_;
   };
+  typedef DiscreteWaveletTransform::MatPtr MatPtr;
+  typedef DiscreteWaveletTransform::MatConstPtr MatConstPtr;
 
 }  // namespace pandora_vision
 
