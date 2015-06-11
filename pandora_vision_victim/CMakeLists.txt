@@ -108,6 +108,8 @@ add_library(${PROJECT_NAME}_classifiers
     src/classifiers/rgb_svm_training.cpp
     src/classifiers/depth_svm_training.cpp
     src/classifiers/random_forests_classifier.cpp
+    src/classifiers/rgb_random_forests_classifier.cpp
+    src/classifiers/depth_random_forests_classifier.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_classifiers

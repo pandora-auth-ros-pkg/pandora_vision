@@ -36,31 +36,39 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_RANDOM_FORESTS_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_RANDOM_FORESTS_CLASSIFIER_H
 
+#include <iostream>
+#include <fstream>
 #include <string>
 
 #include <opencv2/opencv.hpp>
+#include <boost/filesystem.hpp>
+#include <ros/ros.h>
+#include <ros/package.h>
 
-#include "pandora_vision_victim/classifiers/abstract_classifier.h"
+#include "pandora_vision_victim/classifiers/random_forests_classifier.h"
+#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/feature_extraction.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 namespace pandora_vision
 {
-  class RandomForestsClassifier : public AbstractClassifier
+  class RgbRandomForestsClassifier : public RandomForestsClassifier
   {
     public:
       /**
        * @brief The Constructor
        */
-      RandomForestsClassifier(const std::string& ns, int numFeatures,
+      RgbRandomForestsClassifier(const std::string& ns, int numFeatures,
           const std::string& datasetPath, const std::string& classifierType,
           const std::string& imageType);
 
       /**
        * @brief The Destructor
        */
-      virtual ~RandomForestsClassifier();
+      virtual ~RgbRandomForestsClassifier();
 
       /**
        * @brief Function that implements the training for the subsystems
@@ -69,12 +77,7 @@ namespace pandora_vision
        * @return void
        */
       virtual void trainSubSystem();
-
-    protected:
-      /// Parameters of the Random Forests Classifier.
-      CvRTParams randomForestsParams_;
-      /// Train the Random Forests
-      boost::shared_ptr<CvRTrees> randomForestsClassifierPtr_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_RANDOM_FORESTS_CLASSIFIER_H
+
