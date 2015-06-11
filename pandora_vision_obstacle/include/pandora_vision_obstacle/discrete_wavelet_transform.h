@@ -40,12 +40,17 @@
 #ifndef PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
 #define PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
 
+#include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
 
 namespace pandora_vision
 {
   class DiscreteWaveletTransform
   {
+    public:
+      typedef boost::shared_ptr<cv::Mat> MatPtr;
+      typedef boost::shared_ptr<cv::Mat const> MatConstPtr;
+
     public:
       /**
        * @brief Constructor used to implement the Ingrid Daubechies
@@ -92,6 +97,30 @@ namespace pandora_vision
        **/
       cv::Mat convRows(const cv::Mat& inImage,
           const cv::Mat& kernel);
+
+      /**
+       * @brief Create two images by taking half the values of the two input
+       * images respectively
+       * @param imageLow [const cv::Mat&] The input low frequency image
+       * @param imageHigh [const cv::Mat&] The input high frequency image
+       * @param rows [bool] Whether the images are downsampled row-wise
+       * @param subImageLow [const MatPtr&] The output low frequency image
+       * @param subImageHigh [const MatPtr&] The output high frequency image
+       **/
+      void subSample(const cv::Mat& imageLow, const cv::Mat& imageHigh,
+          bool rows, const MatPtr& subImageLow, const MatPtr& subImageHigh);
+
+      /**
+       * @brief Perform convolution and subsampling row-wise or
+       * column-wise according to boolean input
+       * @param inImage [const cv::Mat&] The image to be convolved
+       * @param rows [bool] Whether the convolution is performed
+       * row-wise. Then downsampling is performed column-wise
+       * @param subImageLow [const MatPtr&] The output low frequency image
+       * @param subImageHigh [const MatPtr&] The output high frequency image
+       **/
+      void convAndSubSample(const cv::Mat& inImage, bool rows,
+          const MatPtr& subImageLow, const MatPtr& subImageHigh);
 
       /**
        * @brief Return the final result of the DWT
