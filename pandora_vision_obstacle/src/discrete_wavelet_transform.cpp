@@ -74,13 +74,16 @@ namespace pandora_vision
   cv::Mat DiscreteWaveletTransform::optionalConv(const cv::Mat& inImage,
       const cv::Mat& kernel, bool cols)
   {
-    cv::Mat paddedImage;
-    cv::copyMakeBorder(inImage, paddedImage, 0, 1, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0));
-
-    cv::Mat transKernel = kernel.clone();
+    cv::Mat paddedImage, transKernel;
     if (cols)
     {
       cv::transpose(kernel, transKernel);
+      cv::copyMakeBorder(inImage, paddedImage, 0, 1, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0));
+    }
+    else
+    {
+      transKernel = kernel.clone();
+      cv::copyMakeBorder(inImage, paddedImage, 0, 0, 0, 1, cv::BORDER_CONSTANT, cv::Scalar(0));
     }
 
     cv::Mat result;
