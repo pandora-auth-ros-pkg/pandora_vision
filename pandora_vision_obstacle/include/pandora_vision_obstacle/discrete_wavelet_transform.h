@@ -65,8 +65,9 @@ namespace pandora_vision
        * @param kernel [cost cv::Mat&] The kernel used to perform
        * the transform
        **/
-      DiscreteWaveletTransform(const cv::Mat& kernelLow,
-          const cv::Mat& kernelHigh);
+      DiscreteWaveletTransform(const cv::Mat& rowKernelLow,
+          const cv::Mat& columnKernelLow, const cv::Mat& rowKernelHigh,
+          const cv::Mat& columnKernelHigh);
 
       /**
        * @brief Virtual Destructor
@@ -78,12 +79,12 @@ namespace pandora_vision
        * @brief Perform convolution with a vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
        * @param kernel [const cv::Mat&] The filter used
-       * @param cols [bool] Whether the type of convolution will
-       * be performed column-wise
+       * @param rows [bool] Whether the type of convolution will
+       * be performed row-wise
        * @return [cv::Mat] The result of the convolution
        **/
       cv::Mat optionalConv(const cv::Mat& inImage,
-          const cv::Mat& kernel, bool cols);
+          const cv::Mat& kernel, bool rows);
       /**
        * @brief Perform convolution with a column vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
@@ -201,12 +202,18 @@ namespace pandora_vision
       std::vector<MatPtr> dwt2D(const cv::Mat& inImage, int level = 1);
 
     private:
-      /// The kernel used to perform the DWT that represents the
+      /// The row kernel used to perform the DWT that represents the
       /// low - pass filter used
-      cv::Mat kernelLow_;
-      /// The kernel used to perform the DWT that represents the
+      cv::Mat rowKernelLow_;
+      /// The column kernel used to perform the DWT that represents
+      ///the  low - pass filter used
+      cv::Mat columnKernelLow_;
+      /// The row kernel used to perform the DWT that represents the
       /// band - pass filter used for high frequencies
-      cv::Mat kernelHigh_;
+      cv::Mat rowKernelHigh_;
+      /// The column kernel used to perform the DWT that represents
+      ///the band - pass filter used for high frequencies
+      cv::Mat columnKernelHigh_;
   };
   typedef DiscreteWaveletTransform::MatPtr MatPtr;
   typedef DiscreteWaveletTransform::MatConstPtr MatConstPtr;
