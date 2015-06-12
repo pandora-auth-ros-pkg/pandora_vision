@@ -382,17 +382,21 @@ namespace pandora_vision
       // Find the keypoint coordinates
       float temperatureX = holes.holes[i].keypoint.pt.x;
       float temperatureY = holes.holes[i].keypoint.pt.y;
+      
+      // Convert them to int, in order to access the point in MultiArray
+      int tempX = static_cast <int> (std::floor(temperatureX));
+      int tempY = static_cast <int> (std::floor(temperatureY));
 
       // Find the average temperature around the keypoint
 
       // Check if the keypoint is on the edges of the image
-      if(temperatureX > 0 && temperatureX < 60 && temperatureY > 0 && temperatureY < 80)
+      if(tempX > 0 && tempX < 60 && tempY > 0 && tempY < 80)
       {
         int counter = 0;
 
-        for(unsigned int k = (temperatureY - 1); k < (temperatureY + 2); k++)
+        for(unsigned int k = (tempY - 1); k < (tempY + 2); k++)
         {
-          for(unsigned int o = (temperatureX - 1); o < (temperatureX + 2); o++)
+          for(unsigned int o = (tempX - 1); o < (tempX + 2); o++)
           {
             average += temperatures.data[k * width + o];
             counter++;
@@ -403,7 +407,7 @@ namespace pandora_vision
       else
       {
         // If it is on the edges it take the temperature of the keypoint it self
-        average = temperatures.data[temperatureY * width + temperatureX];
+        average = temperatures.data[tempY * width + tempX];
       }      
 
       // Fill the average temperature vector
