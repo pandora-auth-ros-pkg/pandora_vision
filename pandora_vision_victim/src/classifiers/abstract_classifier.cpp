@@ -77,14 +77,15 @@ namespace pandora_vision
     trainingDirectory_ = trainingDirectory;
 
     trainingAnnotationsFile_ = filePrefix + "training_annotations.txt";
-    // int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
+    int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
 
     const std::string testDatasetPath = datasetPath_ + "/Test_Images";
     boost::filesystem::path testDirectory(testDatasetPath);
     testDirectory_ = testDirectory;
 
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
-    // int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
+    int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
+    ROS_INFO("Created Abstract Classifier Instance!");
 
   }
 
@@ -300,10 +301,10 @@ namespace pandora_vision
     std::cout << "False Positives = " << falsePositives << std::endl;
     std::cout << "False Negatives = " << falseNegatives << std::endl;
 
-    std::cout << "SVM Accuracy = " << accuracy_ << std::endl;
-    std::cout << "SVM Precision = " << precision_ << std::endl;
-    std::cout << "SVM Recall = " << recall_ << std::endl;
-    std::cout << "SVM F-Measure = " << fmeasure_ << std::endl;
+    std::cout << classifierType_ << "Accuracy = " << accuracy_ << std::endl;
+    std::cout << classifierType_ << "Precision = " << precision_ << std::endl;
+    std::cout << classifierType_ << "Recall = " << recall_ << std::endl;
+    std::cout << classifierType_ << "F-Measure = " << fmeasure_ << std::endl;
   }
 
   // Platt's binary SVM Probablistic Output: an improvement from Lin et al.

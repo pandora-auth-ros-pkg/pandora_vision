@@ -37,26 +37,35 @@
 
 #include <string>
 #include <iostream>
+#include <readline/readline.h>
+#include <readline/history.h>
+
 
 #include "pandora_vision_victim/classifiers/rgb_svm_training.h"
+#include "pandora_vision_victim/classifiers/neural_network_classifier.h"
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_rgb_svm_training_node");
+  rl_bind_key('\t', rl_complete);
+
 
   // Number of features for RGB Training = 121
   // Number of features for Depth Training = 103
   int numFeatures;
   std::cout << "Add total number of features required for your subsystem:" << std::endl;
   std::cin >> numFeatures;
+
   std::string datasetPath;
   std::cout << "Add absolute path, where your samples are stored " << std::endl;
-  std::cin >> datasetPath;
+  datasetPath = readline("");
+  // std::cin >> datasetPath;
 
-  std::string classifierType = "svm_";
+  std::string classifierType = "ann_";
   std::string imageType = "rgb_";
   pandora_vision::RgbSvmTraining victim_rgb_svm_trainer("victim",
       numFeatures, datasetPath, classifierType, imageType);
+
   victim_rgb_svm_trainer.trainSubSystem();
 
   return 0;

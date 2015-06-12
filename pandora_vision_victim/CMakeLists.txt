@@ -41,6 +41,10 @@ catkin_package(
     LIBRARIES
 )
 
+set(READLINE_LINK_FLAGS  "-lreadline")
+SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${READLINE_LINK_FLAGS}")
+
+
 include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
@@ -110,6 +114,7 @@ add_library(${PROJECT_NAME}_classifiers
     src/classifiers/random_forests_classifier.cpp
     src/classifiers/rgb_random_forests_classifier.cpp
     src/classifiers/depth_random_forests_classifier.cpp
+    src/classifiers/neural_network_classifier.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_classifiers
@@ -208,6 +213,7 @@ target_link_libraries(${PROJECT_NAME}_node
   ${PROJECT_NAME}_handler
 )
 
+
 ############################# Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)
 
@@ -224,6 +230,7 @@ if(VICTIM_ENABLE_TRAIN)
       ${catkin_EXPORTED_TARGETS}
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
   )
+
 
   add_executable(victim_depth_svm_training_node
       src/classifiers/victim_depth_svm_training_node.cpp

@@ -11,7 +11,9 @@
 
     <rosparam file="$(find pandora_vision_victim)/config/victim_params.yaml" 
         command="load" ns="victim"/>
-            
+      <rosparam file="$(find pandora_vision_victim)/config/rgb_ann_network_params.yaml" 
+        command="load" ns="victim"/>
+
     <!-- Url for model.xml /-->
     <param name="model_url" type="str" 
       value="https://pandora.ee.auth.gr/vision/model.xml"/>  
