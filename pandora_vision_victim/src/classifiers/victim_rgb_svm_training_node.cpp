@@ -37,9 +37,6 @@
 
 #include <string>
 #include <iostream>
-#include <readline/readline.h>
-#include <readline/history.h>
-
 
 #include "pandora_vision_victim/classifiers/rgb_svm_training.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
@@ -47,7 +44,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "victim_rgb_svm_training_node");
-  rl_bind_key('\t', rl_complete);
+  // rl_bind_key('\t', rl_complete);
 
 
   // Number of features for RGB Training = 121
@@ -58,8 +55,8 @@ int main(int argc, char** argv)
 
   std::string datasetPath;
   std::cout << "Add absolute path, where your samples are stored " << std::endl;
-  datasetPath = readline("");
-  // std::cin >> datasetPath;
+  // datasetPath = readline("");
+  std::cin >> datasetPath;
 
   std::string classifierType = "ann_";
   std::string imageType = "rgb_";

@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
     urdf
 )
 
+
 generate_dynamic_reconfigure_options(
     config/victim_dyn_reconf.config
 )
@@ -41,8 +42,6 @@ catkin_package(
     LIBRARIES
 )
 
-set(READLINE_LINK_FLAGS  "-lreadline")
-SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${READLINE_LINK_FLAGS}")
 
 
 include_directories(include
