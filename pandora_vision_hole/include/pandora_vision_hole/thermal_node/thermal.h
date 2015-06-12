@@ -147,20 +147,15 @@ namespace pandora_vision
       /**
         @brief This function finds for each point of interest found it's 
         probability based on the keypoint's average temperature.
-        @param[in] holes [const HolesConveyor&] The points of interest found
+        @param[out] holes [const HolesConveyor&] The points of interest found
         @param[in] temperatures [const Float32MultiArray&] The multiArray with
         the temperatures of the image.
-        @param[out] holesProbability [std::vector<float>] Each holes probability
-        @param[out] averageTemperature [std::vector<float>] 
-        Each holes average temperature
         @param[in] method [const int&] Denotes the probabilities extraction
         method.
         @return void
        **/
-      void findHolesProbability(const HolesConveyor& holes,
-        const std_msgs::Float32MultiArray& temperatures, 
-        std::vector<float>* holesProbability, 
-        std::vector<float>* averageTemperature, const int& method);
+      void findHolesProbability(HolesConveyor* holes,
+        const std_msgs::Float32MultiArray& temperatures, const int& method);
 
     public:
 

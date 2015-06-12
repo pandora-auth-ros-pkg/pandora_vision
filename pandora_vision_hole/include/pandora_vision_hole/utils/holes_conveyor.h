@@ -61,6 +61,10 @@ namespace pandora_vision
     cv::KeyPoint keypoint;
     std::vector<cv::Point2f> rectangle;
     std::vector<cv::Point2f> outline;
+
+    // For Thermal Holes these variables get filled too.
+    float holeProbability;
+    float holeTemperature;
   };
 
   typedef boost::shared_ptr<HoleConveyor> HoleConveyorPtr;

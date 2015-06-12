@@ -145,15 +145,10 @@ namespace pandora_vision
     // Locate potential holes in the thermal image
     HolesConveyor holes = HoleDetector::findHoles(thermalImage);
 
-    // Find the average temperature of the point of interest that we found
-    // and its probability
-    std::vector<float> holesProbability;
-    std::vector<float> averageTemperature;
-      
-    // Find the probability of each point of interest
+    // Find the average temperature of each point of interest that we found
+    // and their probability.
     findHolesProbability(
-      holes, msg.temperatures, &holesProbability, &averageTemperature, 
-      Parameters::Thermal::probability_method);
+      &holes, msg.temperatures, Parameters::Thermal::probability_method);
 
     // Convert the conveyors information so it can match with the
     //  Rgb and Depth images. If its outside of limits discart that conveyor.
@@ -212,8 +207,8 @@ namespace pandora_vision
 
       poisStamped->header.stamp = msg.header.stamp;
       poisStamped->header.frame_id = "/kinect_rgb_optical_frame";
-      poisStamped->frameWidth = msg.thermalImage.width;
-      poisStamped->frameHeight = msg.thermalImage.height;
+      poisStamped->frameWidth = thermalImage.cols;
+      poisStamped->frameHeight = thermalImage.rows;
 
       // For each hole found by thermal node
       for(unsigned int i = 0; i < holes.size(); i++)
@@ -226,7 +221,7 @@ namespace pandora_vision
         poi->point.y = holes.holes[i].keypoint.pt.y;
       
         // Fill the probabilities 
-        poi->probability = holesProbability.at(i);
+        poi->probability = holes.holes[i].holeProbability;
         
         poisStamped->pois.push_back(poi);
       }
@@ -240,7 +235,7 @@ namespace pandora_vision
       for(unsigned int i = 0; i < alert.generalAlerts.size(); i++)
       {
         // Fill the temperature of the thermal message for each hole
-        thermalMsg.temperature = averageTemperature.at(i);
+        thermalMsg.temperature = holes.holes[i].holeTemperature;
 
         thermalMsg.info = alert.generalAlerts.at(i);
 
@@ -355,33 +350,28 @@ namespace pandora_vision
   /**
     @brief This function finds for each point of interest found it's 
     probability based on the keypoint's average temperature.
-    @param[in] holes [const HolesConveyor&] The points of interest found
+    @param[out] holes [const HolesConveyor&] The points of interest found
     @param[in] temperatures [const Float32MultiArray&] The multiArray with
     the temperatures of the image.
-    @param[out] holesProbability [std::vector<float>] Each holes probability
-    @param[out] averageTemperature [std::vector<float>] 
-    Each holes average temperature
     @param[in] method [const int&] Denotes the probabilities extraction
     method.
     @return void
    **/
-  void Thermal::findHolesProbability(const HolesConveyor& holes,
-    const std_msgs::Float32MultiArray& temperatures, 
-    std::vector<float>* holesProbability, 
-    std::vector<float>* averageTemperature, const int& method)
+  void Thermal::findHolesProbability(HolesConveyor* holes,
+    const std_msgs::Float32MultiArray& temperatures, const int& method)
   {
     // The width and height of the input temperature multiarray
     int width = temperatures.layout.dim[1].size;
     int height = temperatures.layout.dim[0].size; 
 
     // For each hole find its probability
-    for(unsigned int i = 0; i < holes.size(); i++)
+    for(unsigned int i = 0; i < holes->size(); i++)
     {
       float average = 0;
 
       // Find the keypoint coordinates
-      float temperatureX = holes.holes[i].keypoint.pt.x;
-      float temperatureY = holes.holes[i].keypoint.pt.y;
+      float temperatureX = holes->holes[i].keypoint.pt.x;
+      float temperatureY = holes->holes[i].keypoint.pt.y;
       
       // Convert them to int, in order to access the point in MultiArray
       int tempX = static_cast <int> (std::floor(temperatureX));
@@ -411,7 +401,7 @@ namespace pandora_vision
       }      
 
       // Fill the average temperature vector
-      averageTemperature->push_back(average);
+      holes->holes[i].holeTemperature = average;
 
       // Apply gaussian function on the average temperature found
       if(method == 0)
@@ -421,7 +411,7 @@ namespace pandora_vision
           / (2 * pow(Parameters::Thermal::tolerance , 2)));
 
         // Push the probability in the vector
-        holesProbability->push_back(probability);
+        holes->holes[i].holeProbability = probability;
       }
       // Apply logistic function on the average temperature found
       else if(method == 1)
@@ -432,7 +422,7 @@ namespace pandora_vision
             (average - Parameters::Thermal::high_acceptable_temperature)));
 
         // Push the probability in the vector 
-        holesProbability->push_back(probability);
+        holes->holes[i].holeProbability = probability;
       }
     }
   }
