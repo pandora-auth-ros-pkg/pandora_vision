@@ -104,41 +104,58 @@ namespace pandora_vision
     return optionalConv(inImage, kernel, false);
   }
 
-  void DiscreteWaveletTransform::subSample(const cv::Mat& imageLow,
-      const cv::Mat& imageHigh, bool rows, const MatPtr& subImageLow,
-      const MatPtr& subImageHigh)
+  void DiscreteWaveletTransform::subSampleLow(const cv::Mat& imageLow,
+      bool rows, const MatPtr& subImageLow)
   {
     if (rows)
     {
-      for (int jj = 0; jj < imageLow.rows; jj++)
+      for (int jj = 0; jj < imageLow.rows; jj += 2)
       {
-        if (jj % 2)
-        {
-          subImageLow->push_back(imageLow.row(jj));
-        }
-        else
-        {
-          subImageHigh->push_back(imageHigh.row(jj));
-        }
+        subImageLow->push_back(imageLow.row(jj));
       }
     }
     else
     {
       *subImageLow = cv::Mat(cv::Mat::zeros(imageLow.rows, static_cast<int>(std::ceil(
           imageLow.cols / 2.0f)), CV_32FC1));
-      *subImageHigh = cv::Mat::zeros(imageHigh.rows, static_cast<int>(
-          std::floor(imageHigh.cols / 2.0f)), CV_32FC1);
       int imageIndex = 0;
       for (int jj = 0; jj < imageLow.cols; jj += 2)
       {
         imageLow.col(jj).copyTo(subImageLow->col(imageIndex));
-        if (jj < imageLow.cols - 1)
-        {
-          imageHigh.col(jj + 1).copyTo(subImageHigh->col(imageIndex));
-        }
         imageIndex += 1;
       }
     }
+  }
+
+  void DiscreteWaveletTransform::subSampleHigh(const cv::Mat& imageHigh,
+      bool rows, const MatPtr& subImageHigh)
+  {
+    if (rows)
+    {
+      for (int jj = 1; jj < imageHigh.rows; jj += 2)
+      {
+        subImageHigh->push_back(imageHigh.row(jj));
+      }
+    }
+    else
+    {
+      *subImageHigh = cv::Mat::zeros(imageHigh.rows, static_cast<int>(
+          std::floor(imageHigh.cols / 2.0f)), CV_32FC1);
+      int imageIndex = 0;
+      for (int jj = 1; jj < imageHigh.cols - 1; jj += 2)
+      {
+        imageHigh.col(jj).copyTo(subImageHigh->col(imageIndex));
+        imageIndex += 1;
+      }
+    }
+  }
+
+  void DiscreteWaveletTransform::subSample(const cv::Mat& imageLow,
+      const cv::Mat& imageHigh, bool rows, const MatPtr& subImageLow,
+      const MatPtr& subImageHigh)
+  {
+    subSampleLow(imageLow, rows, subImageLow);
+    subSampleHigh(imageHigh, rows, subImageHigh);
   }
 
   void DiscreteWaveletTransform::convAndSubSample(const cv::Mat& inImage, bool rows,
@@ -148,6 +165,118 @@ namespace pandora_vision
     cv::Mat imageConvHigh = optionalConv(inImage, kernelHigh_, !rows);
 
     subSample(imageConvLow, imageConvHigh, rows, subImageLow, subImageHigh);
+  }
+
+  std::vector<MatPtr> DiscreteWaveletTransform::getLowLow(const cv::Mat& inImage, int level)
+  {
+    std::vector<MatPtr> LLImages;
+    cv::Mat input = inImage.clone();
+
+    for (int ii = 0; ii < level; ii++)
+    {
+      cv::Mat imageConvLow = convCols(input, kernelLow_);
+
+      MatPtr subImageL(new cv::Mat);
+      subSampleLow(imageConvLow, false, subImageL);
+
+      imageConvLow = convRows(*subImageL, kernelLow_);
+
+      MatPtr subImageLL(new cv::Mat);
+      subSampleLow(imageConvLow, true, subImageLL);
+
+      LLImages.push_back(subImageLL);
+
+      if (ii < level - 1)
+      {
+        input = subImageLL->clone();
+      }
+    }
+    return LLImages;
+  }
+
+  std::vector<MatPtr> DiscreteWaveletTransform::getLowHigh(const cv::Mat& inImage, int level)
+  {
+    std::vector<MatPtr> LHImages;
+    cv::Mat input = inImage.clone();
+
+    for (int ii = 0; ii < level; ii++)
+    {
+      cv::Mat imageConvLow = convCols(input, kernelLow_);
+
+      MatPtr subImageL(new cv::Mat);
+      subSampleLow(imageConvLow, false, subImageL);
+
+      MatPtr subImageLL(new cv::Mat), subImageLH(new cv::Mat);
+      convAndSubSample(*subImageL, true, subImageLL, subImageLH);
+
+      LHImages.push_back(subImageLH);
+
+      if (ii < level - 1)
+      {
+        input = subImageLL->clone();
+      }
+    }
+    return LHImages;
+  }
+
+  std::vector<MatPtr> DiscreteWaveletTransform::getHighLow(const cv::Mat& inImage, int level)
+  {
+    std::vector<MatPtr> HLImages;
+    cv::Mat input = inImage.clone();
+
+    for (int ii = 0; ii < level; ii++)
+    {
+      MatPtr subImageL(new cv::Mat), subImageH(new cv::Mat);
+      convAndSubSample(input, false, subImageL, subImageH);
+
+      cv::Mat imageConvLow = convRows(*subImageH, kernelLow_);
+
+      MatPtr subImageHL(new cv::Mat);
+      subSampleLow(imageConvLow, true, subImageHL);
+
+      HLImages.push_back(subImageHL);
+
+      if (ii < level - 1)
+      {
+        imageConvLow = convRows(*subImageL, kernelLow_);
+
+        MatPtr subImageLL(new cv::Mat);
+        subSampleLow(imageConvLow, true, subImageLL);
+
+        input = subImageLL->clone();
+      }
+    }
+    return HLImages;
+  }
+
+  std::vector<MatPtr> DiscreteWaveletTransform::getHighHigh(const cv::Mat& inImage, int level)
+  {
+    std::vector<MatPtr> HHImages;
+    cv::Mat input = inImage.clone();
+
+    for (int ii = 0; ii < level; ii++)
+    {
+      MatPtr subImageL(new cv::Mat), subImageH(new cv::Mat);
+      convAndSubSample(input, false, subImageL, subImageH);
+
+      cv::Mat imageConvHigh = convRows(*subImageH, kernelHigh_);
+
+      MatPtr subImageHH(new cv::Mat);
+      subSampleHigh(imageConvHigh, true, subImageHH);
+
+      HHImages.push_back(subImageHH);
+
+      if (ii < level - 1)
+      {
+        cv::Mat imageConvLow = convRows(*subImageL, kernelLow_);
+
+        MatPtr subImageLL(new cv::Mat);
+        subSampleLow(imageConvLow, true, subImageLL);
+
+        input = subImageLL->clone();
+      }
+    }
+    return HHImages;
   }
 
   std::vector<MatPtr> DiscreteWaveletTransform::dwt2D(const cv::Mat& inImage, int level)
