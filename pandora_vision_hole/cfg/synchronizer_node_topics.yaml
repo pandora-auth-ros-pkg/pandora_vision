@@ -1,7 +1,12 @@
 subscribed_topics:
   # Topics in Rgbd-T synchronizer node
   input_topic: /kinect/depth_registered/points
+
+  # Temporary topic for rosbags
   input_thermal_topic: /flir_lepton/fused_msg
+  # Real topic after integration
+  # input_thermal_topic: /rpi2/thermal/fused_msg
+
   # Topics in synchronizer node
   synchronized_topic: synchronized/message/info
   unlock_topic: unlock_rgb_depth_synchronizer

@@ -139,7 +139,7 @@
 
   </node>
 
-  <!-- =========================== Thermal Cropper node ============================ -->
+  <!-- ====================== Thermal Cropper node ========================= -->
   <node
     name="thermal_cropper_node"
     type="thermal_cropper_node"
