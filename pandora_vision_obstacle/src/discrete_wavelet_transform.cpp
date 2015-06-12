@@ -45,26 +45,15 @@ namespace pandora_vision
   {
   }
 
-  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& kernelLow,
-      const cv::Mat& kernelHigh)
+  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& rowKernelLow,
+      const cv::Mat& columnKernelLow, const cv::Mat& rowKernelHigh,
+      const cv::Mat& columnKernelHigh)
   {
-    if (kernelLow.rows == 1)
-    {
-      kernelLow_ = kernelLow;
-    }
-    else
-    {
-      cv::transpose(kernelLow, kernelLow_);
-    }
+      rowKernelLow_ = rowKernelLow;
+      columnKernelLow_ = columnKernelLow;
 
-    if (kernelHigh.rows == 1)
-    {
-      kernelHigh_ = kernelHigh;
-    }
-    else
-    {
-      cv::transpose(kernelHigh, kernelHigh_);
-    }
+      rowKernelHigh_ = rowKernelHigh;
+      columnKernelHigh_ = columnKernelHigh;
   }
 
   DiscreteWaveletTransform::~DiscreteWaveletTransform()
@@ -72,22 +61,19 @@ namespace pandora_vision
   }
 
   cv::Mat DiscreteWaveletTransform::optionalConv(const cv::Mat& inImage,
-      const cv::Mat& kernel, bool cols)
+      const cv::Mat& kernel, bool rows)
   {
-    cv::Mat paddedImage, transKernel;
-    if (cols)
+    cv::Mat paddedImage;
+    if (rows)
     {
-      cv::transpose(kernel, transKernel);
-      cv::copyMakeBorder(inImage, paddedImage, 0, 1, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0));
+      cv::copyMakeBorder(inImage, paddedImage, 0, 0, 0, 1, cv::BORDER_CONSTANT, cv::Scalar(0));
     }
     else
     {
-      transKernel = kernel.clone();
-      cv::copyMakeBorder(inImage, paddedImage, 0, 0, 0, 1, cv::BORDER_CONSTANT, cv::Scalar(0));
+      cv::copyMakeBorder(inImage, paddedImage, 0, 1, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(0));
     }
-
     cv::Mat result;
-    cv::filter2D(paddedImage, result, -1, transKernel, cv::Point(-1, -1), cv::BORDER_CONSTANT);
+    cv::filter2D(paddedImage, result, -1, kernel, cv::Point(-1, -1), cv::BORDER_CONSTANT);
 
     return result;
   }
@@ -95,13 +81,13 @@ namespace pandora_vision
   cv::Mat DiscreteWaveletTransform::convCols(const cv::Mat& inImage,
       const cv::Mat& kernel)
   {
-    return optionalConv(inImage, kernel, true);
+    return optionalConv(inImage, kernel, false);
   }
 
   cv::Mat DiscreteWaveletTransform::convRows(const cv::Mat& inImage,
       const cv::Mat& kernel)
   {
-    return optionalConv(inImage, kernel, false);
+    return optionalConv(inImage, kernel, true);
   }
 
   void DiscreteWaveletTransform::subSampleLow(const cv::Mat& imageLow,
@@ -161,9 +147,18 @@ namespace pandora_vision
   void DiscreteWaveletTransform::convAndSubSample(const cv::Mat& inImage, bool rows,
       const MatPtr& subImageLow, const MatPtr& subImageHigh)
   {
-    cv::Mat imageConvLow = optionalConv(inImage, kernelLow_, !rows);
-    cv::Mat imageConvHigh = optionalConv(inImage, kernelHigh_, !rows);
+    cv::Mat imageConvLow, imageConvHigh;
 
+    if (rows)
+    {
+      imageConvLow = optionalConv(inImage, rowKernelLow_, rows);
+      imageConvHigh = optionalConv(inImage, rowKernelHigh_, rows);
+    }
+    else
+    {
+      imageConvLow = optionalConv(inImage, columnKernelLow_, rows);
+      imageConvHigh = optionalConv(inImage, columnKernelHigh_, rows);
+    }
     subSample(imageConvLow, imageConvHigh, rows, subImageLow, subImageHigh);
   }
 
@@ -174,12 +169,12 @@ namespace pandora_vision
 
     for (int ii = 0; ii < level; ii++)
     {
-      cv::Mat imageConvLow = convCols(input, kernelLow_);
+      cv::Mat imageConvLow = convCols(input, columnKernelLow_);
 
       MatPtr subImageL(new cv::Mat);
       subSampleLow(imageConvLow, false, subImageL);
 
-      imageConvLow = convRows(*subImageL, kernelLow_);
+      imageConvLow = convRows(*subImageL, rowKernelLow_);
 
       MatPtr subImageLL(new cv::Mat);
       subSampleLow(imageConvLow, true, subImageLL);
@@ -201,7 +196,7 @@ namespace pandora_vision
 
     for (int ii = 0; ii < level; ii++)
     {
-      cv::Mat imageConvLow = convCols(input, kernelLow_);
+      cv::Mat imageConvLow = convCols(input, columnKernelLow_);
 
       MatPtr subImageL(new cv::Mat);
       subSampleLow(imageConvLow, false, subImageL);
@@ -229,7 +224,7 @@ namespace pandora_vision
       MatPtr subImageL(new cv::Mat), subImageH(new cv::Mat);
       convAndSubSample(input, false, subImageL, subImageH);
 
-      cv::Mat imageConvLow = convRows(*subImageH, kernelLow_);
+      cv::Mat imageConvLow = convRows(*subImageH, rowKernelLow_);
 
       MatPtr subImageHL(new cv::Mat);
       subSampleLow(imageConvLow, true, subImageHL);
@@ -238,7 +233,7 @@ namespace pandora_vision
 
       if (ii < level - 1)
       {
-        imageConvLow = convRows(*subImageL, kernelLow_);
+        imageConvLow = convRows(*subImageL, rowKernelLow_);
 
         MatPtr subImageLL(new cv::Mat);
         subSampleLow(imageConvLow, true, subImageLL);
@@ -259,7 +254,7 @@ namespace pandora_vision
       MatPtr subImageL(new cv::Mat), subImageH(new cv::Mat);
       convAndSubSample(input, false, subImageL, subImageH);
 
-      cv::Mat imageConvHigh = convRows(*subImageH, kernelHigh_);
+      cv::Mat imageConvHigh = convRows(*subImageH, rowKernelHigh_);
 
       MatPtr subImageHH(new cv::Mat);
       subSampleHigh(imageConvHigh, true, subImageHH);
@@ -268,7 +263,7 @@ namespace pandora_vision
 
       if (ii < level - 1)
       {
-        cv::Mat imageConvLow = convRows(*subImageL, kernelLow_);
+        cv::Mat imageConvLow = convRows(*subImageL, rowKernelLow_);
 
         MatPtr subImageLL(new cv::Mat);
         subSampleLow(imageConvLow, true, subImageLL);
