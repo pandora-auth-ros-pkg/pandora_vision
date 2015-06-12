@@ -33,36 +33,32 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
+*   Vassilis Choutas <vasilis4ch@gmail.com>
 *********************************************************************/
 
-#include <vector>
-#include <string>
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H 
 
-#include "pandora_vision_victim/classifiers/rgb_random_forests_classifier.h"
+#include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
 namespace pandora_vision
 {
-  /**
-   * @brief Constructor
-   */
-  RgbRandomForestsClassifier::RgbRandomForestsClassifier(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
-      const std::string& classifierType,
-      const std::string& imageType)
-      : RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+  class ClassifierFactory
   {
-  }
+    public:
+      explicit ClassifierFactory(const std::string& ns);
+      ~ClassifierFactory()
+      {}
 
-  /**
-   * @brief Destructor
-   */
-  RgbRandomForestsClassifier::~RgbRandomForestsClassifier()
-  {
-  }
+      AbstractClassifier* createClassifier(const std::string& classifierType,
+          const std::string& imageType);
 
-  void RgbRandomForestsClassifier::trainSubSystem()
-  {
-      }
-}  // namespace pandora_vision
+    private:
+      ros::NodeHandle nh_;
 
+  };
+} //  namespace pandora_vision
+
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H

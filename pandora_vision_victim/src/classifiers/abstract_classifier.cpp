@@ -37,6 +37,8 @@
 *********************************************************************/
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
+#include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
+#include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
 #include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
 namespace pandora_vision
@@ -59,12 +61,11 @@ namespace pandora_vision
     packagePath_ = ros::package::getPath("pandora_vision_victim");
     ROS_INFO("[victim_node] : Created Abstract Classifier instance");
 
-    featureExtractionUtilities_ = new FeatureExtractionUtilities();
-    featureExtraction_ = new FeatureExtraction();
+    // featureExtractionUtilities_ = new FeatureExtractionUtilities();
 
     filesDirectory_ = packagePath_ + "/data/";
 
-    const std::string filePrefix = filesDirectory_ + imageType_ + classifierType_;
+    const std::string filePrefix = filesDirectory_ + imageType_ + "_";
     trainingFeaturesMatrixFile_ = filePrefix + "training_features_matrix.xml";
     testFeaturesMatrixFile_ = filePrefix + "test_features_matrix.xml";
     trainingLabelsMatrixFile_ = filePrefix + "training_labels_matrix.xml";
@@ -85,8 +86,37 @@ namespace pandora_vision
 
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
-    ROS_INFO("Created Abstract Classifier Instance!");
 
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_" + classifierType + "_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::string trainingSetExtraction = fs["training_set_feature_extraction"];
+    std::string testSetExtraction = fs["test_set_feature_extraction"];
+    std::string loadModel = fs["load_classifier_model"];
+    std::string pcaAnalysis = fs["do_pca_analysis"];
+
+    trainingSetFeatureExtraction_ = trainingSetExtraction.compare("true") == 0;
+    testSetFeatureExtraction_ = testSetExtraction.compare("true") == 0;
+    loadClassifierModel_ = loadModel.compare("true") == 0;
+    doPcaAnalysis_ = pcaAnalysis.compare("true") == 0;
+    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
+
+    fs.release();
+
+    if (imageType_.compare("rgb") == 0)
+      featureExtraction_ = new RgbFeatureExtraction();
+    else if (imageType_.compare("depth") == 0)
+      featureExtraction_ = new DepthFeatureExtraction();
+    else
+    {
+      ROS_ERROR("Invalid image type provided!");
+      ROS_ERROR("The system will now shut down!");
+      ros::shutdown();
+    }
+
+
+    ROS_INFO("Created Abstract Classifier Instance!");
   }
 
   /**
@@ -130,8 +160,8 @@ namespace pandora_vision
       normalizationParamOneTag = "min";
       normalizationParamTwoTag = "max";
 
-      normalizationParamOne = imageType_ + "min_values";
-      normalizationParamTwo = imageType_ + "max_values";
+      normalizationParamOne = imageType_ + "_min_values";
+      normalizationParamTwo = imageType_ + "_max_values";
     }
     else
     {
@@ -141,8 +171,8 @@ namespace pandora_vision
       normalizationParamOneTag = "mean";
       normalizationParamTwoTag = "std_dev";
 
-      normalizationParamOne = imageType_ + "mean_values.xml";
-      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+      normalizationParamOne = imageType_ + "_mean_values.xml";
+      normalizationParamTwo = imageType_ + "_standard_deviation_values.xml";
     }
 
     std::string normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
@@ -185,9 +215,9 @@ namespace pandora_vision
       double newMax = 1.0;
       double newMin = -1.0;
 
-      normalizationParamOne = imageType_ + "min_values.xml";
+      normalizationParamOne = imageType_ + "_min_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "max_values.xml";
+      normalizationParamTwo = imageType_ + "_max_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "min";
@@ -204,9 +234,9 @@ namespace pandora_vision
     }
     else
     {
-      normalizationParamOne = imageType_ + "mean_values.xml";
+      normalizationParamOne = imageType_ + "_mean_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "standard_deviation_values.xml";
+      normalizationParamTwo = imageType_ + "_standard_deviation_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "mean";
@@ -307,11 +337,11 @@ namespace pandora_vision
     std::cout << classifierType_ << "F-Measure = " << fmeasure_ << std::endl;
   }
 
-  // Platt's binary SVM Probablistic Output: an improvement from Lin et al.
+  // Platt's binary Probablistic Output: an improvement from Lin et al.
   /**
    * @brief Function that computes the vectors A,B necessary for the
-   * computation of the probablistic output of the SVM bases on Platt's binary
-   * SVM probablistic Output
+   * computation of the probablistic output of the Classifier bases on Platt's binary
+   * probablistic Output
    * @param dec_values [cv::Mat] the distance from the hyperplane of the
    * predicted results of the given test dataset
    * @param labels [cv::Mat] the true labels of the dataset

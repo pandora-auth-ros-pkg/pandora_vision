@@ -108,11 +108,7 @@ target_link_libraries(${PROJECT_NAME}_feature_extractors
 add_library(${PROJECT_NAME}_classifiers
     src/classifiers/abstract_classifier.cpp
     src/classifiers/svm_training.cpp
-    src/classifiers/rgb_svm_training.cpp
-    src/classifiers/depth_svm_training.cpp
     src/classifiers/random_forests_classifier.cpp
-    src/classifiers/rgb_random_forests_classifier.cpp
-    src/classifiers/depth_random_forests_classifier.cpp
     src/classifiers/neural_network_classifier.cpp
 )
 
@@ -216,34 +212,26 @@ target_link_libraries(${PROJECT_NAME}_node
 ############################# Victim SVM Trainer ##############################
 if(VICTIM_ENABLE_TRAIN)
 
-  add_executable(victim_rgb_svm_training_node
-      src/classifiers/victim_rgb_svm_training_node.cpp
+  add_library(${PROJECT_NAME}_trainer_factory
+    src/classifiers/classifier_factory.cpp)
+  target_link_libraries(${PROJECT_NAME}_trainer_factory
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_classifiers)
+
+  add_executable(victim_training_node
+      src/classifiers/victim_training_node.cpp
   )
 
-  target_link_libraries(victim_rgb_svm_training_node
+  target_link_libraries(victim_training_node
       ${catkin_LIBRARIES}
-      ${PROJECT_NAME}_classifiers
+      ${PROJECT_NAME}_trainer_factory
   )
 
-  add_dependencies(victim_rgb_svm_training_node
+  add_dependencies(victim_training_node
       ${catkin_EXPORTED_TARGETS}
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
   )
 
-
-  add_executable(victim_depth_svm_training_node
-      src/classifiers/victim_depth_svm_training_node.cpp
-  )
-
-  target_link_libraries(victim_depth_svm_training_node
-      ${catkin_LIBRARIES}
-      ${PROJECT_NAME}_classifiers
-  )
-
-  add_dependencies(victim_depth_svm_training_node
-      ${catkin_EXPORTED_TARGETS}
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  )
 endif()
 
 ############################### Model Trainer #################################

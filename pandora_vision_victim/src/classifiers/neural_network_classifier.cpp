@@ -200,11 +200,12 @@ namespace pandora_vision
   /**
    * @brief Function that implements the training for the subsystems
    * according to the given training sets. It applies the training algorithm for the corresponding
-   * classifier tyep and extracts a suitable model.
+   * classifier type and extracts a suitable model.
    * @return void
    */
   void NeuralNetworkClassifier::trainSubSystem()
   {
+    ROS_INFO("Starting the Training Procedure!");
     int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
 
@@ -241,7 +242,7 @@ namespace pandora_vision
         if (vocabularyNeeded)
         {
           std::cout << "Save bag of words vocabulary" << std::endl;
-          const std::string bagOfWordsFile = imageType_ + classifierType_ + "bag_of_words.xml";
+          const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
           const std::string bagOfWordsFilePath = filesDirectory_ + bagOfWordsFile;
           file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
               featureExtraction_->getBagOfWordsVocabulary());
@@ -258,16 +259,8 @@ namespace pandora_vision
       // Start Training Process
       std::cout << "Starting training process for the " << imageType_ << " images" << std::endl;
 
-      // Structs for calculating elapsed time.
-      struct timeval startwtime, endwtime;
-      gettimeofday(&startwtime , NULL);
       classifierPtr_->train(trainingFeaturesMat,  trainingLabelsMat,
           cv::Mat(), cv::Mat(), NeuralNetworkParams_);
-      gettimeofday(&endwtime , NULL);
-      double trainingTime = static_cast<double>((endwtime.tv_usec - 
-            startwtime.tv_usec) / 1.0e6 
-          + endwtime.tv_sec - startwtime.tv_sec);
-      std::cout << "The training finished after " << trainingTime << " seconds" << std::endl;
 
       classifierPtr_->save(classifierFile_.c_str());
       std::cout << "Finished training process" << std::endl;
