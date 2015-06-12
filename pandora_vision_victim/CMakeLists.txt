@@ -233,6 +233,7 @@ if(VICTIM_ENABLE_TRAIN)
 
 endif()
 
+
 if(DOWNLOAD_DATA or FUNCTIONAL_TEST or BENCHMARK)
  download_extra_data(
    ${PROJECT_NAME}_download_training_files

@@ -32,19 +32,37 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Kofinas Miltiadis <mkofinas@gmail.com>
+* Authors:
+*   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
 #include <string>
-#include <iostream>
 
-#include "pandora_vision_victim/classifiers/classifier_factory.h"
+#include "pandora_vision_victim/classifiers/rgb_random_forests_classifier.h"
 
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "victim_training_node");
+  /**
+   * @brief Constructor
+   */
+  RgbRandomForestsClassifier::RgbRandomForestsClassifier(const std::string& ns,
+      int numFeatures, const std::string& datasetPath,
+      const std::string& classifierType,
+      const std::string& imageType)
+      : RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+  {
+  }
 
-  pandora_vision::ClassifierFactory trainerFactory("victim_training_node");
-  return 0;
-}
+  /**
+   * @brief Destructor
+   */
+  RgbRandomForestsClassifier::~RgbRandomForestsClassifier()
+  {
+  }
+
+  void RgbRandomForestsClassifier::trainSubSystem()
+  {
+      }
+}  // namespace pandora_vision
 

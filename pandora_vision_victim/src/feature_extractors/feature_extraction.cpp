@@ -264,13 +264,16 @@ namespace pandora_vision
       }
     }
 
+
     std::cout << "Creating Visual Vocabulary" << std::endl;
+
 
     struct timeval startwtime, endwtime;
     gettimeofday(&startwtime , NULL);
     bowTrainerPtr_->createVocabulary();
     gettimeofday(&endwtime , NULL);
-    double vocCreationTime = static_cast<double>((endwtime.tv_usec - startwtime.tv_usec) / 1.0e6
+    double vocCreationTime = static_cast<double>((endwtime.tv_usec -
+          startwtime.tv_usec) / 1.0e6
         + endwtime.tv_sec - startwtime.tv_sec);
     std::cout << "The vocabulary was created after " << vocCreationTime << " seconds" << std::endl;
 

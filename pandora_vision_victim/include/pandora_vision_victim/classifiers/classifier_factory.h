@@ -42,7 +42,6 @@
 #define PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
 
 #include <string>
-
 #include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
 namespace pandora_vision
@@ -60,4 +59,6 @@ namespace pandora_vision
       ros::NodeHandle nh_;
   };
 }  //  namespace pandora_vision
+
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
+

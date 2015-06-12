@@ -43,6 +43,9 @@
 #include <boost/algorithm/string.hpp>
 
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
+#include "boost/algorithm/string/predicate.hpp"
+#include "pandora_vision_victim/classifiers/classifier_factory.h"
+
 #include "pandora_vision_victim/classifiers/svm_classifier.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
 #include "pandora_vision_victim/classifiers/random_forests_classifier.h"
@@ -88,6 +91,28 @@ namespace pandora_vision
     victimTrainerPtr->trainAndValidate();
 
     gettimeofday(&endwtime, NULL);
+    double trainingTime = static_cast<double>((endwtime.tv_usec -
+          startwtime.tv_usec) / 1.0e6
+      ros::shutdown();
+    }
+
+    boost::shared_ptr<AbstractClassifier> victimTrainerPtr;
+    AbstractClassifier* classifierPtr = this->createClassifier(classifierType, imageType);
+    if (classifierPtr == NULL)
+    {
+      ROS_ERROR("[Victim_Training]: Null pointer allocated for classifier Trainer!");
+      ROS_ERROR("[Victim_Training]: The node will now terminate!");
+      ros::shutdown();
+    }
+    victimTrainerPtr.reset(classifierPtr);
+
+    // Structs for calculating elapsed time.
+    struct timeval startwtime, endwtime;
+    gettimeofday(&startwtime , NULL);
+
+    // Train the system
+    victimTrainerPtr->trainSubSystem();
+
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6
         + endwtime.tv_sec - startwtime.tv_sec);
@@ -146,4 +171,5 @@ namespace pandora_vision
   ClassifierFactory::~ClassifierFactory()
   {
   }
+
 }  //  namespace pandora_vision

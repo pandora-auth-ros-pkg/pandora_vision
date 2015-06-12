@@ -72,7 +72,6 @@ namespace pandora_vision
     filesDirectory_ = packagePath_ + "/data/";
 
     const std::string filePrefix = filesDirectory_ + imageType_ + "_";
-
     trainingFeaturesMatrixFile_ = filePrefix + "training_features_matrix.xml";
     testFeaturesMatrixFile_ = filePrefix + "test_features_matrix.xml";
     trainingLabelsMatrixFile_ = filePrefix + "training_labels_matrix.xml";
@@ -124,6 +123,12 @@ namespace pandora_vision
     }
 
     ROS_INFO("[victim_node] : Created Abstract Classifier instance");
+      ros::shutdown();
+    }
+
+
+    ROS_INFO("Created Abstract Classifier Instance!");
+>>>>>>> Add factory for victim training objects
   }
 
   /**
