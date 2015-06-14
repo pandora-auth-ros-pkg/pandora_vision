@@ -51,20 +51,26 @@ namespace pandora_vision
   {
     public:
       /**
-       * @brief The Constructor
+       * @brief Constructor for the Random Forests Classifier Wrapper Class.
+       * @param ns [const std::string&] The namespace of the node.
+       * @param numFeatures [int] The number of input features to the classifier.
+       * @param datasetPath [const std::string&] The path to the training dataset.
+       * @param classifierType[const std::string&] The type of the classifier.
+       * @param imageType[const std::string&] The type of input images given to
+       * the classifier (RGB or Depth).
        */
       RandomForestsClassifier(const std::string& ns, int numFeatures,
           const std::string& datasetPath, const std::string& classifierType,
           const std::string& imageType);
 
       /**
-       * @brief The Destructor
+       * @brief Destructor
        */
       virtual ~RandomForestsClassifier();
 
       /**
        * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies SVM and extracts
+       * according to the given training sets. It applies RF and extracts
        * a suitable model.
        * @return void
        */
