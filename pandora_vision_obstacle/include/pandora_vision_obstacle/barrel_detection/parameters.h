@@ -2,7 +2,7 @@
  *
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
+ *  Copyright (c) 2014, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,50 +32,57 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors:
- *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
+ * Authors: Vasilis Bosdelekidis
  *********************************************************************/
 
-#ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H
-#define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H
+#include <pandora_vision_obstacle/barrel_nodeConfig.h>
+#include <dynamic_reconfigure/server.h>
 
-#include <string>
-#include <cv_bridge/cv_bridge.h>
-#include "sensor_processor/processor.h"
-#include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_common/images_stamped.h"
-#include "pandora_vision_obstacle/obstacle_poi.h"
-#include "pandora_vision_obstacle/barrel_detection/FastSymmetryDetector.h"
-#include "pandora_vision_obstacle/barrel_detection/parameters.h"
-
+/**
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
+ **/
 namespace pandora_vision
 {
-namespace pandora_vision_obstacle
-{
-  class BarrelProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
+  class BarrelParametersHandler
   {
     public:
-      typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
-
-      BarrelProcessor();
-      virtual void
-      initialize(const std::string& ns, sensor_processor::Handler* handler);
-
-      void getSymmetryObject(const cv::Mat& inputImage, cv::Rect* roi);
-
-      void validateRoi(
-          const cv::Mat& rgbImage, 
-          const cv::Mat& depthImage,
-          const cv::Rect& rectRoi,
-          bool* valid);
-
-      virtual bool process(const ImagesStampedConstPtr& input,
-          const POIsStampedPtr& output);
+      //the constructor
+      BarrelParametersHandler();
 
     private:
-      BarrelParametersHandler* BarrelParametersHandler_;
+      // The dynamic reconfigure (Barrel) parameters' server
+      dynamic_reconfigure::Server<pandora_vision_obstacle::barrel_nodeConfig> serverBarrel;
+
+      // The dynamic reconfigure (Barrel) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_obstacle::barrel_nodeConfig>::CallbackType fBarrel;
+
+      /**
+        @brief The function called when a parameter is changed
+        @param[in] configBarrel [const pandora_vision_hole::barrel_nodeConfig&]
+        @param[in] level [const uint32_t]
+        @return void
+       **/
+      void parametersCallbackBarrel(
+          const pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
+          const uint32_t& level);
   };
-}  // namespace pandora_vision_obstacle
+  /**
+    @struct BarrelDetection
+    @brief Provides flexibility by parameterizing variables needed by the
+    barrel detection package
+   **/
+  struct BarrelDetection
+  {
+    static bool show_respective_barrel;
+    static bool show_valid_barrel;
+    static int fsd_canny_thresh_1;
+    static int fsd_canny_thresh_2;
+    static int fsd_min_pair_dist;
+    static int fsd_max_pair_dist;
+    static int fsd_no_of_peaks;
+    static float roi_variance_thresh;
+  };
+
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H

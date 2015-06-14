@@ -47,10 +47,19 @@
 
 namespace pandora_vision
 {
+<<<<<<< HEAD
 namespace pandora_vision_obstacle
 {
   class BarrelHandler :
     public VisionHandler<ObstaclePreProcessor, BarrelProcessor, ObstaclePostProcessor>
+=======
+<<<<<<< HEAD
+  class BarrelHandler : public VisionHandler<ObstaclePreProcessor, BarrelProcessor,
+=======
+  class BarrelHandler : public VisionHandler<ObstaclePreProcessor, BarrelProcessor, 
+>>>>>>> Update repo [ci skip]
+    ObstaclePostProcessor>
+>>>>>>> Update repo [ci skip]
   {
    public:
     BarrelHandler();

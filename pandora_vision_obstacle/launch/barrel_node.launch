@@ -1,0 +1,10 @@
+<launch>
+
+  <node name="barrel_node" type="pandora_vision_obstacle_barrel_node" pkg="pandora_vision_obstacle"
+    respawn="False" output="screen" ns="/pandora_vision"/>
+    <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+
+  <rosparam file="$(find pandora_vision_obstacle)/config/obstacle_topics.yaml"
+    command="load" ns="/pandora_vision/pandora_vision_obstacle_barrel"/>
+
+</launch>
