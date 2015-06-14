@@ -91,7 +91,7 @@ namespace pandora_vision
 
     if (!nh_.getParam("alpha", alpha))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]:Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]:Could not retrieve"
           " alpha parameter for sigmoid function!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]:Setting alpha value"
           " to 1!");
@@ -100,7 +100,7 @@ namespace pandora_vision
 
     if (!nh_.getParam("beta", beta))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " beta parameter for the sigmoid function!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting beta value"
           " to 1!");
@@ -111,7 +111,7 @@ namespace pandora_vision
 
     if (!nh_.getParam("training_algorithm", trainingAlgorithm))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the type of the training algorithm for the neural Network!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Using the standard"
           " back propagation algorithm!");
@@ -123,7 +123,7 @@ namespace pandora_vision
     // Parse the learning rate parameter
     if (!nh_.getParam("learning_rate", learningRate))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the learning rate for the training procedure!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting the learning"
           " rate to 0.1");
@@ -132,7 +132,7 @@ namespace pandora_vision
 
     if (!nh_.getParam("momentum_scale", bpMomentScale))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the strength of the momentum term!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting the momentum"
           " term to 0(the feature will be disabled)");
@@ -143,7 +143,7 @@ namespace pandora_vision
     int maxIter;
     if (!nh_.getParam("maximum_iter", maxIter))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the maximum number number of training iterations!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting its value"
           " to 1000 iterations.");
@@ -154,7 +154,7 @@ namespace pandora_vision
     double epsilon;
     if (!nh_.getParam("epsilon", epsilon))
     {
-      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve" 
+      ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the epsilon value for the error change between iterations!");
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting its value"
           " to 0.01!");

@@ -38,7 +38,10 @@
 *   Vassilis Choutas <vasilis4ch@gmail.com>
 *********************************************************************/
 
-#include "boost/algorithm/string/predicate.hpp"
+#include <string>
+
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
 #include "pandora_vision_victim/classifiers/svm_training.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
@@ -66,7 +69,7 @@ namespace pandora_vision
       ROS_ERROR("Shutting Down now!");
       ros::shutdown();
     }
-    
+
     boost::shared_ptr<AbstractClassifier> victimTrainerPtr;
     AbstractClassifier* classifierPtr = this->createClassifier(classifierType, imageType);
     if (classifierPtr == NULL)
@@ -84,8 +87,8 @@ namespace pandora_vision
     // Train the system
     victimTrainerPtr->trainSubSystem();
 
-    double trainingTime = static_cast<double>((endwtime.tv_usec - 
-          startwtime.tv_usec) / 1.0e6 
+    double trainingTime = static_cast<double>((endwtime.tv_usec -
+          startwtime.tv_usec) / 1.0e6
         + endwtime.tv_sec - startwtime.tv_sec);
     std::cout << "The training finished after " << trainingTime << " seconds" << std::endl;
 
@@ -109,15 +112,15 @@ namespace pandora_vision
 
     if (boost::iequals(classifierType, "svm"))
     {
-      classifierPtr = new SvmTraining(ns, numFeatures, datasetPath, classifierType, imageType); 
+      classifierPtr = new SvmTraining(ns, numFeatures, datasetPath, classifierType, imageType);
     }
-    else if(boost::iequals(classifierType, "ann"))
+    else if (boost::iequals(classifierType, "ann"))
     {
-      classifierPtr =  new NeuralNetworkClassifier(ns, numFeatures, datasetPath, classifierType, imageType); 
+      classifierPtr =  new NeuralNetworkClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
     }
-    else if(boost::iequals(classifierType, "random_forests"))
+    else if (boost::iequals(classifierType, "random_forests"))
     {
-      classifierPtr =  new RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType); 
+      classifierPtr =  new RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
     }
     else
     {
@@ -129,5 +132,4 @@ namespace pandora_vision
     ROS_INFO("[Victim_Training]: Created %s Classifier for %s images", classifierType.c_str(), imageType.c_str());
     return classifierPtr;
   }
-  
-} //  namespace pandora_vision
+}  //  namespace pandora_vision

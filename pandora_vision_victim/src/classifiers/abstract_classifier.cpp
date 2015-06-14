@@ -36,6 +36,9 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <vector>
+#include <string>
+
 #include "pandora_vision_victim/utilities/file_utilities.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
 #include "pandora_vision_victim/feature_extractors/depth_feature_extraction.h"
