@@ -332,9 +332,6 @@ namespace pandora_vision
         ns + "/thermal_camera_node/published_topics/thermal_data_fusion_topic",
         dataFusionThermalTopic_))
     {
-      // Make the topic's name absolute
-      dataFusionThermalTopic_ = ns + "/" + dataFusionThermalTopic_;
-
       ROS_INFO_NAMED(PKG_NAME,
         "[Thermal Node] Advertising to the Thermal-Data fusion topic");
     }

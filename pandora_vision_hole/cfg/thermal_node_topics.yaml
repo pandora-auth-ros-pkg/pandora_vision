@@ -7,9 +7,9 @@ subscribed_topics:
 
 published_topics:
   candidate_holes_topic: thermal/candidate_holes
-  thermal_data_fusion_topic: thermal/data_fusion/poi
+  thermal_data_fusion_topic: /vision/thermal_direction_alert
   thermal_to_cropper_topic: thermal/cropper/poi  
 
   # thermal cropper node 
-  thermal_victim_node_topic: thermal/victim/poi
+  thermal_victim_node_topic: /vision/enhanced_holes
   thermal_unlock_synchronizer_topic: thermal/unlock/synchronizer

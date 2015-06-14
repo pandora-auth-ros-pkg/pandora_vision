@@ -396,9 +396,6 @@ namespace pandora_vision
         ns + "/thermal_cropper_node/published_topics/thermal_victim_node_topic",
         victimThermalTopic_))
     {
-      // Make the topic's name absolute
-      victimThermalTopic_ = ns + "/" + victimThermalTopic_;
-
       ROS_INFO_NAMED(PKG_NAME,
         "[ThermalCropper Node] Advertising to the Thermal-victim node topic");
     }
