@@ -115,15 +115,29 @@ namespace pandora_vision_obstacle
             cv::Scalar(255, 0, 0), 
             2);
         cv::Point slope;
+        int length = std::abs((*roi).width / 2);
         slope.x = result[i].second.x - result[i].first.x;
         slope.y = result[i].second.y - result[i].first.y;
         float magnitude = std::sqrt(slope.x * slope.x + slope.y * slope.y);
         slope.x /= magnitude;
         slope.y /= magnitude;
         // Rotate vector 90 degrees clockwisely 
-        int temp1 = slope.x;
+        float temp1 = slope.x;
         slope.x = -slope.y;
         slope.y = temp1;
+        // A point on the symmetry line
+        cv::Point s1 = 
+          cv::Point((*roi).x + (*roi).width / 2, 
+              (*roi).y + (*roi).height / 2);
+        cv::Point s2;
+        s2.x = s1.x + slope.x * length;
+        s2.y = s1.y + slope.y * length;
+
+        cv::Point s2;
+        s3.x = s1.x - slope.x * length;
+        s3.y = s1.y - slope.y * length;
+        cv::line(temp, s3, s2, cv::Scalar(0, 255, 0), 2);
+
         /* Visualize the Hough accum matrix */
         cv::Mat accum = detector.getAccumulationMatrix();
         accum.convertTo( accum, CV_8UC3 );
