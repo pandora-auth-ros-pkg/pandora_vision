@@ -62,7 +62,7 @@ namespace pandora_vision
       {
         return tag;
       }
-      
+
       void setDepth(float distance)
       {
         depthDistance = distance;

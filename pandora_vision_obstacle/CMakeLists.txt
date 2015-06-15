@@ -76,6 +76,14 @@ target_link_libraries(${PROJECT_NAME}_barrel_handler
   ${PROJECT_NAME}_barrel_processor
 )
 
+############################### soft obstacle detector ##############################
+add_library(${PROJECT_NAME}_soft_obstacle_detector
+  src/soft_obstacle_detection/soft_obstacle_detector.cpp
+)
+target_link_libraries(${PROJECT_NAME}_soft_obstacle_detector
+  ${catkin_LIBRARIES}
+)
+
 ############################### soft obstacle processor ##############################
 add_library(${PROJECT_NAME}_soft_obstacle_processor
   src/soft_obstacle_detection/soft_obstacle_processor.cpp
@@ -123,7 +131,7 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_node
 
 #~ To check lint : catkin_make roslint_pandora_vision_obstacle
 set(ROSLINT_CPP_OPTS
-    "--filter=-whitespace/end_of_line, -build/include_what_you_use")
+    "--filter=-build/include_what_you_use")
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}

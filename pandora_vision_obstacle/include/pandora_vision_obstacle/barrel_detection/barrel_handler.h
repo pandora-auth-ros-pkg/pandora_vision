@@ -47,7 +47,7 @@
 
 namespace pandora_vision
 {
-  class BarrelHandler : public VisionHandler<ObstaclePreProcessor, BarrelProcessor, 
+  class BarrelHandler : public VisionHandler<ObstaclePreProcessor, BarrelProcessor,
     ObstaclePostProcessor>
   {
     public:

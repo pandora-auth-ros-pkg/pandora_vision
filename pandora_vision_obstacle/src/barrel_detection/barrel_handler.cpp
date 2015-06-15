@@ -40,7 +40,7 @@
 
 namespace pandora_vision
 {
-  BarrelHandler::BarrelHandler(const std::string& ns) : 
+  BarrelHandler::BarrelHandler(const std::string& ns) :
     VisionHandler<ObstaclePreProcessor, BarrelProcessor, ObstaclePostProcessor>(ns)
   {
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_START_AUTONOMOUS);
@@ -51,7 +51,7 @@ namespace pandora_vision
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_MAPPING);
   }
-  
+
   void BarrelHandler::completeTransition()
   {
   }
