@@ -231,16 +231,6 @@ if(VICTIM_ENABLE_TRAIN)
 
 endif()
 
-############################### Model Trainer #################################
-if(MODEL_ENABLE_TRAIN)
-  add_executable(model_train
-      src/model_trainer.cpp
-  )
-  target_link_libraries(model_train
-      ${catkin_LIBRARIES}
-  )
-endif()
-
 if(DOWNLOAD_DATA or FUNCTIONAL_TEST or BENCHMARK)
  download_extra_data(
    ${PROJECT_NAME}_download_training_files
