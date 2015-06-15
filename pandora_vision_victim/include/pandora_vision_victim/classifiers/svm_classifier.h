@@ -37,8 +37,8 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_TRAINING_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_TRAINING_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H
 
 #include <string>
 
@@ -48,36 +48,58 @@
 
 namespace pandora_vision
 {
-  class SvmTraining : public AbstractClassifier
+  class SvmClassifier : public AbstractClassifier
   {
     public:
       /**
        * @brief The Constructor
        */
-      SvmTraining(const std::string& ns, int numFeatures,
+      SvmClassifier(const std::string& ns, int numFeatures,
           const std::string& datasetPath, const std::string& classifierType,
           const std::string& imageType);
 
       /**
        * @brief The Destructor
        */
-      virtual ~SvmTraining();
+      virtual ~SvmClassifier();
 
       /**
-       * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies SVM and extracts
-       * a suitable model.
+       * @brief Trains the corresponding classifier using the input features and training labels.
+       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the 
+       * training set
+       * @param trainingSetLabels[const cv::Mat&] The corresponding labels that define the class of each
+       * training sample.
+       * @return bool True on successfull completions, false otherwise. 
+       */
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels);
+
+      /**
+       * @brief Validates the resulting classifier using the given features 
+       * extracted from the test set.
+       * @param testSetFeatures[const cv::Mat&] The test set features matrix
+       * @param validationResults[cv::Mat*] The results for the test set.
        * @return void
        */
-      virtual void trainSubSystem();
+      virtual void validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults);
+
+      /**
+       * @brief Saves the classifier to a file 
+       * @param classifierFile[const std::string&] The name of the file where the classifier will be stored
+       * @return void
+       */
+      virtual void load(const std::string& classifierFile)
+      {
+        classifierPtr_->load(classifierFile.c_str());
+      }
 
     protected:
       /// Set up SVM's parameters
       // CvSVMParams params;
       CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
 
-      /// Train the SVM
-      CvSVM SVM;
+      /// The Pointer to the classifier object
+      boost::shared_ptr<CvSVM> classifierPtr_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_TRAINING_H
+
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H

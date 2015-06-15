@@ -194,108 +194,46 @@ namespace pandora_vision
    */
   NeuralNetworkClassifier::~NeuralNetworkClassifier()
   {
-    ROS_DEBUG("[victim_node] : Destroying Neural Network training instance");
+    ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Destroying Neural Network training instance");
   }
 
   /**
-   * @brief Function that implements the training for the subsystems
-   * according to the given training sets. It applies the training algorithm for the corresponding
-   * classifier type and extracts a suitable model.
+   * @brief Trains the corresponding classifier using the input features and training labels.
+   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the 
+   * training set
+   * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
+   * training sample.
+   * @return bool True on successfull completions, false otherwise. 
+   */
+  bool NeuralNetworkClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
+  {
+    if (trainingSetFeatures.empty())
+    {
+      ROS_ERROR("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: The features matrix is empty!");
+      return false;
+    }
+    if (trainingSetLabels.empty())
+    {
+      ROS_ERROR("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: The labels matrix is empty!");
+      return false;
+    }
+
+    classifierPtr_->train(trainingSetFeatures,  trainingSetLabels,
+        cv::Mat(), cv::Mat(), NeuralNetworkParams_);
+    return true;
+  }
+
+  /**
+   * @brief Validates the resulting classifier using the given features 
+   * extracted from the test set.
+   * @param testSetFeatures[const cv::Mat&] The test set features matrix
+   * @param validationResults[cv::Mat*] The results for the test set.
    * @return void
    */
-  void NeuralNetworkClassifier::trainSubSystem()
+  void NeuralNetworkClassifier::validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults)
   {
-    ROS_INFO("Starting the Training Procedure!");
-    int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
-    int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
-
-    cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, numFeatures_, CV_64FC1);
-    cv::Mat trainingLabelsMat = cv::Mat::zeros(numTrainingFiles, 1, CV_64FC1);
-    cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
-    cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
-
-    if (loadClassifierModel_ && file_utilities::exist(classifierFile_.c_str()))
-    {
-      classifierPtr_->load(classifierFile_.c_str());
-    }
-    else
-    {
-      if (file_utilities::exist(trainingFeaturesMatrixFile_.c_str()) == false ||
-          trainingSetFeatureExtraction_)
-      {
-        std::cout << "Create necessary training matrix" << std::endl;
-        std::string prefix = "training_";
-
-        bool vocabularyNeeded = constructBagOfWordsVocabulary(trainingDirectory_,
-            trainingAnnotationsFile_);
-
-        constructFeaturesMatrix(trainingDirectory_, trainingAnnotationsFile_,
-            &trainingFeaturesMat, &trainingLabelsMat);
-
-        trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
-        trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
-
-        file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
-            prefix, trainingFeaturesMatrixFile_, trainingLabelsMatrixFile_,
-            imageType_);
-
-        if (vocabularyNeeded)
-        {
-          std::cout << "Save bag of words vocabulary" << std::endl;
-          const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
-          const std::string bagOfWordsFilePath = filesDirectory_ + bagOfWordsFile;
-          file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
-              featureExtraction_->getBagOfWordsVocabulary());
-        }
-      }
-      else
-      {
-        trainingFeaturesMat = file_utilities::loadFiles(
-            trainingFeaturesMatrixFile_, "training_features_mat");
-        trainingLabelsMat = file_utilities::loadFiles(
-            trainingLabelsMatrixFile_, "training_labels_mat");
-      }
-
-      // Start Training Process
-      std::cout << "Starting training process for the " << imageType_ << " images" << std::endl;
-
-      classifierPtr_->train(trainingFeaturesMat,  trainingLabelsMat,
-          cv::Mat(), cv::Mat(), NeuralNetworkParams_);
-
-      classifierPtr_->save(classifierFile_.c_str());
-      std::cout << "Finished training process" << std::endl;
-    }
-    if (file_utilities::exist(testFeaturesMatrixFile_.c_str()) == false ||
-        testSetFeatureExtraction_)
-    {
-      std::cout << "Create necessary test matrix" << std::endl;
-      std::string prefix = "test_";
-
-      constructFeaturesMatrix(testDirectory_, testAnnotationsFile_,
-          &testFeaturesMat, &testLabelsMat);
-
-      loadNormalizationParametersAndNormalizeFeatures(&testFeaturesMat);
-
-      testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
-      testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
-
-      file_utilities::saveFeaturesInFile(testFeaturesMat, testLabelsMat,
-          prefix, testFeaturesMatrixFile_, testLabelsMatrixFile_, imageType_);
-    }
-    else
-    {
-      testFeaturesMat = file_utilities::loadFiles(
-          testFeaturesMatrixFile_, "test_features_mat");
-      testLabelsMat = file_utilities::loadFiles(
-          testLabelsMatrixFile_, "test_labels_mat");
-    }
-
-    cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_32FC1);
-
-    classifierPtr_->predict(testFeaturesMat, results);
-
-    file_utilities::saveToFile(resultsFile_, "results", results);
-    evaluate(results, testLabelsMat);
+    classifierPtr_->predict(testSetFeatures, *validationResults);
+    return;
   }
 }  // namespace pandora_vision
 

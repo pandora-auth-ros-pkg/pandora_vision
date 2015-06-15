@@ -104,7 +104,7 @@ target_link_libraries(${PROJECT_NAME}_feature_extractors
 ########################### Classifiers Library ###############################
 add_library(${PROJECT_NAME}_classifiers
     src/classifiers/abstract_classifier.cpp
-    src/classifiers/svm_training.cpp
+    src/classifiers/svm_classifier.cpp
     src/classifiers/random_forests_classifier.cpp
     src/classifiers/neural_network_classifier.cpp
 )

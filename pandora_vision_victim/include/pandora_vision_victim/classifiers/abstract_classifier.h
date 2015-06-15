@@ -115,7 +115,7 @@ namespace pandora_vision
        * algorithm and extracts a suitable model.
        * @return void
        */
-      virtual void trainSubSystem();
+      virtual void trainAndValidate();
 
       /**
        * @brief This function evaluates the classifier model, based on the
@@ -140,6 +140,32 @@ namespace pandora_vision
        */
       void sigmoid_train(cv::Mat dec_values, cv::Mat labels, double* A,
                          double* B);
+
+      /**
+       * @brief Trains the corresponding classifier using the input features and training labels.
+       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the 
+       * training set
+       * @param trainingSetLabels[const cv::Mat&] The corresponding labels that define the class of each
+       * training sample.
+       * @return bool True on successfull completions, false otherwise. 
+       */
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels) = 0;
+
+      /**
+       * @brief Validates the resulting classifier using the given features 
+       * extracted from the test set.
+       * @param testSetFeatures[const cv::Mat&] The test set features matrix
+       * @param validationResults[cv::Mat*] The results for the test set.
+       * @return void
+       */
+      virtual void validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults) = 0;
+
+      /**
+       * @brief Saves the classifier to a file 
+       * @param classifierFile[const std::string&] The name of the file where the classifier will be stored
+       * @return void
+       */
+      virtual void load(const std::string& classifierFile) = 0;
 
     protected:
       /// The NodeHandle

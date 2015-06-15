@@ -161,7 +161,7 @@ namespace pandora_vision
                                       CV_TERMCRIT_ITER + CV_TERMCRIT_EPS);
 
     // Initialize the pointer to the Random Forests Classifier object.
-    randomForestsClassifierPtr_.reset(new CvRTrees());
+    classifierPtr_.reset(new CvRTrees());
 
     ROS_INFO_STREAM("[PANDORA_VISION_VICTIM_RANDOM_FORESTS]: Successfully created "
         << imageType_ << " " << classifierType_ << " classifier instance");
@@ -175,98 +175,45 @@ namespace pandora_vision
     ROS_DEBUG("[victim_node] : Destroying Random Forests training instance");
   }
 
-  void RandomForestsClassifier::trainSubSystem()
+  /**
+   * @brief Trains the corresponding classifier using the input features and training labels.
+   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the 
+   * training set
+   * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
+   * training sample.
+   * @return bool True on successfull completions, false otherwise. 
+   */
+  bool RandomForestsClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
   {
-    int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
-    int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
-
-    cv::Mat trainingFeaturesMat = cv::Mat::zeros(numTrainingFiles, numFeatures_, CV_64FC1);
-    cv::Mat trainingLabelsMat = cv::Mat::zeros(numTrainingFiles, 1, CV_64FC1);
-    cv::Mat testFeaturesMat = cv::Mat::zeros(numTestFiles, numFeatures_, CV_64FC1);
-    cv::Mat testLabelsMat = cv::Mat::zeros(numTestFiles, 1, CV_64FC1);
-
-    if (loadClassifierModel_ && file_utilities::exist(classifierFile_.c_str()))
+    if (trainingSetFeatures.empty())
     {
-      randomForestsClassifierPtr_->load(classifierFile_.c_str());
+      ROS_ERROR("The features matrix is empty!");
+      return false;
     }
-    else
+    if (trainingSetLabels.empty())
     {
-      if (file_utilities::exist(trainingFeaturesMatrixFile_.c_str()) == false ||
-          trainingSetFeatureExtraction_)
-      {
-        std::cout << "Create necessary training matrix" << std::endl;
-        std::string prefix = "training_";
+      ROS_ERROR("The labels matrix is empty!");
+      return false;
+    }
 
-        bool vocabularyNeeded = constructBagOfWordsVocabulary(trainingDirectory_,
-            trainingAnnotationsFile_);
-
-        constructFeaturesMatrix(trainingDirectory_, trainingAnnotationsFile_,
-            &trainingFeaturesMat, &trainingLabelsMat);
-
-        std::cout << "Normalize features" << std::endl;
-        normalizeFeaturesAndSaveNormalizationParameters(&trainingFeaturesMat);
-
-        trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
-        trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);
-
-        file_utilities::saveFeaturesInFile(trainingFeaturesMat, trainingLabelsMat,
-            prefix, trainingFeaturesMatrixFile_, trainingLabelsMatrixFile_,
-            imageType_);
-
-        if (vocabularyNeeded)
-        {
-          std::cout << "Save bag of words vocabulary" << std::endl;
-          const std::string bagOfWordsFile = imageType_ + classifierType_ + "bag_of_words.xml";
-          const std::string bagOfWordsFilePath = filesDirectory_ + bagOfWordsFile;
-          file_utilities::saveToFile(bagOfWordsFilePath, "bag_of_words",
-              featureExtraction_->getBagOfWordsVocabulary());
-        }
-      }
-      else
-      {
-        trainingFeaturesMat = file_utilities::loadFiles(
-            trainingFeaturesMatrixFile_, "training_features_mat");
-        trainingLabelsMat = file_utilities::loadFiles(
-            trainingLabelsMatrixFile_, "training_labels_mat");
-      }
-
-      // Start Training Process
-      std::cout << "Starting training process for the rgb images" << std::endl;
-      randomForestsClassifierPtr_->train(trainingFeaturesMat, CV_ROW_SAMPLE, trainingLabelsMat,
+    classifierPtr_->train(trainingSetFeatures, CV_ROW_SAMPLE, trainingSetLabels,
           cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(), randomForestsParams_);
-      randomForestsClassifierPtr_->save(classifierFile_.c_str());
-      std::cout << "Finished training process" << std::endl;
-    }
-    if (file_utilities::exist(testFeaturesMatrixFile_.c_str()) == false ||
-        testSetFeatureExtraction_)
-    {
-      std::cout << "Create necessary test matrix" << std::endl;
-      std::string prefix = "test_";
-
-      constructFeaturesMatrix(testDirectory_, testAnnotationsFile_,
-          &testFeaturesMat, &testLabelsMat);
-
-      loadNormalizationParametersAndNormalizeFeatures(&testFeaturesMat);
-
-      testFeaturesMat.convertTo(testFeaturesMat, CV_32FC1);
-      testLabelsMat.convertTo(testLabelsMat, CV_32FC1);
-
-      file_utilities::saveFeaturesInFile(testFeaturesMat, testLabelsMat,
-          prefix, testFeaturesMatrixFile_, testLabelsMatrixFile_, imageType_);
-    }
-    else
-    {
-      testFeaturesMat = file_utilities::loadFiles(
-          testFeaturesMatrixFile_, "test_features_mat");
-      testLabelsMat = file_utilities::loadFiles(
-          testLabelsMatrixFile_, "test_labels_mat");
-    }
-
-    cv::Mat results = cv::Mat::zeros(numTestFiles, 1, CV_32FC1);
-    for (int ii = 0; ii < testFeaturesMat.rows; ii++)
-      results.at<float>(ii) = randomForestsClassifierPtr_->predict(testFeaturesMat.row(ii));
-    file_utilities::saveToFile(resultsFile_, "results", results);
-    evaluate(results, testLabelsMat);
+    return true;
   }
+
+  /**
+   * @brief Validates the resulting classifier using the given features 
+   * extracted from the test set.
+   * @param testSetFeatures[const cv::Mat&] The test set features matrix
+   * @param validationResults[cv::Mat*] The results for the test set.
+   * @return void
+   */
+  void RandomForestsClassifier::validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults)
+  {
+    for (int ii = 0; ii < testSetFeatures.rows; ii++)
+      validationResults->at<float>(ii) = classifierPtr_->predict(testSetFeatures.row(ii));
+    return;
+  }
+
 }  // namespace pandora_vision
 

@@ -73,17 +73,39 @@ namespace pandora_vision
       virtual ~NeuralNetworkClassifier();
 
       /**
-       * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies the training algorithm for the corresponding
-       * classifier tyep and extracts a suitable model.
+       * @brief Trains the corresponding classifier using the input features and training labels.
+       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the 
+       * training set
+       * @param trainingSetLabels[const cv::Mat&] The corresponding labels that define the class of each
+       * training sample.
+       * @return bool True on successfull completions, false otherwise. 
+       */
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels);
+
+      /**
+       * @brief Validates the resulting classifier using the given features 
+       * extracted from the test set.
+       * @param testSetFeatures[const cv::Mat&] The test set features matrix
+       * @param validationResults[cv::Mat*] The results for the test set.
        * @return void
        */
-      virtual void trainSubSystem();
+      virtual void validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults);
+
+      /**
+       * @brief Saves the classifier to a file 
+       * @param classifierFile[const std::string&] The name of the file where the classifier will be stored
+       * @return void
+       */
+      virtual void load(const std::string& classifierFile)
+      {
+        classifierPtr_->load(classifierFile.c_str());
+      }
 
     protected:
       /// Parameters of the Random Forests Classifier.
       cv::ANN_MLP_TrainParams NeuralNetworkParams_;
-      /// Train the Random Forests
+
+      /// The Pointer to the classifier object
       boost::shared_ptr<CvANN_MLP> classifierPtr_;
   };
 }  // namespace pandora_vision

@@ -43,7 +43,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
-#include "pandora_vision_victim/classifiers/svm_training.h"
+#include "pandora_vision_victim/classifiers/svm_classifier.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
 #include "pandora_vision_victim/classifiers/random_forests_classifier.h"
 
@@ -112,7 +112,7 @@ namespace pandora_vision
 
     if (boost::iequals(classifierType, "svm"))
     {
-      classifierPtr = new SvmTraining(ns, numFeatures, datasetPath, classifierType, imageType);
+      classifierPtr = new SvmClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "ann"))
     {
