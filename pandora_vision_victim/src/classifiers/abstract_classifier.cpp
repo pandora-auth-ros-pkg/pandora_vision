@@ -126,7 +126,6 @@ namespace pandora_vision
       ros::shutdown();
     }
 
-
     ROS_INFO("Created Abstract Classifier Instance!");
 >>>>>>> Add factory for victim training objects
   }
