@@ -39,6 +39,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
 

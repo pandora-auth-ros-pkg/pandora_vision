@@ -66,13 +66,13 @@ namespace pandora_vision
 
     ROS_INFO_STREAM(params.depth_classifier_path.c_str());
     svmValidator_.load(params.depth_classifier_path.c_str());
-    
+
     probabilityScaling_ = params.depth_svm_prob_scaling;
     probabilityTranslation_ = params.depth_svm_prob_translation;
     svmParams_.C = params.depth_svm_C;
     svmParams_.gamma = params.depth_svm_gamma;
     svmParams_.svm_type = CvSVM::C_SVC;
-    svmParams_.kernel_type = CvSVM::RBF; 
+    svmParams_.kernel_type = CvSVM::RBF;
 
     std::string filesDirectory = packagePath_ + "/data/";
 

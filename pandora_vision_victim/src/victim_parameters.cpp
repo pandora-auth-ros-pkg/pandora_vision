@@ -40,8 +40,6 @@
 
 namespace pandora_vision
 {
-  //----------------------------Methods----------------------------//
-  
   VictimParameters::VictimParameters()
   {
     //!< Dynamic reconfigure parameters
@@ -53,7 +51,7 @@ namespace pandora_vision
     autoTrain = true;
     debug_img = false;
     debug_img_publisher = false;
-    
+
     rgb_svm_prob_scaling = 0.5;
     rgb_svm_prob_translation = 7.0;
     depth_svm_prob_scaling = 0.5;
@@ -77,11 +75,11 @@ namespace pandora_vision
     params.term_crit.max_iter = 10000;
     params.term_crit.epsilon = 1e-6;
 
-    //!< The dynamic reconfigure (depth) parameter's callback
+    /// The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&VictimParameters::parametersCallback,
         this, _1, _2));
   }
-  
+
   /**
   @brief The function called when a parameter is changed
   @param[in] config [const pandora_vision_motion::motion_cfgConfig&]
@@ -99,22 +97,19 @@ namespace pandora_vision
     debug_img = config.debug_img;
     debug_img_publisher = config.debug_img_publisher;
     rgb_svm_prob_scaling = config.rgb_svm_prob_scaling;
-    rgb_svm_prob_translation = 
-      config.rgb_svm_prob_translation;
+    rgb_svm_prob_translation = config.rgb_svm_prob_translation;
     depth_svm_prob_scaling = config.depth_svm_prob_scaling;
-    depth_svm_prob_translation = 
-      config.depth_svm_prob_translation;
+    depth_svm_prob_translation = config.depth_svm_prob_translation;
     positivesCounter = config.positivesCounter;
     autoTrain = config.autoTrain;
     oneClass = config.oneClass;
-    if(oneClass)
+    if (oneClass)
     params.svm_type = CvSVM::ONE_CLASS;
   }
-  
+
   void VictimParameters::configVictim(const ros::NodeHandle& nh)
   {
-    packagePath =  
-      ros::package::getPath("pandora_vision_victim");
+    packagePath = ros::package::getPath("pandora_vision_victim");
 
     if (!nh.getParam("victim_interpolated_depth_img_topic", interpolatedDepthImg))
     {
@@ -122,7 +117,7 @@ namespace pandora_vision
       ROS_FATAL("[victim_node] : interpolatedDepthImg name param not found");
       ROS_BREAK();
     }
-    
+
     if (!nh.getParam("victim_debug_img_topic", victimDebugImg))
     {
       victimDebugImg = "";
@@ -136,9 +131,9 @@ namespace pandora_vision
     nh.param("rgb_svm_gamma", rgb_svm_gamma, 0.50625);
     nh.param("depth_svm_C", depth_svm_C, 312.5);
     nh.param("depth_svm_gamma", depth_svm_gamma, 0.50625);
-    /* nh.param("depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5);*/
-    /*nh.param("depth_svm_prob_translation", depth_svm_prob_translation, 7.);*/
-    
+    /* nh.param("depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5); */
+    /* nh.param("depth_svm_prob_translation", depth_svm_prob_translation, 7.); */
+
     if (!nh.getParam("cascade_path", cascade_path))
     {
       cascade_path = "/data/haarcascade_frontalface_alt_tree.xml";
@@ -146,7 +141,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     cascade_path = packagePath + cascade_path;
-    
+
     if (!nh.getParam("model_path", model_path))
     {
       model_path = "/data/model.xml";
@@ -154,7 +149,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     model_path = packagePath + model_path;
-    
+
     if (!nh.getParam("rgb_classifier_path", rgb_classifier_path))
     {
       rgb_classifier_path = "data/rgb_svm_classifier.xml";
@@ -162,7 +157,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     rgb_classifier_path = packagePath + rgb_classifier_path;
-    
+
     if (!nh.getParam("depth_classifier_path", depth_classifier_path))
     {
       depth_classifier_path = "/data/depth_svm_classifier.xml";
@@ -170,7 +165,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
     depth_classifier_path = packagePath + depth_classifier_path;
-    
+
     if (!nh.getParam("model_url", model_url))
     {
       model_url = "https://pandora.ee.auth.gr/vision/model.xml";

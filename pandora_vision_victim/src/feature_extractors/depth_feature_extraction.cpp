@@ -38,6 +38,7 @@
 *********************************************************************/
 
 #include <vector>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 
@@ -195,6 +196,5 @@ namespace pandora_vision
       for (int ii = 0; ii < hogDescriptors.size(); ii++)
         featureVector_.push_back(hogDescriptors.at(ii));
     }
-
   }
 }  // namespace pandora_vision

@@ -73,7 +73,7 @@ namespace pandora_vision
 
     protected:
       /// Set up SVM's parameters
-      //CvSVMParams params;
+      // CvSVMParams params;
       CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
 
       /// Train the SVM

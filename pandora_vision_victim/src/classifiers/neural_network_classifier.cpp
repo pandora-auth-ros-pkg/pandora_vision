@@ -128,7 +128,7 @@ namespace pandora_vision
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Setting the learning"
           " rate to 0.1");
       learningRate = 0.1;
-    } 
+    }
 
     if (!nh_.getParam("momentum_scale", bpMomentScale))
     {
@@ -182,12 +182,12 @@ namespace pandora_vision
     classifierPtr_.reset(new CvANN_MLP());
 
     // Create the Neural Network with the specified topology.
-    classifierPtr_->create(layerSizes, CvANN_MLP::SIGMOID_SYM, 
+    classifierPtr_->create(layerSizes, CvANN_MLP::SIGMOID_SYM,
         alpha, beta);
 
-    ROS_INFO("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Successfully created " 
+    ROS_INFO("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Successfully created "
         "Neural Network Classifier Object!");
-  } // End of NeuralNetworkClassifier Constructor
+  }  // End of NeuralNetworkClassifier Constructor
 
   /**
    * @brief Destructor
@@ -296,8 +296,6 @@ namespace pandora_vision
 
     file_utilities::saveToFile(resultsFile_, "results", results);
     evaluate(results, testLabelsMat);
-
   }
-
 }  // namespace pandora_vision
 

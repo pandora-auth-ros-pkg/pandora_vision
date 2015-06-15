@@ -39,13 +39,14 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
 #define PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H
 
+#include <string>
 #include <iostream>
 #include <cstdlib>
 #include <limits>
 #include <map>
 #include <vector>
 
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include <ros/package.h>
 
 #include <dynamic_reconfigure/server.h>
@@ -65,7 +66,6 @@
 
 namespace pandora_vision
 {
-
   enum VictimSource
   {
     RGB_VJ,
@@ -88,7 +88,7 @@ namespace pandora_vision
     cv::Rect bounding_box;
     cv::Point2f keypoint;
   };
-  
+
   struct DetectionImages
   {
     // EnhancedMat rgb;
@@ -106,13 +106,13 @@ namespace pandora_vision
   class VictimParameters
   {
     public:
-      //!< Default contructor
+      /// Default contructor
       VictimParameters();
 
-      //!< The dynamic reconfigure (motion's) parameters' server
+      /// The dynamic reconfigure (motion's) parameters' server
       dynamic_reconfigure::Server
         <pandora_vision_victim::victim_dyn_reconfConfig>server;
-      //!< The dynamic reconfigure (depth) parameters' callback
+      /// The dynamic reconfigure (depth) parameters' callback
       dynamic_reconfigure::Server
         <pandora_vision_victim::victim_dyn_reconfConfig>::CallbackType f;
 
@@ -125,21 +125,21 @@ namespace pandora_vision
       void parametersCallback(
         const pandora_vision_victim::victim_dyn_reconfConfig& config,
         const uint32_t& level);
-        
+
       void configVictim(const ros::NodeHandle& nh);
-    
-    public:  
-      //!< Weight parameters for the victim subsystems
+
+    public:
+      /// Weight parameters for the victim subsystems
       double rgb_vj_weight;
       double depth_vj_weight;
       double rgb_svm_weight;
       double depth_svm_weight;
-      
-      //!< Parameters for debug purposes
+
+      /// Parameters for debug purposes
       bool debug_img;
       bool debug_img_publisher;
 
-      //!< parameters referring to the view and frame characteristics
+      /// parameters referring to the view and frame characteristics
       std::string packagePath;
       std::string victimDebugImg;
       std::string interpolatedDepthImg;
@@ -147,7 +147,7 @@ namespace pandora_vision
       int modelImageWidth;
       int positivesCounter;
 
-      //!< parameters referring to the face detection algorithm
+      /// parameters referring to the face detection algorithm
       std::string cascade_path;
       std::string model_url;
       std::string model_path;
@@ -167,6 +167,5 @@ namespace pandora_vision
       double depth_svm_prob_scaling;
       double depth_svm_prob_translation;
   };
-
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_VICTIM_PARAMETERS_H

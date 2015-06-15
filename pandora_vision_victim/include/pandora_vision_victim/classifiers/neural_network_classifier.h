@@ -53,17 +53,16 @@ namespace pandora_vision
   class NeuralNetworkClassifier : public AbstractClassifier
   {
     public:
-
       /**
-   * @brief Constructor for the Neural Network Classifier Wrapper Class
-   * @param ns[const std::string&] The namespace of the node
-   * @param numFeatures[int] The number of input features to the classifier
-   * @param datasetPath[const std::string&] The path to the training dataset
-   * @param classifierType[const std::string&] The model used by the
-   * classifier.
-   * @param imageType[const std::string&] The type of input images given to
-   * the classifier(RGB or Depth)
-   */
+       * @brief Constructor for the Neural Network Classifier Wrapper Class
+       * @param ns[const std::string&] The namespace of the node
+       * @param numFeatures[int] The number of input features to the classifier
+       * @param datasetPath[const std::string&] The path to the training dataset
+       * @param classifierType[const std::string&] The model used by the
+       * classifier.
+       * @param imageType[const std::string&] The type of input images given to
+       * the classifier(RGB or Depth)
+       */
       NeuralNetworkClassifier(const std::string& ns, int numFeatures,
           const std::string& datasetPath, const std::string& classifierType,
           const std::string& imageType);

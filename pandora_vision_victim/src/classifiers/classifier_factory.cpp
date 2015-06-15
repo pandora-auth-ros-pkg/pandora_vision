@@ -132,4 +132,8 @@ namespace pandora_vision
     ROS_INFO("[Victim_Training]: Created %s Classifier for %s images", classifierType.c_str(), imageType.c_str());
     return classifierPtr;
   }
+
+  ClassifierFactory::~ClassifierFactory()
+  {
+  }
 }  //  namespace pandora_vision

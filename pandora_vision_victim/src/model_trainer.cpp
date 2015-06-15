@@ -35,16 +35,19 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#include <opencv2/core/core.hpp>
-#include "opencv2/contrib/contrib.hpp"
-#include "opencv2/highgui/highgui.hpp"
-
-#include <boost/filesystem.hpp>
-
+#include <vector>
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "ros/ros.h"
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/contrib/contrib.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <boost/filesystem.hpp>
+
+#include <ros/ros.h>
 #include <ros/package.h>
 
 static void read_csv(const std::string& filename,

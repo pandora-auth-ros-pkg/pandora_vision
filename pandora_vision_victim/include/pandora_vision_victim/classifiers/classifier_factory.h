@@ -39,7 +39,9 @@
 *********************************************************************/
 
 #ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H 
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
+
+#include <string>
 
 #include "pandora_vision_victim/classifiers/abstract_classifier.h"
 
@@ -49,16 +51,13 @@ namespace pandora_vision
   {
     public:
       explicit ClassifierFactory(const std::string& ns);
-      ~ClassifierFactory()
-      {}
+      ~ClassifierFactory();
 
       AbstractClassifier* createClassifier(const std::string& classifierType,
           const std::string& imageType);
 
     private:
       ros::NodeHandle nh_;
-
   };
-} //  namespace pandora_vision
-
+}  //  namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H

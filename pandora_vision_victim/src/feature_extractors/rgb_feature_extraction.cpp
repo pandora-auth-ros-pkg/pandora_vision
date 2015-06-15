@@ -102,7 +102,7 @@ namespace pandora_vision
     chosenFeatureTypesMap_["haralick"] = extractHaralickFeatures;
     chosenFeatureTypesMap_["sift"] = extractSiftFeatures;
     chosenFeatureTypesMap_["hog"] = extractHogFeatures;
-    chosenFeatureTypesMap_["color_histograms"] = extractColorHistogramFeatures; 
+    chosenFeatureTypesMap_["color_histograms"] = extractColorHistogramFeatures;
 
     if (chosenFeatureTypesMap_["sift"] == true)
     {
@@ -216,7 +216,7 @@ namespace pandora_vision
       featureFactoryPtrMap_["color_histograms"]->extractFeatures(inImage,
           &colorHistogramFeatures);
 
-      // Plot the features if the visualization flag is true. 
+      // Plot the features if the visualization flag is true.
        if (visualization_)
         featureFactoryPtrMap_["color_histograms"]->plotFeatures(
             colorHistogramFeatures);

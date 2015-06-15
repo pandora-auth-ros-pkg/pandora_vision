@@ -40,6 +40,9 @@
 #ifndef PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H
 #define PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H
 
+#include <string>
+#include <vector>
+
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_victim/enhanced_image_stamped.h"
@@ -55,12 +58,12 @@ namespace pandora_vision
     public:
       VictimHoleProcessor(const std::string& ns, sensor_processor::Handler* handler);
       VictimHoleProcessor();
-      
+
       virtual ~VictimHoleProcessor();
-      
-      virtual bool process(const EnhancedImageStampedConstPtr& input, 
+
+      virtual bool process(const EnhancedImageStampedConstPtr& input,
         const POIsStampedPtr& output);
-    
+
     private:
       /**
       @brief This method check in which state we are, according to
@@ -68,27 +71,27 @@ namespace pandora_vision
       @return void
       **/
       std::vector<VictimPOIPtr> detectVictims(const EnhancedImageStampedConstPtr& input);
-      
+
       /**
       @brief Function that enables suitable subsystems, according
       to the current State 
       @param [std::vector<cv::Mat>] vector of images to be processed. Size of
       vector can be either 2 or 1, if we have both rgbd information or not
       @return void
-      **/ 
-      std::vector<VictimPOIPtr> victimFusion(DetectionImages imgs, 
+      **/
+      std::vector<VictimPOIPtr> victimFusion(DetectionImages imgs,
         DetectionMode detectionMode);
-      
+
       std::vector<cv::Mat> _rgbdImages;
 
       /// Instance of RGB SVM Validator
       boost::shared_ptr<RgbSvmValidator> rgbSvmValidatorPtr_;
       /// Instance of Depth SVM Validator
       boost::shared_ptr<DepthSvmValidator> depthSvmValidatorPtr_;
-      
+
       VictimParameters params_;
-      
-      int counter_; 
+
+      int counter_;
 
       /// Debug purposes
       image_transport::Publisher interpolatedDepthPublisher_;
@@ -105,5 +108,4 @@ namespace pandora_vision
       DetectionImages dImages;
   };
 }  // namespace pandora_vision
-
 #endif  // PANDORA_VISION_VICTIM_VICTIM_HOLE_PROCESSOR_H
