@@ -68,6 +68,18 @@ namespace pandora_vision
     // transactionary affairs with
     getTopicNames();
 
+    // Check if Thermal is enabled to run with hole-detection Package
+    if (mode_)
+    {
+      // Thermal is enabled
+      counter_ = 4;
+    }
+    else
+    {
+      // Thermal is disabled
+      counter_ = 3;
+    }
+
     // Initialize the numNodesReady variable.
     // It acts as a counter of nodes that have published their output to the
     // hole fusion node in each execution cycle.
@@ -275,7 +287,7 @@ namespace pandora_vision
     // If the RGB candidate holes and the RGB image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 4)
+    if (numNodesReady_ == counter_)
     {
       numNodesReady_ = 0;
 
@@ -581,6 +593,18 @@ namespace pandora_vision
   {
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();
+
+    // This variable indicates the mode in which Hole-Package is running
+    // If is set to true -> Rgb-D-T mode
+    // Else Rgb-D mode
+    if(nodeHandle_.getParam("/hole_detector/thermal", mode_))
+    {
+      ROS_INFO("[Hole Fusion Node] Packages Mode has been found");
+    }
+    else
+    {
+      ROS_ERROR("[Hole Fusion Node] Could not find Packages Mode");
+    }
 
     // Read the name of the topic from where the Hole Fusion node acquires the
     // input point cloud
@@ -1301,7 +1325,7 @@ namespace pandora_vision
     // If the depth and RGB candidate holes, the interpolated depth image
     // and the RGB image are set,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 4)
+    if (numNodesReady_ == counter_)
     {
       numNodesReady_ = 0;
 
@@ -2019,7 +2043,7 @@ namespace pandora_vision
     // If the depth candidate holes and the interpolated depth image are set
     // and the point cloud has been delivered and interpolated,
     // unlock the synchronizer and process the candidate holes from both sources
-    if (numNodesReady_ == 4)
+    if (numNodesReady_ == counter_)
     {
       numNodesReady_ = 0;
 

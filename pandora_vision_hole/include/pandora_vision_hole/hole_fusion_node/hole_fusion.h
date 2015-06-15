@@ -236,6 +236,13 @@ namespace pandora_vision
       // received hole candidates and are ready to send them for processing
       int numNodesReady_;
 
+      // If Thermal mode is on counter_ is set to 4, else to 3
+      int counter_;
+
+      // The mode in which the package is running
+      // If true Thermal process is enabled, else only Rgb-D.
+      bool mode_;
+
       // The rgb received by the RGB node
       cv::Mat rgbImage_;
 

@@ -146,6 +146,10 @@ namespace pandora_vision
       bool isLocked_;
       bool thermalLocked_;
 
+      // The mode in which the package is running
+      // If true Thermal process is enabled, else only Rgb-D.
+      bool mode_;
+
       // Records the time for each synchronizer invocation
       double invocationTime_;
 

@@ -188,6 +188,18 @@ namespace pandora_vision
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();
 
+    // This variable indicates the mode in which Hole-Package is running
+    // If is set to true -> Rgb-D-T mode
+    // Else Rgb-D mode
+    if(nodeHandle_.getParam("/hole_detector/thermal", mode_))
+    {
+      ROS_INFO("[Synchronizer Node] Packages Mode has been found");
+    }
+    else
+    {
+      ROS_ERROR("[Synchronizer] Could not find Packages Mode");
+    }
+
     // Read the name of the topic from where the synchronizer node acquires the
     // input synchronized thermal and pointcloud info
     if (nodeHandle_.getParam(
@@ -538,25 +550,29 @@ namespace pandora_vision
         Timer::printAllMeansTree();
         #endif
       }
+  
+      // Check if Thermal is enabled to run with hole-detection Package
+      if(mode_)
+      {
+        // Fill the thermal message
+        pandora_vision_msgs::IndexedThermal thermalMsg;
 
-      // Fill the thermal message
-      pandora_vision_msgs::IndexedThermal thermalMsg;
+        thermalMsg.header.stamp = synchronizedMessage.header.stamp;
+        thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
+        thermalMsg.temperatures = synchronizedMessage.temperatures;
+        // Fill the header of the thermal image
+        thermalMsg.thermalImage.header.stamp =
+          synchronizedMessage.thermalInfo.header.stamp;
 
-      thermalMsg.header.stamp = synchronizedMessage.header.stamp;
-      thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
-      thermalMsg.temperatures = synchronizedMessage.temperatures;
-      // Fill the header of the thermal image
-      thermalMsg.thermalImage.header.stamp =
-        synchronizedMessage.thermalInfo.header.stamp;
+        thermalMsg.thermalIndex = thermalIndex;
+        thermalMsg.thermalImage.encoding = "mono8";
+        thermalMsg.thermalImage.height = 60;
+        thermalMsg.thermalImage.width = 80;
+        thermalMsg.thermalImage.step = 80 * sizeof(uint8_t);
 
-      thermalMsg.thermalIndex = thermalIndex;
-      thermalMsg.thermalImage.encoding = "mono8";
-      thermalMsg.thermalImage.height = 60;
-      thermalMsg.thermalImage.width = 80;
-      thermalMsg.thermalImage.step = 80 * sizeof(uint8_t);
-
-      // Publish the synchronized thermal message to thermal node
-      synchronizedThermalImagePublisher_.publish(thermalMsg);
+        // Publish the synchronized thermal message to thermal node
+        synchronizedThermalImagePublisher_.publish(thermalMsg);
+      }
     }
   }
 
