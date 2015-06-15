@@ -73,8 +73,8 @@ namespace pandora_vision
     testFeaturesMatrixFile_ = filePrefix + "test_features_matrix.xml";
     trainingLabelsMatrixFile_ = filePrefix + "training_labels_matrix.xml";
     testLabelsMatrixFile_ = filePrefix + "test_labels_matrix.xml";
-    resultsFile_ = filePrefix + "results.xml";
-    classifierFile_ = filePrefix + "classifier.xml";
+    resultsFile_ = filePrefix + classifierType_ + "_results.xml";
+    classifierFile_ = filePrefix + classifierType_ +  "_classifier.xml";
 
     const std::string trainingDatasetPath = datasetPath_ + "/Training_Images";
     boost::filesystem::path trainingDirectory(trainingDatasetPath);
@@ -117,7 +117,6 @@ namespace pandora_vision
       ROS_ERROR("The system will now shut down!");
       ros::shutdown();
     }
-
 
     ROS_INFO("Created Abstract Classifier Instance!");
   }

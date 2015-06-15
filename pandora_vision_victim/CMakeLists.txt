@@ -18,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
     urdf
 )
 
-
 generate_dynamic_reconfigure_options(
     config/victim_dyn_reconf.config
 )
@@ -41,8 +40,6 @@ catkin_package(
     INCLUDE_DIRS
     LIBRARIES
 )
-
-
 
 include_directories(include
     ${catkin_INCLUDE_DIRS}
@@ -209,7 +206,7 @@ target_link_libraries(${PROJECT_NAME}_node
 )
 
 
-############################# Victim SVM Trainer ##############################
+############################# Victim Trainer Node #############################
 if(VICTIM_ENABLE_TRAIN)
 
   add_library(${PROJECT_NAME}_trainer_factory
@@ -251,9 +248,8 @@ if(DOWNLOAD_DATA or FUNCTIONAL_TEST or BENCHMARK)
    )
 endif()
 
+#################################### Lint #####################################
 #~ To check lint : catkin_make roslint_pandora_vision_victim
-## Additional lint filters - Not Needed ##
-# -whitespace/braces, -whitespace/newline, -readability/multiline_string
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
@@ -263,7 +259,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
-##################################### Testing ##################################
+##################################### Testing #################################
 
 if(CATKIN_ENABLE_TESTING)
   if(DOWNLOAD_TESTING_DATA)
