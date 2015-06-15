@@ -216,14 +216,14 @@ endif()
 ############################## Node code Lint ##############################
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-  src/**/*.cpp
-  include/**/*.h
+  src/*.cpp
+  include/*.h
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_TEST_SRC
   RELATIVE ${PROJECT_SOURCE_DIR}
-  test/**/*.cpp
+  test/*.cpp
 )
 roslint_cpp(${${PROJECT_NAME}_LINT_TEST_SRC})
 
