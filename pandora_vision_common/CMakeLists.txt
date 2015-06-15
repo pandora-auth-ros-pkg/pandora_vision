@@ -43,8 +43,3 @@ add_dependencies(${PROJECT_NAME}_pcl_to_image
 target_link_libraries(${PROJECT_NAME}_pcl_to_image
   ${catkin_LIBRARIES}
   )
-
-##################################### Testing ##################################
-if(CATKIN_ENABLE_TESTING)
-  add_subdirectory(test)
-endif()
