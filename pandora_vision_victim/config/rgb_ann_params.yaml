@@ -4,5 +4,5 @@ beta: 1
 training_algorithm: BackPropagation
 learning_rate: 0.01
 momentum_scale: 0.1
-epsilon: 0.000001
-maxIter: 10000
+epsilon: 0.001
+maxIter: 1000

@@ -69,6 +69,7 @@ namespace pandora_vision
     filesDirectory_ = packagePath_ + "/data/";
 
     const std::string filePrefix = filesDirectory_ + imageType_ + "_";
+
     trainingFeaturesMatrixFile_ = filePrefix + "training_features_matrix.xml";
     testFeaturesMatrixFile_ = filePrefix + "test_features_matrix.xml";
     trainingLabelsMatrixFile_ = filePrefix + "training_labels_matrix.xml";
@@ -81,6 +82,7 @@ namespace pandora_vision
     trainingDirectory_ = trainingDirectory;
 
     trainingAnnotationsFile_ = filePrefix + "training_annotations.txt";
+    std::cout << trainingAnnotationsFile_ << std::endl;
     int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
 
     const std::string testDatasetPath = datasetPath_ + "/Test_Images";
@@ -162,8 +164,8 @@ namespace pandora_vision
       normalizationParamOneTag = "min";
       normalizationParamTwoTag = "max";
 
-      normalizationParamOne = imageType_ + "_min_values";
-      normalizationParamTwo = imageType_ + "_max_values";
+      normalizationParamOne = imageType_ + "_" + classifierType_ + "_min_values.xml";
+      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_max_values.xml";
     }
     else
     {
@@ -173,8 +175,8 @@ namespace pandora_vision
       normalizationParamOneTag = "mean";
       normalizationParamTwoTag = "std_dev";
 
-      normalizationParamOne = imageType_ + "_mean_values.xml";
-      normalizationParamTwo = imageType_ + "_standard_deviation_values.xml";
+      normalizationParamOne = imageType_ + "_" + classifierType_ + "_mean_values.xml";
+      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_standard_deviation_values.xml";
     }
 
     std::string normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
@@ -217,9 +219,9 @@ namespace pandora_vision
       double newMax = 1.0;
       double newMin = -1.0;
 
-      normalizationParamOne = imageType_ + "_min_values.xml";
+      normalizationParamOne = imageType_ + "_" + classifierType_ + "_min_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "_max_values.xml";
+      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_max_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "min";
@@ -236,9 +238,9 @@ namespace pandora_vision
     }
     else
     {
-      normalizationParamOne = imageType_ + "_mean_values.xml";
+      normalizationParamOne = imageType_ + "_" + classifierType_ + "_mean_values.xml";
       normalizationParamOnePath = filesDirectory_ + normalizationParamOne;
-      normalizationParamTwo = imageType_ + "_standard_deviation_values.xml";
+      normalizationParamTwo = imageType_ + "_" + classifierType_ + "_standard_deviation_values.xml";
       normalizationParamTwoPath = filesDirectory_ + normalizationParamTwo;
 
       normalizationParamOneTag = "mean";
@@ -498,6 +500,9 @@ namespace pandora_vision
 
         constructFeaturesMatrix(trainingDirectory_, trainingAnnotationsFile_,
             &trainingFeaturesMat, &trainingLabelsMat);
+
+        std::cout << "Normalize features" << std::endl;
+        normalizeFeaturesAndSaveNormalizationParameters(&trainingFeaturesMat);
 
         trainingFeaturesMat.convertTo(trainingFeaturesMat, CV_32FC1);
         trainingLabelsMat.convertTo(trainingLabelsMat, CV_32FC1);

@@ -232,7 +232,9 @@ namespace pandora_vision
    */
   void NeuralNetworkClassifier::validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults)
   {
-    classifierPtr_->predict(testSetFeatures, *validationResults);
+    float returnVal = classifierPtr_->predict(testSetFeatures, *validationResults);
+    for (int i = 0; i < validationResults->rows; ++i)
+      validationResults->at<float>(i) = validationResults->at<float>(i) > 0 ? 1.0f : -1.0f;
     return;
   }
 }  // namespace pandora_vision

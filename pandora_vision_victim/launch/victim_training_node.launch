@@ -15,11 +15,13 @@
 
       <rosparam file="$(find pandora_vision_victim)/config/victim_params.yaml"
         command="load" />
-      <rosparam file="$(find pandora_vision_victim)/config/rgb_ann_network_params.yaml"
+      <rosparam file="$(find pandora_vision_victim)/config/rgb_ann_params.yaml"
         command="load" />
 
       <rosparam file="$(find pandora_vision_victim)/config/random_forests_params.yaml"
         command="load" />
+      <rosparam file="$(find pandora_vision_victim)/config/victim_training_params.yaml"
+        command="load"/>
 
     </node>
 

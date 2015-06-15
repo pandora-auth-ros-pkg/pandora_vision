@@ -112,10 +112,10 @@ namespace pandora_vision
   }
 
   /**
-  @brief Function that loads the trained classifier and makes a prediction
-  according to the featurevector given for each image
-  @return void
-  **/
+   * @brief Function that loads the trained classifier and makes a prediction
+   * according to the feature vector given for each image
+   * @return void
+   */
   void SvmValidator::predict(float* classLabel, float* prediction)
   {
     cv::Mat featuresMat = cv::Mat(featureVector_);

@@ -85,8 +85,9 @@ namespace pandora_vision
     gettimeofday(&startwtime , NULL);
 
     // Train the system
-    victimTrainerPtr->trainSubSystem();
+    victimTrainerPtr->trainAndValidate();
 
+    gettimeofday(&endwtime, NULL);
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6
         + endwtime.tv_sec - startwtime.tv_sec);
@@ -99,12 +100,19 @@ namespace pandora_vision
           const std::string& imageType)
   {
     int numFeatures;
-    std::cout << "Add total number of features required for your subsystem:" << std::endl;
-    std::cin >> numFeatures;
-
     std::string datasetPath;
-    std::cout << "Add absolute path, where your samples are stored " << std::endl;
-    std::cin >> datasetPath;
+
+    if (!nh_.getParam("num_features", numFeatures))
+    {
+      ROS_ERROR("Could not retrieve the number of features for the system!");
+      ros::shutdown();
+    }
+
+    if (!nh_.getParam("dataset_path", datasetPath))
+    {
+      ROS_ERROR("Could not get the path to the training dataset!");
+      ros::shutdown();
+    }
 
     std::string ns = nh_.getNamespace();
 
