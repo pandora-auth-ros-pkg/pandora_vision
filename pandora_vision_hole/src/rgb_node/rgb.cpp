@@ -60,7 +60,7 @@ namespace pandora_vision
 
     // Subscribe to the RGB image published by the
     // rgb_depth_synchronizer node
-    rgbImageSubscriber_= nodeHandle_.subscribe( rgbImageTopic_, 1,
+    rgbImageSubscriber_= nodeHandle_.subscribe(rgbImageTopic_, 1,
       &Rgb::inputRgbImageCallback, this);
 
     // Advertise the candidate holes found by the rgb node
@@ -429,4 +429,4 @@ namespace pandora_vision
       config.watershed_background_erosion_factor;
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

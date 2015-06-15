@@ -178,7 +178,7 @@ namespace pandora_vision
     @param void
     @return void
    **/
-  void Depth::getTopicNames ()
+  void Depth::getTopicNames()
   {
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();
@@ -187,7 +187,7 @@ namespace pandora_vision
     // unadulterated depth image and store it in a private member variable
     if (nodeHandle_.getParam(
         ns + "/depth_node/subscribed_topics/depth_image_topic",
-        depthImageTopic_ ))
+        depthImageTopic_))
     {
       // Make the topic's name absolute
       depthImageTopic_ = ns + "/" + depthImageTopic_;
@@ -359,4 +359,4 @@ namespace pandora_vision
     }
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

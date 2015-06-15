@@ -124,11 +124,11 @@ namespace pandora_vision
     MessageConversions::extractImageFromMessage(msg.thermalImage, &thermalImage,
       sensor_msgs::image_encodings::TYPE_8UC1);
 
-    // Obtain the thermal message and extract the temperature information.
-    // Convert this information to cv::Mat in order to be processed.
-    // It's format will be CV_8UC1
-    //cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
-      //(msg.temperatures);
+    //  Obtain the thermal message and extract the temperature information.
+    //  Convert this information to cv::Mat in order to be processed.
+    //  It's format will be CV_8UC1
+    //  cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
+    //  (msg.temperatures);
 
     // Apply double threshold(up and down) in the temperature image.
     // The threshold is set by configuration
@@ -177,7 +177,7 @@ namespace pandora_vision
     // Check the index and send the message to its proper receiver
     // The index takes only three values from synchronized node
     // "thermal", "hole" or "thermalhole".
-    if(msg.thermalIndex == "thermal")
+    if (msg.thermalIndex == "thermal")
     {
       // Publish the candidate holes message to thermal cropper node
       thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
@@ -197,7 +197,7 @@ namespace pandora_vision
     // Finally find the yaw and pitch of each candidate hole found and
     // send it to data fusion if a hole exists. The message to be sent is
     // ThermalAlertsVectorMsg type.
-    if(holes.size() > 0)
+    if (holes.size() > 0)
     {
       // Fill the thermal message to be sent
       pandora_vision_msgs::ThermalAlert thermalMsg;
@@ -285,9 +285,8 @@ namespace pandora_vision
     // unadulterated thermal image and store it in a private member variable
     if (nodeHandle_.getParam(
         ns + "/thermal_camera_node/subscribed_topics/thermal_image_topic",
-        thermalImageTopic_ ))
+        thermalImageTopic_))
     {
-
       // Make topic's name absolute
       thermalImageTopic_ = ns + "/" + thermalImageTopic_;
 
@@ -353,7 +352,6 @@ namespace pandora_vision
       ROS_ERROR_NAMED(PKG_NAME,
         "[Thermal Node] Could not find topic thermal_data_fusion_topic");
     }
-
   }
 
 
@@ -375,7 +373,7 @@ namespace pandora_vision
     int height = temperatures.layout.dim[0].size;
 
     // For each hole find its probability
-    for(unsigned int i = 0; i < holes->size(); i++)
+    for (unsigned int i = 0; i < holes->size(); i++)
     {
       float average = 0;
 
@@ -390,13 +388,13 @@ namespace pandora_vision
       // Find the average temperature around the keypoint
 
       // Check if the keypoint is on the edges of the image
-      if(tempX > 0 && tempX < 60 && tempY > 0 && tempY < 80)
+      if (tempX > 0 && tempX < 60 && tempY > 0 && tempY < 80)
       {
         int counter = 0;
 
-        for(unsigned int k = (tempY - 1); k < (tempY + 2); k++)
+        for (unsigned int k = (tempY - 1); k < (tempY + 2); k++)
         {
-          for(unsigned int o = (tempX - 1); o < (tempX + 2); o++)
+          for (unsigned int o = (tempX - 1); o < (tempX + 2); o++)
           {
             average += temperatures.data[k * width + o];
             counter++;
@@ -414,7 +412,7 @@ namespace pandora_vision
       holes->holes[i].holeTemperature = average;
 
       // Apply gaussian function on the average temperature found
-      if(method == 0)
+      if (method == 0)
       {
         float probability = exp(
           - pow((average - Parameters::Thermal::optimal_temperature), 2)
@@ -424,7 +422,7 @@ namespace pandora_vision
         holes->holes[i].holeProbability = probability;
       }
       // Apply logistic function on the average temperature found
-      else if(method == 1)
+      else if (method == 1)
       {
         float probability = 1/(1 + exp( -Parameters::Thermal::left_tolerance *
             (average - Parameters::Thermal::low_acceptable_temperature ) ))
@@ -603,4 +601,4 @@ namespace pandora_vision
     Parameters::Thermal::right_tolerance = config.right_tolerance;
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

@@ -100,7 +100,7 @@ namespace pandora_vision
         @brief Set up the variables needed to convert the points.Takes variables
         from yaml file so that if one (or both) camera's position is changed
         on the robot they can be changed too.
-        @param[in] nh [ros::Nodehandle&] The nodehandle of the class that
+        @param[in] nh [const ros::Nodehandle&] The nodehandle of the class that
         calls this function.
         @param[in] x_th [double] The x coordinate of thermal image in rgb image
         @param[in] y_th [double] The y coordinate of thermal image in rgb image
@@ -112,8 +112,8 @@ namespace pandora_vision
         rotated.Point of reference is the center of thermal image.
         @return void
         **/
-      static void variableSetUp(ros::NodeHandle& nh, double* x_th, double* y_th,
-        double* c_x, double* c_y, double* angle);
+      static void variableSetUp(const ros::NodeHandle& nh, double* x_th, 
+        double* y_th, double* c_x, double* c_y, double* angle);
 
       /**
         @brief When the outline points of the thermal image are matched on 

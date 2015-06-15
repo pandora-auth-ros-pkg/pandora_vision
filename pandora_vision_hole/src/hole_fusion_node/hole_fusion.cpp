@@ -106,7 +106,7 @@ namespace pandora_vision
     debugRespectiveHolesPublisher_ = imageTransport_.advertise
       (debugRespectiveHolesTopic_, 1, true);
 
-    // Advertise the topic that the enhanced image 
+    // Advertise the topic that the enhanced image
     // will be published to
     enhancedImagesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>(
@@ -117,9 +117,9 @@ namespace pandora_vision
     enhancedHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>(
         enhancedHolesTopic_, 1000, true);
-    
+
     // Advertise the topic that the image of the final holes,
-    // will be published to 
+    // will be published to
     InterpolatedDepthImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>(
         InterpolatedDepthImageTopic_, 1000, true);
@@ -547,7 +547,7 @@ namespace pandora_vision
 
     // The parameter was not found.
     // Set the parent of the frame_id to a default value.
-    if(!res || !nodeHandle_.getParam(model_param_name, robot_description))
+    if (!res || !nodeHandle_.getParam(model_param_name, robot_description))
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "Robot description couldn't be retrieved from the parameter server.");
@@ -577,7 +577,7 @@ namespace pandora_vision
     @param void
     @return void
    **/
-  void HoleFusion::getTopicNames ()
+  void HoleFusion::getTopicNames()
   {
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();
@@ -596,7 +596,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic point_cloud_internal_topic");
     }
 
@@ -614,7 +614,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic depth_candidate_holes_topic");
     }
 
@@ -632,7 +632,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic rgb_candidate_holes_topic");
     }
 
@@ -640,7 +640,7 @@ namespace pandora_vision
     // candidate holes originated from the Thermal node
     if (nodeHandle_.getParam(
         ns + "/hole_fusion_node/subscribed_topics/thermal_candidate_holes_topic"
-        ,thermalCandidateHolesTopic_))
+        , thermalCandidateHolesTopic_))
     {
       // Make the topic's name absolute
       thermalCandidateHolesTopic_ = ns + "/" + thermalCandidateHolesTopic_;
@@ -650,7 +650,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
        "[Hole Fusion Node] Could not find topic thermal_candidate_holes_topic");
     }
 
@@ -668,7 +668,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic synchronizer_unlock_topic");
     }
 
@@ -686,7 +686,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic Process end Topic");
     }
 
@@ -701,7 +701,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic hole_detector_output_topic");
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
@@ -715,7 +715,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic enhanced_images_topic");
     }
 
@@ -731,7 +731,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic enhanced_holes_topic");
     }
 
@@ -747,7 +747,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic interpolated depth topic");
     }
 
@@ -766,7 +766,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
+      ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion Node] Could not find topic"
         " make_synchronizer_subscribe_to_input");
     }
 
@@ -784,7 +784,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME, "[Hole Fusion Node] Could not find topic"
+      ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion Node] Could not find topic"
         " make_synchronizer_leave_subscription_to_input");
     }
 
@@ -800,7 +800,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic debug_respective_holes_image");
     }
 
@@ -816,7 +816,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
+      ROS_INFO_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic debug_valid_holes_image");
     }
   }
@@ -857,8 +857,8 @@ namespace pandora_vision
     ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
 
     ////////////////////////////// Debug parameters ////////////////////////////
-    
-    // Publish the enhancedImage 
+
+    // Publish the enhancedImage
     Parameters::Debug::publish_enhanced_Images =
       config.publish_enhanced_Images;
 
@@ -1184,7 +1184,6 @@ namespace pandora_vision
       config.watershed_background_dilation_factor;
     Parameters::Rgb::watershed_background_erosion_factor =
       config.watershed_background_erosion_factor;
-
   }
 
 
@@ -1205,8 +1204,7 @@ namespace pandora_vision
 
     // The validation process
     Parameters::HoleFusion::Validation::validation_process = 1;
-      //config.validation_process;
-
+    // config.validation_process;
 
     // When depth analysis is applicable
     Parameters::HoleFusion::Validation::rgbd_validity_threshold =
@@ -1273,7 +1271,7 @@ namespace pandora_vision
     // Extract the depth image from the point cloud message
     cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
       msg, CV_32FC1);
-   
+
     // Interpolate the depthImage
     cv::Mat interpolatedDepthImage;
     NoiseElimination::performNoiseElimination(depthImage,
@@ -1346,14 +1344,14 @@ namespace pandora_vision
     #ifdef DEBUG_TIME
     Timer::start("processCandidateHoles", "", true);
     #endif
-    
-    if(Parameters::Debug::publish_enhanced_Images)
+
+    if (Parameters::Debug::publish_enhanced_Images)
     {
       publishEnhancedImage();
 
       publishInterpolatedDepthImage();
     }
-    
+
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_respective_holes)
     {
@@ -1500,13 +1498,13 @@ namespace pandora_vision
     // Apply all active filters and obtain a 2D vector containing the
     // probabilities of validity of each candidate hole, produced by all
     // active filters
-    std::vector<std::vector<float> > probabilitiesVector2D;
+    std::vector<std::vector <float> > probabilitiesVector2D;
     probabilitiesVector2D = filterHoles(preValidatedHoles);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_probabilities)
     {
-      for(int i = 0; i < preValidatedHoles.size(); i++)
+      for (int i = 0; i < preValidatedHoles.size(); i++)
       {
         ROS_INFO_NAMED(PKG_NAME, "--------------------------------");
         ROS_INFO_NAMED(PKG_NAME, "Keypoint [%f %f]",
@@ -1525,7 +1523,7 @@ namespace pandora_vision
     // Write the extracted probabilities to a file. These will be used to
     // produce a dataset of values that need to be minimized in order for a
     // sound validation procedure to be employed
-    //produceDataset(rgbdHolesConveyor, probabilitiesVector2D);
+    // produceDataset(rgbdHolesConveyor, probabilitiesVector2D);
 
     // Which candidate holes are actually holes?
     // The probabilities obtained above need to be evaluated
@@ -1656,7 +1654,7 @@ namespace pandora_vision
   {
     // Open the dataset
     std::ofstream dataset;
-    dataset.open ("dataset_urgent.csv", std::ios_base::app | std::ios_base::out);
+    dataset.open("dataset_urgent.csv", std::ios_base::app | std::ios_base::out);
 
     for (int i = 0; i < conveyor.size(); i++)
     {
@@ -1670,10 +1668,10 @@ namespace pandora_vision
           << probabilities[1][i] << ", "
           << probabilities[2][i] << ", "
           << probabilities[3][i] << ", "
-          //<< probabilities[4][i] << ", "
-          //<< probabilities[5][i] << ", "
-          //<< probabilities[6][i] << ", "
-          //<< probabilities[7][i] << ", "
+          // << probabilities[4][i] << ", "
+          // << probabilities[5][i] << ", "
+          // << probabilities[6][i] << ", "
+          // << probabilities[7][i] << ", "
           << 1 << "\n";
       }
       else
@@ -1682,10 +1680,10 @@ namespace pandora_vision
           << probabilities[1][i] << ", "
           << probabilities[2][i] << ", "
           << probabilities[3][i] << ", "
-          //<< probabilities[4][i] << ", "
-          //<< probabilities[5][i] << ", "
-          //<< probabilities[6][i] << ", "
-          //<< probabilities[7][i] << ", "
+          // << probabilities[4][i] << ", "
+          // << probabilities[5][i] << ", "
+          // << probabilities[6][i] << ", "
+          // << probabilities[7][i] << ", "
           << 0 << "\n";
       }
     }
@@ -1704,9 +1702,8 @@ namespace pandora_vision
         depthMsg);
 
     InterpolatedDepthImagePublisher_.publish(depthMsg);
-
   }
-  
+
   /**
     @brief Publishes the Images' enhanced information.
     @return void
@@ -1737,7 +1734,6 @@ namespace pandora_vision
     enhancedImagesMsg.header.frame_id = frame_id_;
 
     enhancedImagesPublisher_.publish(enhancedImagesMsg);
-
   }
 
 
@@ -1751,7 +1747,7 @@ namespace pandora_vision
     and their respective validity probabilities
     @return void
    **/
-  void HoleFusion::publishEnhancedHoles (const HolesConveyor& conveyor,
+  void HoleFusion::publishEnhancedHoles(const HolesConveyor& conveyor,
     std::map<int, float>* validHolesMap)
   {
     // The overall message of enhanced holes that will be published
@@ -1799,7 +1795,7 @@ namespace pandora_vision
       int maxx = conveyor.holes[it->first].rectangle[0].x;
       int miny = conveyor.holes[it->first].rectangle[0].y;
       int maxy = conveyor.holes[it->first].rectangle[0].y;
-      
+
       for (int r = 0; r < conveyor.holes[it->first].rectangle.size(); r++)
       {
         int xx = conveyor.holes[it->first].rectangle[r].x;
@@ -2063,7 +2059,7 @@ namespace pandora_vision
     #endif
 
     // If the inImage is not of type CV_32FC1, return
-    if(inImage.type() != CV_32FC1)
+    if (inImage.type() != CV_32FC1)
     {
       return;
     }
@@ -2169,4 +2165,4 @@ namespace pandora_vision
     }
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

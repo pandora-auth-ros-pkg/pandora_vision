@@ -60,15 +60,15 @@ namespace pandora_vision
 
 
   ///////////////////////// Debug-specific parameters //////////////////////////
-  
-  //Publish the enhanced Images
+
+  // Publish the enhanced Images
   bool Parameters::Debug::publish_enhanced_Images = false;
 
   // Show the depth image that arrives in the depth node
   bool Parameters::Debug::show_depth_image = false;
 
-  //Show the thermal image that arrives in the thermal node
-  bool Parameters::Debug::show_thermal_image=false;
+  // Show the thermal image that arrives in the thermal node
+  bool Parameters::Debug::show_thermal_image = false;
 
   // Show the rgb image that arrives in the rgb node
   bool Parameters::Debug::show_rgb_image = false;
@@ -122,11 +122,11 @@ namespace pandora_vision
   int Parameters::Depth::interpolation_method = 0;
 
   ////////////////// Parameters pecific to the Thermal node ////////////////////
-  
+
   // The probability extraction method
   // 0 for Gaussian function
   // 1 for Logistic function
-  
+
   int Parameters::Thermal::probability_method = 1;
 
   // Gausian variables
@@ -367,4 +367,4 @@ namespace pandora_vision
   int Parameters::Rgb::watershed_background_dilation_factor = 1;
   int Parameters::Rgb::watershed_background_erosion_factor = 1;
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
