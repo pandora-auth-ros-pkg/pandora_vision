@@ -79,6 +79,7 @@ namespace pandora_vision
        */
       virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
           const std::string& classifierFileDest);
+
       /**
        * @brief Validates the resulting classifier using the given features
        * extracted from the test set.

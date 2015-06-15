@@ -229,6 +229,7 @@ namespace pandora_vision
       classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), svmParams_);
     }
 
+
     classifierPtr_->save(classifierFile_.c_str());
     return true;
   }
@@ -263,5 +264,6 @@ namespace pandora_vision
     classifierPtr_->predict(testSetFeatures, *validationResults);
     return;
   }
+
 }  // namespace pandora_vision
 

@@ -43,9 +43,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
-#include "boost/algorithm/string/predicate.hpp"
-#include "pandora_vision_victim/classifiers/classifier_factory.h"
-
 #include "pandora_vision_victim/classifiers/svm_classifier.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
 #include "pandora_vision_victim/classifiers/random_forests_classifier.h"
