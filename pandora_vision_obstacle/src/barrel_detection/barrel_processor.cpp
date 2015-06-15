@@ -121,9 +121,9 @@ namespace pandora_vision_obstacle
         slope.x /= magnitude;
         slope.y /= magnitude;
         // Rotate vector 90 degrees clockwisely 
-        int temp = slope.x;
+        int temp1 = slope.x;
         slope.x = -slope.y;
-        slope.y = temp;
+        slope.y = temp1;
         /* Visualize the Hough accum matrix */
         cv::Mat accum = detector.getAccumulationMatrix();
         accum.convertTo( accum, CV_8UC3 );
