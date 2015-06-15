@@ -42,7 +42,7 @@
 
 namespace pandora_vision
 {
-  ObstaclePostProcessor::ObstaclePostProcessor(const std::string& ns, 
+  ObstaclePostProcessor::ObstaclePostProcessor(const std::string& ns,
     sensor_processor::Handler* handler) : VisionPostProcessor<
     pandora_vision_msgs::ObstacleAlertVector>(ns, handler)
   {

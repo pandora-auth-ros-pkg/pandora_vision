@@ -41,14 +41,14 @@
 namespace pandora_vision
 {
   BarrelProcessor::BarrelProcessor(const std::string& ns,
-    sensor_processor::Handler* handler) : sensor_processor::Processor<ImagesStamped, 
+    sensor_processor::Handler* handler) : sensor_processor::Processor<ImagesStamped,
     POIsStamped>(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
   }
 
-  BarrelProcessor::BarrelProcessor() : sensor_processor::Processor<ImagesStamped, 
+  BarrelProcessor::BarrelProcessor() : sensor_processor::Processor<ImagesStamped,
     POIsStamped>() {}
 
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
@@ -57,7 +57,7 @@ namespace pandora_vision
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;
     output->frameHeight = input->getRgbImage().rows;
-    
+
     // output->pois = ...(input->getImage());
 
     if (output->pois.empty())

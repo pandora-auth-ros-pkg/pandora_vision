@@ -42,7 +42,7 @@
 
 namespace pandora_vision
 {
-  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns, 
+  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns,
     sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
     ImagesStamped>(ns, handler), converterPtr_(new PointCloudToImageConverter)
   {

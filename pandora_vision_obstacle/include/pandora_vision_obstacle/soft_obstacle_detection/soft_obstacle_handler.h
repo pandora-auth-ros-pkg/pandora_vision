@@ -47,7 +47,7 @@
 
 namespace pandora_vision
 {
-  class SoftObstacleHandler : public VisionHandler<ObstaclePreProcessor, SoftObstacleProcessor, 
+  class SoftObstacleHandler : public VisionHandler<ObstaclePreProcessor, SoftObstacleProcessor,
     ObstaclePostProcessor>
   {
     public:

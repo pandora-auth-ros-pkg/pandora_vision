@@ -206,13 +206,13 @@ namespace pandora_vision
       /// low - pass filter used
       cv::Mat rowKernelLow_;
       /// The column kernel used to perform the DWT that represents
-      ///the  low - pass filter used
+      /// the  low - pass filter used
       cv::Mat columnKernelLow_;
       /// The row kernel used to perform the DWT that represents the
       /// band - pass filter used for high frequencies
       cv::Mat rowKernelHigh_;
       /// The column kernel used to perform the DWT that represents
-      ///the band - pass filter used for high frequencies
+      /// the band - pass filter used for high frequencies
       cv::Mat columnKernelHigh_;
   };
   typedef DiscreteWaveletTransform::MatPtr MatPtr;
