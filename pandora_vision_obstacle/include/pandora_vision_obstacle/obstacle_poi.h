@@ -50,17 +50,17 @@ namespace pandora_vision
       virtual ~ObstaclePOI() {}
 
     public:
-      std::string tag;
+      int type;
       float depthDistance;
 
     public:
-      void setTag(const std::string& tagArg)
+      void setType(int typeArg)
       {
-        tag = tagArg;
+        type = typeArg;
       }
-      std::string getTag() const
+      int getType() const
       {
-        return tag;
+        return type;
       }
 
       void setDepth(float distance)

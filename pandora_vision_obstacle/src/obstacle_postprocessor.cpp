@@ -68,7 +68,7 @@ namespace pandora_vision
 
       boost::shared_ptr<ObstaclePOI> obstaclePOI(boost::dynamic_pointer_cast<ObstaclePOI>(
         input->pois[ii]));
-      obstacleAlert.tag = obstaclePOI->getTag();
+      obstacleAlert.type = obstaclePOI->getType();
       obstacleAlert.depth = obstaclePOI->getDepth();
 
       obstacleAlert.roi.center.x = obstaclePOI->getPoint().x;
