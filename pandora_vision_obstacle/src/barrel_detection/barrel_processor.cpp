@@ -114,6 +114,16 @@ namespace pandora_vision_obstacle
             cv::Point(result[i].first.x + maxDist / 2, result[i].first.y), 
             cv::Scalar(255, 0, 0), 
             2);
+        cv::Point slope;
+        slope.x = result[i].second.x - result[i].first.x;
+        slope.y = result[i].second.y - result[i].first.y;
+        float magnitude = std::sqrt(slope.x * slope.x + slope.y * slope.y);
+        slope.x /= magnitude;
+        slope.y /= magnitude;
+        // Rotate vector 90 degrees clockwisely 
+        int temp = slope.x;
+        slope.x = -slope.y;
+        slope.y = temp;
         /* Visualize the Hough accum matrix */
         cv::Mat accum = detector.getAccumulationMatrix();
         accum.convertTo( accum, CV_8UC3 );
@@ -149,7 +159,10 @@ namespace pandora_vision_obstacle
     cv::Mat roiDepth = depthImage(rectRoi);
     cv::meanStdDev ( roiRgb, mean, stddev );
     if(stddev.val[0] > BarrelDetection::roi_variance_thresh)
+    {
       (*valid) = false;
+      return;
+    }
   }
 
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
