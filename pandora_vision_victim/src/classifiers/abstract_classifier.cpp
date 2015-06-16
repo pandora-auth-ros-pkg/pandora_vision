@@ -536,7 +536,7 @@ namespace pandora_vision
       std::cout << "Starting training process for the " << boost::to_upper_copy<std::string>(imageType_)
         << " images" << std::endl;
 
-      this->train(trainingFeaturesMat, trainingLabelsMat);
+      this->train(trainingFeaturesMat, trainingLabelsMat, classifierFile_);
 
       std::cout << "Finished training process" << std::endl;
     }

@@ -181,9 +181,11 @@ namespace pandora_vision
    * training set
    * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
    * training sample.
+   * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
    * @return bool True on successfull completions, false otherwise.
    */
-  bool RandomForestsClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
+  bool RandomForestsClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+      const std::string& classifierFileDest)
   {
     if (trainingSetFeatures.empty())
     {
@@ -198,6 +200,7 @@ namespace pandora_vision
 
     classifierPtr_->train(trainingSetFeatures, CV_ROW_SAMPLE, trainingSetLabels,
           cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(), randomForestsParams_);
+    classifierPtr_->save(classifierFileDest.c_str());
     return true;
   }
 

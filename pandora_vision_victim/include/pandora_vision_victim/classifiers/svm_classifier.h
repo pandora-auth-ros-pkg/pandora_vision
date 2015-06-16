@@ -65,16 +65,18 @@ namespace pandora_vision
 
       /**
        * @brief Trains the corresponding classifier using the input features and training labels.
-       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the 
+       * @param trainingSetFeatures[const cv::Mat&] The matrix containing the features that describe the
        * training set
        * @param trainingSetLabels[const cv::Mat&] The corresponding labels that define the class of each
        * training sample.
-       * @return bool True on successfull completions, false otherwise. 
+       * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
+       * @return bool True on successfull completions, false otherwise.
        */
-      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels);
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+          const std::string& classifierFileDest);
 
       /**
-       * @brief Validates the resulting classifier using the given features 
+       * @brief Validates the resulting classifier using the given features
        * extracted from the test set.
        * @param testSetFeatures[const cv::Mat&] The test set features matrix
        * @param validationResults[cv::Mat*] The results for the test set.
@@ -83,7 +85,7 @@ namespace pandora_vision
       virtual void validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults);
 
       /**
-       * @brief Saves the classifier to a file 
+       * @brief Saves the classifier to a file
        * @param classifierFile[const std::string&] The name of the file where the classifier will be stored
        * @return void
        */

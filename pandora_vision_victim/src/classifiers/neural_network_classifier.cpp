@@ -66,7 +66,7 @@ namespace pandora_vision
         "Network training instance");
 
     XmlRpc::XmlRpcValue layers;
-    if (!nh_.getParam("layers", layers))
+    if (!nh_.getParam(imageType_ + "/layers", layers))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the number of neurons in each layer of the network!");
@@ -89,7 +89,7 @@ namespace pandora_vision
     // Get the parameters of  the sigmoid function.
     double alpha, beta;
 
-    if (!nh_.getParam("alpha", alpha))
+    if (!nh_.getParam(imageType_ + "/alpha", alpha))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]:Could not retrieve"
           " alpha parameter for sigmoid function!");
@@ -98,7 +98,7 @@ namespace pandora_vision
       alpha = 1;
     }
 
-    if (!nh_.getParam("beta", beta))
+    if (!nh_.getParam(imageType_ + "/beta", beta))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " beta parameter for the sigmoid function!");
@@ -109,7 +109,7 @@ namespace pandora_vision
 
     std::string trainingAlgorithm;
 
-    if (!nh_.getParam("training_algorithm", trainingAlgorithm))
+    if (!nh_.getParam(imageType_ + "/training_algorithm", trainingAlgorithm))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the type of the training algorithm for the neural Network!");
@@ -121,7 +121,7 @@ namespace pandora_vision
 
     double learningRate, bpMomentScale;
     // Parse the learning rate parameter
-    if (!nh_.getParam("learning_rate", learningRate))
+    if (!nh_.getParam(imageType_ + "/learning_rate", learningRate))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the learning rate for the training procedure!");
@@ -130,7 +130,7 @@ namespace pandora_vision
       learningRate = 0.1;
     }
 
-    if (!nh_.getParam("momentum_scale", bpMomentScale))
+    if (!nh_.getParam(imageType_ + "/momentum_scale", bpMomentScale))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the strength of the momentum term!");
@@ -141,7 +141,7 @@ namespace pandora_vision
 
     // Get the maximum number of iterations for the training of the network.
     int maxIter;
-    if (!nh_.getParam("maximum_iter", maxIter))
+    if (!nh_.getParam(imageType_ + "/maximum_iter", maxIter))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the maximum number number of training iterations!");
@@ -152,7 +152,7 @@ namespace pandora_vision
 
     // Get the maximum number of iterations for the training of the network.
     double epsilon;
-    if (!nh_.getParam("epsilon", epsilon))
+    if (!nh_.getParam(imageType_ + "/epsilon", epsilon))
     {
       ROS_DEBUG("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Could not retrieve"
           " the epsilon value for the error change between iterations!");
@@ -203,9 +203,11 @@ namespace pandora_vision
    * training set
    * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
    * training sample.
+   * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
    * @return bool True on successfull completions, false otherwise.
    */
-  bool NeuralNetworkClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
+  bool NeuralNetworkClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+      const std::string& classifierFileDest)
   {
     if (trainingSetFeatures.empty())
     {
@@ -219,12 +221,13 @@ namespace pandora_vision
     }
 
     classifierPtr_->train(trainingSetFeatures,  trainingSetLabels,
-        cv::Mat(), cv::Mat(), NeuralNetworkParams_);
+        cv::Mat(), cv::Mat(), NeuralNetworkParams_, CvANN_MLP::NO_INPUT_SCALE + CvANN_MLP::NO_OUTPUT_SCALE);
+    classifierPtr_->save(classifierFileDest.c_str());
     return true;
   }
 
   /**
-   * @brief Validates the resulting classifier using the given features 
+   * @brief Validates the resulting classifier using the given features
    * extracted from the test set.
    * @param testSetFeatures[const cv::Mat&] The test set features matrix
    * @param validationResults[cv::Mat*] The results for the test set.

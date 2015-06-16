@@ -20,7 +20,7 @@ do_pca_analysis: false
 # 0: No Normalization
 # 1: Min-Max Normalization
 # 2: Z-Score Normalization
-type_of_normalization: 0
+type_of_normalization: 2
 
 training_annotations_file: rgb_training_annotations.txt
 test_annotations_file: rgb_test_annotations.txt
