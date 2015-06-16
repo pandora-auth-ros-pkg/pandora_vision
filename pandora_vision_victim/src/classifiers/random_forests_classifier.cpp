@@ -153,7 +153,7 @@ namespace pandora_vision
           << forestAccuracy);
     }
 
-    float priors[] = {1, 1};
+    const float priors[] = {1, 1};
     randomForestsParams_ = CvRTParams(maxDepth, minSampleCount,
                                       static_cast<float>(regressionAccuracy), useSurrogates,
                                       maxCategories, priors, calcVarImportance, nactiveVars,
@@ -172,16 +172,16 @@ namespace pandora_vision
    */
   RandomForestsClassifier::~RandomForestsClassifier()
   {
-    ROS_DEBUG("[victim_node] : Destroying Random Forests training instance");
+    ROS_DEBUG("[PANDORA_VISION_VICTIM_RANDOM_FORESTS]: Destroying Random Forests training instance");
   }
 
   /**
    * @brief Trains the corresponding classifier using the input features and training labels.
-   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the 
+   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the
    * training set
    * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
    * training sample.
-   * @return bool True on successfull completions, false otherwise. 
+   * @return bool True on successfull completions, false otherwise.
    */
   bool RandomForestsClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
   {
@@ -202,7 +202,7 @@ namespace pandora_vision
   }
 
   /**
-   * @brief Validates the resulting classifier using the given features 
+   * @brief Validates the resulting classifier using the given features
    * extracted from the test set.
    * @param testSetFeatures[const cv::Mat&] The test set features matrix
    * @param validationResults[cv::Mat*] The results for the test set.

@@ -38,6 +38,7 @@
 
 #include <vector>
 #include <string>
+#include "boost/algorithm/string.hpp"
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"
@@ -92,7 +93,9 @@ namespace pandora_vision
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
 
-    std::string paramFile = packagePath_ + "/config/" + imageType + "_" + classifierType + "_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/" + boost::to_upper_copy<std::string>(imageType) +
+      "_" + boost::to_upper_copy<std::string>(classifierType)
+      + "_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
@@ -331,10 +334,10 @@ namespace pandora_vision
     std::cout << "False Positives = " << falsePositives << std::endl;
     std::cout << "False Negatives = " << falseNegatives << std::endl;
 
-    std::cout << classifierType_ << "Accuracy = " << accuracy_ << std::endl;
-    std::cout << classifierType_ << "Precision = " << precision_ << std::endl;
-    std::cout << classifierType_ << "Recall = " << recall_ << std::endl;
-    std::cout << classifierType_ << "F-Measure = " << fmeasure_ << std::endl;
+    std::cout << classifierType_ << " Accuracy = " << accuracy_ << std::endl;
+    std::cout << classifierType_ << " Precision = " << precision_ << std::endl;
+    std::cout << classifierType_ << " Recall = " << recall_ << std::endl;
+    std::cout << classifierType_ << " F-Measure = " << fmeasure_ << std::endl;
   }
 
   // Platt's binary Probablistic Output: an improvement from Lin et al.
@@ -473,7 +476,8 @@ namespace pandora_vision
 
   void AbstractClassifier::trainAndValidate(void)
   {
-    ROS_INFO("Starting the Training Procedure for the %s Classifier!", classifierType_.c_str());
+    ROS_INFO("Starting the Training Procedure for the %s Classifier!",
+        boost::to_upper_copy<std::string>(classifierType_).c_str());
 
     int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
@@ -529,7 +533,8 @@ namespace pandora_vision
       }
 
       // Start Training Process
-      std::cout << "Starting training process for the " << imageType_ << " images" << std::endl;
+      std::cout << "Starting training process for the " << boost::to_upper_copy<std::string>(imageType_)
+        << " images" << std::endl;
 
       this->train(trainingFeaturesMat, trainingLabelsMat);
 

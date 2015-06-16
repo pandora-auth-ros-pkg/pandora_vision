@@ -40,7 +40,7 @@
 
 #include <string>
 
-#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
 #include "pandora_vision_victim/classifiers/svm_classifier.h"
@@ -71,18 +71,18 @@ namespace pandora_vision
     }
 
     boost::shared_ptr<AbstractClassifier> victimTrainerPtr;
-    AbstractClassifier* classifierPtr = this->createClassifier(classifierType, imageType);
-    if (classifierPtr == NULL)
+
+    victimTrainerPtr.reset(this->createClassifier(classifierType, imageType));
+    if (!victimTrainerPtr)
     {
       ROS_ERROR("[Victim_Training]: Null pointer allocated for classifier Trainer!");
       ROS_ERROR("[Victim_Training]: The node will now terminate!");
       ros::shutdown();
     }
-    victimTrainerPtr.reset(classifierPtr);
 
     // Structs for calculating elapsed time.
     struct timeval startwtime, endwtime;
-    gettimeofday(&startwtime , NULL);
+    gettimeofday(&startwtime, NULL);
 
     // Train the system
     victimTrainerPtr->trainAndValidate();
@@ -126,7 +126,7 @@ namespace pandora_vision
     {
       classifierPtr =  new NeuralNetworkClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
     }
-    else if (boost::iequals(classifierType, "random_forests"))
+    else if (boost::iequals(classifierType, "rf"))
     {
       classifierPtr =  new RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
     }
@@ -137,7 +137,9 @@ namespace pandora_vision
       return NULL;
     }
 
-    ROS_INFO("[Victim_Training]: Created %s Classifier for %s images", classifierType.c_str(), imageType.c_str());
+    ROS_INFO("[Victim_Training]: Created %s Classifier for %s images",
+        boost::to_upper_copy<std::string>(classifierType).c_str(),
+        boost::to_upper_copy<std::string>(imageType).c_str());
     return classifierPtr;
   }
 

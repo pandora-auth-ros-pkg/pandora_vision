@@ -72,11 +72,11 @@ namespace pandora_vision
 
   /**
    * @brief Trains the corresponding classifier using the input features and training labels.
-   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the 
+   * @param trainingFeatures[const cv::Mat&] The matrix containing the features that describe the
    * training set
    * @param trainingLabels[const cv::Mat&] The corresponding labels that define the class of each
    * training sample.
-   * @return bool True on successfull completions, false otherwise. 
+   * @return bool True on successfull completions, false otherwise.
    */
   bool SvmClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels)
   {
