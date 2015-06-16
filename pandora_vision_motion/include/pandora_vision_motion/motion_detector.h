@@ -50,7 +50,7 @@ namespace pandora_vision
 {
 namespace pandora_vision_motion
 {
-  class MotionDetector  
+  class MotionDetector
   {
     public:
       //!< Background segmentation parameters
@@ -58,6 +58,7 @@ namespace pandora_vision_motion
       int varThreshold;
       bool bShadowDetection;
       int nmixtures;
+      int indexFrame;
 
       //!< Threshold parameters
       int diff_threshold;
@@ -68,6 +69,12 @@ namespace pandora_vision_motion
       bool show_background;
       bool show_diff_image;
       bool show_moving_objects_contours;
+
+      //!< Maximum deviation for calculation position of moving objects;
+      int max_deviation_;
+
+      int typeOfMovement_;
+
 
       /**
         @brief Class Constructor
@@ -86,6 +93,8 @@ namespace pandora_vision_motion
       void findMotionParameters(const cv::Mat& frame);
 
       BBoxPOIPtr getBoundingBox();
+
+      void setMaxDeviation(int max_deviation);
 
     protected:
       BBoxPOIPtr getMotionPosition(void);
@@ -150,8 +159,6 @@ namespace pandora_vision_motion
       cv::BackgroundSubtractorMOG2 bg_;
       //!< Erode kernel
       cv::Mat kernel_erode_;
-      //!< Maximum deviation for calculation position of moving objects;
-      int max_deviation_;
       //!< Bounding box of moving objects.
       BBoxPOIPtr bounding_box_;
 

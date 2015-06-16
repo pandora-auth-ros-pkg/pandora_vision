@@ -40,26 +40,26 @@
 namespace pandora_vision
 {
   /**
-   @brief Class constructor 
+   @brief Class constructor
   */
-  DBSCAN::DBSCAN(std::vector<cv::Rect>& data, double eps, int minPts): _data(data) 
+  DBSCAN::DBSCAN(std::vector<cv::Rect>& data, double eps, int minPts): _data(data)
   {
     _cluster_id = -1;
     _eps = eps;
     _minPts = minPts;
-  } 
-  
+  }
+
   DBSCAN::~DBSCAN()
   {
   }
-  
+
    /**
    @brief Function that initializes all vectors to begin with the
    clustering process. At the beginning both visited and clustered data
    are set to false, for each point of interest.
    @param num_of_points: Number of points to be created
    @return void
-  */ 
+  */
   void DBSCAN::init(unsigned int num_of_points)
   {
     for (int i = 0; i < num_of_points; i++)
@@ -69,14 +69,14 @@ namespace pandora_vision
       _clusteredPoints.push_back(false);
     }
   }
-  
+
   /**
    @brief Function that check if a point has already been visited, if yes
    true is returned, if no false is returned.
    @param iterator Index of vector _visitedPoints that corresponds
    to the current point we are checking
    @return void
-  */ 
+  */
   bool DBSCAN::isVisited(int iterator)
   {
     if (_visitedPoints.at(iterator) == false)
@@ -84,23 +84,23 @@ namespace pandora_vision
     else
       return true;
   }
-  
+
   /**
-   @brief Function tha caclulates distance between two points 
+   @brief Function tha caclulates distance between two points
    @param pt1: First point
    @param pt2: Second point
    @return their distance
-  */ 
+  */
   double DBSCAN::dist2d(cv::Point2d pt1, cv::Point2d pt2)
   {
     return sqrt(pow(pt1.x-pt2.x, 2) + pow(pt1.y-pt2.y, 2));
   }
-  
+
   /**
    @brief Function that returns all points with P's eps-neighborhood
    @param P:current point,we are processeing
-   @return vector of all point in the neighborhoud 
-  */ 
+   @return vector of all point in the neighborhoud
+  */
   std::vector<int> DBSCAN::regionQuery(int p)
   {
     std::vector<int> res;
@@ -111,17 +111,17 @@ namespace pandora_vision
     }
     return res;
   }
-  
+
   /**
-   @brief If a point is found to be a dense part of a cluster, its 
-   ε-neighborhood is also part of that cluster. Hence, all points that 
-   are found within the ε-neighborhood are added, as is their own ε-neighborhood when 
-   they are also dense. This process continues until the density-connected cluster 
+   @brief If a point is found to be a dense part of a cluster, its
+   ε-neighborhood is also part of that cluster. Hence, all points that
+   are found within the ε-neighborhood are added, as is their own ε-neighborhood when
+   they are also dense. This process continues until the density-connected cluster
    is completely found.
    @param p Point p, whose ε-neighborhood we are calculating
    @param  neighbours, found neighbours for current point
    @param void
-  */ 
+  */
   void DBSCAN::expandCluster(int p, std::vector<int> neighbours)
   {
     _labels[p] = _cluster_id;
@@ -133,7 +133,7 @@ namespace pandora_vision
       {
         /// Mark P' as visited
         _visitedPoints.at(neighbours[i]) = true;
-        
+
         _labels[neighbours[i]] = _cluster_id;
         std::vector<int> neighbours_p = regionQuery(neighbours[i]);
         if (neighbours_p.size() >= _minPts)
@@ -145,8 +145,8 @@ namespace pandora_vision
    @brief Function that returns all clusters calculated from the given
    set of points
    @param void
-   @return vector of clusters 
-  */ 
+   @return vector of clusters
+  */
   std::vector<std::vector<cv::Rect> > DBSCAN::getGroups()
   {
     std::vector<std::vector<cv::Rect> > clusters;
@@ -161,7 +161,7 @@ namespace pandora_vision
     }
     return clusters;
   }
-      
+
   void DBSCAN::dbscan_cluster()
   {
     DP = new double[_data.size()* _data.size()];
@@ -194,18 +194,18 @@ namespace pandora_vision
             expandCluster(i, neighbours);
           }
       }
-    }  
+    }
     delete DP;
   }
-  
+
   double DBSCAN::calculateDistanceMatrix(int pt1, int pt2)
   {
     if (DP[pt1, pt2] != -1.0)
       return DP[pt1, pt2];
-    
+
     cv::Rect a = _data[pt1];
     cv::Rect b = _data[pt2];
-   
+
     cv::Point2d tla = cv::Point2d(a.x, a.y);
     cv::Point2d tra = cv::Point2d(a.x + a.width, a.y);
     cv::Point2d bla = cv::Point2d(a.x, a.y + a.height);
@@ -237,7 +237,7 @@ namespace pandora_vision
     minDist = std::min(minDist, dist2d(bra, trb));
     minDist = std::min(minDist, dist2d(bra, blb));
     minDist = std::min(minDist, dist2d(bra, brb));
-    
+
     DP[pt1, pt2] = minDist;
     DP[pt2, pt1] = minDist;
     return DP[pt1, pt2];

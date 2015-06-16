@@ -41,7 +41,7 @@
 
 namespace pandora_vision
 {
-  MotionPreProcessor::MotionPreProcessor(const std::string& ns, 
+  MotionPreProcessor::MotionPreProcessor(const std::string& ns,
     sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler,
     sensor_msgs::image_encodings::BGR8)
   {

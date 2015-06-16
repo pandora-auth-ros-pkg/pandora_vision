@@ -45,13 +45,14 @@ namespace pandora_vision
     @brief Class Constructor
     Initializes all varialbes for thresholding
   */
-  
-  MotionDetector::MotionDetector(void)   
+
+  MotionDetector::MotionDetector(void)
   {
     setUpMotionDetector();
+    ROS_INFO("Creating MotionDetector instance");
   }
 
-  
+
   /**
     @brief Class Destructor
     Deallocates memory used for storing images
@@ -60,10 +61,15 @@ namespace pandora_vision
   {
     ROS_INFO("Destroying MotionDetector instance");
   }
-  
+
   BBoxPOIPtr MotionDetector::getMotionPosition(void)
   {
     return bounding_box_;
+  }
+
+  void MotionDetector::setMaxDeviation(int max_deviation)
+  {
+    max_deviation_ = max_deviation;
   }
 
   void MotionDetector::setUpMotionDetector(void)
@@ -77,7 +83,7 @@ namespace pandora_vision
     bounding_box_->setProbability(0.0f);
     history = 10;
     varThreshold = 16;
-    bShadowDetection = true;
+    bShadowDetection = false;
     nmixtures = 3;
     diff_threshold = 45;
     motion_high_thres = 7500;
@@ -87,8 +93,9 @@ namespace pandora_vision
     show_background = false;
     show_diff_image = false;
     show_moving_objects_contours = false;
+    indexFrame = 0;
 
-    max_deviation_ = 50;
+    max_deviation_ = 16;
     bg_ = cv::BackgroundSubtractorMOG2(history, varThreshold, bShadowDetection);
     ROS_INFO("Created MotionDetector instance");
   }
@@ -106,6 +113,7 @@ namespace pandora_vision
     /// Check that frame has data and that image has 3 channels
     if (frame.data && frame.channels() == 3)
     {
+      indexFrame++;
       movingObjects_ = frame.clone();
       /// Update the background model and create
       /// binary mask for foreground objects
@@ -119,13 +127,13 @@ namespace pandora_vision
       cv::threshold(thresholdedDifference, thresholdedDifference,
         diff_threshold, 255, cv::THRESH_BINARY);
 
-      int typeOfMovement = motionIdentification(thresholdedDifference);
 
       cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3),
         cv::Point(-1, -1));
 
       cv::morphologyEx(thresholdedDifference, thresholdedDifference,
         cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), 8);
+
 
       detectMotionPosition(thresholdedDifference);
 
@@ -139,7 +147,7 @@ namespace pandora_vision
       {
         debugShow(thresholdedDifference, frame);
       }
-      return typeOfMovement;
+      return typeOfMovement_;
     }
     else
     {
@@ -150,7 +158,7 @@ namespace pandora_vision
   /**
    * @brief
    **/
- 
+
   void MotionDetector::findMotionParameters(const cv::Mat& frame)
   {
     switch (detectMotion(frame))
@@ -169,7 +177,7 @@ namespace pandora_vision
         break;
     }
   }
- 
+
   BBoxPOIPtr MotionDetector::getBoundingBox()
   {
     return bounding_box_;
@@ -190,9 +198,12 @@ namespace pandora_vision
       /// Calculate the standard deviation
       cv::Scalar mean, stddev;
       meanStdDev(diff, mean, stddev);
+      ROS_INFO_STREAM("Motion stdev=" << stddev[0] << " max_deviation= " << max_deviation_);
       /// If not to much changes then the motion is real
       if (stddev[0] < max_deviation_)
       {
+        typeOfMovement_ = motionIdentification(diff);
+
         int number_of_changes = 0;
         int min_x = diff.cols, max_x = 0;
         int min_y = diff.rows, max_y = 0;
@@ -272,8 +283,20 @@ namespace pandora_vision
     std::vector<std::vector<cv::Point> > contours;
     cv::erode(foreground_, foreground_, cv::Mat());
     cv::dilate(foreground_, foreground_, cv::Mat());
-    cv::findContours(foreground_, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::findContours(thresholdedDifference, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
     cv::drawContours(frame, contours, -1, cv::Scalar(0, 0, 255), 2);
+    ROS_INFO_STREAM("Contours found=" << contours.size());
+    std::vector<double> areas(contours.size());
+    //!< find largest contour area
+    for (int i = 0; i < contours.size(); i++)
+    {
+            areas[i] = cv::contourArea(cv::Mat(contours[i]));
+            ROS_INFO_STREAM("Area of contour=" << areas[i]);
+    }
+    //!< get index of largest contour
+    /*double max;
+    cv::Point maxPosition;*/
+    /*cv::minMaxLoc(cv::Mat(areas),0,&max,0,&maxPosition);*/
 
     if (visualization || show_image)
       cv::imshow("Frame", frame);

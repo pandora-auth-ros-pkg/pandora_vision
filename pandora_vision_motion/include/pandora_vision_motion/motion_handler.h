@@ -50,7 +50,7 @@ namespace pandora_vision
 {
 namespace pandora_vision_motion
 {
-  class MotionHandler : public VisionHandler<MotionPreProcessor, 
+  class MotionHandler : public VisionHandler<MotionPreProcessor,
     MotionProcessor, MotionPostProcessor>
   {
     public:

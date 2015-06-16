@@ -67,7 +67,7 @@ namespace pandora_vision
   {
     ROS_INFO("Destroying MotionProcessor instance");
   }
-  
+
   void MotionProcessor::parametersCallback(
     const pandora_vision_motion::motion_cfgConfig& config,
     const uint32_t& level)
@@ -80,10 +80,12 @@ namespace pandora_vision
     motionDetector.motion_high_thres = config.motion_high_thres;
     motionDetector.motion_low_thres = config.motion_low_thres;
     motionDetector.visualization = config.visualization;
+    motionDetector.max_deviation_ = config.max_deviation;
     motionDetector.show_image = config.show_image;
     motionDetector.show_background = config.show_background;
     motionDetector.show_diff_image = config.show_diff_image;
     motionDetector.show_moving_objects_contours = config.show_moving_objects_contours;
+    ROS_INFO_STREAM("diff_threshold" << motionDetector.diff_threshold);
   }
 
    /**

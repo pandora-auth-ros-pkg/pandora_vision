@@ -58,6 +58,7 @@ namespace pandora_vision
         WIDTH = 640;
         HEIGHT = 480;
         motionDetectorPtr_ = new MotionDetector();
+        motionDetectorPtr_->setMaxDeviation(50);
       }
 
       /* accessors to private functions */
@@ -76,7 +77,7 @@ namespace pandora_vision
   {
     motionDetectorPtr_->detectMotionPosition(frame);
     BBoxPOIPtr topLeft = motionDetectorPtr_->getMotionPosition();
-    cv::Point center(topLeft->getPoint().x + topLeft->getWidth() / 2, 
+    cv::Point center(topLeft->getPoint().x + topLeft->getWidth() / 2,
         topLeft->getPoint().y + topLeft->getHeight() / 2);
      // motionDetectorPtr_->detectMotion(frame);
     topLeft->setPoint(center);
