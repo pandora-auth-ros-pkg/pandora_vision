@@ -45,15 +45,14 @@ namespace pandora_vision
   {
   }
 
-  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& rowKernelLow,
-      const cv::Mat& columnKernelLow, const cv::Mat& rowKernelHigh,
+  DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& columnKernelLow,
       const cv::Mat& columnKernelHigh)
   {
-      rowKernelLow_ = rowKernelLow;
       columnKernelLow_ = columnKernelLow;
+      cv::transpose(columnKernelLow, rowKernelLow_);
 
-      rowKernelHigh_ = rowKernelHigh;
       columnKernelHigh_ = columnKernelHigh;
+      cv::transpose(columnKernelHigh, rowKernelHigh_);
   }
 
   DiscreteWaveletTransform::~DiscreteWaveletTransform()

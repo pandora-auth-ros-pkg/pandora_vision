@@ -62,17 +62,70 @@ namespace pandora_vision
       /**
        * @brief Constructor used to implement the DWT with a user
        * defined kernel
-       * @param kernel [cost cv::Mat&] The kernel used to perform
-       * the transform
+       * @param columnKernelLow [cost cv::Mat&] The low frequency
+       * kernel used to perform the convolution of the DWT column-wise
+       * @param columnKernelHigh [const cv::Mat&] The high frequency
+       * kernel used to perform the convolution of the DWT column-wise
        **/
-      DiscreteWaveletTransform(const cv::Mat& rowKernelLow,
-          const cv::Mat& columnKernelLow, const cv::Mat& rowKernelHigh,
+      DiscreteWaveletTransform(const cv::Mat& columnKernelLow,
           const cv::Mat& columnKernelHigh);
 
       /**
        * @brief Virtual Destructor
        **/
       virtual ~DiscreteWaveletTransform();
+
+    public:
+      /**
+       * @brief Return the final LL result of the DWT
+       * @param inImage [const cv::Mat& inImage] The image to which
+       * the transform is performed
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<MatPtr>] The list of LL images that are
+       * the result of the transform according to the level
+       **/
+      std::vector<MatPtr> getLowLow(const cv::Mat& inImage, int level = 1);
+
+      /**
+       * @brief Return the final LH result of the DWT
+       * @param inImage [const cv::Mat& inImage] The image to which
+       * the transform is performed
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<MatPtr>] The list of LH images that are
+       * the result of the transform according to the level
+       **/
+      std::vector<MatPtr> getLowHigh(const cv::Mat& inImage, int level = 1);
+
+      /**
+       * @brief Return the final HL result of the DWT
+       * @param inImage [const cv::Mat& inImage] The image to which
+       * the transform is performed
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<MatPtr>] The list of HL images that are
+       * the result of the transform according to the level
+       **/
+      std::vector<MatPtr> getHighLow(const cv::Mat& inImage, int level = 1);
+
+      /**
+       * @brief Return the final HH result of the DWT
+       * @param inImage [const cv::Mat& inImage] The image to which
+       * the transform is performed
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<MatPtr>] The list of HH images that are
+       * the result of the transform according to the level
+       **/
+      std::vector<MatPtr> getHighHigh(const cv::Mat& inImage, int level = 1);
+
+      /**
+       * @brief Return the final result of the DWT
+       * @param inImage [const cv::Mat& inImage] The image to which
+       * the transform is performed
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<MatPtr>] The list of images that are
+       * the result of the transform with order LL, LH, HL, HH and
+       * so on according to the level
+       **/
+      std::vector<MatPtr> dwt2D(const cv::Mat& inImage, int level = 1);
 
     private:
       /**
@@ -149,57 +202,6 @@ namespace pandora_vision
        **/
       void convAndSubSample(const cv::Mat& inImage, bool rows,
           const MatPtr& subImageLow, const MatPtr& subImageHigh);
-
-      /**
-       * @brief Return the final LL result of the DWT
-       * @param inImage [const cv::Mat& inImage] The image to which
-       * the transform is performed
-       * @param level [int] The number of stages of the DWT
-       * @return [std::vector<MatPtr>] The list of LL images that are
-       * the result of the transform according to the level
-       **/
-      std::vector<MatPtr> getLowLow(const cv::Mat& inImage, int level = 1);
-
-      /**
-       * @brief Return the final LH result of the DWT
-       * @param inImage [const cv::Mat& inImage] The image to which
-       * the transform is performed
-       * @param level [int] The number of stages of the DWT
-       * @return [std::vector<MatPtr>] The list of LH images that are
-       * the result of the transform according to the level
-       **/
-      std::vector<MatPtr> getLowHigh(const cv::Mat& inImage, int level = 1);
-
-      /**
-       * @brief Return the final HL result of the DWT
-       * @param inImage [const cv::Mat& inImage] The image to which
-       * the transform is performed
-       * @param level [int] The number of stages of the DWT
-       * @return [std::vector<MatPtr>] The list of HL images that are
-       * the result of the transform according to the level
-       **/
-      std::vector<MatPtr> getHighLow(const cv::Mat& inImage, int level = 1);
-
-      /**
-       * @brief Return the final HH result of the DWT
-       * @param inImage [const cv::Mat& inImage] The image to which
-       * the transform is performed
-       * @param level [int] The number of stages of the DWT
-       * @return [std::vector<MatPtr>] The list of HH images that are
-       * the result of the transform according to the level
-       **/
-      std::vector<MatPtr> getHighHigh(const cv::Mat& inImage, int level = 1);
-
-      /**
-       * @brief Return the final result of the DWT
-       * @param inImage [const cv::Mat& inImage] The image to which
-       * the transform is performed
-       * @param level [int] The number of stages of the DWT
-       * @return [std::vector<MatPtr>] The list of images that are
-       * the result of the transform with order LL, LH, HL, HH and
-       * so on according to the level
-       **/
-      std::vector<MatPtr> dwt2D(const cv::Mat& inImage, int level = 1);
 
     private:
       /// The row kernel used to perform the DWT that represents the
