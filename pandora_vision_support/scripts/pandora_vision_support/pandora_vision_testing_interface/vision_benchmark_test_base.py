@@ -416,10 +416,10 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         for fileName in sorted(os.listdir(imagePath)):
             self.images = []
             self.names = []
-            
+
             # Read Images Sequentially
             rospy.loginfo("Reading Images")
-            
+
             if self.algorithm == "Hole" or self.algorithm == "Victim":
                 self.readRosBags(imagePath, fileName)
             else:

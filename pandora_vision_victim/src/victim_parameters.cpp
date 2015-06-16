@@ -125,8 +125,6 @@ namespace pandora_vision
       ROS_BREAK();
     }
 
-    nh.param("model_image_height", modelImageHeight, 0);
-    nh.param("model_image_width", modelImageWidth, 0);
     nh.param("rgb_svm_C", rgb_svm_C, 312.5);
     nh.param("rgb_svm_gamma", rgb_svm_gamma, 0.50625);
     nh.param("depth_svm_C", depth_svm_C, 312.5);
@@ -141,14 +139,6 @@ namespace pandora_vision
       ROS_BREAK();
     }
     cascade_path = packagePath + cascade_path;
-
-    if (!nh.getParam("model_path", model_path))
-    {
-      model_path = "/data/model.xml";
-      ROS_FATAL("[victim_node] : model_path name param not found");
-      ROS_BREAK();
-    }
-    model_path = packagePath + model_path;
 
     if (!nh.getParam("rgb_classifier_path", rgb_classifier_path))
     {
@@ -165,12 +155,5 @@ namespace pandora_vision
       ROS_BREAK();
     }
     depth_classifier_path = packagePath + depth_classifier_path;
-
-    if (!nh.getParam("model_url", model_url))
-    {
-      model_url = "https://pandora.ee.auth.gr/vision/model.xml";
-      ROS_FATAL("[victim_node] : model_url name param not found");
-      ROS_BREAK();
-    }
   }
 }  // namespace pandora_vision

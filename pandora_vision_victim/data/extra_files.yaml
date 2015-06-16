@@ -13,8 +13,6 @@ files:
   url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/rgb_training_matrix.xml
 - md5: 68ea5554cbd0be3ed8a32e704f488db9
   url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/rgb_mean_values.xml
-- md5: f99ca9447ea51d8d1d9a816625c3795e
-  url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/model.xml
 - md5: 99476613460b936517e0afb1575cf10e
   url: http://downloads.pandora.ee.auth.gr/data/vision/victim_training/depth_standard_deviation_values.xml
 - md5: 8070412d05bcbdd01510ef9a9e31a793
