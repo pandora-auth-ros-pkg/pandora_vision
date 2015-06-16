@@ -93,9 +93,7 @@ namespace pandora_vision
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
 
-    std::string paramFile = packagePath_ + "/config/" + boost::to_upper_copy<std::string>(imageType) +
-      "_" + boost::to_upper_copy<std::string>(classifierType)
-      + "_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_" + classifierType + "_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
