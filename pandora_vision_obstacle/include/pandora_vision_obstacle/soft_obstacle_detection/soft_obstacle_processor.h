@@ -43,22 +43,24 @@
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/images_stamped.h"
-#include "pandora_vision_obstacle/obstacle_poi.h"
+#include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 
 namespace pandora_vision
 {
   class SoftObstacleProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
   {
     public:
-      typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
-
       SoftObstacleProcessor(const std::string& ns, sensor_processor::Handler* handler);
       SoftObstacleProcessor();
 
       virtual ~SoftObstacleProcessor() {}
 
+    public:
       virtual bool process(const ImagesStampedConstPtr& input,
         const POIsStampedPtr& output);
+
+    private:
+      boost::shared_ptr<SoftObstacleDetector> detector_;
   };
 }  // namespace pandora_vision
 

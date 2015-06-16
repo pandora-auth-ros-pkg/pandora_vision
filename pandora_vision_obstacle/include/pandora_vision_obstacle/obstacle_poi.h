@@ -47,6 +47,9 @@ namespace pandora_vision
   class ObstaclePOI : public BBoxPOI
   {
     public:
+      typedef boost::shared_ptr<ObstaclePOI> Ptr;
+
+    public:
       virtual ~ObstaclePOI() {}
 
     public:
@@ -72,6 +75,8 @@ namespace pandora_vision
         return depthDistance;
       }
   };
+  typedef ObstaclePOI::Ptr ObstaclePOIPtr;
+
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_OBSTACLE_POI_H

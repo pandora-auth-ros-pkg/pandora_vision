@@ -58,7 +58,8 @@ namespace pandora_vision
     output->frameWidth = input->getRgbImage().cols;
     output->frameHeight = input->getRgbImage().rows;
 
-    // output->pois = ...(input->getImage());
+    output->pois = detector_->detectSoftObstacle(
+        input->getRgbImage(), input->getDepthImage());
 
     if (output->pois.empty())
     {
