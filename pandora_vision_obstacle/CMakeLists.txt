@@ -82,6 +82,7 @@ add_library(${PROJECT_NAME}_soft_obstacle_detector
 )
 target_link_libraries(${PROJECT_NAME}_soft_obstacle_detector
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_discrete_wavelet_transform
 )
 
 ############################### soft obstacle processor ##############################
@@ -90,6 +91,7 @@ add_library(${PROJECT_NAME}_soft_obstacle_processor
 )
 target_link_libraries(${PROJECT_NAME}_soft_obstacle_processor
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_soft_obstacle_detector
 )
 
 ############################### soft obstacle handler ##############################

@@ -50,17 +50,6 @@ namespace pandora_vision
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }
 
-  void SoftObstacleDetector::normalizeImage(const MatPtr& image)
-  {
-    double min, max;
-    cv::minMaxLoc(*image, &min);
-    *image -= min;
-
-    cv::minMaxLoc(*image, &min, &max);
-    *image /= max;
-    *image *= 255;
-  }
-
   void SoftObstacleDetector::dilateImage(const MatPtr& image)
   {
     int nonZero = cv::countNonZero(*image);
@@ -108,13 +97,21 @@ namespace pandora_vision
     return verticalLines;
   }
 
-  void SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLines, const boost::shared_ptr<cv::Rect>& roiPtr)
+float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLines,
+      int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr)
   {
+    float probability = 0.0f;
+
     if (verticalLines.size() > 2)
     {
-      int minx = verticalLines[0][0], maxx = verticalLines[0][0], miny = verticalLines[0][1], maxy = verticalLines[0][1];
+      int minx = verticalLines[0][0];
+      int maxx = verticalLines[0][0];
+      int miny = verticalLines[0][1];
+      int maxy = verticalLines[0][1];
+
       for (size_t ii = 1; ii < verticalLines.size(); ii++)
       {
+        // Calculate min and max of line coordinates
         int x0 = verticalLines[ii][0];
         int x1 = verticalLines[ii][2];
         int y0 = verticalLines[ii][1];
@@ -131,42 +128,63 @@ namespace pandora_vision
 
         maxy = y0 > maxy ? y0 : maxy;
         maxy = y1 > maxy ? y1 : maxy;
+
+        // Calculate ROI probability
+        probability += static_cast<float>(abs(y1 - y0)) / static_cast<float>(frameHeight);
       }
+      probability /= verticalLines.size();
+
       int width = maxx - minx;
       int height = maxy - miny;
+
       // The point inside this rect. should be the roi center, now it is the
       // upper left point in order to visualize
       cv::Rect roi(minx, miny, width, height);
       *roiPtr = roi;
     }
+    return probability;
   }
 
-  std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& input)
+  std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& rgbImage,
+      const cv::Mat& depthImage, int level)
   {
-    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(input);
-
+    // Perform DWT
+    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(rgbImage, level);
     MatPtr lhImage(LHImages[LHImages.size() - 1]);
-    normalizeImage(lhImage);
-    lhImage->convertTo(*lhImage, CV_8UC1);
 
+    // Normalize image [0, 255]
+    cv::Mat normalizedImage;
+    cv::normalize(*lhImage, normalizedImage, 0, 255, cv::NORM_MINMAX);
+    normalizedImage.convertTo(normalizedImage, CV_8UC1);
+
+    // Convert image to binary with Otsu thresholding
     MatPtr otsuImage(new cv::Mat());
-    cv::threshold(*lhImage, *otsuImage, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    cv::threshold(normalizedImage, *otsuImage, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
+    // Dilate Image
     dilateImage(otsuImage);
 
+    // Perform Hough Transform to detect lines (keep only vertical)
     std::vector<cv::Vec4i> verticalLines = performProbHoughLines(*otsuImage);
+
+    // Detect bounding box that includes the vertical lines
     boost::shared_ptr<cv::Rect> roi(new cv::Rect());
-    detectROI(verticalLines, roi);
+    float probability = detectROI(verticalLines, otsuImage->rows, roi);
 
     std::vector<POIPtr> pois;
     if (roi->size().width > 0 && roi->size().height > 0)
     {
       ObstaclePOIPtr poi(new ObstaclePOI);
-      poi->setPoint(cv::Point(roi->x + roi->width / 2, roi->y + roi->height / 2));
-      poi->setWidth(roi->width);
-      poi->setHeight(roi->height);
-      // poi->setDepth
+
+      poi->setPoint(cv::Point((roi->x + roi->width / 2) * pow(2, level),
+            (roi->y + roi->height / 2) * pow(2, level)));
+      poi->setWidth(roi->width * pow(2, level));
+      poi->setHeight(roi->height * pow(2, level));
+
+      poi->setProbability(probability);
       poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+
+      // poi->setDepth();
       pois.push_back(poi);
     }
     return pois;

@@ -49,23 +49,61 @@ namespace pandora_vision
   class SoftObstacleDetector
   {
     public:
-      typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
-
-    public:
+      /**
+       * @brief Constructor that initializes dwt Haar kernels
+       **/
       SoftObstacleDetector();
+
+      /**
+       * @brief Destructor
+       **/
       ~SoftObstacleDetector() {}
 
     public:
-      std::vector<POIPtr> detectSoftObstacle(const cv::Mat& input);
+      /**
+       * @brief Detect soft obstacle by performing a number of
+       * operations to the rgb and depth image
+       * @param rgbImage [const cv::Mat&] The input rgb image
+       * @param depthImage [const cv::Mat&] The input depth image
+       * @param level [int] The number of stages of the DWT
+       * @return [std::vector<POIPtr>] The Point Of Interest that
+       * includes the soft obstacle
+       **/
+      std::vector<POIPtr> detectSoftObstacle(const cv::Mat& rgbImage,
+          const cv::Mat& depthImage, int level = 1);
 
     private:
-      void normalizeImage(const MatPtr& image);
+      /**
+       * @brief Invert image if necessary and dilate it
+       * @param image [const MatPtr&] The image to be dilated
+       **/
       void dilateImage(const MatPtr& image);
+
+      /**
+       * @brief Perform Probabilistic Hough Lines Transform and
+       * keep only vertical lines
+       * @param image [const cv::Mat&] The image that the transform
+       * is applied to
+       * @return [std::vector<cv::Vec4i>] The vector containing each
+       * vertical line's start and end point
+       **/
       std::vector<cv::Vec4i> performProbHoughLines(const cv::Mat& image);
-      void detectROI(const std::vector<cv::Vec4i>& verticalLines,
-          const boost::shared_ptr<cv::Rect>& roiPtr);
+
+      /**
+       * @brief Create the bounding box that includes the soft obstacle
+       * @param verticalLines [const std::vector<cv::Vec4i>&] The
+       * input vector that contains the vertical lines found
+       * @param frameHeight [int] The image height
+       * @param roiPtr [const boost::shared_ptr<cv::Rect>&] The
+       * bounding box that is returned
+       * @return [float] The probability of the soft obstacle
+       * considering the line's length
+       **/
+      float detectROI(const std::vector<cv::Vec4i>& verticalLines,
+          int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr);
 
     private:
+      /// The DWT class object used to perform this operation
       boost::shared_ptr<DiscreteWaveletTransform> dwtPtr_;
   };
 }  // namespace pandora_vision
