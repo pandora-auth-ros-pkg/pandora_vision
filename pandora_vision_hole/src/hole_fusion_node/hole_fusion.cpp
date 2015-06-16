@@ -1421,45 +1421,12 @@ namespace pandora_vision
           -1,
           msgs);
 
-      // Holes originated from analysis on the thermal image,
-      // on top of the depth image
-      cv::Mat thermalHolesOnDepthImage =
-        Visualization::showHoles(
-          "Holes originated from Thermal analysis, on the Depth image",
-          interpolatedDepthImage_,
-          thermalHolesConveyor_,
-          -1,
-          msgs);
-
-      // Holes originated from analysis on the thermal image,
-      // on top of the rgb image
-      cv::Mat thermalHolesOnRgbImage =
-        Visualization::showHoles(
-          "Holes originated from Thermal analysis, on the Rgb image",
-          rgbImage_,
-          thermalHolesConveyor_,
-          -1,
-          msgs);
-
-      // Holes originated from analysis on the thermal image,
-      // on top of the resized Thermal image
-      cv::Mat thermalHolesOnThermalImage =
-        Visualization::showHoles(
-          "Holes originated from Thermal analysis, on the Thermal image",
-          thermalImage_,
-          thermalHolesConveyor_,
-          -1,
-          msgs);
-
-      // The six images
+      // The four images
       std::vector<cv::Mat> imgs;
       imgs.push_back(depthHolesOnDepthImage);
       imgs.push_back(depthHolesOnRgbImage);
       imgs.push_back(rgbHolesOnRgbImage);
       imgs.push_back(rgbHolesOnDepthImage);
-      imgs.push_back(thermalHolesOnDepthImage);
-      imgs.push_back(thermalHolesOnRgbImage);
-      imgs.push_back(thermalHolesOnThermalImage);
 
       // The titles of the images
       std::vector<std::string> titles;
@@ -1468,9 +1435,49 @@ namespace pandora_vision
       titles.push_back("Holes originated from Depth analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the RGB image");
       titles.push_back("Holes originated from RGB analysis, on the Depth image");
-      titles.push_back("Holes originated from Thermal analysis, on the Depth image");
-      titles.push_back("Holes originated from Thermal analysis, on the Rgb image");
-      titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
+
+      // If mode is enabled add the information from thermal procedure
+      if (mode_)
+      {
+        // Holes originated from analysis on the thermal image,
+        // on top of the depth image
+        cv::Mat thermalHolesOnDepthImage =
+          Visualization::showHoles(
+            "Holes originated from Thermal analysis, on the Depth image",
+            interpolatedDepthImage_,
+            thermalHolesConveyor_,
+            -1,
+            msgs);
+
+        // Holes originated from analysis on the thermal image,
+        // on top of the rgb image
+        cv::Mat thermalHolesOnRgbImage =
+          Visualization::showHoles(
+            "Holes originated from Thermal analysis, on the Rgb image",
+            rgbImage_,
+            thermalHolesConveyor_,
+            -1,
+            msgs);
+
+        // Holes originated from analysis on the thermal image,
+        // on top of the resized Thermal image
+        cv::Mat thermalHolesOnThermalImage =
+          Visualization::showHoles(
+            "Thermal holes on thermal image, evaluate image_matching transformation",
+            thermalImage_,
+            thermalHolesConveyor_,
+            -1,
+            msgs);
+
+        imgs.push_back(thermalHolesOnDepthImage);
+        imgs.push_back(thermalHolesOnRgbImage);
+        imgs.push_back(thermalHolesOnThermalImage);
+
+
+        titles.push_back("Holes originated from Thermal analysis, on the Depth image");
+        titles.push_back("Holes originated from Thermal analysis, on the Rgb image");
+        titles.push_back("Holes originated from Thermal analysis, on the Thermal image");
+      }
 
       Visualization::multipleShow("Respective keypoints", imgs, titles, 1280, 1);
     }
@@ -1484,8 +1491,11 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    HolesConveyorUtils::merge(rgbdHolesConveyor, thermalHolesConveyor_,
-      &rgbdHolesConveyor);
+    if(mode_)
+    {
+      HolesConveyorUtils::merge(rgbdHolesConveyor, thermalHolesConveyor_,
+        &rgbdHolesConveyor);
+    }
 
     // The container in which holes will be assembled before validation
     HolesConveyor preValidatedHoles;
