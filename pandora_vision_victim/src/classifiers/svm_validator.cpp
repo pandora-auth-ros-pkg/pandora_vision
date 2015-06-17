@@ -66,47 +66,6 @@ namespace pandora_vision
 
     svmValidator_.load(classifierPath_.c_str());
 
-    double svmC;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_C", svmC))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
-          << "the C parameter for the SVM classifier!");
-      ROS_BREAK();
-    }
-
-    double svmGamma;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_gamma", svmGamma))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
-          << "the gamma parameter for the SVM Classifier!");
-      ROS_BREAK();
-    }
-
-    int svmType;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_type", svmType))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
-          << "the type of the SVM Classifier!");
-      svmType = CvSVM::C_SVC;
-      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << svmType);
-    }
-
-    int kernelType;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/kernel_type", kernelType))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
-          << "the kernel type of the SVM Classifier!");
-      kernelType = CvSVM::RBF;
-      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << kernelType);
-    }
-
-    svmParams_.C = svmC;
-    svmParams_.gamma = svmGamma;
-    svmParams_.svm_type = svmType;
-    svmParams_.kernel_type = kernelType;
-    svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
-        10000, 1e-6);
-
     double probabilityScaling;
     if (!nh.getParam(classifierType_ + "/" + imageType_ + "/probability_scaling", probabilityScaling))
     {

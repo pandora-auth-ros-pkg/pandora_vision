@@ -49,7 +49,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#include "pandora_vision_victim/victim_parameters.h"
 #include "pandora_vision_victim/feature_extractors/feature_extraction.h"
 #include "pandora_vision_victim/utilities/feature_extraction_utilities.h"
 
@@ -69,6 +68,14 @@ namespace pandora_vision
        * @brief The Destructor
        */
       virtual ~AbstractClassifier();
+
+      /**
+       * @brief Function that implements the training for the subsystems
+       * according to the given training sets. It applies a classification
+       * algorithm and extracts a suitable model.
+       * @return void
+       */
+      virtual void trainAndValidate();
 
       /**
        * @brief This function normalizes the features and saves normalization
@@ -108,14 +115,6 @@ namespace pandora_vision
       void constructFeaturesMatrix(const boost::filesystem::path& directory,
                                    const std::string& annotationsFile,
                                    cv::Mat* featuresMat, cv::Mat* labelsMat);
-
-      /**
-       * @brief Function that implements the training for the subsystems
-       * according to the given training sets. It applies a classification
-       * algorithm and extracts a suitable model.
-       * @return void
-       */
-      virtual void trainAndValidate();
 
       /**
        * @brief This function evaluates the classifier model, based on the
@@ -170,10 +169,11 @@ namespace pandora_vision
       virtual void load(const std::string& classifierFile) = 0;
 
     protected:
+      /// String used in node messages.
+      std::string nodeMessagePrefix_;
+
       /// The NodeHandle
       ros::NodeHandle nh_;
-
-      VictimParameters vparams;
 
       /// String containing the type of the images used in the feature
       /// extraction process.

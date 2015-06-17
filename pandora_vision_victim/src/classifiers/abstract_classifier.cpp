@@ -55,15 +55,15 @@ namespace pandora_vision
       const std::string& classifierType, const std::string& imageType) :
       nh_(ns)
   {
-    vparams.configVictim(nh_);
-
     datasetPath_ = datasetPath;
     numFeatures_ = numFeatures;
     imageType_ = imageType;
     classifierType_ = classifierType;
 
+    nodeMessagePrefix_ = "[PANDORA_VISION_VICTIM_" + boost::to_upper_copy<std::string>(imageType)
+        + "_" + boost::to_upper_copy<std::string>(classifierType) + "]";
+
     packagePath_ = ros::package::getPath("pandora_vision_victim");
-    ROS_INFO("[victim_node] : Created Abstract Classifier instance");
 
     // featureExtractionUtilities_ = new FeatureExtractionUtilities();
 
@@ -118,10 +118,10 @@ namespace pandora_vision
     {
       ROS_ERROR("Invalid image type provided!");
       ROS_ERROR("The system will now shut down!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
-    ROS_INFO("Created Abstract Classifier Instance!");
+    ROS_INFO("[victim_node] : Created Abstract Classifier instance");
   }
 
   /**

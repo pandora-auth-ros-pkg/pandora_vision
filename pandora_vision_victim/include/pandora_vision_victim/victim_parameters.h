@@ -147,19 +147,9 @@ namespace pandora_vision
 
       /// parameters referring to the face detection algorithm
       std::string cascade_path;
-      std::string rgb_classifier_path;
-      std::string depth_classifier_path;
 
-      /// parameters for svms
-      CvSVMParams params;
-      bool oneClass;
-      bool autoTrain;
-      double rgb_svm_C;
-      double rgb_svm_gamma;
       double rgb_svm_prob_scaling;
       double rgb_svm_prob_translation;
-      double depth_svm_C;
-      double depth_svm_gamma;
       double depth_svm_prob_scaling;
       double depth_svm_prob_translation;
   };

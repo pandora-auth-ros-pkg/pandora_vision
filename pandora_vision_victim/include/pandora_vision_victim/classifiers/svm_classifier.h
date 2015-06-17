@@ -94,10 +94,12 @@ namespace pandora_vision
         classifierPtr_->load(classifierFile.c_str());
       }
 
-    protected:
-      /// Set up SVM's parameters
-      // CvSVMParams params;
+    private:
+      /// SVM parameters
+      CvSVMParams svmParams_;
       CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
+
+      bool autoTrain_;
 
       /// The Pointer to the classifier object
       boost::shared_ptr<CvSVM> classifierPtr_;

@@ -57,6 +57,116 @@ namespace pandora_vision
   {
     ROS_INFO("[victim_node] : Creating SVM training instance!");
 
+    int svmType;
+    if (!nh_.getParam(imageType_ + "/svm_type", svmType))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the type of the SVM Classifier!");
+      svmType = CvSVM::C_SVC;
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << svmType);
+    }
+
+    int kernelType;
+    if (!nh_.getParam(imageType_ + "/kernel_type", kernelType))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the kernel type of the SVM Classifier!");
+      kernelType = CvSVM::RBF;
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << kernelType);
+    }
+
+    double svmDegree = 0.0;
+    if (kernelType == CvSVM::POLY)
+    {
+      if (!nh_.getParam(imageType_ + "/degree", svmDegree))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the degree of the SVM Classifier!");
+        ROS_BREAK();
+      }
+    }
+
+    double svmGamma = 1.0;
+    if (kernelType == CvSVM::POLY || kernelType == CvSVM::RBF || kernelType == CvSVM::SIGMOID)
+    {
+      if (!nh_.getParam(imageType_ + "/gamma", svmGamma))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the gamma parameter for the SVM Classifier!");
+        ROS_BREAK();
+      }
+    }
+
+    double svmCoef0 = 0.0;
+    if (kernelType == CvSVM::POLY || kernelType == CvSVM::SIGMOID)
+    {
+      if (!nh_.getParam(imageType_ + "/coef0", svmCoef0))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the coef0 parameter for the SVM Classifier!");
+        ROS_BREAK();
+      }
+    }
+
+    double svmC = 1.0;
+    if (svmType == CvSVM::C_SVC || svmType == CvSVM::EPS_SVR || svmType == CvSVM::NU_SVR)
+    {
+      if (!nh_.getParam(imageType_ + "/C", svmC))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the C parameter for the SVM classifier!");
+        ROS_BREAK();
+      }
+    }
+
+    double svmNu = 0.0;
+    if (svmType == CvSVM::NU_SVC || svmType == CvSVM::ONE_CLASS || svmType == CvSVM::NU_SVR)
+    {
+      if (!nh_.getParam(imageType_ + "/nu", svmNu))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the Nu parameter for the SVM classifier!");
+        ROS_BREAK();
+      }
+    }
+    double svmP = 0.0;
+    if (svmType == CvSVM::EPS_SVR)
+    {
+      if (!nh_.getParam(imageType_ + "/p", svmP))
+      {
+        ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+            << "the p parameter for the SVM classifier!");
+        ROS_BREAK();
+      }
+    }
+    svmParams_.svm_type = svmType;
+    svmParams_.kernel_type = kernelType;
+
+    svmParams_.degree = svmDegree;  //!< POLY
+    svmParams_.gamma = svmGamma;  //!< POLY/RBF/SIGMOID
+    svmParams_.coef0 = svmCoef0;  //!< POLY/SIGMOID
+    svmParams_.C = svmC;  //!< CV_SVM_C_SVC, CV_SVM_EPS_SVR, CV_SVM_NU_SVR
+    svmParams_.nu = svmNu;  //!< CV_SVM_NU_SVC, CV_SVM_ONE_CLASS, CV_SVM_NU_SVR
+    svmParams_.p = svmP;  //!< CV_SVM_EPS_SVR
+    svmParams_.class_weights = NULL;  //!< CV_SVM_C_SVC
+    svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
+        10000, 1e-6);
+
+    // CvParamGrid CvParamGrid_C(pow(2.0,-5), pow(2.0,15), pow(2.0,2));
+    // CvParamGrid CvParamGrid_gamma(pow(2.0,-20), pow(2.0,3), pow(2.0,2));
+    // if (!CvParamGrid_C.check() || !CvParamGrid_gamma.check())
+      // std::cout << "The grid is NOT VALID." << std::endl;
+
+    bool autoTrain;
+    if (!nh_.getParam(imageType_ + "/auto_train", autoTrain))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the auto train parameter of the SVM Classifier!");
+      autoTrain = true;
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default value " << autoTrain);
+    }
+    autoTrain_ = autoTrain;
+
     classifierPtr_.reset(new CvSVM());
 
     ROS_INFO("Created %s %s Training Instance.", imageType_.c_str(), classifierType_.c_str());
@@ -93,11 +203,11 @@ namespace pandora_vision
       return false;
     }
 
-    if (vparams.autoTrain)
+    if (autoTrain_)
     {
       std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
       classifierPtr_->train_auto(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(),
-          vparams.params, 10, CvSVM::get_default_grid(CvSVM::C),
+          svmParams_, 10, CvSVM::get_default_grid(CvSVM::C),
           CvSVM::get_default_grid(CvSVM::GAMMA),
           CvSVM::get_default_grid(CvSVM::P),
           CvSVM::get_default_grid(CvSVM::NU),
@@ -105,18 +215,18 @@ namespace pandora_vision
           CvSVM::get_default_grid(CvSVM::DEGREE),
           true);
 
-      vparams.params = classifierPtr_->get_params();
+      svmParams_ = classifierPtr_->get_params();
       std::cout << "Using optimal Parameters" << std::endl;
-      std::cout << "degree=" << vparams.params.degree << std::endl;
-      std::cout << "gamma=" << vparams.params.gamma << std::endl;
-      std::cout << "coef0=" << vparams.params.coef0 << std::endl;
-      std::cout << "C=" << vparams.params.C << std::endl;
-      std::cout << "nu=" << vparams.params.nu << std::endl;
-      std::cout << "p=" << vparams.params.p << std::endl;
+      std::cout << "degree=" << svmParams_.degree << std::endl;
+      std::cout << "gamma=" << svmParams_.gamma << std::endl;
+      std::cout << "coef0=" << svmParams_.coef0 << std::endl;
+      std::cout << "C=" << svmParams_.C << std::endl;
+      std::cout << "nu=" << svmParams_.nu << std::endl;
+      std::cout << "p=" << svmParams_.p << std::endl;
     }
     else
     {
-      classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), vparams.params);
+      classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), svmParams_);
     }
 
     classifierPtr_->save(classifierFile_.c_str());

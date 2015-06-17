@@ -60,14 +60,14 @@ namespace pandora_vision
     {
       ROS_ERROR("Could not retrieve the image type from the yaml file!");
       ROS_ERROR("Shutting Down now!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
     if (!nh_.getParam("classifier_type", classifierType))
     {
       ROS_ERROR("Could not retrieve the classifier type from the yaml file!");
       ROS_ERROR("Shutting Down now!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
     boost::shared_ptr<AbstractClassifier> victimTrainerPtr;
@@ -77,7 +77,7 @@ namespace pandora_vision
     {
       ROS_ERROR("[Victim_Training]: Null pointer allocated for classifier Trainer!");
       ROS_ERROR("[Victim_Training]: The node will now terminate!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
     // Structs for calculating elapsed time.
@@ -105,13 +105,13 @@ namespace pandora_vision
     if (!nh_.getParam("num_features", numFeatures))
     {
       ROS_ERROR("Could not retrieve the number of features for the system!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
     if (!nh_.getParam("dataset_path", datasetPath))
     {
       ROS_ERROR("Could not get the path to the training dataset!");
-      ros::shutdown();
+      ROS_BREAK();
     }
 
     std::string ns = nh_.getNamespace();

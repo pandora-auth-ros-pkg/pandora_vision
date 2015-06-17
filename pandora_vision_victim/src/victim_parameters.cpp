@@ -47,33 +47,15 @@ namespace pandora_vision
     depth_vj_weight = 0;
     rgb_svm_weight = 0.9;
     depth_svm_weight = 0;
-    oneClass = false;
-    autoTrain = true;
+
     debug_img = false;
     debug_img_publisher = false;
 
-    rgb_svm_prob_scaling = 0.5;
-    rgb_svm_prob_translation = 7.0;
-    depth_svm_prob_scaling = 0.5;
-    depth_svm_prob_translation = 7.0;
+    rgb_svm_prob_scaling = 4.7;
+    rgb_svm_prob_translation = 1.0;
+    depth_svm_prob_scaling = 4.7;
+    depth_svm_prob_translation = 1.0;
     positivesCounter = 1;
-
-    params.svm_type = CvSVM::C_SVC;
-    params.kernel_type = CvSVM::RBF;  //!< CvSVM::RBF, CvSVM::LINEAR ...
-    params.degree = 0;  //!< for poly
-    params.gamma = 0.00225;  //!< for poly/rbf/sigmoid
-    params.coef0 = 0;  //!< for poly/sigmoid
-    // CvParamGrid CvParamGrid_C(pow(2.0,-5), pow(2.0,15), pow(2.0,2));
-    // CvParamGrid CvParamGrid_gamma(pow(2.0,-20), pow(2.0,3), pow(2.0,2));
-    // if (!CvParamGrid_C.check() || !CvParamGrid_gamma.check())
-      // std::cout << "The grid is NOT VALID." << std::endl;
-    params.C = 2.5;  //!< for CV_SVM_C_SVC, CV_SVM_EPS_SVR and CV_SVM_NU_SVR
-    params.nu = 0.0;  //!< for CV_SVM_NU_SVC, CV_SVM_ONE_CLASS, and CV_SVM_NU_SVR
-    params.p = 0.0;  //!< for CV_SVM_EPS_SVR
-    params.class_weights = NULL;  //!< for CV_SVM_C_SVC
-    params.term_crit.type = CV_TERMCRIT_ITER+CV_TERMCRIT_EPS;
-    params.term_crit.max_iter = 10000;
-    params.term_crit.epsilon = 1e-6;
 
     /// The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&VictimParameters::parametersCallback,
@@ -101,10 +83,6 @@ namespace pandora_vision
     depth_svm_prob_scaling = config.depth_svm_prob_scaling;
     depth_svm_prob_translation = config.depth_svm_prob_translation;
     positivesCounter = config.positivesCounter;
-    autoTrain = config.autoTrain;
-    oneClass = config.oneClass;
-    if (oneClass)
-      params.svm_type = CvSVM::ONE_CLASS;
   }
 
   void VictimParameters::configVictim(const ros::NodeHandle& nh)
@@ -125,13 +103,6 @@ namespace pandora_vision
       ROS_BREAK();
     }
 
-    nh.param("rgb_svm_C", rgb_svm_C, 312.5);
-    nh.param("rgb_svm_gamma", rgb_svm_gamma, 0.50625);
-    nh.param("depth_svm_C", depth_svm_C, 312.5);
-    nh.param("depth_svm_gamma", depth_svm_gamma, 0.50625);
-    /* nh.param("depth_svm_prob_scaling", depth_svm_prob_scaling, 0.5); */
-    /* nh.param("depth_svm_prob_translation", depth_svm_prob_translation, 7.); */
-
     if (!nh.getParam("cascade_path", cascade_path))
     {
       cascade_path = "/data/haarcascade_frontalface_alt_tree.xml";
@@ -139,21 +110,5 @@ namespace pandora_vision
       ROS_BREAK();
     }
     cascade_path = packagePath + cascade_path;
-
-    if (!nh.getParam("rgb_classifier_path", rgb_classifier_path))
-    {
-      rgb_classifier_path = "data/rgb_svm_classifier.xml";
-      ROS_FATAL("[victim_node] : rgb_classifier_path name param not found");
-      ROS_BREAK();
-    }
-    rgb_classifier_path = packagePath + rgb_classifier_path;
-
-    if (!nh.getParam("depth_classifier_path", depth_classifier_path))
-    {
-      depth_classifier_path = "/data/depth_svm_classifier.xml";
-      ROS_FATAL("[victim_node] : depth_classifier_path name param not found");
-      ROS_BREAK();
-    }
-    depth_classifier_path = packagePath + depth_classifier_path;
   }
 }  // namespace pandora_vision

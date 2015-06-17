@@ -15,19 +15,20 @@
 
       <rosparam file="$(find pandora_vision_victim)/config/victim_params.yaml"
         command="load" />
+
+      <rosparam file="$(find pandora_vision_victim)/config/victim_training_params.yaml"
+        command="load"/>
+
       <rosparam file="$(find pandora_vision_victim)/config/neural_network_params.yaml"
         command="load" />
 
       <rosparam file="$(find pandora_vision_victim)/config/random_forests_params.yaml"
         command="load" />
-      <rosparam file="$(find pandora_vision_victim)/config/victim_training_params.yaml"
-        command="load"/>
+
+      <rosparam file="$(find pandora_vision_victim)/config/svm_params.yaml"
+        command="load" />
 
     </node>
-
-    <!-- Url for model.xml /-->
-    <param name="model_url" type="str"
-      value="https://pandora.ee.auth.gr/vision/model.xml"/>
 
     <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
 

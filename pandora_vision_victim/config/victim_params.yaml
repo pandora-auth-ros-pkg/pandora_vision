@@ -1,36 +1,13 @@
 cascade_path: /data/rgb_cascade.xml
 
 svm:
-  # Parameters for the SVM type
-  # C_SVC=100
-  # NU_SVC=101
-  # ONE_CLASS=102
-  # EPS_SVR=103
-  # NU_SVR=104
-
-  # Parameters for the SVM Kernel Type
-  # CUSTOM =-1
-  # LINEAR =0
-  # POLY =1
-  # RBF =2
-  # SIGMOID =3
-  # CHI2 =4
-  # INTER =5
   rgb:
     classifier_path: /data/rgb_svm_classifier.xml
-    svm_C: 62.5
-    svm_gamma: 0.00225
-    svm_type: 100
-    kernel_type: 2
     probability_scaling: 4.7
     probability_translation: 1.0
 
   depth:
     classifier_path: /data/depth_svm_classifier.xml
-    svm_C: 312.5
-    svm_gamma: 0.50625
-    svm_type: 100
-    kernel_type: 2
     probability_scaling: 4.7
     probability_translation: 1.0
 
