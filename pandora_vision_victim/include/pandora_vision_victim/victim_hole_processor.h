@@ -48,8 +48,7 @@
 #include "pandora_vision_victim/enhanced_image_stamped.h"
 #include "pandora_vision_victim/victim_poi.h"
 #include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/classifiers/rgb_svm_validator.h"
-#include "pandora_vision_victim/classifiers/depth_svm_validator.h"
+#include "pandora_vision_victim/classifiers/svm_validator.h"
 
 namespace pandora_vision
 {
@@ -85,9 +84,9 @@ namespace pandora_vision
       std::vector<cv::Mat> _rgbdImages;
 
       /// Instance of RGB SVM Validator
-      boost::shared_ptr<RgbSvmValidator> rgbSvmValidatorPtr_;
+      boost::shared_ptr<SvmValidator> rgbSvmValidatorPtr_;
       /// Instance of Depth SVM Validator
-      boost::shared_ptr<DepthSvmValidator> depthSvmValidatorPtr_;
+      boost::shared_ptr<SvmValidator> depthSvmValidatorPtr_;
 
       VictimParameters params_;
 

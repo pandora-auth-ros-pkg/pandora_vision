@@ -56,19 +56,53 @@ namespace pandora_vision
    * @param classifierPath [const std::string&] The path to the classifier
    * model.
    */
-  SvmValidator::SvmValidator()
+  SvmValidator::SvmValidator(const ros::NodeHandle& nh,
+      const std::string& imageType,
+      const std::string& classifierType)
+      : AbstractValidator(nh, imageType, classifierType)
   {
-    ROS_INFO("Enter SVM Validator");
+    svmValidator_.load(classifierPath_.c_str());
 
-    packagePath_ = ros::package::getPath("pandora_vision_victim");
+    double svmC;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_C", svmC))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the C parameter for the SVM classifier!");
+      ROS_BREAK();
+    }
 
-    svmParams_.svm_type = CvSVM::C_SVC;
-    svmParams_.kernel_type = CvSVM::RBF;
+    double svmGamma;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_gamma", svmGamma))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the gamma parameter for the SVM Classifier!");
+      ROS_BREAK();
+    }
+
+    int svmType;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/svm_type", svmType))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the type of the SVM Classifier!");
+      svmType = CvSVM::C_SVC;
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << svmType);
+    }
+
+    int kernelType;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/kernel_type", kernelType))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the kernel type of the SVM Classifier!");
+      kernelType = CvSVM::RBF;
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Using the default type " << kernelType);
+    }
+
+    svmParams_.C = svmC;
+    svmParams_.gamma = svmGamma;
+    svmParams_.svm_type = svmType;
+    svmParams_.kernel_type = kernelType;
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
         10000, 1e-6);
-
-    featureExtraction_ = new FeatureExtraction();
-    featureExtractionUtilities_ = new FeatureExtractionUtilities();
   }
 
   /**
@@ -79,87 +113,14 @@ namespace pandora_vision
   }
 
   /**
-   * @brief This function extracts features according to the predefined
-   * feature extraction algorithms.
-   * @param inImage [const cv::Mat&] Frame to extract features from.
-   * @return void
-   */
-  void SvmValidator::extractFeatures(const cv::Mat& inImage)
-  {
-    featureExtraction_->extractFeatures(inImage);
-  }
-
-  /**
-   * @brief This function extract features according to the
-   * predifined features for the rgb image
-   * @param inImage [cv::Mat] current rgb frame to be processed
-   * @return void
-  */
-  void SvmValidator::calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability)
-  {
-    ROS_INFO("Extracting features");
-    extractFeatures(inImage);
-    ROS_INFO("Extracted Features");
-    if (!featureVector_.empty())
-      featureVector_.clear();
-    featureVector_ = featureExtraction_->getFeatureVector();
-    ROS_INFO("Find prediction probability");
-    float prediction;
-    predict(classLabel, &prediction);
-    *probability = predictionToProbability(prediction);
-    ROS_INFO_STREAM("SVM Class Label: " << *classLabel);
-    ROS_INFO_STREAM("SVM prediction: " << prediction);
-  }
-
-  /**
    * @brief Function that loads the trained classifier and makes a prediction
    * according to the feature vector given for each image
    * @return void
    */
-  void SvmValidator::predict(float* classLabel, float* prediction)
+  void SvmValidator::predict(const cv::Mat& featuresMat,
+      float* classLabel, float* prediction)
   {
-    cv::Mat featuresMat = cv::Mat(featureVector_);
-    // Make features matrix a row vector.
-    if (featuresMat.cols == 1)
-      transpose(featuresMat, featuresMat);
-    /// Normalize the data
-    ROS_INFO("Normalize features");
-    if (typeOfNormalization_ == 1)
-    {
-      double newMin = -1.0;
-      double newMax = 1.0;
-      featureExtractionUtilities_->performMinMaxNormalization(newMax, newMin,
-          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
-    }
-    else if (typeOfNormalization_ == 2)
-    {
-      featureExtractionUtilities_->performZScoreNormalization(
-          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
-    }
-
-    featuresMat.convertTo(featuresMat, CV_32FC1);
-
     *classLabel = svmValidator_.predict(featuresMat, false);
     *prediction = svmValidator_.predict(featuresMat, true);
-  }
-
-  /**
-   * @brief This function calculates the classification probability according to
-   * the SVM prediction.
-   * @param prediction [float] The SVM prediction.
-   * @return [float] The classification probability.
-   */
-  float SvmValidator::predictionToProbability(float prediction)
-  {
-    if (prediction < 0.0f)
-      prediction = fabs(prediction);
-
-    // Normalize probability to [-1,1]
-    float probability = tanh(probabilityScaling_ * prediction -
-        probabilityTranslation_);
-    // Normalize probability to [0,1]
-    probability = (1.0f + probability) / 2.0f;
-    ROS_INFO_STREAM("SVM probability: " << probability);
-    return probability;
   }
 }  // namespace pandora_vision

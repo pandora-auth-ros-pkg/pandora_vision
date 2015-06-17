@@ -120,9 +120,9 @@ target_link_libraries(${PROJECT_NAME}_classifiers
 ########################## Victim Hole Processor ##############################
 add_library(${PROJECT_NAME}_hole_processor
   src/victim_hole_processor.cpp
+  src/classifiers/abstract_validator.cpp
   src/classifiers/svm_validator.cpp
-  src/classifiers/rgb_svm_validator.cpp
-  src/classifiers/depth_svm_validator.cpp
+  src/classifiers/random_forests_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_hole_processor
   ${catkin_LIBRARIES}
@@ -145,9 +145,9 @@ add_dependencies(${PROJECT_NAME}_hole_preprocessor
 ########################## Victim Image Processor #############################
 add_library(${PROJECT_NAME}_image_processor
   src/victim_image_processor.cpp
+  src/classifiers/abstract_validator.cpp
   src/classifiers/svm_validator.cpp
-  src/classifiers/rgb_svm_validator.cpp
-  src/classifiers/depth_svm_validator.cpp
+  src/classifiers/random_forests_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_image_processor
   ${catkin_LIBRARIES}

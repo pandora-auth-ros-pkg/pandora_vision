@@ -58,8 +58,8 @@ namespace pandora_vision
       *this->accessProcessorNh()).advertise(
       params_.interpolatedDepthImg, 1, true);
 
-    rgbSvmValidatorPtr_.reset(new RgbSvmValidator(params_));
-    depthSvmValidatorPtr_.reset(new DepthSvmValidator(params_));
+    rgbSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "rgb", "svm"));
+    depthSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "depth", "svm"));
 
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());

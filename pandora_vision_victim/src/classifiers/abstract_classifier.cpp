@@ -38,7 +38,7 @@
 
 #include <vector>
 #include <string>
-#include "boost/algorithm/string.hpp"
+#include <boost/algorithm/string.hpp>
 
 #include "pandora_vision_victim/utilities/file_utilities.h"
 #include "pandora_vision_victim/feature_extractors/rgb_feature_extraction.h"

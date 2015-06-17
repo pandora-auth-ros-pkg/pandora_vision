@@ -34,15 +34,14 @@
 *
 * Authors:
 *   Kofinas Miltiadis <mkofinas@gmail.com>
-*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_VALIDATOR_H
 
 #include <string>
 
-#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/classifiers/svm_validator.h"
+#include <ros/console.h>
+
+#include "pandora_vision_victim/classifiers/random_forests_validator.h"
+#include "pandora_vision_victim/utilities/file_utilities.h"
 
 /**
  * @namespace pandora_vision
@@ -51,26 +50,36 @@
 namespace pandora_vision
 {
   /**
-   * @class DepthSvmValidator
-   * @brief This class classifies Depth images using an SVM classifier model.
+   * @brief Constructor. Initializes Random Forests classifier parameters and loads
+   * classifier model.
+   * @param classifierPath [const std::string&] The path to the classifier
+   * model.
    */
-  class DepthSvmValidator : public SvmValidator
+  RandomForestsValidator::RandomForestsValidator(const ros::NodeHandle& nh,
+      const std::string& imageType,
+      const std::string& classifierType)
+      : AbstractValidator(nh, imageType, classifierType)
   {
-    public:
-      /**
-       * @brief Constructor. Initializes SVM classifier parameters and loads
-       * classifier model. The classifier is to be used with Depth images.
-       * @param classifierPath [const std::string&] The path to the classifier
-       * model.
-       */
-      explicit DepthSvmValidator(const VictimParameters& params);
+    randomForestsValidator_.load(classifierPath_.c_str());
+  }
 
-      /**
-       * @brief Default Destructor.
-       */
-      virtual ~DepthSvmValidator();
-  };
+  /**
+   * @brief Default Destructor.
+   */
+  RandomForestsValidator::~RandomForestsValidator()
+  {
+  }
+
+  /**
+   * @brief Function that loads the trained classifier and makes a prediction
+   * according to the feature vector given for each image
+   * @return void
+   */
+  void RandomForestsValidator::predict(const cv::Mat& featuresMat,
+      float* classLabel, float* prediction)
+  {
+    *classLabel = randomForestsValidator_.predict(featuresMat);
+    *prediction = randomForestsValidator_.predict_prob(featuresMat);
+  }
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_DEPTH_SVM_VALIDATOR_H
-
 

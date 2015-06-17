@@ -119,13 +119,12 @@ namespace pandora_vision
       classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), vparams.params);
     }
 
-
     classifierPtr_->save(classifierFile_.c_str());
     return true;
   }
 
   /**
-   * @brief Validates the resulting classifier using the given features 
+   * @brief Validates the resulting classifier using the given features
    * extracted from the test set.
    * @param testSetFeatures[const cv::Mat&] The test set features matrix
    * @param validationResults[cv::Mat*] The results for the test set.
@@ -154,6 +153,5 @@ namespace pandora_vision
     classifierPtr_->predict(testSetFeatures, *validationResults);
     return;
   }
-
 }  // namespace pandora_vision
 

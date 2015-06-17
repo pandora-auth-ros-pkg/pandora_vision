@@ -34,16 +34,17 @@
 *
 * Authors:
 *   Kofinas Miltiadis <mkofinas@gmail.com>
-*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_VALIDATOR_H
 
 #include <string>
 
-#include "pandora_vision_victim/victim_parameters.h"
-#include "pandora_vision_victim/classifiers/svm_validator.h"
+#include <opencv2/opencv.hpp>
+#include <ros/ros.h>
+
+#include "pandora_vision_victim/classifiers/abstract_validator.h"
 
 /**
  * @namespace pandora_vision
@@ -52,25 +53,38 @@
 namespace pandora_vision
 {
   /**
-   * @class RgbSvmValidator
-   * @brief This class classifies RGB images using an SVM classifier model.
+   * @class RandomForestsValidator
+   * @brief This class classifies images using a Random Forests classifier model.
    */
-  class RgbSvmValidator : public SvmValidator
+  class RandomForestsValidator : public AbstractValidator
   {
     public:
       /**
-       * @brief Constructor. Initializes SVM classifier parameters and loads
-       * classifier model. The classifier is to be used with RGB images.
-       * @param classifierPath [const std::string&] The path to the classifier
-       * model.
+       * @brief Constructor. Initializes Random Forests classifier parameters and loads
+       * classifier model.
        */
-      explicit RgbSvmValidator(const VictimParameters& params);
+      RandomForestsValidator(const ros::NodeHandle& nh,
+          const std::string& imageType,
+          const std::string& classififierType);
 
       /**
        * @brief Default Destructor.
        */
-      virtual ~RgbSvmValidator();
+      virtual ~RandomForestsValidator();
+
+    protected:
+      /**
+       * @brief Function that loads the trained classifier and makes a prediction
+       * according to the feature vector given for each image
+       * @return void
+       */
+      virtual void predict(const cv::Mat& featuresMat,
+          float* classLabel, float* prediction);
+
+    private:
+      /// The OpenCV SVM classifier.
+      CvRTrees randomForestsValidator_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RGB_SVM_VALIDATOR_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_VALIDATOR_H
 
