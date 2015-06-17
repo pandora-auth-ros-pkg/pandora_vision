@@ -79,10 +79,10 @@ namespace pandora_vision
        * @return void
        */
       virtual void predict(const cv::Mat& featuresMat,
-          float* classLabel, float* prediction);
+          float* classLabel, float* probability);
 
     private:
-      /// The OpenCV SVM classifier.
+      /// The OpenCV Random Forests classifier.
       CvRTrees randomForestsValidator_;
   };
 }  // namespace pandora_vision

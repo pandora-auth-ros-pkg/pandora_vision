@@ -99,15 +99,7 @@ namespace pandora_vision
       according to the featurevector given for each image
       @return void
       **/
-      virtual void predict(const cv::Mat& featuresMat, float* classLabel, float* prediction) = 0;
-
-      /**
-       * @brief This function calculates the classification probability
-       * according to the SVM prediction.
-       * @param prediction [float] The SVM prediction.
-       * @return [float] The classification probability.
-       */
-      float predictionToProbability(float prediction);
+      virtual void predict(const cv::Mat& featuresMat, float* classLabel, float* probability) = 0;
 
     protected:
       std::string imageType_;
@@ -123,11 +115,6 @@ namespace pandora_vision
 
       /// The path to the classifier model.
       std::string classifierPath_;
-
-      /// Variables used for the transformation of the classifier prediction to
-      /// probabilities.
-      double probabilityScaling_;
-      double probabilityTranslation_;
 
       /// Variable used to decide the type of feature normalization to perform.
       int typeOfNormalization_;

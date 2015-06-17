@@ -34,10 +34,10 @@
 *
 * Authors:
 *   Kofinas Miltiadis <mkofinas@gmail.com>
-*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
+
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_NEURAL_NETWORK_VALIDATOR_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_NEURAL_NETWORK_VALIDATOR_H
 
 #include <string>
 
@@ -53,24 +53,24 @@
 namespace pandora_vision
 {
   /**
-   * @class SvmValidator
-   * @brief This class classifies images using an SVM classifier model.
+   * @class NeuralNetworkValidator
+   * @brief This class classifies images using a Random Forests classifier model.
    */
-  class SvmValidator : public AbstractValidator
+  class NeuralNetworkValidator : public AbstractValidator
   {
     public:
       /**
-       * @brief Constructor. Initializes SVM classifier parameters and loads
+       * @brief Constructor. Initializes Neural Network classifier parameters and loads
        * classifier model.
        */
-      SvmValidator(const ros::NodeHandle& nh,
+      NeuralNetworkValidator(const ros::NodeHandle& nh,
           const std::string& imageType,
           const std::string& classififierType);
 
       /**
        * @brief Default Destructor.
        */
-      virtual ~SvmValidator();
+      virtual ~NeuralNetworkValidator();
 
     protected:
       /**
@@ -79,28 +79,13 @@ namespace pandora_vision
        * @return void
        */
       virtual void predict(const cv::Mat& featuresMat,
-          float* classLabel, float* prediction);
+          float* classLabel, float* probability);
 
     private:
-      /**
-       * @brief This function calculates the classification probability
-       * according to the SVM prediction.
-       * @param prediction [float] The SVM prediction.
-       * @return [float] The classification probability.
-       */
-      float transformPredictionToProbability(float prediction);
-
-    private:
-      /// The OpenCV SVM classifier.
-      CvSVM svmValidator_;
-
-      /// Parameters for the OpenCV SVM classifier.
-      CvSVMParams svmParams_;
-
-      /// Variables used for the transformation of the classifier prediction to
-      /// probabilities.
-      double probabilityScaling_;
-      double probabilityTranslation_;
+      /// The OpenCV Neural Network classifier.
+      CvANN_MLP neuralNetworkValidator_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_NEURAL_NETWORK_VALIDATOR_H
+
+

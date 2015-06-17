@@ -76,29 +76,10 @@ namespace pandora_vision
       ROS_BREAK();
     }
 
-    double probabilityScaling;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/probability_scaling", probabilityScaling))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve"
-          << " the probability scaling parameter!");
-      ROS_BREAK();
-    }
-
-    double probabilityTranslation;
-    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/probability_translation", probabilityTranslation))
-    {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
-          << "the probability translation parameter!");
-      ROS_BREAK();
-    }
-
     packagePath_ = ros::package::getPath("pandora_vision_victim");
 
     classifierPath_ = packagePath_ + classifierPath;
     ROS_INFO_STREAM(classifierPath_);
-
-    probabilityScaling_ = probabilityScaling;
-    probabilityTranslation_ = probabilityTranslation;
 
     std::string paramFile = packagePath_ + "/config/" + imageType_ + "_" + classifierType_ + "_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
@@ -198,8 +179,6 @@ namespace pandora_vision
     if (!featureVector_.empty())
       featureVector_.clear();
     featureVector_ = featureExtraction_->getFeatureVector();
-    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Find prediction probability");
-    float prediction;
 
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
@@ -221,29 +200,11 @@ namespace pandora_vision
     }
 
     featuresMat.convertTo(featuresMat, CV_32FC1);
-    predict(featuresMat, classLabel, &prediction);
-    *probability = predictionToProbability(prediction);
+
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Predict image class and probability");
+    predict(featuresMat, classLabel, probability);
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Class Label = " << *classLabel);
-    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Prediction = " << prediction);
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Probability = " << *probability);
   }
 
-  /**
-   * @brief This function calculates the classification probability according to
-   * the classifier prediction.
-   * @param prediction [float] The classifier prediction.
-   * @return [float] The classification probability.
-   */
-  float AbstractValidator::predictionToProbability(float prediction)
-  {
-    if (prediction < 0.0f)
-      prediction = fabs(prediction);
-
-    // Normalize probability to [-1,1]
-    float probability = std::tanh(probabilityScaling_ * prediction -
-        probabilityTranslation_);
-    // Normalize probability to [0,1]
-    probability = (1.0f + probability) / 2.0f;
-    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Probability = " << probability);
-    return probability;
-  }
 }  // namespace pandora_vision

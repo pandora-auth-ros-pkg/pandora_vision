@@ -60,7 +60,12 @@ namespace pandora_vision
       const std::string& classifierType)
       : AbstractValidator(nh, imageType, classifierType)
   {
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating " << imageType
+        << " " << classifierType << " Validator instance");
     randomForestsValidator_.load(classifierPath_.c_str());
+
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
+        << classifierType_ << " Validator instance");
   }
 
   /**
@@ -76,10 +81,10 @@ namespace pandora_vision
    * @return void
    */
   void RandomForestsValidator::predict(const cv::Mat& featuresMat,
-      float* classLabel, float* prediction)
+      float* classLabel, float* probability)
   {
     *classLabel = randomForestsValidator_.predict(featuresMat);
-    *prediction = randomForestsValidator_.predict_prob(featuresMat);
+    *probability = randomForestsValidator_.predict_prob(featuresMat);
   }
 }  // namespace pandora_vision
 

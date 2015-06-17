@@ -107,6 +107,25 @@ namespace pandora_vision
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
         10000, 1e-6);
 
+    double probabilityScaling;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/probability_scaling", probabilityScaling))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve"
+          << " the probability scaling parameter!");
+      ROS_BREAK();
+    }
+
+    double probabilityTranslation;
+    if (!nh.getParam(classifierType_ + "/" + imageType_ + "/probability_translation", probabilityTranslation))
+    {
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Could not retrieve "
+          << "the probability translation parameter!");
+      ROS_BREAK();
+    }
+
+    probabilityScaling_ = probabilityScaling;
+    probabilityTranslation_ = probabilityTranslation;
+
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
         << classifierType_ << " Validator instance");
   }
@@ -124,9 +143,32 @@ namespace pandora_vision
    * @return void
    */
   void SvmValidator::predict(const cv::Mat& featuresMat,
-      float* classLabel, float* prediction)
+      float* classLabel, float* probability)
   {
     *classLabel = svmValidator_.predict(featuresMat, false);
-    *prediction = svmValidator_.predict(featuresMat, true);
+    float prediction;
+    prediction = svmValidator_.predict(featuresMat, true);
+
+    *probability = transformPredictionToProbability(prediction);
+  }
+
+  /**
+   * @brief This function calculates the classification probability according to
+   * the classifier prediction.
+   * @param prediction [float] The classifier prediction.
+   * @return [float] The classification probability.
+   */
+  float SvmValidator::transformPredictionToProbability(float prediction)
+  {
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Prediction = " << prediction);
+    if (prediction < 0.0f)
+      prediction = fabs(prediction);
+
+    // Normalize probability to [-1,1]
+    float probability = std::tanh(probabilityScaling_ * prediction -
+        probabilityTranslation_);
+    // Normalize probability to [0,1]
+    probability = (1.0f + probability) / 2.0f;
+    return probability;
   }
 }  // namespace pandora_vision

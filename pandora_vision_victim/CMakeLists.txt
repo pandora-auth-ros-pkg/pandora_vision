@@ -123,6 +123,7 @@ add_library(${PROJECT_NAME}_hole_processor
   src/classifiers/abstract_validator.cpp
   src/classifiers/svm_validator.cpp
   src/classifiers/random_forests_validator.cpp
+  src/classifiers/neural_network_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_hole_processor
   ${catkin_LIBRARIES}
@@ -148,6 +149,7 @@ add_library(${PROJECT_NAME}_image_processor
   src/classifiers/abstract_validator.cpp
   src/classifiers/svm_validator.cpp
   src/classifiers/random_forests_validator.cpp
+  src/classifiers/neural_network_validator.cpp
 )
 target_link_libraries(${PROJECT_NAME}_image_processor
   ${catkin_LIBRARIES}

@@ -34,17 +34,13 @@
 *
 * Authors:
 *   Kofinas Miltiadis <mkofinas@gmail.com>
-*   Protopapas Marios <protopapas_marios@hotmail.com>
 *********************************************************************/
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
 
 #include <string>
 
-#include <opencv2/opencv.hpp>
-#include <ros/ros.h>
+#include <ros/console.h>
 
-#include "pandora_vision_victim/classifiers/abstract_validator.h"
+#include "pandora_vision_victim/classifiers/neural_network_validator.h"
 
 /**
  * @namespace pandora_vision
@@ -53,54 +49,44 @@
 namespace pandora_vision
 {
   /**
-   * @class SvmValidator
-   * @brief This class classifies images using an SVM classifier model.
+   * @brief Constructor. Initializes Neural Network classifier parameters and loads
+   * classifier model.
+   * @param classifierPath [const std::string&] The path to the classifier
+   * model.
    */
-  class SvmValidator : public AbstractValidator
+  NeuralNetworkValidator::NeuralNetworkValidator(const ros::NodeHandle& nh,
+      const std::string& imageType,
+      const std::string& classifierType)
+      : AbstractValidator(nh, imageType, classifierType)
   {
-    public:
-      /**
-       * @brief Constructor. Initializes SVM classifier parameters and loads
-       * classifier model.
-       */
-      SvmValidator(const ros::NodeHandle& nh,
-          const std::string& imageType,
-          const std::string& classififierType);
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating " << imageType
+        << " " << classifierType << " Validator instance");
+    neuralNetworkValidator_.load(classifierPath_.c_str());
 
-      /**
-       * @brief Default Destructor.
-       */
-      virtual ~SvmValidator();
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
+        << classifierType_ << " Validator instance");
+  }
 
-    protected:
-      /**
-       * @brief Function that loads the trained classifier and makes a prediction
-       * according to the feature vector given for each image
-       * @return void
-       */
-      virtual void predict(const cv::Mat& featuresMat,
-          float* classLabel, float* prediction);
+  /**
+   * @brief Default Destructor.
+   */
+  NeuralNetworkValidator::~NeuralNetworkValidator()
+  {
+  }
 
-    private:
-      /**
-       * @brief This function calculates the classification probability
-       * according to the SVM prediction.
-       * @param prediction [float] The SVM prediction.
-       * @return [float] The classification probability.
-       */
-      float transformPredictionToProbability(float prediction);
-
-    private:
-      /// The OpenCV SVM classifier.
-      CvSVM svmValidator_;
-
-      /// Parameters for the OpenCV SVM classifier.
-      CvSVMParams svmParams_;
-
-      /// Variables used for the transformation of the classifier prediction to
-      /// probabilities.
-      double probabilityScaling_;
-      double probabilityTranslation_;
-  };
+  /**
+   * @brief Function that loads the trained classifier and makes a prediction
+   * according to the feature vector given for each image
+   * @return void
+   */
+  void NeuralNetworkValidator::predict(const cv::Mat& featuresMat,
+      float* classLabel, float* probability)
+  {
+    cv::Mat outputs;
+    float dummyValue = neuralNetworkValidator_.predict(featuresMat, outputs);
+    *probability = outputs.at<float>(0, 0);
+    *classLabel = *probability > 0.0f ? 1.0f : -1.0f;
+  }
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H
+
+

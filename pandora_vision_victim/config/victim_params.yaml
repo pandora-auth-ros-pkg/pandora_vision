@@ -18,12 +18,12 @@ svm:
   # INTER =5
   rgb:
     classifier_path: /data/rgb_svm_classifier.xml
-    svm_C: 312.5
-    svm_gamma: 0.50625
+    svm_C: 62.5
+    svm_gamma: 0.00225
     svm_type: 100
     kernel_type: 2
-    probability_scaling: 0.5
-    probability_translation: 7.0
+    probability_scaling: 4.7
+    probability_translation: 1.0
 
   depth:
     classifier_path: /data/depth_svm_classifier.xml
@@ -31,25 +31,17 @@ svm:
     svm_gamma: 0.50625
     svm_type: 100
     kernel_type: 2
-    probability_scaling: 0.5
-    probability_translation: 7.0
+    probability_scaling: 4.7
+    probability_translation: 1.0
 
 rf:
   rgb:
     classifier_path: /data/rgb_rf_classifier.xml
-    probability_scaling: 0.5
-    probability_translation: 7.0
   depth:
     classifier_path: /data/depth_rf_classifier.xml
-    probability_scaling: 0.5
-    probability_translation: 7.0
 
 ann:
   rgb:
     classifier_path: /data/rgb_ann_classifier.yaml
-    probability_scaling: 0.5
-    probability_translation: 7.0
   depth:
     classifier_path: /data/depth_ann_classifier.yaml
-    probability_scaling: 0.5
-    probability_translation: 7.0
