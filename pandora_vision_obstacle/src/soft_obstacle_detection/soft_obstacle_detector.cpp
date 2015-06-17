@@ -42,12 +42,51 @@
 
 namespace pandora_vision
 {
-  SoftObstacleDetector::SoftObstacleDetector()
+  SoftObstacleDetector::SoftObstacleDetector(const std::string& name)
   {
+    nodeName_ = name;
+
+    showOriginalImage = false;
+    showDWTImage = false;
+    showOtsuImage = false;
+    showDilatedImage = false;
+    showVerticalLines = false;
+    showROI = false;
+
     cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << 1 / sqrt(2), 1 / sqrt(2));
     cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - 1 / sqrt(2), 1 / sqrt(2));
 
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
+  }
+
+  void SoftObstacleDetector::setShowOriginalImage(bool arg)
+  {
+    showOriginalImage = arg;
+  }
+
+  void SoftObstacleDetector::setShowDWTImage(bool arg)
+  {
+    showDWTImage = arg;
+  }
+
+  void SoftObstacleDetector::setShowOtsuImage(bool arg)
+  {
+    showOtsuImage = arg;
+  }
+
+  void SoftObstacleDetector::setShowDilatedImage(bool arg)
+  {
+    showDilatedImage = arg;
+  }
+
+  void SoftObstacleDetector::setShowVerticalLines(bool arg)
+  {
+    showVerticalLines = arg;
+  }
+
+  void SoftObstacleDetector::setShowROI(bool arg)
+  {
+    showROI = arg;
   }
 
   void SoftObstacleDetector::dilateImage(const MatPtr& image)
@@ -68,6 +107,9 @@ namespace pandora_vision
   {
     std::vector<cv::Vec4i> lines;
     cv::HoughLinesP(image, lines, 1, CV_PI / 180, 100, 100, 10);
+
+    cv::Mat imageToShow;
+    cv::cvtColor(image, imageToShow, CV_GRAY2BGR);
 
     std::vector<cv::Vec4i> verticalLines;
 
@@ -92,7 +134,16 @@ namespace pandora_vision
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
         verticalLines.push_back(line);
+
+        cv::line(imageToShow, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]),
+            cv::Scalar(255, 0, 0), 3, 8);
       }
+    }
+
+    if (showVerticalLines)
+    {
+      cv::imshow("[" + nodeName_ + "] : Vertical Lines Detected", imageToShow);
+      cv::waitKey(10);
     }
     return verticalLines;
   }
@@ -132,12 +183,12 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
         // Calculate ROI probability
         probability += static_cast<float>(abs(y1 - y0)) / static_cast<float>(frameHeight);
       }
-      probability /= verticalLines.size();
+      probability /= static_cast<float>(verticalLines.size());
 
       int width = maxx - minx;
       int height = maxy - miny;
 
-      // The point inside this rect. should be the roi center, now it is the
+      // The point inside this Rect is the roi center, now it is the
       // upper left point in order to visualize
       cv::Rect roi(minx, miny, width, height);
       *roiPtr = roi;
@@ -145,11 +196,43 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     return probability;
   }
 
+  float SoftObstacleDetector::findDepthDistance(const cv::Mat& depthImage,
+      const std::vector<cv::Vec4i>& verticalLines, int level)
+  {
+    float depth = 0.0f;
+
+    if (verticalLines.size() > 2)
+    {
+      for (size_t ii = 1; ii < verticalLines.size(); ii++)
+      {
+        int x0 = verticalLines[ii][0];
+        int x1 = verticalLines[ii][2];
+        int y0 = verticalLines[ii][1];
+        int y1 = verticalLines[ii][3];
+
+        // Find depth distance
+        depth += depthImage.at<float>(((y0 + y1) / 2) * pow(2, level),
+            ((x0 + x1) / 2) * pow(2, level));
+      }
+      depth /= static_cast<float>(verticalLines.size());
+    }
+    return depth;
+  }
+
   std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& rgbImage,
       const cv::Mat& depthImage, int level)
   {
+    if (showOriginalImage)
+    {
+      cv::imshow("[" + nodeName_ + "] : Original Image", rgbImage);
+      cv::waitKey(10);
+    }
+
+    cv::Mat rgbImageFloat;
+    rgbImage.convertTo(rgbImageFloat, CV_32FC1);
+
     // Perform DWT
-    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(rgbImage, level);
+    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(rgbImageFloat, level);
     MatPtr lhImage(LHImages[LHImages.size() - 1]);
 
     // Normalize image [0, 255]
@@ -157,12 +240,30 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     cv::normalize(*lhImage, normalizedImage, 0, 255, cv::NORM_MINMAX);
     normalizedImage.convertTo(normalizedImage, CV_8UC1);
 
+    if (showDWTImage)
+    {
+      cv::imshow("[" + nodeName_ + "] : DWT Normalized Image", normalizedImage);
+      cv::waitKey(10);
+    }
+
     // Convert image to binary with Otsu thresholding
     MatPtr otsuImage(new cv::Mat());
     cv::threshold(normalizedImage, *otsuImage, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
+    if (showOtsuImage)
+    {
+      cv::imshow("[" + nodeName_ + "] : Image after Otsu Thresholding", *otsuImage);
+      cv::waitKey(10);
+    }
+
     // Dilate Image
     dilateImage(otsuImage);
+
+    if (showDilatedImage)
+    {
+      cv::imshow("[" + nodeName_ + "] : Dilated Image", *otsuImage);
+      cv::waitKey(10);
+    }
 
     // Perform Hough Transform to detect lines (keep only vertical)
     std::vector<cv::Vec4i> verticalLines = performProbHoughLines(*otsuImage);
@@ -170,6 +271,24 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     // Detect bounding box that includes the vertical lines
     boost::shared_ptr<cv::Rect> roi(new cv::Rect());
     float probability = detectROI(verticalLines, otsuImage->rows, roi);
+
+    if (showROI)
+    {
+      cv::Mat imageToShow;
+      cv::cvtColor(*otsuImage, imageToShow, CV_GRAY2BGR);
+
+      cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
+          roi->width * pow(2, level), roi->height * pow(2, level));
+      cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
+
+      cv::imshow("[" + nodeName_ + "] : Soft Obstacle Bounding Box",
+          imageToShow);
+      cv::waitKey(10);
+    }
+
+    // Find the depth distance of the soft obstacle
+    float depthDistance = findDepthDistance(depthImage, verticalLines,
+        level);
 
     std::vector<POIPtr> pois;
     if (roi->size().width > 0 && roi->size().height > 0)
@@ -184,7 +303,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       poi->setProbability(probability);
       poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
 
-      // poi->setDepth();
+      poi->setDepth(depthDistance);
       pois.push_back(poi);
     }
     return pois;

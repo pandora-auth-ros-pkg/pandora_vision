@@ -46,10 +46,23 @@ namespace pandora_vision
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
+
+    detector_.reset(new SoftObstacleDetector(this->getName()));
   }
 
   SoftObstacleProcessor::SoftObstacleProcessor() : sensor_processor::Processor<ImagesStamped,
     POIsStamped>() {}
+
+  void SoftObstacleProcessor::parametersCallback(const pandora_vision_obstacle::soft_obstacle_cfgConfig& config,
+        const uint32_t& level)
+  {
+    detector_->setShowOriginalImage(config.showOriginalImage);
+    detector_->setShowDWTImage(config.showDWTImage);
+    detector_->setShowOtsuImage(config.showOtsuImage);
+    detector_->setShowDilatedImage(config.showDilatedImage);
+    detector_->setShowVerticalLines(config.showVerticalLines);
+    detector_->setShowROI(config.showROI);
+  }
 
   bool SoftObstacleProcessor::process(const ImagesStampedConstPtr& input,
     const POIsStampedPtr& output)

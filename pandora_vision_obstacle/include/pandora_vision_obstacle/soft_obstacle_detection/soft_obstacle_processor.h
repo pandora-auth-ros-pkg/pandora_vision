@@ -40,9 +40,11 @@
 #define PANDORA_VISION_OBSTACLE_SOFT_OBSTACLE_DETECTION_SOFT_OBSTACLE_PROCESSOR_H
 
 #include <cv_bridge/cv_bridge.h>
+#include <dynamic_reconfigure/server.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/images_stamped.h"
+#include "pandora_vision_obstacle/soft_obstacle_cfgConfig.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 
 namespace pandora_vision
@@ -60,6 +62,22 @@ namespace pandora_vision
         const POIsStampedPtr& output);
 
     private:
+      /**
+       * @brief The function called when a parameter is changed
+       * @param config [const pandora_vision_obstacle::soft_obstacle_cfgConfig&]
+       * @param level [const uint32_t] The level
+      **/
+      void parametersCallback(const pandora_vision_obstacle::soft_obstacle_cfgConfig& config,
+        const uint32_t& level);
+
+    private:
+      /// The dynamic reconfigure parameters' server
+      dynamic_reconfigure::Server<pandora_vision_obstacle::soft_obstacle_cfgConfig>
+        server;
+      /// The dynamic reconfigure parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_obstacle::soft_obstacle_cfgConfig>
+        ::CallbackType f;
+
       boost::shared_ptr<SoftObstacleDetector> detector_;
   };
 }  // namespace pandora_vision
