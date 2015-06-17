@@ -4,6 +4,7 @@ project(pandora_vision_obstacle)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslint
+    dynamic_reconfigure
     cv_bridge
     sensor_msgs
     pandora_vision_msgs
@@ -14,10 +15,15 @@ find_package(catkin REQUIRED COMPONENTS
     pandora_cmake_tools
 )
 
+generate_dynamic_reconfigure_options(
+  config/pandora_vision_obstacle/soft_obstacle_cfg.cfg
+)
+
 catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      dynamic_reconfigure
       cv_bridge
       sensor_msgs
       pandora_vision_msgs

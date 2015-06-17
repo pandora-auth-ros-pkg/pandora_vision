@@ -52,7 +52,7 @@ namespace pandora_vision
       /**
        * @brief Constructor that initializes dwt Haar kernels
        **/
-      SoftObstacleDetector();
+      explicit SoftObstacleDetector(const std::string& name);
 
       /**
        * @brief Destructor
@@ -71,6 +71,13 @@ namespace pandora_vision
        **/
       std::vector<POIPtr> detectSoftObstacle(const cv::Mat& rgbImage,
           const cv::Mat& depthImage, int level = 1);
+
+      void setShowOriginalImage(bool arg);
+      void setShowDWTImage(bool arg);
+      void setShowOtsuImage(bool arg);
+      void setShowDilatedImage(bool arg);
+      void setShowVerticalLines(bool arg);
+      void setShowROI(bool arg);
 
     private:
       /**
@@ -102,9 +109,32 @@ namespace pandora_vision
       float detectROI(const std::vector<cv::Vec4i>& verticalLines,
           int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr);
 
+      /**
+       * @brief Calculate average depth distance of soft obstacle
+       * @param depthImage [const cv::Mat&] The input depth image
+       * @param verticalLines [const std::vector<cv::Vec4i>&] The
+       * input vector that contains the vertical lines found
+       * @param level [int] The number of stages of the DWT
+       * @return [float] The average depth distance of the
+       * vertical lines' centers
+       **/
+      float findDepthDistance(const cv::Mat& depthImage,
+          const std::vector<cv::Vec4i>& verticalLines, int level = 1);
+
     private:
       /// The DWT class object used to perform this operation
       boost::shared_ptr<DiscreteWaveletTransform> dwtPtr_;
+
+      /// The node's name
+      std::string nodeName_;
+
+      /// Debug parameters
+      bool showOriginalImage;
+      bool showDWTImage;
+      bool showOtsuImage;
+      bool showDilatedImage;
+      bool showVerticalLines;
+      bool showROI;
   };
 }  // namespace pandora_vision
 
