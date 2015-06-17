@@ -48,14 +48,20 @@ namespace pandora_vision
       this->accessProcessorNh()->getNamespace());
 
     detector_.reset(new SoftObstacleDetector(this->getName()));
+
+    server.setCallback(boost::bind(&SoftObstacleProcessor::parametersCallback,
+        this, _1, _2));
   }
 
   SoftObstacleProcessor::SoftObstacleProcessor() : sensor_processor::Processor<ImagesStamped,
     POIsStamped>() {}
 
-  void SoftObstacleProcessor::parametersCallback(const pandora_vision_obstacle::soft_obstacle_cfgConfig& config,
-        const uint32_t& level)
+  void SoftObstacleProcessor::parametersCallback(
+      const pandora_vision_obstacle::soft_obstacle_cfgConfig& config,
+      const uint32_t& level)
   {
+    ROS_INFO("Enter PARAMETERS CALLBACK");
+
     detector_->setShowOriginalImage(config.showOriginalImage);
     detector_->setShowDWTImage(config.showDWTImage);
     detector_->setShowOtsuImage(config.showOtsuImage);

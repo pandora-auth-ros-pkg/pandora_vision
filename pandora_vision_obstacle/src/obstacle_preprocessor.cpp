@@ -58,9 +58,9 @@ namespace pandora_vision
     output->setHeader(input->header);
 
     output->setRgbImage(converterPtr_->convertPclToImage(input,
-          sensor_msgs::image_encodings::TYPE_8UC3));
+          CV_8UC3));
     output->setDepthImage(converterPtr_->convertPclToImage(input,
-          sensor_msgs::image_encodings::TYPE_32FC1));
+          CV_32FC1));
 
     if (output->rgbImage.empty() || output->depthImage.empty())
     {

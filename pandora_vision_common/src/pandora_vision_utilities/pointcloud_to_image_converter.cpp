@@ -33,6 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
+ *   Alexandros Philotheou
+ *   Manos Tsardoulias
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
@@ -52,13 +54,47 @@ namespace pandora_vision
   }
 
   cv::Mat PointCloudToImageConverter::convertPclToImage(const sensor_msgs::PointCloud2ConstPtr& pclPtr,
-      const std::string& encoding)
+      int encoding)
   {
-    sensor_msgs::Image image;
-    pcl::toROSMsg(*pclPtr, image);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::fromROSMsg<pcl::PointXYZRGB>(*pclPtr, *pointCloud);
 
-    cv_bridge::CvImagePtr inMsg;
-    inMsg = cv_bridge::toCvCopy(image, encoding);
-    return inMsg->image;
+    // Prepare the output image
+    cv::Mat image(pointCloud->height, pointCloud->width, encoding);
+
+    // For the depth image
+    if (encoding == CV_32FC1)
+    {
+      for (unsigned int row = 0; row < pointCloud->height; ++row)
+      {
+        for (unsigned int col = 0; col < pointCloud->width; ++col)
+        {
+          image.at<float>(row, col) =
+            pointCloud->points[col + pointCloud->width * row].z;
+
+          // if element is nan make it a zero
+          if (image.at<float>(row, col) != image.at<float>(row, col))
+          {
+            image.at<float>(row, col) = 0.0;
+          }
+        }
+      }
+    }
+    else if (encoding == CV_8UC3) // For the rgb image
+    {
+      for (unsigned int row = 0; row < pointCloud->height; ++row)
+      {
+        for (unsigned int col = 0; col < pointCloud->width; ++col)
+        {
+          image.at<unsigned char>(row, 3 * col + 2) =
+            pointCloud->points[col + pointCloud->width * row].r;
+          image.at<unsigned char>(row, 3 * col + 1) =
+            pointCloud->points[col + pointCloud->width * row].g;
+          image.at<unsigned char>(row, 3 * col + 0) =
+            pointCloud->points[col + pointCloud->width * row].b;
+        }
+      }
+    }
+    return image;
   }
 }  // namespace pandora_vision
