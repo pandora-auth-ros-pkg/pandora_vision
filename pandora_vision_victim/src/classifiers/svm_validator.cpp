@@ -61,6 +61,9 @@ namespace pandora_vision
       const std::string& classifierType)
       : AbstractValidator(nh, imageType, classifierType)
   {
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating " << imageType
+        << " " << classifierType << " Validator instance");
+
     svmValidator_.load(classifierPath_.c_str());
 
     double svmC;
@@ -103,6 +106,9 @@ namespace pandora_vision
     svmParams_.kernel_type = kernelType;
     svmParams_.term_crit = cvTermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS,
         10000, 1e-6);
+
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
+        << classifierType_ << " Validator instance");
   }
 
   /**

@@ -402,7 +402,7 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         if self.algorithm == "Hole":
             suffix = "sDirections"
         else:
-            suffix = "generalAlerts"
+            suffix = "alerts"
 
         queueIndex = 0
         count = 0

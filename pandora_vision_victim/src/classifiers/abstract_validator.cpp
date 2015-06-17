@@ -63,8 +63,7 @@ namespace pandora_vision
     nodeMessagePrefix_ = "[PANDORA_VISION_VICTIM_" + boost::to_upper_copy<std::string>(imageType)
         + "_" + boost::to_upper_copy<std::string>(classifierType) + "]";
 
-    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating " << imageType
-        << " " << classifierType << " Validator instance");
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating Abstract Validator instance");
 
     imageType_ = imageType;
     classifierType_ = classifierType;
@@ -93,13 +92,13 @@ namespace pandora_vision
       ROS_BREAK();
     }
 
-    classifierPath_ = classifierPath;
+    packagePath_ = ros::package::getPath("pandora_vision_victim");
+
+    classifierPath_ = packagePath_ + classifierPath;
     ROS_INFO_STREAM(classifierPath_);
 
     probabilityScaling_ = probabilityScaling;
     probabilityTranslation_ = probabilityTranslation;
-
-    packagePath_ = ros::package::getPath("pandora_vision_victim");
 
     std::string paramFile = packagePath_ + "/config/" + imageType_ + "_" + classifierType_ + "_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
@@ -164,8 +163,7 @@ namespace pandora_vision
       featureExtraction_->setBagOfWordsVocabulary(vocabulary);
     }
     featureExtractionUtilities_ = new FeatureExtractionUtilities();
-    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
-        << classifierType_ << " Validator instance");
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized Abstract Validator instance");
   }
 
   /**

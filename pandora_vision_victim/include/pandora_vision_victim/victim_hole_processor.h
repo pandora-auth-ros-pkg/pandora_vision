@@ -73,7 +73,7 @@ namespace pandora_vision
 
       /**
       @brief Function that enables suitable subsystems, according
-      to the current State 
+      to the current State
       @param [std::vector<cv::Mat>] vector of images to be processed. Size of
       vector can be either 2 or 1, if we have both rgbd information or not
       @return void
