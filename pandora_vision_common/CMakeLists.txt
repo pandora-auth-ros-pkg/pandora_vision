@@ -4,7 +4,7 @@ project(pandora_vision_common)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   cv_bridge
-  pcl_conversions
+  pcl_ros
   image_transport
   sensor_msgs
   pandora_common_msgs
@@ -17,7 +17,7 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     cv_bridge
-    pcl_conversions
+    pcl_ros
     image_transport
     sensor_msgs
     pandora_common_msgs

@@ -57,7 +57,7 @@ namespace pandora_vision
 
     public:
       cv::Mat convertPclToImage(const sensor_msgs::PointCloud2ConstPtr& pclPtr,
-          const std::string& encoding);
+          int encoding);
   };
   typedef PointCloudToImageConverter::Ptr PointCloudToImageConverterPtr;
   typedef PointCloudToImageConverter::ConstPtr PointCloudToImageConverterConstPtr;

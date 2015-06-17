@@ -37,6 +37,7 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <ros/ros.h>
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 
@@ -222,17 +223,19 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
   std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& rgbImage,
       const cv::Mat& depthImage, int level)
   {
+    cv::Mat greyScaleImage;
+    cv::cvtColor(rgbImage, greyScaleImage, CV_BGR2GRAY);
     if (showOriginalImage)
     {
       cv::imshow("[" + nodeName_ + "] : Original Image", rgbImage);
       cv::waitKey(10);
     }
 
-    cv::Mat rgbImageFloat;
-    rgbImage.convertTo(rgbImageFloat, CV_32FC1);
+    cv::Mat imageFloat;
+    greyScaleImage.convertTo(imageFloat, CV_32FC1);
 
     // Perform DWT
-    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(rgbImageFloat, level);
+    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(imageFloat, level);
     MatPtr lhImage(LHImages[LHImages.size() - 1]);
 
     // Normalize image [0, 255]
@@ -268,43 +271,51 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     // Perform Hough Transform to detect lines (keep only vertical)
     std::vector<cv::Vec4i> verticalLines = performProbHoughLines(*otsuImage);
 
-    // Detect bounding box that includes the vertical lines
-    boost::shared_ptr<cv::Rect> roi(new cv::Rect());
-    float probability = detectROI(verticalLines, otsuImage->rows, roi);
-
-    if (showROI)
-    {
-      cv::Mat imageToShow;
-      cv::cvtColor(*otsuImage, imageToShow, CV_GRAY2BGR);
-
-      cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
-          roi->width * pow(2, level), roi->height * pow(2, level));
-      cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
-
-      cv::imshow("[" + nodeName_ + "] : Soft Obstacle Bounding Box",
-          imageToShow);
-      cv::waitKey(10);
-    }
-
-    // Find the depth distance of the soft obstacle
-    float depthDistance = findDepthDistance(depthImage, verticalLines,
-        level);
-
     std::vector<POIPtr> pois;
-    if (roi->size().width > 0 && roi->size().height > 0)
+
+    if (verticalLines.size() > 0)
     {
-      ObstaclePOIPtr poi(new ObstaclePOI);
+      ROS_INFO("Detected Vertical Lines");
 
-      poi->setPoint(cv::Point((roi->x + roi->width / 2) * pow(2, level),
-            (roi->y + roi->height / 2) * pow(2, level)));
-      poi->setWidth(roi->width * pow(2, level));
-      poi->setHeight(roi->height * pow(2, level));
+      // Detect bounding box that includes the vertical lines
+      boost::shared_ptr<cv::Rect> roi(new cv::Rect());
+      float probability = detectROI(verticalLines, otsuImage->rows, roi);
 
-      poi->setProbability(probability);
-      poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+      if (showROI)
+      {
+        cv::Mat imageToShow;
+        cv::cvtColor(greyScaleImage, imageToShow, CV_GRAY2BGR);
 
-      poi->setDepth(depthDistance);
-      pois.push_back(poi);
+        cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
+            roi->width * pow(2, level), roi->height * pow(2, level));
+        cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
+
+        cv::imshow("[" + nodeName_ + "] : Soft Obstacle Bounding Box",
+            imageToShow);
+        cv::waitKey(10);
+      }
+
+      // Find the depth distance of the soft obstacle
+      float depthDistance = findDepthDistance(depthImage, verticalLines,
+          level);
+
+      if (roi->size().width > 0 && roi->size().height > 0)
+      {
+        ROS_INFO("Soft Obstacle Detected!");
+
+        ObstaclePOIPtr poi(new ObstaclePOI);
+
+        poi->setPoint(cv::Point((roi->x + roi->width / 2) * pow(2, level),
+              (roi->y + roi->height / 2) * pow(2, level)));
+        poi->setWidth(roi->width * pow(2, level));
+        poi->setHeight(roi->height * pow(2, level));
+
+        poi->setProbability(probability);
+        poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+
+        poi->setDepth(depthDistance);
+        pois.push_back(poi);
+      }
     }
     return pois;
   }
