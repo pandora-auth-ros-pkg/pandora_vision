@@ -44,6 +44,6 @@ namespace pandora_vision
   {
 
 
-} // namespace pandora_vision_hazmat
-} // namespace pandora_vision
+  }  // namespace pandora_vision_hazmat
+}  // namespace pandora_vision
 

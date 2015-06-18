@@ -663,8 +663,8 @@ namespace pandora_vision
     // Read the name of the topic from where the Hole Fusion node acquires the
     // candidate holes originated from the Thermal node
     if (nodeHandle_.getParam(
-        ns + "/hole_fusion_node/subscribed_topics/thermal_candidate_holes_topic"
-        , thermalCandidateHolesTopic_))
+        ns + "/hole_fusion_node/subscribed_topics/thermal_candidate_holes_topic",
+        thermalCandidateHolesTopic_))
     {
       // Make the topic's name absolute
       thermalCandidateHolesTopic_ = ns + "/" + thermalCandidateHolesTopic_;

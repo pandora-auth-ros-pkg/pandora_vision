@@ -35,7 +35,8 @@
  * Authors: Choutas Vassilis
  *********************************************************************/
 
-
+#include <algorithm>
+#include <vector>
 #include "pandora_vision_hazmat/mock/mock_feature_detector.h"
 #include "gtest/gtest.h"
 
@@ -67,7 +68,7 @@ namespace pandora_vision
           patternBB.push_back(cv::Point2f(0.0f, 100.0f));
 
           patternKeyPoints.push_back(cv::Point2f(25.0f, 0.0f));
-          patternKeyPoints.push_back(cv::Point2f(75.0f, 0.0f ));
+          patternKeyPoints.push_back(cv::Point2f(75.0f, 0.0f));
           patternKeyPoints.push_back(cv::Point2f(75.0f, 75.0f));
           patternKeyPoints.push_back(cv::Point2f(0.0f, 75.0f));
           patternKeyPoints.push_back(cv::Point2f(50.0f, 50.0f));
@@ -167,7 +168,6 @@ namespace pandora_vision
       testFlag = MockDetector.findBoundingBox(testVecP2f, testVecP2f,
           emptyVecP2f, &returnVec);
       ASSERT_FALSE(testFlag);
-
     }
 
     TEST_F(FeatureMatchingDetectorTest, bounding_box_test)
@@ -270,7 +270,6 @@ namespace pandora_vision
         ASSERT_NEAR(correctBB[i].y, sceneBB[i].y, 0.01);
       }
     }
-
-} // namespace pandora_vision_hazmat
-} // namespace pandora_vision
+}  // namespace pandora_vision_hazmat
+}  // namespace pandora_vision
 
