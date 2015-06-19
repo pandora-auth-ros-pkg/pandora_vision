@@ -48,6 +48,7 @@ from sensor_msgs.msg import Image
 from pandora_vision_msgs.msg import EnhancedImage
 from pandora_vision_msgs.msg import RegionOfInterest
 
+
 def convert(input_bag_name, topic, annotation_file, output_bag_name="output.bag"):
     """ @brief: Converts a bag which contains a topic of sensor_msgs/Image to a
         bag which contains the respective pandora_vision_msgs/EnhancedImage
@@ -95,19 +96,32 @@ def convert_image(image, frame_name, annotation_dict):
     enhanced_image = EnhancedImage()
     enhanced_image.isDepth = False
     enhanced_image.rgbImage = image
+    annotation = annotation_dict[frame_name]
+    region_of_interest = annotation_to_roi(annotation)
+    enhanced_image.regionsOfInterest.append(region_of_interest)
+    enhanced_image.header = image.header
+    return enhanced_image
+
+
+def annotation_to_roi(annotation):
+    """ @brief: Convert an annotation entry to ROI msg
+
+    @param annotation: annotation from pandora_rqt_annotator
+    @type annotation: tuple
+    @return: corresponding message
+    @rtype: pandora_vision_msgs.msg.RegionOfInterest
+
+    """
     region_of_interest = RegionOfInterest()
-    roi = annotation_dict[frame_name]
-    width = roi[3] - roi[1]
-    height = roi[4] - roi[2]
-    center_x = (roi[1] + roi[3]) / 2
-    center_y = (roi[2] + roi[4]) / 2
+    width = annotation[3] - annotation[1]
+    height = annotation[4] - annotation[2]
+    center_x = (annotation[1] + annotation[3]) / 2
+    center_y = (annotation[2] + annotation[4]) / 2
     region_of_interest.center.x = center_x
     region_of_interest.center.y = center_y
     region_of_interest.height = height
     region_of_interest.width = width
-    enhanced_image.regionsOfInterest.append(region_of_interest)
-    enhanced_image.header = image.header
-    return enhanced_image
+    return region_of_interest
 
 
 def read_annotation_file(annotation_file):
@@ -136,6 +150,7 @@ def read_annotation_file(annotation_file):
                                                  int(x_bottom_right_point),
                                                  int(y_bottom_right_point)))
     return annotations_dict
+
 
 if __name__ == '__main__':
     ARGS = sys.argv[1:]
