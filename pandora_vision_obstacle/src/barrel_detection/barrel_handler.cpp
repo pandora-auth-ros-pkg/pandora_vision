@@ -36,6 +36,7 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include <string>
 #include "pandora_vision_obstacle/barrel_detection/barrel_handler.h"
 
 namespace pandora_vision

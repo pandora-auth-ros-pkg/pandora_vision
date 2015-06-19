@@ -1,0 +1,3 @@
+gaussianKernelSize: 13
+gradientThreshold: 2.0
+betaThreshold: 3.0

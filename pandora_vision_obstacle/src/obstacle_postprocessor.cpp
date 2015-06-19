@@ -36,6 +36,7 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include <string>
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_obstacle/obstacle_poi.h"
 #include "pandora_vision_obstacle/obstacle_postprocessor.h"

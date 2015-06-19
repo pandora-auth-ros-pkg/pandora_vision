@@ -40,7 +40,10 @@
 #ifndef PANDORA_VISION_OBSTACLE_SOFT_OBSTACLE_DETECTION_SOFT_OBSTACLE_DETECTOR_H
 #define PANDORA_VISION_OBSTACLE_SOFT_OBSTACLE_DETECTION_SOFT_OBSTACLE_DETECTOR_H
 
+#include <string>
+#include <vector>
 #include <cv_bridge/cv_bridge.h>
+#include <ros/ros.h>
 #include "pandora_vision_obstacle/discrete_wavelet_transform.h"
 #include "pandora_vision_obstacle/obstacle_poi.h"
 
@@ -52,7 +55,7 @@ namespace pandora_vision
       /**
        * @brief Constructor that initializes dwt Haar kernels
        **/
-      explicit SoftObstacleDetector(const std::string& name);
+      SoftObstacleDetector(const std::string& name, const ros::NodeHandle& nh);
 
       /**
        * @brief Destructor
