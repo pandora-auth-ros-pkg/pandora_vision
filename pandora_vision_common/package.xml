@@ -20,11 +20,7 @@
 
   <depend>roscpp</depend>
   <depend>cv_bridge</depend>
-<<<<<<< HEAD
   <depend>pcl_ros</depend>
-=======
-  <depend>pcl_conversions</depend>
->>>>>>> Fix minor issue [ci skip]
   <depend>image_transport</depend>
   <depend>sensor_msgs</depend>
   <depend>sensor_processor</depend>

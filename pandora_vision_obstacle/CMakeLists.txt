@@ -112,6 +112,7 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_handler
 add_executable(${PROJECT_NAME}_barrel_node
   src/barrel_detection/barrel_node.cpp
   src/barrel_detection/FastSymmetryDetector.cpp
+  src/barrel_detection/parameters.cpp
 )
 add_dependencies(${PROJECT_NAME}_barrel_node
   ${catkin_EXPORTED_TARGETS}

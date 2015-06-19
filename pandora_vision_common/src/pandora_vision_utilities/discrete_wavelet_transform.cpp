@@ -56,6 +56,7 @@ namespace pandora_vision_obstacle
 
     columnKernelHigh_ = columnKernelHigh;
     cv::transpose(columnKernelHigh, rowKernelHigh_);
+  }
 
   DiscreteWaveletTransform::~DiscreteWaveletTransform()
   {

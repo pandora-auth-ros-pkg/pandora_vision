@@ -65,7 +65,7 @@ namespace pandora_vision_obstacle
 
     cv::Rect region( 0, inputImage.rows, thetaDivs * 2.0, rhoDivs * 0.5 );
     //setMouseCallback( "", onMouse, static_cast<void*>( &region ) );
-    cv::Mat temp, edge;
+    cv::Mat temp, edge, temp1, depth8UC3;
 
     /* Adjustable parameters, depending on the scene condition */                                                                                                 
     //int canny_thresh_1 = 30;
@@ -83,9 +83,13 @@ namespace pandora_vision_obstacle
 
     temp = inputImage.clone();
 
+    temp.convertTo(depth8UC3, CV_8UC3, 255);
+    temp.convertTo(temp1, CV_8UC1);
+    temp1.convertTo(edge, CV_8UC1, 255, 0); 
+    edge.copyTo(temp1);
     /* Find the edges */
-    if(temp.channels() == 3)
-      cvtColor( temp, edge, CV_BGR2GRAY );
+    if(edge.channels() == 3)
+      cvtColor( edge, edge, CV_BGR2GRAY );
     cv::Canny( edge, edge, canny_thresh_1, canny_thresh_2 );
 
     /* Vote for the accumulation matrix */
@@ -108,8 +112,8 @@ namespace pandora_vision_obstacle
           result[i].first.y - result[i].second.y);
       if(BarrelDetection::show_respective_barrel)
       {
-        cv::line(temp, result[i].first, result[i].second, cv::Scalar(0, 0, 255), 2);
-        cv::rectangle(temp, 
+        cv::line(depth8UC3, result[i].first, result[i].second, cv::Scalar(0, 0, 255), 2);
+        cv::rectangle(depth8UC3, 
             cv::Point(result[i].second.x - maxDist / 2, result[i].second.y), 
             cv::Point(result[i].first.x + maxDist / 2, result[i].first.y), 
             cv::Scalar(255, 0, 0), 
@@ -147,14 +151,15 @@ namespace pandora_vision_obstacle
         /* Draw lines based on cursor position */
         if(accumIndex.x != -1 && accumIndex.y != -1 ) {
           std::pair<cv::Point, cv::Point> point_pair = detector.getLine( accumIndex.y, accumIndex.x );                                                                           
-          cv::line( temp, point_pair.first, point_pair.second, CV_RGB(0, 255, 0), 2 );
+          cv::line( depth8UC3, point_pair.first, point_pair.second, CV_RGB(0, 255, 0), 2 );
         }
 
         /* Show the original and edge images */
-        cv::Mat appended = cv::Mat::zeros( temp.rows + accum.rows, temp.cols * 2, CV_8UC3 );
-        temp.copyTo( cv::Mat(appended, cv::Rect(0, 0, temp.cols, temp.rows)) );
-        cv::cvtColor( edge, cv::Mat(appended, cv::Rect(temp.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR );
-        accum.copyTo( cv::Mat( appended, Rect(0, temp.rows, accum.cols, accum.rows) ) );
+        cv::Mat appended = cv::Mat::zeros( depth8UC3.rows + accum.rows, depth8UC3.cols * 2, CV_8UC3 );
+        depth8UC3.copyTo( cv::Mat(appended, cv::Rect(0, 0, depth8UC3.cols, depth8UC3.rows)) );
+        ROS_INFO("dfijkdf");
+        cv::cvtColor( edge, cv::Mat(appended, cv::Rect(depth8UC3.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR );
+        accum.copyTo( cv::Mat( appended, Rect(0, depth8UC3.rows, accum.cols, accum.rows) ) );
         cv::imshow("Candidate Barrel", appended);
       }
     }
