@@ -40,6 +40,7 @@
 #ifndef PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
 #define PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
 
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
 

@@ -36,6 +36,7 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include <string>
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_processor.h"
 
 namespace pandora_vision
@@ -47,7 +48,8 @@ namespace pandora_vision
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
 
-    detector_.reset(new SoftObstacleDetector(this->getName()));
+    detector_.reset(new SoftObstacleDetector(this->getName(),
+          *this->accessPublicNh()));
 
     server.setCallback(boost::bind(&SoftObstacleProcessor::parametersCallback,
         this, _1, _2));
@@ -60,8 +62,6 @@ namespace pandora_vision
       const pandora_vision_obstacle::soft_obstacle_cfgConfig& config,
       const uint32_t& level)
   {
-    ROS_INFO("Enter PARAMETERS CALLBACK");
-
     detector_->setShowOriginalImage(config.showOriginalImage);
     detector_->setShowDWTImage(config.showDWTImage);
     detector_->setShowOtsuImage(config.showOtsuImage);

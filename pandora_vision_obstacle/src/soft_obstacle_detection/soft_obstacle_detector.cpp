@@ -37,19 +37,27 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <string>
+#include <vector>
 #include <limits>
-#include <ros/ros.h>
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 
 namespace pandora_vision
 {
-  SoftObstacleDetector::SoftObstacleDetector(const std::string& name)
+  SoftObstacleDetector::SoftObstacleDetector(const std::string& name,
+      const ros::NodeHandle& nh)
   {
     nodeName_ = name;
-    gaussianKernelSize_ = 9;
-    gradientThreshold_ = 2.0f;
-    betaThreshold_ = 3.0f;
+
+    double param;
+    nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
+
+    nh.param("gradientThreshold", param, 2.0);
+    gradientThreshold_ = param;
+
+    nh.param("betaThreshold", param, 3.0);
+    betaThreshold_ = param;
 
     showOriginalImage_ = false;
     showDWTImage_ = false;

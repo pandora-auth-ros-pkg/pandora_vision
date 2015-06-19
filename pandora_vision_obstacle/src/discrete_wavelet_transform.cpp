@@ -37,6 +37,7 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <vector>
 #include "pandora_vision_obstacle/discrete_wavelet_transform.h"
 
 namespace pandora_vision

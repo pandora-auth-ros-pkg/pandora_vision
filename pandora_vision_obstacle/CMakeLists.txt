@@ -138,8 +138,9 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_node
 )
 
 #~ To check lint : catkin_make roslint_pandora_vision_obstacle
-set(ROSLINT_CPP_OPTS
-    "--filter=-build/include_what_you_use")
+
+#set(ROSLINT_CPP_OPTS
+    #"--filter=-build/include_what_you_use")
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}

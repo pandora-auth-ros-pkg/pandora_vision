@@ -39,6 +39,7 @@
 #ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H
 #define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H
 
+#include <string>
 #include <cv_bridge/cv_bridge.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
