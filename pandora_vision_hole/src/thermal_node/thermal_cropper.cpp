@@ -73,6 +73,12 @@ namespace pandora_vision
     unlockThermalProcedurePublisher_ = nodeHandle_.advertise
       <std_msgs::Empty>(unlockThermalProcedureTopic_, 1000, true);
 
+    // Advertise the topic where any external node(e.g. a functional test node)
+    // will be subscribed to know that the hole node has finished processing
+    // the current candidate holes as well as the result of the procedure.
+    processEndPublisher_ = nodeHandle_.advertise<sensor_processor::ProcessorLogInfo>(
+     processEndTopic_, 1000, true);
+
     // When the node starts from launch file dictates thermal procedure to start
     unlockThermalProcedure();
 
@@ -242,8 +248,16 @@ namespace pandora_vision
     enhancedMsg.regionsOfInterest = 
       findRegionsOfInterest(thermalHolesConveyor_);
 
-    // Publish the enhanced message to victim node
-    victimThermalPublisher_.publish(enhancedMsg); 
+    // Used for functional test
+    sensor_processor::ProcessorLogInfo resultMsg;
+    resultMsg.success = (thermalHolesConveyor_.size() > 0);
+    processEndPublisher_.publish(resultMsg);
+
+    if (thermalHolesConveyor_.size() > 0)
+    {
+      // Publish the enhanced message to victim node
+      victimThermalPublisher_.publish(enhancedMsg); 
+    }
   }
 
   /**
@@ -421,6 +435,23 @@ namespace pandora_vision
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "[ThermalCropper Node] Could not find topic thermal_unlock_synchronizer_topic");
+    }
+
+    // Get the topic where the process end will be advertised
+    if (nodeHandle_.getParam(
+        ns + "/hole_cropper_node/published_topics/processor_log_topic",
+        processEndTopic_))
+    {
+       // Make the topic's name absolute
+       processEndTopic_ = ns + "/" + processEndTopic_;
+
+       ROS_INFO_NAMED(PKG_NAME,
+       "[Hole Fusion Node] Advertising to the Process End topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+        "[Hole Fusion Node] Could not find topic Process end Topic");
     }
   }
 

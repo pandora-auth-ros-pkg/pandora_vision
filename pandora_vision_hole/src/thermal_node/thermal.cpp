@@ -77,6 +77,12 @@ namespace pandora_vision
       <pandora_vision_msgs::ThermalAlertVector>
       (dataFusionThermalTopic_, 1000);
 
+    // Advertise the topic where any external node(e.g. a functional test node)
+    // will be subscribed to know that the hole node has finished processing
+    // the current candidate holes as well as the result of the procedure.
+    processEndPublisher_ = nodeHandle_.advertise<sensor_processor::ProcessorLogInfo>(
+        processEndTopic_, 1000, true);
+
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
 
@@ -193,6 +199,11 @@ namespace pandora_vision
       thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
       candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
     }
+
+    // Used for functional test
+    sensor_processor::ProcessorLogInfo resultMsg;
+    resultMsg.success = (holes.size() > 0);
+    processEndPublisher_.publish(resultMsg);
 
     // Finally find the yaw and pitch of each candidate hole found and
     // send it to data fusion if a hole exists. The message to be sent is
@@ -351,6 +362,23 @@ namespace pandora_vision
     {
       ROS_ERROR_NAMED(PKG_NAME,
         "[Thermal Node] Could not find topic thermal_data_fusion_topic");
+    }
+
+    // Get the topic where the process end will be advertised
+    if (nodeHandle_.getParam(
+        ns + "/hole_camera_node/published_topics/processor_log_topic",
+        processEndTopic_))
+    {
+       // Make the topic's name absolute
+       processEndTopic_ = ns + "/" + processEndTopic_;
+
+       ROS_INFO_NAMED(PKG_NAME,
+       "[Hole Fusion Node] Advertising to the Process End topic");
+    }
+    else
+    {
+      ROS_INFO_NAMED (PKG_NAME,
+        "[Hole Fusion Node] Could not find topic Process end Topic");
     }
   }
 

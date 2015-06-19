@@ -50,6 +50,7 @@
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
 #include "std_msgs/Float32MultiArray.h"
+#include "sensor_processor/ProcessorLogInfo.h"
 
 /**
   @namespace pandora_vision
@@ -95,6 +96,13 @@ namespace pandora_vision
       // The name of the topic where the thermal node publishes 
       // directly to thermal cropper node
       std::string thermalToCropperTopic_;
+
+      // The publisher used to infor that thermal node has finished 
+      // processing the input data.
+      ros::Publisher processEndPublisher_;
+
+      // The name of the topic where the process end will be advertised
+      std::string processEndTopic_;
 
       // The variables used to match the holeConveyor information to the
       // Rgb and Depth images.

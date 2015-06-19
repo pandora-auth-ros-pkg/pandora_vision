@@ -92,6 +92,13 @@ namespace pandora_vision
       // to synchronizer node.
       std::string unlockThermalProcedureTopic_;
 
+      // The publisher used to infor that thermal node has finished 
+      // processing the input data.
+      ros::Publisher processEndPublisher_;
+
+      // The name of the topic where the process end will be advertised
+      std::string processEndTopic_;
+
       // Counter to check if both thermalCandidateHoles from thermal node
       // and enhanced from synchronizer node messages arrived
       int counter_;
