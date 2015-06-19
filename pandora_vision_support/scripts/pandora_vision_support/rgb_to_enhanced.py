@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# encoding: utf-8
 # Software License Agreement
 __version__ = "0.0.1"
 __status__ = "Development"
@@ -101,6 +103,7 @@ def convert_image(image, frame_name, annotation_dict):
     region_of_interest.height = height
     region_of_interest.width = width
     enhanced_image.regionsOfInterest.append(region_of_interest)
+    enhanced_image.header = image.header
     return enhanced_image
 
 
