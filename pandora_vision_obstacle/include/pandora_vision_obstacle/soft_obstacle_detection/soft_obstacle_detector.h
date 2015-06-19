@@ -72,6 +72,8 @@ namespace pandora_vision
       std::vector<POIPtr> detectSoftObstacle(const cv::Mat& rgbImage,
           const cv::Mat& depthImage, int level = 1);
 
+      void setGaussianKernel(int size);
+
       void setShowOriginalImage(bool arg);
       void setShowDWTImage(bool arg);
       void setShowOtsuImage(bool arg);
@@ -85,6 +87,21 @@ namespace pandora_vision
        * @param image [const MatPtr&] The image to be dilated
        **/
       void dilateImage(const MatPtr& image);
+
+      /**
+       * @brief Find out if a line is almost the same with another
+       * that is already added to the vector of vertical lines
+       * @param verticalLines [const std::vector<cv::Vec4i>&] The
+       * input vector that contains the vertical lines found
+       * @param lineCoeffs [const std::vector<cv::Vec2f>&] The
+       * vector containing the grad and beta of each vertical line
+       * @param grad [float] The grad of the current line
+       * @param beta [float] The beta parameter of the current line
+       * @return [bool] Whether the current vertical line is not very
+       * close to another and so it should be added to the vector
+       **/
+      bool findNonIdenticalLines(const std::vector<cv::Vec4i> verticalLines,
+          const std::vector<cv::Vec2f> lineCoeffs, float grad, float beta);
 
       /**
        * @brief Perform Probabilistic Hough Lines Transform and
@@ -128,13 +145,23 @@ namespace pandora_vision
       /// The node's name
       std::string nodeName_;
 
+      /// The size of the kernel of the Gaussian filter used to blur image
+      int gaussianKernelSize_;
+
+      /// The maximum gradient difference that two lines should have to be
+      /// considered almost identical
+      float gradientThreshold_;
+      /// The maximum beta difference that two lines should have to be
+      /// considered almost identical
+      float betaThreshold_;
+
       /// Debug parameters
-      bool showOriginalImage;
-      bool showDWTImage;
-      bool showOtsuImage;
-      bool showDilatedImage;
-      bool showVerticalLines;
-      bool showROI;
+      bool showOriginalImage_;
+      bool showDWTImage_;
+      bool showOtsuImage_;
+      bool showDilatedImage_;
+      bool showVerticalLines_;
+      bool showROI_;
   };
 }  // namespace pandora_vision
 

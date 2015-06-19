@@ -37,6 +37,7 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <limits>
 #include <ros/ros.h>
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
@@ -46,13 +47,16 @@ namespace pandora_vision
   SoftObstacleDetector::SoftObstacleDetector(const std::string& name)
   {
     nodeName_ = name;
+    gaussianKernelSize_ = 9;
+    gradientThreshold_ = 2.0f;
+    betaThreshold_ = 3.0f;
 
-    showOriginalImage = false;
-    showDWTImage = false;
-    showOtsuImage = false;
-    showDilatedImage = false;
-    showVerticalLines = false;
-    showROI = false;
+    showOriginalImage_ = false;
+    showDWTImage_ = false;
+    showOtsuImage_ = false;
+    showDilatedImage_ = false;
+    showVerticalLines_ = false;
+    showROI_ = false;
 
     cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << 1 / sqrt(2), 1 / sqrt(2));
     cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - 1 / sqrt(2), 1 / sqrt(2));
@@ -62,32 +66,37 @@ namespace pandora_vision
 
   void SoftObstacleDetector::setShowOriginalImage(bool arg)
   {
-    showOriginalImage = arg;
+    showOriginalImage_ = arg;
   }
 
   void SoftObstacleDetector::setShowDWTImage(bool arg)
   {
-    showDWTImage = arg;
+    showDWTImage_ = arg;
   }
 
   void SoftObstacleDetector::setShowOtsuImage(bool arg)
   {
-    showOtsuImage = arg;
+    showOtsuImage_ = arg;
   }
 
   void SoftObstacleDetector::setShowDilatedImage(bool arg)
   {
-    showDilatedImage = arg;
+    showDilatedImage_ = arg;
   }
 
   void SoftObstacleDetector::setShowVerticalLines(bool arg)
   {
-    showVerticalLines = arg;
+    showVerticalLines_ = arg;
   }
 
   void SoftObstacleDetector::setShowROI(bool arg)
   {
-    showROI = arg;
+    showROI_ = arg;
+  }
+
+  void SoftObstacleDetector::setGaussianKernel(int size)
+  {
+    gaussianKernelSize_ = size;
   }
 
   void SoftObstacleDetector::dilateImage(const MatPtr& image)
@@ -97,15 +106,29 @@ namespace pandora_vision
     {
       *image = 255 - *image;
     }
-
     cv::Mat dilatedImage;
     // cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     cv::dilate(*image, dilatedImage, cv::Mat());
     *image = dilatedImage;
   }
 
+  bool SoftObstacleDetector::findNonIdenticalLines(const std::vector<cv::Vec4i> verticalLines,
+      const std::vector<cv::Vec2f> lineCoeffs, float grad, float beta)
+  {
+    for (size_t ii = 0; ii < verticalLines.size(); ii++)
+    {
+      if (fabs(fabs(grad) - fabs(lineCoeffs[ii][0])) < gradientThreshold_
+          && fabs(fabs(beta) - fabs(lineCoeffs[ii][1])) < betaThreshold_)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
   std::vector<cv::Vec4i> SoftObstacleDetector::performProbHoughLines(const cv::Mat& image)
   {
+    /// Perform Hough Transform
     std::vector<cv::Vec4i> lines;
     cv::HoughLinesP(image, lines, 1, CV_PI / 180, 100, 100, 10);
 
@@ -113,35 +136,44 @@ namespace pandora_vision
     cv::cvtColor(image, imageToShow, CV_GRAY2BGR);
 
     std::vector<cv::Vec4i> verticalLines;
+    std::vector<cv::Vec2f> lineCoefficients;
 
+    /// Keep only vertical lines
     for (size_t ii = 0; ii < lines.size(); ii++)
     {
       cv::Vec4i line = lines[ii];
       bool awayFromBorder = (line[0] > 10 && line[0] < image.cols - 10) ||
         (line[2] > 10 && line[2] < image.cols - 10);
 
-      float grad;
+      float grad, beta;
       if (line[0] == line[2])
       {
         grad = 90.0f;
+        beta = line[0];
       }
       else
       {
-        grad = atan(static_cast<float>(line[3] - line[1]) / static_cast<float>(
-            line[2] - line[0]));
-        grad = static_cast<float>(fabs(grad * 180.0f / CV_PI));
+        grad = static_cast<float>(line[3] - line[1]) / static_cast<float>(
+            line[2] - line[0]);
+
+        beta = line[0] - line[1] / grad;  //!< The point that the line intersects with the x-axis
+        grad = static_cast<float>(fabs(atan(grad) * 180.0f / CV_PI));
       }
 
+      /// If line is almost vertical and not close to image borders
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
-        verticalLines.push_back(line);
+        if (findNonIdenticalLines(verticalLines, lineCoefficients, grad, beta))
+        {
+          lineCoefficients.push_back(cv::Vec2f(grad, beta));
 
-        cv::line(imageToShow, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]),
-            cv::Scalar(255, 0, 0), 3, 8);
+          verticalLines.push_back(line);
+          cv::line(imageToShow, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]),
+              cv::Scalar(255, 0, 0), 3, 8);
+        }
       }
     }
-
-    if (showVerticalLines)
+    if (showVerticalLines_)
     {
       cv::imshow("[" + nodeName_ + "] : Vertical Lines Detected", imageToShow);
       cv::waitKey(10);
@@ -154,46 +186,44 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
   {
     float probability = 0.0f;
 
-    if (verticalLines.size() > 2)
+    int minx = std::numeric_limits<int>::max();
+    int maxx = std::numeric_limits<int>::min();
+    int miny = std::numeric_limits<int>::max();
+    int maxy = std::numeric_limits<int>::min();
+
+    for (size_t ii = 1; ii < verticalLines.size(); ii++)
     {
-      int minx = verticalLines[0][0];
-      int maxx = verticalLines[0][0];
-      int miny = verticalLines[0][1];
-      int maxy = verticalLines[0][1];
+      /// Calculate min and max of line coordinates
+      int x0 = verticalLines[ii][0];
+      int x1 = verticalLines[ii][2];
+      int y0 = verticalLines[ii][1];
+      int y1 = verticalLines[ii][3];
 
-      for (size_t ii = 1; ii < verticalLines.size(); ii++)
-      {
-        // Calculate min and max of line coordinates
-        int x0 = verticalLines[ii][0];
-        int x1 = verticalLines[ii][2];
-        int y0 = verticalLines[ii][1];
-        int y1 = verticalLines[ii][3];
+      minx = x0 < minx ? x0 : minx;
+      minx = x1 < minx ? x1 : minx;
 
-        minx = x0 < minx ? x0 : minx;
-        minx = x1 < minx ? x1 : minx;
+      maxx = x0 > maxx ? x0 : maxx;
+      maxx = x1 > maxx ? x1 : maxx;
 
-        maxx = x0 > maxx ? x0 : maxx;
-        maxx = x1 > maxx ? x1 : maxx;
+      miny = y0 < miny ? y0 : miny;
+      miny = y1 < miny ? y1 : miny;
 
-        miny = y0 < miny ? y0 : miny;
-        miny = y1 < miny ? y1 : miny;
+      maxy = y0 > maxy ? y0 : maxy;
+      maxy = y1 > maxy ? y1 : maxy;
 
-        maxy = y0 > maxy ? y0 : maxy;
-        maxy = y1 > maxy ? y1 : maxy;
-
-        // Calculate ROI probability
-        probability += static_cast<float>(abs(y1 - y0)) / static_cast<float>(frameHeight);
-      }
-      probability /= static_cast<float>(verticalLines.size());
-
-      int width = maxx - minx;
-      int height = maxy - miny;
-
-      // The point inside this Rect is the roi center, now it is the
-      // upper left point in order to visualize
-      cv::Rect roi(minx, miny, width, height);
-      *roiPtr = roi;
+      /// Calculate ROI probability
+      probability += static_cast<float>(abs(y1 - y0)) / static_cast<float>(frameHeight);
     }
+    probability /= static_cast<float>(verticalLines.size());
+
+    int width = maxx - minx;
+    int height = maxy - miny;
+
+    // The point inside this Rect is the roi center, now it is the
+    // upper left point in order to visualize
+    cv::Rect roi(minx, miny, width, height);
+    *roiPtr = roi;
+
     return probability;
   }
 
@@ -202,37 +232,41 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
   {
     float depth = 0.0f;
 
-    if (verticalLines.size() > 2)
+    for (size_t ii = 1; ii < verticalLines.size(); ii++)
     {
-      for (size_t ii = 1; ii < verticalLines.size(); ii++)
-      {
-        int x0 = verticalLines[ii][0];
-        int x1 = verticalLines[ii][2];
-        int y0 = verticalLines[ii][1];
-        int y1 = verticalLines[ii][3];
+      int x0 = verticalLines[ii][0];
+      int x1 = verticalLines[ii][2];
+      int y0 = verticalLines[ii][1];
+      int y1 = verticalLines[ii][3];
 
-        // Find depth distance
-        depth += depthImage.at<float>(((y0 + y1) / 2) * pow(2, level),
-            ((x0 + x1) / 2) * pow(2, level));
-      }
-      depth /= static_cast<float>(verticalLines.size());
+      /// Find depth distance
+      depth += depthImage.at<float>(((y0 + y1) / 2) * pow(2, level),
+          ((x0 + x1) / 2) * pow(2, level));
     }
+    depth /= static_cast<float>(verticalLines.size());
     return depth;
   }
 
   std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& rgbImage,
       const cv::Mat& depthImage, int level)
   {
-    cv::Mat greyScaleImage;
-    cv::cvtColor(rgbImage, greyScaleImage, CV_BGR2GRAY);
-    if (showOriginalImage)
+    if (showOriginalImage_)
     {
       cv::imshow("[" + nodeName_ + "] : Original Image", rgbImage);
       cv::waitKey(10);
     }
 
+    // Convert rgb image to grayscale
+    cv::Mat grayScaleImage;
+    cv::cvtColor(rgbImage, grayScaleImage, CV_BGR2GRAY);
+
+    // Blur image using Gaussian filter
+    cv::Mat blurImage;
+    cv::GaussianBlur(grayScaleImage, blurImage, cv::Size(gaussianKernelSize_,
+          gaussianKernelSize_), 0);
+
     cv::Mat imageFloat;
-    greyScaleImage.convertTo(imageFloat, CV_32FC1);
+    blurImage.convertTo(imageFloat, CV_32FC1);
 
     // Perform DWT
     std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(imageFloat, level);
@@ -243,7 +277,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     cv::normalize(*lhImage, normalizedImage, 0, 255, cv::NORM_MINMAX);
     normalizedImage.convertTo(normalizedImage, CV_8UC1);
 
-    if (showDWTImage)
+    if (showDWTImage_)
     {
       cv::imshow("[" + nodeName_ + "] : DWT Normalized Image", normalizedImage);
       cv::waitKey(10);
@@ -253,7 +287,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     MatPtr otsuImage(new cv::Mat());
     cv::threshold(normalizedImage, *otsuImage, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
-    if (showOtsuImage)
+    if (showOtsuImage_)
     {
       cv::imshow("[" + nodeName_ + "] : Image after Otsu Thresholding", *otsuImage);
       cv::waitKey(10);
@@ -262,7 +296,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     // Dilate Image
     dilateImage(otsuImage);
 
-    if (showDilatedImage)
+    if (showDilatedImage_)
     {
       cv::imshow("[" + nodeName_ + "] : Dilated Image", *otsuImage);
       cv::waitKey(10);
@@ -273,7 +307,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
 
     std::vector<POIPtr> pois;
 
-    if (verticalLines.size() > 0)
+    if (verticalLines.size() > 3)
     {
       ROS_INFO("Detected Vertical Lines");
 
@@ -281,10 +315,9 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       boost::shared_ptr<cv::Rect> roi(new cv::Rect());
       float probability = detectROI(verticalLines, otsuImage->rows, roi);
 
-      if (showROI)
+      if (showROI_)
       {
-        cv::Mat imageToShow;
-        cv::cvtColor(greyScaleImage, imageToShow, CV_GRAY2BGR);
+        cv::Mat imageToShow = rgbImage.clone();
 
         cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
             roi->width * pow(2, level), roi->height * pow(2, level));
