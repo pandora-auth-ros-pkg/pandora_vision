@@ -710,7 +710,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_INFO_NAMED(PKG_NAME,
+      ROS_ERROR_NAMED(PKG_NAME,
         "[Hole Fusion Node] Could not find topic Process end Topic");
     }
 

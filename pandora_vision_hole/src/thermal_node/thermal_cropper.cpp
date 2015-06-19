@@ -439,19 +439,19 @@ namespace pandora_vision
 
     // Get the topic where the process end will be advertised
     if (nodeHandle_.getParam(
-        ns + "/hole_cropper_node/published_topics/processor_log_topic",
+        ns + "/thermal_cropper_node/published_topics/processor_log_topic",
         processEndTopic_))
     {
        // Make the topic's name absolute
        processEndTopic_ = ns + "/" + processEndTopic_;
 
        ROS_INFO_NAMED(PKG_NAME,
-       "[Hole Fusion Node] Advertising to the Process End topic");
+       "[ThermalCropper Node] Advertising to the Process End topic");
     }
     else
     {
-      ROS_INFO_NAMED (PKG_NAME,
-        "[Hole Fusion Node] Could not find topic Process end Topic");
+      ROS_ERROR_NAMED (PKG_NAME,
+        "[ThermalCropper Node] Could not find topic Process end Topic");
     }
   }
 
