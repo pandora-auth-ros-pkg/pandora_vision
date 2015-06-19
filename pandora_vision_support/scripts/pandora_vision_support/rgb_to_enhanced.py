@@ -68,11 +68,14 @@ def convert(input_bag_name, topic, annotation_file, output_bag_name="output.bag"
         with rosbag.Bag(input_bag_name, 'r') as input_bag:
             annotation_dict = read_annotation_file(annotation_file)
             i = 0
-            for topic_name, image, time in input_bag.read_messages(topics=topic):
-                i += 1
-                enhanced_image = convert_image(Image(image),
-                                               "bbox_"+str(i), annotation_dict)
-                output_bag.write(topic_name, enhanced_image, time)
+            for topic_name, image, time in input_bag.read_messages():
+                if topic_name == topic:
+                    i += 1
+                    enhanced_image = convert_image(Image(image),
+                                                   "bbox_"+str(i), annotation_dict)
+                    output_bag.write(topic_name, enhanced_image, time)
+                else:
+                    output_bag.write(topic_name, image, time)
 
 
 def convert_image(image, frame_name, annotation_dict):
