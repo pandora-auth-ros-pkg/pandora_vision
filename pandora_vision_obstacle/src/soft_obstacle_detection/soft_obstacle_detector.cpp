@@ -260,7 +260,8 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
   {
     if (showOriginalImage_)
     {
-      cv::imshow("[" + nodeName_ + "] : Original Image", rgbImage);
+      cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
+          rgbImage);
       cv::waitKey(10);
     }
 
@@ -331,7 +332,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
             roi->width * pow(2, level), roi->height * pow(2, level));
         cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
 
-        cv::imshow("[" + nodeName_ + "] : Soft Obstacle Bounding Box",
+        cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
             imageToShow);
         cv::waitKey(10);
       }
