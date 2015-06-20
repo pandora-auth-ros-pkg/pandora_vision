@@ -84,7 +84,7 @@
   <!-- ======================= RGBDT Synchronizer node ===================== -->
   
   <node name="rgb_depth_thermal_synchronizer_node"
-        type="rgb_depth_thermal_synchronizer.py"
+        type="rgb_depth_thermal_synchronizer_node"
         pkg="pandora_vision_hole"
         respawn="false"
         output="$(arg output)"

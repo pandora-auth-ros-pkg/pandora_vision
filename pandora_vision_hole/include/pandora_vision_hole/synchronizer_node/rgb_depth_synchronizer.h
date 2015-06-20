@@ -42,8 +42,6 @@
 #include <utils/defines.h>
 #include <utils/parameters.h>
 #include <std_msgs/Empty.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
 #include "pandora_vision_msgs/SynchronizedMsg.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "pandora_vision_msgs/IndexedThermal.h"
