@@ -37,6 +37,7 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <limits>
@@ -66,8 +67,9 @@ namespace pandora_vision
     showVerticalLines_ = false;
     showROI_ = false;
 
-    cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << 1 / sqrt(2), 1 / sqrt(2));
-    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - 1 / sqrt(2), 1 / sqrt(2));
+    float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
+    cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
+    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - invRootTwo, invRootTwo);
 
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }

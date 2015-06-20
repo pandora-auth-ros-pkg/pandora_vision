@@ -7,3 +7,17 @@ include_directories(
 ${pandora_testing_tools_INCLUDE_DIRS}
 ${roslib_INCLUDE_DIRS}
 ${catkin_INCLUDE_DIRS})
+
+################################################################################
+#                               Unit Tests                                     #
+################################################################################
+
+catkin_add_gtest(discrete_wavelet_transform_test
+  unit/discrete_wavelet_transform_test.cpp
+  )
+target_link_libraries(discrete_wavelet_transform_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_discrete_wavelet_transform
+  gtest_main
+  gtest
+  )

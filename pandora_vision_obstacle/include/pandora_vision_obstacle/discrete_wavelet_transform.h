@@ -132,31 +132,29 @@ namespace pandora_vision
       /**
        * @brief Perform convolution with a vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
-       * @param kernel [const cv::Mat&] The filter used
+       * @param low [bool] Whether the low frequency filter is used
        * @param rows [bool] Whether the type of convolution will
        * be performed row-wise
        * @return [cv::Mat] The result of the convolution
        **/
       cv::Mat optionalConv(const cv::Mat& inImage,
-          const cv::Mat& kernel, bool rows);
+          bool low, bool rows);
       /**
        * @brief Perform convolution with a column vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
-       * @param kernel [const cv::Mat&] The filter used
+       * @param low [bool] Whether the low frequency filter is used
        * @return [cv::Mat] The result of the convolution performed
        * column-wise
        **/
-      cv::Mat convCols(const cv::Mat& inImage,
-          const cv::Mat& kernel);
+      cv::Mat convCols(const cv::Mat& inImage, bool low);
       /**
        * @brief Perform convolution with a row vector kernel
        * @param inImage [const cv::Mat&] The image to be convolved
-       * @param kernel [const cv::Mat&] The filter used
+       * @param low [bool] Whether the low frequency filter is used
        * @return [cv::Mat] The result of the convolution performed
        * row-wise
        **/
-      cv::Mat convRows(const cv::Mat& inImage,
-          const cv::Mat& kernel);
+      cv::Mat convRows(const cv::Mat& inImage, bool low);
 
       /**
        * @brief Creating an image by taking half the values of the
@@ -217,6 +215,8 @@ namespace pandora_vision
       /// The column kernel used to perform the DWT that represents
       /// the band - pass filter used for high frequencies
       cv::Mat columnKernelHigh_;
+
+      friend class DiscreteWaveletTransformTest;
   };
   typedef DiscreteWaveletTransform::MatPtr MatPtr;
   typedef DiscreteWaveletTransform::MatConstPtr MatConstPtr;
