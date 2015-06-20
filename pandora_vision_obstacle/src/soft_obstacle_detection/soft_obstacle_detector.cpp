@@ -343,7 +343,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       float depthDistance = findDepthDistance(depthImage, verticalLines,
           level);
 
-      if (roi->size().width > 0 && roi->size().height > 0)
+      if (probability > 0.0f)
       {
         ROS_INFO("Soft Obstacle Detected!");
 

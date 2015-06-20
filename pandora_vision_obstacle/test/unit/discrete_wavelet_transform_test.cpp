@@ -64,13 +64,20 @@ namespace pandora_vision
         return dwtPtr_->convCols(image, low);
       }
 
+      void subSample(const cv::Mat& imageLow, const cv::Mat& imageHigh, bool rows,
+          const MatPtr& subImageLow, const MatPtr& subImageHigh)
+      {
+        return dwtPtr_->subSample(imageLow, imageHigh, rows, subImageLow,
+            subImageHigh);
+      }
+
     protected:
       virtual void SetUp() {}
 
       boost::shared_ptr<DiscreteWaveletTransform> dwtPtr_;
   };
 
-  TEST_F(DiscreteWaveletTransformTest, padSizeInConv)
+  TEST_F(DiscreteWaveletTransformTest, isPadSizeInConvolutionCorrect)
   {
     cv::Mat image = cv::Mat::ones(3, 3, CV_32FC1);
 
@@ -83,7 +90,7 @@ namespace pandora_vision
     ASSERT_EQ(4, imageConvCols.rows);
   }
 
-  TEST_F(DiscreteWaveletTransformTest, convolutionResult)
+  TEST_F(DiscreteWaveletTransformTest, isConvolutionResultCorrect)
   {
     cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
@@ -116,5 +123,65 @@ namespace pandora_vision
         EXPECT_NEAR(colsResult.at<float>(ii, jj), imageConvCols.at<float>(ii, jj), 1e-6);
       }
     }
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isSubSampleRowsResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 1, 1, 2, 2, 2,
+        3, 3, 3);
+
+    MatPtr subImageLow(new cv::Mat());
+    MatPtr subImageHigh(new cv::Mat());
+
+    subSample(image, image, true, subImageLow, subImageHigh);
+
+    ASSERT_EQ(2, subImageLow->rows);
+    ASSERT_EQ(3, subImageLow->cols);
+
+    ASSERT_EQ(1, subImageHigh->rows);
+    ASSERT_EQ(3, subImageHigh->cols);
+
+    for (int ii = 0; ii < subImageLow->cols; ii++)
+    {
+      EXPECT_EQ(1, subImageLow->at<float>(0, ii));
+      EXPECT_EQ(2, subImageHigh->at<float>(0, ii));
+      EXPECT_EQ(3, subImageLow->at<float>(1, ii));
+    }
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isSubSampleColsResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 1, 2, 3,
+        1, 2, 3);
+
+    MatPtr subImageLow(new cv::Mat());
+    MatPtr subImageHigh(new cv::Mat());
+
+    subSample(image, image, false, subImageLow, subImageHigh);
+
+    ASSERT_EQ(2, subImageLow->cols);
+    ASSERT_EQ(3, subImageLow->rows);
+
+    ASSERT_EQ(1, subImageHigh->cols);
+    ASSERT_EQ(3, subImageHigh->rows);
+
+    for (int ii = 0; ii < subImageLow->rows; ii++)
+    {
+      EXPECT_EQ(1, subImageLow->at<float>(ii, 0));
+      EXPECT_EQ(2, subImageHigh->at<float>(ii, 0));
+      EXPECT_EQ(3, subImageLow->at<float>(ii, 1));
+    }
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isLowLowResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+    std::vector<MatPtr> llImages = dwtPtr_->getLowLow(image);
+
+    ASSERT_EQ(1, llImages.size());
+    //std::cout << *llImages[0] << std::endl;
+    ASSERT_EQ(2, llImages[0]->rows);
+    ASSERT_EQ(2, llImages[0]->cols);
   }
 }  // namespace pandora_vision
