@@ -364,6 +364,7 @@ namespace pandora_vision
 
     if (loadClassifierModel_ && file_utilities::exist(classifierFile_.c_str()))
     {
+      ROS_INFO("Loading model for %s Classifier", boost::to_upper_copy<std::string>(classifierType_).c_str());
       this->load(classifierFile_);
     }
     else

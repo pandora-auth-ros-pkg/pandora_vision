@@ -85,6 +85,11 @@ namespace pandora_vision
       */
       void calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability);
 
+      const std::string& getClassifierType(void)
+      {
+        return classifierType_;
+      }
+
     protected:
       /**
        * @brief This function extracts features according to the predefined

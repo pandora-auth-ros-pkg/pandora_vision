@@ -49,6 +49,10 @@
 
 namespace pandora_vision
 {
+  /**
+   * @brief The constructor for the factory used to produce the classifier trainer objects.
+   * @param ns[const std::string&] The namespace for the node handles of the object
+   */
   ClassifierFactory::ClassifierFactory(const std::string& ns): nh_(ns)
   {
     ROS_INFO("[Victim_Training]: Starting Victim Training Procedure!");
@@ -118,6 +122,15 @@ namespace pandora_vision
     ROS_INFO("[Victim_Training]: The procedure has finished!");
   }
 
+  /**
+   * @brief Creates a classifier object depending on the image type and the classifier type
+   * provided.
+   * @param classifierType[const std::string&] The type of classifier that will be used.
+   * @param imageType[const std::string&] The type of images used for the classifier, such as
+   * RGB images.
+   * @return AbstractValidator* The pointer to the created object that will be used for object
+   * detection.
+   */
   AbstractClassifier* ClassifierFactory::createClassifier(const std::string& classifierType,
           const std::string& imageType)
   {
@@ -163,10 +176,6 @@ namespace pandora_vision
         boost::to_upper_copy<std::string>(classifierType).c_str(),
         boost::to_upper_copy<std::string>(imageType).c_str());
     return classifierPtr;
-  }
-
-  ClassifierFactory::~ClassifierFactory()
-  {
   }
 
 }  //  namespace pandora_vision

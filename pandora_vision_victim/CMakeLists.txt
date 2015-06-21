@@ -118,19 +118,27 @@ target_link_libraries(${PROJECT_NAME}_classifiers
     ${PROJECT_NAME}_utilities
 )
 
-
-########################## Victim Hole Processor ##############################
-add_library(${PROJECT_NAME}_hole_processor
-  src/victim_hole_processor.cpp
+########################## Victim Detector Library ##########################
+add_library(${PROJECT_NAME}_validator_factory
+  src/classifiers/validator_factory.cpp
   src/classifiers/abstract_validator.cpp
   src/classifiers/svm_validator.cpp
   src/classifiers/random_forests_validator.cpp
   src/classifiers/neural_network_validator.cpp
-)
-target_link_libraries(${PROJECT_NAME}_hole_processor
+  )
+target_link_libraries(${PROJECT_NAME}_validator_factory
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_victim_parameters
   ${PROJECT_NAME}_feature_extractors
+  )
+
+########################## Victim Hole Processor ##############################
+add_library(${PROJECT_NAME}_hole_processor
+  src/victim_hole_processor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_hole_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_validator_factory
 )
 
 ######################## Victim Hole Preprocessor #############################
@@ -145,18 +153,15 @@ target_link_libraries(${PROJECT_NAME}_hole_preprocessor
 add_dependencies(${PROJECT_NAME}_hole_preprocessor
   ${catkin_EXPORTED_TARGETS})
 
+
+
 ########################## Victim Image Processor #############################
 add_library(${PROJECT_NAME}_image_processor
   src/victim_image_processor.cpp
-  src/classifiers/abstract_validator.cpp
-  src/classifiers/svm_validator.cpp
-  src/classifiers/random_forests_validator.cpp
-  src/classifiers/neural_network_validator.cpp
-)
+  )
 target_link_libraries(${PROJECT_NAME}_image_processor
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_victim_parameters
-  ${PROJECT_NAME}_feature_extractors
+  ${PROJECT_NAME}_validator_factory
 )
 
 ######################## Victim Image Preprocessor ############################

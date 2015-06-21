@@ -58,8 +58,28 @@ namespace pandora_vision
       *this->accessProcessorNh()).advertise(
       params_.interpolatedDepthImg, 1, true);
 
-    rgbSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "rgb", "svm"));
-    depthSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "depth", "svm"));
+    std::string rgbClassifierType;
+    if (!this->accessPublicNh()->getParam("rgb_classifier", rgbClassifierType))
+    {
+      ROS_ERROR("Could not retrieve the RGB classifier Type from the yaml file!");
+      ROS_ERROR("Shutting Down now!");
+      ROS_BREAK();
+    }
+
+    std::string depthClassifierType;
+    if (!this->accessPublicNh()->getParam("depth_classifier", depthClassifierType))
+    {
+      ROS_ERROR("Could not retrieve the Depth Classifier Type from the yaml file!");
+      ROS_ERROR("Shutting Down now!");
+      ROS_BREAK();
+    }
+
+    validatorFactoryPtr_.reset(new ValidatorFactory(this->accessPublicNh()->getNamespace()));
+
+    rgbValidatorPtr_.reset(validatorFactoryPtr_->createValidator(*this->accessPublicNh(),
+          rgbClassifierType, "rgb"));
+    depthValidatorPtr_.reset(validatorFactoryPtr_->createValidator(*this->accessPublicNh(),
+          depthClassifierType, "depth"));
 
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
@@ -221,7 +241,8 @@ namespace pandora_vision
       // if (counter_ == params_.positivesCounter)
       {
         std::ostringstream convert;
-        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        convert << "RGB_ " << boost::to_upper_copy<std::string>(rgbValidatorPtr_->getClassifierType())
+          << " : " << rgb_svm_keypoints.size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 60),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 255), 1, CV_AA);
@@ -239,7 +260,8 @@ namespace pandora_vision
 
       {
         std::ostringstream convert;
-        convert << "DEPTH_SVM : "<< depth_svm_keypoints.size();
+        convert << "Depth_ " << boost::to_upper_copy<std::string>(depthValidatorPtr_->getClassifierType())
+          << " : " << depth_svm_keypoints.size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 80),
           cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
@@ -307,7 +329,7 @@ namespace pandora_vision
       for (int i = 0 ; i < imgs.rgbMasks.size(); i++)
       {
         VictimPOIPtr temp(new VictimPOI);
-        rgbSvmValidatorPtr_->calculatePredictionProbability(imgs.rgbMasks.at(i).img, &classLabel, &probability);
+        rgbValidatorPtr_->calculatePredictionProbability(imgs.rgbMasks.at(i).img, &classLabel, &probability);
         temp->setProbability(probability);
         temp->setClassLabel(classLabel);
         temp->setPoint(imgs.rgbMasks[i].keypoint);
@@ -323,7 +345,7 @@ namespace pandora_vision
       for (int i = 0 ; i < imgs.depthMasks.size(); i++)
       {
         VictimPOIPtr temp(new VictimPOI);
-        depthSvmValidatorPtr_->calculatePredictionProbability(imgs.depthMasks.at(i).img, &classLabel, &probability);
+        depthValidatorPtr_->calculatePredictionProbability(imgs.depthMasks.at(i).img, &classLabel, &probability);
         temp->setProbability(probability);
         temp->setClassLabel(classLabel);
         temp->setPoint(imgs.depthMasks[i].keypoint);
@@ -350,7 +372,7 @@ namespace pandora_vision
         mergedProb = (depth_svm_probabilities[i]->getClassLabel() * params_.depth_svm_weight *
                      depth_svm_probabilities[i]->getProbability() +
                      rgb_svm_probabilities[i]->getClassLabel() * params_.rgb_svm_weight *
-                     rgb_svm_probabilities[i]->getProbability()); 
+                     rgb_svm_probabilities[i]->getProbability());
 
         if (mergedProb >= 0.0f)
         {

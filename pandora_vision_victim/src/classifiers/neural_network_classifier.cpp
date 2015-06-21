@@ -76,14 +76,14 @@ namespace pandora_vision
 
     // Iterate over the parameter YAML file to get the size for each layer
     // of the ANN.
-    cv::Mat layerSizes(layerNum, 1, CV_32SC1);
+    cv::Mat layerSizes(1, layerNum, CV_32SC1);
     int ii = 0;
 
     for (int ii = 0; ii < layerNum ; ii++)
     {
       std::stringstream ss;
       ss << layers[ii];
-      ss >> layerSizes.at<int>(ii);
+      ss >> layerSizes.at<signed int>(ii);
     }
 
     // Get the parameters of  the sigmoid function.

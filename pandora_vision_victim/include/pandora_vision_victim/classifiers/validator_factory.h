@@ -38,46 +38,48 @@
 *   Vassilis Choutas <vasilis4ch@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_VALIDATOR_FACTORY_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_VALIDATOR_FACTORY_H
 
 #include <string>
-#include "pandora_vision_victim/classifiers/abstract_classifier.h"
+
+#include "pandora_vision_victim/classifiers/abstract_validator.h"
 
 namespace pandora_vision
 {
   /*
    * @class ClassifierFactory
-   * @brief The class used to produce the different classifier trainer objects
+   * @brief The class used to produce the different classifier objects
    * during runtime
   */
-  class ClassifierFactory
+  class ValidatorFactory
   {
     public:
       /**
-       * @brief The constructor for the factory used to produce the classifier trainer objects.
+       * @brief The constructor for the factory used to produce the validator/classifier objects.
        * @param ns[const std::string&] The namespace for the node handles of the object
        */
-      explicit ClassifierFactory(const std::string& ns);
-      ~ClassifierFactory()
-      {}
+      explicit ValidatorFactory(const std::string& ns);
+      ~ValidatorFactory()
+      { }
 
       /**
-       * @brief Creates a classifier object depending on the image type and the classifier type
+       * @brief Creates a validator object depending on the image type and the validator type
        * provided.
-       * @param classifierType[const std::string&] The type of classifier that will be used.
+       * @param nh[const ros::NodeHandle&] The nodehandle used by the node that wants to create a classifier
+       * object.
+       * @param validatorType[const std::string&] The type of classifier that will be used.
        * @param imageType[const std::string&] The type of images used for the classifier, such as
        * RGB images.
        * @return AbstractValidator* The pointer to the created object that will be used for object
        * detection.
        */
-      AbstractClassifier* createClassifier(const std::string& classifierType,
+      AbstractValidator* createValidator(const ros::NodeHandle& nh,
+          const std::string& validatorType,
           const std::string& imageType);
 
     private:
       ros::NodeHandle nh_;
   };
 }  //  namespace pandora_vision
-
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
-
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_VALIDATOR_FACTORY_H

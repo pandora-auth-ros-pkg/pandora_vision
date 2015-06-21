@@ -153,10 +153,10 @@ namespace pandora_vision
           << forestAccuracy);
     }
 
-    const float priors[] = {1, 1};
+    // const float priors[] = {1, 1};
     randomForestsParams_ = CvRTParams(maxDepth, minSampleCount,
                                       static_cast<float>(regressionAccuracy), useSurrogates,
-                                      maxCategories, priors, calcVarImportance, nactiveVars,
+                                      maxCategories, 0, calcVarImportance, nactiveVars,
                                       maxNumOfTreesInTheForest, static_cast<float>(forestAccuracy),
                                       CV_TERMCRIT_ITER + CV_TERMCRIT_EPS);
 
