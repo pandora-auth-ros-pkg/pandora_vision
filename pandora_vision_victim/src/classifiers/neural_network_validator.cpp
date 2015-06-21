@@ -61,7 +61,14 @@ namespace pandora_vision
   {
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Creating " << imageType
         << " " << classifierType << " Validator instance");
+
     neuralNetworkValidator_.load(classifierPath_.c_str());
+    if (!neuralNetworkValidator_.get_layer_count())
+    {
+      ROS_FATAL("Could not read the classifier %s\n", classifierPath_.c_str());
+      ros::shutdown();
+    }
+
 
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
         << classifierType_ << " Validator instance");
@@ -84,6 +91,8 @@ namespace pandora_vision
   {
     cv::Mat outputs;
     float dummyValue = neuralNetworkValidator_.predict(featuresMat, outputs);
+    // const CvMat* layerSizes = neuralNetworkValidator_.get_layer_sizes();
+    // std::cout << layerSizes-><int>(0,0) << std::endl;
     *probability = outputs.at<float>(0, 0);
     *classLabel = *probability > 0.0f ? 1.0f : -1.0f;
   }

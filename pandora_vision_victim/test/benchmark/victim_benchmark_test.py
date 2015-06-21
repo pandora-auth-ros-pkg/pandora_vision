@@ -14,8 +14,9 @@ from pandora_vision_support.pandora_vision_testing_interface import vision_bench
 
 PKG_PATH = rospkg.RosPack().get_path(PKG)
 
-                           
+
 class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
+
     def test_benchmark(self):
         self.datasetCamera = rospy.get_param("dataset_camera")
         self.imageHFOV = rospy.get_param("/kinect_rgb_optical_frame/hfov")
@@ -33,7 +34,22 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
         imagePath = rospy.get_param("dataset_path")
         self.benchmarkTest(PKG_PATH + imagePath,
                            publisherTopic, subscriberTopic, benchmarkFlag)
-                           
+
+    @classmethod
+    def mockPublish(cls, input_topic, output_topic, data):
+
+        cls.block.clear()
+        # cls.repliedList[output_topic] = False
+        for key in cls.repliedList.iterkeys():
+            cls.repliedList[key] = False
+        cls.messageList[output_topic] = list()
+        if not isinstance(data, cls.publishedTypes[input_topic]):
+            rospy.logerr("[mockPublish] Publishes wrong message type.")
+        cls.publishers[input_topic].publish(data)
+        if not cls.benchmarking:
+            rospy.sleep(cls.publish_wait_duration)
+        cls.block.wait()
+
     @classmethod
     def mockCallback(cls, data, output_topic):
         rospy.logdebug("Got message from topic : " + str(output_topic))
@@ -47,8 +63,15 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
             if "hole" in output_topic:
                 if not data.success:
                     cls.block.set()
-            elif "victim" in output_topic:
-                cls.block.set()
+                    return None
+            # elif "victim" in output_topic:
+                # cls.block.set()
+        counter = 0
+        for key, val in cls.repliedList.iteritems():
+            if "processor" in key and val:
+                counter += 1
+        if counter == 2:
+            cls.block.set()
         # Notify the program that an alert has been received.
         if "alert" in output_topic:
             cls.alertEvent.set()
@@ -115,7 +138,7 @@ if __name__ == "__main__":
                                                      "MessageType")
     else:
         rospy.logfatal("Could not find the Alert Message Type parameter!")
-        
+
     holeSubscriberTopic = None
     holeSubscriberMessagePackage = None
     holeSubscriberMessageType = None
@@ -151,7 +174,7 @@ if __name__ == "__main__":
                              (subscriberAlertTopic,
                               subscriberAlertMessagePackage,
                               subscriberAlertMessageType),
-                              (holeSubscriberTopic,
+                             (holeSubscriberTopic,
                               holeSubscriberMessagePackage,
                               holeSubscriberMessageType)]
 

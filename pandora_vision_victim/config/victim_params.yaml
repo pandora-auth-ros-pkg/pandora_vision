@@ -19,6 +19,6 @@ rf:
 
 ann:
   rgb:
-    classifier_path: /data/rgb_ann_classifier.yaml
+    classifier_path: /data/rgb_ann_classifier.xml
   depth:
-    classifier_path: /data/depth_ann_classifier.yaml
+    classifier_path: /data/depth_ann_classifier.xml
