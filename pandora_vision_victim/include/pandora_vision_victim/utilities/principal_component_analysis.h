@@ -35,9 +35,10 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
-#define PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
+#ifndef PANDORA_VISION_VICTIM_UTILITIES_PRINCIPAL_COMPONENT_ANALYSIS_H
+#define PANDORA_VISION_VICTIM_UTILITIES_PRINCIPAL_COMPONENT_ANALYSIS_H
 
+#include <string>
 #include <vector>
 
 #include <opencv2/opencv.hpp>
@@ -108,4 +109,4 @@ namespace pandora_vision
       cv::PCA pca_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
+#endif  // PANDORA_VISION_VICTIM_UTILITIES_PRINCIPAL_COMPONENT_ANALYSIS_H

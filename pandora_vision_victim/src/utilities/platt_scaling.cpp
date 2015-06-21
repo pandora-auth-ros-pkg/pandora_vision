@@ -37,6 +37,7 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <string>
 #include <vector>
 #include <opencv2/opencv.hpp>
 
@@ -221,8 +222,8 @@ namespace pandora_vision
   void PlattScaling::load(const std::string& fileName)
   {
     cv::FileStorage fs(fileName, cv::FileStorage::READ);
-    fs["A"] >> A_ ;
-    fs["B"] >> B_ ;
+    fs["A"] >> A_;
+    fs["B"] >> B_;
     fs.release();
   }
 

@@ -35,6 +35,7 @@
 * Author: Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <string>
 #include <vector>
 
 #include "pandora_vision_victim/utilities/principal_component_analysis.h"
@@ -86,9 +87,9 @@ namespace pandora_vision
   void PrincipalComponentAnalysis::load(const std::string &fileName)
   {
       cv::FileStorage fs(fileName, cv::FileStorage::READ);
-      fs["mean"] >> pca_.mean ;
-      fs["eigenvectors"] >> pca_.eigenvectors ;
-      fs["eigenvalues"] >> pca_.eigenvalues ;
+      fs["mean"] >> pca_.mean;
+      fs["eigenvectors"] >> pca_.eigenvectors;
+      fs["eigenvalues"] >> pca_.eigenvalues;
       fs.release();
   }
 }  // namespace pandora_vision
