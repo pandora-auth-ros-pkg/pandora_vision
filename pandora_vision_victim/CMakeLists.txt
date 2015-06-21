@@ -50,6 +50,8 @@ add_library(${PROJECT_NAME}_utilities
     src/utilities/file_utilities.cpp
     src/utilities/feature_extraction_utilities.cpp
     src/utilities/bag_of_words_trainer.cpp
+    src/utilities/platt_scaling.cpp
+    src/utilities/principal_component_analysis.cpp
 )
 target_link_libraries(${PROJECT_NAME}_utilities
     ${catkin_LIBRARIES}

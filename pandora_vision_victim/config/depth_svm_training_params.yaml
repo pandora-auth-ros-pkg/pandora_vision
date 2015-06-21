@@ -5,7 +5,7 @@ extract_haralick_features: false
 extract_sift_features: true
 extract_hog_features: false
 
-dictionary_size: 5
+dictionary_size: 200
 visualization: false
 save_descriptors: false
 load_descriptors: false

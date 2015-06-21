@@ -39,6 +39,7 @@
 #define PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
 
 #include <vector>
+
 #include <opencv2/opencv.hpp>
 
 /**
@@ -48,69 +49,63 @@
 namespace pandora_vision
 {
   /**
-   * @class FeatureExtractionUtilities
-   * @brief This class provides utilities for feature extraction, feature
-   * selection and feature normalization.
+   * @class PrincipalComponentAnalysis
+   * @brief This class implements a wrapper of the OPENCV Principal Component
+   * Analysis.
    */
-  class FeatureExtractionUtilities
+  class PrincipalComponentAnalysis
   {
     public:
       /**
-       * @brief Constructor
+       * @brief Default Constructor.
        */
-      FeatureExtractionUtilities();
+      PrincipalComponentAnalysis();
 
       /**
-       * @brief Destructor
+       * @brief Constructor. Initializes PCA with a specified number of maximum
+       * components.
        */
-      ~FeatureExtractionUtilities();
+      PrincipalComponentAnalysis(const cv::Mat& featuresMat,
+          int maxPrincipalComponents);
 
       /**
-       * @brief
-       * @param newMax [double]
-       * @param newMin [double]
-       * @param image [cv::Mat*]
-       * @param minVec [std::vector<double>*]
-       * @param maxVec [std::vector<double>*]
+       * @brief Constructor. Initializes PCA with a specified minimum retained
+       * variance.
+       */
+      PrincipalComponentAnalysis(const cv::Mat& featuresMat,
+          double retainedVariance);
+
+      /**
+       * @brief Destructor.
+       */
+      ~PrincipalComponentAnalysis();
+
+      /**
+       * @brief This function performs PCA, projecting a matrix into the
+       * Principal Component Subspace.
+       * @param featuresMat [const cv::Mat&] The features matrix in which to
+       * perform the analysis.
+       * @return [cv::Mat] The projected features matrix.
+       */
+      cv::Mat performPcaAnalysis(const cv::Mat& featuresMat);
+
+      /**
+       * @brief This function saves the Principal components in a file.
+       * @param fileName [const std::string&] The name of the file in which to
+       * save the data.
        * @return void
        */
-      void findMinMaxParameters(double newMax, double newMin,
-          cv::Mat* image, std::vector<double>* minVec,
-          std::vector<double>* maxVec);
+      void save(const std::string& fileName);
 
       /**
-       * @brief
-       * @param newMax [double]
-       * @param newMin [double]
-       * @param image [cv::Mat*]
-       * @param minVec [std::vector<double>&]
-       * @param maxVec [std::vector<double>&]
+       * @brief This function loads the Principal components from a file.
+       * @param fileName [const std::string&] The name of the file from which
+       * to load the data.
        * @return void
        */
-      void performMinMaxNormalization(double newMax, double newMin,
-          cv::Mat* image, const std::vector<double>& minVec,
-          const std::vector<double>& maxVec);
-
-      /**
-       * @brief
-       * @param image [cv::Mat*]
-       * @param meanVec [std::vector<double>*]
-       * @param stdDevVec [std::vector<double>*]
-       * @return void
-       */
-      void findZScoreParameters(cv::Mat* image,
-          std::vector<double>* meanVec, std::vector<double>* stdDevVec);
-
-      /**
-       * @brief
-       * @param image [cv::Mat*]
-       * @param meanVec [std::vector<double>&]
-       * @param stdDevVec [std::vector<double>&]
-       * @return void
-       */
-      void performZScoreNormalization(cv::Mat* image,
-          const std::vector<double>& meanVec,
-          const std::vector<double>& stdDevVec);
+      void load(const std::string &fileName);
+    private:
+      cv::PCA pca_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_UTILITIES_FEATURE_EXTRACTION_UTILITIES_H
