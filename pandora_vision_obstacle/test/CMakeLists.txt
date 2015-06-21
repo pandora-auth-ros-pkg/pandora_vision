@@ -21,3 +21,13 @@ target_link_libraries(discrete_wavelet_transform_test
   gtest_main
   gtest
   )
+
+catkin_add_gtest(soft_obstacle_detector_test
+  unit/soft_obstacle_detector_test.cpp
+  )
+target_link_libraries(soft_obstacle_detector_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_soft_obstacle_detector
+  gtest_main
+  gtest
+  )

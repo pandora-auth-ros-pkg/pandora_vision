@@ -237,23 +237,27 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     return probability;
   }
 
-  float SoftObstacleDetector::findDepthDistance(const cv::Mat& depthImage,
-      const std::vector<cv::Vec4i>& verticalLines, int level)
+  std::vector<float> SoftObstacleDetector::findDepthDistance(const cv::Mat& depthImage,
+      const cv::Rect& roi, int level)
   {
-    float depth = 0.0f;
+    std::vector<float> depth;
 
-    for (size_t ii = 1; ii < verticalLines.size(); ii++)
-    {
-      int x0 = verticalLines[ii][0];
-      int x1 = verticalLines[ii][2];
-      int y0 = verticalLines[ii][1];
-      int y1 = verticalLines[ii][3];
+    int xx = (roi.x + roi.width / 2) * pow(2, level);
+    int yy = roi.y * pow(2, level);
+    depth.push_back(depthImage.at<float>(yy, xx));
 
-      /// Find depth distance
-      depth += depthImage.at<float>(((y0 + y1) / 2) * pow(2, level),
-          ((x0 + x1) / 2) * pow(2, level));
-    }
-    depth /= static_cast<float>(verticalLines.size());
+    xx = (roi.x + roi.width) * pow(2, level);
+    yy = (roi.y + roi.height / 2) * pow(2, level);
+    depth.push_back(depthImage.at<float>(yy, xx));
+
+    xx = (roi.x + roi.width / 2) * pow(2, level);
+    yy = (roi.y + roi.height) * pow(2, level);
+    depth.push_back(depthImage.at<float>(yy, xx));
+
+    xx = roi.x * pow(2, level);
+    yy = (roi.y + roi.height / 2) * pow(2, level);
+    depth.push_back(depthImage.at<float>(yy, xx));
+
     return depth;
   }
 
@@ -340,25 +344,27 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       }
 
       // Find the depth distance of the soft obstacle
-      float depthDistance = findDepthDistance(depthImage, verticalLines,
+      std::vector<float> depthDistance = findDepthDistance(depthImage, *roi,
           level);
 
       if (probability > 0.0f)
       {
         ROS_INFO("Soft Obstacle Detected!");
 
-        ObstaclePOIPtr poi(new ObstaclePOI);
+        for (int ii = 0; ii < depthDistance.size(); ii++)
+        {
+          ObstaclePOIPtr poi(new ObstaclePOI);
 
-        poi->setPoint(cv::Point((roi->x + roi->width / 2) * pow(2, level),
-              (roi->y + roi->height / 2) * pow(2, level)));
-        poi->setWidth(roi->width * pow(2, level));
-        poi->setHeight(roi->height * pow(2, level));
+          poi->setPoint(cv::Point(
+                (roi->x + (1 - (ii == 3)) * roi->width / pow(2, !(ii % 2))) * pow(2, level),
+                (roi->y + (1 - (ii == 0)) * roi->height / pow(2, ii % 2)) * pow(2, level)));
 
-        poi->setProbability(probability);
-        poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+          poi->setProbability(probability);
+          poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
 
-        poi->setDepth(depthDistance);
-        pois.push_back(poi);
+          poi->setDepth(depthDistance[ii]);
+          pois.push_back(poi);
+        }
       }
     }
     return pois;
