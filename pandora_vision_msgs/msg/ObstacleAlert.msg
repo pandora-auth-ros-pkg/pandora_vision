@@ -1,7 +1,8 @@
-pandora_common_msgs/GeneralAlertInfo info
-pandora_vision_msgs/RegionOfInterest roi
+float64[4] pointsYaw
+float64[4] pointsPitch
+float64[4] pointsDepth
 
-float32 depth
+float32 probability
 uint8 type
 
 uint8 BARREL = 0
