@@ -43,7 +43,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-
+#include <ros/ros.h>
 namespace pandora_vision
 {
 namespace pandora_vision_motion
@@ -62,17 +62,14 @@ namespace pandora_vision_motion
       //!< Minimum number of points required to form a dense region
       size_t _minPts;
 
-      int _cluster_id;
 
       //!< Vector of visited points
       VisitedPoints _visitedPoints;
       //!< Vector of clustered data
       ClusteredPoints _clusteredPoints;
       NoisePoints _noise;
-      std::map<int, int> _labels;
 
-      std::vector<cv::Rect>& _data;
-
+      
       /**
        @brief Function that initializes all vectors to begin with the
        clustering process. At the beginning both visited and clustered data
@@ -123,6 +120,12 @@ namespace pandora_vision_motion
       double *DP;
 
     public:
+
+      int _cluster_id;
+
+      std::map<int, int> _labels;
+      std::vector<cv::Rect>& _data;
+
       //!< Class constructor
       explicit DBSCAN(std::vector<cv::Rect>& _data, double eps, int minPts);
 

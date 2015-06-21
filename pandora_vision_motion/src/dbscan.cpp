@@ -47,6 +47,14 @@ namespace pandora_vision
     _cluster_id = -1;
     _eps = eps;
     _minPts = minPts;
+    
+    for (int i = 0; i < data.size(); i++)
+    {
+      _labels[i] = -99;
+      _visitedPoints.push_back(false);
+      _clusteredPoints.push_back(false);
+    }
+
   }
 
   DBSCAN::~DBSCAN()
@@ -104,10 +112,17 @@ namespace pandora_vision
   std::vector<int> DBSCAN::regionQuery(int p)
   {
     std::vector<int> res;
+    ROS_INFO_STREAM("DATA="<< _data.size());
+    ROS_INFO_STREAM("find regionQuery of "<< p);
     for (int i = 0; i < _data.size(); i++)
     {
+      if(p == i)
+        continue;
       if (calculateDistanceMatrix(p, i) <= _eps)
+      {
           res.push_back(i);
+          ROS_INFO_STREAM("NEIGHBOR " << res[i]);
+      }
     }
     return res;
   }
@@ -132,12 +147,16 @@ namespace pandora_vision
       if (!isVisited(neighbours[i]))
       {
         /// Mark P' as visited
-        _visitedPoints.at(neighbours[i]) = true;
+         _visitedPoints.at(neighbours[i]) = true;
 
-        _labels[neighbours[i]] = _cluster_id;
+        // _labels[neighbours[i]] = _cluster_id;
         std::vector<int> neighbours_p = regionQuery(neighbours[i]);
         if (neighbours_p.size() >= _minPts)
             expandCluster(neighbours[i], neighbours_p);
+      }
+      if(_labels[neighbours[i]]== -99)
+      {
+        _labels[neighbours[i]] = _cluster_id;
       }
     }
   }
@@ -170,20 +189,24 @@ namespace pandora_vision
       for (int j = 0; j < _data.size(); j++)
       {
         if (i == j)
-            DP[i, j]=0;
+            DP[i, j]=0.0;
         else
-            DP[i, j]=-1;
+            DP[i, j]=-1.0;
+        double x = DP[i, j];
+        ROS_INFO_STREAM("DP["<<i<<"]["<<j<<"]="<<x);
       }
     }
-    for (int i = 0; i < _data.size(); i++){
+    for (int i = 0; i < _data.size(); i++)
+    {
       if (isVisited(i) == false)
       {
         /// Mark current point as visited
         _visitedPoints.at(i) = true;
         std::vector<int> neighbours = regionQuery(i);
-          if (neighbours.size() < _minPts)
+          if (neighbours.size() < _minPts && i != 0)
           {
             /// Mark P as noise
+            ROS_INFO_STREAM("POINT "<< i <<" is noise");
             _labels[i] = -1;
             _noise.push_back(i);
           }
@@ -200,8 +223,12 @@ namespace pandora_vision
 
   double DBSCAN::calculateDistanceMatrix(int pt1, int pt2)
   {
-    if (DP[pt1, pt2] != -1.0)
-      return DP[pt1, pt2];
+   /*  if (DP[pt1, pt2] != -1.0) */
+    // {
+      // double x = DP[pt1, pt2];
+      // ROS_INFO_STREAM("dist"<< pt1 << " "<< pt2 <<"=" << x);
+      // return DP[pt1, pt2];
+    // }
 
     cv::Rect a = _data[pt1];
     cv::Rect b = _data[pt2];
@@ -240,6 +267,7 @@ namespace pandora_vision
 
     DP[pt1, pt2] = minDist;
     DP[pt2, pt1] = minDist;
+    ROS_INFO_STREAM("DIST"<< pt1 << " "<< pt2 <<"=" << minDist);
     return DP[pt1, pt2];
   }
 }  // namespace pandora_vision

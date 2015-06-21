@@ -281,18 +281,72 @@ namespace pandora_vision
   )
   {
     std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
     cv::erode(foreground_, foreground_, cv::Mat());
     cv::dilate(foreground_, foreground_, cv::Mat());
-    cv::findContours(thresholdedDifference, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::findContours(thresholdedDifference.clone(), contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
     cv::drawContours(frame, contours, -1, cv::Scalar(0, 0, 255), 2);
     ROS_INFO_STREAM("Contours found=" << contours.size());
     std::vector<double> areas(contours.size());
     //!< find largest contour area
-    for (int i = 0; i < contours.size(); i++)
+ 
+    // for (int i = 0; i < contours.size(); i++) 
+    // {
+            // areas[i] = cv::contourArea(cv::Mat(contours[i]));
+            // ROS_INFO_STREAM("Area of contour=" << areas[i]);
+    /* }  */
+
+    std::vector<cv::Rect> boxes, finalBoxes;
+    std::vector<std::vector<cv::Rect> > clusters;
+
+    for(int i = 0; i < contours.size(); i++)
     {
-            areas[i] = cv::contourArea(cv::Mat(contours[i]));
-            ROS_INFO_STREAM("Area of contour=" << areas[i]);
+        cv::Rect r = cv::boundingRect(contours[i]);
+        boxes.push_back(r);
+        ROS_INFO_STREAM("RECT[" << i << "]=" << r.x <<" " <<r.y
+                        << " "<< r.width<< " " << r.height);
     }
+
+    DBSCAN dbscan(boxes, 100, 1);
+    dbscan.dbscan_cluster();
+    clusters = dbscan.getGroups();
+    std::vector<cv::Rect> temp;
+    // cv::groupRectangles(clusters[i],1,100000);
+    for (int i = 0; i < clusters.size(); i++)
+    {
+
+      finalBoxes.push_back(mergeBoundingBoxes(clusters[i]));
+    }
+
+        cv::Mat grouped = cv::Mat::zeros(frame.size(),CV_8UC3);
+    std::vector<cv::Scalar> colors;
+    cv::RNG rng(3);
+
+    for(int i = 0; i <= dbscan._cluster_id; i++)
+    {
+        colors.push_back(HSVtoRGBcvScalar(rng(255),255,255));
+    }
+    for(int i = 0; i < dbscan._data.size(); i++)
+    {
+      cv::Scalar color;
+        if(dbscan._labels[i] == -1)
+        {
+            color = cv::Scalar(128,128,128);
+        }
+        else
+        {
+            int label = dbscan._labels[i];
+            color = colors[label];
+        }
+        putText(grouped, to_string(dbscan._labels[i]), dbscan._data[i].tl(), cv::FONT_HERSHEY_COMPLEX, .5, color, 1);
+        drawContours(grouped, contours, i, color, -1);
+    }
+    for(int i = 0; i < finalBoxes.size(); i++)
+    {
+      cv::rectangle(grouped,finalBoxes[i].tl(),finalBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
+    }
+
+    imshow("grouped", grouped);
     //!< get index of largest contour
     /*double max;
     cv::Point maxPosition;*/
@@ -309,5 +363,128 @@ namespace pandora_vision
     cv::waitKey(10);
 
     contours.clear();
+  }
+
+  cv::Rect MotionDetector::mergeBoundingBoxes(std::vector<cv::Rect>& bbox)
+  {
+    int min_x = movingObjects_.cols;
+    int max_x = 0;
+    int min_y = movingObjects_.rows;
+    int max_y = 0;
+    for(int i = 0; i < bbox.size(); i++)
+    {
+      ROS_INFO_STREAM("RECT="<<bbox[i].tl() << " " << bbox[i].br());
+      if(min_x > bbox[i].tl().x)
+        min_x = bbox[i].tl().x;
+      if(min_y > bbox[i].tl().y)
+        min_y = bbox[i].tl().y;
+      if(max_x < bbox[i].br().x)
+        max_x = bbox[i].br().x;
+      if(max_y < bbox[i].br().y)
+        max_y = bbox[i].br().y;
+    }
+
+    cv::Rect r=cv::Rect(min_x, min_y, max_x-min_x, max_y-min_y);
+
+    ROS_INFO_STREAM("final RECT="<<r.tl() << " " << r.br());
+    return r;
+  }
+
+  cv::Scalar MotionDetector::HSVtoRGBcvScalar(int H, int S, int V) 
+  {
+
+    int bH = H; // H component
+    int bS = S; // S component
+    int bV = V; // V component
+    double fH, fS, fV;
+    double fR, fG, fB;
+    const double double_TO_BYTE = 255.0f;
+    const double BYTE_TO_double = 1.0f / double_TO_BYTE;
+
+    // Convert from 8-bit integers to doubles
+    fH = (double)bH * BYTE_TO_double;
+    fS = (double)bS * BYTE_TO_double;
+    fV = (double)bV * BYTE_TO_double;
+
+    // Convert from HSV to RGB, using double ranges 0.0 to 1.0
+    int iI;
+    double fI, fF, p, q, t;
+
+    if( bS == 0 ) 
+    {
+      // achromatic (grey)
+        fR = fG = fB = fV;
+    }
+    else 
+    {
+        // If Hue == 1.0, then wrap it around the circle to 0.0
+        if (fH>= 1.0f)
+            fH = 0.0f;
+
+        fH *= 6.0; // sector 0 to 5
+        fI = floor( fH ); // integer part of h (0,1,2,3,4,5 or 6)
+        iI = (int) fH; // " " " "
+        fF = fH - fI; // factorial part of h (0 to 1)
+
+        p = fV * ( 1.0f - fS );
+        q = fV * ( 1.0f - fS * fF );
+        t = fV * ( 1.0f - fS * ( 1.0f - fF ) );
+
+        switch( iI ) 
+        {
+        case 0:
+            fR = fV;
+            fG = t;
+            fB = p;
+            break;
+        case 1:
+            fR = q;
+            fG = fV;
+            fB = p;
+            break;
+        case 2:
+            fR = p;
+            fG = fV;
+            fB = t;
+            break;
+        case 3:
+            fR = p;
+            fG = q;
+            fB = fV;
+            break;
+        case 4:
+            fR = t;
+            fG = p;
+            fB = fV;
+            break;
+        default: // case 5 (or 6):
+            fR = fV;
+            fG = p;
+            fB = q;
+            break;
+        }
+    }
+
+    // Convert from doubles to 8-bit integers
+    int bR = (int)(fR * double_TO_BYTE);
+    int bG = (int)(fG * double_TO_BYTE);
+    int bB = (int)(fB * double_TO_BYTE);
+
+    // Clip the values to make sure it fits within the 8bits.
+    if (bR > 255)
+        bR = 255;
+    if (bR < 0)
+        bR = 0;
+    if (bG >255)
+        bG = 255;
+    if (bG < 0)
+        bG = 0;
+    if (bB > 255)
+        bB = 255;
+    if (bB < 0)
+        bB = 0;
+
+    // Set the RGB cvScalar with G B R, you can use this values as you want too..
+    return cv::Scalar(bB,bG,bR); // R component
   }
 }  // namespace pandora_vision

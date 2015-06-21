@@ -39,17 +39,28 @@
 #define PANDORA_VISION_MOTION_MOTION_DETECTOR_H
 
 #include <iostream>
+#include <algorithm>
+#include <sstream>
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <ros/ros.h>
 #include "pandora_vision_common/cv_mat_stamped.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/bbox_poi.h"
+#include "pandora_vision_motion/dbscan.h"
 
 namespace pandora_vision
 {
 namespace pandora_vision_motion
 {
+  template <class T>
+  inline std::string to_string (const T& t)
+  {
+      std::stringstream ss;
+      ss << t;
+      return ss.str();
+  }
+
   class MotionDetector
   {
     public:
@@ -145,6 +156,11 @@ namespace pandora_vision_motion
         @return void
       */
       void detectMotionPosition(const cv::Mat& diff);
+
+      bool compareContourAreas(cv::Rect contour1, cv::Rect contour2);
+
+     cv::Scalar HSVtoRGBcvScalar(int H, int S, int V);
+     cv::Rect mergeBoundingBoxes(std::vector<cv::Rect>& bbox);
 
     private:
       //!< Current frame to be processed

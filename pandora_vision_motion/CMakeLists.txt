@@ -44,6 +44,18 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+################# dpscan #################
+add_library(${PROJECT_NAME}_dbscan
+  src/dbscan.cpp
+)
+
+add_dependencies(${PROJECT_NAME}_dbscan
+    ${catkin_EXPORTED_TARGETS}
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_dbscan
+  ${catkin_LIBRARIES}
+)
 ################# motion detector #################
 add_library(${PROJECT_NAME}_detector
   src/motion_detector.cpp
@@ -54,6 +66,7 @@ add_dependencies(${PROJECT_NAME}_detector
 )
 target_link_libraries(${PROJECT_NAME}_detector
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_dbscan
 )
 
 
