@@ -7,3 +7,4 @@ uint8 type
 
 uint8 BARREL = 0
 uint8 SOFT_OBSTACLE = 1
+uint8 HARD_OBSTACLE = 2
