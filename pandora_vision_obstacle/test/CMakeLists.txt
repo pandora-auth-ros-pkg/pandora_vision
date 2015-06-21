@@ -21,3 +21,13 @@ target_link_libraries(soft_obstacle_detector_test
   gtest_main
   gtest
   )
+
+catkin_add_gtest(fast_symmetry_detector_test
+  unit/fast_symmetry_detector_test.cpp
+  )
+target_link_libraries(fast_symmetry_detector_test
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_fast_symmetry_detector
+  gtest_main
+  gtest
+  )

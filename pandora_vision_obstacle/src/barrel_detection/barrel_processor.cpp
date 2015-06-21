@@ -37,6 +37,9 @@
  *********************************************************************/
 
 #include <string>
+#include <vector>
+#include <limits>
+#include <utility>
 #include "pandora_vision_obstacle/barrel_detection/barrel_processor.h"
 
 namespace pandora_vision
@@ -46,33 +49,36 @@ namespace pandora_vision_obstacle
   BarrelProcessor::BarrelProcessor() :
     sensor_processor::Processor<ImagesStamped, POIsStamped>()
   {}
-
-  void BarrelProcessor::getSymmetryObject(const cv::Mat& inputImage, cv::Rect* roi)
+ 
+  void BarrelProcessor::getSymmetryObject(
+      const cv::Mat& inputImage,
+      cv::Rect* roi,
+      cv::Point* symmetricStartPoint,
+      cv::Point* symmetricEndPoint)
   {
     namedWindow("");
     moveWindow("", 0, 0);
     cv::Point accumIndex(-1, -1);
 
-    if(!inputImage.data)
+    if (!inputImage.data)
       return;
 
     /* Determine the shape of Hough accumulationmatrix */
-    float rhoDivs   = hypotf( inputImage.rows, inputImage.cols ) + 1;
+    float rhoDivs = hypotf(inputImage.rows, inputImage.cols) + 1;
     float thetaDivs = 180.0;
 
-    FastSymmetryDetector detector( inputImage.size(), cv::Size(rhoDivs, thetaDivs), 1 );
+    FastSymmetryDetector detector(inputImage.size(), cv::Size(rhoDivs, thetaDivs), 1);
 
-
-    cv::Rect region( 0, inputImage.rows, thetaDivs * 2.0, rhoDivs * 0.5 );
-    //setMouseCallback( "", onMouse, static_cast<void*>( &region ) );
+    cv::Rect region(0, inputImage.rows, thetaDivs * 2.0, rhoDivs * 0.5);
+    // setMouseCallback( "", onMouse, static_cast<void*>( &region ) );
     cv::Mat temp, edge, temp1, depth8UC3;
 
-    /* Adjustable parameters, depending on the scene condition */                                                                                                 
-    //int canny_thresh_1 = 30;
-    //int canny_thresh_2 = 90;
-    //int min_pair_dist  = 25;
-    //int max_pair_dist  = 500;
-    //int no_of_peaks    = 1;
+    /* Adjustable parameters, depending on the scene condition */
+    // int canny_thresh_1 = 30;
+    // int canny_thresh_2 = 90;
+    // int min_pair_dist  = 25;
+    // int max_pair_dist  = 500;
+    // int no_of_peaks    = 1;
 
 
     int canny_thresh_1 = BarrelDetection::fsd_canny_thresh_1;
@@ -85,89 +91,89 @@ namespace pandora_vision_obstacle
 
     temp.convertTo(depth8UC3, CV_8UC3, 255);
     temp.convertTo(temp1, CV_8UC1);
-    temp1.convertTo(edge, CV_8UC1, 255, 0); 
+    temp1.convertTo(edge, CV_8UC1, 255, 0);
     edge.copyTo(temp1);
     /* Find the edges */
-    if(edge.channels() == 3)
-      cvtColor( edge, edge, CV_BGR2GRAY );
-    cv::Canny( edge, edge, canny_thresh_1, canny_thresh_2 );
+    if (edge.channels() == 3)
+      cvtColor(edge, edge, CV_BGR2GRAY);
+    cv::Canny(edge, edge, canny_thresh_1, canny_thresh_2);
 
     /* Vote for the accumulation matrix */
-    detector.vote( edge, min_pair_dist, max_pair_dist );
+    detector.vote(edge, min_pair_dist, max_pair_dist);
 
     /* Draw the symmetrical line */
-    std::vector<std::pair<cv::Point, cv::Point> > result = detector.getResult( no_of_peaks );
+    std::vector<std::pair<cv::Point, cv::Point> > result = detector.getResult(no_of_peaks);
     float maxDist;
     float maxY;
     float minY;
-    detector.getMaxDist(&maxDist);                                                                                                                              
+    detector.getMaxDist(&maxDist);
     detector.getYCoords(&maxY, &minY);
 
-    for( int i = 0; i < result.size(); i ++ )
+    for (int i = 0; i < result.size(); i ++)
     {
       (*roi) = cv::Rect(
           result[i].second.x - maxDist / 2, 
           result[i].second.y, 
           result[i].first.x - result[i].second.x + maxDist, 
           result[i].first.y - result[i].second.y);
-      if(BarrelDetection::show_respective_barrel)
+      float startROIX = result[i].second.x - maxDist / 2;
+      float startROIY = result[i].second.y;
+      float widthROI = result[i].first.x - result[i].second.x + maxDist;
+      float heightROI = result[i].first.y - result[i].second.y;
+      if (startROIX < 0)
+        startROIX = 0;
+      if (startROIY < 0)
+        startROIY = 0;
+      if (startROIX + widthROI > inputImage.cols)
+        widthROI = inputImage.cols - startROIX;
+      if (startROIY + heightROI > inputImage.rows)
+        heightROI = inputImage.rows - startROIY;
+      (*roi) = cv::Rect(
+          startROIX,
+          startROIY,
+          widthROI,
+          heightROI);
+      (*symmetricStartPoint) = result[i].second;
+      (*symmetricEndPoint) = result[i].first;
+
+
+      if (BarrelDetection::show_respective_barrel)
       {
         cv::line(depth8UC3, result[i].first, result[i].second, cv::Scalar(0, 0, 255), 2);
-        cv::rectangle(depth8UC3, 
-            cv::Point(result[i].second.x - maxDist / 2, result[i].second.y), 
-            cv::Point(result[i].first.x + maxDist / 2, result[i].first.y), 
-            cv::Scalar(255, 0, 0), 
+        cv::rectangle(depth8UC3,
+            cv::Point(result[i].second.x - maxDist / 2, result[i].second.y),
+            cv::Point(result[i].first.x + maxDist / 2, result[i].first.y),
+            cv::Scalar(255, 0, 0),
             2);
-        cv::Point slope;
-        int length = std::abs((*roi).width / 2);
-        slope.x = result[i].second.x - result[i].first.x;
-        slope.y = result[i].second.y - result[i].first.y;
-        float magnitude = std::sqrt(slope.x * slope.x + slope.y * slope.y);
-        slope.x /= magnitude;
-        slope.y /= magnitude;
-        // Rotate vector 90 degrees clockwisely 
-        float temp1 = slope.x;
-        slope.x = -slope.y;
-        slope.y = temp1;
-        // A point on the symmetry line
-        cv::Point s1 = 
-          cv::Point((*roi).x + (*roi).width / 2, 
-              (*roi).y + (*roi).height / 2);
-        cv::Point s2;
-        s2.x = s1.x + slope.x * length;
-        s2.y = s1.y + slope.y * length;
-
-        cv::Point s2;
-        s3.x = s1.x - slope.x * length;
-        s3.y = s1.y - slope.y * length;
-        cv::line(temp, s3, s2, cv::Scalar(0, 255, 0), 2);
 
         /* Visualize the Hough accum matrix */
         cv::Mat accum = detector.getAccumulationMatrix();
-        accum.convertTo( accum, CV_8UC3 );
-        cv::applyColorMap( accum, accum, COLORMAP_JET );
-        cv::resize( accum, accum, cv::Size(), 2.0, 0.5 );
+        accum.convertTo(accum, CV_8UC3);
+        cv::applyColorMap(accum, accum, COLORMAP_JET);
+        cv::resize(accum, accum, cv::Size(), 2.0, 0.5);
 
         /* Draw lines based on cursor position */
-        if(accumIndex.x != -1 && accumIndex.y != -1 ) {
-          std::pair<cv::Point, cv::Point> point_pair = detector.getLine( accumIndex.y, accumIndex.x );                                                                           
-          cv::line( depth8UC3, point_pair.first, point_pair.second, CV_RGB(0, 255, 0), 2 );
+        if (accumIndex.x != -1 && accumIndex.y != -1)
+        {
+          std::pair<cv::Point, cv::Point> point_pair = detector.getLine(accumIndex.y, accumIndex.x);
+          cv::line(depth8UC3, point_pair.first, point_pair.second, CV_RGB(0, 255, 0), 2);
         }
 
         /* Show the original and edge images */
-        cv::Mat appended = cv::Mat::zeros( depth8UC3.rows + accum.rows, depth8UC3.cols * 2, CV_8UC3 );
-        depth8UC3.copyTo( cv::Mat(appended, cv::Rect(0, 0, depth8UC3.cols, depth8UC3.rows)) );
-        ROS_INFO("dfijkdf");
-        cv::cvtColor( edge, cv::Mat(appended, cv::Rect(depth8UC3.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR );
-        accum.copyTo( cv::Mat( appended, Rect(0, depth8UC3.rows, accum.cols, accum.rows) ) );
-        cv::imshow("Candidate Barrel", appended);
+        cv::imshow("edge", depth8UC3);
+        cv::waitKey(10);
+        // cv::Mat appended = cv::Mat::zeros( depth8UC3.rows + accum.rows, depth8UC3.cols * 2, CV_8UC3 );
+        // depth8UC3.copyTo( cv::Mat(appended, cv::Rect(0, 0, depth8UC3.cols, depth8UC3.rows)) );
+        // cv::cvtColor( edge, cv::Mat(appended, cv::Rect(depth8UC3.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR );
+        // accum.copyTo( cv::Mat( appended, Rect(0, depth8UC3.rows, accum.cols, accum.rows) ) );
+        // cv::imshow("Candidate Barrel", appended);
       }
     }
   }
 
   void BarrelProcessor::validateRoi(
-      const cv::Mat& rgbImage, 
-      const cv::Mat& depthImage, 
+      const cv::Mat& rgbImage,
+      const cv::Mat& depthImage,
       const cv::Rect& rectRoi,
       bool* valid)
   {
@@ -177,7 +183,105 @@ namespace pandora_vision_obstacle
     cv::Mat roiRgb = rgbImage(rectRoi);
     cv::Mat roiDepth = depthImage(rectRoi);
     cv::meanStdDev ( roiRgb, mean, stddev );
-    if(stddev.val[0] > BarrelDetection::roi_variance_thresh)
+    if (stddev.val[0] > BarrelDetection::roi_variance_thresh)
+    {
+      (*valid) = false;
+      return;
+    }
+    cv::Point slope;
+    int length = std::abs(rectRoi.width / 2);
+    slope.x = symmetricEndPoint.x - symmetricStartPoint.x;
+    slope.y = symmetricEndPoint.y - symmetricStartPoint.y;
+    float magnitude = std::sqrt(slope.x * slope.x + slope.y * slope.y);
+    slope.x /= magnitude;
+    slope.y /= magnitude;
+    // Rotate vector 90 degrees clockwisely
+    float temp1 = slope.x;
+    slope.x = -slope.y;
+    slope.y = temp1;
+    // A point on the symmetry line
+    cv::Point s1 =
+      cv::Point(rectRoi.x + rectRoi.width / 2,
+          rectRoi.y + rectRoi.height / 2);
+    cv::Point s2;
+    s2.x = s1.x + slope.x * length;
+    s2.y = s1.y + slope.y * length;
+
+    cv::Point s3;
+    s3.x = s1.x - slope.x * length;
+    s3.y = s1.y - slope.y * length;
+
+    // In order to calculate circularity place points of the perpendicular
+    // line into a vector
+
+    cv::LineIterator it(depthImage, s3, s2, 8);
+    std::vector<cv::Vec3b> buf(it.count);
+    std::vector<cv::Point> points(it.count);
+    std::vector<float> differentialPoints(it.count);
+    float maxDifferential = std::numeric_limits<float>::min();
+    differentialPoints[0] = 0.0;
+
+    for (int linePoint = 0; linePoint < it.count; linePoint ++, ++it)
+    {
+      buf[linePoint] = (const cv::Vec3b)* it;
+      points[linePoint] = it.pos();
+      if (linePoint > 0)
+      {
+        if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
+          differentialPoints[linePoint] =
+            depthImage.at<float>(points[linePoint].y, points[linePoint].x)
+            - depthImage.at<float>(points[linePoint - 1].y, points[linePoint - 1].x);
+        else
+          differentialPoints[linePoint] = 0;
+        if (std::abs(differentialPoints[linePoint]) > maxDifferential)
+          maxDifferential = std::abs(differentialPoints[linePoint]);
+      }
+    }
+
+    // calculate differentiation of depth values, through the perpendicular
+    // line(s) for the left side of the barrel and the right side of the
+    // barrel. Calculate avg of differentiation for left and right side
+    // separately.
+    int leftRightBorder = static_cast<int>(points.size() / 2);
+    float sumLeftLine = 0.0;
+
+    for (int leftLinePoint = 0; leftLinePoint <= leftRightBorder; leftLinePoint ++)
+    {
+      sumLeftLine += differentialPoints[leftLinePoint];
+    }
+
+    float avgLeftLinePoint = 0.0;
+    if (leftRightBorder + 1 > 0)
+      avgLeftLinePoint = sumLeftLine / (leftRightBorder + 1);
+    else
+      avgLeftLinePoint = 0.0;
+
+
+    float sumRightLine = 0.0;
+    for (int rightLinePoint = leftRightBorder + 1; rightLinePoint < points.size(); rightLinePoint ++)
+    {
+      sumRightLine += differentialPoints[rightLinePoint];
+    }
+
+    float avgRightLinePoint = 0.0;
+    if (points.size() - leftRightBorder > 0)
+      avgRightLinePoint = sumRightLine / (points.size() - leftRightBorder);
+    else
+      avgRightLinePoint = 0.0;
+
+    // We expect that starting from the left side of the barrel,
+    // we have a decreasing depth up to the peak of the barrel
+    // (negative differential avg), and then increasing depth.
+    if (avgLeftLinePoint >= 0 || avgRightLinePoint <= 0)
+    {
+      (*valid) = false;
+      return;
+    }
+
+    // We must have a symmetry between the differential avgs of the
+    // left and right sides of the barrel.
+    ROS_INFO("zcbznjsdjsdjh %f", std::abs(avgLeftLinePoint + avgRightLinePoint));
+    if (std::abs(avgLeftLinePoint + avgRightLinePoint) > BarrelDetection::differential_depth_unsymmetry_thresh)
     {
       (*valid) = false;
       return;
@@ -189,12 +293,39 @@ namespace pandora_vision_obstacle
   {
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;
+    output->frameHeight = input->getRgbImage().rows;
 
     // output->pois = ...(input->getImage());
     cv::Rect roi;
     getSymmetryObject(input->getDepthImage(), &roi);
     bool valid = true;
     validateRoi(input->getRgbImage(), input->getDepthImage(), roi, &valid);
+    cv::Rect roi;
+    cv::Point symmetricStartPoint;
+    cv::Point symmetricEndPoint;
+    getSymmetryObject(input->getDepthImage(), &roi, &symmetricStartPoint, &symmetricEndPoint);
+    if (roi.area() > 0)
+    {
+      bool valid = true;
+      validateRoi(input->getRgbImage(), input->getDepthImage(),
+          roi, &valid, symmetricStartPoint, symmetricEndPoint);
+
+      ObstaclePOIPtr poi(new ObstaclePOI);
+      std::vector<POIPtr> pois;
+      if (valid)
+      {
+        poi->setPoint(cv::Point((roi.x + roi.width / 2),
+              (roi.y + roi.height / 2)));
+        poi->setWidth(roi.width);
+        poi->setHeight(roi.height);
+
+        poi->setProbability(1.0);
+        poi->setType(pandora_vision_msgs::ObstacleAlert::BARREL);
+
+        // poi->setDepth(depthDistance);
+        pois.push_back(poi);
+        ROS_INFO("barrel found");
+      }
 
     if (output->pois.empty())
     {

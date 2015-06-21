@@ -44,6 +44,15 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
+############################# fast symmetry detector #########################
+add_library(${PROJECT_NAME}_fast_symmetry_detector
+  src/barrel_detection/FastSymmetryDetector.cpp
+  src/barrel_detection/parameters.cpp
+)
+target_link_libraries(${PROJECT_NAME}_fast_symmetry_detector
+  ${catkin_LIBRARIES}
+)
+
 ############################### obstacle preprocessor ##############################
 add_library(${PROJECT_NAME}_obstacle_preprocessor
   src/obstacle_preprocessor.cpp
