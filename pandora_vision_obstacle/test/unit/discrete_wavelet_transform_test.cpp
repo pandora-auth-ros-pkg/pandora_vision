@@ -175,13 +175,143 @@ namespace pandora_vision
 
   TEST_F(DiscreteWaveletTransformTest, isLowLowResultCorrect)
   {
-    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5,
+        6, 7, 8, 9);
 
     std::vector<MatPtr> llImages = dwtPtr_->getLowLow(image);
 
     ASSERT_EQ(1, llImages.size());
-    //std::cout << *llImages[0] << std::endl;
+
     ASSERT_EQ(2, llImages[0]->rows);
     ASSERT_EQ(2, llImages[0]->cols);
+
+    EXPECT_NEAR(llImages[0]->at<float>(0, 0), 0.5, 1e-6);
+    EXPECT_NEAR(llImages[0]->at<float>(0, 1), 2.5, 1e-6);
+    EXPECT_NEAR(llImages[0]->at<float>(1, 0), 5.5, 1e-6);
+    EXPECT_NEAR(llImages[0]->at<float>(1, 1), 14, 1e-6);
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isLowHighResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5,
+        6, 7, 8, 9);
+
+    std::vector<MatPtr> lhImages = dwtPtr_->getLowHigh(image);
+
+    ASSERT_EQ(1, lhImages.size());
+
+    ASSERT_EQ(2, lhImages[0]->rows);
+    ASSERT_EQ(2, lhImages[0]->cols);
+
+    EXPECT_NEAR(lhImages[0]->at<float>(0, 0), 0.5, 1e-6);
+    EXPECT_NEAR(lhImages[0]->at<float>(0, 1), - 1.5, 1e-6);
+    EXPECT_NEAR(lhImages[0]->at<float>(1, 0), 1, 1e-6);
+    EXPECT_NEAR(lhImages[0]->at<float>(1, 1), - 7.5, 1e-6);
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isHighLowResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5,
+        6, 7, 8, 9);
+
+    std::vector<MatPtr> hlImages = dwtPtr_->getHighLow(image);
+
+    ASSERT_EQ(1, hlImages.size());
+
+    ASSERT_EQ(2, hlImages[0]->rows);
+    ASSERT_EQ(2, hlImages[0]->cols);
+
+    EXPECT_NEAR(hlImages[0]->at<float>(0, 0), 1.5, 1e-6);
+    EXPECT_NEAR(hlImages[0]->at<float>(0, 1), 3, 1e-6);
+    EXPECT_NEAR(hlImages[0]->at<float>(1, 0), - 3.5, 1e-6);
+    EXPECT_NEAR(hlImages[0]->at<float>(1, 1), - 8.5, 1e-6);
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isHighHighResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5,
+        6, 7, 8, 9);
+
+    std::vector<MatPtr> hhImages = dwtPtr_->getHighHigh(image);
+
+    ASSERT_EQ(1, hhImages.size());
+
+    ASSERT_EQ(2, hhImages[0]->rows);
+    ASSERT_EQ(2, hhImages[0]->cols);
+
+    EXPECT_NEAR(hhImages[0]->at<float>(0, 0), 0, 1e-6);
+    EXPECT_NEAR(hhImages[0]->at<float>(0, 1), - 1.5, 1e-6);
+    EXPECT_NEAR(hhImages[0]->at<float>(1, 0), - 0.5, 1e-6);
+    EXPECT_NEAR(hhImages[0]->at<float>(1, 1), 4.5, 1e-6);
+  }
+
+  TEST_F(DiscreteWaveletTransformTest, isDWTResultCorrect)
+  {
+    cv::Mat image = (cv::Mat_<float>(4, 4) << 1, 2, 3, 4, 5,
+        6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7);
+
+    std::vector<MatPtr> dwtImages = dwtPtr_->dwt2D(image);
+
+    ASSERT_EQ(4, dwtImages.size());
+
+    ASSERT_EQ(3, dwtImages[0]->rows);
+    ASSERT_EQ(3, dwtImages[0]->cols);
+
+    ASSERT_EQ(3, dwtImages[1]->rows);
+    ASSERT_EQ(2, dwtImages[1]->cols);
+
+    ASSERT_EQ(2, dwtImages[2]->rows);
+    ASSERT_EQ(3, dwtImages[2]->cols);
+
+    ASSERT_EQ(2, dwtImages[3]->rows);
+    ASSERT_EQ(2, dwtImages[3]->cols);
+
+    cv::Mat llImage = (cv::Mat_<float>(3, 3) << 0.5, 2.5,
+        2, 7, 8, 5.5, 2, 5.5, 3.5);
+
+    for (int ii = 0; ii < llImage.rows; ii++)
+    {
+      for (int jj = 0; jj < llImage.cols; jj++)
+      {
+        EXPECT_NEAR(llImage.at<float>(ii, jj),
+            dwtImages[0]->at<float>(ii, jj), 1e-6);
+      }
+    }
+
+    cv::Mat lhImage = (cv::Mat_<float>(3, 2) << 0.5, 0.5,
+        - 3.5, 1, 0.5, 0.5);
+
+    for (int ii = 0; ii < lhImage.rows; ii++)
+    {
+      for (int jj = 0; jj < lhImage.cols; jj++)
+      {
+        EXPECT_NEAR(lhImage.at<float>(ii, jj),
+            dwtImages[1]->at<float>(ii, jj), 1e-6);
+      }
+    }
+
+    cv::Mat hlImage = (cv::Mat_<float>(2, 3) << 2, 4, 2,
+        - 2.5, 4, 2);
+
+    for (int ii = 0; ii < hlImage.rows; ii++)
+    {
+      for (int jj = 0; jj < hlImage.cols; jj++)
+      {
+        EXPECT_NEAR(hlImage.at<float>(ii, jj),
+            dwtImages[2]->at<float>(ii, jj), 1e-6);
+      }
+    }
+
+    cv::Mat hhImage = (cv::Mat_<float>(2, 2) << 0, 0,
+        4.5, 0);
+
+    for (int ii = 0; ii < hhImage.rows; ii++)
+    {
+      for (int jj = 0; jj < hhImage.cols; jj++)
+      {
+        EXPECT_NEAR(hhImage.at<float>(ii, jj),
+            dwtImages[3]->at<float>(ii, jj), 1e-6);
+      }
+    }
   }
 }  // namespace pandora_vision

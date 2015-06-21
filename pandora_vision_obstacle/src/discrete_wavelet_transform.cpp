@@ -141,7 +141,7 @@ namespace pandora_vision
       *subImageHigh = cv::Mat::zeros(imageHigh.rows, static_cast<int>(
           std::floor(imageHigh.cols / 2.0f)), CV_32FC1);
       int imageIndex = 0;
-      for (int jj = 1; jj < imageHigh.cols - 1; jj += 2)
+      for (int jj = 1; jj < imageHigh.cols; jj += 2)
       {
         imageHigh.col(jj).copyTo(subImageHigh->col(imageIndex));
         imageIndex += 1;
@@ -160,19 +160,10 @@ namespace pandora_vision
   void DiscreteWaveletTransform::convAndSubSample(const cv::Mat& inImage, bool rows,
       const MatPtr& subImageLow, const MatPtr& subImageHigh)
   {
-    cv::Mat imageConvLow, imageConvHigh;
+    cv::Mat imageConvLow = optionalConv(inImage, true, rows);
+    cv::Mat imageConvHigh = optionalConv(inImage, false, rows);
 
-    if (rows)
-    {
-      imageConvLow = optionalConv(inImage, true, rows);
-      imageConvHigh = optionalConv(inImage, false, rows);
-    }
-    else
-    {
-      imageConvLow = optionalConv(inImage, true, rows);
-      imageConvHigh = optionalConv(inImage, false, rows);
-    }
-    subSample(imageConvLow, imageConvHigh, rows, subImageLow, subImageHigh);
+    subSample(imageConvLow, imageConvHigh, !rows, subImageLow, subImageHigh);
   }
 
   std::vector<MatPtr> DiscreteWaveletTransform::getLowLow(const cv::Mat& inImage, int level)
@@ -185,12 +176,12 @@ namespace pandora_vision
       cv::Mat imageConvLow = convCols(input, true);
 
       MatPtr subImageL(new cv::Mat);
-      subSampleLow(imageConvLow, false, subImageL);
+      subSampleLow(imageConvLow, true, subImageL);
 
       imageConvLow = convRows(*subImageL, true);
 
       MatPtr subImageLL(new cv::Mat);
-      subSampleLow(imageConvLow, true, subImageLL);
+      subSampleLow(imageConvLow, false, subImageLL);
 
       LLImages.push_back(subImageLL);
 
@@ -212,7 +203,7 @@ namespace pandora_vision
       cv::Mat imageConvLow = convCols(input, true);
 
       MatPtr subImageL(new cv::Mat);
-      subSampleLow(imageConvLow, false, subImageL);
+      subSampleLow(imageConvLow, true, subImageL);
 
       MatPtr subImageLL(new cv::Mat), subImageLH(new cv::Mat);
       convAndSubSample(*subImageL, true, subImageLL, subImageLH);
@@ -240,7 +231,7 @@ namespace pandora_vision
       cv::Mat imageConvLow = convRows(*subImageH, true);
 
       MatPtr subImageHL(new cv::Mat);
-      subSampleLow(imageConvLow, true, subImageHL);
+      subSampleLow(imageConvLow, false, subImageHL);
 
       HLImages.push_back(subImageHL);
 
@@ -249,7 +240,7 @@ namespace pandora_vision
         imageConvLow = convRows(*subImageL, true);
 
         MatPtr subImageLL(new cv::Mat);
-        subSampleLow(imageConvLow, true, subImageLL);
+        subSampleLow(imageConvLow, false, subImageLL);
 
         input = subImageLL->clone();
       }
@@ -270,7 +261,7 @@ namespace pandora_vision
       cv::Mat imageConvHigh = convRows(*subImageH, false);
 
       MatPtr subImageHH(new cv::Mat);
-      subSampleHigh(imageConvHigh, true, subImageHH);
+      subSampleHigh(imageConvHigh, false, subImageHH);
 
       HHImages.push_back(subImageHH);
 
@@ -279,7 +270,7 @@ namespace pandora_vision
         cv::Mat imageConvLow = convRows(*subImageL, true);
 
         MatPtr subImageLL(new cv::Mat);
-        subSampleLow(imageConvLow, true, subImageLL);
+        subSampleLow(imageConvLow, false, subImageLL);
 
         input = subImageLL->clone();
       }

@@ -191,8 +191,8 @@ namespace pandora_vision
           bool rows, const MatPtr& subImageLow, const MatPtr& subImageHigh);
 
       /**
-       * @brief Perform convolution and subsampling row-wise or
-       * column-wise according to boolean input
+       * @brief Perform convolution row-wise or column-wise and the oposite
+       * subsampling according to boolean input
        * @param inImage [const cv::Mat&] The image to be convolved
        * @param rows [bool] Whether the convolution is performed
        * row-wise. Then downsampling is performed column-wise
