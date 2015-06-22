@@ -60,7 +60,8 @@ namespace pandora_vision
        * @brief Constructor without NodeHandle used for testing
        **/
       SoftObstacleDetector(int gaussianKernelSize, float gradThreshold,
-          float betaThreshold);
+          float betaThreshold, const cv::Size& erodeKernelSize,
+          const cv::Size& dilateKernelSize);
 
       /**
        * @brief Destructor
@@ -160,6 +161,11 @@ namespace pandora_vision
       /// The maximum beta difference that two lines should have to be
       /// considered almost identical
       float betaThreshold_;
+
+      /// The size of the kernel used to erode the image
+      cv::Size erodeKernelSize_;
+      /// The size of the kernel used to dilate the image
+      cv::Size dilateKernelSize_;
 
       /// Debug parameters
       bool showOriginalImage_;

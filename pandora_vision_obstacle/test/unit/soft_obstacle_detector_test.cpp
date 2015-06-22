@@ -47,7 +47,8 @@ namespace pandora_vision
   {
     public:
       SoftObstacleDetectorTest() :
-        detector_(new SoftObstacleDetector(13, 2.0, 3.0)) {}
+          detector_(new SoftObstacleDetector(13, 2.0, 3.0, cv::Size(5, 1),
+          cv::Size(3, 3))) {}
 
       bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
           float grad, float beta)

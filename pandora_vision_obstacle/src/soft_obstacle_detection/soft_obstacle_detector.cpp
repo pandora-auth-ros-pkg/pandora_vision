@@ -51,12 +51,20 @@ namespace pandora_vision
   {
     nodeName_ = name;
 
-    double param;
     nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
 
+    int rows, cols;
+    nh.param("erodeKernelSize/rows", rows, 3);
+    nh.param("erodeKernelSize/cols", cols, 3);
+    erodeKernelSize_ = cv::Size(rows, cols);
+
+    nh.param("dilateKernelSize/rows", rows, 3);
+    nh.param("dilateKernelSize/cols", cols, 3);
+    dilateKernelSize_ = cv::Size(rows, cols);
+
+    double param;
     nh.param("gradientThreshold", param, 2.0);
     gradientThreshold_ = param;
-
     nh.param("betaThreshold", param, 3.0);
     betaThreshold_ = param;
 
@@ -75,11 +83,15 @@ namespace pandora_vision
   }
 
   SoftObstacleDetector::SoftObstacleDetector(int gaussianKernelSize,
-      float gradThreshold, float betaThreshold)
+      float gradThreshold, float betaThreshold, const cv::Size& erodeKernelSize,
+      const cv::Size& dilateKernelSize)
   {
     gaussianKernelSize_ = gaussianKernelSize;
     gradientThreshold_ = gradThreshold;
     betaThreshold_ = betaThreshold;
+
+    erodeKernelSize_ = erodeKernelSize;
+    dilateKernelSize_ = dilateKernelSize;
 
     showOriginalImage_ = false;
     showDWTImage_ = false;
@@ -137,9 +149,15 @@ namespace pandora_vision
     {
       *image = 255 - *image;
     }
+
+    // First erode image to eliminate noise and then dilate
+    cv::Mat erodedImage;
+    cv::Mat erodeKernel = cv::getStructuringElement(cv::MORPH_RECT, erodeKernelSize_);
+    cv::erode(*image, erodedImage, erodeKernel);
+
     cv::Mat dilatedImage;
-    // cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-    cv::dilate(*image, dilatedImage, cv::Mat());
+    cv::Mat dilateKernel = cv::getStructuringElement(cv::MORPH_RECT, dilateKernelSize_);
+    cv::dilate(erodedImage, dilatedImage, dilateKernel);
     *image = dilatedImage;
   }
 
@@ -296,16 +314,16 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     cv::Mat grayScaleImage;
     cv::cvtColor(rgbImage, grayScaleImage, CV_BGR2GRAY);
 
+    cv::Mat imageFloat;
+    grayScaleImage.convertTo(imageFloat, CV_32FC1);
+
     // Blur image using Gaussian filter
     cv::Mat blurImage;
-    cv::GaussianBlur(grayScaleImage, blurImage, cv::Size(gaussianKernelSize_,
+    cv::GaussianBlur(imageFloat, blurImage, cv::Size(gaussianKernelSize_,
           gaussianKernelSize_), 0);
 
-    cv::Mat imageFloat;
-    blurImage.convertTo(imageFloat, CV_32FC1);
-
     // Perform DWT
-    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(imageFloat, level);
+    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(blurImage, level);
     MatPtr lhImage(LHImages[LHImages.size() - 1]);
 
     // Normalize image [0, 255]
