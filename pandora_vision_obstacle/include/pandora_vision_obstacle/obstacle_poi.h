@@ -44,7 +44,7 @@
 
 namespace pandora_vision
 {
-  class ObstaclePOI : public BBoxPOI
+  class ObstaclePOI : public POI
   {
     public:
       typedef boost::shared_ptr<ObstaclePOI> Ptr;

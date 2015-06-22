@@ -130,16 +130,16 @@ namespace pandora_vision
           int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr);
 
       /**
-       * @brief Calculate average depth distance of soft obstacle
+       * @brief Find depth distance of soft obstacle bounding box
        * @param depthImage [const cv::Mat&] The input depth image
-       * @param verticalLines [const std::vector<cv::Vec4i>&] The
-       * input vector that contains the vertical lines found
+       * @param roi [const cv::Rect&] The bounding box that is
+       * used to find the depth distance
        * @param level [int] The number of stages of the DWT
-       * @return [float] The average depth distance of the
-       * vertical lines' centers
+       * @return [std::vector<float>] The depth distance of each
+       * point of the bounding box
        **/
-      float findDepthDistance(const cv::Mat& depthImage,
-          const std::vector<cv::Vec4i>& verticalLines, int level = 1);
+      std::vector<float> findDepthDistance(const cv::Mat& depthImage,
+          const cv::Rect& roi, int level = 1);
 
     private:
       /// The DWT class object used to perform this operation

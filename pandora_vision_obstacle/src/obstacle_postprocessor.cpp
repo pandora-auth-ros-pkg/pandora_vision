@@ -59,26 +59,20 @@ namespace pandora_vision
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     output->header = alertVector.header;
 
+    pandora_vision_msgs::ObstacleAlert obstacleAlert;
+
     for (int ii = 0; ii < alertVector.alerts.size(); ii++)
     {
-      pandora_vision_msgs::ObstacleAlert obstacleAlert;
-
-      obstacleAlert.info.yaw = alertVector.alerts[ii].yaw;
-      obstacleAlert.info.pitch = alertVector.alerts[ii].pitch;
-      obstacleAlert.info.probability = 1;
+      obstacleAlert.pointsYaw[ii] = alertVector.alerts[ii].yaw;
+      obstacleAlert.pointsPitch[ii] = alertVector.alerts[ii].pitch;
+      obstacleAlert.probability = alertVector.alerts[ii].probability;
 
       boost::shared_ptr<ObstaclePOI> obstaclePOI(boost::dynamic_pointer_cast<ObstaclePOI>(
         input->pois[ii]));
       obstacleAlert.type = obstaclePOI->getType();
-      obstacleAlert.depth = obstaclePOI->getDepth();
-
-      obstacleAlert.roi.center.x = obstaclePOI->getPoint().x;
-      obstacleAlert.roi.center.y = obstaclePOI->getPoint().y;
-      obstacleAlert.roi.width = obstaclePOI->getWidth();
-      obstacleAlert.roi.height = obstaclePOI->getHeight();
-
-      output->alerts.push_back(obstacleAlert);
+      obstacleAlert.pointsDepth[ii] = obstaclePOI->getDepth();
     }
+    output->alerts.push_back(obstacleAlert);
 
     if (output->alerts.empty())
     {
