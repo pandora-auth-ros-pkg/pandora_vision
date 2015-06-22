@@ -74,6 +74,27 @@ namespace pandora_vision
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }
 
+  SoftObstacleDetector::SoftObstacleDetector(int gaussianKernelSize,
+      float gradThreshold, float betaThreshold)
+  {
+    gaussianKernelSize_ = gaussianKernelSize;
+    gradientThreshold_ = gradThreshold;
+    betaThreshold_ = betaThreshold;
+
+    showOriginalImage_ = false;
+    showDWTImage_ = false;
+    showOtsuImage_ = false;
+    showDilatedImage_ = false;
+    showVerticalLines_ = false;
+    showROI_ = false;
+
+    float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
+    cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
+    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - invRootTwo, invRootTwo);
+
+    dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
+  }
+
   void SoftObstacleDetector::setShowOriginalImage(bool arg)
   {
     showOriginalImage_ = arg;
@@ -122,10 +143,10 @@ namespace pandora_vision
     *image = dilatedImage;
   }
 
-  bool SoftObstacleDetector::findNonIdenticalLines(const std::vector<cv::Vec4i> verticalLines,
-      const std::vector<cv::Vec2f> lineCoeffs, float grad, float beta)
+  bool SoftObstacleDetector::findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
+      float grad, float beta)
   {
-    for (size_t ii = 0; ii < verticalLines.size(); ii++)
+    for (size_t ii = 0; ii < lineCoeffs.size(); ii++)
     {
       if (fabs(fabs(grad) - fabs(lineCoeffs[ii][0])) < gradientThreshold_
           && fabs(fabs(beta) - fabs(lineCoeffs[ii][1])) < betaThreshold_)
@@ -173,7 +194,7 @@ namespace pandora_vision
       /// If line is almost vertical and not close to image borders
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
-        if (findNonIdenticalLines(verticalLines, lineCoefficients, grad, beta))
+        if (findNonIdenticalLines(lineCoefficients, grad, beta))
         {
           lineCoefficients.push_back(cv::Vec2f(grad, beta));
 
@@ -201,7 +222,7 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     int miny = std::numeric_limits<int>::max();
     int maxy = std::numeric_limits<int>::min();
 
-    for (size_t ii = 1; ii < verticalLines.size(); ii++)
+    for (size_t ii = 0; ii < verticalLines.size(); ii++)
     {
       /// Calculate min and max of line coordinates
       int x0 = verticalLines[ii][0];

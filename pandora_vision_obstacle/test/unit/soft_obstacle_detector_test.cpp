@@ -42,12 +42,53 @@
 
 namespace pandora_vision
 {
-  class SoftObstacleDetectorTest
+  class SoftObstacleDetectorTest : public ::testing::Test
   {
     public:
-      SoftObstacleDetectorTest() {}
+      SoftObstacleDetectorTest() :
+        detector_(new SoftObstacleDetector(13, 2.0, 3.0)) {}
+
+      bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
+          float grad, float beta)
+      {
+        return detector_->findNonIdenticalLines(lineCoeffs, grad, beta);
+      }
+
+      float detectROI(const std::vector<cv::Vec4i>& verticalLines,
+            int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr)
+      {
+        return detector_->detectROI(verticalLines, frameHeight, roiPtr);
+      }
 
     protected:
       boost::shared_ptr<SoftObstacleDetector> detector_;
   };
+
+  TEST_F(SoftObstacleDetectorTest, areIdenticalLinesDetected)
+  {
+    std::vector<cv::Vec2f> lineCoeffs;
+    lineCoeffs.push_back(cv::Vec2f(89, 20));
+    lineCoeffs.push_back(cv::Vec2f(85, 30));
+
+    ASSERT_FALSE(findNonIdenticalLines(lineCoeffs, 90, 22));
+    ASSERT_TRUE(findNonIdenticalLines(lineCoeffs, 85, 35));
+    ASSERT_TRUE(findNonIdenticalLines(lineCoeffs, 95, 28));
+  }
+
+  TEST_F(SoftObstacleDetectorTest, isROIDetectedCorrectly)
+  {
+    std::vector<cv::Vec4i> lines;
+    lines.push_back(cv::Vec4i(1, 1, 1, 3));
+    lines.push_back(cv::Vec4i(2, 1, 2, 3));
+    lines.push_back(cv::Vec4i(4, 1, 4, 3));
+
+    boost::shared_ptr<cv::Rect> roi(new cv::Rect);
+
+    ASSERT_EQ(0.5, detectROI(lines, 4, roi));
+
+    EXPECT_EQ(1, roi->x);
+    EXPECT_EQ(1, roi->y);
+    EXPECT_EQ(3, roi->width);
+    EXPECT_EQ(2, roi->height);
+  }
 }  // namespace pandora_vision

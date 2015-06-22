@@ -56,6 +56,11 @@ namespace pandora_vision
        * @brief Constructor that initializes dwt Haar kernels
        **/
       SoftObstacleDetector(const std::string& name, const ros::NodeHandle& nh);
+      /**
+       * @brief Constructor without NodeHandle used for testing
+       **/
+      SoftObstacleDetector(int gaussianKernelSize, float gradThreshold,
+          float betaThreshold);
 
       /**
        * @brief Destructor
@@ -94,8 +99,6 @@ namespace pandora_vision
       /**
        * @brief Find out if a line is almost the same with another
        * that is already added to the vector of vertical lines
-       * @param verticalLines [const std::vector<cv::Vec4i>&] The
-       * input vector that contains the vertical lines found
        * @param lineCoeffs [const std::vector<cv::Vec2f>&] The
        * vector containing the grad and beta of each vertical line
        * @param grad [float] The grad of the current line
@@ -103,8 +106,8 @@ namespace pandora_vision
        * @return [bool] Whether the current vertical line is not very
        * close to another and so it should be added to the vector
        **/
-      bool findNonIdenticalLines(const std::vector<cv::Vec4i> verticalLines,
-          const std::vector<cv::Vec2f> lineCoeffs, float grad, float beta);
+      bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
+          float grad, float beta);
 
       /**
        * @brief Perform Probabilistic Hough Lines Transform and
@@ -165,6 +168,8 @@ namespace pandora_vision
       bool showDilatedImage_;
       bool showVerticalLines_;
       bool showROI_;
+
+      friend class SoftObstacleDetectorTest;
   };
 }  // namespace pandora_vision
 
