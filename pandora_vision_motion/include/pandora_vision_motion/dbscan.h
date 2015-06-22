@@ -139,7 +139,7 @@ namespace pandora_vision_motion
        @param void
        @return vector of clusters
       */
-      std::vector<std::vector<cv::Rect> > getGroups();
+      std::vector<std::vector<cv::Rect> > getGroups(std::vector<cv::Rect>* noisePoints);
   };
 }  // namespace pandora_vision_motion
 }  // namespace pandora_vision

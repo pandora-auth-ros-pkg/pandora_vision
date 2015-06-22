@@ -112,8 +112,8 @@ namespace pandora_vision
   std::vector<int> DBSCAN::regionQuery(int p)
   {
     std::vector<int> res;
-    ROS_INFO_STREAM("DATA="<< _data.size());
-    ROS_INFO_STREAM("find regionQuery of "<< p);
+    // ROS_INFO_STREAM("DATA="<< _data.size());
+    // ROS_INFO_STREAM("find regionQuery of "<< p);
     for (int i = 0; i < _data.size(); i++)
     {
       if(p == i)
@@ -121,7 +121,7 @@ namespace pandora_vision
       if (calculateDistanceMatrix(p, i) <= _eps)
       {
           res.push_back(i);
-          ROS_INFO_STREAM("NEIGHBOR " << res[i]);
+          // ROS_INFO_STREAM("NEIGHBOR " << res[i]);
       }
     }
     return res;
@@ -166,9 +166,11 @@ namespace pandora_vision
    @param void
    @return vector of clusters
   */
-  std::vector<std::vector<cv::Rect> > DBSCAN::getGroups()
+  std::vector<std::vector<cv::Rect> > DBSCAN::getGroups(std::vector<cv::Rect>* noisePoints)
   {
     std::vector<std::vector<cv::Rect> > clusters;
+    std::vector<cv::Rect> noise;
+    // noise.push_back(cv::Rect());
     for (int i = 0; i <= _cluster_id; i++)
     {
       clusters.push_back(std::vector<cv::Rect>());
@@ -176,8 +178,12 @@ namespace pandora_vision
       {
         if (_labels[j] == i)
           clusters[clusters.size()-1].push_back(_data[j]);
+        if(_labels[j] == -1)
+          noise.push_back(_data[j]);
       }
     }
+
+    *noisePoints = noise;
     return clusters;
   }
 
@@ -193,7 +199,7 @@ namespace pandora_vision
         else
             DP[i, j]=-1.0;
         double x = DP[i, j];
-        ROS_INFO_STREAM("DP["<<i<<"]["<<j<<"]="<<x);
+        // ROS_INFO_STREAM("DP["<<i<<"]["<<j<<"]="<<x);
       }
     }
     for (int i = 0; i < _data.size(); i++)
@@ -206,7 +212,7 @@ namespace pandora_vision
           if (neighbours.size() < _minPts && i != 0)
           {
             /// Mark P as noise
-            ROS_INFO_STREAM("POINT "<< i <<" is noise");
+            // ROS_INFO_STREAM("POINT "<< i <<" is noise");
             _labels[i] = -1;
             _noise.push_back(i);
           }
@@ -267,7 +273,7 @@ namespace pandora_vision
 
     DP[pt1, pt2] = minDist;
     DP[pt2, pt1] = minDist;
-    ROS_INFO_STREAM("DIST"<< pt1 << " "<< pt2 <<"=" << minDist);
+    // ROS_INFO_STREAM("DIST"<< pt1 << " "<< pt2 <<"=" << minDist);
     return DP[pt1, pt2];
   }
 }  // namespace pandora_vision

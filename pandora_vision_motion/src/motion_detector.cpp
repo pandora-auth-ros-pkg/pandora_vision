@@ -296,7 +296,7 @@ namespace pandora_vision
             // ROS_INFO_STREAM("Area of contour=" << areas[i]);
     /* }  */
 
-    std::vector<cv::Rect> boxes, finalBoxes;
+    std::vector<cv::Rect> boxes, finalBoxes, noiseBoxes;
     std::vector<std::vector<cv::Rect> > clusters;
 
     for(int i = 0; i < contours.size(); i++)
@@ -307,9 +307,9 @@ namespace pandora_vision
                         << " "<< r.width<< " " << r.height);
     }
 
-    DBSCAN dbscan(boxes, 100, 1);
+    DBSCAN dbscan(boxes, 20, 1);
     dbscan.dbscan_cluster();
-    clusters = dbscan.getGroups();
+    clusters = dbscan.getGroups(&noiseBoxes);
     std::vector<cv::Rect> temp;
     // cv::groupRectangles(clusters[i],1,100000);
     for (int i = 0; i < clusters.size(); i++)
@@ -345,6 +345,12 @@ namespace pandora_vision
     {
       cv::rectangle(grouped,finalBoxes[i].tl(),finalBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
     }
+    
+    for(int i = 0; i < noiseBoxes.size(); i++)
+    {
+      cv::rectangle(grouped,noiseBoxes[i].tl(),noiseBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
+    }
+
 
     imshow("grouped", grouped);
     //!< get index of largest contour
