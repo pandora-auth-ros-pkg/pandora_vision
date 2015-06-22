@@ -69,7 +69,7 @@ namespace pandora_vision
 
     float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
     cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
-    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - invRootTwo, invRootTwo);
+    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
 
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }
@@ -90,7 +90,7 @@ namespace pandora_vision
 
     float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
     cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
-    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - invRootTwo, invRootTwo);
+    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
 
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }

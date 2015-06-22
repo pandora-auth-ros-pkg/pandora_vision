@@ -37,6 +37,7 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
+#include <vector>
 #include <gtest/gtest.h>
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 

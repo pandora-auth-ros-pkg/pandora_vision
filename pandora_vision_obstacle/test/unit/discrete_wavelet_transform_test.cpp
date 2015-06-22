@@ -50,7 +50,7 @@ namespace pandora_vision
       DiscreteWaveletTransformTest()
       {
         cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << 1 / sqrt(2), 1 / sqrt(2));
-        cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << - 1 / sqrt(2), 1 / sqrt(2));
+        cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << 1 / sqrt(2), - 1 / sqrt(2));
 
         dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
       }
@@ -65,11 +65,9 @@ namespace pandora_vision
         return dwtPtr_->convCols(image, low);
       }
 
-      void subSample(const cv::Mat& imageLow, const cv::Mat& imageHigh, bool rows,
-          const MatPtr& subImageLow, const MatPtr& subImageHigh)
+      void subSample(const cv::Mat& image, bool rows, const MatPtr& subImage)
       {
-        return dwtPtr_->subSample(imageLow, imageHigh, rows, subImageLow,
-            subImageHigh);
+        return dwtPtr_->subSample(image, rows, subImage);
       }
 
     protected:
@@ -96,8 +94,8 @@ namespace pandora_vision
     cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
     cv::Mat imageConvRows = convRows(image, true);
-    cv::Mat rowsResult = (cv::Mat_<float>(3, 4) << 1, 3, 5, 3, 4, 9, 11,
-        6, 7, 15, 17, 9);
+    cv::Mat rowsResult = (cv::Mat_<float>(3, 4) << 1, 3, 5, 6, 4, 9, 11,
+        12, 7, 15, 17, 18);
     rowsResult /= static_cast<float>(std::sqrt(2));
 
     ASSERT_TRUE(imageConvRows.rows == rowsResult.rows);
@@ -112,7 +110,7 @@ namespace pandora_vision
 
     cv::Mat imageConvCols = convCols(image, true);
     cv::Mat colsResult = (cv::Mat_<float>(4, 3) << 1, 2, 3, 5, 7, 9,
-        11, 13, 15, 7, 8, 9);
+        11, 13, 15, 14, 16, 18);
     colsResult /= static_cast<float>(std::sqrt(2));
 
     ASSERT_TRUE(imageConvCols.rows == colsResult.rows);
@@ -131,46 +129,35 @@ namespace pandora_vision
     cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 1, 1, 2, 2, 2,
         3, 3, 3);
 
-    MatPtr subImageLow(new cv::Mat());
-    MatPtr subImageHigh(new cv::Mat());
+    MatPtr subImage(new cv::Mat());
 
-    subSample(image, image, true, subImageLow, subImageHigh);
+    subSample(image, true, subImage);
 
-    ASSERT_EQ(2, subImageLow->rows);
-    ASSERT_EQ(3, subImageLow->cols);
+    ASSERT_EQ(1, subImage->rows);
+    ASSERT_EQ(3, subImage->cols);
 
-    ASSERT_EQ(1, subImageHigh->rows);
-    ASSERT_EQ(3, subImageHigh->cols);
-
-    for (int ii = 0; ii < subImageLow->cols; ii++)
+    for (int ii = 0; ii < subImage->cols; ii++)
     {
-      EXPECT_EQ(1, subImageLow->at<float>(0, ii));
-      EXPECT_EQ(2, subImageHigh->at<float>(0, ii));
-      EXPECT_EQ(3, subImageLow->at<float>(1, ii));
+      EXPECT_EQ(2, subImage->at<float>(0, ii));
     }
   }
 
   TEST_F(DiscreteWaveletTransformTest, isSubSampleColsResultCorrect)
   {
-    cv::Mat image = (cv::Mat_<float>(3, 3) << 1, 2, 3, 1, 2, 3,
-        1, 2, 3);
+    cv::Mat image = (cv::Mat_<float>(4, 4) << 1, 2, 3, 4, 1, 2, 3,
+        4, 1, 2, 3, 4, 1, 2, 3, 4);
 
-    MatPtr subImageLow(new cv::Mat());
-    MatPtr subImageHigh(new cv::Mat());
+    MatPtr subImage(new cv::Mat());
 
-    subSample(image, image, false, subImageLow, subImageHigh);
+    subSample(image, false, subImage);
 
-    ASSERT_EQ(2, subImageLow->cols);
-    ASSERT_EQ(3, subImageLow->rows);
+    ASSERT_EQ(2, subImage->cols);
+    ASSERT_EQ(4, subImage->rows);
 
-    ASSERT_EQ(1, subImageHigh->cols);
-    ASSERT_EQ(3, subImageHigh->rows);
-
-    for (int ii = 0; ii < subImageLow->rows; ii++)
+    for (int ii = 0; ii < subImage->rows; ii++)
     {
-      EXPECT_EQ(1, subImageLow->at<float>(ii, 0));
-      EXPECT_EQ(2, subImageHigh->at<float>(ii, 0));
-      EXPECT_EQ(3, subImageLow->at<float>(ii, 1));
+      EXPECT_EQ(2, subImage->at<float>(ii, 0));
+      EXPECT_EQ(4, subImage->at<float>(ii, 1));
     }
   }
 
@@ -186,10 +173,10 @@ namespace pandora_vision
     ASSERT_EQ(2, llImages[0]->rows);
     ASSERT_EQ(2, llImages[0]->cols);
 
-    EXPECT_NEAR(llImages[0]->at<float>(0, 0), 0.5, 1e-6);
-    EXPECT_NEAR(llImages[0]->at<float>(0, 1), 2.5, 1e-6);
-    EXPECT_NEAR(llImages[0]->at<float>(1, 0), 5.5, 1e-6);
-    EXPECT_NEAR(llImages[0]->at<float>(1, 1), 14, 1e-6);
+    EXPECT_NEAR(llImages[0]->at<float>(0, 0), 6, 1e-5);
+    EXPECT_NEAR(llImages[0]->at<float>(0, 1), 9, 1e-5);
+    EXPECT_NEAR(llImages[0]->at<float>(1, 0), 15, 1e-5);
+    EXPECT_NEAR(llImages[0]->at<float>(1, 1), 18, 1e-5);
   }
 
   TEST_F(DiscreteWaveletTransformTest, isLowHighResultCorrect)
@@ -204,10 +191,10 @@ namespace pandora_vision
     ASSERT_EQ(2, lhImages[0]->rows);
     ASSERT_EQ(2, lhImages[0]->cols);
 
-    EXPECT_NEAR(lhImages[0]->at<float>(0, 0), 0.5, 1e-6);
-    EXPECT_NEAR(lhImages[0]->at<float>(0, 1), - 1.5, 1e-6);
-    EXPECT_NEAR(lhImages[0]->at<float>(1, 0), 1, 1e-6);
-    EXPECT_NEAR(lhImages[0]->at<float>(1, 1), - 7.5, 1e-6);
+    EXPECT_NEAR(lhImages[0]->at<float>(0, 0), - 1, 1e-5);
+    EXPECT_NEAR(lhImages[0]->at<float>(0, 1), 0, 1e-5);
+    EXPECT_NEAR(lhImages[0]->at<float>(1, 0), - 1, 1e-5);
+    EXPECT_NEAR(lhImages[0]->at<float>(1, 1), 0, 1e-5);
   }
 
   TEST_F(DiscreteWaveletTransformTest, isHighLowResultCorrect)
@@ -222,10 +209,10 @@ namespace pandora_vision
     ASSERT_EQ(2, hlImages[0]->rows);
     ASSERT_EQ(2, hlImages[0]->cols);
 
-    EXPECT_NEAR(hlImages[0]->at<float>(0, 0), 1.5, 1e-6);
-    EXPECT_NEAR(hlImages[0]->at<float>(0, 1), 3, 1e-6);
-    EXPECT_NEAR(hlImages[0]->at<float>(1, 0), - 3.5, 1e-6);
-    EXPECT_NEAR(hlImages[0]->at<float>(1, 1), - 8.5, 1e-6);
+    EXPECT_NEAR(hlImages[0]->at<float>(0, 0), - 3, 1e-5);
+    EXPECT_NEAR(hlImages[0]->at<float>(0, 1), - 3, 1e-5);
+    EXPECT_NEAR(hlImages[0]->at<float>(1, 0), 0, 1e-5);
+    EXPECT_NEAR(hlImages[0]->at<float>(1, 1), 0, 1e-5);
   }
 
   TEST_F(DiscreteWaveletTransformTest, isHighHighResultCorrect)
@@ -240,10 +227,10 @@ namespace pandora_vision
     ASSERT_EQ(2, hhImages[0]->rows);
     ASSERT_EQ(2, hhImages[0]->cols);
 
-    EXPECT_NEAR(hhImages[0]->at<float>(0, 0), 0, 1e-6);
-    EXPECT_NEAR(hhImages[0]->at<float>(0, 1), - 1.5, 1e-6);
-    EXPECT_NEAR(hhImages[0]->at<float>(1, 0), - 0.5, 1e-6);
-    EXPECT_NEAR(hhImages[0]->at<float>(1, 1), 4.5, 1e-6);
+    EXPECT_NEAR(hhImages[0]->at<float>(0, 0), 0, 1e-5);
+    EXPECT_NEAR(hhImages[0]->at<float>(0, 1), 0, 1e-5);
+    EXPECT_NEAR(hhImages[0]->at<float>(1, 0), 0, 1e-5);
+    EXPECT_NEAR(hhImages[0]->at<float>(1, 1), 0, 1e-5);
   }
 
   TEST_F(DiscreteWaveletTransformTest, isDWTResultCorrect)
@@ -255,51 +242,45 @@ namespace pandora_vision
 
     ASSERT_EQ(4, dwtImages.size());
 
-    ASSERT_EQ(3, dwtImages[0]->rows);
-    ASSERT_EQ(3, dwtImages[0]->cols);
+    for (int ii = 0; ii < dwtImages.size(); ii++)
+    {
+      ASSERT_EQ(2, dwtImages[ii]->rows);
+      ASSERT_EQ(2, dwtImages[ii]->cols);
+    }
 
-    ASSERT_EQ(3, dwtImages[1]->rows);
-    ASSERT_EQ(2, dwtImages[1]->cols);
-
-    ASSERT_EQ(2, dwtImages[2]->rows);
-    ASSERT_EQ(3, dwtImages[2]->cols);
-
-    ASSERT_EQ(2, dwtImages[3]->rows);
-    ASSERT_EQ(2, dwtImages[3]->cols);
-
-    cv::Mat llImage = (cv::Mat_<float>(3, 3) << 0.5, 2.5,
-        2, 7, 8, 5.5, 2, 5.5, 3.5);
+    cv::Mat llImage = (cv::Mat_<float>(2, 2) << 7, 11,
+        9.5, 9);
 
     for (int ii = 0; ii < llImage.rows; ii++)
     {
       for (int jj = 0; jj < llImage.cols; jj++)
       {
         EXPECT_NEAR(llImage.at<float>(ii, jj),
-            dwtImages[0]->at<float>(ii, jj), 1e-6);
+            dwtImages[0]->at<float>(ii, jj), 1e-5);
       }
     }
 
-    cv::Mat lhImage = (cv::Mat_<float>(3, 2) << 0.5, 0.5,
-        - 3.5, 1, 0.5, 0.5);
+    cv::Mat lhImage = (cv::Mat_<float>(2, 2) << - 1, - 1,
+        3.5, - 1);
 
     for (int ii = 0; ii < lhImage.rows; ii++)
     {
       for (int jj = 0; jj < lhImage.cols; jj++)
       {
         EXPECT_NEAR(lhImage.at<float>(ii, jj),
-            dwtImages[1]->at<float>(ii, jj), 1e-6);
+            dwtImages[1]->at<float>(ii, jj), 1e-5);
       }
     }
 
-    cv::Mat hlImage = (cv::Mat_<float>(2, 3) << 2, 4, 2,
-        - 2.5, 4, 2);
+    cv::Mat hlImage = (cv::Mat_<float>(2, 2) << - 4, - 4,
+        0.5, - 4);
 
     for (int ii = 0; ii < hlImage.rows; ii++)
     {
       for (int jj = 0; jj < hlImage.cols; jj++)
       {
         EXPECT_NEAR(hlImage.at<float>(ii, jj),
-            dwtImages[2]->at<float>(ii, jj), 1e-6);
+            dwtImages[2]->at<float>(ii, jj), 1e-5);
       }
     }
 
@@ -311,7 +292,7 @@ namespace pandora_vision
       for (int jj = 0; jj < hhImage.cols; jj++)
       {
         EXPECT_NEAR(hhImage.at<float>(ii, jj),
-            dwtImages[3]->at<float>(ii, jj), 1e-6);
+            dwtImages[3]->at<float>(ii, jj), 1e-5);
       }
     }
   }

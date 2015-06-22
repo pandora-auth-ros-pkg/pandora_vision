@@ -158,37 +158,14 @@ namespace pandora_vision
 
       /**
        * @brief Creating an image by taking half the values of the
-       * image that the convolution with the low frequency kernel
-       * resulted to
-       * @param imageLow [const cv::Mat&] The input low frequency image
+       * image that the convolution with the dwt kernel resulted to
+       * @param image [const cv::Mat&] The input image
        * @param rows [bool] Whether the images are downsampled row-wise
-       * @param subImageLow [const MatPtr&] The output low frequency image
+       * @param subImage [const MatPtr&] The output image after
+       * subsampling
        **/
-      void subSampleLow(const cv::Mat& imageLow, bool rows,
-          const MatPtr& subImageLow);
-
-      /**
-       * @brief Creating an image by taking half the values of the
-       * image that the convolution with the high frequency kernel
-       * resulted to
-       * @param imageHigh [const cv::Mat&] The input high frequency image
-       * @param rows [bool] Whether the images are downsampled row-wise
-       * @param subImageHigh [const MatPtr&] The output high frequency image
-       **/
-      void subSampleHigh(const cv::Mat& imageHigh, bool rows,
-          const MatPtr& subImageHigh);
-
-      /**
-       * @brief Create two images by taking half the values of the two input
-       * images respectively
-       * @param imageLow [const cv::Mat&] The input low frequency image
-       * @param imageHigh [const cv::Mat&] The input high frequency image
-       * @param rows [bool] Whether the images are downsampled row-wise
-       * @param subImageLow [const MatPtr&] The output low frequency image
-       * @param subImageHigh [const MatPtr&] The output high frequency image
-       **/
-      void subSample(const cv::Mat& imageLow, const cv::Mat& imageHigh,
-          bool rows, const MatPtr& subImageLow, const MatPtr& subImageHigh);
+      void subSample(const cv::Mat& image, bool rows,
+          const MatPtr& subImage);
 
       /**
        * @brief Perform convolution row-wise or column-wise and the oposite
