@@ -71,8 +71,9 @@ target_link_libraries(${PROJECT_NAME}_obstacle_postprocessor
 
 ############################### barrel processor ##############################
 add_library(${PROJECT_NAME}_barrel_processor
-  src/barrel_detection/barrel_processor.cpp
+  src/barrel_detection/barrel_processor.cpp 
   src/barrel_detection/parameters.cpp
+  src/barrel_detection/FastSymmetryDetector.cpp
 )
 target_link_libraries(${PROJECT_NAME}_barrel_processor
   ${catkin_LIBRARIES}

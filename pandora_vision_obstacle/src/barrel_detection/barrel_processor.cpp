@@ -71,7 +71,7 @@ namespace pandora_vision_obstacle
 
     cv::Rect region(0, inputImage.rows, thetaDivs * 2.0, rhoDivs * 0.5);
     // setMouseCallback( "", onMouse, static_cast<void*>( &region ) );
-    cv::Mat temp, edge, temp1, depth8UC3;
+    cv::Mat temp, edge, depth8UC3;
 
     /* Adjustable parameters, depending on the scene condition */
     // int canny_thresh_1 = 30;
@@ -89,10 +89,11 @@ namespace pandora_vision_obstacle
 
     temp = inputImage.clone();
 
+    double minVal, maxVal;
+    cv::minMaxLoc(temp, &minVal, &maxVal); 
+    temp.convertTo(edge, CV_8U, 255.0 / (maxVal - minVal), -minVal * 255.0 / (maxVal - minVal));
+
     temp.convertTo(depth8UC3, CV_8UC3, 255);
-    temp.convertTo(temp1, CV_8UC1);
-    temp1.convertTo(edge, CV_8UC1, 255, 0);
-    edge.copyTo(temp1);
     /* Find the edges */
     if (edge.channels() == 3)
       cvtColor(edge, edge, CV_BGR2GRAY);
@@ -111,15 +112,30 @@ namespace pandora_vision_obstacle
 
     for (int i = 0; i < result.size(); i ++)
     {
-      (*roi) = cv::Rect(
-          result[i].second.x - maxDist / 2, 
-          result[i].second.y, 
-          result[i].first.x - result[i].second.x + maxDist, 
-          result[i].first.y - result[i].second.y);
-      float startROIX = result[i].second.x - maxDist / 2;
-      float startROIY = result[i].second.y;
-      float widthROI = result[i].first.x - result[i].second.x + maxDist;
-      float heightROI = result[i].first.y - result[i].second.y;
+      //float len1 = std::sqrt(result[i].first.x * result[i].first.x + result[i].first.y * result[i].first.y);
+      //float len2 = std::sqrt(result[i].second.x * result[i].second.x + result[i].second.y * result[i].second.y);
+
+      //float dot = result[i].first.x * result[i].second.x + result[i].first.y * result[i].second.y;
+
+      //float a = dot / (len1 * len2);
+
+      //float angle;
+      //if (a >= 1.0)
+      //  angle = 0.0;
+      //else if (a <= -1.0)
+      //  angle = 3.14;
+      //else
+      //  angle = std::acos(a); // 0..PI
+      //angle = angle * 180 / 3.14;
+      cv::Point minPoint, maxPoint;
+      minPoint.x = std::min(result[i].first.x, result[i].second.x);
+      minPoint.y = std::min(result[i].first.y, result[i].second.y);
+      maxPoint.x = std::max(result[i].first.x, result[i].second.x);
+      maxPoint.y = std::max(result[i].first.y, result[i].second.y);
+      float startROIX = minPoint.x - maxDist / 2;
+      float startROIY = minPoint.y;
+      float widthROI = maxDist;
+      float heightROI = maxPoint.y - minPoint.y;
       if (startROIX < 0)
         startROIX = 0;
       if (startROIY < 0)
@@ -219,23 +235,34 @@ namespace pandora_vision_obstacle
     std::vector<cv::Point> points(it.count);
     std::vector<float> differentialPoints(it.count);
     float maxDifferential = std::numeric_limits<float>::min();
-    differentialPoints[0] = 0.0;
 
-    for (int linePoint = 0; linePoint < it.count; linePoint ++, ++it)
+    // Ignore values at the border
+    for (int linePoint = 0; linePoint < 10; linePoint ++, ++it)
     {
       buf[linePoint] = (const cv::Vec3b)* it;
       points[linePoint] = it.pos();
-      if (linePoint > 0)
-      {
-        if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
-          differentialPoints[linePoint] =
-            depthImage.at<float>(points[linePoint].y, points[linePoint].x)
-            - depthImage.at<float>(points[linePoint - 1].y, points[linePoint - 1].x);
-        else
-          differentialPoints[linePoint] = 0;
-        if (std::abs(differentialPoints[linePoint]) > maxDifferential)
-          maxDifferential = std::abs(differentialPoints[linePoint]);
-      }
+      differentialPoints[linePoint] = 0.0;
+    }
+
+    for (int linePoint = 10; linePoint < it.count - 10; linePoint ++, ++it)
+    {
+      buf[linePoint] = (const cv::Vec3b)* it;
+      points[linePoint] = it.pos();
+      if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
+        differentialPoints[linePoint] =
+          depthImage.at<float>(points[linePoint].y, points[linePoint].x)
+          - depthImage.at<float>(points[linePoint - 1].y, points[linePoint - 1].x);
+      else
+        differentialPoints[linePoint] = 0;
+      if (std::abs(differentialPoints[linePoint]) > maxDifferential)
+        maxDifferential = std::abs(differentialPoints[linePoint]);
+    }
+
+    for (int linePoint = it.count - 10; linePoint < it.count; linePoint ++, ++it)
+    {
+      buf[linePoint] = (const cv::Vec3b)* it;
+      points[linePoint] = it.pos();
+      differentialPoints[linePoint] = 0.0;
     }
 
     // calculate differentiation of depth values, through the perpendicular
@@ -251,10 +278,11 @@ namespace pandora_vision_obstacle
     }
 
     float avgLeftLinePoint = 0.0;
-    if (leftRightBorder + 1 > 0)
-      avgLeftLinePoint = sumLeftLine / (leftRightBorder + 1);
-    else
-      avgLeftLinePoint = 0.0;
+    //if (leftRightBorder + 1 > 0)
+    //  avgLeftLinePoint = sumLeftLine / (leftRightBorder + 1);
+    //else
+    //  avgLeftLinePoint = 0.0;
+    avgLeftLinePoint = sumLeftLine;
 
 
     float sumRightLine = 0.0;
@@ -264,10 +292,11 @@ namespace pandora_vision_obstacle
     }
 
     float avgRightLinePoint = 0.0;
-    if (points.size() - leftRightBorder > 0)
-      avgRightLinePoint = sumRightLine / (points.size() - leftRightBorder);
-    else
-      avgRightLinePoint = 0.0;
+    //if (points.size() - leftRightBorder > 0)
+    //  avgRightLinePoint = sumRightLine / (points.size() - leftRightBorder);
+    //else
+    //  avgRightLinePoint = 0.0;
+    avgRightLinePoint = sumRightLine;
 
     // We expect that starting from the left side of the barrel,
     // we have a decreasing depth up to the peak of the barrel
@@ -280,7 +309,6 @@ namespace pandora_vision_obstacle
 
     // We must have a symmetry between the differential avgs of the
     // left and right sides of the barrel.
-    ROS_INFO("zcbznjsdjsdjh %f", std::abs(avgLeftLinePoint + avgRightLinePoint));
     if (std::abs(avgLeftLinePoint + avgRightLinePoint) > BarrelDetection::differential_depth_unsymmetry_thresh)
     {
       (*valid) = false;
