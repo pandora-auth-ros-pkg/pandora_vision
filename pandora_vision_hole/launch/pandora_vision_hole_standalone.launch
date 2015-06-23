@@ -12,7 +12,7 @@
 
   <!-- ========================== Thermal Enable =========================== -->
   <!-- Set both to true if Thermal must be included -->
-  
+
   <param name="/hole_detector/thermal" value="false" />
   <arg name="open_thermal" default="false" />
 
@@ -46,7 +46,7 @@
   <group unless="$(arg openni)">
     <group unless="$(arg openni2)">
 
-      <arg name="path" default="/media/INTENSO/pandora/thermal2.bag" />
+      <arg name="path" default="/home/aggelos/Desktop/pcl_thermal_bags/thermal2.bag" />
 
       <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
         <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
@@ -54,7 +54,7 @@
 
     </group>
   </group>
-  
+
   <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
   <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
   <include file="$(find pandora_robots_description)/launch/woody/woody_description.launch" />
@@ -81,19 +81,47 @@
               command="load" />
   </node>
 
-  <!-- ======================= RGBDT Synchronizer node ===================== -->
-  
+  <!-- If the source is a physical device, run the cpp synchronizer -->
+  <group if="$(arg openni)">
+    <group if="$(arg openni2)">
+
+  <!-- ============= RGBDT Synchronizer node Real Time ===================== -->
+
   <node name="rgb_depth_thermal_synchronizer_node"
         type="rgb_depth_thermal_synchronizer_node"
         pkg="pandora_vision_hole"
         respawn="false"
         output="$(arg output)"
         ns="$(arg namespace)">
-        
+
     <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
               command="load" />
 
   </node>
+
+    </group>
+  </group>
+
+  <!-- If the source is not a physical device, run python synchronizer -->
+  <group unless="$(arg openni)">
+    <group unless="$(arg openni2)">
+
+  <!-- ================== RGBDT Synchronizer node Bag Mode ================= -->
+
+  <node name="rgb_depth_thermal_synchronizer_node"
+        type="rgb_depth_thermal_synchronizer.py"
+        pkg="pandora_vision_hole"
+        respawn="false"
+        output="$(arg output)"
+        ns="$(arg namespace)">
+
+    <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
+              command="load" />
+
+  </node>
+
+    </group>
+  </group>
 
   <!-- ============================ Depth node ============================= -->
 
@@ -139,12 +167,12 @@
       command="load" />
 
       <rosparam file="$(find pandora_vision_hole)/cfg/thermal_node_matching_variables.yaml"
-      command="load" />    
+      command="load" />
 
     </node>
 
     <!-- ====================== Thermal Cropper node ======================= -->
-  
+
     <node
       name="thermal_cropper_node"
       type="thermal_cropper_node"
@@ -159,7 +187,7 @@
     </node>
   </group>
 
-  <!-- ========================= Hole Fusion node ========================== -->   
+  <!-- ========================= Hole Fusion node ========================== -->
 
   <node
     name="hole_fusion_node"
@@ -171,6 +199,6 @@
 
     <rosparam file="$(find pandora_vision_hole)/cfg/hole_fusion_node_topics.yaml"
               command="load" />
-  </node> 
-        
+  </node>
+
 </launch>
