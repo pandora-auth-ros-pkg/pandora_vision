@@ -345,11 +345,10 @@ namespace pandora_vision
 
     bool valid = true; 
 
-    barrelProcessor.validateRoi(
+    valid = barrelProcessor.validateRoi(
         rgbImage, 
         depthImage, 
         roi, 
-        &valid,
         symmetricStartPoint, 
         symmetricEndPoint); 
 

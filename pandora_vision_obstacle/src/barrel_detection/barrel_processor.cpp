@@ -56,8 +56,8 @@ namespace pandora_vision_obstacle
       cv::Point* symmetricStartPoint,
       cv::Point* symmetricEndPoint)
   {
-    namedWindow("");
-    moveWindow("", 0, 0);
+    cv::namedWindow("");
+    cv::moveWindow("", 0, 0);
     cv::Point accumIndex(-1, -1);
 
     if (!inputImage.data)
@@ -81,11 +81,11 @@ namespace pandora_vision_obstacle
     // int no_of_peaks    = 1;
 
 
-    int canny_thresh_1 = BarrelDetection::fsd_canny_thresh_1;
-    int canny_thresh_2 = BarrelDetection::fsd_canny_thresh_2;
-    int min_pair_dist  = BarrelDetection::fsd_min_pair_dist;
-    int max_pair_dist  = BarrelDetection::fsd_max_pair_dist;
-    int no_of_peaks    = BarrelDetection::fsd_no_of_peaks;
+    int cannyThresh1 = BarrelDetection::fsd_canny_thresh_1;
+    int cannyThresh2 = BarrelDetection::fsd_canny_thresh_2;
+    int minPairDist  = BarrelDetection::fsd_min_pair_dist;
+    int maxPairDist  = BarrelDetection::fsd_max_pair_dist;
+    int noOfPeaks    = BarrelDetection::fsd_no_of_peaks;
 
     temp = inputImage.clone();
 
@@ -97,17 +97,17 @@ namespace pandora_vision_obstacle
     /* Find the edges */
     if (edge.channels() == 3)
       cvtColor(edge, edge, CV_BGR2GRAY);
-    cv::Canny(edge, edge, canny_thresh_1, canny_thresh_2);
+    cv::Canny(edge, edge, cannyThresh1, cannyThresh2);
 
     /* Vote for the accumulation matrix */
-    detector.vote(edge, min_pair_dist, max_pair_dist);
+    detector.vote(edge, minPairDist, maxPairDist);
 
     /* Draw the symmetrical line */
-    std::vector<std::pair<cv::Point, cv::Point> > result = detector.getResult(no_of_peaks);
+    std::vector<std::pair<cv::Point, cv::Point> > result = detector.getResult(noOfPeaks);
     float maxDist;
     float maxY;
     float minY;
-    detector.getMaxDist(&maxDist);
+    detector.getMaxDistance(&maxDist);
     detector.getYCoords(&maxY, &minY);
 
     for (int i = 0; i < result.size(); i ++)
@@ -165,14 +165,14 @@ namespace pandora_vision_obstacle
         /* Visualize the Hough accum matrix */
         cv::Mat accum = detector.getAccumulationMatrix();
         accum.convertTo(accum, CV_8UC3);
-        cv::applyColorMap(accum, accum, COLORMAP_JET);
+        cv::applyColorMap(accum, accum, cv::COLORMAP_JET);
         cv::resize(accum, accum, cv::Size(), 2.0, 0.5);
 
         /* Draw lines based on cursor position */
         if (accumIndex.x != -1 && accumIndex.y != -1)
         {
-          std::pair<cv::Point, cv::Point> point_pair = detector.getLine(accumIndex.y, accumIndex.x);
-          cv::line(depth8UC3, point_pair.first, point_pair.second, CV_RGB(0, 255, 0), 2);
+          std::pair<cv::Point, cv::Point> pointPair = detector.getLine(accumIndex.y, accumIndex.x);
+          cv::line(depth8UC3, pointPair.first, pointPair.second, CV_RGB(0, 255, 0), 2);
         }
 
         /* Show the original and edge images */

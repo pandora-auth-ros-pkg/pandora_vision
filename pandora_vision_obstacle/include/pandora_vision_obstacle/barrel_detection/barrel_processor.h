@@ -45,7 +45,7 @@
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/images_stamped.h"
 #include "pandora_vision_obstacle/obstacle_poi.h"
-#include "pandora_vision_obstacle/barrel_detection/FastSymmetryDetector.h"
+#include "pandora_vision_obstacle/barrel_detection/fast_symmetry_detector.h"
 #include "pandora_vision_obstacle/barrel_detection/parameters.h"
 
 namespace pandora_vision

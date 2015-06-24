@@ -28,38 +28,33 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <tbb/tbb.h>
-
-using namespace std;
-using namespace cv;
-
 
 class FastSymmetryDetector {
 public:
-    FastSymmetryDetector( const Size image_size, const Size hough_size, const int rot_resolution = 1 );
-    void vote( Mat& image, int min_pair_dist, int max_pair_dist  );
-    inline void rotateEdges( vector<Point2f>& edges, int theta );
+    FastSymmetryDetector(const cv::Size imageSize, const cv::Size houghSize, const int rotResolution = 1);
+    void vote(cv::Mat& image, int minPairDist, int maxPairDist);
+    inline void rotateEdges(std::vector<cv::Point2f>& edges, int theta);
     
-    Mat getAccumulationMatrix( float thresh = 0.0 );
+    cv::Mat getAccumulationMatrix(float thresh = 0.0);
     
-    vector<pair<Point, Point> > getResult( int no_of_peaks, float threshold = -1.0f );
-    pair<Point, Point> getLine( float rho, float theta );
-    void getMaxDist(float* maxDist);
+    std::vector<std::pair<cv::Point, cv::Point> > getResult(int noOfPeaks, float threshold = -1.0f);
+    std::pair<cv::Point, cv::Point> getLine(float rho, float theta);
+    void getMaxDistance(float* maxDistance);
     void getYCoords(float* maxY, float* minY);
     
 private:
-    vector<Mat> rotMatrices;
-    Mat rotEdges;
-    vector<float*> reRows;
-    Mat accum;
+    std::vector<cv::Mat> rotMatrices;
+    cv::Mat rotEdges;
+    std::vector<float*> reRows;
+    cv::Mat accum;
     
-    Size imageSize;
-    Point2f center;
+    cv::Size imageSize;
+    cv::Point2f center;
     float diagonal;
     int rhoDivision;
     int rhoMax;
     int thetaMax;
-    float maxDist;
+    float maxDistance;
     float maxY;
     float minY;
 };

@@ -38,7 +38,7 @@
 
 #include <cmath>
 #include <gtest/gtest.h>
-#include "pandora_vision_obstacle/barrel_detection/FastSymmetryDetector.h"
+#include "pandora_vision_obstacle/barrel_detection/fast_symmetry_detector.h"
 #include "pandora_vision_obstacle/barrel_detection/parameters.h"
 
 namespace pandora_vision
@@ -176,8 +176,8 @@ namespace pandora_vision
   {
   }
 
-  //! Tests FastSymmetryDetector::getMaxDist
-  TEST_F ( FastSymmetryDetectorTest, getMaxDistTest )
+  //! Tests FastSymmetryDetector::getMaxDistance
+  TEST_F ( FastSymmetryDetectorTest, getMaxDistanceTest )
   {
     // The image upon which the squares will be inprinted
     depthImage = cv::Mat::zeros( HEIGHT, WIDTH, CV_32FC1 );
@@ -239,8 +239,48 @@ namespace pandora_vision
     float maxDist = 0.0;
     float maxY;
     float minY;
-    detector.getMaxDist(&maxDist);
+    detector.getMaxDistance(&maxDist);
 
+<<<<<<< HEAD
+=======
+    // It is expected that the maximum distance will be zero, because no
+    // object has been found
+    EXPECT_NEAR(0.0, maxDist, 0.1);
+    // And the symmetric lines are also zero
+    EXPECT_EQ(0, result.size());
+
+    // Construct a square
+    cv::Mat square = cv::Mat::zeros(HEIGHT, WIDTH, CV_32FC1 );
+
+    FastSymmetryDetectorTest::generateDepthRectangle
+      ( cv::Point2f ( WIDTH - 350, HEIGHT - 350 ),
+        310,
+        310,
+        0.9,
+        &square );
+
+    depthImage += square;
+
+
+    temp = depthImage.clone();
+
+    temp.convertTo(edge, CV_8UC1, 255, 0);
+    // edge.copyTo(temp1);
+
+    /* Find the edges */
+    if (edge.channels() == 3)
+      cvtColor(edge, edge, CV_BGR2GRAY);
+    cv::Canny(edge, edge, canny_thresh_1, canny_thresh_2);
+
+    /* Vote for the accumulation matrix */
+    detector.vote(edge, min_pair_dist, max_pair_dist);
+
+    /* Get the symmetrical line */
+    result = detector.getResult(no_of_peaks);
+    maxDist = 0.0;
+    detector.getMaxDistance(&maxDist);
+
+>>>>>>> Partially fix lint at FSD [ci skip]
     // It is expected that the maximum distance between symmetric lines will
     // be equal to the square's width or height
     EXPECT_NEAR(310, maxDist, 100);

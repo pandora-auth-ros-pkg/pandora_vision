@@ -46,7 +46,7 @@ include_directories(include
 
 ############################# fast symmetry detector #########################
 add_library(${PROJECT_NAME}_fast_symmetry_detector
-  src/barrel_detection/FastSymmetryDetector.cpp
+  src/barrel_detection/fast_symmetry_detector.cpp
   src/barrel_detection/parameters.cpp
 )
 target_link_libraries(${PROJECT_NAME}_fast_symmetry_detector
@@ -71,9 +71,9 @@ target_link_libraries(${PROJECT_NAME}_obstacle_postprocessor
 
 ############################### barrel processor ##############################
 add_library(${PROJECT_NAME}_barrel_processor
-  src/barrel_detection/barrel_processor.cpp 
+  src/barrel_detection/barrel_processor.cpp
+  src/barrel_detection/fast_symmetry_detector.cpp
   src/barrel_detection/parameters.cpp
-  src/barrel_detection/FastSymmetryDetector.cpp
 )
 target_link_libraries(${PROJECT_NAME}_barrel_processor
   ${catkin_LIBRARIES}
@@ -121,7 +121,7 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_handler
 ############################ barrel node ###############################
 add_executable(${PROJECT_NAME}_barrel_node
   src/barrel_detection/barrel_node.cpp
-  src/barrel_detection/FastSymmetryDetector.cpp
+  src/barrel_detection/fast_symmetry_detector.cpp
   src/barrel_detection/parameters.cpp
 )
 add_dependencies(${PROJECT_NAME}_barrel_node
