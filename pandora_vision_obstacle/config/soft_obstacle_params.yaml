@@ -1,5 +1,9 @@
 gaussianKernelSize: 13
 
+hsvColor:
+  sThreshold: 95
+  vThreshold: 190
+
 erodeKernelSize:
   rows: 3
   cols: 3

@@ -51,6 +51,9 @@ namespace pandora_vision
   {
     nodeName_ = name;
 
+    nh.param("hsvColor/sThreshold", sValueThreshold_, 95);
+    nh.param("hsvColor/vThreshold", vValueThreshold_, 190);
+
     nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
 
     int rows, cols;
@@ -83,9 +86,12 @@ namespace pandora_vision
   }
 
   SoftObstacleDetector::SoftObstacleDetector(int gaussianKernelSize,
-      float gradThreshold, float betaThreshold, const cv::Size& erodeKernelSize,
-      const cv::Size& dilateKernelSize)
+      int sThreshold, int vThreshold, float gradThreshold, float betaThreshold,
+      const cv::Size& erodeKernelSize, const cv::Size& dilateKernelSize)
   {
+    sValueThreshold_ = sThreshold;
+    vValueThreshold_ = vThreshold;
+
     gaussianKernelSize_ = gaussianKernelSize;
     gradientThreshold_ = gradThreshold;
     betaThreshold_ = betaThreshold;
@@ -175,14 +181,33 @@ namespace pandora_vision
     return true;
   }
 
-  std::vector<cv::Vec4i> SoftObstacleDetector::performProbHoughLines(const cv::Mat& image)
+  bool SoftObstacleDetector::pickLineColor(const cv::Mat& hsvImage, const cv::Vec4i& line,
+      int level)
+  {
+    cv::Point center((line[0] + line[2]) / 2 * pow(2, level),
+        (line[1] + line[3]) / 2 * pow(2, level));
+
+    cv::Vec3b hsvValue = hsvImage.at<cv::Vec3b>(center.y, center.x);
+
+    if (hsvValue[1] < sValueThreshold_ && hsvValue[2] > vValueThreshold_)
+    {
+      return true;
+    }
+    return false;
+  }
+
+  std::vector<cv::Vec4i> SoftObstacleDetector::performProbHoughLines(const cv::Mat& rgbImage,
+      const cv::Mat& binaryImage, int level)
   {
     /// Perform Hough Transform
     std::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(image, lines, 1, CV_PI / 180, 100, 100, 10);
+    cv::HoughLinesP(binaryImage, lines, 1, CV_PI / 180, 100, 100, 10);
 
     cv::Mat imageToShow;
-    cv::cvtColor(image, imageToShow, CV_GRAY2BGR);
+    cv::cvtColor(binaryImage, imageToShow, CV_GRAY2BGR);
+
+    cv::Mat hsvImage;
+    cv::cvtColor(rgbImage, hsvImage, CV_BGR2HSV);
 
     std::vector<cv::Vec4i> verticalLines;
     std::vector<cv::Vec2f> lineCoefficients;
@@ -191,8 +216,8 @@ namespace pandora_vision
     for (size_t ii = 0; ii < lines.size(); ii++)
     {
       cv::Vec4i line = lines[ii];
-      bool awayFromBorder = (line[0] > 10 && line[0] < image.cols - 10) ||
-        (line[2] > 10 && line[2] < image.cols - 10);
+      bool awayFromBorder = (line[0] > 10 && line[0] < binaryImage.cols - 10) ||
+        (line[2] > 10 && line[2] < binaryImage.cols - 10);
 
       float grad, beta;
       if (line[0] == line[2])
@@ -212,7 +237,8 @@ namespace pandora_vision
       /// If line is almost vertical and not close to image borders
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
-        if (findNonIdenticalLines(lineCoefficients, grad, beta))
+        if (findNonIdenticalLines(lineCoefficients, grad, beta) 
+            && pickLineColor(hsvImage, line, level))
         {
           lineCoefficients.push_back(cv::Vec2f(grad, beta));
 
@@ -357,11 +383,11 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     }
 
     // Perform Hough Transform to detect lines (keep only vertical)
-    std::vector<cv::Vec4i> verticalLines = performProbHoughLines(*otsuImage);
+    std::vector<cv::Vec4i> verticalLines = performProbHoughLines(rgbImage, *otsuImage);
 
     std::vector<POIPtr> pois;
 
-    if (verticalLines.size() > 3)
+    if (verticalLines.size() > 2)
     {
       ROS_INFO("Detected Vertical Lines");
 

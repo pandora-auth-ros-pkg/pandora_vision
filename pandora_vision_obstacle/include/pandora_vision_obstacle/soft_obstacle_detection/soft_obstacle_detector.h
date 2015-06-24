@@ -59,9 +59,9 @@ namespace pandora_vision
       /**
        * @brief Constructor without NodeHandle used for testing
        **/
-      SoftObstacleDetector(int gaussianKernelSize, float gradThreshold,
-          float betaThreshold, const cv::Size& erodeKernelSize,
-          const cv::Size& dilateKernelSize);
+      SoftObstacleDetector(int gaussianKernelSize, int sThreshold,
+          int vThreshold, float gradThreshold, float betaThreshold,
+          const cv::Size& erodeKernelSize, const cv::Size& dilateKernelSize);
 
       /**
        * @brief Destructor
@@ -111,14 +111,31 @@ namespace pandora_vision
           float grad, float beta);
 
       /**
+       * @brief Find the line's color so that it can be included or
+       * excluded from the list of vertical lines
+       * @param hsvImage [const cv::Mat&] The image used to find each
+       * line's color
+       * @param line [cv::Vec4i&] The current line
+       * @param level [int] The number of stages of the DWT
+       * @return [bool] Whether the current line has the desired color.
+       * In this case it is close to white
+       **/
+      bool pickLineColor(const cv::Mat& hsvImage, const cv::Vec4i& line,
+          int level = 1);
+
+      /**
        * @brief Perform Probabilistic Hough Lines Transform and
        * keep only vertical lines
-       * @param image [const cv::Mat&] The image that the transform
+       * @param rgbImage [const cv::Mat&] The image used to find each
+       * line's color
+       * @param binaryImage [const cv::Mat&] The image that the transform
        * is applied to
+       * @param level [int] The number of stages of the DWT
        * @return [std::vector<cv::Vec4i>] The vector containing each
        * vertical line's start and end point
        **/
-      std::vector<cv::Vec4i> performProbHoughLines(const cv::Mat& image);
+      std::vector<cv::Vec4i> performProbHoughLines(const cv::Mat& rgbImage,
+          const cv::Mat& binaryImage, int level = 1);
 
       /**
        * @brief Create the bounding box that includes the soft obstacle
@@ -151,6 +168,11 @@ namespace pandora_vision
 
       /// The node's name
       std::string nodeName_;
+
+      /// The saturation threshold of HSV color used to pick the color of a line
+      int sValueThreshold_;
+      /// The value threshold of HSV color used to pick the color of a line
+      int vValueThreshold_;
 
       /// The size of the kernel of the Gaussian filter used to blur image
       int gaussianKernelSize_;
