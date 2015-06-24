@@ -1,5 +1,5 @@
 rgb:
-  max_depth: 10
+  max_depth: 20
   min_sample_count: 10
   regression_accuracy: 0.0
   use_surrogates: false

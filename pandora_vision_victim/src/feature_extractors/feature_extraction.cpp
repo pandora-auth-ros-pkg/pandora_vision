@@ -50,7 +50,7 @@ namespace pandora_vision
   /**
    * @brief Default Constructor
    */
-  FeatureExtraction::FeatureExtraction()
+  FeatureExtraction::FeatureExtraction(const std::string& classifierType)
   {
     if (!featureVector_.empty())
       featureVector_.clear();

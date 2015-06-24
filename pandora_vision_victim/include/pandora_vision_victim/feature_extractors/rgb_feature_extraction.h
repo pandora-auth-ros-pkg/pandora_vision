@@ -59,7 +59,7 @@ namespace pandora_vision
       /**
        * @brief Default Constructor
        */
-      RgbFeatureExtraction();
+      RgbFeatureExtraction(const std::string& classifierType = std::string("svm"));
 
       /**
        * @brief Default Destructor

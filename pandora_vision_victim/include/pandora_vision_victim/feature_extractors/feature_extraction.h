@@ -66,7 +66,7 @@ namespace pandora_vision
       /**
        * @brief Default Constructor
        */
-      FeatureExtraction();
+      FeatureExtraction(const std::string& classifierType);
 
       /**
        * @brief Default Destructor
@@ -150,6 +150,11 @@ namespace pandora_vision
        * needed or not.
        */
       bool bagOfWordsVocabularyNeeded();
+
+      int getDictionarySize(void)
+      {
+        return dictionarySize_;
+      }
 
       /**
        * @brief

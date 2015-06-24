@@ -121,11 +121,11 @@ namespace pandora_vision
 
     if (boost::iequals(imageType_ , "rgb"))
     {
-      featureExtraction_ = new RgbFeatureExtraction();
+      featureExtraction_ = new RgbFeatureExtraction(classifierType_);
     }
     else if (boost::iequals(imageType_, "depth"))
     {
-      featureExtraction_ = new DepthFeatureExtraction();
+      featureExtraction_ = new DepthFeatureExtraction(classifierType_);
     }
     else
     {

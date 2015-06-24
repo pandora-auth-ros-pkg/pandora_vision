@@ -67,7 +67,7 @@ namespace pandora_vision
 
     packagePath_ = ros::package::getPath("pandora_vision_victim");
 
-    featureExtractionUtilities_ = new FeatureExtractionUtilities();
+    featureExtractionUtilities_.reset(new FeatureExtractionUtilities());
 
     filesDirectory_ = packagePath_ + "/data/";
 
@@ -94,27 +94,36 @@ namespace pandora_vision
     testAnnotationsFile_ = filePrefix + "test_annotations.txt";
     int numTestFiles = file_utilities::findNumberOfAnnotations(testAnnotationsFile_);
 
-    std::string paramFile = packagePath_ + "/config/" + imageType + "_" + classifierType + "_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_victim_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
-    std::string trainingSetExtraction = fs["training_set_feature_extraction"];
-    std::string testSetExtraction = fs["test_set_feature_extraction"];
-    std::string loadModel = fs["load_classifier_model"];
-    std::string pcaAnalysis = fs["do_pca_analysis"];
+    std::cout << paramFile << std::endl;
+    if (!fs.isOpened())
+    {
+      ROS_ERROR("Could not open : %s !", paramFile.c_str());
+      ROS_ERROR("The training node will now shut down!");
+      ROS_BREAK();
+    }
+
+    cv::FileNode classifierNode = fs[classifierType_];
+    std::string trainingSetExtraction = classifierNode["training_set_feature_extraction"];
+    std::string testSetExtraction = classifierNode["test_set_feature_extraction"];
+    std::string loadModel = classifierNode["load_classifier_model"];
+    std::string pcaAnalysis = classifierNode["do_pca_analysis"];
 
     trainingSetFeatureExtraction_ = trainingSetExtraction.compare("true") == 0;
     testSetFeatureExtraction_ = testSetExtraction.compare("true") == 0;
     loadClassifierModel_ = loadModel.compare("true") == 0;
     doPcaAnalysis_ = pcaAnalysis.compare("true") == 0;
-    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
+    typeOfNormalization_ = static_cast<int>(classifierNode["type_of_normalization"]);
 
     fs.release();
 
     if (imageType_.compare("rgb") == 0)
-      featureExtraction_ = new RgbFeatureExtraction();
+      featureExtraction_.reset(new RgbFeatureExtraction(classifierType_));
     else if (imageType_.compare("depth") == 0)
-      featureExtraction_ = new DepthFeatureExtraction();
+      featureExtraction_.reset(new DepthFeatureExtraction(classifierType_));
     else
     {
       ROS_ERROR("Invalid image type provided!");
@@ -257,6 +266,13 @@ namespace pandora_vision
       normalizationParamTwoVector = file_utilities::loadFiles(
           normalizationParamTwoPath,
           normalizationParamTwoTag);
+      if (featuresMatrix->empty() || normalizationParamOneVector.empty() ||
+          normalizationParamTwoVector.empty())
+      {
+        std::cout << "Cannot perform Z Score Normalization for test features, invalid input matrices!"
+          << std::endl;
+        exit(-1);
+      }
       featureExtractionUtilities_->performZScoreNormalization(
           featuresMatrix, normalizationParamOneVector,
           normalizationParamTwoVector);

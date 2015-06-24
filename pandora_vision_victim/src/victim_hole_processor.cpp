@@ -61,16 +61,20 @@ namespace pandora_vision
     std::string rgbClassifierType;
     if (!this->accessPublicNh()->getParam("rgb_classifier", rgbClassifierType))
     {
-      ROS_ERROR("Could not retrieve the RGB classifier Type from the yaml file!");
-      ROS_ERROR("Shutting Down now!");
+      ROS_ERROR_STREAM("[" + this->getName() + "] processor nh processor : " +
+          "Could not retrieve the RGB classifier Type from the yaml file!");
+      ROS_ERROR_STREAM("[" + this->getName() + "] processor nh processor : "
+          + "Shutting Down now!");
       ROS_BREAK();
     }
 
     std::string depthClassifierType;
     if (!this->accessPublicNh()->getParam("depth_classifier", depthClassifierType))
     {
-      ROS_ERROR("Could not retrieve the Depth Classifier Type from the yaml file!");
-      ROS_ERROR("Shutting Down now!");
+      ROS_ERROR_STREAM("[" + this->getName() + "] processor nh processor : " +
+          "Could not retrieve the Depth Classifier Type from the yaml file!");
+      ROS_ERROR_STREAM("[" + this->getName() + "] processor nh processor : " +
+          "Shutting Down now!");
       ROS_BREAK();
     }
 

@@ -245,10 +245,10 @@ namespace pandora_vision
       std::string testAnnotationsFile_;
 
       /// Feature Extractor
-      FeatureExtraction* featureExtraction_;
+      boost::shared_ptr<FeatureExtraction> featureExtraction_;
       /// Feature Extraction Utilities used to perform feature normalization
       /// and/or feature selection.
-      FeatureExtractionUtilities* featureExtractionUtilities_;
+      boost::shared_ptr<FeatureExtractionUtilities> featureExtractionUtilities_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
