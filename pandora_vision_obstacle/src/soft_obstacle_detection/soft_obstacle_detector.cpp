@@ -237,7 +237,7 @@ namespace pandora_vision
       /// If line is almost vertical and not close to image borders
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
-        if (findNonIdenticalLines(lineCoefficients, grad, beta) 
+        if (findNonIdenticalLines(lineCoefficients, grad, beta)
             && pickLineColor(hsvImage, line, level))
         {
           lineCoefficients.push_back(cv::Vec2f(grad, beta));
