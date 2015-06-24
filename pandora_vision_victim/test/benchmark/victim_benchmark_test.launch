@@ -4,10 +4,7 @@
 
   <include file="$(find state_manager)/launch/stateManager.launch" />
   <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch" />
-  <include file="$(find pandora_vision_victim)/launch/victim_node.launch">
-    <arg name="output" value="screen" />
-  </include>
-
+  <include file="$(find pandora_vision_victim)/launch/victim_node.launch" />
 
   <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" />
 
@@ -37,6 +34,6 @@
   <param name="algorithm" value="Victim"/>
 
   <test test-name="VictimBenchmarkTest" pkg="pandora_vision_victim"
-    type="victim_benchmark_test.py" time-limit="6000.0"/>
+    type="victim_benchmark_test.py" time-limit="10000.0"/>
 
 </launch>

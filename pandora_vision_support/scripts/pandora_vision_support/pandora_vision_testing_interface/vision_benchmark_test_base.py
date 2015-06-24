@@ -361,15 +361,33 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         return imageX, imageY
 
     @classmethod
+    def mockPublish(cls, input_topic, output_topic, data):
+        cls.block.clear()
+        cls.alertEvent.clear()
+
+        if not isinstance(data, cls.publishedTypes[input_topic]):
+            rospy.logerr("[mockPublish] Publishes wrong message type.")
+        cls.publishers[input_topic].publish(data)
+        if not cls.benchmarking:
+            rospy.sleep(cls.publish_wait_duration)
+        cls.block.wait()
+        rospy.loginfo("Wait for the alert to arrive")
+        # Wait for the alert to arrive.
+        cls.alertEvent.wait()
+
+    @classmethod
     def mockCallback(cls, data, output_topic):
-        rospy.logdebug("Got message from topic : " + str(output_topic))
-        rospy.logdebug(data)
+        rospy.logdebug("Got message from topic : " + str(output_topic) + " " +
+                str(data))
         cls.messageList[output_topic].append(data)
         cls.repliedList[output_topic] = True
         # Set the processor block to notify the program that the processor
         # answered
         if "processor" in output_topic:
             cls.block.set()
+            if not data.success:
+                cls.alertEvent.set()
+                return None
         # Notify the program that an alert has been received.
         if "alert" in output_topic:
             cls.alertEvent.set()
@@ -434,8 +452,11 @@ class VisionBenchmarkTestBase(test_base.TestBase):
             # Confirm the authenticity of the alert using the annotator
             # groundtruth set.
             for image, imageName in zip(self.images, self.names):
-                self.alertEvent.clear()
                 rospy.logdebug("Sending Image %s", imageName)
+                for topic in outputTopic:
+                    self.messageList[topic] = []
+                    self.repliedList[topic] = False
+
                 startTime = time.time()
                 self.mockPublish(inputTopic, outputTopic[1], image)
                 elapsedTime = time.time() - startTime
@@ -446,13 +467,10 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                         if responseFlag and len(self.messageList[topic]) > 0:
                             response = self.messageList[topic][-1].success
                             responseFlag = responseFlag and response
-                        else:
-                            continue
-                print responseFlag
+
+                rospy.logdebug("Response Flag for image " + imageName + ": " +
+                        str(responseFlag))
                 if responseFlag:
-                    print "Wait for the alert to arrive"
-                    # Wait for the alert to arrive.
-                    self.alertEvent.wait()
                     rospy.logdebug("Alert found in Image %s", imageName)
                     rospy.logdebug("Time passed: %f seconds", elapsedTime)
                     truePositivesInImage = 0

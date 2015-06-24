@@ -9,6 +9,7 @@ import rostest
 import rospy
 import rospkg
 import math
+import threading
 
 from pandora_vision_support.pandora_vision_testing_interface import vision_benchmark_test_base
 
@@ -16,6 +17,8 @@ PKG_PATH = rospkg.RosPack().get_path(PKG)
 
 
 class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
+
+    victimBlock = threading.Event()
 
     def test_benchmark(self):
         self.datasetCamera = rospy.get_param("dataset_camera")
@@ -37,45 +40,40 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
 
     @classmethod
     def mockPublish(cls, input_topic, output_topic, data):
-
         cls.block.clear()
-        # cls.repliedList[output_topic] = False
-        for key in cls.repliedList.iterkeys():
-            cls.repliedList[key] = False
-        cls.messageList[output_topic] = list()
+        cls.victimBlock.clear()
+        cls.alertEvent.clear()
+
         if not isinstance(data, cls.publishedTypes[input_topic]):
             rospy.logerr("[mockPublish] Publishes wrong message type.")
         cls.publishers[input_topic].publish(data)
         if not cls.benchmarking:
             rospy.sleep(cls.publish_wait_duration)
         cls.block.wait()
+        cls.victimBlock.wait()
+        rospy.loginfo("Wait for the alert to arrive")
+        # Wait for the alert to arrive.
+        cls.alertEvent.wait()
 
     @classmethod
     def mockCallback(cls, data, output_topic):
-        rospy.logdebug("Got message from topic : " + str(output_topic))
-        rospy.logdebug(data)
-        cls.messageList[output_topic] = []
+        rospy.logdebug("Got message from topic : " + str(output_topic) + " " +
+                str(data))
         cls.messageList[output_topic].append(data)
         cls.repliedList[output_topic] = True
         # Set the processor block to notify the program that the processor
         # answered
         if "processor" in output_topic:
             if "hole" in output_topic:
-                if not data.success:
-                    cls.block.set()
-                    return None
-            # elif "victim" in output_topic:
-                # cls.block.set()
-        counter = 0
-        for key, val in cls.repliedList.iteritems():
-            if "processor" in key and val:
-                counter += 1
-        if counter == 2:
-            cls.block.set()
+                cls.block.set()
+            if "victim" in output_topic:
+                cls.victimBlock.set()
+            if not data.success:
+                cls.alertEvent.set()
+                return None
         # Notify the program that an alert has been received.
         if "alert" in output_topic:
             cls.alertEvent.set()
-        print "Exit callback with topic", str(output_topic)
 
 if __name__ == "__main__":
     # Initialize the node
