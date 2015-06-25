@@ -64,24 +64,24 @@ namespace pandora_vision
     // Advertise the candidate holes found by the thermal node to hole fusion
     candidateHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_hole::CandidateHolesVectorMsg>(
-      candidateHolesTopic_, 1000);
+      candidateHolesTopic_, 1);
 
     // Advertise the candidate holes found by the thermal
     // node to thermal cropper
     thermalToCropperPublisher_ = nodeHandle_.advertise
       <pandora_vision_hole::CandidateHolesVectorMsg>(
-      thermalToCropperTopic_, 1000);
+      thermalToCropperTopic_, 1);
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     dataFusionThermalPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::ThermalAlertVector>
-      (dataFusionThermalTopic_, 1000);
+      (dataFusionThermalTopic_, 1);
 
     // Advertise the topic where any external node(e.g. a functional test node)
     // will be subscribed to know that the hole node has finished processing
     // the current candidate holes as well as the result of the procedure.
     processEndPublisher_ = nodeHandle_.advertise<sensor_processor::ProcessorLogInfo>(
-        processEndTopic_, 1000, true);
+        processEndTopic_, 1, true);
 
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));

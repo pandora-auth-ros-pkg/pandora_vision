@@ -61,7 +61,7 @@ namespace pandora_vision
     // Advertise the candidate holes found by the depth node
     candidateHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_hole::CandidateHolesVectorMsg>(
-      candidateHolesTopic_, 1000);
+      candidateHolesTopic_, 1);
 
     // The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));

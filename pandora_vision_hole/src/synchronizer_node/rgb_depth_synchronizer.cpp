@@ -94,25 +94,25 @@ namespace pandora_vision
 
     // Advertise the synchronized point cloud
     synchronizedPointCloudPublisher_ = nodeHandle_.advertise
-      <PointCloud>(synchronizedPointCloudTopic_, 1000);
+      <PointCloud>(synchronizedPointCloudTopic_, 1);
 
     // Advertise the synchronized depth image
     synchronizedDepthImagePublisher_ = nodeHandle_.advertise
-      <sensor_msgs::Image>(synchronizedDepthImageTopic_, 1000);
+      <sensor_msgs::Image>(synchronizedDepthImageTopic_, 1);
 
     // Advertise the synchronized rgb image
     synchronizedRGBImagePublisher_ = nodeHandle_.advertise
-      <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1000);
+      <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1);
 
     // Advertise the synchronized thermal image and its index
     synchronizedThermalImagePublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::IndexedThermal>
-      (synchronizedThermalImageTopic_, 1000);
+      (synchronizedThermalImageTopic_, 1);
 
     // Advertise the synchronized rgb and depth image to thermal cropper node
     synchronizedRgbDepthCropperImagesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>
-      (synchronizedRgbDepthCropperImagesTopic_, 1000);
+      (synchronizedRgbDepthCropperImagesTopic_, 1);
 
     ROS_INFO_NAMED(PKG_NAME, "[Synchronizer node] Initiated");
   }

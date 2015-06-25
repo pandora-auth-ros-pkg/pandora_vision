@@ -66,7 +66,7 @@ namespace pandora_vision
     // Advertise the candidate holes found by the rgb node
     candidateHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_hole::CandidateHolesVectorMsg>(
-      candidateHolesTopic_, 1000);
+      candidateHolesTopic_, 1);
 
     // The dynamic reconfigure (RGB) parameter's callback
     server.setCallback(boost::bind(&Rgb::parametersCallback, this, _1, _2));

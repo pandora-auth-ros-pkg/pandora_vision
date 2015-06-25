@@ -88,19 +88,19 @@ namespace pandora_vision
     // Advertise the topic that the rgb_depth_synchronizer will be
     // subscribed to in order for the hole_fusion_node to unlock it
     unlockPublisher_ = nodeHandle_.advertise <std_msgs::Empty>(
-      unlockTopic_, 1000, true);
+      unlockTopic_, 1, true);
 
     // Advertise the topic where any external node(e.g. a functional test node)
     // will be subscribed to know that the hole node has finished processing
     // the current candidate holes as well as the result of the procedure.
     processEndPublisher_ = nodeHandle_.advertise<sensor_processor::ProcessorLogInfo>(
-        processEndTopic_, 1000, true);
+        processEndTopic_, 1, true);
 
     // Advertise the topic that the yaw and pitch of the keypoints of the final,
     // valid holes will be published to
     validHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::HoleDirectionAlertVector>(
-        validHolesTopic_, 10, true);
+        validHolesTopic_, 1, true);
 
     // Advertise the topic that information about the final holes,
     // will be published to
@@ -122,32 +122,32 @@ namespace pandora_vision
     // will be published to
     enhancedImagesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>(
-        enhancedImagesTopic_, 1000, true);
+        enhancedImagesTopic_, 1, true);
 
     // Advertise the topic that the image of the final holes,
     // will be published to
     enhancedHolesPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::EnhancedImage>(
-        enhancedHolesTopic_, 1000, true);
+        enhancedHolesTopic_, 1, true);
 
     // Advertise the topic that the image of the final holes,
     // will be published to
     InterpolatedDepthImagePublisher_ = nodeHandle_.advertise
       <sensor_msgs::Image>(
-        InterpolatedDepthImageTopic_, 1000, true);
+        InterpolatedDepthImageTopic_, 1, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
     // synchronizer node to subscribe to the input point cloud topic
     synchronizerSubscribeToInputPointCloudPublisher_ =
       nodeHandle_.advertise <std_msgs::Empty>(
-        synchronizerSubscribeToInputPointCloudTopic_, 1000, true);
+        synchronizerSubscribeToInputPointCloudTopic_, 1, true);
 
     // Advertise the topic where the Hole Fusion node requests from the
     // synchronizer node to leave its subscription to the
     // input point cloud topic
     synchronizerLeaveSubscriptionToInputPointCloudPublisher_=
       nodeHandle_.advertise <std_msgs::Empty>(
-        synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1000, true);
+        synchronizerLeaveSubscriptionToInputPointCloudTopic_, 1, true);
 
     // Subscribe to the topic where the depth node publishes
     // candidate holes

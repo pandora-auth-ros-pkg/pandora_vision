@@ -52,7 +52,7 @@ namespace pandora_vision
 
     queue_ = 5;
 
-    // If thermal mode is enabled in launch file message filters is on and 
+    // If thermal mode is enabled in launch file message filters is on and
     // the two input messages are synchronized packed and sent.
     // If not only the pointcloud is sent for further usage
     if (mode_)
@@ -64,8 +64,8 @@ namespace pandora_vision
       inputThermalCameraTopic_, queue_);
 
     synchronizer_ = new message_filters::Synchronizer<mySyncPolicy>
-      (mySyncPolicy(queue_), 
-      *inputPointCloudSubscriber_, 
+      (mySyncPolicy(queue_),
+      *inputPointCloudSubscriber_,
       *inputThermalCameraSubscriber_);
 
     synchronizer_->registerCallback(
@@ -80,11 +80,11 @@ namespace pandora_vision
 
     synchronizedMsgPublisher_ = nodeHandle_.advertise
       <pandora_vision_msgs::SynchronizedMsg>
-      (synchronizedMsgTopic_, 1000);
+      (synchronizedMsgTopic_, 1);
 
     ROS_INFO("[RGBDT Synchronizer node] Initiated");
   }
-  
+
   /**
     @brief Default destructor
     @return void
@@ -98,14 +98,14 @@ namespace pandora_vision
     @brief The synchronized callback called when the input messages from kinect
     and thermal camera are acquired. A custom synchronized message is filled and
     sent to synchronizer node for further usage.
-    @param[in] pcMsg [const sensor_msgs::PointCloud2::ConstPtr&] 
+    @param[in] pcMsg [const sensor_msgs::PointCloud2::ConstPtr&]
     The input pointcloud from kinect
     @param[in] thermalMsg[const distrib_msgs::flirLeptonMsg::ConstPtr&]
     The input thermal message
     @return void
    **/
   void RgbDTSynchronizer::synchronizedCallback(
-    const sensor_msgs::PointCloud2::ConstPtr& pcMsg, 
+    const sensor_msgs::PointCloud2::ConstPtr& pcMsg,
     const distrib_msgs::flirLeptonMsg::ConstPtr& thermalMsg)
   {
     //ROS_INFO("[RGBDT Synchronizer node] Synchronized callback called");
@@ -116,7 +116,7 @@ namespace pandora_vision
     msg.pc = *pcMsg;
     // The synchronized message header stamp
     msg.header.stamp = ros::Time::now();
-    
+
     // The pointcloud2
     //pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
 
@@ -139,9 +139,9 @@ namespace pandora_vision
   }
 
   /**
-    @brief This callback is called when thermal mode is off. A custom synchronized 
+    @brief This callback is called when thermal mode is off. A custom synchronized
     message is sent to synchronizer node. This time we fill only the pointcloud.
-    @param[in] pointCloudMsg [const sensor_msgs::PointCloud2::ConstPtr&] 
+    @param[in] pointCloudMsg [const sensor_msgs::PointCloud2::ConstPtr&]
     The input pointcloud2
     @return void
    **/
@@ -183,8 +183,8 @@ namespace pandora_vision
       ROS_ERROR("[RGBDT Synchronizer] Could not find Packages Mode");
     }
 
-    // Read the name of the topic from where the rgb_depth_thermal_synchronizer 
-    // node acquires the input pointcloud2 
+    // Read the name of the topic from where the rgb_depth_thermal_synchronizer
+    // node acquires the input pointcloud2
     if (nodeHandle_.getParam(
         ns + "/synchronizer_node/subscribed_topics/input_topic",
         inputPointCloudTopic_))
@@ -198,7 +198,7 @@ namespace pandora_vision
         "[RGBDT Synchronizer Node] Could not find topic kinect topic");
     }
 
-    // Read the name of the topic from where the rgb_depth_thermalsynchronizer 
+    // Read the name of the topic from where the rgb_depth_thermalsynchronizer
     // node acquires the input thermal message
     if (nodeHandle_.getParam(
         ns + "/synchronizer_node/subscribed_topics/input_thermal_topic",
