@@ -35,6 +35,10 @@ class BenchmarkTester(vision_benchmark_test_base.VisionBenchmarkTestBase):
             benchmarkFlag = True
 
         imagePath = rospy.get_param("dataset_path")
+
+        package_data_path = os.path.join(PKG_PATH, "data")
+        self.results_file = os.path.join(package_data_path,
+                                         "benchmark_results.txt")
         self.benchmarkTest(PKG_PATH + imagePath,
                            publisherTopic, subscriberTopic, benchmarkFlag)
 

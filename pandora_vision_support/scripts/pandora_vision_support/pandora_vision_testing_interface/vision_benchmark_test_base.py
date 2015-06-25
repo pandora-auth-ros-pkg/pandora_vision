@@ -333,6 +333,18 @@ class VisionBenchmarkTestBase(test_base.TestBase):
         rospy.loginfo("F-measure: %f", fMeasure)
         rospy.loginfo("Mean Squared Error from POI: %f", self.meanSquaredError)
 
+        if self.algorithm == "Victim":
+            results_data = open(self.results_file, "w")
+            results_data.write(str(self.truePositives) + "\n")
+            results_data.write(str(self.falsePositives) + "\n")
+            results_data.write(str(self.trueNegatives) + "\n")
+            results_data.write(str(self.falseNegatives) + "\n")
+            results_data.write(str(accuracy) + "\n")
+            results_data.write(str(precision) + "\n")
+            results_data.write(str(recall) + "\n")
+            results_data.write(str(fMeasure) + "\n")
+            results_data.close()
+
     def calculateRecallResults(self):
         for dictKeyTP, dictValuesTP in self.actualPositivesBenchmarkDict.iteritems():
             if dictKeyTP in self.truePositivesBenchmarkDict:
