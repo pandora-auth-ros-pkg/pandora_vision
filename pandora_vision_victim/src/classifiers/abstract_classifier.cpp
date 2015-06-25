@@ -53,12 +53,11 @@ namespace pandora_vision
    * @brief Constructor. Initialize member variables.
    */
   AbstractClassifier::AbstractClassifier(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
-      const std::string& classifierType, const std::string& imageType) :
+      const std::string& datasetPath, const std::string& classifierType,
+      const std::string& imageType) :
       nh_(ns)
   {
     datasetPath_ = datasetPath;
-    numFeatures_ = numFeatures;
     imageType_ = imageType;
     classifierType_ = classifierType;
 
@@ -130,6 +129,9 @@ namespace pandora_vision
       ROS_ERROR("The system will now shut down!");
       ROS_BREAK();
     }
+
+
+    numFeatures_ = featureExtraction_->getFeatureNumber();
 
     ROS_INFO("[victim_node] : Created Abstract Classifier instance");
       ros::shutdown();

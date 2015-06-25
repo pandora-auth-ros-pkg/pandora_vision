@@ -304,6 +304,11 @@ namespace pandora_vision
     return bowTrainerPtr_->getVocabulary();
   }
 
+  int FeatureExtraction::getFeatureNumber()
+  {
+    return numFeatures_;
+  }
+
   /**
    * @brief
    */

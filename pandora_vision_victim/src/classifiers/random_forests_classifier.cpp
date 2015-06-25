@@ -55,10 +55,10 @@ namespace pandora_vision
    * the classifier (RGB or Depth).
    */
   RandomForestsClassifier::RandomForestsClassifier(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
+      const std::string& datasetPath,
       const std::string& classifierType,
       const std::string& imageType)
-      : AbstractClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+      : AbstractClassifier(ns, datasetPath, classifierType, imageType)
   {
     ROS_INFO_STREAM("[PANDORA_VISION_VICTIM_RANDOM_FORESTS]: Creating " << imageType_
         << " Random Forests training instance");

@@ -37,8 +37,8 @@
 *   Marios Protopapas <protopapas_marios@hotmail.com>
 *********************************************************************/
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -79,6 +79,7 @@ namespace pandora_vision
     std::string hogFeatures = classifierNode["extract_hog_features"];
     std::string histogramFeatures = classifierNode["extract_color_histograms"];
 
+    numFeatures_ = 0;
     bool extractChannelsStatisticsFeatures =
       channelsStatisticsFeatures.compare("true") == 0;
     bool extractEdgeOrientationFeatures =
@@ -101,6 +102,7 @@ namespace pandora_vision
     dictionarySize_ = static_cast<int>(classifierNode["dictionary_size"]);
 
     fs.release();
+
 
     chosenFeatureTypesMap_["channels_statistics"] =
         extractChannelsStatisticsFeatures;
@@ -134,6 +136,15 @@ namespace pandora_vision
         HistogramExtractor(fs));
       featureFactoryPtrMap_["histogram"] = histPtr;
     }
+
+    if (extractHaralickFeatures)
+      numFeatures_ += 13;
+    if (extractEdgeOrientationFeatures)
+      numFeatures_ += 80;
+    if (extractChannelsStatisticsFeatures)
+      numFeatures_ += 28;
+    if (extractSiftFeatures)
+      numFeatures_ += dictionarySize_;
 
     imageType_ = "rgb_";
   }

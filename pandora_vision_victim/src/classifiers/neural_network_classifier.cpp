@@ -56,10 +56,10 @@ namespace pandora_vision
    * the classifier(RGB or Depth)
    */
   NeuralNetworkClassifier::NeuralNetworkClassifier(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
+      const std::string& datasetPath,
       const std::string& classifierType,
       const std::string& imageType)
-    : AbstractClassifier(ns, numFeatures, datasetPath, classifierType,
+    : AbstractClassifier(ns, datasetPath, classifierType,
         imageType)
   {
     ROS_INFO("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Creating Neural "
@@ -84,6 +84,11 @@ namespace pandora_vision
       std::stringstream ss;
       ss << layers[ii];
       ss >> layerSizes.at<signed int>(ii);
+    }
+    if (layerSizes.at<signed int>(0) != numFeatures_)
+    {
+      ROS_ERROR_STREAM("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: Invalid Input layer neuron number!");
+      ROS_BREAK();
     }
 
     // Get the parameters of  the sigmoid function.

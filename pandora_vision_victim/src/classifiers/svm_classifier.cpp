@@ -50,10 +50,10 @@ namespace pandora_vision
    * @brief Constructor
    */
   SvmClassifier::SvmClassifier(const std::string& ns,
-      int numFeatures, const std::string& datasetPath,
+      const std::string& datasetPath,
       const std::string& classifierType,
       const std::string& imageType)
-      : AbstractClassifier(ns, numFeatures, datasetPath, classifierType, imageType)
+      : AbstractClassifier(ns, datasetPath, classifierType, imageType)
   {
     ROS_INFO("[victim_node] : Creating SVM training instance!");
 

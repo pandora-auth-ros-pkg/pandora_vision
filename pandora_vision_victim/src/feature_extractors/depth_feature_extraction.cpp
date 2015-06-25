@@ -122,6 +122,16 @@ namespace pandora_vision
       featureFactoryPtrMap_["hog"] = hogPtr;
     }
 
+    if (extractHaralickFeatures)
+      numFeatures_ += 13;
+    if (extractEdgeOrientationFeatures)
+      numFeatures_ += 80;
+    if (extractChannelsStatisticsFeatures)
+      numFeatures_ += 10;
+    if (extractSiftFeatures)
+      numFeatures_ += dictionarySize_;
+
+
     imageType_ = "depth_";
   }
 

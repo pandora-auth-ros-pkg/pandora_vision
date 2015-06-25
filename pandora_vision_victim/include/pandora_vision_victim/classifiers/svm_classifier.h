@@ -33,11 +33,12 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 * Authors:
+*   Marios Protopapas <protopapas_marios@hotmail.com>
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
-#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
-#define PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
+#ifndef PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H
+#define PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H
 
 #include <string>
 
@@ -47,26 +48,20 @@
 
 namespace pandora_vision
 {
-  class RandomForestsClassifier : public AbstractClassifier
+  class SvmClassifier : public AbstractClassifier
   {
     public:
       /**
-       * @brief Constructor for the Random Forests Classifier Wrapper Class.
-       * @param ns [const std::string&] The namespace of the node.
-       * @param numFeatures [int] The number of input features to the classifier.
-       * @param datasetPath [const std::string&] The path to the training dataset.
-       * @param classifierType[const std::string&] The type of the classifier.
-       * @param imageType[const std::string&] The type of input images given to
-       * the classifier (RGB or Depth).
+       * @brief The Constructor
        */
-      RandomForestsClassifier(const std::string& ns, const std::string& datasetPath,
+      SvmClassifier(const std::string& ns, const std::string& datasetPath,
           const std::string& classifierType,
           const std::string& imageType);
 
       /**
-       * @brief Destructor
+       * @brief The Destructor
        */
-      virtual ~RandomForestsClassifier();
+      virtual ~SvmClassifier();
 
       /**
        * @brief Trains the corresponding classifier using the input features and training labels.
@@ -99,11 +94,16 @@ namespace pandora_vision
         classifierPtr_->load(classifierFile.c_str());
       }
 
-    protected:
-      /// Parameters of the Random Forests Classifier.
-      CvRTParams randomForestsParams_;
-      /// The Pointer to the classifier object.
-      boost::shared_ptr<CvRTrees> classifierPtr_;
+    private:
+      /// SVM parameters
+      CvSVMParams svmParams_;
+      CvParamGrid CvParamGrid_gamma, CvParamGrid_C;
+
+      bool autoTrain_;
+
+      /// The Pointer to the classifier object
+      boost::shared_ptr<CvSVM> classifierPtr_;
   };
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RANDOM_FORESTS_CLASSIFIER_H
+
+#endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_CLASSIFIER_H

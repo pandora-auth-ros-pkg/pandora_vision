@@ -134,14 +134,7 @@ namespace pandora_vision
   AbstractClassifier* ClassifierFactory::createClassifier(const std::string& classifierType,
           const std::string& imageType)
   {
-    int numFeatures;
     std::string datasetPath;
-
-    if (!nh_.getParam("num_features", numFeatures))
-    {
-      ROS_ERROR("Could not retrieve the number of features for the system!");
-      ROS_BREAK();
-    }
 
     if (!nh_.getParam("dataset_path", datasetPath))
     {
@@ -155,15 +148,15 @@ namespace pandora_vision
 
     if (boost::iequals(classifierType, "svm"))
     {
-      classifierPtr = new SvmClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
+      classifierPtr = new SvmClassifier(ns, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "ann"))
     {
-      classifierPtr =  new NeuralNetworkClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
+      classifierPtr =  new NeuralNetworkClassifier(ns, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "rf"))
     {
-      classifierPtr =  new RandomForestsClassifier(ns, numFeatures, datasetPath, classifierType, imageType);
+      classifierPtr =  new RandomForestsClassifier(ns, datasetPath, classifierType, imageType);
     }
     else
     {
