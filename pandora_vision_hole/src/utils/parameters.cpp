@@ -46,8 +46,8 @@ namespace pandora_vision
   //////////////////// Blob detection - specific parameters ////////////////////
 
   int Parameters::Blob::min_threshold = 0;
-  int Parameters::Blob::max_threshold = 1255;
-  int Parameters::Blob::threshold_step = 5;
+  int Parameters::Blob::max_threshold = 200;
+  int Parameters::Blob::threshold_step = 100;
   int Parameters::Blob::min_area = 550;
   int Parameters::Blob::max_area = 300000;
   double Parameters::Blob::min_convexity = 0;

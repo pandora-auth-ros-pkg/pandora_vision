@@ -472,6 +472,8 @@ namespace pandora_vision
 
     // Apply a threshold to the image of edges
     // to get rid of low value - insignificant - edges
+    // The next two steps are insignificant when we process the Temperature
+    // image extracted from thermal camera
     cv::threshold(denoisedDepthImageEdges, denoisedDepthImageEdges,
       Parameters::Edge::denoised_edges_threshold, 255, 3);
 
