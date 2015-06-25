@@ -43,7 +43,7 @@
  **/
 namespace pandora_vision
 {
-  
+
   /**
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
@@ -138,9 +138,9 @@ namespace pandora_vision
 
     ROS_INFO("Temperatures Callback called");
     timeNow_ = ros::Time::now().toSec();
-    
+
     processTime_ = timeNow_ - timeBefore_;
-    
+
     ROS_INFO_STREAM("[Temperatures node] Process time:" << processTime_);
 
     ROS_INFO("=========================================================");
@@ -166,7 +166,7 @@ namespace pandora_vision
     //cv::waitKey(1);
     ///////////////////////////////////////////////////////////////////////////////////////////
     cv::inRange(
-      temperatureImage, cv::Scalar(lowTemperature), cv::Scalar(highTemperature), temperatureImage); 
+      temperatureImage, cv::Scalar(lowTemperature), cv::Scalar(highTemperature), temperatureImage);
 
     cv::resize(temperatureImage, temperatureImage, cvSize(640, 480));
     cv::imshow("temperature",temperatureImage);

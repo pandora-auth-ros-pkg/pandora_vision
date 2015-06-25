@@ -140,6 +140,10 @@ namespace pandora_vision
   float Parameters::Thermal::left_tolerance = 4;
   float Parameters::Thermal::right_tolerance = 8;
 
+  ///////////// Parameters of acceptable temperature for threshold /////////////
+  float Parameters::Thermal::low_temperature = 28;
+  float Parameters::Thermal::high_temperature = 40;
+
   ////////////////////// Parameters of the thermal image ///////////////////////
   int Parameters::ThermalImage::WIDTH = 80;
   int Parameters::ThermalImage::HEIGHT =60;

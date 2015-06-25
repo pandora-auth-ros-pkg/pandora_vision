@@ -63,7 +63,7 @@ namespace pandora_vision
     hole detector package
    **/
   struct Parameters
-  {       
+  {
     //! Blob detection - specific parameters
     struct Blob
     {
@@ -168,6 +168,10 @@ namespace pandora_vision
 
       static float left_tolerance;
       static float right_tolerance;
+
+      // Low and High acceptable temperatures for thresholding
+      static float low_temperature;
+      static float high_temperature;
     };
 
     //! Thermal image parameters

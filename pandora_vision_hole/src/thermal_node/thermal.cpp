@@ -125,26 +125,26 @@ namespace pandora_vision
     // Obtain the thermal image. Since the image is in a format of
     // sensor_msgs::Image, it has to be transformed into a cv format in order
     // to be processed. Its cv format will be CV_8UC1.
-
-    cv::Mat thermalImage;
-    MessageConversions::extractImageFromMessage(msg.thermalImage, &thermalImage,
-      sensor_msgs::image_encodings::TYPE_8UC1);
+    cv::Mat thermalSensorImage;
+    MessageConversions::extractImageFromMessage(msg.thermalImage,
+      &thermalSensorImage, sensor_msgs::image_encodings::TYPE_8UC1);
 
     //  Obtain the thermal message and extract the temperature information.
     //  Convert this information to cv::Mat in order to be processed.
     //  It's format will be CV_8UC1
-    //  cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
-    //  (msg.temperatures);
+    cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
+      (msg.temperatures);
 
     // Apply double threshold(up and down) in the temperature image.
     // The threshold is set by configuration
-    //cv::inRange(
-      //thermalImage, cv::Scalar(30), cv::Scalar(40), thermalImage);
+    cv::inRange(
+      thermalImage, cv::Scalar(Parameters::Thermal::low_temperature),
+      cv::Scalar(Parameters::Thermal::high_temperature), thermalImage);
 
     #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
     {
-      Visualization::showScaled("Thermal image", thermalImage, 1);
+      Visualization::showScaled("Thermal image", thermalSensorImage, 1);
     }
     #endif
 
@@ -627,6 +627,11 @@ namespace pandora_vision
     // right is for the right side of the destributions curve
     Parameters::Thermal::left_tolerance = config.left_tolerance;
     Parameters::Thermal::right_tolerance = config.right_tolerance;
+
+    //-------------- Low and High accepted Temperatures ---------------------
+
+    Parameters::Thermal::low_temperature = config.low_temperature;
+    Parameters::Thermal::high_temperature = config.high_temperature;
   }
 
 }  // namespace pandora_vision
