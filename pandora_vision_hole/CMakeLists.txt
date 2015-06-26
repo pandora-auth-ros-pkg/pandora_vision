@@ -163,7 +163,7 @@ set(ROSLINT_CPP_OPTS
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  #include/*.h
+  include/*.h
   #src/*.cpp
   #test/*.cpp
 

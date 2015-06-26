@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias,Angelos Triantafyllidis
  *********************************************************************/
 
-#ifndef THERMAL_NODE_DEPTH_H
-#define THERMAL_NODE_DEPTH_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H
 
 #include "thermal_node/hole_detector.h"
 #include "utils/parameters.h"
@@ -86,18 +86,18 @@ namespace pandora_vision
       // Ros publisher for candidate holes POI directly to Data fusion.
       ros::Publisher dataFusionThermalPublisher_;
 
-      // The name of the topic where the thermal node publishes 
+      // The name of the topic where the thermal node publishes
       // directly to Data fusion.
       std::string dataFusionThermalTopic_;
 
       // Ros publisher for candidate holes POI to thermal cropper node.
       ros::Publisher thermalToCropperPublisher_;
 
-      // The name of the topic where the thermal node publishes 
+      // The name of the topic where the thermal node publishes
       // directly to thermal cropper node
       std::string thermalToCropperTopic_;
 
-      // The publisher used to infor that thermal node has finished 
+      // The publisher used to infor that thermal node has finished
       // processing the input data.
       ros::Publisher processEndPublisher_;
 
@@ -116,8 +116,8 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
         server;
 
-       //The dynamic reconfigure (thermal) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>   
+      // The dynamic reconfigure (thermal) parameters' callback
+      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
        ::CallbackType f;
 
       /**
@@ -151,9 +151,8 @@ namespace pandora_vision
         const pandora_vision_hole::thermal_cfgConfig& config,
         const uint32_t& level);
 
-
       /**
-        @brief This function finds for each point of interest found it's 
+        @brief This function finds for each point of interest found it's
         probability based on the keypoint's average temperature.
         @param[out] holes [const HolesConveyor&] The points of interest found
         @param[in] temperatures [const Float32MultiArray&] The multiArray with
@@ -166,7 +165,6 @@ namespace pandora_vision
         const std_msgs::Float32MultiArray& temperatures, const int& method);
 
     public:
-
       /**
         @brief Default constructor. Initiates communications, loads parameters.
         @return void
@@ -178,9 +176,8 @@ namespace pandora_vision
         @return void
        **/
       ~Thermal(void);
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // THERMAL_NODE_DEPTH_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H

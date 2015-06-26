@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef HOLE_FUSION_NODE_HOLE_FUSION_H
-#define HOLE_FUSION_NODE_HOLE_FUSION_H
+#ifndef PANDORA_VISION_HOLE_HOLE_FUSION_NODE_HOLE_FUSION_H
+#define PANDORA_VISION_HOLE_HOLE_FUSION_NODE_HOLE_FUSION_H
 
 #include <dirent.h>
 #include <ros/package.h>
@@ -80,7 +80,6 @@ namespace pandora_vision
   class HoleFusion : public StateClient
   {
     private:
-
       // The main ROS nodehandle
       ros::NodeHandle nodeHandle_;
 
@@ -130,12 +129,12 @@ namespace pandora_vision
       // produced by this package
       ros::Publisher enhancedHolesPublisher_;
 
-      // The ROS publisher that will be used to publish the enhanced 
+      // The ROS publisher that will be used to publish the enhanced
       // image produced by this package
       ros::Publisher enhancedImagesPublisher_;
 
-      // The ROS publisher that will be used to publish the  
-      //interpolated depth iMAGE
+      // The ROS publisher that will be used to publish the
+      // interpolated depth iMAGE
       ros::Publisher InterpolatedDepthImagePublisher_;
 
       // The name of the topic where the Hole Fusion node will publish
@@ -274,7 +273,6 @@ namespace pandora_vision
       // The on/off state of the Hole Detector package
       bool isOn_;
 
-
       // The dynamic reconfigure server for debugging parameters
       dynamic_reconfigure::Server<pandora_vision_hole::
         debug_cfgConfig> serverDebug;
@@ -282,7 +280,6 @@ namespace pandora_vision
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server<pandora_vision_hole::
         debug_cfgConfig>::CallbackType f_debug;
-
 
       // The dynamic reconfigure server for parameters pertaining to the
       // prioriority of filters' execution
@@ -293,7 +290,6 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole::
         filters_priority_cfgConfig>::CallbackType f_filters_priority;
 
-
       // The dynamic reconfigure server for parameters pertaining to
       // thresholds of filters
       dynamic_reconfigure::Server<pandora_vision_hole::
@@ -303,7 +299,6 @@ namespace pandora_vision
       dynamic_reconfigure::Server<pandora_vision_hole::
         filters_thresholds_cfgConfig>::CallbackType f_filters_thresholds;
 
-
       // The dynamic reconfigure server for general parameters
       dynamic_reconfigure::Server<pandora_vision_hole::
         general_cfgConfig> serverGeneral;
@@ -311,7 +306,6 @@ namespace pandora_vision
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server<pandora_vision_hole::
         general_cfgConfig>::CallbackType f_general;
-
 
       // The dynamic reconfigure server for parameters pertaining to
       // the validity of holes
@@ -551,7 +545,7 @@ namespace pandora_vision
         and their respective validity probabilities
         @return void
        **/
-      void publishEnhancedHoles (const HolesConveyor& conveyor,
+      void publishEnhancedHoles(const HolesConveyor& conveyor,
           std::map<int, float>* validHolesMap);
 
       /**
@@ -566,14 +560,13 @@ namespace pandora_vision
        **/
       void publishInterpolatedDepthImage();
 
-
-        /**
-          @brief Publishes an image showing holes found from the Depth node
-          and the RGB node.
-          @param void
-          @return void
-         **/
-        void publishRespectiveHolesFound();
+      /**
+        @brief Publishes an image showing holes found from the Depth node
+        and the RGB node.
+        @param void
+        @return void
+       **/
+      void publishRespectiveHolesFound();
 
       /**
         @brief Publishes the valid holes' information.
@@ -649,9 +642,7 @@ namespace pandora_vision
           cv::Mat* image,
           const std::string& encoding);
 
-
     public:
-
       /**
         @brief The HoleFusion constructor
        **/
@@ -684,9 +675,8 @@ namespace pandora_vision
         @return void
        **/
       void completeTransition(void);
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // HOLE_FUSION_NODE_HOLE_FUSION_H
+#endif  // PANDORA_VISION_HOLE_HOLE_FUSION_NODE_HOLE_FUSION_H
