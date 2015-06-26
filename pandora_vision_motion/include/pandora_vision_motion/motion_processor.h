@@ -76,7 +76,7 @@ namespace pandora_vision_motion
         process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
     private:
-      BBoxPOIPtr bounding_box_;
+      std::vector<BBoxPOIPtr> bounding_boxes_;
 
       MotionDetector motionDetector;
 

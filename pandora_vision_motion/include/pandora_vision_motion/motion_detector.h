@@ -101,16 +101,13 @@ namespace pandora_vision_motion
       /**
       * @brief
       **/
-      void findMotionParameters(const cv::Mat& frame);
+      // void findMotionParameters(const cv::Mat& frame);
 
-      BBoxPOIPtr getBoundingBox();
+      std::vector<BBoxPOIPtr> getBoundingBox();
+
+     std::vector<BBoxPOIPtr> getMotionPosition(void);
 
       void setMaxDeviation(int max_deviation);
-
-    protected:
-      BBoxPOIPtr getMotionPosition(void);
-
-      void setUpMotionDetector(void);
 
       /**
         @brief Function that detects motion, according to substraction
@@ -120,8 +117,14 @@ namespace pandora_vision_motion
         @param frame [&cv::Mat] current frame to be processed
         @return [int] Index of evaluation of Motion in current frame.
       */
-      int detectMotion(const cv::Mat& frame);
+      void detectMotion(const cv::Mat& frame);
 
+
+    protected:
+
+      void setUpMotionDetector(void);
+
+     
       /**
         @brief Function that defines the type of movement
         according to the number of pixels, that differ from current
@@ -160,7 +163,9 @@ namespace pandora_vision_motion
       bool compareContourAreas(cv::Rect contour1, cv::Rect contour2);
 
      cv::Scalar HSVtoRGBcvScalar(int H, int S, int V);
-     cv::Rect mergeBoundingBoxes(std::vector<cv::Rect>& bbox);
+     cv::Rect mergeBoundingBoxes(std::vector<cv::Point>& bbox);
+     float calculateMotionProbability(const cv::Rect& bbox, const cv::Mat& img);
+
 
     private:
       //!< Current frame to be processed
@@ -176,8 +181,10 @@ namespace pandora_vision_motion
       //!< Erode kernel
       cv::Mat kernel_erode_;
       //!< Bounding box of moving objects.
+      std::vector<BBoxPOIPtr> bounding_boxes_;
       BBoxPOIPtr bounding_box_;
-
+      std::vector<cv::Rect> finalBoxes;
+      std::vector<double> cohesion;
      friend class MotionDetectorTest;
   };
 }  // namespace pandora_vision_motion

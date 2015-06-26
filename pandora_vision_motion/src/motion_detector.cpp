@@ -62,9 +62,9 @@ namespace pandora_vision
     ROS_INFO("Destroying MotionDetector instance");
   }
 
-  BBoxPOIPtr MotionDetector::getMotionPosition(void)
+  std::vector<BBoxPOIPtr> MotionDetector::getMotionPosition(void)
   {
-    return bounding_box_;
+    return bounding_boxes_;
   }
 
   void MotionDetector::setMaxDeviation(int max_deviation)
@@ -74,13 +74,12 @@ namespace pandora_vision
 
   void MotionDetector::setUpMotionDetector(void)
   {
-    bounding_box_.reset( new BBoxPOI() );
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
 
-    bounding_box_->setPoint(cv::Point(0, 0));
-    bounding_box_->setWidth(0);
-    bounding_box_->setHeight(0);
-    bounding_box_->setProbability(0.0f);
+    /* bounding_box_->setPoint(cv::Point(0, 0)); */
+    // bounding_box_->setWidth(0);
+    // bounding_box_->setHeight(0);
+    /* bounding_box_->setProbability(0.0f); */
     history = 10;
     varThreshold = 16;
     bShadowDetection = false;
@@ -95,7 +94,7 @@ namespace pandora_vision
     show_moving_objects_contours = false;
     indexFrame = 0;
 
-    max_deviation_ = 16;
+    max_deviation_ = 25;
     bg_ = cv::BackgroundSubtractorMOG2(history, varThreshold, bShadowDetection);
     ROS_INFO("Created MotionDetector instance");
   }
@@ -108,7 +107,7 @@ namespace pandora_vision
     @param frame [&cv::Mat] current frame to be processed
     @return [int] Index of evaluation of Motion in current frame.
   */
-  int MotionDetector::detectMotion(const cv::Mat& frame)
+  void MotionDetector::detectMotion(const cv::Mat& frame)
   {
     /// Check that frame has data and that image has 3 channels
     if (frame.data && frame.channels() == 3)
@@ -137,9 +136,9 @@ namespace pandora_vision
 
       detectMotionPosition(thresholdedDifference);
 
-      cv::Point boxCenter(floor(bounding_box_->getPoint().x + bounding_box_->getWidth() * 0.5),
-        floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
-      bounding_box_->setPoint(boxCenter);
+    /*   cv::Point boxCenter(floor(bounding_box_->getPoint().x + bounding_box_->getWidth() * 0.5), */
+        // floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
+      /* bounding_box_->setPoint(boxCenter); */
 
       if (visualization || show_image ||
         show_background || show_diff_image ||
@@ -147,40 +146,41 @@ namespace pandora_vision
       {
         debugShow(thresholdedDifference, frame);
       }
-      return typeOfMovement_;
+
+      // return typeOfMovement_;
     }
-    else
-    {
-      return 0;
-    }
+   /*  else */
+    // {
+      // return 0;
+    /* } */
   }
 
   /**
    * @brief
    **/
 
-  void MotionDetector::findMotionParameters(const cv::Mat& frame)
-  {
-    switch (detectMotion(frame))
-    {
-      case 0:
-        bounding_box_->setProbability(0);
-        break;
-      case 1:
-        bounding_box_->setProbability(0.51);
-        break;
-      case 2:
-        bounding_box_->setProbability(1);
-        break;
-      default:
-        bounding_box_->setProbability(-1);
-        break;
-    }
-  }
+ /*  void MotionDetector::findMotionParameters(const cv::Mat& frame) */
+  // {
+    // switch (detectMotion(frame))
+    // {
+      // case 0:
+        // bounding_box_->setProbability(0);
+        // break;
+      // case 1:
+        // bounding_box_->setProbability(0.51);
+        // break;
+      // case 2:
+        // bounding_box_->setProbability(1);
+        // break;
+      // default:
+        // bounding_box_->setProbability(-1);
+        // break;
+    // }
+  /* } */
 
-  BBoxPOIPtr MotionDetector::getBoundingBox()
+  std::vector<BBoxPOIPtr> MotionDetector::getBoundingBox()
   {
-    return bounding_box_;
+    return bounding_boxes_;
   }
 
   /**
@@ -193,6 +193,8 @@ namespace pandora_vision
   void MotionDetector::detectMotionPosition(const cv::Mat& diff)
   {
     /// Check that the thresholded difference image has data
+    finalBoxes.clear();
+    bounding_boxes_.clear();
     if (diff.data)
     {
       /// Calculate the standard deviation
@@ -202,42 +204,130 @@ namespace pandora_vision
       /// If not to much changes then the motion is real
       if (stddev[0] < max_deviation_)
       {
-        typeOfMovement_ = motionIdentification(diff);
+        std::vector<std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::erode(foreground_, foreground_, cv::Mat());
+        cv::dilate(foreground_, foreground_, cv::Mat());
 
-        int number_of_changes = 0;
-        int min_x = diff.cols, max_x = 0;
-        int min_y = diff.rows, max_y = 0;
-        /// Loop over image and detect changes
-        for (int i = 0; i < diff.rows; i++)
+        /// find motion Contours
+        cv::findContours(diff.clone(), contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+        cv::Mat mask = cv::Mat::zeros(diff.size(), CV_8UC1);
+        cv::drawContours(mask, contours, -1, cv::Scalar(255, 255, 255), CV_FILLED);
+       /*  for (int i = 148; i < 150; i++)  */
+          // for (int j = 148; j< 150; j++)
+              // mask.at<uchar>(j,i) = 255;
+
+        // for (int i = 246; i < 250; i++)
+          // for (int j = 246; j< 250; j++)
+             // if (i % 2  && j % 2)
+               /* mask.at<uchar>(j,i) = 255; */
+
+        // cv::imshow("mask",mask);
+        ROS_INFO_STREAM("Contours found=" << contours.size());
+        /// find motion Points
+        std::vector<cv::Point> motionPoints;
+        for(int i = 0; i < diff.cols; i++)
+        for (int j = 0; j < diff.rows; j++)
         {
-          for (int j = 0; j < diff.cols; j++)
+          if(static_cast<int>(mask.at<uchar>(j, i)) == 255)
           {
-            if (static_cast<int>(diff.at<uchar>(i, j)) == 255)
-            {
-              number_of_changes++;
-              if (min_y > i)
-                min_y = i;
-              if (max_y < i)
-                max_y = i;
-              if (min_x > j)
-                min_x = j;
-              if (max_x < j)
-                max_x = j;
-            }
+            motionPoints.push_back(cv::Point(i, j));
           }
         }
-        if (number_of_changes)
+        ROS_INFO_STREAM("motion points=" << motionPoints.size());
+
+        /// Start dbscan to cluster motion Points for localization
+        std::vector<std::vector<cv::Point> > clusters;
+
+         /*    for(int i = 0; i < contours.size(); i++) */
+        // {
+            // cv::Rect r = cv::boundingRect(contours[i]);
+            // boxes.push_back(r);
+            // ROS_INFO_STREAM("RECT[" << i << "]=" << r.x <<" " <<r.y
+                            // << " "<< r.width<< " " << r.height);
+        /* } */
+
+         if(contours.size() > 1)
         {
-          cv::Point _tlcorner(min_x, min_y);
-          cv::Point _brcorner(max_x, max_y);
-          rectangle(movingObjects_, _tlcorner, _brcorner, cv::Scalar(0, 255, 255), 1);
-          bounding_box_->setWidth(max_x - min_x + 1);
-          bounding_box_->setHeight(max_y - min_y + 1);
-          bounding_box_->setPoint(_tlcorner);
+          DBSCAN dbscan(motionPoints, 50, 1);
+          dbscan.dbscan_cluster();
+          clusters = dbscan.getGroups();
+          ROS_INFO_STREAM("CLUSTERS FOUND="<<clusters.size());
+          if(clusters.size() > 0)
+            // cohesion = dbscan.getCohesion(clusters);
+          for (int i = 0; i < cohesion.size(); i++)
+          std::cout << cohesion[i] << std::endl;
+
+          /// bound clusters into a box
+          for (int i = 0; i < clusters.size(); i++)
+          {
+            finalBoxes.push_back(mergeBoundingBoxes(clusters[i]));
+          }
+        }
+        else if (motionPoints.size() != 0)
+        {
+           finalBoxes.push_back(mergeBoundingBoxes(motionPoints));
+        }
+
+        /* typeOfMovement_ = motionIdentification(diff); */
+
+        // int number_of_changes = 0;
+        // int min_x = diff.cols, max_x = 0;
+        // int min_y = diff.rows, max_y = 0;
+        // /// Loop over image and detect changes
+        // for (int i = 0; i < diff.rows; i++) 
+        // {
+          // for (int j = 0; j < diff.cols; j++)
+          // {
+            // if (static_cast<int>(diff.at<uchar>(i, j)) == 255)
+            // {
+              // number_of_changes++;
+              // if (min_y > i)
+                // min_y = i;
+              // if (max_y < i)
+                // max_y = i;
+              // if (min_x > j)
+                // min_x = j;
+              // if (max_x < j)
+                // max_x = j;
+            // }
+          /* } */
+
+        for (int i = 0; i < finalBoxes.size(); i++)
+        {
+          bounding_box_.reset( new BBoxPOI() );
+          rectangle(movingObjects_, finalBoxes[i].tl(), finalBoxes[i].br(), cv::Scalar(0, 255, 255), 1);
+          bounding_box_->setWidth(finalBoxes[i].width);
+          bounding_box_->setHeight(finalBoxes[i].height);
+          bounding_box_->setPoint(cv::Point(finalBoxes[i].tl().x + finalBoxes[i].width / 2,
+                                  finalBoxes[i].tl().y + finalBoxes[i].height / 2));
+          bounding_box_->setProbability(calculateMotionProbability(finalBoxes[i], mask));
+          bounding_boxes_.push_back(bounding_box_);
         }
       }
     }
   }
+
+  float MotionDetector::calculateMotionProbability(const cv::Rect& bbox, const cv::Mat& img)
+  {
+    int points = 0;
+    float prob = 0;
+    for(int i = bbox.x; i < bbox.x + bbox.width; i++)
+      for(int j = bbox.y; j < bbox.y + bbox.height; j++)
+      {
+        if(static_cast<int>(img.at<uchar>(j, i)) == 255)
+        {
+          points++;
+        }
+      }
+    if (points <= motion_high_thres && points >= motion_low_thres)
+      prob = 1.0; //points / static_cast<float>(bbox.width * bbox.height);
+    if (points > motion_high_thres)
+      prob = 0.51;
+    ROS_INFO_STREAM("PROB=" << prob << " points=" << points);
+    return prob;
+  }
+
 
   /**
     @brief Function that defines the type of movement
@@ -280,98 +370,62 @@ namespace pandora_vision
     const cv::Mat& frame
   )
   {
-    std::vector<std::vector<cv::Point> > contours;
-    std::vector<cv::Vec4i> hierarchy;
-    cv::erode(foreground_, foreground_, cv::Mat());
-    cv::dilate(foreground_, foreground_, cv::Mat());
-    cv::findContours(thresholdedDifference.clone(), contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-    cv::drawContours(frame, contours, -1, cv::Scalar(0, 0, 255), 2);
-    ROS_INFO_STREAM("Contours found=" << contours.size());
-    std::vector<double> areas(contours.size());
+    /* std::vector<double> areas(contours.size()); */
     //!< find largest contour area
- 
-    // for (int i = 0; i < contours.size(); i++) 
+
+    // for (int i = 0; i < contours.size(); i++)
     // {
             // areas[i] = cv::contourArea(cv::Mat(contours[i]));
             // ROS_INFO_STREAM("Area of contour=" << areas[i]);
-    /* }  */
-
-    std::vector<cv::Rect> boxes, finalBoxes, noiseBoxes;
-    std::vector<std::vector<cv::Rect> > clusters;
-
-    for(int i = 0; i < contours.size(); i++)
-    {
-        cv::Rect r = cv::boundingRect(contours[i]);
-        boxes.push_back(r);
-        ROS_INFO_STREAM("RECT[" << i << "]=" << r.x <<" " <<r.y
-                        << " "<< r.width<< " " << r.height);
-    }
-
-    DBSCAN dbscan(boxes, 20, 1);
-    dbscan.dbscan_cluster();
-    clusters = dbscan.getGroups(&noiseBoxes);
-    std::vector<cv::Rect> temp;
-    // cv::groupRectangles(clusters[i],1,100000);
-    for (int i = 0; i < clusters.size(); i++)
-    {
-
-      finalBoxes.push_back(mergeBoundingBoxes(clusters[i]));
-    }
-
-        cv::Mat grouped = cv::Mat::zeros(frame.size(),CV_8UC3);
+    /* } */
+           cv::Mat grouped = thresholdedDifference.clone();//cv::Mat::zeros(frame.size(),CV_8UC3);
     std::vector<cv::Scalar> colors;
     cv::RNG rng(3);
 
-    for(int i = 0; i <= dbscan._cluster_id; i++)
+    for(int i = 0; i <= finalBoxes.size(); i++)
     {
         colors.push_back(HSVtoRGBcvScalar(rng(255),255,255));
     }
-    for(int i = 0; i < dbscan._data.size(); i++)
-    {
-      cv::Scalar color;
-        if(dbscan._labels[i] == -1)
-        {
-            color = cv::Scalar(128,128,128);
-        }
-        else
-        {
-            int label = dbscan._labels[i];
-            color = colors[label];
-        }
-        putText(grouped, to_string(dbscan._labels[i]), dbscan._data[i].tl(), cv::FONT_HERSHEY_COMPLEX, .5, color, 1);
-        drawContours(grouped, contours, i, color, -1);
-    }
     for(int i = 0; i < finalBoxes.size(); i++)
     {
-      cv::rectangle(grouped,finalBoxes[i].tl(),finalBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
+      cv::Scalar color;
+        /* if(dbscan._labels[i] == -1) */
+        // {
+            // color = cv::Scalar(128,128,128);
+        /* } */
+        // else
+        // {
+            int label = i ;//dbscan._labels[i];
+            color = colors[label];
+        // }
+        putText(grouped, to_string(i), finalBoxes[i].tl(), cv::FONT_HERSHEY_COMPLEX, .5, color, 1);        // drawContours(grouped, contours, i, color, -1);
+      cv::rectangle(grouped,finalBoxes[i].tl(),finalBoxes[i].br(), color, 2, CV_AA);
     }
-    
-    for(int i = 0; i < noiseBoxes.size(); i++)
-    {
-      cv::rectangle(grouped,noiseBoxes[i].tl(),noiseBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
-    }
+    /* for(int i = 0; i < noiseBoxes.size(); i++) */
+    // {
+      // cv::rectangle(grouped,noiseBoxes[i].tl(),noiseBoxes[i].br(), cv::Scalar(100,100,200), 2, CV_AA);
+    // }
 
 
-    imshow("grouped", grouped);
+    /* imshow("grouped", grouped); */
+    /* imshow("mask",mask); */
     //!< get index of largest contour
-    /*double max;
-    cv::Point maxPosition;*/
-    /*cv::minMaxLoc(cv::Mat(areas),0,&max,0,&maxPosition);*/
+   /*  double max; */
+    // cv::Point maxPosition;
+    /* cv::minMaxLoc(cv::Mat(areas),0,&max,0,&maxPosition); */
 
     if (visualization || show_image)
       cv::imshow("Frame", frame);
     if (visualization || show_background)
       cv::imshow("Background", background_);
     if (visualization || show_diff_image)
-      cv::imshow("Thresholded difference between background and current frame", thresholdedDifference);
+      cv::imshow("Thresholded difference between background and current frame", grouped);
     if (visualization || show_moving_objects_contours)
       cv::imshow("Moving objects in current frame", movingObjects_);
     cv::waitKey(10);
-
-    contours.clear();
   }
 
-  cv::Rect MotionDetector::mergeBoundingBoxes(std::vector<cv::Rect>& bbox)
+  cv::Rect MotionDetector::mergeBoundingBoxes(std::vector<cv::Point>& bbox)
   {
     int min_x = movingObjects_.cols;
     int max_x = 0;
@@ -379,18 +433,18 @@ namespace pandora_vision
     int max_y = 0;
     for(int i = 0; i < bbox.size(); i++)
     {
-      ROS_INFO_STREAM("RECT="<<bbox[i].tl() << " " << bbox[i].br());
-      if(min_x > bbox[i].tl().x)
-        min_x = bbox[i].tl().x;
-      if(min_y > bbox[i].tl().y)
-        min_y = bbox[i].tl().y;
-      if(max_x < bbox[i].br().x)
-        max_x = bbox[i].br().x;
-      if(max_y < bbox[i].br().y)
-        max_y = bbox[i].br().y;
+      // ROS_INFO_STREAM("RECT="<<bbox[i].tl() << " " << bbox[i].br());
+      if(min_x > bbox[i].x)
+        min_x = bbox[i].x;
+      if(min_y > bbox[i].y)
+        min_y = bbox[i].y;
+      if(max_x < bbox[i].x)
+        max_x = bbox[i].x;
+      if(max_y < bbox[i].y)
+        max_y = bbox[i].y;
     }
 
-    cv::Rect r=cv::Rect(min_x, min_y, max_x-min_x, max_y-min_y);
+    cv::Rect r = cv::Rect(min_x, min_y, max_x-min_x+1, max_y-min_y+1);
 
     ROS_INFO_STREAM("final RECT="<<r.tl() << " " << r.br());
     return r;

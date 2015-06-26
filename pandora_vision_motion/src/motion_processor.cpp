@@ -85,7 +85,6 @@ namespace pandora_vision
     motionDetector.show_background = config.show_background;
     motionDetector.show_diff_image = config.show_diff_image;
     motionDetector.show_moving_objects_contours = config.show_moving_objects_contours;
-    ROS_INFO_STREAM("diff_threshold" << motionDetector.diff_threshold);
   }
 
    /**
@@ -94,15 +93,22 @@ namespace pandora_vision
   bool MotionProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
-    motionDetector.findMotionParameters(input->getImage());
-    bounding_box_ = motionDetector.getBoundingBox();
+    motionDetector.detectMotion(input->getImage());
+    bounding_boxes_ = motionDetector.getMotionPosition();
     output->frameWidth = input->getImage().cols;
     output->frameHeight = input->getImage().rows;
-    if (bounding_box_->getProbability() > 0.1)
+    for (int i = 0; i < bounding_boxes_.size(); i++)
     {
-      output->pois.push_back(bounding_box_);
-      return true;
+      if (bounding_boxes_[i]->getProbability() > 0.1)
+      {
+        output->pois.push_back(bounding_boxes_[i]);
+        ROS_INFO_STREAM("Motion bbox no:" << i << 
+                        "with prob=" << bounding_boxes_[i]->getProbability());
+      }
     }
-    return false;
+    if(output->pois.size() != 0)
+      return true;
+    else
+      return false;
   }
 }  // namespace pandora_vision
