@@ -116,8 +116,8 @@ void Timer::start(std::string timerId, std::string father, bool top)
     timer_tree.insert(std::pair<std::string, std::set<std::string> >
       (timerId, std::set<std::string>()));
     gettimeofday(&msTime, NULL);
-    double ms = static_cast<double>msTime.tv_sec * 1000 +
-      static_cast<double>msTime.tv_usec / 1000;
+    double ms = static_cast<double>(msTime.tv_sec) * 1000 +
+      static_cast<double>(msTime.tv_usec) / 1000;
     times.insert(Psd(timerId, ms));
     count.insert(Psul(timerId, 0));
     mean_time.insert(Psul(timerId, 0));
@@ -128,8 +128,8 @@ void Timer::start(std::string timerId, std::string father, bool top)
   else
   {
     gettimeofday(&msTime, NULL);
-    double ms = static_cast<double>msTime.tv_sec * 1000 +
-      static_cast<double>msTime.tv_usec / 1000;
+    double ms = static_cast<double>(msTime.tv_sec) * 1000 +
+      static_cast<double>(msTime.tv_usec) / 1000;
     it->second = ms;
     mean_time.insert(Psul(timerId, 0));
     sum_time.insert(Psul(timerId, 0));
@@ -157,8 +157,8 @@ double Timer::stop(std::string timerId)
   else
   {
     gettimeofday(&msTime , NULL);
-    double ms = static_cast<double>msTime.tv_sec * 1000 +
-      static_cast<double>msTime.tv_usec / 1000;
+    double ms = static_cast<double>(msTime.tv_sec) * 1000 +
+      static_cast<double>(msTime.tv_usec) / 1000;
     return ms - it->second;
   }
 }
@@ -188,8 +188,8 @@ void Timer::tick(std::string timerId)
   {
     count[timerId]++;
     gettimeofday(&msTime , NULL);
-    double ms = static_cast<double>msTime.tv_sec * 1000 +
-      static_cast<double>msTime.tv_usec / 1000;
+    double ms = static_cast<double>(msTime.tv_sec) * 1000 +
+      static_cast<double>(msTime.tv_usec) / 1000;
     ms -= it->second;
     times[timerId] = ms;
     sum_time[timerId] += ms;
