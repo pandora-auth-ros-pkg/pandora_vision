@@ -164,7 +164,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
   include/*.h
-  #src/*.cpp
+  src/*.cpp
   #test/*.cpp
 
   ## depth_node ##

@@ -119,7 +119,7 @@ namespace pandora_vision
 
     counter_++;
 
-    if(counter_ == 2)
+    if (counter_ == 2)
     {
       // Set counter to zero to restart the process
       counter_ = 0;
@@ -153,7 +153,7 @@ namespace pandora_vision
 
     counter_++;
 
-    if(counter_ == 2)
+    if (counter_ == 2)
     {
       // Set counter to zero to restart the process
       counter_ = 0;
@@ -177,7 +177,7 @@ namespace pandora_vision
     const std::vector<pandora_vision_hole::CandidateHoleMsg>&
     candidateHolesVector)
   {
-    for(unsigned int i = 0; i < candidateHolesVector.size(); i++)
+    for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
     {
       // A singe hole
       HoleConveyor hole;
@@ -215,13 +215,12 @@ namespace pandora_vision
     @return void
    **/
   void ThermalCropper::unpackEnhancedMsgFromSynchronizer(
-    const pandora_vision_msgs:: EnhancedImage& msg)
+    const pandora_vision_msgs::EnhancedImage& msg)
   {
     headerStamp_ = msg.header.stamp;
     depthImage_ = msg.depthImage;
     rgbImage_ = msg.rgbImage;
     thermalImage_ = msg.thermalImage;
-
   }
 
   /**
@@ -274,8 +273,8 @@ namespace pandora_vision
     cv::Mat depthImageMat;
 
     // Obtain the depth image. Since the image is in a format of
-    // // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // // to be processed. Its cv format will be CV_32FC1.
+    // sensor_msgs::Image, it has to be transformed into a cv format in order
+    // to be processed. Its cv format will be CV_32FC1.
     MessageConversions::extractImageFromMessage(depthImage, &depthImageMat,
       sensor_msgs::image_encodings::TYPE_32FC1);
 
@@ -289,7 +288,7 @@ namespace pandora_vision
 
     // When the depth image is interpolated, we also acquire the interpolation
     // method. Check if depth analysis is applicable.
-    if(Parameters::Depth::interpolation_method == 0)
+    if (Parameters::Depth::interpolation_method == 0)
     {
       isDepth_ = true;
     }
@@ -301,7 +300,6 @@ namespace pandora_vision
     // Convert the cv::Mat to sensor_msgs/Image type
     return MessageConversions::convertImageToMessage(interpolatedDepthImage,
       sensor_msgs::image_encodings::TYPE_32FC1, depthImage);
-
   }
 
   /**
@@ -318,7 +316,7 @@ namespace pandora_vision
     // The vector of regions of interest that is going to be returned
     std::vector<pandora_vision_msgs::RegionOfInterest> regions;
 
-    for(unsigned int i = 0; i < thermalHoles.size(); i++)
+    for (unsigned int i = 0; i < thermalHoles.size(); i++)
     {
       // The enhanced hole message. Used for one hole only
       pandora_vision_msgs::RegionOfInterest enhancedHoleMsg;
@@ -359,7 +357,7 @@ namespace pandora_vision
     @param void
     @return void
    **/
-  void ThermalCropper::getTopicNames ()
+  void ThermalCropper::getTopicNames()
   {
     // The namespace dictated in the launch file
     std::string ns = nodeHandle_.getNamespace();
@@ -368,9 +366,8 @@ namespace pandora_vision
     // the thermal poi message and store it in a private member variable
     if (nodeHandle_.getParam(
         ns + "/thermal_cropper_node/subscribed_topics/thermal_poi_topic",
-        thermalPoiTopic_ ))
+        thermalPoiTopic_))
     {
-
       // Make topic's name absolute
       thermalPoiTopic_ = ns + "/" + thermalPoiTopic_;
 
@@ -388,9 +385,8 @@ namespace pandora_vision
     // a private member variable
     if (nodeHandle_.getParam(
         ns + "/thermal_cropper_node/subscribed_topics/rgb_depth_images_topic",
-        rgbDepthImagesTopic_ ))
+        rgbDepthImagesTopic_))
     {
-
       // Make topic's name absolute
       rgbDepthImagesTopic_ = ns + "/" + rgbDepthImagesTopic_;
 
@@ -403,9 +399,9 @@ namespace pandora_vision
         "[ThermalCropper Node] Could not find topic rgb_depth_images_topic");
     }
 
-     //Read the name of the topic to which the thermal node will be publishing
-     //information directly to victim node about the candidate holes found
-     //and store it in a private member variable
+     // Read the name of the topic to which the thermal node will be publishing
+     // information directly to victim node about the candidate holes found
+     // and store it in a private member variable
     if (nodeHandle_.getParam(
         ns + "/thermal_cropper_node/published_topics/thermal_victim_node_topic",
         victimThermalTopic_))
@@ -419,8 +415,8 @@ namespace pandora_vision
         "[ThermalCropper Node] Could not find topic thermal_victim_node_topic");
     }
 
-     //Read the name of the topic to which the thermal node will be publishing
-     //information directly to synchronizer node.
+     // Read the name of the topic to which the thermal node will be publishing
+     // information directly to synchronizer node.
     if (nodeHandle_.getParam(
         ns + "/thermal_cropper_node/published_topics/thermal_unlock_synchronizer_topic",
         unlockThermalProcedureTopic_))
@@ -450,7 +446,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED (PKG_NAME,
+      ROS_ERROR_NAMED(PKG_NAME,
         "[ThermalCropper Node] Could not find topic Process end Topic");
     }
   }
@@ -468,4 +464,4 @@ namespace pandora_vision
     unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
   }
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

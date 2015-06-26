@@ -57,20 +57,20 @@ namespace pandora_vision
     // If not only the pointcloud is sent for further usage
     if (mode_)
     {
-    inputPointCloudSubscriber_ = new pcSubscriber(nodeHandle_,
-      inputPointCloudTopic_, queue_);
+      inputPointCloudSubscriber_ = new pcSubscriber(nodeHandle_,
+        inputPointCloudTopic_, queue_);
 
-    inputThermalCameraSubscriber_ = new thermalSubscriber(nodeHandle_,
-      inputThermalCameraTopic_, queue_);
+      inputThermalCameraSubscriber_ = new thermalSubscriber(nodeHandle_,
+        inputThermalCameraTopic_, queue_);
 
-    synchronizer_ = new message_filters::Synchronizer<mySyncPolicy>
-      (mySyncPolicy(queue_),
-      *inputPointCloudSubscriber_,
-      *inputThermalCameraSubscriber_);
+      synchronizer_ = new message_filters::Synchronizer<mySyncPolicy>
+        (mySyncPolicy(queue_),
+         *inputPointCloudSubscriber_,
+         *inputThermalCameraSubscriber_);
 
-    synchronizer_->registerCallback(
-      boost::bind(&RgbDTSynchronizer::synchronizedCallback,
-        this, _1, _2));
+      synchronizer_->registerCallback(
+        boost::bind(&RgbDTSynchronizer::synchronizedCallback,
+          this, _1, _2));
     }
     else
     {
@@ -108,7 +108,7 @@ namespace pandora_vision
     const sensor_msgs::PointCloud2::ConstPtr& pcMsg,
     const distrib_msgs::flirLeptonMsg::ConstPtr& thermalMsg)
   {
-    //ROS_INFO("[RGBDT Synchronizer node] Synchronized callback called");
+    // ROS_INFO("[RGBDT Synchronizer node] Synchronized callback called");
 
     // The synchronized message that is sent to synchronizer node
     pandora_vision_msgs::SynchronizedMsg msg;
@@ -118,10 +118,10 @@ namespace pandora_vision
     msg.header.stamp = ros::Time::now();
 
     // The pointcloud2
-    //pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
+    // pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
 
-    //pcl_conversions::toPCL(*pcMsg, *cloud);
-    //pcl_conversions::fromPCL(*cloud, msg.pc);
+    // pcl_conversions::toPCL(*pcMsg, *cloud);
+    // pcl_conversions::fromPCL(*cloud, msg.pc);
 
     // The thermal Image
     msg.thermalInfo.header = thermalMsg->thermalImage.header;
@@ -148,7 +148,7 @@ namespace pandora_vision
   void RgbDTSynchronizer::pointCloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& pointCloudMsg)
   {
-    //ROS_INFO("[RGBDT Synchronizer node] PointCloud callback called");
+    // ROS_INFO("[RGBDT Synchronizer node] PointCloud callback called");
 
     // The synchronized message that is sent to synchronizer node
     pandora_vision_msgs::SynchronizedMsg msg;
@@ -174,7 +174,7 @@ namespace pandora_vision
     // This variable indicates the mode in which Hole-Package is running
     // If is set to true -> Rgb-D-T mode
     // Else Rgb-D mode
-    if(nodeHandle_.getParam("/hole_detector/thermal", mode_))
+    if (nodeHandle_.getParam("/hole_detector/thermal", mode_))
     {
       ROS_INFO("[RGBDT Synchronizer Node] Packages Mode has been found");
     }
