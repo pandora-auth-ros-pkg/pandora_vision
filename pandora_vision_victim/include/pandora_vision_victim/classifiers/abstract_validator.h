@@ -65,10 +65,13 @@ namespace pandora_vision
   {
     public:
       /**
-       * @brief Constructor. Initializes classifier parameters and loads
-       * classifier model.
+       * @brief Constructor. Initializes abstract classifier parameters.
+       * @param nh [const ros::NodeHandle&] The node handle.
+       * @param imageType [const std:string&] The type of the images used for
+       * classification.
+       * @param classifierType [const std::string&] The type of the classifier.
        */
-      AbstractValidator(const ros::NodeHandle& ns,
+      AbstractValidator(const ros::NodeHandle& nh,
           const std::string& imageType,
           const std::string& classififierType);
 
@@ -78,13 +81,19 @@ namespace pandora_vision
       virtual ~AbstractValidator();
 
       /**
-       * @brief This function extract features according to the
-       * predifined features for the rgb image
-       * @param inImage [cv::Mat] current rgb frame to be processed
+       * @brief This function classifies an image and calculates the probability
+       * of it belonging to that class.
+       * @param inImage [const cv::Mat&] The frame to be processed.
+       * @param classLabel [float*] The predicted class label.
+       * @param probability [float*] The classification probability.
        * @return void
-      */
+       */
       void calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability);
 
+      /**
+       * @brief This function returns the type of the classifier.
+       * @return [const std:;string&] The type of the classifier.
+       */
       const std::string& getClassifierType(void)
       {
         return classifierType_;
@@ -100,10 +109,13 @@ namespace pandora_vision
       void extractFeatures(const cv::Mat& inImage);
 
       /**
-      @brief Function that loads the trained classifier and makes a prediction
-      according to the featurevector given for each image
-      @return void
-      **/
+       * @brief This function predicts the class label and the classification
+       * probability of an image's feature vector.
+       * @param featuresMat [const cv::Mat&] The feature vector of an image.
+       * @param classLabel [float*] The predicted class label.
+       * @param probability [float*] The classification probability.
+       * @return void
+       */
       virtual void predict(const cv::Mat& featuresMat, float* classLabel, float* probability) = 0;
 
     protected:

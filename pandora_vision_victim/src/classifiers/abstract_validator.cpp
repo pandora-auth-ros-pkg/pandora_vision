@@ -50,12 +50,6 @@
  */
 namespace pandora_vision
 {
-  /**
-   * @brief Constructor. Initializes SVM classifier parameters and loads
-   * classifier model.
-   * @param classifierPath [const std::string&] The path to the classifier
-   * model.
-   */
   AbstractValidator::AbstractValidator(const ros::NodeHandle& nh,
       const std::string& imageType,
       const std::string& classifierType)
@@ -81,11 +75,20 @@ namespace pandora_vision
     classifierPath_ = packagePath_ + classifierPath;
     ROS_INFO_STREAM(classifierPath_);
 
-    std::string paramFile = packagePath_ + "/config/" + imageType_ + "_" + classifierType_ + "_training_params.yaml";
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_victim_training_params.yaml";
     cv::FileStorage fs(paramFile, cv::FileStorage::READ);
     fs.open(paramFile, cv::FileStorage::READ);
 
-    typeOfNormalization_ = static_cast<int>(fs["type_of_normalization"]);
+    std::cout << paramFile << std::endl;
+    if (!fs.isOpened())
+    {
+      ROS_ERROR("Could not open : %s !", paramFile.c_str());
+      ROS_ERROR("The validation node will now shut down!");
+      ROS_BREAK();
+    }
+
+    cv::FileNode classifierNode = fs[classifierType_];
+    typeOfNormalization_ = static_cast<int>(classifierNode["type_of_normalization"]);
 
     fs.release();
 
@@ -129,8 +132,8 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Wrong image type!"
-          << " Cannot implement validator!");
+      ROS_ERROR_STREAM(nodeMessagePrefix_ << ": Wrong image type! "
+          << "Cannot implement validator!");
       ROS_BREAK();
     }
 
@@ -147,31 +150,17 @@ namespace pandora_vision
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized Abstract Validator instance");
   }
 
-  /**
-   * @brief Default Destructor.
-   */
   AbstractValidator::~AbstractValidator()
   {
   }
 
-  /**
-   * @brief This function extracts features according to the predefined
-   * feature extraction algorithms.
-   * @param inImage [const cv::Mat&] Frame to extract features from.
-   * @return void
-   */
   void AbstractValidator::extractFeatures(const cv::Mat& inImage)
   {
     featureExtraction_->extractFeatures(inImage);
   }
 
-  /**
-   * @brief This function extract features according to the
-   * predifined features for the rgb image
-   * @param inImage [cv::Mat] current rgb frame to be processed
-   * @return void
-  */
-  void AbstractValidator::calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability)
+  void AbstractValidator::calculatePredictionProbability(const cv::Mat& inImage,
+      float* classLabel, float* probability)
   {
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Extracting features");
     extractFeatures(inImage);
@@ -206,5 +195,4 @@ namespace pandora_vision
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Class Label = " << *classLabel);
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Probability = " << *probability);
   }
-
 }  // namespace pandora_vision

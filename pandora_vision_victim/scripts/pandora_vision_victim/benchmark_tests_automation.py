@@ -51,9 +51,19 @@ __author__ = "Kofinas Miltiadis"
 __maintainer__ = "Kofinas Miltiadis"
 __email__ = "mkofinas@gmail.com"
 
+def help_details():
+    """Prints details about the desired format of each of the folders used for
+    benchmark tests.
+    """
+    print "Each folder should contain a classifier model, possibly and 'xml' "\
+          "or a 'yaml' file. Additionaly, "\
+          "if feature normalization is to be performed, normalization "\
+          "parameters files should exist. Finally, a file containing the "\
+          "training parameters should be present (.yaml). The last file is "\
+          "presumed to contain the keyword 'params' in its name."
 
-def executeBenchmarkTests():
-    """Main
+def execute_benchmark_tests():
+    """Executes a set of benchmark tests for a set of classification models.
     """
     # Set the auto completion scheme
     readline.set_completer_delims(" \t")
@@ -61,7 +71,13 @@ def executeBenchmarkTests():
 
     print "Type the absolute path to the classifier models:"
     print "e.g. /home/user/foo"
+
+    help_details()
+
     classifiers_path = raw_input("-->")
+    if not os.path.isdir(classifiers_path):
+        print "The specified path is not valid. Exiting!"
+        return None
 
     package_path = rospkg.RosPack().get_path(PKG)
 
@@ -69,33 +85,15 @@ def executeBenchmarkTests():
     package_config_path = os.path.join(package_path, "config")
 
     for folder in os.listdir(classifiers_path):
-        num_of_clusters = folder[7:]
-        num_of_clusters = num_of_clusters[:-7]
-
-        training_params_file = os.path.join(package_config_path,
-                               "rgb_svm_training_params.yaml")
-
-        new_training_params_file = os.path.join(package_config_path,
-                                   "new_rgb_svm_training_params.yaml")
-
-        params_data = open(training_params_file, "r")
-        new_params_data = open(new_training_params_file, "w")
-        for params_data_line in params_data:
-            if "dictionary_size" in params_data_line:
-                params_data_line = params_data_line[0:17] + num_of_clusters + "\n"
-            new_params_data.write(params_data_line)
-
-        params_data.close()
-        new_params_data.close()
-        # Remove old params file and replace it with the new one.
-        os.remove(training_params_file)
-        os.rename(new_training_params_file, training_params_file)
-
         folder_path = os.path.join(classifiers_path, folder)
 
         for data_file in os.listdir(folder_path):
-            shutil.copyfile(os.path.join(folder_path, data_file),
-                            os.path.join(package_data_path, data_file))
+            if "params" in data_file:
+                shutil.copyfile(os.path.join(folder_path, data_file),
+                                os.path.join(package_config_path, data_file))
+            else:
+                shutil.copyfile(os.path.join(folder_path, data_file),
+                                os.path.join(package_data_path, data_file))
 
         os.chdir("/home/pandora/ws/pandora_ws")
 
@@ -112,4 +110,4 @@ def executeBenchmarkTests():
 
 
 if __name__ == "__main__":
-    executeBenchmarkTests()
+    execute_benchmark_tests()
