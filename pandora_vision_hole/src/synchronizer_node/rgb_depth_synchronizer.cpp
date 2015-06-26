@@ -191,7 +191,7 @@ namespace pandora_vision
     // This variable indicates the mode in which Hole-Package is running
     // If is set to true -> Rgb-D-T mode
     // Else Rgb-D mode
-    if(nodeHandle_.getParam("/hole_detector/thermal", mode_))
+    if (nodeHandle_.getParam("/hole_detector/thermal", mode_))
     {
       ROS_INFO("[Synchronizer Node] Packages Mode has been found");
     }
@@ -550,9 +550,9 @@ namespace pandora_vision
         Timer::printAllMeansTree();
         #endif
       }
-  
+
       // Check if Thermal is enabled to run with hole-detection Package
-      if(mode_)
+      if (mode_)
       {
         // Fill the thermal message
         pandora_vision_msgs::IndexedThermal thermalMsg;

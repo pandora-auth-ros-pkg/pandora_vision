@@ -597,7 +597,7 @@ namespace pandora_vision
     // This variable indicates the mode in which Hole-Package is running
     // If is set to true -> Rgb-D-T mode
     // Else Rgb-D mode
-    if(nodeHandle_.getParam("/hole_detector/thermal", mode_))
+    if (nodeHandle_.getParam("/hole_detector/thermal", mode_))
     {
       ROS_INFO("[Hole Fusion Node] Packages Mode has been found");
     }
@@ -1491,7 +1491,7 @@ namespace pandora_vision
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    if(mode_)
+    if (mode_)
     {
       HolesConveyorUtils::merge(rgbdHolesConveyor, thermalHolesConveyor_,
         &rgbdHolesConveyor);

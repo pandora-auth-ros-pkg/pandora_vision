@@ -130,7 +130,8 @@ namespace pandora_vision
       &thermalSensorImage, sensor_msgs::image_encodings::TYPE_8UC1);
 
     //  Obtain the thermal message and extract the temperature information.
-    //  Convert this information to cv::Mat in order to be processed.
+    //  Convert this
+    //  information to cv::Mat in order to be processed.
     //  It's format will be CV_8UC1
     cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat
       (msg.temperatures);
@@ -255,7 +256,7 @@ namespace pandora_vision
           converter.getGeneralAlertInfo(ros::this_node::getName(),
             nodeHandle_, poisStamped);
 
-        for(unsigned int i = 0; i < alert.alerts.size(); i++)
+        for (unsigned int i = 0; i < alert.alerts.size(); i++)
         {
           // Fill the temperature of the thermal message for each hole
           thermalMsg.temperature = holes.holes[i].holeTemperature;
@@ -377,7 +378,7 @@ namespace pandora_vision
     }
     else
     {
-      ROS_ERROR_NAMED (PKG_NAME,
+      ROS_ERROR_NAMED(PKG_NAME,
         "[Thermal Node] Could not find topic Process end Topic");
     }
   }
@@ -452,8 +453,8 @@ namespace pandora_vision
       // Apply logistic function on the average temperature found
       else if (method == 1)
       {
-        float probability = 1/(1 + exp( -Parameters::Thermal::left_tolerance *
-            (average - Parameters::Thermal::low_acceptable_temperature ) ))
+        float probability = 1/(1 + exp(-Parameters::Thermal::left_tolerance *
+            (average - Parameters::Thermal::low_acceptable_temperature)))
             - 1/(1 + exp(- Parameters::Thermal::right_tolerance *
             (average - Parameters::Thermal::high_acceptable_temperature)));
 
