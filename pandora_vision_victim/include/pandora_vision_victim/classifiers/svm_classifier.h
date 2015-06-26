@@ -45,6 +45,8 @@
 #include <opencv2/opencv.hpp>
 
 #include "pandora_vision_victim/classifiers/abstract_classifier.h"
+#include "pandora_vision_victim/utilities/platt_scaling.h"
+#include "pandora_vision_victim/utilities/principal_component_analysis.h"
 
 namespace pandora_vision
 {
@@ -72,7 +74,7 @@ namespace pandora_vision
        * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
        * @return bool True on successfull completions, false otherwise.
        */
-      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat& trainingSetLabels,
           const std::string& classifierFileDest);
 
       /**
@@ -101,8 +103,16 @@ namespace pandora_vision
 
       bool autoTrain_;
 
+      bool usePlattScaling_;
+
       /// The Pointer to the classifier object
       boost::shared_ptr<CvSVM> classifierPtr_;
+
+      /// The pointers to the Platt Scaling object.
+      boost::shared_ptr<PlattScaling> plattScalingPtr_;
+
+      /// The pointer to the PCA object.
+      boost::shared_ptr<PrincipalComponentAnalysis> pcaPtr_;
   };
 }  // namespace pandora_vision
 

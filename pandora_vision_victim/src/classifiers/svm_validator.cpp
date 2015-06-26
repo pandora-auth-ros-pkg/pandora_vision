@@ -85,6 +85,32 @@ namespace pandora_vision
     probabilityScaling_ = probabilityScaling;
     probabilityTranslation_ = probabilityTranslation;
 
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_victim_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::cout << paramFile << std::endl;
+    if (!fs.isOpened())
+    {
+      ROS_ERROR("Could not open : %s !", paramFile.c_str());
+      ROS_ERROR("The training node will now shut down!");
+      ROS_BREAK();
+    }
+
+    cv::FileNode classifierNode = fs[classifierType_];
+    std::string usePlattScaling = classifierNode["use_platt_scaling"];
+    usePlattScaling_ = usePlattScaling.compare("true") == 0;
+
+    fs.release();
+
+    if (usePlattScaling_)
+    {
+      plattScalingPtr_.reset(new PlattScaling());
+      std::string plattParametersFile = packagePath_ + "/data/" + imageType_ +
+          "_" + classifierType_ + "_platt_scaling.xml";
+      plattScalingPtr_->load(plattParametersFile);
+    }
+
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
         << classifierType_ << " Validator instance");
   }
@@ -108,7 +134,7 @@ namespace pandora_vision
     float prediction;
     prediction = svmValidator_.predict(featuresMat, true);
 
-    *probability = transformPredictionToProbability(prediction);
+    *probability = transformPredictionToProbability(prediction, *classLabel);
   }
 
   /**
@@ -117,17 +143,26 @@ namespace pandora_vision
    * @param prediction [float] The classifier prediction.
    * @return [float] The classification probability.
    */
-  float SvmValidator::transformPredictionToProbability(float prediction)
+  float SvmValidator::transformPredictionToProbability(float prediction,
+      float classLabel)
   {
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Prediction = " << prediction);
-    if (prediction < 0.0f)
-      prediction = fabs(prediction);
 
-    // Normalize probability to [-1,1]
-    float probability = std::tanh(probabilityScaling_ * prediction -
-        probabilityTranslation_);
-    // Normalize probability to [0,1]
-    probability = (1.0f + probability) / 2.0f;
+    double absPrediction = fabs(prediction);
+    float probability;
+    if (usePlattScaling_)
+    {
+      ROS_INFO_STREAM(nodeMessagePrefix_ << ": Use Platt Scaling to estimate probability");
+      probability = plattScalingPtr_->sigmoidPredict(absPrediction * classLabel);
+    }
+    else
+    {
+      // Normalize probability to [-1,1]
+      probability = static_cast<float>(std::tanh(
+          probabilityScaling_ * absPrediction - probabilityTranslation_));
+      // Normalize probability to [0,1]
+      probability = (1.0f + probability) / 2.0f;
+    }
     return probability;
   }
 }  // namespace pandora_vision

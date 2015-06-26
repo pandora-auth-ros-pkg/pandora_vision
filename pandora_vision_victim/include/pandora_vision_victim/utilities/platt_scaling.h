@@ -74,7 +74,7 @@ namespace pandora_vision
        * @param actualLabelsMat [const cv::Mat&] The actual class labels matrix.
        * @return void
        */
-      void sigmoidTrain(const cv::Mat& predictedLabelsMat,
+      void sigmoidTrain(const cv::Mat& predictionsMat,
           const cv::Mat& actualLabelsMat);
 
       /**
@@ -83,7 +83,7 @@ namespace pandora_vision
        * @param predicted [float] The predicted class label for a single image.
        * @return [float] The prediction probability.
        */
-      float sigmoidPredict(float predicted);
+      float sigmoidPredict(double predicted);
 
       /**
        * @brief This function estimates the classification probability for a

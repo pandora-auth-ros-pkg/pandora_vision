@@ -43,8 +43,10 @@
 
 #include <opencv2/opencv.hpp>
 #include <ros/ros.h>
+#include <boost/shared_ptr.hpp>
 
 #include "pandora_vision_victim/classifiers/abstract_validator.h"
+#include "pandora_vision_victim/utilities/platt_scaling.h"
 
 /**
  * @namespace pandora_vision
@@ -86,9 +88,10 @@ namespace pandora_vision
        * @brief This function calculates the classification probability
        * according to the SVM prediction.
        * @param prediction [float] The SVM prediction.
+       * @param classLabel [float] The estimated class label.
        * @return [float] The classification probability.
        */
-      float transformPredictionToProbability(float prediction);
+      float transformPredictionToProbability(float prediction, float classLabel);
 
     private:
       /// The OpenCV SVM classifier.
@@ -101,6 +104,10 @@ namespace pandora_vision
       /// probabilities.
       double probabilityScaling_;
       double probabilityTranslation_;
+
+      boost::shared_ptr<PlattScaling> plattScalingPtr_;
+
+      bool usePlattScaling_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H

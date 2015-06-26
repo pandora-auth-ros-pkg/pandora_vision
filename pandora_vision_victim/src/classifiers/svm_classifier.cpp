@@ -167,6 +167,29 @@ namespace pandora_vision
     }
     autoTrain_ = autoTrain;
 
+    std::string paramFile = packagePath_ + "/config/" + imageType + "_victim_training_params.yaml";
+    cv::FileStorage fs(paramFile, cv::FileStorage::READ);
+    fs.open(paramFile, cv::FileStorage::READ);
+
+    std::cout << paramFile << std::endl;
+    if (!fs.isOpened())
+    {
+      ROS_ERROR("Could not open : %s !", paramFile.c_str());
+      ROS_ERROR("The training node will now shut down!");
+      ROS_BREAK();
+    }
+
+    cv::FileNode classifierNode = fs[classifierType_];
+    std::string usePlattScaling = classifierNode["use_platt_scaling"];
+    usePlattScaling_ = usePlattScaling.compare("true") == 0;
+
+    fs.release();
+
+    if (usePlattScaling_)
+    {
+      plattScalingPtr_.reset(new PlattScaling());
+    }
+
     classifierPtr_.reset(new CvSVM());
 
     ROS_INFO("Created %s %s Training Instance.", imageType_.c_str(), classifierType_.c_str());
@@ -189,7 +212,7 @@ namespace pandora_vision
    * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
    * @return bool True on successfull completions, false otherwise.
    */
-  bool SvmClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+  bool SvmClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat& trainingSetLabels,
       const std::string& classifierFileDest)
   {
     if (trainingSetFeatures.empty())
@@ -229,6 +252,19 @@ namespace pandora_vision
       classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), svmParams_);
     }
 
+    if (usePlattScaling_)
+    {
+      cv::Mat predictionsMat = cv::Mat::zeros(trainingSetFeatures.rows, 1, CV_32FC1);
+      for (int ii = 0; ii < trainingSetFeatures.rows; ii++)
+      {
+        float prediction = classifierPtr_->predict(trainingSetFeatures.row(ii), true);
+        float classLabel = classifierPtr_->predict(trainingSetFeatures.row(ii), false);
+        predictionsMat.at<double>(ii, 0) = static_cast<double>(prediction);
+      }
+      plattScalingPtr_->sigmoidTrain(predictionsMat, trainingSetLabels);
+      std::string plattParametersFile = filesDirectory_ + imageType_ + "_" + classifierType_ + "_platt_scaling.xml";
+      plattScalingPtr_->save(plattParametersFile);
+    }
 
     classifierPtr_->save(classifierFile_.c_str());
     return true;
@@ -243,18 +279,6 @@ namespace pandora_vision
    */
   void SvmClassifier::validate(const cv::Mat& testSetFeatures, cv::Mat* validationResults)
   {
-    // uncomment to produce the platt probability
-    // float prediction;
-    // double A, B;
-    // for (int ii = 0; ii < testFeaturesMat.rows; ii++)
-    // {
-    // prediction = classifierPtr_->predict(testFeaturesMat.row(ii), true);
-    // results.at<double>(ii, 0)= prediction;
-    // }
-    // sigmoid_train(results, testLabelsMat, &A, &B);
-    // std::cout << "A=" << A << std::endl;
-    // std::cout << "B=" << B << std::endl;
-
     // uncomment for ONE_CLASS SVM
     // for (int ii = 0; ii < results.rows; ii++)
     // for (int jj = 0; jj < results.cols; jj++)

@@ -55,12 +55,13 @@ namespace pandora_vision
   {
   }
 
-  void PlattScaling::sigmoidTrain(const cv::Mat& predictedLabelsMat,
+  void PlattScaling::sigmoidTrain(const cv::Mat& predictionsMat,
       const cv::Mat& actualLabelsMat)
   {
-    double prior1 = 0, prior0 = 0;
-    size_t numRows = actualLabelsMat.rows;
-    for (int ii = 0; ii < predictedLabelsMat.rows; ii++)
+    double prior1 = 0;
+    double prior0 = 0;
+    int numRows = actualLabelsMat.rows;
+    for (int ii = 0; ii < predictionsMat.rows; ii++)
     {
       if (actualLabelsMat.at<double>(ii, 0) > 0)
         prior1 += 1;
@@ -91,7 +92,7 @@ namespace pandora_vision
         t[ii] = hiTarget;
       else
         t[ii]=loTarget;
-      fApB = predictedLabelsMat.at<double>(ii, 0) * Avector + Bvector;
+      fApB = predictionsMat.at<double>(ii, 0) * Avector + Bvector;
       if (fApB >= 0)
         fval += t[ii] * fApB + log(1 + exp(-fApB));
       else
@@ -105,9 +106,9 @@ namespace pandora_vision
       h21 = 0.0;
       g1 = 0.0;
       g2 = 0.0;
-      for (int ii = 0; ii < predictedLabelsMat.rows; ii++)
+      for (int ii = 0; ii < predictionsMat.rows; ii++)
       {
-        fApB = predictedLabelsMat.at<double>(ii, 0) * Avector + Bvector;
+        fApB = predictionsMat.at<double>(ii, 0) * Avector + Bvector;
         if (fApB >= 0)
         {
           p = exp(-fApB) / (1.0 + exp(-fApB));
@@ -119,11 +120,11 @@ namespace pandora_vision
           q = exp(fApB) / (1.0 + exp(fApB));
         }
         d2 = p * q;
-        h11 += predictedLabelsMat.at<double>(ii, 0) * predictedLabelsMat.at<double>(ii, 0) * d2;
+        h11 += predictionsMat.at<double>(ii, 0) * predictionsMat.at<double>(ii, 0) * d2;
         h22 += d2;
-        h21 += predictedLabelsMat.at<double>(ii, 0) * d2;
+        h21 += predictionsMat.at<double>(ii, 0) * d2;
         d1 = t[ii] - p;
-        g1 += predictedLabelsMat.at<double>(ii, 0) * d1;
+        g1 += predictionsMat.at<double>(ii, 0) * d1;
         g2 += d1;
       }
 
@@ -148,7 +149,7 @@ namespace pandora_vision
         newf = 0.0;
         for (int ii = 0; ii < actualLabelsMat.rows; ii++)
         {
-          fApB = predictedLabelsMat.at<double>(ii, 0) * newA + newB;
+          fApB = predictionsMat.at<double>(ii, 0) * newA + newB;
           if (fApB >= 0)
             newf += t[ii] * fApB + log(1 + exp(-fApB));
           else
@@ -180,21 +181,21 @@ namespace pandora_vision
     B_ = Bvector;
   }
 
-  float PlattScaling::sigmoidPredict(float predicted)
+  float PlattScaling::sigmoidPredict(double predicted)
   {
-    float probability;
-    float fApB = predicted * A_ + B_;
+    double probability;
+    double fApB = predicted * A_ + B_;
 
-    float expFApB = static_cast<float>(exp(-abs(fApB)));
-    if (fApB >= 0)
+    double expFApB = exp(-abs(fApB));
+    if (fApB >= 0.0)
     {
-      probability =  expFApB / (1.0f + expFApB);
+      probability =  expFApB / (1.0 + expFApB);
     }
     else
     {
-      probability = 1.0f / (1.0f + expFApB);
+      probability = 1.0 / (1.0 + expFApB);
     }
-    return probability;
+    return static_cast<float>(probability);
   }
 
   std::vector<float> PlattScaling::sigmoidPredict(const cv::Mat& predicted)
@@ -207,14 +208,16 @@ namespace pandora_vision
 
     for (int ii = 0; ii < expFApB.rows; ii++)
     {
-      if (fApB.at<float>(ii, 0) >= 0)
+      double probability;
+      if (fApB.at<double>(ii, 0) >= 0.0)
       {
-        probabilityVector.push_back(expFApB.at<float>(ii, 0) / (1.0f + expFApB.at<float>(ii , 0)));
+        probability = expFApB.at<double>(ii, 0) / (1.0 + expFApB.at<double>(ii , 0));
       }
       else
       {
-        probabilityVector.push_back(1.0f / (1.0f + expFApB.at<float>(ii, 0)));
+        probability = 1.0 / (1.0 + expFApB.at<double>(ii, 0));
       }
+      probabilityVector.push_back(static_cast<float>(probability));
     }
     return probabilityVector;
   }

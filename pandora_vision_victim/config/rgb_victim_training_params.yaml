@@ -17,6 +17,7 @@ svm:
   load_classifier_model: false
 
   do_pca_analysis: false
+  use_platt_scaling: false
   # Normalization Types
   # 0: No Normalization
   # 1: Min-Max Normalization

@@ -77,7 +77,7 @@ namespace pandora_vision
        * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
        * @return bool True on successfull completions, false otherwise.
        */
-      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+      virtual bool train(const cv::Mat& trainingSetFeatures, const cv::Mat& trainingSetLabels,
           const std::string& classifierFileDest);
 
       /**

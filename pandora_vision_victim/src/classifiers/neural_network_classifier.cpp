@@ -211,7 +211,7 @@ namespace pandora_vision
    * @param classifierFileDest[const std::string&] The file where the classifier will be stored.
    * @return bool True on successfull completions, false otherwise.
    */
-  bool NeuralNetworkClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat trainingSetLabels,
+  bool NeuralNetworkClassifier::train(const cv::Mat& trainingSetFeatures, const cv::Mat& trainingSetLabels,
       const std::string& classifierFileDest)
   {
     if (trainingSetFeatures.empty())
@@ -225,7 +225,7 @@ namespace pandora_vision
       return false;
     }
 
-    classifierPtr_->train(trainingSetFeatures,  trainingSetLabels,
+    classifierPtr_->train(trainingSetFeatures, trainingSetLabels,
         cv::Mat(), cv::Mat(), NeuralNetworkParams_, CvANN_MLP::NO_INPUT_SCALE + CvANN_MLP::NO_OUTPUT_SCALE);
     classifierPtr_->save(classifierFileDest.c_str());
     return true;
