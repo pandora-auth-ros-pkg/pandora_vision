@@ -56,7 +56,7 @@ namespace pandora_vision
 {
   class GeneralAlertConverter
   {
-  public:
+   public:
     /**
      * @brief Constructor
      **/
@@ -81,7 +81,7 @@ namespace pandora_vision
       getGeneralAlertInfo(const std::string& nodeName, ros::NodeHandle& nh,
       const POIsStampedConstPtr& result);
 
-  private:
+   private:
     /**
      * @brief Function that finds in a dictionary a parameter of type T with the frame id
      * as key. If the parameter is not found there, external files (yaml files, launchers)
@@ -116,7 +116,7 @@ namespace pandora_vision
         const std::string& key,
         const std::string& model_param_name);
 
-  protected:
+   protected:
     /// A dictionary that includes every parent frame id that the node uses
     /// with frame id as key
     std::map<std::string, std::string> parentFrameDict_;
@@ -156,10 +156,8 @@ namespace pandora_vision
     {
       const POIPtr poiPtr = result->pois[i];
       pandora_common_msgs::GeneralAlertInfo info;
-      x = poiPtr->getPoint().x
-        - static_cast<float>(result->frameWidth) / 2;
-      y = static_cast<float>(result->frameHeight) / 2
-        - poiPtr->getPoint().y;
+      x = static_cast<float>(result->frameWidth) / 2 - poiPtr->getPoint().x;
+      y = poiPtr->getPoint().y - static_cast<float>(result->frameHeight) / 2;
 
       info.yaw = atan(2 * x / result->frameWidth * tan(hfov * CV_PI / 360.0f));
       info.pitch = atan(2 * y / result->frameHeight * tan(vfov * CV_PI / 360.0f));
