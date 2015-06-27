@@ -75,9 +75,17 @@ def execute_benchmark_tests():
     help_details()
 
     classifiers_path = raw_input("-->")
+
     if not os.path.isdir(classifiers_path):
         print "The specified path is not valid. Exiting!"
         return None
+
+    print "Type the path to your catkin workspace: "
+    catkinPath = raw_input("--> ")
+    if not os.path.isdir(catkinPath):
+        print "The specified path to the catking workspace is not valid. Exiting!"
+        return None
+
 
     package_path = rospkg.RosPack().get_path(PKG)
 
@@ -85,8 +93,10 @@ def execute_benchmark_tests():
     package_config_path = os.path.join(package_path, "config")
 
     for folder in os.listdir(classifiers_path):
+        print "Starting new test procedure!"
         folder_path = os.path.join(classifiers_path, folder)
 
+        print "Copying necessary files to the package folder!"
         for data_file in os.listdir(folder_path):
             if "params" in data_file:
                 shutil.copyfile(os.path.join(folder_path, data_file),
@@ -95,12 +105,13 @@ def execute_benchmark_tests():
                 shutil.copyfile(os.path.join(folder_path, data_file),
                                 os.path.join(package_data_path, data_file))
 
-        os.chdir("/home/pandora/ws/pandora_ws")
+        os.chdir(os.path.abspath(catkinPath))
 
+        print "Starting Test! \n\n"
         subprocess.call("rostest pandora_vision_victim victim_benchmark_test.launch",
                         shell=True)
         # Sleep for a while until the process is fully finished.
-        rospy.sleep(30)
+        rospy.sleep(1)
         print "Finished one test"
         shutil.copyfile(os.path.join(package_data_path, "benchmark_results.txt"),
                         os.path.join(folder_path, "benchmark_results.txt"))

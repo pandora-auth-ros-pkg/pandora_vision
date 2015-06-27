@@ -34,6 +34,6 @@
   <param name="algorithm" value="Victim"/>
 
   <test test-name="VictimBenchmarkTest" pkg="pandora_vision_victim"
-    type="victim_benchmark_test.py" time-limit="10000.0"/>
+    type="victim_benchmark_test.py" time-limit="20000.0"/>
 
 </launch>
