@@ -72,9 +72,12 @@ def convert(input_bag_name, topic, annotation_file, output_bag_name="output.bag"
             for topic_name, image, time in input_bag.read_messages():
                 if topic_name == topic:
                     i += 1
-                    enhanced_image = convert_image(Image(image),
-                                                   "bbox_"+str(i), annotation_dict)
-                    output_bag.write(topic_name, enhanced_image, time)
+                    frame_name = "frame"+str(i)+".png"
+                    if frame_name not in annotation_dict:
+                        continue
+                    enhanced_image = convert_image(image,
+                                                   frame_name, annotation_dict)
+                    output_bag.write("/enhanced_images", enhanced_image, time)
                 else:
                     output_bag.write(topic_name, image, time)
 
@@ -133,8 +136,9 @@ def read_annotation_file(annotation_file):
     @rtype: defaultdict of tuples
 
     """
-    if not os.path.isdir(annotation_file):
+    if not os.path.isfile(annotation_file):
         print "ERROR : Incorrect Path for annotator file."
+        print annotation_file
         exit(2)
     annotations_dict = defaultdict(tuple)
     with open(annotation_file, "rU") as annotator_file:
@@ -144,23 +148,25 @@ def read_annotation_file(annotation_file):
             (frame_name, object_type, x_top_left_point, y_top_left_point,
              x_bottom_right_point, y_bottom_right_point) = line.split(",")
             y_bottom_right_point = y_bottom_right_point.replace("\n", "")
-            annotations_dict[frame_name].append((object_type,
-                                                 int(x_top_left_point),
-                                                 int(y_top_left_point),
-                                                 int(x_bottom_right_point),
-                                                 int(y_bottom_right_point)))
+            annotations_dict[frame_name] = (object_type,
+                                            int(x_top_left_point),
+                                            int(y_top_left_point),
+                                            int(x_bottom_right_point),
+                                            int(y_bottom_right_point))
     return annotations_dict
 
 
 if __name__ == '__main__':
     ARGS = sys.argv[1:]
     if len(ARGS) < 3:
-        print "./rgb_to_enhanced.py [-O output_bag_name] input_bag_name \
-               topic_name annotation_file_name"
+        print "./rgb_to_enhanced.py [-O output_bag_name] input_bag_name "+\
+               "topic_name annotation_file_name"
+        exit(1)
     if ARGS[0] == '-O':
         if len(ARGS) < 5:
-            print "./rgb_to_enhanced.py [-O output_bag_name] input_bag_name \
-                   topic_name annotation_file_name"
+            print "./rgb_to_enhanced.py [-O output_bag_name] input_bag_name "+\
+                  "topic_name annotation_file_name"
+            exit(1)
         OUTBAG_NAME = ARGS[1]
         INBAG_NAME = ARGS[2]
         TOPIC = ARGS[3]
