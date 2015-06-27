@@ -245,7 +245,7 @@ namespace pandora_vision
       // if (counter_ == params_.positivesCounter)
       {
         std::ostringstream convert;
-        convert << "RGB_ " << boost::to_upper_copy<std::string>(rgbValidatorPtr_->getClassifierType())
+        convert << "RGB_" << boost::to_upper_copy<std::string>(rgbValidatorPtr_->getClassifierType())
           << " : " << rgb_svm_keypoints.size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 60),
@@ -264,7 +264,7 @@ namespace pandora_vision
 
       {
         std::ostringstream convert;
-        convert << "Depth_ " << boost::to_upper_copy<std::string>(depthValidatorPtr_->getClassifierType())
+        convert << "Depth_" << boost::to_upper_copy<std::string>(depthValidatorPtr_->getClassifierType())
           << " : " << depth_svm_keypoints.size();
         cv::putText(debugImage, convert.str().c_str(),
           cvPoint(10, 80),

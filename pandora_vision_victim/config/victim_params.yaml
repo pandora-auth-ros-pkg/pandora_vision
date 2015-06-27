@@ -1,6 +1,6 @@
 cascade_path: /data/rgb_cascade.xml
 
-rgb_classifier: svm
+rgb_classifier: ann
 depth_classifier: svm
 
 svm:

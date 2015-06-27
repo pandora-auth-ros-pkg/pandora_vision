@@ -130,12 +130,7 @@ namespace pandora_vision
       ROS_BREAK();
     }
 
-
     numFeatures_ = featureExtraction_->getFeatureNumber();
-
-    ROS_INFO("[victim_node] : Created Abstract Classifier instance");
-      ros::shutdown();
-    }
 
     ROS_INFO("Created Abstract Classifier Instance!");
   }

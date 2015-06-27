@@ -94,25 +94,6 @@ namespace pandora_vision
     gettimeofday(&endwtime, NULL);
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6
-      ros::shutdown();
-    }
-
-    boost::shared_ptr<AbstractClassifier> victimTrainerPtr;
-    AbstractClassifier* classifierPtr = this->createClassifier(classifierType, imageType);
-    if (classifierPtr == NULL)
-    {
-      ROS_ERROR("[Victim_Training]: Null pointer allocated for classifier Trainer!");
-      ROS_ERROR("[Victim_Training]: The node will now terminate!");
-      ros::shutdown();
-    }
-    victimTrainerPtr.reset(classifierPtr);
-
-    // Structs for calculating elapsed time.
-    struct timeval startwtime, endwtime;
-    gettimeofday(&startwtime , NULL);
-
-    // Train the system
-    victimTrainerPtr->trainSubSystem();
 
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6

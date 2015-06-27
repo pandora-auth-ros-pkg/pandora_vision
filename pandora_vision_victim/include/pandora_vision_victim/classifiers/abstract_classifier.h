@@ -54,6 +54,7 @@
 
 namespace pandora_vision
 {
+  class AbstractClassifier
   {
     public:
       /**
