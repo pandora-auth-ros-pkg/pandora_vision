@@ -76,7 +76,7 @@ namespace pandora_vision
       // (so that the blob it represents can barely be identified)
       // and the the third one has its lower right vertex at
       // (WIDTH - 1, HEIGHT - 1)
-      vitual void SetUp()
+      virtual void SetUp()
       {
         WIDTH = 640;
         HEIGHT = 480;
