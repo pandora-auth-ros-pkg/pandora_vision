@@ -153,6 +153,8 @@ namespace pandora_vision
       /**
        * @brief Find depth distance of soft obstacle bounding box
        * @param depthImage [const cv::Mat&] The input depth image
+       * @param verticalLines [const std::vector<cv::Vec4i>&] The
+       * input vector that contains the vertical lines found
        * @param roi [const cv::Rect&] The bounding box that is
        * used to find the depth distance
        * @param level [int] The number of stages of the DWT
@@ -160,7 +162,8 @@ namespace pandora_vision
        * point of the bounding box
        **/
       std::vector<float> findDepthDistance(const cv::Mat& depthImage,
-          const cv::Rect& roi, int level = 1);
+          const std::vector<cv::Vec4i> verticalLines, const cv::Rect& roi,
+          int level = 1);
 
     private:
       /// The DWT class object used to perform this operation

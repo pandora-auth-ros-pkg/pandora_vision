@@ -52,7 +52,7 @@ namespace pandora_vision
     nodeName_ = name;
 
     nh.param("hsvColor/sThreshold", sValueThreshold_, 95);
-    nh.param("hsvColor/vThreshold", vValueThreshold_, 190);
+    nh.param("hsvColor/vThreshold", vValueThreshold_, 130);
 
     nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
 
@@ -303,24 +303,47 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
   }
 
   std::vector<float> SoftObstacleDetector::findDepthDistance(const cv::Mat& depthImage,
-      const cv::Rect& roi, int level)
+      const std::vector<cv::Vec4i> verticalLines, const cv::Rect& roi, int level)
   {
     std::vector<float> depth;
+
+    int minLinePosition = 0;
+    int maxLinePosition = 0;
+
+    for (size_t ii = 1; ii < verticalLines.size(); ii++)
+    {
+      int x0 = verticalLines[ii][0];
+      int x1 = verticalLines[ii][2];
+
+      minLinePosition = (x0 == roi.x || x1 == roi.x) ? ii : minLinePosition;
+      maxLinePosition = (x0 == roi.x + roi.width || x1 == roi.x + roi.width)
+        ? ii : maxLinePosition;
+    }
 
     int xx = (roi.x + roi.width / 2) * pow(2, level);
     int yy = roi.y * pow(2, level);
     depth.push_back(depthImage.at<float>(yy, xx));
 
-    xx = (roi.x + roi.width) * pow(2, level);
-    yy = (roi.y + roi.height / 2) * pow(2, level);
+    int lineCenterX = (verticalLines[maxLinePosition][0]
+        + verticalLines[maxLinePosition][2]) / 2;
+    int lineCenterY = (verticalLines[maxLinePosition][1]
+        + verticalLines[maxLinePosition][3]) / 2;
+
+    xx = lineCenterX * pow(2, level);
+    yy = lineCenterY * pow(2, level);
     depth.push_back(depthImage.at<float>(yy, xx));
 
     xx = (roi.x + roi.width / 2) * pow(2, level);
     yy = (roi.y + roi.height) * pow(2, level);
     depth.push_back(depthImage.at<float>(yy, xx));
 
-    xx = roi.x * pow(2, level);
-    yy = (roi.y + roi.height / 2) * pow(2, level);
+    lineCenterX = (verticalLines[minLinePosition][0]
+        + verticalLines[minLinePosition][2]) / 2;
+    lineCenterY = (verticalLines[minLinePosition][1]
+        + verticalLines[minLinePosition][3]) / 2;
+
+    xx = lineCenterX * pow(2, level);
+    yy = lineCenterY * pow(2, level);
     depth.push_back(depthImage.at<float>(yy, xx));
 
     return depth;
@@ -409,8 +432,8 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       }
 
       // Find the depth distance of the soft obstacle
-      std::vector<float> depthDistance = findDepthDistance(depthImage, *roi,
-          level);
+      std::vector<float> depthDistance = findDepthDistance(depthImage, verticalLines,
+          *roi, level);
 
       if (probability > 0.0f)
       {
