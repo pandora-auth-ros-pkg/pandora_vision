@@ -47,13 +47,19 @@ namespace pandora_vision
   {
     public:
       SoftObstacleDetectorTest() :
-          detector_(new SoftObstacleDetector(13, 95, 190, 2.0, 3.0,
+          detector_(new SoftObstacleDetector(13, 100, 130, 2.0, 3.0,
           cv::Size(5, 1), cv::Size(3, 3))) {}
 
       bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
           float grad, float beta)
       {
         return detector_->findNonIdenticalLines(lineCoeffs, grad, beta);
+      }
+
+      std::vector<cv::Vec4i> performProbHoughLines(const cv::Mat& rgbImage,
+          const cv::Mat& binaryImage, int level = 1)
+      {
+        return detector_->performProbHoughLines(rgbImage, binaryImage, level);
       }
 
       float detectROI(const std::vector<cv::Vec4i>& verticalLines,
@@ -75,6 +81,48 @@ namespace pandora_vision
     ASSERT_FALSE(findNonIdenticalLines(lineCoeffs, 90, 22));
     ASSERT_TRUE(findNonIdenticalLines(lineCoeffs, 85, 35));
     ASSERT_TRUE(findNonIdenticalLines(lineCoeffs, 95, 28));
+  }
+
+  TEST_F(SoftObstacleDetectorTest, areVerticalLinesDetectedCorrectly)
+  {
+    cv::Mat rgbImage(240, 240, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    cv::line(rgbImage, cv::Point(5, 10), cv::Point(7, 200),
+        cv::Scalar(255, 255, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(45, 10), cv::Point(46, 190),
+        cv::Scalar(255, 255, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(47, 15), cv::Point(44, 210),
+        cv::Scalar(255, 255, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(100, 20), cv::Point(102, 85),
+        cv::Scalar(255, 255, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(150, 10), cv::Point(175, 140),
+        cv::Scalar(255, 255, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(70, 30), cv::Point(72, 195),
+        cv::Scalar(0, 0, 255), 3, 8);
+    cv::line(rgbImage, cv::Point(182, 15), cv::Point(180, 215),
+        cv::Scalar(255, 255, 255), 3, 8);
+
+    cv::Mat resizedImage;
+    cv::resize(rgbImage, resizedImage, cv::Size(480, 480));
+
+    cv::Mat grayImage;
+    cv::cvtColor(rgbImage, grayImage, CV_BGR2GRAY);
+    cv::Mat binaryImage = (grayImage > 0);
+
+    std::vector<cv::Vec4i> verticalLines = performProbHoughLines(
+        resizedImage, binaryImage);
+
+    ASSERT_EQ(2, verticalLines.size());
+
+    EXPECT_NEAR(verticalLines[0][0], 180, 2);
+    EXPECT_NEAR(verticalLines[0][1], 215, 2);
+    EXPECT_NEAR(verticalLines[0][2], 182, 2);
+    EXPECT_NEAR(verticalLines[0][3], 15, 2);
+
+    EXPECT_NEAR(verticalLines[1][0], 45, 2);
+    EXPECT_NEAR(verticalLines[1][1], 210, 2);
+    EXPECT_NEAR(verticalLines[1][2], 47, 2);
+    EXPECT_NEAR(verticalLines[1][3], 15, 2);
   }
 
   TEST_F(SoftObstacleDetectorTest, isROIDetectedCorrectly)
