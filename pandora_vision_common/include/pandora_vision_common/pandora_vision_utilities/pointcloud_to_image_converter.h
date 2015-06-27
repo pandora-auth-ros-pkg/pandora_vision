@@ -36,8 +36,8 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER
-#define PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER
+#ifndef PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER_H
+#define PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER_H
 
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
@@ -47,22 +47,21 @@ namespace pandora_vision
 {
   class PointCloudToImageConverter
   {
-    public:
-      typedef boost::shared_ptr<PointCloudToImageConverter> Ptr;
-      typedef boost::shared_ptr<PointCloudToImageConverter const> ConstPtr;
+   public:
+    typedef boost::shared_ptr<PointCloudToImageConverter> Ptr;
+    typedef boost::shared_ptr<PointCloudToImageConverter const> ConstPtr;
 
-    public:
-      PointCloudToImageConverter();
-      virtual ~PointCloudToImageConverter();
+   public:
+    PointCloudToImageConverter();
+    virtual ~PointCloudToImageConverter();
 
-    public:
-      cv::Mat convertPclToImage(const sensor_msgs::PointCloud2ConstPtr& pclPtr,
-          int encoding);
+   public:
+    cv::Mat convertPclToImage(const sensor_msgs::PointCloud2ConstPtr& pclPtr,
+                              int encoding);
   };
+
   typedef PointCloudToImageConverter::Ptr PointCloudToImageConverterPtr;
   typedef PointCloudToImageConverter::ConstPtr PointCloudToImageConverterConstPtr;
-
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER
-
+#endif  // PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_POINTCLOUD_TO_IMAGE_CONVERTER_H

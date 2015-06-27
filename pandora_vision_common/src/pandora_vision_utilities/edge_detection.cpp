@@ -34,8 +34,8 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
- 
-#include "edge_detection.h"
+
+#include "pandora_vision_common/pandora_vision_utilities/edge_detection.h"
 
 namespace pandora_vision
 {
@@ -47,7 +47,5 @@ namespace pandora_vision
   **/
   void EdgeDetection::applyCanny(const cv::Mat& inImage, cv::Mat* outImage)
   {
-    
   }
-  
-} // namespace pandora_vision
+}  // namespace pandora_vision

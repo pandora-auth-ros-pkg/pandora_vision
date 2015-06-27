@@ -43,3 +43,10 @@ add_dependencies(${PROJECT_NAME}_pcl_to_image
 target_link_libraries(${PROJECT_NAME}_pcl_to_image
   ${catkin_LIBRARIES}
   )
+
+file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
+  RELATIVE ${PROJECT_SOURCE_DIR}
+    include/**/*.h
+    src/**/*.cpp
+    )
+roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})

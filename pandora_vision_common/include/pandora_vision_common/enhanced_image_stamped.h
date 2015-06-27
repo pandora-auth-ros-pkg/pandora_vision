@@ -39,38 +39,42 @@
 #ifndef PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H
 #define PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H
 
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
+
 #include "pandora_vision_common/images_stamped.h"
 
 namespace pandora_vision
 {
   class EnhancedImageStamped : public ImagesStamped
   {
-    public:
-      typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
-      typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
-      typedef cv::Rect_<float> Rect2f;
-      
-    public:
-      bool isDepth;
-      std::vector<Rect2f> regionsOfInterest;
-      
-    public:
-      void setDepth(bool depth);
-      bool getDepth() const;
+   public:
+    typedef boost::shared_ptr<EnhancedImageStamped> Ptr;
+    typedef boost::shared_ptr<EnhancedImageStamped const> ConstPtr;
+    typedef cv::Rect_<float> Rect2f;
 
-      void setRegions(const std::vector<Rect2f>&);
-      std::vector<Rect2f> getRegions() const;
-      
-      void setRegion(int , const Rect2f&);
-      Rect2f getRegion(int it) const;
+   public:
+    bool isDepth;
+    std::vector<Rect2f> regionsOfInterest;
+
+   public:
+    void setDepth(bool depth);
+    bool getDepth() const;
+
+    void setRegions(const std::vector<Rect2f>&);
+    std::vector<Rect2f> getRegions() const;
+
+    void setRegion(int , const Rect2f&);
+    Rect2f getRegion(int it) const;
   };
 
   void EnhancedImageStamped::setDepth(bool depth)
   {
     isDepth = depth;
   }
+
   bool EnhancedImageStamped::getDepth() const
   {
     return isDepth;
@@ -80,11 +84,12 @@ namespace pandora_vision
   {
     regionsOfInterest = regions;
   }
+
   std::vector<EnhancedImageStamped::Rect2f> EnhancedImageStamped::getRegions() const
   {
     return regionsOfInterest;
   }
-  
+
   void EnhancedImageStamped::setRegion(int it, const Rect2f& region)
   {
     if (it == 0)
@@ -93,15 +98,15 @@ namespace pandora_vision
     }
     regionsOfInterest.push_back(region);
   }
+
   EnhancedImageStamped::Rect2f EnhancedImageStamped::getRegion(int it) const
   {
     return regionsOfInterest[it];
   }
-  
+
   typedef EnhancedImageStamped::Rect2f Rect2f;
   typedef EnhancedImageStamped::Ptr EnhancedImageStampedPtr;
   typedef EnhancedImageStamped::ConstPtr EnhancedImageStampedConstPtr;
-  
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_COMMON_ENHANCED_IMAGE_STAMPED_H

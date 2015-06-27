@@ -41,30 +41,32 @@
 
 #include <boost/shared_ptr.hpp>
 #include <opencv2/opencv.hpp>
-#include "std_msgs/Header.h"
+
+#include <std_msgs/Header.h>
 
 namespace pandora_vision
 {
-  class CVMatStamped {
-    public:
-      typedef boost::shared_ptr<CVMatStamped> Ptr;
-      typedef boost::shared_ptr<CVMatStamped const> ConstPtr;
+  class CVMatStamped
+  {
+   public:
+    typedef boost::shared_ptr<CVMatStamped> Ptr;
+    typedef boost::shared_ptr<CVMatStamped const> ConstPtr;
 
-    public:
-      virtual ~CVMatStamped() {}
+   public:
+    CVMatStamped() {}
+    virtual ~CVMatStamped() {}
 
-    public:
-
+   public:
     /// Message Header referring to the openCV matrix that corresponds
     /// to a frame
     std_msgs::Header header;
-    
+
     /// OpenCV matrix that corresponds to the current frame to be processed
     cv::Mat image;
 
-    public:
+   public:
     void setHeader(const std_msgs::Header&);
-    const std_msgs::Header& getHeader() const;
+    std_msgs::Header getHeader() const;
 
     void setImage(const cv::Mat&);
     cv::Mat getImage() const;
@@ -75,8 +77,7 @@ namespace pandora_vision
     header = headerArg;
   }
 
-  // mby delete
-  const std_msgs::Header& CVMatStamped::getHeader() const
+  std_msgs::Header CVMatStamped::getHeader() const
   {
     return header;
   }
