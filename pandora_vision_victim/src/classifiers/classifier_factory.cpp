@@ -92,7 +92,6 @@ namespace pandora_vision
     victimTrainerPtr->trainAndValidate();
 
     gettimeofday(&endwtime, NULL);
-
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6
         + endwtime.tv_sec - startwtime.tv_sec);
@@ -115,7 +114,7 @@ namespace pandora_vision
   {
     std::string datasetPath;
 
-    if (!nh_.getParam("dataset_path", datasetPath))
+    if (!nh_.getParam(imageType + "/dataset_path", datasetPath))
     {
       ROS_ERROR("Could not get the path to the training dataset!");
       ROS_BREAK();
