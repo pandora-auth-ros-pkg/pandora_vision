@@ -37,6 +37,7 @@
 *   Kofinas Miltiadis <mkofinas@gmail.com>
 *********************************************************************/
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -61,7 +62,7 @@ namespace pandora_vision
     double prior1 = 0;
     double prior0 = 0;
     int numRows = actualLabelsMat.rows;
-    for (int ii = 0; ii < predictionsMat.rows; ii++)
+    for (int ii = 0; ii < numRows; ii++)
     {
       if (actualLabelsMat.at<double>(ii, 0) > 0)
         prior1 += 1;
@@ -69,34 +70,34 @@ namespace pandora_vision
         prior0 += 1;
     }
 
-    int max_iter = 100;  // Maximal number of iterations
-    double min_step = 1e-10;  // Minimal step taken in line search
-    double sigma = 1e-12;  // For numerically strict PD of Hessian
-    double eps = 1e-5;
-    double hiTarget = (prior1 + 1.0) / (prior1 + 2.0);
-    double loTarget = 1 / (prior0 + 2.0);
+    const int max_iter = 100;  // Maximal number of iterations
+    const double min_step = 1e-10;  // Minimal step taken in line search
+    const double sigma = 1e-12;  // For numerically strict PD of Hessian
+    const double eps = 1e-5;
+    const double hiTarget = (prior1 + 1.0) / (prior1 + 2.0);
+    const double loTarget = 1.0 / (prior0 + 2.0);
 
-    double* t = new double[actualLabelsMat.rows];
+    double* t = new double[numRows];
     double fApB, p, q, h11, h22, h21, g1, g2, det, dA, dB, gd, stepsize;
-    double newA, newB, newf, d1, d2, Avector, Bvector;
+    double newA, newB, newf, d1, d2;
     int iter;
 
     // Initial Point and Initial Fun Value
-    Avector = 0.0;
-    Bvector = log((prior0 + 1.0) / (prior1 + 1.0));
+    double A = 0.0;
+    double B = std::log((prior0 + 1.0) / (prior1 + 1.0));
     double fval = 0.0;
 
-    for (int ii = 0; ii <actualLabelsMat.rows; ii++)
+    for (int ii = 0; ii <numRows; ii++)
     {
       if (actualLabelsMat.at<double>(ii, 0) > 0)
         t[ii] = hiTarget;
       else
         t[ii]=loTarget;
-      fApB = predictionsMat.at<double>(ii, 0) * Avector + Bvector;
-      if (fApB >= 0)
-        fval += t[ii] * fApB + log(1 + exp(-fApB));
+      fApB = predictionsMat.at<double>(ii, 0) * A + B;
+      if (fApB >= 0.0)
+        fval += t[ii] * fApB + std::log(1 + std::exp(-fApB));
       else
-        fval += (t[ii] - 1) * fApB + log(1 + exp(fApB));
+        fval += (t[ii] - 1) * fApB + std::log(1 + std::exp(fApB));
     }
     for (iter = 0; iter < max_iter; iter++)
     {
@@ -106,18 +107,18 @@ namespace pandora_vision
       h21 = 0.0;
       g1 = 0.0;
       g2 = 0.0;
-      for (int ii = 0; ii < predictionsMat.rows; ii++)
+      for (int ii = 0; ii < numRows; ii++)
       {
-        fApB = predictionsMat.at<double>(ii, 0) * Avector + Bvector;
-        if (fApB >= 0)
+        fApB = predictionsMat.at<double>(ii, 0) * A + B;
+        if (fApB >= 0.0)
         {
-          p = exp(-fApB) / (1.0 + exp(-fApB));
-          q = 1.0 / (1.0 + exp(-fApB));
+          p = std::exp(-fApB) / (1.0 + std::exp(-fApB));
+          q = 1.0 / (1.0 + std::exp(-fApB));
         }
         else
         {
-          p = 1.0 / (1.0 + exp(fApB));
-          q = exp(fApB) / (1.0 + exp(fApB));
+          p = 1.0 / (1.0 + std::exp(fApB));
+          q = std::exp(fApB) / (1.0 + std::exp(fApB));
         }
         d2 = p * q;
         h11 += predictionsMat.at<double>(ii, 0) * predictionsMat.at<double>(ii, 0) * d2;
@@ -129,37 +130,37 @@ namespace pandora_vision
       }
 
       // Stopping Criteria
-      if (fabs(g1) < eps && fabs(g2) < eps)
+      if (std::fabs(g1) < eps && std::fabs(g2) < eps)
         break;
 
       // Finding Newton direction: -inv(H') * g
-      det= h11 * h22 - h21 * h21;
-      dA =- (h22 * g1 - h21 * g2) / det;
-      dB=-(-h21 * g1 + h11 * g2) / det;
+      det = h11 * h22 - h21 * h21;
+      dA = -(h22 * g1 - h21 * g2) / det;
+      dB = -(-h21 * g1 + h11 * g2) / det;
       gd = g1 * dA + g2 * dB;
 
 
       stepsize = 1;  // Line Search
       while (stepsize >= min_step)
       {
-        newA = Avector + stepsize * dA;
-        newB = Bvector + stepsize * dB;
+        newA = A + stepsize * dA;
+        newB = B + stepsize * dB;
 
         // New function value
         newf = 0.0;
-        for (int ii = 0; ii < actualLabelsMat.rows; ii++)
+        for (int ii = 0; ii < numRows; ii++)
         {
           fApB = predictionsMat.at<double>(ii, 0) * newA + newB;
-          if (fApB >= 0)
-            newf += t[ii] * fApB + log(1 + exp(-fApB));
+          if (fApB >= 0.0)
+            newf += t[ii] * fApB + std::log(1 + std::exp(-fApB));
           else
-            newf += (t[ii] - 1) * fApB +log(1 + exp(fApB));
+            newf += (t[ii] - 1) * fApB + std::log(1 + std::exp(fApB));
         }
         // Check sufficient decrease
         if (newf < fval + 0.0001 * stepsize * gd)
         {
-          Avector = newA;
-          Bvector = newB;
+          A = newA;
+          B = newB;
           fval = newf;
           break;
         }
@@ -177,8 +178,9 @@ namespace pandora_vision
     if (iter >= max_iter)
       std::cout << "Reaching maximal iterations in two-class probability estimates" << std::endl;
     free(t);
-    A_ = Avector;
-    B_ = Bvector;
+    A_ = A;
+    B_ = B;
+    std::cout << A_ << " " << B_ << std::endl;
   }
 
   float PlattScaling::sigmoidPredict(double predicted)
@@ -186,7 +188,7 @@ namespace pandora_vision
     double probability;
     double fApB = predicted * A_ + B_;
 
-    double expFApB = exp(-abs(fApB));
+    double expFApB = std::exp(-std::fabs(fApB));
     if (fApB >= 0.0)
     {
       probability =  expFApB / (1.0 + expFApB);

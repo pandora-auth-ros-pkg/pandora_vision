@@ -7,15 +7,9 @@
     <arg name="imageType" default="rgb" />
 
     <node name="victim_training_node" type="victim_training_node" pkg="pandora_vision_victim"
-      output="screen" >
+      output="screen" required="true" >
       <param name="image_type" value="$(arg imageType)" />
       <param name="classifier_type" value="$(arg classifierType)" />
-
-      <rosparam file="$(find pandora_vision_victim)/config/victim_topics.yaml"
-        command="load" />
-
-      <rosparam file="$(find pandora_vision_victim)/config/victim_params.yaml"
-        command="load" />
 
       <rosparam file="$(find pandora_vision_victim)/config/victim_training_params.yaml"
         command="load"/>
@@ -30,7 +24,5 @@
         command="load" />
 
     </node>
-
-    <include file="$(find pandora_robots_description)/launch/gears/gears_description.launch" />
 
 </launch>

@@ -92,8 +92,6 @@ namespace pandora_vision
     victimTrainerPtr->trainAndValidate();
 
     gettimeofday(&endwtime, NULL);
-    double trainingTime = static_cast<double>((endwtime.tv_usec -
-          startwtime.tv_usec) / 1.0e6
 
     double trainingTime = static_cast<double>((endwtime.tv_usec -
           startwtime.tv_usec) / 1.0e6

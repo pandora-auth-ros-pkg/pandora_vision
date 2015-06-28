@@ -52,12 +52,6 @@ namespace pandora_vision
   }
 
   PrincipalComponentAnalysis::PrincipalComponentAnalysis(const cv::Mat& featuresMat,
-      int maxPrincipalComponents)
-  {
-    pca_ = cv::PCA(featuresMat, cv::Mat(), CV_PCA_DATA_AS_ROW, maxPrincipalComponents);
-  }
-
-  PrincipalComponentAnalysis::PrincipalComponentAnalysis(const cv::Mat& featuresMat,
       double retainedVariance)
   {
     pca_ = cv::PCA(featuresMat, cv::Mat(), CV_PCA_DATA_AS_ROW, retainedVariance);
@@ -67,12 +61,15 @@ namespace pandora_vision
   {
   }
 
-  cv::Mat PrincipalComponentAnalysis::performPcaAnalysis(
-      const cv::Mat& featuresMat)
+  void PrincipalComponentAnalysis::performPCA(const cv::Mat& featuresMat)
   {
-    cv::Mat projectedFeaturesMat;
-    pca_.project(featuresMat, projectedFeaturesMat);
-    return projectedFeaturesMat;
+    pca_.computeVar(featuresMat, cv::Mat(), CV_PCA_DATA_AS_ROW, 0.95);
+  }
+
+  void PrincipalComponentAnalysis::project(
+      const cv::Mat& featuresMat, cv::Mat* projectedFeaturesMat)
+  {
+    pca_.project(featuresMat, *projectedFeaturesMat);
   }
 
   void PrincipalComponentAnalysis::save(const std::string& fileName)

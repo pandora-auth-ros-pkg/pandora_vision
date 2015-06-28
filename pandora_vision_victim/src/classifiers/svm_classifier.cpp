@@ -190,6 +190,11 @@ namespace pandora_vision
       plattScalingPtr_.reset(new PlattScaling());
     }
 
+    if (doPcaAnalysis_)
+    {
+      pcaPtr_.reset(new PrincipalComponentAnalysis());
+    }
+
     classifierPtr_.reset(new CvSVM());
 
     ROS_INFO("Created %s %s Training Instance.", imageType_.c_str(), classifierType_.c_str());
@@ -217,19 +222,32 @@ namespace pandora_vision
   {
     if (trainingSetFeatures.empty())
     {
-      ROS_ERROR("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: The features matrix is empty!");
+      ROS_ERROR("[PANDORA_VISION_VICTIM_SVM]: The features matrix is empty!");
       return false;
     }
     if (trainingSetLabels.empty())
     {
-      ROS_ERROR("[PANDORA_VISION_VICTIM_NEURAL_NETWORK]: The labels matrix is empty!");
+      ROS_ERROR("[PANDORA_VISION_VICTIM_SVM]: The labels matrix is empty!");
       return false;
+    }
+
+    cv::Mat projectedTrainingSetFeatures;
+    if (doPcaAnalysis_)
+    {
+      pcaPtr_->performPCA(trainingSetFeatures);
+      pcaPtr_->project(trainingSetFeatures, &projectedTrainingSetFeatures);
+      std::string pcaParametersFile = filesDirectory_ + imageType_ + "_" + classifierType_ + "_pca_parameters.xml";
+      pcaPtr_->save(pcaParametersFile);
+    }
+    else
+    {
+      projectedTrainingSetFeatures = trainingSetFeatures.clone();
     }
 
     if (autoTrain_)
     {
       std::cout << "(SVM 'grid search' => may take some time!)" << std::endl;
-      classifierPtr_->train_auto(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(),
+      classifierPtr_->train_auto(projectedTrainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(),
           svmParams_, 10, CvSVM::get_default_grid(CvSVM::C),
           CvSVM::get_default_grid(CvSVM::GAMMA),
           CvSVM::get_default_grid(CvSVM::P),
@@ -249,17 +267,17 @@ namespace pandora_vision
     }
     else
     {
-      classifierPtr_->train(trainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), svmParams_);
+      classifierPtr_->train(projectedTrainingSetFeatures, trainingSetLabels, cv::Mat(), cv::Mat(), svmParams_);
     }
 
     if (usePlattScaling_)
     {
-      cv::Mat predictionsMat = cv::Mat::zeros(trainingSetFeatures.rows, 1, CV_32FC1);
-      for (int ii = 0; ii < trainingSetFeatures.rows; ii++)
+      cv::Mat predictionsMat = cv::Mat::zeros(projectedTrainingSetFeatures.rows, 1, CV_64FC1);
+      for (int ii = 0; ii < projectedTrainingSetFeatures.rows; ii++)
       {
-        float prediction = classifierPtr_->predict(trainingSetFeatures.row(ii), true);
-        float classLabel = classifierPtr_->predict(trainingSetFeatures.row(ii), false);
-        predictionsMat.at<double>(ii, 0) = static_cast<double>(prediction);
+        float prediction = classifierPtr_->predict(projectedTrainingSetFeatures.row(ii), true);
+        float classLabel = classifierPtr_->predict(projectedTrainingSetFeatures.row(ii), false);
+        predictionsMat.at<double>(ii, 0) = fabs(static_cast<double>(prediction)) * static_cast<double>(classLabel);
       }
       plattScalingPtr_->sigmoidTrain(predictionsMat, trainingSetLabels);
       std::string plattParametersFile = filesDirectory_ + imageType_ + "_" + classifierType_ + "_platt_scaling.xml";
@@ -285,7 +303,17 @@ namespace pandora_vision
     // if(results.at<float>(ii, jj) == 0)
     // results.at<float>(ii, jj) = -1;
 
-    classifierPtr_->predict(testSetFeatures, *validationResults);
+    cv::Mat projectedTestSetFeatures;
+    if (doPcaAnalysis_)
+    {
+      pcaPtr_->project(testSetFeatures, &projectedTestSetFeatures);
+    }
+    else
+    {
+      projectedTestSetFeatures = testSetFeatures.clone();
+    }
+
+    classifierPtr_->predict(projectedTestSetFeatures, *validationResults);
     return;
   }
 

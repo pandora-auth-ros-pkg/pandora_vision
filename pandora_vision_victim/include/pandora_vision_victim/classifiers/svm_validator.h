@@ -47,6 +47,7 @@
 
 #include "pandora_vision_victim/classifiers/abstract_validator.h"
 #include "pandora_vision_victim/utilities/platt_scaling.h"
+#include "pandora_vision_victim/utilities/principal_component_analysis.h"
 
 /**
  * @namespace pandora_vision
@@ -108,6 +109,10 @@ namespace pandora_vision
       boost::shared_ptr<PlattScaling> plattScalingPtr_;
 
       bool usePlattScaling_;
+
+      bool doPcaAnalysis_;
+
+      boost::shared_ptr<PrincipalComponentAnalysis> pcaPtr_;
   };
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_SVM_VALIDATOR_H

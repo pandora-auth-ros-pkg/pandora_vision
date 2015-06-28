@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-"""Automates the selection of a suitable classification model by executing a set
-of benchmark tests for a set of models.
+"""Trains a set of classifiers for a given set of classification parameters.
 """
 
 PKG = "pandora_vision_victim"
 
 import os
-import sys
 import shutil
 import readline
 import subprocess
@@ -68,32 +66,27 @@ def find_ros_workspace(current_package_path):
               "inside ROS_PACKAGE_PATH. Exiting!"
         sys.exit()
 
-
 def help_details():
-    """Prints details about the desired format of each of the folders used for
-    benchmark tests.
+    """Prints details about the desired format of each of the folders used to
+    train classifiers.
     """
-    print "Each folder should contain a classifier model, possibly and 'xml' "\
-          "or a 'yaml' file. Additionaly, "\
-          "if feature normalization is to be performed, normalization "\
-          "parameters files should exist. Finally, a file containing the "\
-          "training parameters should be present (.yaml). The last file is "\
-          "presumed to contain the keyword 'params' in its name."
+    print "Each folder should contain two annotations files (.txt), one for "\
+          "training and one for testing. Additionally, a set of configuration "\
+          "files are required (.yaml)."
 
-def execute_benchmark_tests():
-    """Executes a set of benchmark tests for a set of classification models.
+def train_classifiers():
+    """Trains a set of classifiers for a given set of classification parameters.
     """
     # Set the auto completion scheme
     readline.set_completer_delims(" \t")
     readline.parse_and_bind("tab:complete")
 
-    print "Type the absolute path to the classifier models:"
+    print "Type the absolute path to the classifier parameters:"
     print "e.g. /home/user/foo"
 
     help_details()
 
     classifiers_path = raw_input("-->")
-
     if not os.path.isdir(classifiers_path):
         print "The specified path is not valid. Exiting!"
         return None
@@ -106,10 +99,8 @@ def execute_benchmark_tests():
     package_config_path = os.path.join(package_path, "config")
 
     for folder in os.listdir(classifiers_path):
-        print "Starting new test procedure!"
         folder_path = os.path.join(classifiers_path, folder)
 
-        print "Copying necessary files to the package folder!"
         for data_file in os.listdir(folder_path):
             if "params" in data_file:
                 shutil.copyfile(os.path.join(folder_path, data_file),
@@ -118,20 +109,23 @@ def execute_benchmark_tests():
                 shutil.copyfile(os.path.join(folder_path, data_file),
                                 os.path.join(package_data_path, data_file))
 
-        os.chdir(os.path.abspath(ros_workspace_path))
+        os.chdir(ros_workspace_path)
 
-        print "Starting Test! \n\n"
-        subprocess.call("rostest pandora_vision_victim victim_benchmark_test.launch",
+        subprocess.call("roslaunch pandora_vision_victim victim_training_node.launch classifierType:=svm imageType:=rgb",
                         shell=True)
         # Sleep for a while until the process is fully finished.
-        rospy.sleep(1)
-        print "Finished one test"
-        shutil.copyfile(os.path.join(package_data_path, "benchmark_results.txt"),
-                        os.path.join(folder_path, "benchmark_results.txt"))
-        os.rename(os.path.join(folder_path, "benchmark_results.txt"),
-                  os.path.join(folder_path, folder + ".txt"))
+        rospy.sleep(10)
+        print "Finished one training"
+        for data_file in os.listdir(package_data_path):
+            shutil.copyfile(os.path.join(package_data_path, data_file),
+                            os.path.join(folder_path, data_file))
+
+        for config_file in os.listdir(package_config_path):
+            shutil.copyfile(os.path.join(package_config_path, config_file),
+                            os.path.join(folder_path, config_file))
     print "Process is finished successfully!"
 
 
 if __name__ == "__main__":
-    execute_benchmark_tests()
+    train_classifiers()
+

@@ -101,6 +101,9 @@ namespace pandora_vision
     std::string usePlattScaling = classifierNode["use_platt_scaling"];
     usePlattScaling_ = usePlattScaling.compare("true") == 0;
 
+    std::string doPcaAnalysis = classifierNode["do_pca_analysis"];
+    doPcaAnalysis_ = doPcaAnalysis.compare("true") == 0;
+
     fs.release();
 
     if (usePlattScaling_)
@@ -109,6 +112,14 @@ namespace pandora_vision
       std::string plattParametersFile = packagePath_ + "/data/" + imageType_ +
           "_" + classifierType_ + "_platt_scaling.xml";
       plattScalingPtr_->load(plattParametersFile);
+    }
+
+    if (doPcaAnalysis_)
+    {
+      pcaPtr_.reset(new PrincipalComponentAnalysis());
+      std::string pcaParametersFile = packagePath_ + "/data" + imageType_ +
+          "_" + classifierType_ + "_pca_parameters.xml";
+      pcaPtr_->load(pcaParametersFile);
     }
 
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized " << imageType_ << " "
@@ -130,9 +141,19 @@ namespace pandora_vision
   void SvmValidator::predict(const cv::Mat& featuresMat,
       float* classLabel, float* probability)
   {
-    *classLabel = svmValidator_.predict(featuresMat, false);
+    cv::Mat projectedFeaturesMat;
+    if (doPcaAnalysis_)
+    {
+      pcaPtr_->project(featuresMat, &projectedFeaturesMat);
+    }
+    else
+    {
+      projectedFeaturesMat = featuresMat.clone();
+    }
+
+    *classLabel = svmValidator_.predict(projectedFeaturesMat, false);
     float prediction;
-    prediction = svmValidator_.predict(featuresMat, true);
+    prediction = svmValidator_.predict(projectedFeaturesMat, true);
 
     *probability = transformPredictionToProbability(prediction, *classLabel);
   }

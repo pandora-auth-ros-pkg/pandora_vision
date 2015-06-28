@@ -63,13 +63,6 @@ namespace pandora_vision
       PrincipalComponentAnalysis();
 
       /**
-       * @brief Constructor. Initializes PCA with a specified number of maximum
-       * components.
-       */
-      PrincipalComponentAnalysis(const cv::Mat& featuresMat,
-          int maxPrincipalComponents);
-
-      /**
        * @brief Constructor. Initializes PCA with a specified minimum retained
        * variance.
        */
@@ -82,13 +75,22 @@ namespace pandora_vision
       ~PrincipalComponentAnalysis();
 
       /**
-       * @brief This function performs PCA, projecting a matrix into the
-       * Principal Component Subspace.
+       * @brief This function performs Principal Component Analysis to a
+       * supplied dataset.
        * @param featuresMat [const cv::Mat&] The features matrix in which to
        * perform the analysis.
-       * @return [cv::Mat] The projected features matrix.
+       * @return void
        */
-      cv::Mat performPcaAnalysis(const cv::Mat& featuresMat);
+      void performPCA(const cv::Mat& featuresMat);
+
+      /**
+       * @brief This function projects a matrix into the Principal Component
+       * Subspace.
+       * @param featuresMat [const cv::Mat&] The features matrix to be
+       * projected.
+       * @param projectedFeaturesMat [cv::Mat*] The projected features matrix.
+       */
+      void project(const cv::Mat& featuresMat, cv::Mat* projectedFeaturesMat);
 
       /**
        * @brief This function saves the Principal components in a file.
