@@ -47,53 +47,59 @@ namespace pandora_vision
 {
   class ImagesStamped
   {
-    public:
-      typedef boost::shared_ptr<ImagesStamped> Ptr;
-      typedef boost::shared_ptr<ImagesStamped const> ConstPtr;
-      
-    public:
-      std_msgs::Header header;
+   public:
+    typedef boost::shared_ptr<ImagesStamped> Ptr;
+    typedef boost::shared_ptr<ImagesStamped const> ConstPtr;
 
-      cv::Mat depthImage;
-      cv::Mat rgbImage;
-      cv::Mat thermalImage;
-      
-    public:
-      void setHeader(const std_msgs::Header&);
-      const std_msgs::Header& getHeader() const;
+   public:
+    std_msgs::Header header;
 
-      void setRgbImage(const cv::Mat&);
-      cv::Mat getRgbImage() const;
-      
-      void setDepthImage(const cv::Mat&);
-      cv::Mat getDepthImage() const;
+    cv::Mat depthImage;
+    cv::Mat rgbImage;
+    cv::Mat thermalImage;
 
-      void setThermalImage(const cv::Mat&);
-      cv::Mat getThermalImage() const;
+   public:
+    ImagesStamped() {}
+    virtual ~ImagesStamped() {}
+
+    void setHeader(const std_msgs::Header&);
+    const std_msgs::Header& getHeader() const;
+
+    void setRgbImage(const cv::Mat&);
+    cv::Mat getRgbImage() const;
+
+    void setDepthImage(const cv::Mat&);
+    cv::Mat getDepthImage() const;
+
+    void setThermalImage(const cv::Mat&);
+    cv::Mat getThermalImage() const;
   };
-  
+
   void ImagesStamped::setHeader(const std_msgs::Header& headerArg)
   {
     header = headerArg;
   }
+
   const std_msgs::Header& ImagesStamped::getHeader() const
   {
     return header;
   }
-  
+
   void ImagesStamped::setRgbImage(const cv::Mat& imageArg)
   {
     rgbImage = imageArg;
   }
+
   cv::Mat ImagesStamped::getRgbImage() const
   {
     return rgbImage;
   }
-  
+
   void ImagesStamped::setDepthImage(const cv::Mat& imageArg)
   {
     depthImage = imageArg;
   }
+
   cv::Mat ImagesStamped::getDepthImage() const
   {
     return depthImage;
@@ -103,6 +109,7 @@ namespace pandora_vision
   {
     thermalImage = imageArg;
   }
+
   cv::Mat ImagesStamped::getThermalImage() const
   {
     return thermalImage;
@@ -110,7 +117,6 @@ namespace pandora_vision
 
   typedef ImagesStamped::Ptr ImagesStampedPtr;
   typedef ImagesStamped::ConstPtr ImagesStampedConstPtr;
-  
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_COMMON_IMAGES_STAMPED_H

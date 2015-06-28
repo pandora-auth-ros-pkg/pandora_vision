@@ -41,6 +41,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/Image.h>
+
 #include "pandora_vision_common/pandora_vision_utilities/pointcloud_to_image_converter.h"
 
 namespace pandora_vision
@@ -65,10 +66,8 @@ namespace pandora_vision
     // For the depth image
     if (encoding == CV_32FC1)
     {
-      for (unsigned int row = 0; row < pointCloud->height; ++row)
-      {
-        for (unsigned int col = 0; col < pointCloud->width; ++col)
-        {
+      for (unsigned int row = 0; row < pointCloud->height; ++row) {
+        for (unsigned int col = 0; col < pointCloud->width; ++col) {
           image.at<float>(row, col) =
             pointCloud->points[col + pointCloud->width * row].z;
 
@@ -80,12 +79,10 @@ namespace pandora_vision
         }
       }
     }
-    else if (encoding == CV_8UC3) // For the rgb image
+    else if (encoding == CV_8UC3)  // For the rgb image
     {
-      for (unsigned int row = 0; row < pointCloud->height; ++row)
-      {
-        for (unsigned int col = 0; col < pointCloud->width; ++col)
-        {
+      for (unsigned int row = 0; row < pointCloud->height; ++row) {
+        for (unsigned int col = 0; col < pointCloud->width; ++col) {
           image.at<unsigned char>(row, 3 * col + 2) =
             pointCloud->points[col + pointCloud->width * row].r;
           image.at<unsigned char>(row, 3 * col + 1) =
