@@ -46,9 +46,33 @@ namespace pandora_vision
   class SoftObstacleDetectorTest : public ::testing::Test
   {
     public:
-      SoftObstacleDetectorTest() :
-          detector_(new SoftObstacleDetector(13, 100, 130, 2.0, 3.0,
-          cv::Size(5, 1), cv::Size(3, 3))) {}
+      SoftObstacleDetectorTest() : detector_(new SoftObstacleDetector)
+      {
+        detector_->sValueThreshold_ = 100;
+        detector_->vValueThreshold_ = 130;
+
+        detector_->gaussianKernelSize_ = 13;
+        detector_->gradientThreshold_ = 2.0;
+        detector_->betaThreshold_ = 3.0;
+
+        detector_->depthThreshold_ = 0.3;
+
+        detector_->erodeKernelSize_ = cv::Size(3, 3);
+        detector_->dilateKernelSize_ = cv::Size(3, 3);
+
+        detector_->showOriginalImage_ = false;
+        detector_->showDWTImage_ = false;
+        detector_->showOtsuImage_ = false;
+        detector_->showDilatedImage_ = false;
+        detector_->showVerticalLines_ = false;
+        detector_->showROI_ = false;
+
+        float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
+        cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
+        cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
+
+        detector_->dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
+      }
 
       bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
           float grad, float beta)

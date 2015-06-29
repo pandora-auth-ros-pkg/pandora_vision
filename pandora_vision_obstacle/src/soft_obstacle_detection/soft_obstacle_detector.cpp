@@ -71,33 +71,7 @@ namespace pandora_vision
     nh.param("betaThreshold", param, 3.0);
     betaThreshold_ = param;
 
-    showOriginalImage_ = false;
-    showDWTImage_ = false;
-    showOtsuImage_ = false;
-    showDilatedImage_ = false;
-    showVerticalLines_ = false;
-    showROI_ = false;
-
-    float invRootTwo = 1.0f / static_cast<float>(std::sqrt(2));
-    cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
-    cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
-
-    dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
-  }
-
-  SoftObstacleDetector::SoftObstacleDetector(int gaussianKernelSize,
-      int sThreshold, int vThreshold, float gradThreshold, float betaThreshold,
-      const cv::Size& erodeKernelSize, const cv::Size& dilateKernelSize)
-  {
-    sValueThreshold_ = sThreshold;
-    vValueThreshold_ = vThreshold;
-
-    gaussianKernelSize_ = gaussianKernelSize;
-    gradientThreshold_ = gradThreshold;
-    betaThreshold_ = betaThreshold;
-
-    erodeKernelSize_ = erodeKernelSize;
-    dilateKernelSize_ = dilateKernelSize;
+    nh.param("depthThreshold", depthThreshold_, 0.3);
 
     showOriginalImage_ = false;
     showDWTImage_ = false;
@@ -112,6 +86,8 @@ namespace pandora_vision
 
     dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
   }
+
+  SoftObstacleDetector::SoftObstacleDetector() {}
 
   void SoftObstacleDetector::setShowOriginalImage(bool arg)
   {
@@ -181,6 +157,28 @@ namespace pandora_vision
     return true;
   }
 
+  bool SoftObstacleDetector::detectLineIntersection(const std::vector<cv::Vec4i>& verticalLines,
+      const cv::Vec4i& line)
+  {
+    for (size_t ii = 0; ii < verticalLines.size(); ii++)
+    {
+      cv::Point startPoint(verticalLines[ii][0], verticalLines[ii][1]);
+      cv::Point endPoint(verticalLines[ii][2], verticalLines[ii][3]);
+
+      cv::Point verticalLineDiff = endPoint - startPoint;
+      cv::Point currentLineDiff(line[2] - line[0], line[3] - line[1]);
+
+      double det0 = verticalLineDiff.x * currentLineDiff.y
+        - verticalLineDiff.y * currentLineDiff.x;
+
+      if (fabs(det0) > 1e-6)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool SoftObstacleDetector::pickLineColor(const cv::Mat& hsvImage, const cv::Vec4i& line,
       int level)
   {
@@ -238,6 +236,7 @@ namespace pandora_vision
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
         if (findNonIdenticalLines(lineCoefficients, grad, beta)
+            // && !detectLineIntersection(verticalLines, line)
             && pickLineColor(hsvImage, line, level))
         {
           lineCoefficients.push_back(cv::Vec2f(grad, beta));
@@ -349,6 +348,20 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     return depth;
   }
 
+  bool SoftObstacleDetector::findDifferentROIDepth(const cv::Mat& depthImage,
+      const cv::Rect& roi, float firstLineDepth, float lastLineDepth)
+  {
+    cv::Mat depthROI = depthImage(roi);
+    cv::Scalar meanValue = cv::mean(depthROI);
+
+    if (fabs(meanValue[0] - firstLineDepth) < depthThreshold_
+        || fabs(meanValue[0] - lastLineDepth) < depthThreshold_)
+    {
+      return false;
+    }
+    return true;
+  }
+
   std::vector<POIPtr> SoftObstacleDetector::detectSoftObstacle(const cv::Mat& rgbImage,
       const cv::Mat& depthImage, int level)
   {
@@ -418,26 +431,31 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
       boost::shared_ptr<cv::Rect> roi(new cv::Rect());
       float probability = detectROI(verticalLines, otsuImage->rows, roi);
 
-      if (showROI_)
-      {
-        cv::Mat imageToShow = rgbImage.clone();
-
-        cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
-            roi->width * pow(2, level), roi->height * pow(2, level));
-        cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
-
-        cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
-            imageToShow);
-        cv::waitKey(10);
-      }
-
       // Find the depth distance of the soft obstacle
       std::vector<float> depthDistance = findDepthDistance(depthImage, verticalLines,
           *roi, level);
 
-      if (probability > 0.0f)
+      // Examine whether the points of the bounding box have difference in depth
+      // distance
+      bool differentDepth = findDifferentROIDepth(depthImage, *roi, depthDistance[1],
+            depthDistance[3]);
+
+      if (probability > 0.0f && differentDepth)
       {
         ROS_INFO("Soft Obstacle Detected!");
+
+        if (showROI_)
+        {
+          cv::Mat imageToShow = rgbImage.clone();
+
+          cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
+              roi->width * pow(2, level), roi->height * pow(2, level));
+          cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
+
+          cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
+              imageToShow);
+          cv::waitKey(10);
+        }
 
         for (int ii = 0; ii < depthDistance.size(); ii++)
         {
