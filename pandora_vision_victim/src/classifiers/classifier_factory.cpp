@@ -44,6 +44,7 @@
 
 #include "pandora_vision_victim/classifiers/classifier_factory.h"
 #include "pandora_vision_victim/classifiers/svm_classifier.h"
+#include "pandora_vision_victim/classifiers/rgbd_svm_classifier.h"
 #include "pandora_vision_victim/classifiers/neural_network_classifier.h"
 #include "pandora_vision_victim/classifiers/random_forests_classifier.h"
 
@@ -124,9 +125,15 @@ namespace pandora_vision_victim
 
     AbstractClassifier* classifierPtr;
 
-    if (boost::iequals(classifierType, "svm"))
+    if (boost::iequals(classifierType, "svm") &&
+      (boost::iequals(imageType, "rgb") || (boost::iequals(imageType, "rgb"))))
     {
       classifierPtr = new SvmClassifier(nh, datasetPath, classifierType, imageType);
+    }
+
+    else if (boost::iequals(classifierType, "svm") && boost::iequals(imageType, "rgbd"))
+    {
+      classifierPtr = new RgbdSvmClassifier(ns, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "ann"))
     {

@@ -38,6 +38,7 @@
 
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include <ros/console.h>
 
@@ -124,13 +125,54 @@ namespace pandora_vision_victim
           normalizationParamTwoPath, normalizationParamTwoTag);
     }
 
+    std::vector<bool> vocabularyNeeded;
     if (boost::iequals(imageType_ , "rgb"))
     {
-      featureExtraction_ = new RgbFeatureExtraction(classifierType_);
+      featureExtraction_[imageType_].reset(new RgbFeatureExtraction(classifierType_));
+      vocabularyNeeded.push_back(featureExtraction_[imageType_]->bagOfWordsVocabularyNeeded());
+      if (vocabularyNeeded[0])
+      {
+        const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
+        const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
+        cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
+            "bag_of_words");
+        featureExtraction_[imageType_]->setBagOfWordsVocabulary(vocabulary);
+      }
     }
     else if (boost::iequals(imageType_, "depth"))
     {
-      featureExtraction_ = new DepthFeatureExtraction(classifierType_);
+      featureExtraction_[imageType_].reset(new DepthFeatureExtraction(classifierType_));
+      vocabularyNeeded.push_back(featureExtraction_[imageType_]->bagOfWordsVocabularyNeeded());
+      if (vocabularyNeeded[0])
+      {
+        const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
+        const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
+        cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
+            "bag_of_words");
+        featureExtraction_[imageType_]->setBagOfWordsVocabulary(vocabulary);
+      }
+    }
+    else if (boost::iequals(imageType_, "rgbd"))
+    {
+      featureExtraction_["rgb"].reset(new RgbFeatureExtraction(classifierType_));
+      featureExtraction_["depth"].reset(new DepthFeatureExtraction(classifierType_));
+      vocabularyNeeded.push_back(featureExtraction_["rgb"]->bagOfWordsVocabularyNeeded());
+      vocabularyNeeded.push_back(featureExtraction_["depth"]->bagOfWordsVocabularyNeeded());
+      std::vector<std::string> imageTypesVec;
+      imageTypesVec.push_back("rgb");
+      imageTypesVec.push_back("depth");
+
+      for (int ii = 0; ii < vocabularyNeeded.size(); ii++)
+      if (vocabularyNeeded[ii])
+      {
+        const std::string bagOfWordsFile = imageType_ + "_"
+                                          + imageTypesVec[ii] + "_"
+                                          + classifierType_ + "_bag_of_words.xml";
+        const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
+        cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
+            "bag_of_words");
+        featureExtraction_[imageTypesVec[ii]]->setBagOfWordsVocabulary(vocabulary);
+      }
     }
     else
     {
@@ -139,16 +181,7 @@ namespace pandora_vision_victim
       ROS_BREAK();
     }
 
-    bool vocabularyNeeded = featureExtraction_->bagOfWordsVocabularyNeeded();
-    if (vocabularyNeeded)
-    {
-      const std::string bagOfWordsFile = imageType_ + "_" + classifierType_ + "_bag_of_words.xml";
-      const std::string bagOfWordsFilePath = filesDirectory + bagOfWordsFile;
-      cv::Mat vocabulary = file_utilities::loadFiles(bagOfWordsFilePath,
-          "bag_of_words");
-      featureExtraction_->setBagOfWordsVocabulary(vocabulary);
-    }
-    featureExtractionUtilities_ = new FeatureExtractionUtilities();
+    featureExtractionUtilities_ .reset(new FeatureExtractionUtilities());
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Initialized Abstract Validator instance");
   }
 
@@ -158,7 +191,7 @@ namespace pandora_vision_victim
 
   void AbstractValidator::extractFeatures(const cv::Mat& inImage)
   {
-    featureExtraction_->extractFeatures(inImage);
+    featureExtraction_[imageType_]->extractFeatures(inImage);
   }
 
   void AbstractValidator::calculatePredictionProbability(const cv::Mat& inImage,
@@ -169,7 +202,7 @@ namespace pandora_vision_victim
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Extracted Features");
     if (!featureVector_.empty())
       featureVector_.clear();
-    featureVector_ = featureExtraction_->getFeatureVector();
+    featureVector_ = featureExtraction_[imageType_]->getFeatureVector();
 
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.

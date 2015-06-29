@@ -41,6 +41,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include <opencv2/opencv.hpp>
 
@@ -138,12 +139,10 @@ namespace pandora_vision_victim
       /// Variable used to decide the type of feature normalization to perform.
       int typeOfNormalization_;
 
-      /// Extractor of all the neccesary features for the classification.
-      FeatureExtraction* featureExtraction_;
-
+       std::map<std::string, boost::shared_ptr<FeatureExtraction> > featureExtraction_;
       /// Feature Extraction Utilities used to perform feature normalization
       /// and/or feature selection.
-      FeatureExtractionUtilities* featureExtractionUtilities_;
+      boost::shared_ptr<FeatureExtractionUtilities> featureExtractionUtilities_;
 
       /// Vector used for normalization. If z-score normalization is used, this
       /// vector contains mean values. If min-max normalization is used, this

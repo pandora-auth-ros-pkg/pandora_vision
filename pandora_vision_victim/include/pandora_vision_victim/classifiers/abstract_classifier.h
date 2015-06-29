@@ -40,6 +40,7 @@
 #define PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_CLASSIFIER_H
 
 #include <string>
+#include <map>
 
 #include <opencv2/opencv.hpp>
 #include <boost/shared_ptr.hpp>
@@ -245,7 +246,7 @@ namespace pandora_vision_victim
       std::string testAnnotationsFile_;
 
       /// Feature Extractor
-      boost::shared_ptr<FeatureExtraction> featureExtraction_;
+      std::map<std::string, boost::shared_ptr<FeatureExtraction> > featureExtraction_;
       /// Feature Extraction Utilities used to perform feature normalization
       /// and/or feature selection.
       boost::shared_ptr<FeatureExtractionUtilities> featureExtractionUtilities_;
