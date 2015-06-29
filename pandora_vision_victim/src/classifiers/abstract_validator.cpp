@@ -208,7 +208,6 @@ namespace pandora_vision_victim
     if (!featureVector_.empty())
       featureVector_.clear();
     featureVector_ = featureExtraction_[imageType_]->getFeatureVector();
-
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
     if (featuresMat.cols == 1)
@@ -248,7 +247,6 @@ namespace pandora_vision_victim
     featureVector_ = featureExtraction_["rgb"]->getFeatureVector();
     std::vector<double> depthFeatureVector = featureExtraction_["depth"]->getFeatureVector();
     featureVector_.insert(featureVector_.end(), depthFeatureVector.begin(), depthFeatureVector.end());
-
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.
     if (featuresMat.cols == 1)
