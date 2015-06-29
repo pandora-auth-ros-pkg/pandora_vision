@@ -81,7 +81,7 @@ namespace pandora_vision
       fs.release();
   }
 
-  void PrincipalComponentAnalysis::load(const std::string &fileName)
+  void PrincipalComponentAnalysis::load(const std::string& fileName)
   {
       cv::FileStorage fs(fileName, cv::FileStorage::READ);
       fs["mean"] >> pca_.mean;

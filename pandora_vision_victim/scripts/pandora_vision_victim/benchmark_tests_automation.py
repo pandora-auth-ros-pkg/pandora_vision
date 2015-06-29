@@ -120,14 +120,16 @@ def execute_benchmark_tests():
 
         os.chdir(os.path.abspath(ros_workspace_path))
 
-        print "Starting Test! \n\n"
-        subprocess.call("rostest pandora_vision_victim victim_benchmark_test.launch",
-                        shell=True)
+        print "Starting Test! \n"
+        command = "rostest pandora_vision_victim victim_benchmark_test.launch -t"
+        subprocess.call(command, shell=True)
         # Sleep for a while until the process is fully finished.
         rospy.sleep(1)
         print "Finished one test"
-        shutil.copyfile(os.path.join(package_data_path, "benchmark_results.txt"),
-                        os.path.join(folder_path, "benchmark_results.txt"))
+        shutil.copyfile(os.path.join(package_data_path,
+                                     "benchmark_results.txt"),
+                                     os.path.join(folder_path,
+                                     "benchmark_results.txt"))
         os.rename(os.path.join(folder_path, "benchmark_results.txt"),
                   os.path.join(folder_path, folder + ".txt"))
     print "Process is finished successfully!"

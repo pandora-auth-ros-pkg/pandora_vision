@@ -106,7 +106,7 @@ namespace pandora_vision
        * to load the data.
        * @return void
        */
-      void load(const std::string &fileName);
+      void load(const std::string& fileName);
     private:
       cv::PCA pca_;
   };

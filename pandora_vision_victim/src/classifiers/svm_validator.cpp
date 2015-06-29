@@ -117,7 +117,7 @@ namespace pandora_vision
     if (doPcaAnalysis_)
     {
       pcaPtr_.reset(new PrincipalComponentAnalysis());
-      std::string pcaParametersFile = packagePath_ + "/data" + imageType_ +
+      std::string pcaParametersFile = packagePath_ + "/data/" + imageType_ +
           "_" + classifierType_ + "_pca_parameters.xml";
       pcaPtr_->load(pcaParametersFile);
     }
