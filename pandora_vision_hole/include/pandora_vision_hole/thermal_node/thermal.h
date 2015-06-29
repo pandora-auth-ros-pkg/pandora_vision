@@ -50,7 +50,7 @@
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "distrib_msgs/FlirLeptonMsg.h"
 #include "pandora_vision_common/pois_stamped.h"
-#include "pandora_vision_common/pandora_vision_interface/general_alert_converter.h"
+#include "pandora_vision_common/pandora_vision_utilities/general_alert_converter.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
