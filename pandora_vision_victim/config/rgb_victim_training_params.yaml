@@ -7,7 +7,7 @@ svm:
   extract_hog_features: false
   extract_color_histograms: false
 
-  dictionary_size: 200
+  dictionary_size: 100
   visualization: false
   save_descriptors: false
   load_descriptors: false
