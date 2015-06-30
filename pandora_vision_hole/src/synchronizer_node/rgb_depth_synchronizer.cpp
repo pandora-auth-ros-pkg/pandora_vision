@@ -480,7 +480,7 @@ namespace pandora_vision
         enhancedCropperMsg.header.stamp = synchronizedMessage.header.stamp;
         enhancedCropperMsg.depthImage = *depthImageMessagePtr->toImageMsg();
         enhancedCropperMsg.rgbImage = *rgbImageMessagePtr->toImageMsg();
-        enhancedCropperMsg.thermalImage = synchronizedMessage.thermalInfo;
+        enhancedCropperMsg.thermalImage = synchronizedMessage.thermalImage;
 
         // Publish the synchronized depth and rgb images to thermal cropper node
         synchronizedRgbDepthCropperImagesPublisher_.publish(enhancedCropperMsg);
@@ -558,11 +558,11 @@ namespace pandora_vision
         pandora_vision_msgs::IndexedThermal thermalMsg;
 
         thermalMsg.header.stamp = synchronizedMessage.header.stamp;
-        thermalMsg.thermalImage = synchronizedMessage.thermalInfo;
+        thermalMsg.thermalImage = synchronizedMessage.thermalImage;
         thermalMsg.temperatures = synchronizedMessage.temperatures;
         // Fill the header of the thermal image
         thermalMsg.thermalImage.header.stamp =
-          synchronizedMessage.thermalInfo.header.stamp;
+          synchronizedMessage.thermalImage.header.stamp;
 
         thermalMsg.thermalIndex = thermalIndex;
         thermalMsg.thermalImage.encoding = "mono8";

@@ -24,30 +24,20 @@
         type="synchronizer_node"
         pkg="pandora_vision_hole"
         respawn="False"
-        ns="$(arg namespace)">
+        ns="$(arg namespace)" >
 
     <!-- The width and height variables needed when in simulation mode -->
     <param name="width" value="640" />
     <param name="height" value="480" />
 
-    <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
+    <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_nodes_cfg/rgbdt_synchronizer_params.yaml"
               command="load" />
   </node>
 
   <!-- ======================= RGBDT Synchronizer node ===================== -->
 
-  <node name="rgb_depth_thermal_synchronizer_node"
-        type="rgb_depth_thermal_synchronizer_node"
-        pkg="pandora_vision_hole"
-        respawn="false"
-        output="$(arg output)"
-        ns="$(arg namespace)">
-
-
-    <rosparam file="$(find pandora_vision_hole)/cfg/synchronizer_node_topics.yaml"
-              command="load" />
-
-  </node>
+  <include file="$(find pandora_vision_hole)/launch/synchronizer_nodes/pandora_pc_thermal_synchronizer.launch"
+      ns="$(arg namespace)" />
 
   <!-- ============================ Depth node ============================= -->
 

@@ -66,86 +66,88 @@ namespace pandora_vision
    **/
   class RgbDTSynchronizer
   {
-    private:
-      // The ROS node handle
-      ros::NodeHandle nodeHandle_;
+   public:
+    /**
+      @brief The constructor
+      **/
+    RgbDTSynchronizer(void);
 
-      // The message_filters subscriber to kinect that aquires the PointCloud2
-      // message
-      pcSubscriber *inputPointCloudSubscriber_;
+    /**
+      @brief The default constructor
+      **/
+    virtual ~RgbDTSynchronizer(void);
 
-      // The name of the topic from where the PointCloud2 message is acquired
-      std::string inputPointCloudTopic_;
-
-      // The message_filters subscriber to flir-lepton camera that aquires
-      // the flirLeptonMsg message
-      thermalSubscriber *inputThermalCameraSubscriber_;
-
-      message_filters::Synchronizer<mySyncPolicy> *synchronizer_;
-
-      // The name of the topic from where the flirLeptonMsg message is acquired
-      std::string inputThermalCameraTopic_;
-
-      // Subscriber to kinect's pointcloud if thermal mode is off
-      ros::Subscriber pointCloudSubscriber_;
-
-      // The publisher which will advertise the synchronized message to
-      // rgb_depth_synchronizer node
-      ros::Publisher synchronizedMsgPublisher_;
-
-      // The name of the topic to which the synchronized message will be
-      // published
-      std::string synchronizedMsgTopic_;
-
-      // The queue size of the approximate time synch method
-      int queue_;
-
-      // The mode in which the package is running
-      // If true Thermal process is enabled, else only Rgb-D.
-      bool mode_;
-
-      /**
-        @brief The synchronized callback called when the input messages from kinect
-        and thermal camera are acquired. A custom synchronized message is filled and
-        sent to synchronizer node for further usage.
-        @param[in] pcMsg [const sensor_msgs::PointCloud2::ConstPtr&]
-        The input pointcloud from kinect
-        @param[in] thermalMsg[const distrib_msgs::flirLeptonMsg::ConstPtr&]
-        The input thermal message
-        @return void
-       **/
-      void synchronizedCallback(
+   private:
+    /**
+      @brief The synchronized callback called when the input messages from kinect
+      and thermal camera are acquired. A custom synchronized message is filled and
+      sent to synchronizer node for further usage.
+      @param[in] pcMsg [const sensor_msgs::PointCloud2::ConstPtr&]
+      The input pointcloud from kinect
+      @param[in] thermalMsg[const distrib_msgs::flirLeptonMsg::ConstPtr&]
+      The input thermal message
+      @return void
+      **/
+    void synchronizedCallback(
         const sensor_msgs::PointCloud2::ConstPtr& pcMsg,
         const distrib_msgs::flirLeptonMsg::ConstPtr& thermalMsg);
 
-      /**
-        @brief This callback is called when thermal mode is off. A custom synchronized
-        message is sent to synchronizer node. This time we fill only the pointcloud.
-        @param[in] pointCloudMsg [const sensor_msgs::PointCloud2::ConstPtr&]
-        The input pointcloud2
-        @return void
-       **/
-      void pointCloudCallback(
+    /**
+      @brief This callback is called when thermal mode is off. A custom synchronized
+      message is sent to synchronizer node. This time we fill only the pointcloud.
+      @param[in] pointCloudMsg [const sensor_msgs::PointCloud2::ConstPtr&]
+      The input pointcloud2
+      @return void
+      **/
+    void pointCloudCallback(
         const sensor_msgs::PointCloud2::ConstPtr& pointCloudMsg);
 
-      /**
-        @brief Acquires topics' names needed to be subscribed to and advertise
-        to by the rgb_depth_thermal_synchronizer node
-        @param void
-        @return void
-       **/
-      void getTopicNames(void);
+    /**
+      @brief Acquires topics' names needed to be subscribed to and advertise
+      to by the rgb_depth_thermal_synchronizer node
+      @param void
+      @return void
+      **/
+    void getTopicNames(void);
 
-    public:
-      /**
-        @brief The constructor
-       **/
-      RgbDTSynchronizer(void);
 
-      /**
-        @brief The default constructor
-       **/
-      ~RgbDTSynchronizer(void);
+   private:
+    // The ROS node handle
+    ros::NodeHandle nodeHandle_;
+
+    // The message_filters subscriber to kinect that aquires the PointCloud2
+    // message
+    pcSubscriber *inputPointCloudSubscriber_;
+
+    // The name of the topic from where the PointCloud2 message is acquired
+    std::string inputPointCloudTopic_;
+
+    // The message_filters subscriber to flir-lepton camera that aquires
+    // the flirLeptonMsg message
+    thermalSubscriber *inputThermalCameraSubscriber_;
+
+    message_filters::Synchronizer<mySyncPolicy> *synchronizer_;
+
+    // The name of the topic from where the flirLeptonMsg message is acquired
+    std::string inputThermalCameraTopic_;
+
+    // Subscriber to kinect's pointcloud if thermal mode is off
+    ros::Subscriber pointCloudSubscriber_;
+
+    // The publisher which will advertise the synchronized message to
+    // rgb_depth_synchronizer node
+    ros::Publisher synchronizedMsgPublisher_;
+
+    // The name of the topic to which the synchronized message will be
+    // published
+    std::string synchronizedMsgTopic_;
+
+    // The queue size of the approximate time synch method
+    int queue_;
+
+    // The mode in which the package is running
+    // If true Thermal process is enabled, else only Rgb-D.
+    bool mode_;
   };
 
 }  // namespace pandora_vision
