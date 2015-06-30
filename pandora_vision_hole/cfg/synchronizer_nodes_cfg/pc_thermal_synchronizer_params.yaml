@@ -3,4 +3,4 @@ subscribed_topics:
   thermal_topic: /rpi2/thermal/fused_msg
 published_topics:
   synchronized_topic: synchronized/message
-synchronized_queue: 3
+synchronized_queue: 1
