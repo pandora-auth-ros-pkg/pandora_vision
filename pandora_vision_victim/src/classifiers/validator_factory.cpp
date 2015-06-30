@@ -81,7 +81,7 @@ namespace pandora_vision_victim
 
     std::cout << "In factory : " << validatorType << std::endl;
     if (boost::iequals(validatorType, "svm") &&
-        (boost::iequals(imageType, "rgb") || (boost::iequals(imageType, "rgb"))))
+        (boost::iequals(imageType, "rgb") || (boost::iequals(imageType, "depth"))))
     {
       validatorPtr = new SvmValidator(nh, imageType, validatorType);
     }

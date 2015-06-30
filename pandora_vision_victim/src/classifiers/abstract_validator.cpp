@@ -194,6 +194,11 @@ namespace pandora_vision_victim
     featureExtraction_[imageType_]->extractFeatures(inImage);
   }
 
+  void AbstractValidator::extractFeatures(const cv::Mat& inImage, const std::string& imageType)
+  {
+    featureExtraction_[imageType]->extractFeatures(inImage);
+  }
+
   void AbstractValidator::calculatePredictionProbability(const cv::Mat& inImage,
       float* classLabel, float* probability)
   {
@@ -203,6 +208,46 @@ namespace pandora_vision_victim
     if (!featureVector_.empty())
       featureVector_.clear();
     featureVector_ = featureExtraction_[imageType_]->getFeatureVector();
+
+    cv::Mat featuresMat = cv::Mat(featureVector_);
+    // Make features matrix a row vector.
+    if (featuresMat.cols == 1)
+      transpose(featuresMat, featuresMat);
+    /// Normalize the data
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Normalize features");
+    if (typeOfNormalization_ == 1)
+    {
+      double newMin = -1.0;
+      double newMax = 1.0;
+      featureExtractionUtilities_->performMinMaxNormalization(newMax, newMin,
+          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    }
+    else if (typeOfNormalization_ == 2)
+    {
+      featureExtractionUtilities_->performZScoreNormalization(
+          &featuresMat, normalizationParamOneVec_, normalizationParamTwoVec_);
+    }
+
+    featuresMat.convertTo(featuresMat, CV_32FC1);
+
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Predict image class and probability");
+    predict(featuresMat, classLabel, probability);
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Class Label = " << *classLabel);
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Probability = " << *probability);
+  }
+
+  void AbstractValidator::calculatePredictionProbability(const cv::Mat& rgbImage,
+      const cv::Mat& depthImage, float* classLabel, float* probability)
+  {
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Extracting features");
+    extractFeatures(rgbImage, "rgb");
+    extractFeatures(depthImage, "depth");
+    ROS_INFO_STREAM(nodeMessagePrefix_ << ": Extracted Features");
+    if (!featureVector_.empty())
+      featureVector_.clear();
+    featureVector_ = featureExtraction_["rgb"]->getFeatureVector();
+    std::vector<double> depthFeatureVector = featureExtraction_["depth"]->getFeatureVector();
+    featureVector_.insert(featureVector_.end(), depthFeatureVector.begin(), depthFeatureVector.end());
 
     cv::Mat featuresMat = cv::Mat(featureVector_);
     // Make features matrix a row vector.

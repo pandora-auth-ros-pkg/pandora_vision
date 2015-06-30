@@ -88,6 +88,8 @@ namespace pandora_vision_victim
       boost::shared_ptr<AbstractValidator> rgbValidatorPtr_;
       /// Instance of Depth SVM Validator
       boost::shared_ptr<AbstractValidator> depthValidatorPtr_;
+       /// Instance of RGBD SVM Validator
+      boost::shared_ptr<AbstractValidator> rgbdValidatorPtr_;
 
       boost::shared_ptr<ValidatorFactory> validatorFactoryPtr_;
 
@@ -98,15 +100,17 @@ namespace pandora_vision_victim
       /// Debug purposes
       image_transport::Publisher interpolatedDepthPublisher_;
       image_transport::Publisher _debugVictimsPublisher;
-      cv::Mat debugImage;
+      std::vector<cv::Mat> debugImage;
       std::vector<cv::KeyPoint> rgb_svm_keypoints;
       std::vector<cv::KeyPoint> depth_svm_keypoints;
+      std::vector<cv::KeyPoint> rgbd_svm_keypoints;
       std::vector<cv::Rect> rgb_svm_bounding_boxes;
       std::vector<cv::Rect> depth_svm_bounding_boxes;
+      std::vector<cv::Rect> rgbd_svm_bounding_boxes;
       std::vector<cv::Rect> holes_bounding_boxes;
       std::vector<float> rgb_svm_p;
       std::vector<float> depth_svm_p;
-
+      std::vector<float> rgbd_svm_p;
       DetectionImages dImages;
   };
 }  // namespace pandora_vision_victim

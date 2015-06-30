@@ -94,6 +94,18 @@ namespace pandora_vision_victim
       void calculatePredictionProbability(const cv::Mat& inImage, float* classLabel, float* probability);
 
       /**
+       * @brief This function classifies an image and calculates the probability
+       * of it belonging to that class.
+       * @param rgbImage [const cv::Mat&] The rgb frame to be processed.
+       * @param depthImage [const cv::Mat&] The depth frame to be processed.
+       * @param classLabel [float*] The predicted class label.
+       * @param probability [float*] The classification probability.
+       * @return void
+       */
+      void calculatePredictionProbability(const cv::Mat& rgbImage, const cv::Mat& depthImage,
+                                          float* classLabel, float* probability);
+
+      /**
        * @brief This function returns the type of the classifier.
        * @return [const std:;string&] The type of the classifier.
        */
@@ -110,6 +122,15 @@ namespace pandora_vision_victim
        * @return void
        */
       void extractFeatures(const cv::Mat& inImage);
+
+      /**
+       * @brief This function extracts features according to the predefined
+       * feature extraction algorithms.
+       * @param inImage [const cv::Mat&] Frame to extract features from.
+       * @param imageType [const std::string&] the type of image
+       * @return void
+       */
+      void extractFeatures(const cv::Mat& inImage, const std::string& imageType);
 
       /**
        * @brief This function predicts the class label and the classification

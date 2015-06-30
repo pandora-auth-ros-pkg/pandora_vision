@@ -73,7 +73,8 @@ namespace pandora_vision_victim
     RGB_VJ,
     DEPTH_VJ,
     RGB_SVM,
-    DEPTH_RGB_SVM
+    DEPTH_SVM,
+    RGBD_SVM
   };
 
   enum DetectionMode
@@ -155,6 +156,7 @@ namespace pandora_vision_victim
       double rgb_svm_prob_translation;
       double depth_svm_prob_scaling;
       double depth_svm_prob_translation;
+      bool rgbdEnabled;
   };
 }  // namespace pandora_vision_victim
 }  // namespace pandora_vision

@@ -62,7 +62,6 @@ namespace pandora_vision_victim
     inMsg = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_8UC1);
     cv::Mat depthImage = inMsg->image.clone();
     output->setDepthImage(depthImage);
-
     output->setDepth(input->isDepth);
 
     for (int ii = 0; ii < input->regionsOfInterest.size(); ii++)
