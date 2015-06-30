@@ -162,18 +162,44 @@ namespace pandora_vision
   {
     for (size_t ii = 0; ii < verticalLines.size(); ii++)
     {
-      cv::Point startPoint(verticalLines[ii][0], verticalLines[ii][1]);
-      cv::Point endPoint(verticalLines[ii][2], verticalLines[ii][3]);
+      cv::Point2f startPoint(verticalLines[ii][0], verticalLines[ii][1]);
+      cv::Point2f endPoint(verticalLines[ii][2], verticalLines[ii][3]);
 
-      cv::Point verticalLineDiff = endPoint - startPoint;
-      cv::Point currentLineDiff(line[2] - line[0], line[3] - line[1]);
+      cv::Point2f verticalLineDiff = endPoint - startPoint;
+      cv::Point2f currentLineDiff(line[2] - line[0], line[3] - line[1]);
 
-      double det0 = verticalLineDiff.x * currentLineDiff.y
-        - verticalLineDiff.y * currentLineDiff.x;
+      double crossProduct = verticalLineDiff.cross(currentLineDiff);
 
-      if (fabs(det0) > 1e-6)
+      if (fabs(crossProduct) > 1e-5)
       {
-        return true;
+        double tt = - currentLineDiff.cross(cv::Point2f(line[0], line[1])
+            - startPoint) / crossProduct;
+        cv::Point2f intersectionPoint = startPoint + tt * verticalLineDiff;
+
+        double verLineCrossProduct = verticalLineDiff.cross(intersectionPoint
+            - startPoint);
+        double curLineCrossProduct = currentLineDiff.cross(intersectionPoint
+            - cv::Point2f(line[0], line[1]));
+
+        if (fabs(verLineCrossProduct) < 1e-5 && fabs(curLineCrossProduct) < 1e-5)
+        {
+          double verLineDotProduct = verticalLineDiff.ddot(intersectionPoint
+              - startPoint);
+          double verLine2DotProduct = verticalLineDiff.ddot(verticalLineDiff);
+          bool verLineIntersection = (verLineDotProduct >= 0
+              && verLineDotProduct <= verLine2DotProduct);
+
+          double curLineDotProduct = currentLineDiff.ddot(intersectionPoint
+              - cv::Point2f(line[0], line[1]));
+          double curLine2DotProduct = currentLineDiff.ddot(currentLineDiff);
+          bool curLineIntersection = (curLineDotProduct >= 0
+              && curLineDotProduct <= curLine2DotProduct);
+
+          if (verLineIntersection && curLineIntersection)
+          {
+            return true;
+          }
+        }
       }
     }
     return false;
@@ -236,7 +262,7 @@ namespace pandora_vision
       if ((grad > 80.0f && grad < 100.0f) && awayFromBorder)
       {
         if (findNonIdenticalLines(lineCoefficients, grad, beta)
-            // && !detectLineIntersection(verticalLines, line)
+            && !detectLineIntersection(verticalLines, line)
             && pickLineColor(hsvImage, line, level))
         {
           lineCoefficients.push_back(cv::Vec2f(grad, beta));
