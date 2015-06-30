@@ -1,5 +1,5 @@
 <class_libraries>
-  <library path="libpc_thermal_synchonizer">
+  <library path="lib/libpc_thermal_synchonizer">
     <class name="pandora_vision_hole/pc_thermal_synchronizer"
         type="pandora_vision::pandora_vision_hole::PcThermalSynchronizer" base_class_type="nodelet::Nodelet">
       <description>

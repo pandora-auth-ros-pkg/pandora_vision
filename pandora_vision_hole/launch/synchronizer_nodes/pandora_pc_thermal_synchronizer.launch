@@ -1,5 +1,5 @@
 <launch>
-  <arg name="nodelet_manager" default="kinect_nodelet_manager" />
+  <arg name="nodelet_manager" default="/kinect/kinect_nodelet_manager" />
 
   <node pkg="nodelet" type="nodelet" name="pc_thermal_synchronizer"
       args="load pandora_vision_hole/pc_thermal_synchronizer $(arg nodelet_manager)" output="screen" >
