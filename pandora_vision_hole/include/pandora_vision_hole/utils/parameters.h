@@ -153,6 +153,11 @@ namespace pandora_vision
     //  Parameters specific to the Thermal node
     struct Thermal
     {
+      // The thermal detection method
+      // If set to 0 process the binary image acquired from temperatures MultiArray
+      // If set to 1 process the sensor/Image from thermal sensor
+      static int detection_method;
+
       //  The probability extraction method
       //  0 for Gaussian function
       //  1 for Logistic function

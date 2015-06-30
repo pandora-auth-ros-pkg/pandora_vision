@@ -149,8 +149,19 @@ namespace pandora_vision
     }
     #endif
 
-    // Locate potential holes in the thermal image
-    HolesConveyor holes = HoleDetector::findHoles(thermalImage);
+    HolesConveyor holes;
+    // Detection method = 0 --> process the binary image acquired from temperatures
+    // Detection method = 1 --> process the sensor image acuired from sensor
+    if (Parameters::Thermal::detection_method == 0)
+    {
+      // Locate potential holes in the thermal image
+      holes = HoleDetector::findHoles(thermalImage);
+    }
+    else
+    {
+      // Locate potential holes in the thermal image
+      holes = HoleDetector::findHoles(thermalSensorImage);
+    }
 
     // Find the average temperature of each point of interest that we found
     // and their probability.
@@ -164,7 +175,7 @@ namespace pandora_vision
 
     // Resize the thermal image to match the rgb-d images, of course the thermal
     // image will not be further processed.
-    cv::resize(thermalImage, thermalImage, cvSize(
+    cv::resize(thermalSensorImage, thermalSensorImage, cvSize(
         Parameters::Image::WIDTH, Parameters::Image::HEIGHT));
 
     // Create the candidate holes message
@@ -176,7 +187,7 @@ namespace pandora_vision
     // or thermal cropper node based on the index of thermal message acquired
     // from the synchronizer node
     MessageConversions::createCandidateHolesVectorMessage(holes,
-      thermalImage,
+      thermalSensorImage,
       &thermalCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_8UC1,
       msg.thermalImage);
@@ -219,8 +230,8 @@ namespace pandora_vision
 
       poisStamped->header.stamp = msg.header.stamp;
       poisStamped->header.frame_id = "/kinect_rgb_optical_frame";
-      poisStamped->frameWidth = thermalImage.cols;
-      poisStamped->frameHeight = thermalImage.rows;
+      poisStamped->frameWidth = thermalSensorImage.cols;
+      poisStamped->frameHeight = thermalSensorImage.rows;
 
       // For each hole found by thermal node
       std::vector<HoleConveyor>::iterator iter = holes.holes.begin();
@@ -475,6 +486,11 @@ namespace pandora_vision
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Thermal node] Parameters callback called");
+
+    ///////////////////// The thermal detection method ////////////////////////
+    // If set to 0 process the binary image acquired from temperatures MultiArray
+    // If set to 1 process the sensor/Image from thermal sensor
+    Parameters::Thermal::detection_method = config.detection_method;
 
     //////////////////// Blob detection - specific parameters //////////////////
 
