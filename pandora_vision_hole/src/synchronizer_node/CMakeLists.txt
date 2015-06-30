@@ -2,28 +2,22 @@ add_executable(synchronizer_node
   rgb_depth_synchronizer.cpp
   rgb_depth_synchronizer_node.cpp
   )
-
 target_link_libraries(synchronizer_node
   ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
-
 add_dependencies(synchronizer_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   )
 
-add_executable(rgb_depth_thermal_synchronizer_node
-  rgb_depth_thermal_synchronizer.cpp
-  rgb_depth_thermal_synchronizer_node.cpp
+add_library(pc_thermal_synchronizer
+  pc_thermal_synchronizer.cpp
   )
-
-target_link_libraries(rgb_depth_thermal_synchronizer_node
+target_link_libraries(pc_thermal_synchronizer
   ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES}
   )
-
-add_dependencies(rgb_depth_thermal_synchronizer_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+add_dependencies(pc_thermal_synchronizer
   ${catkin_EXPORTED_TARGETS}
   )
