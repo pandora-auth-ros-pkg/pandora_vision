@@ -7,8 +7,8 @@
   <!-- ========================== Thermal Enable =========================== -->
   <!-- Set both to true if Thermal must be included -->
 
-  <param name="/hole_detector/thermal" value="true" />
-  <arg name="open_thermal" default="true" />
+  <param name="/hole_detector/thermal" value="false" />
+  <arg name="open_thermal" default="false" />
 
   <!-- ================== Parameters for yaw pitch extraction ============== -->
 
@@ -33,7 +33,7 @@
   <include file="$(find pandora_vision_hole)/launch/hole_fusion_node/pandora_vision_hole_fusion_node.launch"
       ns="$(arg namespace)" />
 
-  <!-- <group if="$(arg open_thermal)"> -->
+  <group if="$(arg open_thermal)">
     <!-- =========================== Thermal node ========================== -->
 
   <include file="$(find pandora_vision_hole)/launch/thermal_node/pandora_vision_thermal.launch"
@@ -41,7 +41,8 @@
 
     <!-- ====================== Thermal Cropper node ======================= -->
 
-  <include file="$(find pandora_vision_hole)/launch/thermal_node/pandora_vision_hole_thermal_cropper.launch"
+  <include file="$(find pandora_vision_hole)/launch/thermal_node/pandora_vision_thermal_cropper.launch"
     ns="$(arg namespace)" />
+</group>
 
 </launch>

@@ -1,6 +1,6 @@
 <class_libraries>
   <library path="lib/libpc_thermal_synchronizer">
-    <class name="pandora_vision_hole/pandora_pc_thermal_synchronizer"
+    <class name="pandora_vision_hole/pc_thermal_synchronizer"
         type="pandora_vision::pandora_vision_hole::PcThermalSynchronizer" base_class_type="nodelet::Nodelet">
       <description>
         Nodelet for handling and synchronizing pointcloud2 with thermal messages.
@@ -16,7 +16,7 @@
     </class>
   </library>
   <library path="lib/libpandora_vision_hole_thermal">
-    <class name="pandora_vision_hole/pandora_thermal"
+    <class name="pandora_vision_hole/thermal"
         type="pandora_vision::pandora_vision_hole::Thermal" base_class_type="nodelet::Nodelet">
       <description>
         Thermal processing nodelet
@@ -24,7 +24,7 @@
     </class>
   </library>
   <library path="lib/libpandora_vision_hole_thermal_cropper">
-    <class name="pandora_vision_hole/pandora_thermal_cropper"
+    <class name="pandora_vision_hole/thermal_cropper"
         type="pandora_vision::pandora_vision_hole::ThermalCropper" base_class_type="nodelet::Nodelet">
       <description>
         Synchronizer nodelet that fuses RGBDT info and ROIs from thermal to produce input for victim node.

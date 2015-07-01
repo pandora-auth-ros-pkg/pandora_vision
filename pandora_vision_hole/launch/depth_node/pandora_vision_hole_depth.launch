@@ -1,4 +1,6 @@
-<launch>  
+<launch>
+ <arg name="namespace" default="/pandora_vision/pandora_vision_hole" />
+
   <node name="depth_node"
       type="depth_node"
       pkg="pandora_vision_hole"

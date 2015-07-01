@@ -630,7 +630,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic from where the Hole Fusion node acquires the
     // candidate holes originated from the Rgb node
-    if (privateNodeHandle_.getParam("subscribed_topics/rgb_candidate_holes_topic",
+    if (!privateNodeHandle_.getParam("subscribed_topics/rgb_candidate_holes_topic",
         rgbCandidateHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -639,7 +639,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic from where the Hole Fusion node acquires the
     // candidate holes originated from the Thermal node
-    if (privateNodeHandle_.getParam("subscribed_topics/thermal_candidate_holes_topic",
+    if (!privateNodeHandle_.getParam("subscribed_topics/thermal_candidate_holes_topic",
         thermalCandidateHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -648,7 +648,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic that the Hole Fusion node uses to unlock
     // the synchronizer node
-    if (privateNodeHandle_.getParam("published_topics/synchronizer_unlock_topic",
+    if (!privateNodeHandle_.getParam("published_topics/synchronizer_unlock_topic",
         unlockTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -657,7 +657,7 @@ namespace pandora_vision_hole
     }
     // Get the topic where the result of the hole processing will be
     // published.
-    if (privateNodeHandle_.getParam("published_topics/processor_log_topic",
+    if (!privateNodeHandle_.getParam("published_topics/processor_log_topic",
         processEndTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -666,7 +666,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
     // information about the valid holes found by the Hole Detector package
-    if (privateNodeHandle_.getParam("published_topics/hole_detector_output_topic",
+    if (!privateNodeHandle_.getParam("published_topics/hole_detector_output_topic",
         validHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -675,7 +675,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
     // the EnhancedImage msg
-    if (privateNodeHandle_.getParam("published_topics/enhanced_images_topic",
+    if (!privateNodeHandle_.getParam("published_topics/enhanced_images_topic",
         enhancedImagesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -685,7 +685,7 @@ namespace pandora_vision_hole
     // Read the name of the topic that the Hole Fusion node uses to publish
     // additional information about the valid holes found by the
     // Hole Detector package
-    if (privateNodeHandle_.getParam("published_topics/enhanced_holes_topic",
+    if (!privateNodeHandle_.getParam("published_topics/enhanced_holes_topic",
         enhancedHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -695,7 +695,7 @@ namespace pandora_vision_hole
     // Read the name of the topic that the Hole Fusion node uses to publish
     // the InterpolatedDepthImage found by the
     // Hole Detector package
-    if (privateNodeHandle_.getParam("published_topics/interpolated_depth_topic",
+    if (!privateNodeHandle_.getParam("published_topics/interpolated_depth_topic",
         InterpolatedDepthImageTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -705,7 +705,7 @@ namespace pandora_vision_hole
     // Read the name of the topic that the Hole Fusion node uses to publish
     // messages so that the synchronizer node subscribes to the
     // input point cloud
-    if (privateNodeHandle_.getParam("published_topics/make_synchronizer_subscribe_to_input",
+    if (!privateNodeHandle_.getParam("published_topics/make_synchronizer_subscribe_to_input",
         synchronizerSubscribeToInputPointCloudTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -715,7 +715,7 @@ namespace pandora_vision_hole
     // Read the name of the topic that the Hole Fusion node uses to publish
     // messages so that the synchronizer node leaves its subscription to the
     // input point cloud
-    if (privateNodeHandle_.getParam("published_topics/make_synchronizer_leave_subscription_to_input",
+    if (!privateNodeHandle_.getParam("published_topics/make_synchronizer_leave_subscription_to_input",
         synchronizerLeaveSubscriptionToInputPointCloudTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -724,7 +724,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
     // an image of holes found by the Depth and RGB nodes
-    if (privateNodeHandle_.getParam("published_topics/debug_respective_holes_image",
+    if (!privateNodeHandle_.getParam("published_topics/debug_respective_holes_image",
         debugRespectiveHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
@@ -733,7 +733,7 @@ namespace pandora_vision_hole
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
     // an image of the valid holes found
-    if (privateNodeHandle_.getParam("published_topics/debug_valid_holes_image",
+    if (!privateNodeHandle_.getParam("published_topics/debug_valid_holes_image",
         debugValidHolesTopic_))
     {
       ROS_FATAL_NAMED(PKG_NAME,
