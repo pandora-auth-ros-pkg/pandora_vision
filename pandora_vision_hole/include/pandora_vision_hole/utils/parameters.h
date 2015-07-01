@@ -163,6 +163,7 @@ namespace pandora_vision_hole
       //  0 for Gaussian function
       //  1 for Logistic function
       static int probability_method;
+      static float min_thermal_probability;
 
       //  Gausian variables
       static float optimal_temperature;

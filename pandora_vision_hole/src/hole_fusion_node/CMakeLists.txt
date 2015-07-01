@@ -26,4 +26,3 @@ add_dependencies(${PROJECT_NAME}_hole_fusion
 # target_link_libraries(hole_fusion_node
   # ${PROJECT_NAME}_hole_fusion
   # ${catkin_LIBRARIES})
-

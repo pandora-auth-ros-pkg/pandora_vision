@@ -1,5 +1,6 @@
 subscribed_topics:
   thermal_image_topic: synchronized/thermal/image
+  thermal_output_receiver_topic: synchronized/thermal/receiver_info
 
   # thermal cropper node
   thermal_poi_topic: thermal/cropper/poi
@@ -15,3 +16,18 @@ published_topics:
   thermal_victim_node_topic: /vision/enhanced_holes
   thermal_unlock_synchronizer_topic: thermal/unlock/synchronizer
   processor_log_topic: processor_log
+
+converted_frame: /kinect_rgb_optical_frame
+
+matching_values:
+
+  # The initial position of thermal image after linear transformation
+  x_therm: 12
+  y_therm: 9
+
+  # Thermal image: c_x = new_width/old_width, c_y = new_height/old_height
+  c_x: 7.025
+  c_y: 7.025
+
+  # Angle in degrees. It is positive if its rotated Clockwise
+  angle: 4.62

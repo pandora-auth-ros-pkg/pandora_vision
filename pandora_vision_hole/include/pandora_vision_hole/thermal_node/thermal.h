@@ -38,19 +38,28 @@
 #ifndef PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H
 #define PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H
 
-#include "thermal_node/hole_detector.h"
-#include "utils/parameters.h"
-#include "utils/message_conversions.h"
-#include "utils/image_matching.h"
+#include <string>
+#include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/String.h>
+
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-#include "pandora_vision_msgs/IndexedThermal.h"
+#include "distrib_msgs/FlirLeptonMsg.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/pandora_vision_interface/general_alert_converter.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
-#include "std_msgs/Float32MultiArray.h"
 #include "sensor_processor/ProcessorLogInfo.h"
+
+#include "utils/parameters.h"
+#include "utils/message_conversions.h"
+#include "utils/image_matching.h"
+#include "thermal_node/hole_detector.h"
 
 /**
   @namespace pandora_vision
@@ -65,119 +74,147 @@ namespace pandora_vision_hole
     @brief Provides functionalities for locating holes via
     analysis of a thermal image
    **/
-  class Thermal
+  class Thermal : public nodelet::Nodelet
   {
-    private:
-      // The ROS node handle
-      ros::NodeHandle nodeHandle_;
+   public:
+    /**
+      @brief Default constructor. Initiates communications, loads parameters.
+      @return void
+      **/
+    Thermal();
 
-      // Subscriber of thermal camera info
-      ros::Subscriber thermalImageSubscriber_;
+    /**
+      @brief Default destructor
+      @return void
+      **/
+    virtual
+    ~Thermal();
 
-      // The name of the topic where the thermal image is acquired from
-      std::string thermalImageTopic_;
+    virtual void
+    onInit();
 
-      // Ros publisher for the candidate holes to hole-fusion.
-      ros::Publisher candidateHolesPublisher_;
+    /**
+      @brief Callback for the thermal image received by the camera.
 
-      // The name of the topic where the candidate holes that the thermal node
-      // locates are published to. Publishes to hole-fusion and its independent
-      // from the state.
-      std::string candidateHolesTopic_;
+      The thermal image message received by the camera is unpacked
+      in a cv::Mat image.
+      Holes are then located inside this image and information about them,
+      along with the denoised image, is then sent to the hole fusion node
+      @param msg [const pandora_vision_msgs::IndexedThermal&]
+      The thermal image message
+      @return void
+      **/
+    void
+    inputThermalImageCallback(const distrib_msgs::FlirLeptonMsgConstPtr& msg);
 
-      // Ros publisher for candidate holes POI directly to Data fusion.
-      ros::Publisher dataFusionThermalPublisher_;
+    void
+    inputThermalOutputReceiverCallback(const std_msgs::StringConstPtr& msg);
 
-      // The name of the topic where the thermal node publishes
-      // directly to Data fusion.
-      std::string dataFusionThermalTopic_;
+    /**
+      @brief The function called when a parameter is changed
+      @param[in] config [const pandora_vision_hole::thermal_cfgConfig&]
+      @param[in] level [const uint32_t]
+      @return void
+      **/
+    void
+    parametersCallback(const ::pandora_vision_hole::thermal_cfgConfig& config,
+        uint32_t level);
 
-      // Ros publisher for candidate holes POI to thermal cropper node.
-      ros::Publisher thermalToCropperPublisher_;
+   private:
+    void
+    process();
 
-      // The name of the topic where the thermal node publishes
-      // directly to thermal cropper node
-      std::string thermalToCropperTopic_;
+    /**
+      @brief Acquires topics' names needed to be subscribed by the thermal node.
+      @param void
+      @return void
+      **/
+    void
+    getTopicNames();
 
-      // The publisher used to infor that thermal node has finished
-      // processing the input data.
-      ros::Publisher processEndPublisher_;
+    /**
+      @brief This function finds for each point of interest found it's
+      probability based on the keypoint's average temperature.
+      @param[out] holes [const HolesConveyor&] The points of interest found
+      @param[in] temperatures [const Float32MultiArray&] The multiArray with
+      the temperatures of the image.
+      @param[in] method [int] Denotes the probabilities extraction
+      method.
+      @return void
+      **/
+    void
+    findHolesProbability(HolesConveyor* holes,
+        const std_msgs::Float32MultiArray& temperatures, int method);
 
-      // The name of the topic where the process end will be advertised
-      std::string processEndTopic_;
+   private:
+    //!< Node's distinct name
+    std::string nodeName_;
+    //!< The ROS node handle in general namespace
+    ros::NodeHandle nh_;
+    //!< The ROS node handle in private namespace
+    ros::NodeHandle private_nh_;
 
-      // The variables used to match the holeConveyor information to the
-      // Rgb and Depth images.
-      double xThermal_;
-      double yThermal_;
-      double cX_;
-      double cY_;
-      double angle_;
+    // Subscriber of thermal camera image
+    ros::Subscriber thermalImageSubscriber_;
+    // The name of the topic where the thermal image is acquired from
+    std::string thermalImageTopic_;
+    // Flag which shows that thermalImage data is available
+    bool isImageAvailable_;
+    // Input image
+    distrib_msgs::FlirLeptonMsgConstPtr imageConstPtr_;
 
-      // The dynamic reconfigure (thermal) parameters' server
-      dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
-        server;
+    // Subscriber of thermal output receiver
+    ros::Subscriber thermalOutputReceiverSubscriber_;
+    // The name of the topic where thermal output receiver is acquired from
+    std::string thermalOutputReceiverTopic_;
+    // Flag which shows that thermal outpue receiver data is available
+    bool isReceiverInfoAvailable_;
+    // Output receiver information
+    std_msgs::StringConstPtr receiverInfoConstPtr_;
 
-      // The dynamic reconfigure (thermal) parameters' callback
-      dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
-       ::CallbackType f;
+    // Ros publisher for the candidate holes to hole-fusion.
+    ros::Publisher candidateHolesPublisher_;
+    // The name of the topic where the candidate holes that the thermal node
+    // locates are published to. Publishes to hole-fusion and its independent
+    // from the state.
+    std::string candidateHolesTopic_;
 
-      /**
-        @brief Callback for the thermal image received by the camera.
+    // Ros publisher for candidate holes POI directly to Data fusion.
+    ros::Publisher dataFusionThermalPublisher_;
+    // The name of the topic where the thermal node publishes
+    // directly to Data fusion.
+    std::string dataFusionThermalTopic_;
 
-        The thermal image message received by the camera is unpacked
-        in a cv::Mat image.
-        Holes are then located inside this image and information about them,
-        along with the denoised image, is then sent to the hole fusion node
-        @param msg [const pandora_vision_msgs::IndexedThermal&]
-        The thermal image message
-        @return void
-       **/
-      void inputThermalImageCallback(
-        const pandora_vision_msgs::IndexedThermal& msg);
+    // Ros publisher for candidate holes POI to thermal cropper node.
+    ros::Publisher thermalToCropperPublisher_;
+    // The name of the topic where the thermal node publishes
+    // directly to thermal cropper node
+    std::string thermalToCropperTopic_;
 
-      /**
-        @brief Acquires topics' names needed to be subscribed by the thermal node.
-        @param void
-        @return void
-       **/
-      void getTopicNames();
+    // The publisher used to infor that thermal node has finished
+    // processing the input data.
+    ros::Publisher processEndPublisher_;
+    // The name of the topic where the process end will be advertised
+    std::string processEndTopic_;
 
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::thermal_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-        const ::pandora_vision_hole::thermal_cfgConfig& config,
-        const uint32_t& level);
+    std::string converted_frame_;
+    GeneralAlertConverter alertConverter_;
 
-      /**
-        @brief This function finds for each point of interest found it's
-        probability based on the keypoint's average temperature.
-        @param[out] holes [const HolesConveyor&] The points of interest found
-        @param[in] temperatures [const Float32MultiArray&] The multiArray with
-        the temperatures of the image.
-        @param[in] method [const int&] Denotes the probabilities extraction
-        method.
-        @return void
-       **/
-      void findHolesProbability(HolesConveyor* holes,
-        const std_msgs::Float32MultiArray& temperatures, const int& method);
+    // The variables used to match the holeConveyor information to the
+    // Rgb and Depth images.
+    double xThermal_;
+    double yThermal_;
+    double cX_;
+    double cY_;
+    double angle_;
 
-    public:
-      /**
-        @brief Default constructor. Initiates communications, loads parameters.
-        @return void
-       **/
-      Thermal(void);
+    // The dynamic reconfigure (thermal) parameters' server
+    dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
+      server;
 
-      /**
-        @brief Default destructor
-        @return void
-       **/
-      ~Thermal(void);
+    // The dynamic reconfigure (thermal) parameters' callback
+    dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
+      ::CallbackType f;
   };
 
 }  // namespace pandora_vision_hole

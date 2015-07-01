@@ -135,6 +135,7 @@ namespace pandora_vision_hole
   // 1 for Logistic function
 
   int Parameters::Thermal::probability_method = 1;
+  float Parameters::Thermal::min_thermal_probability = 0.3;
 
   // Gausian variables
   float Parameters::Thermal::optimal_temperature = 35;
