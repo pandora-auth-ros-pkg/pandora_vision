@@ -178,7 +178,7 @@ namespace pandora_vision_hole
   Thermal::
   process()
   {
-    if (!isImageAvailable_ && !isReceiverInfoAvailable_)
+    if (!isImageAvailable_ || !isReceiverInfoAvailable_)
     {
       NODELET_ERROR("[%s] Incorrect callback: process has not received enough info",
           nodeName_.c_str());

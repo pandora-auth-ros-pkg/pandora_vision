@@ -54,6 +54,7 @@
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
+#include "sensor_msgs/Image.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "sensor_processor/ProcessorLogInfo.h"
 

@@ -23,4 +23,12 @@
       </description>
     </class>
   </library>
+  <library path="lib/libpandora_vision_hole_thermal_cropper">
+    <class name="pandora_vision_hole/pandora_thermal_cropper"
+        type="pandora_vision::pandora_vision_hole::ThermalCropper" base_class_type="nodelet::Nodelet">
+      <description>
+        Synchronizer nodelet that fuses RGBDT info and ROIs from thermal to produce input for victim node.
+      </description>
+    </class>
+  </library>
 </class_libraries>

@@ -11,15 +11,13 @@ add_dependencies(${PROJECT_NAME}_thermal
   ${catkin_EXPORTED_TARGETS}
   )
 
-add_library(${PROJECT_NAME}_thermalcropper
+add_library(${PROJECT_NAME}_thermal_cropper
   thermal_cropper.cpp
   )
-target_link_libraries(${PROJECT_NAME}_thermalcropper
-  ${PROJECT_NAME}_thermal
-  ${catkin_LIBRARIES})
-
-
-add_executable(thermal_cropper_node thermal_cropper_node.cpp)
-target_link_libraries(thermal_cropper_node
-  ${PROJECT_NAME}_thermalcropper
-  ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_thermal_cropper
+  ${PROJECT_NAME}_utils
+  ${catkin_LIBRARIES}
+  )
+add_dependencies(${PROJECT_NAME}_thermal_cropper
+  ${catkin_EXPORTED_TARGETS}
+  )
