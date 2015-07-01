@@ -58,6 +58,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
   /**
     @class Thermal
     @brief Provides functionalities for locating holes via
@@ -113,11 +115,11 @@ namespace pandora_vision
       double angle_;
 
       // The dynamic reconfigure (thermal) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
+      dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
         server;
 
       // The dynamic reconfigure (thermal) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_hole::thermal_cfgConfig>
+      dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
        ::CallbackType f;
 
       /**
@@ -148,7 +150,7 @@ namespace pandora_vision
         @return void
        **/
       void parametersCallback(
-        const pandora_vision_hole::thermal_cfgConfig& config,
+        const ::pandora_vision_hole::thermal_cfgConfig& config,
         const uint32_t& level);
 
       /**
@@ -178,6 +180,7 @@ namespace pandora_vision
       ~Thermal(void);
   };
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H

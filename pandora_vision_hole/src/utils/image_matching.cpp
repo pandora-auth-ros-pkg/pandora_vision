@@ -45,6 +45,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
 
   /**
     @brief Converts Conveyors which represent each hole and include all
@@ -386,4 +388,5 @@ namespace pandora_vision
   }
 
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision

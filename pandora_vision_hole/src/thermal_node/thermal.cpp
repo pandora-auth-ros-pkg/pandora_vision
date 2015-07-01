@@ -43,6 +43,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
   /**
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
@@ -63,13 +65,13 @@ namespace pandora_vision
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     candidateHolesPublisher_ = nodeHandle_.advertise
-      <pandora_vision_hole::CandidateHolesVectorMsg>(
+      < ::pandora_vision_hole::CandidateHolesVectorMsg >(
       candidateHolesTopic_, 1);
 
     // Advertise the candidate holes found by the thermal
     // node to thermal cropper
     thermalToCropperPublisher_ = nodeHandle_.advertise
-      <pandora_vision_hole::CandidateHolesVectorMsg>(
+      < ::pandora_vision_hole::CandidateHolesVectorMsg >(
       thermalToCropperTopic_, 1);
 
     // Advertise the candidate holes found by the thermal node to hole fusion
@@ -179,7 +181,7 @@ namespace pandora_vision
         Parameters::Image::WIDTH, Parameters::Image::HEIGHT));
 
     // Create the candidate holes message
-    pandora_vision_hole::CandidateHolesVectorMsg thermalCandidateHolesMsg;
+    ::pandora_vision_hole::CandidateHolesVectorMsg thermalCandidateHolesMsg;
 
     // Pack information about holes found and the thermal image
     // inside a message.
@@ -482,7 +484,7 @@ namespace pandora_vision
     @return void
    **/
   void Thermal::parametersCallback(
-    const pandora_vision_hole::thermal_cfgConfig& config,
+    const ::pandora_vision_hole::thermal_cfgConfig& config,
     const uint32_t& level)
   {
     ROS_INFO_NAMED(PKG_NAME, "[Thermal node] Parameters callback called");
@@ -651,4 +653,5 @@ namespace pandora_vision
     Parameters::Thermal::high_temperature = config.high_temperature;
   }
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision

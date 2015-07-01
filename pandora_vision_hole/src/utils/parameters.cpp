@@ -43,6 +43,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
   //////////////////// Blob detection - specific parameters ////////////////////
 
   int Parameters::Blob::min_threshold = 0;
@@ -376,4 +378,5 @@ namespace pandora_vision
   int Parameters::Rgb::watershed_background_dilation_factor = 1;
   int Parameters::Rgb::watershed_background_erosion_factor = 1;
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision

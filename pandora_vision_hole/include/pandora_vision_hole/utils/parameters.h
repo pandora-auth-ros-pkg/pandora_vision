@@ -56,6 +56,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
   /**
     @struct Parameters
     @brief Provides flexibility by parameterizing variables needed by the
@@ -466,6 +468,7 @@ namespace pandora_vision
     };
   };
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_HOLE_UTILS_PARAMETERS_H

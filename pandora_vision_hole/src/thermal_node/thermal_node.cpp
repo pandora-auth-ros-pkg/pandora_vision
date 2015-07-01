@@ -46,7 +46,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "thermal_node");
-  pandora_vision::Thermal thermal;
+  pandora_vision::pandora_vision_hole::Thermal thermal;
   ros::spin();
   return 0;
 }

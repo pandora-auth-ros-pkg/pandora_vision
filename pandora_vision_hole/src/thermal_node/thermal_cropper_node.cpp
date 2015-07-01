@@ -46,7 +46,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "thermal_cropper_node");
-  pandora_vision::ThermalCropper thermalCropper;
+  pandora_vision::pandora_vision_hole::ThermalCropper thermalCropper;
   ros::spin();
   return 0;
 }

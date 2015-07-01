@@ -261,7 +261,7 @@ namespace pandora_vision_hole
     the synchronizer and calls for processing of the candidate
     holes.
     @param[in] depthCandidateHolesVector
-    [const pandora_vision_hole::CandidateHolesVectorMsg&]
+    [const ::pandora_vision_hole::CandidateHolesVectorMsg&]
     The message containing the necessary information acquired through
     the depth node
     @return void
@@ -1919,7 +1919,7 @@ namespace pandora_vision_hole
     the synchronizer and calls for processing of the candidate
     holes.
     @param[in] rgbCandidateHolesVector
-    [const pandora_vision_hole::CandidateHolesVectorMsg&]
+    [const ::pandora_vision_hole::CandidateHolesVectorMsg&]
     The message containing the necessary information to filter hole
     candidates acquired through the rgb node
     @return void

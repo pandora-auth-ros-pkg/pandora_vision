@@ -43,6 +43,8 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_hole
+{
   /**
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
@@ -101,12 +103,12 @@ namespace pandora_vision
     The thermal poi message received by the thermal node is unpacked.
     A counter is set. When this counter reach 2 it means both rgb Depth and
     thermal poi message have been subscribed and are ready to be sent to victim.
-    @param msg [const pandora_vision_hole::CandidateHolesVectorMsg&]
+    @param msg [const ::pandora_vision_hole::CandidateHolesVectorMsg&]
     The thermal image message
     @return void
    **/
   void ThermalCropper::inputThermalPoiCallback(
-    const pandora_vision_hole::CandidateHolesVectorMsg& msg)
+    const ::pandora_vision_hole::CandidateHolesVectorMsg& msg)
   {
     ROS_INFO("[ThermalCropper node], ThermalPoi callback called");
 
@@ -169,12 +171,12 @@ namespace pandora_vision
     @brief When CandidateHolesMsg arrives from thermal node it must be unpacked,
     in order to be further used. These information is stored in
     private member variable for further use.
-    @param[in] msg [const std::vector<pandora_vision_hole::CandidateHoleMsg>&]
+    @param[in] msg [const std::vector<::pandora_vision_hole::CandidateHoleMsg>&]
     the input candidate holes
     @return void
    **/
   void ThermalCropper::unpackThermalMsg(
-    const std::vector<pandora_vision_hole::CandidateHoleMsg>&
+    const std::vector< ::pandora_vision_hole::CandidateHoleMsg >&
     candidateHolesVector)
   {
     for (unsigned int i = 0; i < candidateHolesVector.size(); i++)
@@ -464,4 +466,5 @@ namespace pandora_vision
     unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
   }
 
+}  // namespace pandora_vision_hole
 }  // namespace pandora_vision
