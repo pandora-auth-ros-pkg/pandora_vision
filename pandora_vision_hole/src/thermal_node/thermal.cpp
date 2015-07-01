@@ -36,6 +36,7 @@
  *********************************************************************/
 
 #include <string>
+#include <limits>
 #include <boost/algorithm/string.hpp>
 
 #include <ros/ros.h>
@@ -44,14 +45,16 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/String.h>
 
-#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "distrib_msgs/FlirLeptonMsg.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
 #include "sensor_processor/ProcessorLogInfo.h"
 
+#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
+#include "pandora_vision_hole/CandidateHoleMsg.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/image_matching.h"
@@ -115,19 +118,16 @@ namespace pandora_vision_hole
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     candidateHolesPublisher_ = nh_.advertise
-      < ::pandora_vision_hole::CandidateHolesVectorMsg >(
-      candidateHolesTopic_, 1);
+      < ::pandora_vision_hole::CandidateHolesVectorMsg >(candidateHolesTopic_, 1);
 
     // Advertise the candidate holes found by the thermal
     // node to thermal cropper
     thermalToCropperPublisher_ = nh_.advertise
-      < ::pandora_vision_hole::CandidateHolesVectorMsg >(
-      thermalToCropperTopic_, 1);
+      <pandora_vision_msgs::EnhancedImage>(thermalToCropperTopic_, 1);
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     dataFusionThermalPublisher_ = nh_.advertise
-      <pandora_vision_msgs::ThermalAlertVector>
-      (dataFusionThermalTopic_, 1);
+      <pandora_vision_msgs::ThermalAlertVector>(dataFusionThermalTopic_, 1);
 
     // Advertise the topic where any external node(e.g. a functional test node)
     // will be subscribed to know that the hole node has finished processing
@@ -244,6 +244,7 @@ namespace pandora_vision_hole
     findHolesProbability(
       &holes, imageConstPtr_->temperatures, Parameters::Thermal::probability_method);
 
+    // TODO Delegate to Frame Matcher
     // Convert the conveyors information so it can match with the
     //  Rgb and Depth images. If its outside of limits discart that conveyor.
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_, angle_);
@@ -273,7 +274,7 @@ namespace pandora_vision_hole
     if (receiverInfoConstPtr_->data == "thermal")
     {
       // Publish the candidate holes message to thermal cropper node
-      thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
+      publishToThermalCropper(thermalCandidateHolesMsg);
     }
     else if (receiverInfoConstPtr_->data == "hole")
     {
@@ -283,7 +284,7 @@ namespace pandora_vision_hole
     else if (receiverInfoConstPtr_->data == "thermalhole")
     {
       // Publish to both thermal cropper and hole fusion nodes
-      thermalToCropperPublisher_.publish(thermalCandidateHolesMsg);
+      publishToThermalCropper(thermalCandidateHolesMsg);
       candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
     }
     else
@@ -374,6 +375,52 @@ namespace pandora_vision_hole
     Timer::tick("inputThermalImageCallback");
     Timer::printAllMeansTree();
 #endif
+  }
+
+  void
+  Thermal::
+  publishToThermalCropper(const ::pandora_vision_hole::
+      CandidateHolesVectorMsgConstPtr& candidateHolesConstPtr)
+  {
+    pandora_vision_msgs::EnhancedImagePtr enhancedThermalImagePtr(
+        new pandora_vision_msgs::EnhancedImage );
+    convertCandidateHolesToEnhancedImage(candidateHolesConstPtr, enhancedThermalImagePtr);
+    thermalToCropperPublisher_.publish(enhancedThermalImagePtr);
+  }
+
+  void
+  Thermal::
+  convertCandidateHolesToEnhancedImage(
+      const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr& candidateHolesConstPtr,
+      const pandora_vision_msgs::EnhancedImagePtr& enhancedThermalImagePtr)
+  {
+    enhancedThermalImagePtr->header = candidateHolesConstPtr->header;
+    enhancedThermalImagePtr->thermalImage = candidateHolesConstPtr->image;
+    enhancedThermalImagePtr->isDepth = false;
+    for (int ii = 0; ii < candidateHolesConstPtr->candidateHoles.size(); ++ii) {
+      ::pandora_vision_hole::CandidateHoleMsg hole;
+      hole = candidateHolesConstPtr->candidateHoles[ii];
+      pandora_vision_msgs::RegionOfInterest roi;
+
+      roi.center.x = hole.keypointX;
+      roi.center.y = hole.keypointY;
+
+      int minx, maxx, miny, maxy;
+      minx = miny = std::numeric_limits<int>::max();
+      maxx = maxy = std::numeric_limits<int>::min();
+      for (int jj = 0; jj < hole.verticesX.size(); ++jj) {
+        minx = hole.verticesX[jj] < minx ? hole.verticesX[jj] : minx;
+        maxx = hole.verticesX[jj] > maxx ? hole.verticesX[jj] : maxx;
+      }
+      for (int jj = 0; jj < hole.verticesY.size(); ++jj) {
+        miny = hole.verticesY[jj] < miny ? hole.verticesY[jj] : minx;
+        maxy = hole.verticesY[jj] > maxy ? hole.verticesY[jj] : maxy;
+      }
+      roi.width = maxx - minx;
+      roi.height = maxy - miny;
+
+      enhancedThermalImagePtr->regionsOfInterest.push_back(roi);
+    }
   }
 
   /**

@@ -39,6 +39,7 @@
 #define PANDORA_VISION_HOLE_THERMAL_NODE_THERMAL_H
 
 #include <string>
+#include <limits>
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -47,15 +48,17 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/String.h>
 
-#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "distrib_msgs/FlirLeptonMsg.h"
 #include "pandora_vision_common/pois_stamped.h"
 #include "pandora_vision_common/pandora_vision_utilities/general_alert_converter.h"
 #include "pandora_common_msgs/GeneralAlertVector.h"
 #include "pandora_vision_msgs/ThermalAlert.h"
 #include "pandora_vision_msgs/ThermalAlertVector.h"
+#include "pandora_vision_msgs/EnhancedImage.h"
 #include "sensor_processor/ProcessorLogInfo.h"
 
+#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
+#include "pandora_vision_hole/CandidateHoleMsg.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/image_matching.h"
@@ -145,6 +148,15 @@ namespace pandora_vision_hole
     void
     findHolesProbability(HolesConveyor* holes,
         const std_msgs::Float32MultiArray& temperatures, int method);
+
+    void
+    publishToThermalCropper(const ::pandora_vision_hole::
+        CandidateHolesVectorMsgConstPtr& candidateHolesConstPtr);
+
+    void
+    convertCandidateHolesToEnhancedImage(
+        const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr& candidateHolesConstPtr,
+        const pandora_vision_msgs::EnhancedImagePtr& enhancedThermalImagePtr);
 
    private:
     //!< Node's distinct name
