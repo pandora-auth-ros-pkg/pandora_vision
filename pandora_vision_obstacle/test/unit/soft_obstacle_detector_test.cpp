@@ -225,7 +225,8 @@ namespace pandora_vision
 
     EXPECT_EQ(1, roi->x);
     EXPECT_EQ(1, roi->y);
-    EXPECT_EQ(3, roi->width);
-    EXPECT_EQ(2, roi->height);
+    // Considering that a pixel has width and height equal to 1
+    EXPECT_EQ(4, roi->width);
+    EXPECT_EQ(3, roi->height);
   }
 }  // namespace pandora_vision
