@@ -2,19 +2,10 @@ subscribed_topics:
   thermal_image_topic: synchronized/thermal/image
   thermal_output_receiver_topic: synchronized/thermal/receiver_info
 
-  # thermal cropper node
-  thermal_poi_topic: thermal/cropper/poi
-  rgb_depth_images_topic: synchronized/enhanced/image
-
 published_topics:
-  candidate_holes_topic: thermal/candidate_holes
+  candidate_holes_topic: synchronized/thermal/candidate_holes
   thermal_data_fusion_topic: /vision/thermal_direction_alert
-  thermal_to_cropper_topic: thermal/cropper/poi
-  processor_log_topic: processor_log
-
-  # thermal cropper node
-  thermal_victim_node_topic: /vision/enhanced_holes
-  thermal_unlock_synchronizer_topic: thermal/unlock/synchronizer
+  thermal_to_cropper_topic: thermal/cropper/enhanced/image
   processor_log_topic: processor_log
 
 converted_frame: /kinect_rgb_optical_frame
