@@ -141,8 +141,6 @@ namespace pandora_vision_hole
     NODELET_INFO("[%s] Initiated", nodeName_.c_str());
   }
 
-
-
   /**
     @brief Callback for the thermal image received by the camera.
 
@@ -310,12 +308,12 @@ namespace pandora_vision_hole
     // send it to data fusion if a hole exists. The message to be sent is
     // ThermalAlertsVectorMsg type.
     // Fill the thermal message to be sent
-    POIsStampedPtr poisStamped( new POIsStamped );
+    POIsStamped poisStamped;
 
-    poisStamped->header.stamp = imageConstPtr_->header.stamp;
-    poisStamped->header.frame_id = converted_frame_;
-    poisStamped->frameWidth = thermalSensorImage.cols;
-    poisStamped->frameHeight = thermalSensorImage.rows;
+    poisStamped.header.stamp = imageConstPtr_->header.stamp;
+    poisStamped.header.frame_id = converted_frame_;
+    poisStamped.frameWidth = thermalSensorImage.cols;
+    poisStamped.frameHeight = thermalSensorImage.rows;
 
     // For each hole found by thermal node
     std::vector<HoleConveyor>::iterator iter = holes.holes.begin();
@@ -338,13 +336,13 @@ namespace pandora_vision_hole
       // Fill the probabilities
       poi->probability = iter->holeProbability;
 
-      poisStamped->pois.push_back(poi);
+      poisStamped.pois.push_back(poi);
 
       ++iter;
     }
 
     pandora_vision_msgs::ThermalAlertVectorPtr thermalAlertVector( new pandora_vision_msgs::ThermalAlertVector );
-    if (poisStamped->pois.size() > 0)
+    if (poisStamped.pois.size() > 0)
     {
       pandora_common_msgs::GeneralAlertVector alertVector;
       alertVector = alertConverter_.getGeneralAlertVector(nh_, poisStamped);
