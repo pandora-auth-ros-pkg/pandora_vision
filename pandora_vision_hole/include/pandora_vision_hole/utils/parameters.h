@@ -39,7 +39,6 @@
 #define PANDORA_VISION_HOLE_UTILS_PARAMETERS_H
 
 #include "utils/defines.h"
-#include "utils/parameters.h"
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole/thermal_cfgConfig.h>
 #include <pandora_vision_hole/depth_cfgConfig.h>
