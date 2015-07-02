@@ -34,10 +34,12 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
+
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
 
 #include "hole_fusion_node/hole_fusion.h"
+
 PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::HoleFusion, nodelet::Nodelet)
 
 /**
@@ -71,6 +73,9 @@ namespace pandora_vision_hole
     privateNodeHandle_ = this->getPrivateNodeHandle();
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
 
+    nodeHandle_.param("rgbd", rgbdMode_, true);
+    nodeHandle_.param("rgbdt", rgbdtMode_, true);
+
     std::string private_namespace = privateNodeHandle_.getNamespace();
     generalNodeHandle_ = ros::NodeHandle(private_namespace + "/general");
     filtersPriorityNodeHandle_ =  ros::NodeHandle(private_namespace + "/priority");
@@ -101,15 +106,20 @@ namespace pandora_vision_hole
     getTopicNames();
 
     // Check if Thermal is enabled to run with hole-detection Package
-    if (mode_)
+    if (rgbdtMode_)
     {
       // Thermal is enabled
       counter_ = 4;
     }
-    else
+    else if(rgbdMode_)
     {
       // Thermal is disabled
       counter_ = 3;
+    }
+    else
+    {
+      NODELET_FATAL("[%s] Hole Fusion loaded with rgbd and rgbdt mode set to false!",
+          nodeName_.c_str());
     }
 
     // Initialize the numNodesReady variable.
@@ -611,24 +621,13 @@ namespace pandora_vision_hole
    **/
   void HoleFusion::getTopicNames()
   {
-    // This variable indicates the mode in which Hole-Package is running
-    // If is set to true -> Rgb-D-T mode
-    // Else Rgb-D mode
-    if (nodeHandle_.getParam("/hole_detector/thermal", mode_))
-    {
-      ROS_INFO("[Hole Fusion Node] Packages Mode has been found");
-    }
-    else
-    {
-      ROS_ERROR("[Hole Fusion Node] Could not find Packages Mode");
-    }
     // Read the name of the topic from where the Hole Fusion node acquires the
     // input point cloud
     if (!privateNodeHandle_.getParam("subscribed_topics/point_cloud_internal_topic",
         pointCloudTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic point_cloud_internal_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic point_cloud_internal_topic",
+          nodeName_.c_str());
       ROS_BREAK();
     }
     // Read the name of the topic from where the Hole Fusion node acquires the
@@ -636,8 +635,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("subscribed_topics/depth_candidate_holes_topic",
         depthCandidateHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic depth_candidate_holes_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic depth_candidate_holes_topic", nodeName_.c_str());
       ROS_BREAK();
     }
     // Read the name of the topic from where the Hole Fusion node acquires the
@@ -645,8 +643,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("subscribed_topics/rgb_candidate_holes_topic",
         rgbCandidateHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic rgb_candidate_holes_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic rgb_candidate_holes_topic", nodeName_.c_str());
       ROS_BREAK();
     }
     // Read the name of the topic from where the Hole Fusion node acquires the
@@ -654,8 +651,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("subscribed_topics/thermal_candidate_holes_topic",
         thermalCandidateHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic thermal_candidate_holes_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic thermal_candidate_holes_topic", nodeName_.c_str());
       ROS_BREAK();
     }
     // Read the name of the topic that the Hole Fusion node uses to unlock
@@ -663,8 +659,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/synchronizer_unlock_topic",
         unlockTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic synchronizer_unlock_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic synchronizer_unlock_topic", nodeName_.c_str());
       ROS_BREAK();
     }
     // Get the topic where the result of the hole processing will be
@@ -672,8 +667,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/processor_log_topic",
         processEndTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
-        "[%s] Could not find topic processor_log_topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find topic processor_log_topic", nodeName_.c_str());
       ROS_BREAK();
     }
     // Read the name of the topic that the Hole Fusion node uses to publish
@@ -681,7 +675,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/hole_detector_output_topic",
         validHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic hole_detector_output_topic", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -690,7 +684,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/enhanced_images_topic",
         enhancedImagesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic enhanced_images_topic", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -700,7 +694,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/enhanced_holes_topic",
         enhancedHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic enhanced_images_topic", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -710,7 +704,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/interpolated_depth_topic",
         InterpolatedDepthImageTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic interpolated_depth_topic", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -720,7 +714,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/make_synchronizer_subscribe_to_input",
         synchronizerSubscribeToInputPointCloudTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic make_synchronizer_subscribe_to_input", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -730,7 +724,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/make_synchronizer_leave_subscription_to_input",
         synchronizerLeaveSubscriptionToInputPointCloudTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic make_synchronizer_leave_subscription_to_input", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -739,7 +733,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/debug_respective_holes_image",
         debugRespectiveHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic debug_respective_holes_image", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -748,7 +742,7 @@ namespace pandora_vision_hole
     if (!privateNodeHandle_.getParam("published_topics/debug_valid_holes_image",
         debugValidHolesTopic_))
     {
-      ROS_FATAL_NAMED(PKG_NAME,
+      NODELET_FATAL(
         "[%s] Could not find topic debug_valid_holes_image", nodeName_.c_str());
       ROS_BREAK();
     }
@@ -1346,7 +1340,7 @@ namespace pandora_vision_hole
       titles.push_back("Holes originated from RGB analysis, on the Depth image");
 
       // If mode is enabled add the information from thermal procedure
-      if (mode_)
+      if (rgbdtMode_)
       {
         // Holes originated from analysis on the thermal image,
         // on top of the depth image
@@ -1400,7 +1394,7 @@ namespace pandora_vision_hole
     HolesConveyorUtils::merge(depthHolesConveyor_, rgbHolesConveyor_,
       &rgbdHolesConveyor);
 
-    if (mode_)
+    if (rgbdtMode_)
     {
       HolesConveyorUtils::merge(rgbdHolesConveyor, thermalHolesConveyor_,
         &rgbdHolesConveyor);

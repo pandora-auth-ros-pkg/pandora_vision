@@ -228,6 +228,9 @@ namespace pandora_vision_hole
     // The dynamic reconfigure (thermal) parameters' callback
     dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
       ::CallbackType f;
+
+    bool thermalMode_;
+    bool rgbdtMode_;
   };
 
 }  // namespace pandora_vision_hole

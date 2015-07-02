@@ -35,7 +35,16 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
+#include <vector>
+#include <string>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Image.h>
+#include <std_msgs/Float32MultiArray.h>
+
+#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "utils/message_conversions.h"
+#include "utils/holes_conveyor.h"
 
 /**
   @namespace pandora_vision
@@ -65,8 +74,6 @@ namespace pandora_vision_hole
 
     return *msgPtr->toImageMsg();
   }
-
-
 
   /**
     @brief Extracts an image from a point cloud message
@@ -127,7 +134,50 @@ namespace pandora_vision_hole
     return image;
   }
 
+  void MessageConversions::toROSDepthMsg(
+    const sensor_msgs::PointCloud2& cloud, sensor_msgs::Image& msg)
+  {
+    int depth_index = -1;
+    // Get the index we need
+    for (size_t d = 0; d < cloud.fields.size(); ++d)
+      if (cloud.fields[d].name == "z")
+      {
+        depth_index = d;
+        break;
+      }
 
+    if (depth_index == -1)
+      throw std::runtime_error("No z field!!");
+    if (cloud.width == 0 && cloud.height == 0)
+      throw std::runtime_error("Needs to be a dense like cloud!!");
+    else
+    {
+      msg.height = cloud.height;
+      msg.width = cloud.width;
+    }
+
+    if (cloud.fields[depth_index].datatype != 7)
+    {
+      ROS_WARN("Depth field has datatype: %d", cloud.fields[depth_index].datatype);
+    }
+    msg.encoding = sensor_msgs::image_encodings::MONO8;
+    msg.is_bigendian = false;
+    // CV_32FC1
+    size_t float32_size = 4 * sizeof(uint8_t);
+    msg.step = msg.width * float32_size;
+    msg.data.resize(msg.step * msg.height);
+
+    uint32_t depth_offset = cloud.fields[depth_index].offset;
+    uint32_t point_step = cloud.point_step;  // it was int
+    for (uint32_t row = 0; row < cloud.height; ++row)
+    {
+      for (uint32_t col = 0; col < cloud.width; ++col, depth_offset += point_step)
+      {
+        uint8_t* pixel = &(msg.data[row * msg.step + col]);
+        memcpy(pixel, &(cloud.data[depth_offset]), float32_size);
+      }
+    }
+  }
 
   /**
     @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg

@@ -38,11 +38,17 @@
 #ifndef PANDORA_VISION_HOLE_UTILS_MESSAGE_CONVERSIONS_H
 #define PANDORA_VISION_HOLE_UTILS_MESSAGE_CONVERSIONS_H
 
+#include <vector>
+#include <string>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Image.h>
+#include <std_msgs/Float32MultiArray.h>
+
+#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "utils/defines.h"
 #include "utils/outline_discovery.h"
 #include "utils/holes_conveyor.h"
-#include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-#include "std_msgs/Float32MultiArray.h"
 
 /**
   @namespace pandora_vision
@@ -82,6 +88,9 @@ namespace pandora_vision_hole
        **/
       static cv::Mat convertPointCloudMessageToImage(
         const PointCloudPtr& pointCloud, const int& encoding);
+
+      static void toROSDepthMsg(
+        const sensor_msgs::PointCloud2& cloud, sensor_msgs::Image& msg);
 
       /**
         @brief Constructs a pandora_vision_msgs/CandidateHolesVectorMsg

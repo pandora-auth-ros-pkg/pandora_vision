@@ -96,11 +96,13 @@ namespace pandora_vision_hole
     private_nh_ = this->getPrivateNodeHandle();
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
 
+    nh_.param("thermal", thermalMode_, true);
+    nh_.param("rgbdt", rgbdtMode_, true);
+    private_nh_.param<std::string>("converted_frame", converted_frame_, "/kinect_rgb_optical_frame");
+
     // Acquire the names of topics which the thermal node will be having
     // transactionary affairs with
     getTopicNames();
-
-    private_nh_.param<std::string>("converted_frame", converted_frame_, "/kinect_rgb_optical_frame");
 
     // Get the values of the variables used to match the final holeConveyors
     ImageMatching::variableSetUp(private_nh_, &xThermal_, &yThermal_,
@@ -116,14 +118,20 @@ namespace pandora_vision_hole
     thermalOutputReceiverSubscriber_ = nh_.subscribe(thermalOutputReceiverTopic_, 1,
       &Thermal::inputThermalOutputReceiverCallback, this);
 
-    // Advertise the candidate holes found by the thermal node to hole fusion
-    candidateHolesPublisher_ = nh_.advertise
-      < ::pandora_vision_hole::CandidateHolesVectorMsg >(candidateHolesTopic_, 1);
+    if (rgbdtMode_)
+    {
+      // Advertise the candidate holes found by the thermal node to hole fusion
+      candidateHolesPublisher_ = nh_.advertise
+        < ::pandora_vision_hole::CandidateHolesVectorMsg >(candidateHolesTopic_, 1);
+    }
 
-    // Advertise the candidate holes found by the thermal
-    // node to thermal cropper
-    thermalToCropperPublisher_ = nh_.advertise
-      <pandora_vision_msgs::EnhancedImage>(thermalToCropperTopic_, 1);
+    if (thermalMode_)
+    {
+      // Advertise the candidate holes found by the thermal
+      // node to thermal cropper
+      thermalToCropperPublisher_ = nh_.advertise
+        <pandora_vision_msgs::EnhancedImage>(thermalToCropperTopic_, 1);
+    }
 
     // Advertise the candidate holes found by the thermal node to hole fusion
     dataFusionThermalPublisher_ = nh_.advertise
@@ -273,19 +281,35 @@ namespace pandora_vision_hole
     // "thermal", "hole" or "thermalhole".
     if (receiverInfoConstPtr_->data == "thermal")
     {
-      // Publish the candidate holes message to thermal cropper node
-      publishToThermalCropper(thermalCandidateHolesMsg);
+      if (thermalMode_)
+        // Publish the candidate holes message to thermal cropper node
+        publishToThermalCropper(thermalCandidateHolesMsg);
+      else
+        NODELET_ERROR("[%s] ReceiverInfo is 'thermal' while 'thermal' mode is not on!",
+            nodeName_.c_str());
     }
     else if (receiverInfoConstPtr_->data == "hole")
     {
-      // Publish the candidate holes message to hole fusion node
-      candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+      if (rgbdtMode_)
+        // Publish the candidate holes message to hole fusion node
+        candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+      else
+        NODELET_ERROR("[%s] ReceiverInfo is 'hole' while 'rgbdt' mode is not on!",
+            nodeName_.c_str());
     }
     else if (receiverInfoConstPtr_->data == "thermalhole")
     {
-      // Publish to both thermal cropper and hole fusion nodes
-      publishToThermalCropper(thermalCandidateHolesMsg);
-      candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+      if (thermalMode_)
+        // Publish to both thermal cropper and hole fusion nodes
+        publishToThermalCropper(thermalCandidateHolesMsg);
+      else
+        NODELET_ERROR("[%s] ReceiverInfo is 'thermalhole' while 'thermal' mode is not on!",
+            nodeName_.c_str());
+      if (rgbdtMode_)
+        candidateHolesPublisher_.publish(thermalCandidateHolesMsg);
+      else
+        NODELET_ERROR("[%s] ReceiverInfo is 'thermalhole' while 'rgbdt' mode is not on!",
+            nodeName_.c_str());
     }
     else
     {
@@ -413,7 +437,7 @@ namespace pandora_vision_hole
         maxx = hole.verticesX[jj] > maxx ? hole.verticesX[jj] : maxx;
       }
       for (int jj = 0; jj < hole.verticesY.size(); ++jj) {
-        miny = hole.verticesY[jj] < miny ? hole.verticesY[jj] : minx;
+        miny = hole.verticesY[jj] < miny ? hole.verticesY[jj] : miny;
         maxy = hole.verticesY[jj] > maxy ? hole.verticesY[jj] : maxy;
       }
       roi.width = maxx - minx;
@@ -443,20 +467,26 @@ namespace pandora_vision_hole
       NODELET_FATAL("[%s] Could not find thermal output receiver topic", nodeName_.c_str());
       ROS_BREAK();
     }
-    if (!private_nh_.getParam("published_topics/candidate_holes_topic", candidateHolesTopic_))
+    if (rgbdtMode_)
     {
-      NODELET_FATAL("[%s] Could not find candidate holes topic", nodeName_.c_str());
-      ROS_BREAK();
+      if (!private_nh_.getParam("published_topics/candidate_holes_topic", candidateHolesTopic_))
+      {
+        NODELET_FATAL("[%s] Could not find candidate holes topic", nodeName_.c_str());
+        ROS_BREAK();
+      }
     }
     if (!private_nh_.getParam("published_topics/thermal_data_fusion_topic", dataFusionThermalTopic_))
     {
       NODELET_FATAL("[%s] Could not find thermal data fusion topic", nodeName_.c_str());
       ROS_BREAK();
     }
-    if (!private_nh_.getParam("published_topics/thermal_to_cropper_topic", thermalToCropperTopic_))
+    if (thermalMode_)
     {
-      NODELET_FATAL("[%s] Could not find thermal to cropper topic", nodeName_.c_str());
-      ROS_BREAK();
+      if (!private_nh_.getParam("published_topics/thermal_to_cropper_topic", thermalToCropperTopic_))
+      {
+        NODELET_FATAL("[%s] Could not find thermal to cropper topic", nodeName_.c_str());
+        ROS_BREAK();
+      }
     }
     if (!private_nh_.getParam("published_topics/processor_log_topic", processEndTopic_))
     {

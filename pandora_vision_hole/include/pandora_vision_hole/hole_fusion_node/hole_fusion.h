@@ -250,7 +250,8 @@ namespace pandora_vision_hole
 
       // The mode in which the package is running
       // If true Thermal process is enabled, else only Rgb-D.
-      bool mode_;
+      bool rgbdMode_;
+      bool rgbdtMode_;
 
       // The rgb received by the RGB node
       cv::Mat rgbImage_;
