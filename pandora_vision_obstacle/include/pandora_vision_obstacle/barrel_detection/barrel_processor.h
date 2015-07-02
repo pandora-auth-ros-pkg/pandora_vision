@@ -61,13 +61,45 @@ namespace pandora_vision_obstacle
       virtual void
       initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-      void getSymmetryObject(const cv::Mat& inputImage, cv::Rect* roi);
+      /**
+        @brief Find symmetric object inside frame
+        @description Use fast symmetry detector algorith to find symmetric objects
+        based on edges extracted from Canny edge detector  
+        @param[in] inputImage [const cv::Mat&] Input depth image where we do the 
+        processing
+        @param[in out] roi [cv::Rect*] Here the candidate roi is stored
+        @param[in] symmetricStartPoint [cv::Point*] The symmetry's line start point
+        @param[in] symmetricEndPoint [cv::Point*] The symmetry's line end point
+        @return void
+       **/
+      void getSymmetryObject(
+          const cv::Mat& inputImage,
+          cv::Rect* roi,
+          cv::Point* symmetricStartPoint,
+          cv::Point* symmetricEndPoint);
 
-      void validateRoi(
-          const cv::Mat& rgbImage, 
+      /**
+        @brief Validates the ROI for barrel existence
+        @description Keep homogeneous regions in rgb, with decreasing depth
+        from left to the symmetry line and increasing depth from symmetry line to
+        right, with almost identical variation between two parts and with almost stable 
+        depth through the symmetry line. 
+        @param[in] rgbImage [const cv::Mat&] The rgb image
+        @param[in] depthImage [const cv::Mat&] The depth image
+        @param[in] rectRoi [const cv::Rect&] The ROI to validate
+        @param[in] symmetricStartPoint [const cv::Point&] The symmetry's line start point
+        @param[in] symmetricEndPoint [const cv::Point&] The symmetry's line end point
+        @return [bool] A flag indicating roi's validity
+       **/
+      bool validateRoi(
+          const cv::Mat& rgbImage,
           const cv::Mat& depthImage,
           const cv::Rect& rectRoi,
-          bool* valid);
+          const cv::Point& symmetricStartPoint,
+          const cv::Point& symmetricEndPoint);
+
+      float findDepthDistance(const cv::Mat& depthImage,
+          const cv::Rect& roi);
 
       virtual bool process(const ImagesStampedConstPtr& input,
           const POIsStampedPtr& output);

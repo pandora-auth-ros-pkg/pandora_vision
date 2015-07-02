@@ -50,6 +50,17 @@ namespace pandora_vision_obstacle
     sensor_processor::Processor<ImagesStamped, POIsStamped>()
   {}
  
+  /**
+    @brief Find symmetric object inside frame
+    @description Use fast symmetry detector algorith to find symmetric objects
+    based on edges extracted from Canny edge detector  
+    @param[in] inputImage [const cv::Mat&] Input depth image where we do the 
+    processing
+    @param[in out] roi [cv::Rect*] Here the candidate roi is stored
+    @param[in] symmetricStartPoint [cv::Point*] The symmetry's line start point
+    @param[in] symmetricEndPoint [cv::Point*] The symmetry's line end point
+    @return void
+   **/
   void BarrelProcessor::getSymmetryObject(
       const cv::Mat& inputImage,
       cv::Rect* roi,
@@ -187,7 +198,20 @@ namespace pandora_vision_obstacle
     }
   }
 
-  void BarrelProcessor::validateRoi(
+  /**
+    @brief Validates the ROI for barrel existence
+    @description Keep homogeneous regions in rgb, with decreasing depth
+    from left to the symmetry line and increasing depth from symmetry line to
+    right, with almost identical variation between two parts and with almost stable 
+    depth through the symmetry line. 
+    @param[in] rgbImage [const cv::Mat&] The rgb image
+    @param[in] depthImage [const cv::Mat&] The depth image
+    @param[in] rectRoi [const cv::Rect&] The ROI to validate
+    @param[in] symmetricStartPoint [const cv::Point&] The symmetry's line start point
+    @param[in] symmetricEndPoint [const cv::Point&] The symmetry's line end point
+    @return [bool] A flag indicating roi's validity
+   **/
+  bool BarrelProcessor::validateRoi(
       const cv::Mat& rgbImage,
       const cv::Mat& depthImage,
       const cv::Rect& rectRoi,
@@ -316,6 +340,23 @@ namespace pandora_vision_obstacle
     }
   }
 
+  float BarrelProcessor::findDepthDistance(const cv::Mat& depthImage,
+      const cv::Rect& roi)
+  {
+    float depth = 0.0f;
+
+    for (size_t row = 1; row < roi.height; row ++)
+    {
+    for (size_t col = 1; col < roi.width; col ++)
+    {
+      /// Find depth distance
+      depth += depthImage.at<float>(row, col);
+    }
+    }
+    depth /= static_cast<float>(roi.area());
+    return depth;
+  }
+
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
       const POIsStampedPtr& output)
   {
@@ -332,7 +373,10 @@ namespace pandora_vision_obstacle
     cv::Point symmetricStartPoint;
     cv::Point symmetricEndPoint;
     getSymmetryObject(input->getDepthImage(), &roi, &symmetricStartPoint, &symmetricEndPoint);
-    if (roi.area() > 0)
+    bool valid;
+    // Find the depth distance of the soft obstacle
+    float depthDistance;
+    if (roi.area() > 0.1)
     {
       bool valid = true;
       validateRoi(input->getRgbImage(), input->getDepthImage(),
@@ -342,6 +386,8 @@ namespace pandora_vision_obstacle
       std::vector<POIPtr> pois;
       if (valid)
       {
+        depthDistance = findDepthDistance(input->getDepthImage(), roi);
+        ObstaclePOIPtr poi(new ObstaclePOI);
         poi->setPoint(cv::Point((roi.x + roi.width / 2),
               (roi.y + roi.height / 2)));
         poi->setWidth(roi.width);
@@ -350,8 +396,8 @@ namespace pandora_vision_obstacle
         poi->setProbability(1.0);
         poi->setType(pandora_vision_msgs::ObstacleAlert::BARREL);
 
-        // poi->setDepth(depthDistance);
-        pois.push_back(poi);
+        poi->setDepth(depthDistance);
+        output->pois.push_back(poi);
         ROS_INFO("barrel found");
       }
 
