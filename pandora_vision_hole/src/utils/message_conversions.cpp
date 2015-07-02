@@ -251,7 +251,7 @@ namespace pandora_vision_hole
   void MessageConversions::createCandidateHolesVectorMessage(
     const HolesConveyor& conveyor,
     const cv::Mat& image,
-    ::pandora_vision_hole::CandidateHolesVectorMsgPtr candidateHolesVectorMsg,
+    const ::pandora_vision_hole::CandidateHolesVectorMsgPtr& candidateHolesVectorMsg,
     const std::string& encoding,
     const sensor_msgs::Image& msg)
   {

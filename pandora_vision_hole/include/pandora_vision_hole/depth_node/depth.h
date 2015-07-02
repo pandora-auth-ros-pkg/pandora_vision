@@ -64,82 +64,86 @@ namespace pandora_vision_hole
    **/
   class Depth : public nodelet::Nodelet
   {
-    private:
-      // The ROS node handle
-      ros::NodeHandle nodeHandle_;
+   public:
+    /**
+      @brief Default constructor. Initiates communications, loads parameters.
+      @return void
+      **/
+    Depth();
 
-      // The private ROS node handle
-      ros::NodeHandle privateNodeHandle_;
+    /**
+      @brief Default destructor
+      @return void
+      **/
+    virtual
+    ~Depth();
 
-      // Subscriber of Kinect point cloud
-      ros::Subscriber depthImageSubscriber_;
+    virtual void
+    onInit();
 
-      // The name of the topic where the depth image is acquired from
-      std::string depthImageTopic_;
+    /**
+      @brief Callback for the depth image received by the synchronizer node.
 
-      // ROS publisher for the candidate holes
-      ros::Publisher candidateHolesPublisher_;
+      The depth image message received by the synchronizer node is unpacked
+      in a cv::Mat image and stripped of its noise.
+      Holes are then located inside this image and information about them,
+      along with the denoised image, is then sent to the hole fusion node
+      @param msg [const sensor_msgs::Image&] The depth image message
+      @return void
+      **/
+    void
+    inputDepthImageCallback(const sensor_msgs::ImageConstPtr& msg);
 
-      // The name of the topic where the candidate holes that the depth node
-      // locates are published to
-      std::string candidateHolesTopic_;
-
-      // Node's distinct name
-      std::string nodeName_;
-
-      // The dynamic reconfigure (depth) parameters' server
-      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig> >
-        serverPtr_;
-
-      // The dynamic reconfigure (depth) parameters' callback
-      dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig>
-        ::CallbackType f;
-
-      /**
-        @brief Callback for the depth image received by the synchronizer node.
-
-        The depth image message received by the synchronizer node is unpacked
-        in a cv::Mat image and stripped of its noise.
-        Holes are then located inside this image and information about them,
-        along with the denoised image, is then sent to the hole fusion node
-        @param msg [const sensor_msgs::Image&] The depth image message
-        @return void
-       **/
-      void inputDepthImageCallback(const sensor_msgs::Image& msg);
-
-      /**
-        @brief Acquires topics' names needed to be subscribed to and advertise
-        to by the depth node
-        @param void
-        @return void
-       **/
-      void getTopicNames();
-
-      /**
-        @brief The function called when a parameter is changed
-        @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
-        @param[in] level [const uint32_t]
-        @return void
-       **/
-      void parametersCallback(
-        const ::pandora_vision_hole::depth_cfgConfig& config,
+    /**
+      @brief The function called when a parameter is changed
+      @param[in] config [const pandora_vision_hole::depth_cfgConfig&]
+      @param[in] level [const uint32_t]
+      @return void
+      **/
+    void
+    parametersCallback(const ::pandora_vision_hole::depth_cfgConfig& config,
         const uint32_t& level);
 
+   private:
+    /**
+      @brief Acquires topics' names needed to be subscribed to and advertise
+      to by the depth node
+      @param void
+      @return void
+      **/
+    void
+    getTopicNames();
 
-    public:
-      /**
-        @brief Default constructor. Initiates communications, loads parameters.
-        @return void
-       **/
-      Depth(void);
+   private:
+    // The ROS node handle
+    ros::NodeHandle nodeHandle_;
 
-      /**
-        @brief Default destructor
-        @return void
-       **/
-      virtual ~Depth(void);
+    // The private ROS node handle
+    ros::NodeHandle privateNodeHandle_;
 
-      virtual void onInit();
+    // Subscriber of Kinect point cloud
+    ros::Subscriber depthImageSubscriber_;
+
+    // The name of the topic where the depth image is acquired from
+    std::string depthImageTopic_;
+
+    // ROS publisher for the candidate holes
+    ros::Publisher candidateHolesPublisher_;
+
+    // The name of the topic where the candidate holes that the depth node
+    // locates are published to
+    std::string candidateHolesTopic_;
+
+    // Node's distinct name
+    std::string nodeName_;
+
+    // The dynamic reconfigure (depth) parameters' server
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig> >
+      serverPtr_;
+
+    // The dynamic reconfigure (depth) parameters' callback
+    dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig>
+      ::CallbackType f;
   };
 
 }  // namespace pandora_vision_hole

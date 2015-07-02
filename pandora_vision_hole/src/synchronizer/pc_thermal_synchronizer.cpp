@@ -47,6 +47,7 @@
 #include "distrib_msgs/FlirLeptonMsg.h"
 
 #include "utils/defines.h"
+#include "utils/noise_elimination.h"
 #include "synchronizer/pc_thermal_synchronizer.h"
 
 PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::PcThermalSynchronizer, nodelet::Nodelet)
@@ -430,18 +431,29 @@ namespace pandora_vision_hole
     rgbImageMessagePtr->header = pcMsg->header;
 
     // Extract the depth image from the point cloud
-    // cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
-    //   pointCloud, CV_32FC1);
-    // cv_bridge::CvImagePtr depthImageConverter(new cv_bridge::CvImage());
-    // depthImageConverter->header = pcMsg->header;
-    // depthImageConverter->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-    // depthImageConverter->image = depthImage;
-    // depthImageMessagePtr = depthImageConverter->toImageMsg();
+    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
+        pcPtr, CV_32FC1);
+    cv::Mat interpolatedDepthImage;
+    NoiseElimination::performNoiseElimination(depthImage, &interpolatedDepthImage);
 
-    depthImageMessagePtr = boost::make_shared<sensor_msgs::Image>();
-    MessageConversions::toROSDepthMsg(*pcMsg, *depthImageMessagePtr);
-    depthImageMessagePtr->header = pcMsg->header;
+#ifdef DEBUG_SHOW
+    if (Parameters::Debug::show_depth_image)
+    {
+      Visualization::showScaled("Interpolated Depth image", interpolatedDepthImage, 1);
+    }
+#endif
+
+    cv_bridge::CvImagePtr depthImageConverter(new cv_bridge::CvImage());
+    depthImageConverter->header = pcMsg->header;
+    depthImageConverter->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+    depthImageConverter->image = interpolatedDepthImage;
+    depthImageMessagePtr = depthImageConverter->toImageMsg();
+
+    // depthImageMessagePtr = boost::make_shared<sensor_msgs::Image>();
+    // MessageConversions::toROSDepthMsg(*pcMsg, *depthImageMessagePtr);
+    // depthImageMessagePtr->header = pcMsg->header;
   }
+
 
   /**
     @brief Variables regarding the point cloud are needed to be set in

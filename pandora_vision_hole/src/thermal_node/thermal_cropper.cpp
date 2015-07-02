@@ -207,56 +207,20 @@ namespace pandora_vision_hole
     enhancedImagePtr->header = thermalEnhancedImageConstPtr_->header;
     enhancedImagePtr->thermalImage = thermalEnhancedImageConstPtr_->thermalImage;
     enhancedImagePtr->rgbImage = *rgbImageConstPtr_;
-    enhancedImagePtr->depthImage = interpolateDepthImage(*depthImageConstPtr_);
-    enhancedImagePtr->isDepth = isDepth_;
+    enhancedImagePtr->depthImage = *depthImageConstPtr_;
+    if (Parameters::Depth::interpolation_method == 0)
+    {
+      enhancedImagePtr->isDepth = true;
+    }
+    else
+    {
+      enhancedImagePtr->isDepth = false;
+    }
     enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
 
     processorLogPtr->success = true;
     processEndPublisher_.publish(processorLogPtr);
     victimThermalPublisher_.publish(enhancedImagePtr);
-  }
-
-  /**
-    @brief The enhanced messages that is sent to victim node must have the
-    interpolated depth image. So this fuction must extract the image from the
-    message, interpolate it and convert it again to sensor_msgs/Image type.
-    @param[in] depthImage [const sensor_msgs::Image&] The input depthImage
-    @return [sensor_msgs::Image]
-    The interpolated depth image.
-   **/
-  sensor_msgs::Image ThermalCropper::interpolateDepthImage(
-      const sensor_msgs::Image& depthImage)
-  {
-    cv::Mat depthImageMat;
-
-    // Obtain the depth image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be CV_32FC1.
-    MessageConversions::extractImageFromMessage(depthImage, &depthImageMat,
-      sensor_msgs::image_encodings::TYPE_32FC1);
-
-    // Perform noise elimination on the depth image.
-    // Every pixel of noise will be eliminated and substituted by an
-    // appropriate non-zero value, depending on the amount of noise present
-    // in the input depth image.
-    cv::Mat interpolatedDepthImage;
-    NoiseElimination::performNoiseElimination(depthImageMat,
-      &interpolatedDepthImage);
-
-    // When the depth image is interpolated, we also acquire the interpolation
-    // method. Check if depth analysis is applicable.
-    if (Parameters::Depth::interpolation_method == 0)
-    {
-      isDepth_ = true;
-    }
-    else
-    {
-      isDepth_ = false;
-    }
-
-    // Convert the cv::Mat to sensor_msgs/Image type
-    return MessageConversions::convertImageToMessage(interpolatedDepthImage,
-      sensor_msgs::image_encodings::TYPE_32FC1, depthImage);
   }
 
   /**

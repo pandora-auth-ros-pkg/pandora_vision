@@ -81,8 +81,6 @@ namespace pandora_vision_hole
     return temp;
   }
 
-
-
   cv::Mat Wavelets::convRows(const cv::Mat& in,
     const std::vector<float>& kernel)
   {
@@ -119,8 +117,6 @@ namespace pandora_vision_hole
     return temp;
   }
 
-
-
   cv::Mat Wavelets::getLowLow(const cv::Mat& in,
     const std::vector<float>& kernel)
   {
@@ -155,7 +151,6 @@ namespace pandora_vision_hole
 
     return tempy000;
   }
-
 
   /**
     @brief Returns a CV_32FC1 image containing the low-low part of the

@@ -58,6 +58,7 @@
 #include "pandora_vision_msgs/IndexedThermal.h"
 
 #include "utils/message_conversions.h"
+#include "utils/noise_elimination.h"
 #include "utils/defines.h"
 #include "utils/parameters.h"
 
@@ -182,7 +183,6 @@ namespace pandora_vision_hole
         sensor_msgs::ImagePtr& rgbImageMessagePtr,
         sensor_msgs::ImagePtr& depthImageMessagePtr,
         const sensor_msgs::PointCloud2ConstPtr& pcMsg);
-
 
     /**
       @brief Variables regarding the point cloud are needed to be set in

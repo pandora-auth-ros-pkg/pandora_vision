@@ -141,17 +141,6 @@ namespace pandora_vision_hole
     void
     unlockThermalProcedure();
 
-    /**
-      @brief The enhanced messages that is sent to victim node must have the
-      interpolated depth image. So this fuction must extract the image from the
-      message, interpolate it and convert it again to sensor_msgs/Image type.
-      @param[in] depthImage [const sensor_msgs::Image&] The input depthImage
-      @return [sensor_msgs::Image]
-      The interpolated depth image.
-      **/
-    sensor_msgs::Image
-    interpolateDepthImage(const sensor_msgs::Image& depthImage);
-
    private:
     //!< Node's distinct name
     std::string nodeName_;
@@ -202,8 +191,6 @@ namespace pandora_vision_hole
     ros::Publisher processEndPublisher_;
     // The name of the topic where the process end will be advertised
     std::string processEndTopic_;
-
-    bool isDepth_;
   };
 
 }  // namespace pandora_vision_hole
