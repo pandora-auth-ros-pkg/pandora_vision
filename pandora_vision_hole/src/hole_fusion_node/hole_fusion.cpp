@@ -62,8 +62,8 @@ namespace pandora_vision_hole
    **/
   HoleFusion::~HoleFusion(void)
   {
+    NODELET_INFO("[%s] Terminated", nodeName_.c_str());
     ros::shutdown();
-     NODELET_INFO("[%s] Terminated", nodeName_.c_str());
   }
 
   void HoleFusion::onInit()
@@ -262,9 +262,9 @@ namespace pandora_vision_hole
 
     std::string modes;
     if (rgbdMode_)
-      modes += "rgbd "
+      modes += "rgbd ";
     if (rgbdtMode_)
-      modes += "rgbdt "
+      modes += "rgbdt ";
     NODELET_INFO("[%s] Initiated %s", nodeName_.c_str(), modes.c_str());
   }
 

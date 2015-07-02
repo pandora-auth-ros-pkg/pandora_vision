@@ -148,9 +148,9 @@ namespace pandora_vision_hole
 
     std::string modes;
     if (rgbdtMode_)
-      modes += "rgbdt "
+      modes += "rgbdt ";
     if (thermalMode_)
-      modes += "thermal"
+      modes += "thermal";
     NODELET_INFO("[%s] Initiated %s", nodeName_.c_str(), modes.c_str());
   }
 
