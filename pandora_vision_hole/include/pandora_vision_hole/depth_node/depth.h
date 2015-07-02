@@ -47,7 +47,6 @@
 #include "utils/wavelets.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 
-
 /**
   @namespace pandora_vision
   @brief The main namespace for PANDORA vision
