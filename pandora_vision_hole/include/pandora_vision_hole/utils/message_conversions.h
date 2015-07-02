@@ -87,7 +87,7 @@ namespace pandora_vision_hole
         @return cv::Mat The output image
        **/
       static cv::Mat convertPointCloudMessageToImage(
-        const PointCloudPtr& pointCloud, const int& encoding);
+        const PointCloudConstPtr& pointCloud, int encoding);
 
       static void toROSDepthMsg(
         const sensor_msgs::PointCloud2& cloud, sensor_msgs::Image& msg);

@@ -106,7 +106,7 @@ namespace pandora_vision_hole
       ros::NodeHandle validityNodeHandle_;
 
       // The image_transport nodehandle
-      image_transport::ImageTransport imageTransport_;
+      boost::shared_ptr< image_transport::ImageTransport > imageTransportPtr_;
 
       // Node's distinct name
       std::string nodeName_;
@@ -344,7 +344,7 @@ namespace pandora_vision_hole
         @return void
        **/
       void depthCandidateHolesCallback(
-          const ::pandora_vision_hole::CandidateHolesVectorMsg&
+          const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr&
           depthCandidateHolesVector);
 
       /**
@@ -363,7 +363,7 @@ namespace pandora_vision_hole
         @return void
        **/
       void thermalCandidateHolesCallback(
-        const ::pandora_vision_hole::CandidateHolesVectorMsg&
+        const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr&
         thermalCandidateHolesVector);
 
       /**
@@ -520,7 +520,7 @@ namespace pandora_vision_hole
         the point cloud
         @return void
        **/
-      void pointCloudCallback(const PointCloudPtr& msg);
+      void pointCloudCallback(const PointCloudConstPtr& msg);
 
       /**
         @brief Implements a strategy to combine information from both
@@ -607,7 +607,7 @@ namespace pandora_vision_hole
         @return void
        **/
       void rgbCandidateHolesCallback(
-          const ::pandora_vision_hole::CandidateHolesVectorMsg&
+          const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr&
           rgbCandidateHolesVector);
 
       /**

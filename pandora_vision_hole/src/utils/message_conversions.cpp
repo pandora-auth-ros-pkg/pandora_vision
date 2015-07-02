@@ -84,7 +84,7 @@ namespace pandora_vision_hole
     @return cv::Mat The output image
    **/
   cv::Mat MessageConversions::convertPointCloudMessageToImage(
-    const PointCloudPtr& pointCloud, const int& encoding)
+    const PointCloudConstPtr& pointCloud, int encoding)
   {
     #ifdef DEBUG_TIME
     Timer::start("convertPointCloudMessageToImage");

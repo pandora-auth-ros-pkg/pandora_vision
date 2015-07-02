@@ -53,7 +53,7 @@ namespace pandora_vision_hole
   /**
     @brief The HoleFusion constructor
    **/
-  HoleFusion::HoleFusion(void):imageTransport_(nodeHandle_)
+  HoleFusion::HoleFusion(void)
   {
   }
 
@@ -82,6 +82,8 @@ namespace pandora_vision_hole
     filtersThresholdsNodeHandle_ =  ros::NodeHandle(private_namespace + "/thresholds");
     validityNodeHandle_ = ros::NodeHandle(private_namespace + "/validation");
     debugNodeHandle_ = ros::NodeHandle(private_namespace + "/debug");
+
+    imageTransportPtr_.reset( new image_transport::ImageTransport(nodeHandle_) );
 
     serverDebugPtr_.reset(new dynamic_reconfigure::Server<
         ::pandora_vision_hole::debug_cfgConfig>(debugNodeHandle_));
@@ -149,7 +151,7 @@ namespace pandora_vision_hole
     // Command line usage:
     // image_view /pandora_vision/hole_detector/debug_valid_holes_image
     // _image_transport:=compressed
-    debugValidHolesPublisher_ = imageTransport_.advertise
+    debugValidHolesPublisher_ = imageTransportPtr_->advertise
       (debugValidHolesTopic_, 1, true);
 
     // Advertise the topic that information about holes found by the Depth
@@ -157,7 +159,7 @@ namespace pandora_vision_hole
     // Command line usage:
     // image_view /pandora_vision/hole_detector/debug_respective_holes_image
     // _image_transport:=compressed
-    debugRespectiveHolesPublisher_ = imageTransport_.advertise
+    debugRespectiveHolesPublisher_ = imageTransportPtr_->advertise
       (debugRespectiveHolesTopic_, 1, true);
 
     // Advertise the topic that the enhanced image
@@ -289,8 +291,7 @@ namespace pandora_vision_hole
     @return void
    **/
   void HoleFusion::depthCandidateHolesCallback(
-    const ::pandora_vision_hole::CandidateHolesVectorMsg&
-    depthCandidateHolesVector)
+    const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr& depthCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
     Timer::start("depthCandidateHolesCallback", "", true);
@@ -303,7 +304,7 @@ namespace pandora_vision_hole
     HolesConveyorUtils::clear(&depthHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(depthCandidateHolesVector,
+    MessageConversions::unpackMessage(*depthCandidateHolesVector,
       &depthHolesConveyor_,
       &interpolatedDepthImage_,
       Parameters::Image::image_representation_method,
@@ -348,7 +349,7 @@ namespace pandora_vision_hole
     @return void
    **/
   void HoleFusion::thermalCandidateHolesCallback(
-    const ::pandora_vision_hole::CandidateHolesVectorMsg&
+    const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr&
     thermalCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
@@ -362,7 +363,7 @@ namespace pandora_vision_hole
     HolesConveyorUtils::clear(&thermalHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(thermalCandidateHolesVector,
+    MessageConversions::unpackMessage(*thermalCandidateHolesVector,
       &thermalHolesConveyor_,
       &thermalImage_, 0,
       sensor_msgs::image_encodings::TYPE_8UC1,
@@ -1160,7 +1161,7 @@ namespace pandora_vision_hole
     the point cloud
     @return void
    **/
-  void HoleFusion::pointCloudCallback(const PointCloudPtr& msg)
+  void HoleFusion::pointCloudCallback(const PointCloudConstPtr& msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("pointCloudCallback", "", true);
@@ -1197,7 +1198,7 @@ namespace pandora_vision_hole
 
     // Extract the depth image from the point cloud message
     cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
-      msg, CV_32FC1);
+        msg, CV_32FC1);
 
     // Interpolate the depthImage
     cv::Mat interpolatedDepthImage;
@@ -1932,7 +1933,7 @@ namespace pandora_vision_hole
     @return void
    **/
   void HoleFusion::rgbCandidateHolesCallback(
-    const ::pandora_vision_hole::CandidateHolesVectorMsg&
+    const ::pandora_vision_hole::CandidateHolesVectorMsgConstPtr&
     rgbCandidateHolesVector)
   {
     #ifdef DEBUG_TIME
@@ -1946,7 +1947,7 @@ namespace pandora_vision_hole
     HolesConveyorUtils::clear(&rgbHolesConveyor_);
 
     // Unpack the message
-    MessageConversions::unpackMessage(rgbCandidateHolesVector,
+    MessageConversions::unpackMessage(*rgbCandidateHolesVector,
       &rgbHolesConveyor_,
       &rgbImage_,
       Parameters::Image::image_representation_method,
