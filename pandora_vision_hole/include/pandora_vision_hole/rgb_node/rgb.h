@@ -38,6 +38,9 @@
 #ifndef PANDORA_VISION_HOLE_RGB_NODE_RGB_H
 #define PANDORA_VISION_HOLE_RGB_NODE_RGB_H
 
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
+
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "utils/message_conversions.h"
 #include "utils/histogram.h"
@@ -58,15 +61,22 @@ namespace pandora_vision_hole
     @brief Provides functionalities for locating holes via
     analysis of a RGB image
    **/
-  class Rgb
+  class Rgb : public nodelet::Nodelet
+
   {
     private:
       // The NodeHandle
       ros::NodeHandle nodeHandle_;
 
+      // The private ROS node handle
+      ros::NodeHandle privateNodeHandle_;
+
       // The ROS subscriber for acquisition of the RGB image through the
       // depth sensor
       ros::Subscriber rgbImageSubscriber_;
+
+      // Node's distinct name
+      std::string nodeName_;
 
       // The name of the topic where the rgb image is acquired from
       std::string rgbImageTopic_;
@@ -82,8 +92,8 @@ namespace pandora_vision_hole
       std::vector<cv::MatND> wallsHistogram_;
 
       // The dynamic reconfigure (RGB) parameters' server
-      dynamic_reconfigure::Server< ::pandora_vision_hole::rgb_cfgConfig >
-        server;
+       boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::rgb_cfgConfig> >
+        serverPtr_;
 
       // The dynamic reconfigure (RGB) parameters' callback
       dynamic_reconfigure::Server< ::pandora_vision_hole::rgb_cfgConfig >::
@@ -125,7 +135,9 @@ namespace pandora_vision_hole
       Rgb();
 
       // The destructor
-      ~Rgb();
+      virtual ~Rgb();
+
+      virtual void onInit();
   };
 
 }  // namespace pandora_vision_hole

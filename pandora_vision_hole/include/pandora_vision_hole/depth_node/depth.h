@@ -38,6 +38,9 @@
 #ifndef PANDORA_VISION_HOLE_DEPTH_NODE_DEPTH_H
 #define PANDORA_VISION_HOLE_DEPTH_NODE_DEPTH_H
 
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
+
 #include "depth_node/hole_detector.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
@@ -59,11 +62,14 @@ namespace pandora_vision_hole
     @brief Provides functionalities for locating holes via
     analysis of a depth image
    **/
-  class Depth
+  class Depth : public nodelet::Nodelet
   {
     private:
       // The ROS node handle
       ros::NodeHandle nodeHandle_;
+
+      // The private ROS node handle
+      ros::NodeHandle privateNodeHandle_;
 
       // Subscriber of Kinect point cloud
       ros::Subscriber depthImageSubscriber_;
@@ -78,9 +84,12 @@ namespace pandora_vision_hole
       // locates are published to
       std::string candidateHolesTopic_;
 
+      // Node's distinct name
+      std::string nodeName_;
+
       // The dynamic reconfigure (depth) parameters' server
-      dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig>
-        server;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig> >
+        serverPtr_;
 
       // The dynamic reconfigure (depth) parameters' callback
       dynamic_reconfigure::Server< ::pandora_vision_hole::depth_cfgConfig>
@@ -128,7 +137,9 @@ namespace pandora_vision_hole
         @brief Default destructor
         @return void
        **/
-      ~Depth(void);
+      virtual ~Depth(void);
+
+      virtual void onInit();
   };
 
 }  // namespace pandora_vision_hole

@@ -51,18 +51,7 @@ namespace pandora_vision_hole
   /**
     @brief The HoleFusion constructor
    **/
-  HoleFusion::HoleFusion(void): generalNodeHandle_("~/general"),
-                                debugNodeHandle_("~/debug"),
-                                filtersPriorityNodeHandle_("~/priority"),
-                                filtersThresholdsNodeHandle_("~/thresholds"),
-                                validityNodeHandle_("~/validation"),
-                                serverDebug(debugNodeHandle_),
-                                serverFiltersPriority(filtersPriorityNodeHandle_),
-                                serverFiltersThresholds(filtersThresholdsNodeHandle_),
-                                serverGeneral(generalNodeHandle_),
-                                serverValidity(validityNodeHandle_),
-                                imageTransport_(nodeHandle_)
-
+  HoleFusion::HoleFusion(void):imageTransport_(nodeHandle_)
   {
   }
 
@@ -81,6 +70,28 @@ namespace pandora_vision_hole
     nodeHandle_ = this->getNodeHandle();
     privateNodeHandle_ = this->getPrivateNodeHandle();
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
+
+    std::string private_namespace = privateNodeHandle_.getNamespace();
+    generalNodeHandle_ = ros::NodeHandle(private_namespace + "/general");
+    filtersPriorityNodeHandle_ =  ros::NodeHandle(private_namespace + "/priority");
+    filtersThresholdsNodeHandle_ =  ros::NodeHandle(private_namespace + "/thresholds");
+    validityNodeHandle_ = ros::NodeHandle(private_namespace + "/validation");
+    debugNodeHandle_ = ros::NodeHandle(private_namespace + "/debug");
+
+    serverDebugPtr_.reset(new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::debug_cfgConfig>(debugNodeHandle_));
+
+    serverFiltersPriorityPtr_.reset( new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::filters_priority_cfgConfig>(filtersPriorityNodeHandle_));
+
+    serverFiltersThresholdsPtr_.reset(new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::filters_thresholds_cfgConfig>(filtersThresholdsNodeHandle_));
+
+    serverGeneralPtr_.reset( new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::general_cfgConfig>(generalNodeHandle_) );
+
+    serverValidityPtr_.reset( new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::validity_cfgConfig>(validityNodeHandle_));
 
     // Initialize the parent frame_id to an empty string
     parent_frame_id_ = "";
@@ -195,30 +206,31 @@ namespace pandora_vision_hole
       &HoleFusion::thermalCandidateHolesCallback, this);
 
     // The dynamic reconfigure server for debugging parameters
-    serverDebug.setCallback(
+    serverDebugPtr_->setCallback(
       boost::bind(&HoleFusion::parametersCallbackDebug,
         this, _1, _2));
 
     // The dynamic reconfigure server for parameters pertaining to the
-    // priority of filters' execution
-    serverFiltersPriority.setCallback(
+    // priority of filters' execution:w
+    //
+    serverFiltersPriorityPtr_->setCallback(
       boost::bind(&HoleFusion::parametersCallbackFiltersPriority,
         this, _1, _2));
 
     // The dynamic reconfigure server for parameters pertaining to
     // thresholds of filters
-    serverFiltersThresholds.setCallback(
+    serverFiltersThresholdsPtr_->setCallback(
       boost::bind(&HoleFusion::parametersCallbackFiltersThresholds,
         this, _1, _2));
 
     // The dynamic reconfigure server for general parameters
-    serverGeneral.setCallback(
+    serverGeneralPtr_->setCallback(
       boost::bind(&HoleFusion::parametersCallbackGeneral,
         this, _1, _2));
 
     // The dynamic reconfigure server for parameters pertaining to
     // the validity of holes
-    serverValidity.setCallback(
+    serverValidityPtr_->setCallback(
       boost::bind(&HoleFusion::parametersCallbackValidity,
         this, _1, _2));
 
@@ -246,7 +258,7 @@ namespace pandora_vision_hole
    **/
   void HoleFusion::completeTransition(void)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Detector] : Transition Complete");
+    NODELET_INFO("[%s]Transition Complete", nodeName_.c_str());
   }
 
 
@@ -274,7 +286,7 @@ namespace pandora_vision_hole
     Timer::start("depthCandidateHolesCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Depth callback");
+    NODELET_INFO("[%s] Hole Fusion Depth callback", nodeName_.c_str());
 
     // Clear the current depthHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -775,7 +787,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::debug_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+    NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     ////////////////////////////// Debug parameters ////////////////////////////
 
@@ -848,7 +860,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::filters_priority_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+    NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     // Depth / Area
     Parameters::Filters::DepthArea::priority =
@@ -912,7 +924,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::filters_thresholds_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+    NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     // Depth / Area
     Parameters::Filters::DepthArea::threshold =
@@ -976,7 +988,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::general_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+    NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     // Threshold parameters
     Parameters::Edge::denoised_edges_threshold =
@@ -1121,7 +1133,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::validity_cfgConfig &config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Hole Fusion node] Parameters callback called");
+     NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     // The validation process
     Parameters::HoleFusion::Validation::validation_process = 1;
@@ -1160,7 +1172,7 @@ namespace pandora_vision_hole
     Timer::start("pointCloudCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Point Cloud callback");
+    NODELET_INFO("[%s] Hole Fusion Point Cloud callback", nodeName_.c_str());
 
     // Convert the header of the point cloud message
     std_msgs::Header header;
@@ -1260,7 +1272,7 @@ namespace pandora_vision_hole
    **/
   void HoleFusion::processCandidateHoles()
   {
-    ROS_INFO_NAMED(PKG_NAME, "Processing candidate holes");
+    NODELET_INFO("[%s] Processing candidate holes", nodeName_.c_str());
 
     #ifdef DEBUG_TIME
     Timer::start("processCandidateHoles", "", true);
@@ -1437,14 +1449,15 @@ namespace pandora_vision_hole
     {
       for (int i = 0; i < preValidatedHoles.size(); i++)
       {
-        ROS_INFO_NAMED(PKG_NAME, "--------------------------------");
-        ROS_INFO_NAMED(PKG_NAME, "Keypoint [%f %f]",
+        NODELET_INFO("[%s]--------------------------------", nodeName_.c_str());
+        NODELET_INFO("[%s] Keypoint [%f %f]",
+          nodeName_.c_str(),
           preValidatedHoles.holes[i].keypoint.pt.x,
           preValidatedHoles.holes[i].keypoint.pt.y);
 
         for (int j = 0; j < probabilitiesVector2D.size(); j++)
         {
-          ROS_INFO_STREAM_NAMED(PKG_NAME,
+          NODELET_INFO_STREAM(nodeName_.c_str() <<
             "filter j = " << j << ": " <<probabilitiesVector2D[j][i]);
         }
       }
@@ -1932,7 +1945,7 @@ namespace pandora_vision_hole
     Timer::start("rgbCandidateHolesCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion RGB callback");
+    NODELET_INFO("[%s] Hole Fusion RGB callback", nodeName_.c_str());
 
     // Clear the current rgbHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -2091,7 +2104,7 @@ namespace pandora_vision_hole
     // is set to on
     if (isOn_)
     {
-      ROS_INFO_NAMED(PKG_NAME, "Sending unlock message");
+      NODELET_INFO("[%s] Sending unlock message", nodeName_.c_str());
 
       std_msgs::EmptyPtr unlockMsgPtr (new std_msgs::Empty);
       unlockPublisher_.publish(unlockMsgPtr);

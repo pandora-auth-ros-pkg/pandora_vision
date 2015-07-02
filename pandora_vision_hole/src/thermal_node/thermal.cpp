@@ -244,7 +244,7 @@ namespace pandora_vision_hole
     findHolesProbability(
       &holes, imageConstPtr_->temperatures, Parameters::Thermal::probability_method);
 
-    // TODO Delegate to Frame Matcher
+    // TODO(@anyone): Delegate to Frame Matcher
     // Convert the conveyors information so it can match with the
     //  Rgb and Depth images. If its outside of limits discart that conveyor.
     ImageMatching::conveyorMatching(&holes, xThermal_, yThermal_, cX_, cY_, angle_);
@@ -264,7 +264,7 @@ namespace pandora_vision_hole
     // from the synchronizer node
     MessageConversions::createCandidateHolesVectorMessage(holes,
       thermalSensorImage,
-      thermalCandidateHolesMsg.get(),
+      thermalCandidateHolesMsg,
       sensor_msgs::image_encodings::TYPE_8UC1,
       imageConstPtr_->thermalImage);
 

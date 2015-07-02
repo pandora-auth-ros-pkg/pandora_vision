@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias, Angelos Triantafyllidis
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_SYNCHRONIZER_NODE_PC_THERMAL_SYNCHRONIZER_H
-#define PANDORA_VISION_HOLE_SYNCHRONIZER_NODE_PC_THERMAL_SYNCHRONIZER_H
+#ifndef PANDORA_VISION_HOLE_SYNCHRONIZER_PC_THERMAL_SYNCHRONIZER_H
+#define PANDORA_VISION_HOLE_SYNCHRONIZER_PC_THERMAL_SYNCHRONIZER_H
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -290,4 +290,4 @@ namespace pandora_vision_hole
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_SYNCHRONIZER_NODE_PC_THERMAL_SYNCHRONIZER_H
+#endif  // PANDORA_VISION_HOLE_SYNCHRONIZER_PC_THERMAL_SYNCHRONIZER_H

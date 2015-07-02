@@ -9,8 +9,8 @@ add_dependencies(${PROJECT_NAME}_depth
   ${catkin_EXPORTED_TARGETS})
 
 
-add_executable(depth_node depth_node.cpp)
-target_link_libraries(depth_node
-  ${PROJECT_NAME}_depth
-  ${catkin_LIBRARIES})
+# add_executable(depth_node depth_node.cpp)
+# target_link_libraries(depth_node
+  # ${PROJECT_NAME}_depth
+  # ${catkin_LIBRARIES})
 

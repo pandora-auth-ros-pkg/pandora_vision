@@ -34,8 +34,13 @@
  *
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
 
 #include "depth_node/depth.h"
+
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Depth, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -51,6 +56,25 @@ namespace pandora_vision_hole
    **/
   Depth::Depth(void)
   {
+  }
+
+  /**
+    @brief Default destructor
+    @return void
+   **/
+  Depth::~Depth(void)
+  {
+    NODELET_INFO("[%s] Terminated", nodeName_.c_str());
+  }
+
+  void Depth::onInit()
+  {
+    nodeHandle_ = this->getNodeHandle();
+    privateNodeHandle_ = this->getPrivateNodeHandle();
+    nodeName_ = boost::to_upper_copy<std::string>(this->getName());
+    serverPtr_.reset(new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::depth_cfgConfig>(privateNodeHandle_));
+
     // Acquire the names of topics which the depth node will be having
     // transactionary affairs with
     getTopicNames();
@@ -66,20 +90,9 @@ namespace pandora_vision_hole
       candidateHolesTopic_, 1);
 
     // The dynamic reconfigure (depth) parameter's callback
-    server.setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));
+    serverPtr_->setCallback(boost::bind(&Depth::parametersCallback, this, _1, _2));
 
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Initiated");
-  }
-
-
-
-  /**
-    @brief Default destructor
-    @return void
-   **/
-  Depth::~Depth(void)
-  {
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Terminated");
+    NODELET_INFO("[%s] Initiated", nodeName_.c_str());
   }
 
 
@@ -100,7 +113,7 @@ namespace pandora_vision_hole
     Timer::start("inputDepthImageCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Depth node callback");
+    NODELET_INFO("[%s] callback", nodeName_.c_str());
 
     // Obtain the depth image. Since the image is in a format of
     // sensor_msgs::Image, it has to be transformed into a cv format in order
@@ -150,19 +163,20 @@ namespace pandora_vision_hole
     HolesConveyor holes = HoleDetector::findHoles(interpolatedDepthImage);
 
     // Create the candidate holes message
-    ::pandora_vision_hole::CandidateHolesVectorMsg depthCandidateHolesMsg;
+    ::pandora_vision_hole::CandidateHolesVectorMsgPtr
+      depthCandidateHolesMsgPtr(new ::pandora_vision_hole::CandidateHolesVectorMsg);
 
     // Pack information about holes found and the interpolated depth image
     // inside a message.
     // This message will be published to and received by the hole fusion node
     MessageConversions::createCandidateHolesVectorMessage(holes,
       interpolatedDepthImageSent,
-      &depthCandidateHolesMsg,
+      depthCandidateHolesMsgPtr,
       sensor_msgs::image_encodings::TYPE_32FC1,
       msg);
 
     // Publish the candidate holes message
-    candidateHolesPublisher_.publish(depthCandidateHolesMsg);
+    candidateHolesPublisher_.publish(depthCandidateHolesMsgPtr);
 
     #ifdef DEBUG_TIME
     Timer::tick("inputDepthImageCallback");
@@ -182,48 +196,25 @@ namespace pandora_vision_hole
    **/
   void Depth::getTopicNames()
   {
-    // The namespace dictated in the launch file
-    std::string ns = nodeHandle_.getNamespace();
-
-    // Read the name of the topic from where the depth node acquires the
+     // Read the name of the topic from where the depth node acquires the
     // unadulterated depth image and store it in a private member variable
-    if (nodeHandle_.getParam(
-        ns + "/depth_node/subscribed_topics/depth_image_topic",
+    if (!privateNodeHandle_.getParam("subscribed_topics/depth_image_topic",
         depthImageTopic_))
     {
-      // Make the topic's name absolute
-      depthImageTopic_ = ns + "/" + depthImageTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "[Depth Node] Subscribed to the input depth image");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "[Depth Node] Could not find topic depth_image_topic");
+       NODELET_FATAL("[%s] Could not find topic depth_image_topic", nodeName_.c_str());
+      ROS_BREAK();
     }
 
     // Read the name of the topic to which the depth node will be publishing
     // information about the candidate holes found and store it in a private
     // member variable
-    if (nodeHandle_.getParam(
-        ns + "/depth_node/published_topics/candidate_holes_topic",
+    if (!privateNodeHandle_.getParam("published_topics/candidate_holes_topic",
         candidateHolesTopic_))
     {
-      // Make the topic's name absolute
-      candidateHolesTopic_ = ns + "/" + candidateHolesTopic_;
-
-      ROS_INFO_NAMED(PKG_NAME,
-        "[Depth Node] Advertising to the candidate holes topic");
-    }
-    else
-    {
-      ROS_ERROR_NAMED(PKG_NAME,
-        "[Depth Node] Could not find topic candidate_holes_topic");
+      NODELET_FATAL("[%s] Could not find topic candidate_holes_topic", nodeName_.c_str());
+      ROS_BREAK();
     }
   }
-
-
 
   /**
     @brief The function called when a parameter is changed
@@ -235,7 +226,7 @@ namespace pandora_vision_hole
     const ::pandora_vision_hole::depth_cfgConfig& config,
     const uint32_t& level)
   {
-    ROS_INFO_NAMED(PKG_NAME, "[Depth node] Parameters callback called");
+    NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
 
     //////////////////// Blob detection - specific parameters //////////////////
 

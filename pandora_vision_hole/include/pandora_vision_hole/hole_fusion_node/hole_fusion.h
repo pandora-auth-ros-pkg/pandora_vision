@@ -284,8 +284,8 @@ namespace pandora_vision_hole
       bool isOn_;
 
       // The dynamic reconfigure server for debugging parameters
-      dynamic_reconfigure::Server< ::pandora_vision_hole::
-        debug_cfgConfig > serverDebug;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
+        debug_cfgConfig > > serverDebugPtr_;
 
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::
@@ -293,8 +293,8 @@ namespace pandora_vision_hole
 
       // The dynamic reconfigure server for parameters pertaining to the
       // prioriority of filters' execution
-      dynamic_reconfigure::Server< ::pandora_vision_hole::
-        filters_priority_cfgConfig > serverFiltersPriority;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
+        filters_priority_cfgConfig > > serverFiltersPriorityPtr_;
 
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::
@@ -302,16 +302,16 @@ namespace pandora_vision_hole
 
       // The dynamic reconfigure server for parameters pertaining to
       // thresholds of filters
-      dynamic_reconfigure::Server< ::pandora_vision_hole::
-        filters_thresholds_cfgConfig > serverFiltersThresholds;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
+        filters_thresholds_cfgConfig > > serverFiltersThresholdsPtr_;
 
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::
         filters_thresholds_cfgConfig >::CallbackType f_filters_thresholds;
 
       // The dynamic reconfigure server for general parameters
-      dynamic_reconfigure::Server< ::pandora_vision_hole::
-        general_cfgConfig > serverGeneral;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
+        general_cfgConfig > > serverGeneralPtr_;
 
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::
@@ -319,8 +319,8 @@ namespace pandora_vision_hole
 
       // The dynamic reconfigure server for parameters pertaining to
       // the validity of holes
-      dynamic_reconfigure::Server< ::pandora_vision_hole::
-        validity_cfgConfig > serverValidity;
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
+        validity_cfgConfig > > serverValidityPtr_;
 
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::

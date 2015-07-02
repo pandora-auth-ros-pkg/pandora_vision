@@ -31,4 +31,20 @@
       </description>
     </class>
   </library>
+  <library path="lib/libpandora_vision_hole_rgb">
+    <class name="pandora_vision_hole/rgb"
+        type="pandora_vision::pandora_vision_hole::Rgb" base_class_type="nodelet::Nodelet">
+      <description>
+        Rgb processing nodelet
+      </description>
+    </class>
+  </library>
+  <library path="lib/libpandora_vision_hole_depth">
+    <class name="pandora_vision_hole/depth"
+        type="pandora_vision::pandora_vision_hole::Depth" base_class_type="nodelet::Nodelet">
+      <description>
+        Rgb processing nodelet
+      </description>
+    </class>
+  </library>
 </class_libraries>

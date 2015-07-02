@@ -9,8 +9,8 @@ add_dependencies(${PROJECT_NAME}_rgb
   ${catkin_EXPORTED_TARGETS})
 
 
-add_executable(rgb_node rgb_node.cpp)
-target_link_libraries(rgb_node
-  ${PROJECT_NAME}_rgb
-  ${catkin_LIBRARIES})
+# add_executable(rgb_node rgb_node.cpp)
+# target_link_libraries(rgb_node
+  # ${PROJECT_NAME}_rgb
+  # ${catkin_LIBRARIES})
 

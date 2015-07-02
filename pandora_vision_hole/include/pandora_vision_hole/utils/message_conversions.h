@@ -117,7 +117,7 @@ namespace pandora_vision_hole
       static void createCandidateHolesVectorMessage(
         const HolesConveyor& conveyor,
         const cv::Mat& image,
-        ::pandora_vision_hole::CandidateHolesVectorMsg* candidateHolesVectorMsg,
+        ::pandora_vision_hole::CandidateHolesVectorMsgPtr candidateHolesVectorMsg,
         const std::string& encoding,
         const sensor_msgs::Image& msg);
 

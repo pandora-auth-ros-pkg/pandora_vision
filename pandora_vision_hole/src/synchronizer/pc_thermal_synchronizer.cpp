@@ -434,29 +434,29 @@ namespace pandora_vision_hole
   PcThermalSynchronizer::
   getSimulationInfo()
   {
-    /* // Read "simulating" from the nodehandle */
-    // if (!private_nh_.getParam("simulating", simulating_))
-    // {
-      // NODELET_FATAL(
-        // "[%s] Simulating mode failed to be read", nodeName_.c_str());
-      // ROS_BREAK();
-    // }
+    // Read "simulating" from the nodehandle
+    /* if (!private_nh_.getParam("simulating", simulating_))
+    {
+      NODELET_FATAL(
+        "[%s] Simulating mode failed to be read", nodeName_.c_str());
+      ROS_BREAK();
+    } */
 
-    // // Read "height" from the nodehandle
-    // if (!private_nh_.getParam("height", Parameters::Image::HEIGHT))
-    // {
-      // NODELET_FATAL(
-        // "[%s] Input dimension height failed to be read", nodeName_.c_str());
-      // ROS_BREAK();
-    // }
+    // Read "height" from the nodehandle
+    /* if (!private_nh_.getParam("height", Parameters::Image::HEIGHT))
+    {
+      NODELET_FATAL(
+        "[%s] Input dimension height failed to be read", nodeName_.c_str());
+      ROS_BREAK();
+    } */
 
-    // // Read "width" from the nodehandle
-    // if (!private_nh_.getParam("width", Parameters::Image::WIDTH))
-    // {
-      // NODELET_FATAL(
-        // "[%s] Input dimension width failed to be read", nodeName_.c_str());
-      // ROS_BREAK();
-    /* } */
+    // Read "width" from the nodehandle
+    /* if (!private_nh_.getParam("width", Parameters::Image::WIDTH))
+    {
+      NODELET_FATAL(
+        "[%s] Input dimension width failed to be read", nodeName_.c_str());
+      ROS_BREAK();
+    }    */
   }
 
   /**
@@ -488,7 +488,7 @@ namespace pandora_vision_hole
     // This variable indicates the mode in which Hole-Package is running
     // If is set to true -> Rgb-D-T mode
     // Else Rgb-D mode
-    if (!nh_.getParam("/hole_detector/thermal", thermalMode_)) 
+    if (!nh_.getParam("/hole_detector/thermal", thermalMode_))
     {
       NODELET_FATAL("[%s] Could not find Packages Mode", nodeName_.c_str());
       ROS_BREAK();

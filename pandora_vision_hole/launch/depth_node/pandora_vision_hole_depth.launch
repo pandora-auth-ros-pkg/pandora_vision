@@ -1,13 +1,9 @@
 <launch>
- <arg name="namespace" default="/pandora_vision/pandora_vision_hole" />
+  <arg name="nodelet_manager" default="/kinect/kinect_nodelet_manager" />
 
-  <node name="depth_node"
-      type="depth_node"
-      pkg="pandora_vision_hole"
-      respawn="False"
-      ns="$(arg namespace)">
+  <node pkg="nodelet" type="nodelet" name="depth"
+    args="load pandora_vision_hole/depth $(arg nodelet_manager)" output="screen" >
     <rosparam file="$(find pandora_vision_hole)/cfg/depth_node_cfg/depth_node_topics.yaml"
-          command="load" />
+              command="load" />
   </node>
 </launch>
-
