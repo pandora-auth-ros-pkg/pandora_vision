@@ -34,6 +34,7 @@
 *
 * Authors: Despoina Paschalidou, Alexandros Philotheou
 *********************************************************************/
+
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
@@ -53,19 +54,21 @@ namespace pandora_vision_hole
   /**
     @brief Constructor
   **/
-  Rgb::Rgb()
-  {
-  }
+  Rgb::
+  Rgb() {}
 
   /**
     @brief Destructor
    **/
-  Rgb::~Rgb()
+  Rgb::
+  ~Rgb()
   {
     NODELET_INFO("[%s] Terminated", nodeName_.c_str());
   }
 
-  void Rgb::onInit()
+  void
+  Rgb::
+  onInit()
   {
     nodeHandle_ = this->getNodeHandle();
     privateNodeHandle_ = this->getPrivateNodeHandle();
@@ -109,7 +112,9 @@ namespace pandora_vision_hole
     @param msg [const sensor_msgs::Image&] The rgb image message
     @return void
   **/
-  void Rgb::inputRgbImageCallback(const sensor_msgs::Image& msg)
+  void
+  Rgb::
+  inputRgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     #ifdef DEBUG_TIME
     Timer::start("inputRgbImageCallback", "", true);
@@ -121,7 +126,7 @@ namespace pandora_vision_hole
     // sensor_msgs::Image, it has to be transformed into a cv format in order
     // to be processed. Its cv format will be CV_8UC3.
     cv::Mat rgbImage;
-    MessageConversions::extractImageFromMessage(msg, &rgbImage,
+    MessageConversions::extractImageFromMessage(*msg, &rgbImage,
       sensor_msgs::image_encodings::BGR8);
 
     #ifdef DEBUG_SHOW
@@ -149,14 +154,15 @@ namespace pandora_vision_hole
 
     // Create the candidate holes message
     ::pandora_vision_hole::CandidateHolesVectorMsgPtr
-      rgbCandidateHolesMsgPtr(new ::pandora_vision_hole::CandidateHolesVectorMsg);
+      rgbCandidateHolesMsgPtr( new ::pandora_vision_hole::CandidateHolesVectorMsg );
 
     // Pack information about holes found and the rgb image inside a message.
     // This message will be published to and received by the hole fusion node
-    MessageConversions::createCandidateHolesVectorMessage(conveyor,
-      rgbImageSent,
-      rgbCandidateHolesMsgPtr,
-      sensor_msgs::image_encodings::TYPE_8UC3, msg);
+    MessageConversions::createCandidateHolesVectorMessage(
+        conveyor,
+        rgbImageSent,
+        rgbCandidateHolesMsgPtr,
+        sensor_msgs::image_encodings::TYPE_8UC3, *msg);
 
     // Publish the candidate holes message
     candidateHolesPublisher_.publish(rgbCandidateHolesMsgPtr);
@@ -167,15 +173,15 @@ namespace pandora_vision_hole
     #endif
   }
 
-
-
   /**
     @brief Acquires topics' names needed to be subscribed to and advertise
     to by the rgb node
     @param void
     @return void
    **/
-  void Rgb::getTopicNames()
+  void
+  Rgb::
+  getTopicNames()
   {
     // Read the name of the topic from where the rgb node acquires the
     // rgb image and store it in a private member variable
@@ -196,17 +202,17 @@ namespace pandora_vision_hole
     }
   }
 
-
-
   /**
     @brief The function called when a parameter is changed
     @param[in] config [const pandora_vision_hole::rgb_cfgConfig&]
     @param[in] level [const uint32_t]
     @return void
    **/
-  void Rgb::parametersCallback(
-    const ::pandora_vision_hole::rgb_cfgConfig& config,
-    const uint32_t& level)
+  void
+  Rgb::
+  parametersCallback(
+      const ::pandora_vision_hole::rgb_cfgConfig& config,
+      const uint32_t& level)
   {
     NODELET_INFO("[%s] Parameters callback called", nodeName_.c_str());
     //////////////////// Blob detection - specific parameters //////////////////

@@ -43,7 +43,7 @@
     <class name="pandora_vision_hole/depth"
         type="pandora_vision::pandora_vision_hole::Depth" base_class_type="nodelet::Nodelet">
       <description>
-        Rgb processing nodelet
+        Depth processing nodelet
       </description>
     </class>
   </library>
