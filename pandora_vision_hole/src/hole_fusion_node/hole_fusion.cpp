@@ -1168,9 +1168,9 @@ namespace pandora_vision_hole
    **/
   void HoleFusion::pointCloudCallback(const PointCloudConstPtr& msg)
   {
-    #ifdef DEBUG_TIME
+#ifdef DEBUG_TIME
     Timer::start("pointCloudCallback", "", true);
-    #endif
+#endif
 
     NODELET_INFO("[%s] Hole Fusion Point Cloud callback", nodeName_.c_str());
 

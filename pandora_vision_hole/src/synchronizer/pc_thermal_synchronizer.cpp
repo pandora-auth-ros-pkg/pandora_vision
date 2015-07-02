@@ -301,15 +301,15 @@ namespace pandora_vision_hole
   PcThermalSynchronizer::
   leaveSubscriptionToInputPointCloudCallback(const std_msgs::EmptyConstPtr& msg)
   {
-    if (rgbdMode_)
-    {
-      inputPointCloudSubscriber_.shutdown();
-    }
-    else if (rgbdtMode_ || thermalMode_)
+    if (rgbdtMode_ || thermalMode_)
     {
       // Shutdown the input thermal subscriber
       syncPointCloudSubscriberPtr_->unsubscribe();
       syncThermalCameraSubscriberPtr_->unsubscribe();
+    }
+    else if (rgbdMode_)
+    {
+      inputPointCloudSubscriber_.shutdown();
     }
   }
 
@@ -329,15 +329,15 @@ namespace pandora_vision_hole
   PcThermalSynchronizer::
   subscribeToInputPointCloudCallback(const std_msgs::EmptyConstPtr& msg)
   {
-    if (rgbdMode_)
-    {
-      inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
-          &PcThermalSynchronizer::inputPointCloudCallback, this);
-    }
-    else if (rgbdtMode_ || thermalMode_)
+    if (rgbdtMode_ || thermalMode_)
     {
       syncPointCloudSubscriberPtr_->subscribe();
       syncThermalCameraSubscriberPtr_->subscribe();
+    }
+    else if (rgbdMode_)
+    {
+      inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
+          &PcThermalSynchronizer::inputPointCloudCallback, this);
     }
   }
 
