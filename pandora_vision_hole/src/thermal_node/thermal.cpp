@@ -146,7 +146,12 @@ namespace pandora_vision_hole
     // The dynamic reconfigure (thermal) parameter's callback
     server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
 
-    NODELET_INFO("[%s] Initiated", nodeName_.c_str());
+    std::string modes;
+    if (rgbdtMode_)
+      modes += "rgbdt "
+    if (thermalMode_)
+      modes += "thermal"
+    NODELET_INFO("[%s] Initiated %s", nodeName_.c_str(), modes.c_str());
   }
 
   /**
@@ -212,8 +217,8 @@ namespace pandora_vision_hole
     //  Convert this
     //  information to cv::Mat in order to be processed.
     //  It's format will be CV_8UC1
-    cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat(imageConstPtr_->
-        temperatures);
+    cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat(
+        imageConstPtr_->temperatures);
 
     // Apply double threshold(up and down) in the temperature image.
     // The threshold is set by configuration

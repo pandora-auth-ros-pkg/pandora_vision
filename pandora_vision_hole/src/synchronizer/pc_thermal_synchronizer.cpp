@@ -202,7 +202,14 @@ namespace pandora_vision_hole
         <std_msgs::String>
         (thermalOutputReceiverTopic_, 1);
     }
-    NODELET_INFO("[%s] Initiated", nodeName_.c_str());
+    std::string modes;
+    if (rgbdMode_)
+      modes += "rgbd "
+    if (rgbdtMode_)
+      modes += "rgbdt "
+    if (thermalMode_)
+      modes += "thermal"
+    NODELET_INFO("[%s] Initiated %s", nodeName_.c_str(), modes.c_str());
   }
 
   void
@@ -211,6 +218,7 @@ namespace pandora_vision_hole
   {
     if (!holeFusionLocked_)
     {
+      NODELET_INFO("[%s] RGBD Callback", nodeName_.c_str());
       holeFusionLocked_ = true;
       std_msgs::StringPtr thermalIndex( new std_msgs::String );
       thermalIndex->data = thermalIndex->data + "hole";
@@ -221,7 +229,7 @@ namespace pandora_vision_hole
       synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
       synchronizedDepthImagePublisher_.publish(depthImageMessagePtr);
 
-      inputPointCloudSubscriber_.shutdown();
+      // inputPointCloudSubscriber_.shutdown();
     }
   }
 
@@ -247,6 +255,7 @@ namespace pandora_vision_hole
   {
     if (!thermalLocked_ || !holeFusionLocked_)
     {
+      NODELET_INFO("[%s] RGBDT Callback", nodeName_.c_str());
       std_msgs::StringPtr thermalIndex( new std_msgs::String );
       sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
       PointCloudPtr pointCloudPtr;
@@ -273,8 +282,8 @@ namespace pandora_vision_hole
       synchronizedThermalImagePublisher_.publish(thermalMsg);
       thermalOutputReceiverPublisher_.publish(thermalIndex);
 
-      syncPointCloudSubscriberPtr_->unsubscribe();
-      syncThermalCameraSubscriberPtr_->unsubscribe();
+      // syncPointCloudSubscriberPtr_->unsubscribe();
+      // syncThermalCameraSubscriberPtr_->unsubscribe();
     }
   }
 
@@ -322,8 +331,8 @@ namespace pandora_vision_hole
   {
     if (rgbdMode_)
     {
-    inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
-        &PcThermalSynchronizer::inputPointCloudCallback, this);
+      inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
+          &PcThermalSynchronizer::inputPointCloudCallback, this);
     }
     else if (rgbdtMode_ || thermalMode_)
     {
@@ -355,16 +364,16 @@ namespace pandora_vision_hole
   unlockHoleFusionCallback(const std_msgs::EmptyConstPtr& lockMsg)
   {
     holeFusionLocked_ = false;
-    if (rgbdtMode_ || thermalMode_)
-    {
-      syncPointCloudSubscriberPtr_->subscribe();
-      syncThermalCameraSubscriberPtr_->subscribe();
-    }
-    else if (rgbdMode_)
-    {
-      inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
-          &PcThermalSynchronizer::inputPointCloudCallback, this);
-    }
+    // if (rgbdtMode_ || thermalMode_)
+    // {
+    //   syncPointCloudSubscriberPtr_->subscribe();
+    //   syncThermalCameraSubscriberPtr_->subscribe();
+    // }
+    // else if (rgbdMode_)
+    // {
+    //   inputPointCloudSubscriber_ = nh_.subscribe(inputPointCloudTopic_, 1,
+    //       &PcThermalSynchronizer::inputPointCloudCallback, this);
+    // }
   }
 
   /**
@@ -379,11 +388,11 @@ namespace pandora_vision_hole
   unlockThermalCallback(const std_msgs::EmptyConstPtr& lockMsg)
   {
     thermalLocked_ = false;
-    if (rgbdtMode_ || thermalMode_)
-    {
-      syncPointCloudSubscriberPtr_->subscribe();
-      syncThermalCameraSubscriberPtr_->subscribe();
-    }
+    // if (rgbdtMode_ || thermalMode_)
+    // {
+    //   syncPointCloudSubscriberPtr_->subscribe();
+    //   syncThermalCameraSubscriberPtr_->subscribe();
+    // }
   }
 
   void

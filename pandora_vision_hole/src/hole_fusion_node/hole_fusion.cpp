@@ -260,7 +260,12 @@ namespace pandora_vision_hole
 
     clientInitialize();
 
-    NODELET_INFO("[%s] Initiated", nodeName_.c_str());
+    std::string modes;
+    if (rgbdMode_)
+      modes += "rgbd "
+    if (rgbdtMode_)
+      modes += "rgbdt "
+    NODELET_INFO("[%s] Initiated %s", nodeName_.c_str(), modes.c_str());
   }
 
   /**
