@@ -87,9 +87,9 @@ namespace thermal
   onInit()
   {
     // Take NodeHandlers from nodelet manager
-    nh_ = this->getNodeHandle();
-    private_nh_ = this->getPrivateNodeHandle();
-    nodeName_ = boost::to_upper_copy<std::string>(this->getName());
+    nh_ = this->getPublicNh();
+    private_nh_ = this->getPrivateNh();
+    nodeName_ = this->getNodeName();
 
     // Acquire the names of topics which the thermal_cropper node will be having
     // transactionary affairs with
@@ -106,6 +106,10 @@ namespace thermal
     depthImageSubscriber_ = nh_.subscribe(depthImageTopic_, 1,
       &ThermalCropper::inputDepthImageCallback, this);
     isDepthAvailable_ = false;
+
+    // Set the initial on/off state of the Hole Detector package to off
+    isOn_ = false;
+    publishingEnhancedHoles_ = false;
 
     // Advertise enhanced message to victim node
     victimThermalPublisher_ = nh_.advertise
@@ -125,7 +129,19 @@ namespace thermal
     // When the node starts from launch file dictates thermal procedure to start
     unlockThermalProcedure();
 
+    clientInitialize();
+
     NODELET_INFO("[%s] Initiated", nodeName_.c_str());
+  }
+
+  /**
+    @brief Completes the transition to a new state
+    @param void
+    @return void
+   **/
+  void ThermalCropper::completeTransition(void)
+  {
+    NODELET_INFO("[%s] Transition Complete", nodeName_.c_str());
   }
 
   /**
@@ -222,7 +238,10 @@ namespace thermal
     processorLogPtr->success = true;
     processorLogPtr->logInfo = "Finished";
     processEndPublisher_.publish(processorLogPtr);
-    victimThermalPublisher_.publish(enhancedImagePtr);
+    if(publishingEnhancedHoles_)
+    {
+      victimThermalPublisher_.publish(enhancedImagePtr);
+    }
   }
 
   /**
@@ -266,6 +285,60 @@ namespace thermal
   }
 
   /**
+    @brief The node's state manager.
+    @param[in] newState [const int&] The robot's new state
+    @return void
+   **/
+  void
+  ThermalCropper::
+  startTransition(int newState)
+  {
+    // The new on/off state of the Hole Detector package
+    bool toBeOn = (newState ==
+        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
+      || (newState ==
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
+      || (newState ==
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+
+    // off -> on
+    if (!isOn_ && toBeOn)
+    {
+      // The on/off state of the Hole Detector Package is off, so the
+      // synchronizer must be unlocked to start the thermal procedure
+      isOn_ = toBeOn;
+      unlockThermalProcedure();
+    }
+    // on -> off
+    else if (isOn_ && !toBeOn)
+    {
+      isOn_ = toBeOn;
+    }
+
+    // Shutdown or open publisher of enhanced images
+    if (toBeOn)
+    {
+      if (!publishingEnhancedHoles_)
+      {
+        NODELET_INFO("[%s] Publishes now enhanced images from holes", nodeName_.c_str());
+        publishingEnhancedHoles_ = true;
+        victimThermalPublisher_ = nh_.advertise
+          <pandora_vision_msgs::EnhancedImage>(victimThermalTopic_, 1);
+      }
+    }
+    else
+    {
+      if (publishingEnhancedHoles_)
+      {
+        NODELET_INFO("[%s] Stop publishing now enhanced images from holes", nodeName_.c_str());
+        publishingEnhancedHoles_ = false;
+        victimThermalPublisher_.shutdown();
+      }
+    }
+
+    transitionComplete(newState);
+  }
+  /**
     @brief Sends an empty message to dictate synchronizer node to unlock
     the thermal procedure.
     @param void
@@ -276,8 +349,11 @@ namespace thermal
   unlockThermalProcedure()
   {
     // Send message to synchronizer in order for thermal procedure to start.
-    std_msgs::EmptyPtr unlockThermalProcedure( new std_msgs::Empty );
-    unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
+    if (isOn_)
+    {
+      std_msgs::EmptyPtr unlockThermalProcedure( new std_msgs::Empty );
+      unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
+    }
   }
 
 }  // namespace thermal
