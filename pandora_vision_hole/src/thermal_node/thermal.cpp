@@ -52,6 +52,7 @@
 #include "pandora_vision_msgs/ThermalAlertVector.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "sensor_processor/ProcessorLogInfo.h"
+#include "pandora_vision_common/pandora_vision_interface/vision_exceptions.h"
 
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "pandora_vision_hole/CandidateHoleMsg.h"
@@ -333,7 +334,7 @@ namespace pandora_vision_hole
 
     if (!resultMsg->success)
     {
-      NODELET_DEBUG("[%s] Did not find any thermal alerts", nodeName_.c_str());
+      NODELET_WARN("[%s] Did not find any thermal alerts", nodeName_.c_str());
       return;
     }
 
@@ -378,7 +379,16 @@ namespace pandora_vision_hole
     if (poisStamped.pois.size() > 0)
     {
       pandora_common_msgs::GeneralAlertVector alertVector;
-      alertVector = alertConverter_.getGeneralAlertVector(nh_, poisStamped);
+      try
+      {
+        alertVector = alertConverter_.getGeneralAlertVector(nh_, poisStamped);
+      }
+      catch (const vision_config_error& ex)
+      {
+        NODELET_ERROR("[%s] Error in converting POIs to alerts: %s",
+            nodeName_.c_str(), ex.what());
+        return;
+      }
 
       // Fill the thermal message header to be sent
       thermalAlertVector->header = alertVector.header;
@@ -399,7 +409,7 @@ namespace pandora_vision_hole
     }
     else
     {
-      NODELET_DEBUG("[%s] Did not find thermal with high enough probability",
+      NODELET_WARN("[%s] Did not find thermal with high enough probability",
           nodeName_.c_str());
     }
 
