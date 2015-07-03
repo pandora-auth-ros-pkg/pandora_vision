@@ -144,7 +144,9 @@ namespace pandora_vision_hole
         processEndTopic_, 1, true);
 
     // The dynamic reconfigure (thermal) parameter's callback
-    server.setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
+    thermalReconfServerPtr_.reset( new dynamic_reconfigure::Server<
+        ::pandora_vision_hole::thermal_cfgConfig >(private_nh_) );
+    thermalReconfServerPtr_->setCallback(boost::bind(&Thermal::parametersCallback, this, _1, _2));
 
     std::string modes;
     if (rgbdtMode_)

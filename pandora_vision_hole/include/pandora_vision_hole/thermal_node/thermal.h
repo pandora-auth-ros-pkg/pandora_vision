@@ -222,8 +222,8 @@ namespace pandora_vision_hole
     double angle_;
 
     // The dynamic reconfigure (thermal) parameters' server
-    dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
-      server;
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig > >
+      thermalReconfServerPtr_;
 
     // The dynamic reconfigure (thermal) parameters' callback
     dynamic_reconfigure::Server< ::pandora_vision_hole::thermal_cfgConfig >
