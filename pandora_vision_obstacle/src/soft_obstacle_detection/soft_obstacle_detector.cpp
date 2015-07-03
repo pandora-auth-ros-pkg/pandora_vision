@@ -476,50 +476,55 @@ namespace pandora_vision
 
       // Examine whether the points of the bounding box have difference in depth
       // distance
+      Vec4iVectorPtr verticalLinesPtr = boost::make_shared< std::vector<cv::Vec4i> >(
+          verticalLines);
       bool sameDepth = findSameROIDepth(depthImage, fullFrameRect,
-          boost::make_shared< std::vector<cv::Vec4i> >(verticalLines));
+          verticalLinesPtr);
 
-      if (sameDepth)
+      if (verticalLinesPtr->size() > 2)
       {
-        // Detect bounding box that includes the new vertical lines
-        probability = detectROI(verticalLines, otsuImage->rows, roi);
-
-        // Find the new depth distance of the soft obstacle
-        depthDistance.clear();
-        depthDistance = findDepthDistance(depthImage, verticalLines,
-            *roi, level);
-      }
-
-      if (probability > 0.0f)
-      {
-        ROS_INFO("Soft Obstacle Detected!");
-
-        if (showROI_)
+        if (sameDepth)
         {
-          cv::Mat imageToShow = rgbImage.clone();
+          // Detect bounding box that includes the new vertical lines
+          probability = detectROI(*verticalLinesPtr, otsuImage->rows, roi);
 
-          cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
-              roi->width * pow(2, level), roi->height * pow(2, level));
-          cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
-
-          cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
-              imageToShow);
-          cv::waitKey(10);
+          // Find the new depth distance of the soft obstacle
+          depthDistance.clear();
+          depthDistance = findDepthDistance(depthImage, *verticalLinesPtr,
+              *roi, level);
         }
 
-        for (int ii = 0; ii < depthDistance.size(); ii++)
+        if (probability > 0.0f)
         {
-          ObstaclePOIPtr poi(new ObstaclePOI);
+          ROS_INFO("Soft Obstacle Detected!");
 
-          poi->setPoint(cv::Point(
-                (roi->x + (1 - (ii == 3)) * roi->width / pow(2, !(ii % 2))) * pow(2, level),
-                (roi->y + (1 - (ii == 0)) * roi->height / pow(2, ii % 2)) * pow(2, level)));
+          if (showROI_)
+          {
+            cv::Mat imageToShow = rgbImage.clone();
 
-          poi->setProbability(probability);
-          poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+            cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
+                roi->width * pow(2, level), roi->height * pow(2, level));
+            cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
 
-          poi->setDepth(depthDistance[ii]);
-          pois.push_back(poi);
+            cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
+                imageToShow);
+            cv::waitKey(10);
+          }
+
+          for (int ii = 0; ii < depthDistance.size(); ii++)
+          {
+            ObstaclePOIPtr poi(new ObstaclePOI);
+
+            poi->setPoint(cv::Point(
+                  (roi->x + (1 - (ii == 3)) * roi->width / pow(2, !(ii % 2))) * pow(2, level),
+                  (roi->y + (1 - (ii == 0)) * roi->height / pow(2, ii % 2)) * pow(2, level)));
+
+            poi->setProbability(probability);
+            poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
+
+            poi->setDepth(depthDistance[ii]);
+            pois.push_back(poi);
+          }
         }
       }
     }
