@@ -43,13 +43,13 @@ namespace pandora_vision
 {
   SoftObstacleProcessor::SoftObstacleProcessor(const std::string& ns,
     sensor_processor::Handler* handler) : sensor_processor::Processor<ImagesStamped,
-    POIsStamped>(ns, handler)
+    POIsStamped>(ns, handler), server(*this->accessProcessorNh())
   {
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
       this->accessProcessorNh()->getNamespace());
 
     detector_.reset(new SoftObstacleDetector(this->getName(),
-          *this->accessPublicNh()));
+          *this->accessProcessorNh()));
 
     server.setCallback(boost::bind(&SoftObstacleProcessor::parametersCallback,
         this, _1, _2));
