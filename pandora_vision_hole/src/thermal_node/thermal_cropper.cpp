@@ -141,6 +141,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputThermalRoiCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] Thermal callback", nodeName_.c_str());
     isThermalAvailable_ = true;
     thermalEnhancedImageConstPtr_ = msg;
 
@@ -154,6 +155,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputRgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] RGB callback", nodeName_.c_str());
     isRgbAvailable_ = true;
     rgbImageConstPtr_ = msg;
 
@@ -167,6 +169,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputDepthImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] Depth callback", nodeName_.c_str());
     isDepthAvailable_ = true;
     depthImageConstPtr_ = msg;
 
@@ -189,6 +192,8 @@ namespace pandora_vision_hole
     isRgbAvailable_ = false;
     isDepthAvailable_ = false;
     isThermalAvailable_ = false;
+
+    NODELET_INFO("[%s] Processing callback", nodeName_.c_str());
 
     unlockThermalProcedure();
 

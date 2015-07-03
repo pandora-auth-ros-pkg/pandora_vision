@@ -333,6 +333,7 @@ namespace pandora_vision_hole
     {
       syncPointCloudSubscriberPtr_->subscribe();
       syncThermalCameraSubscriberPtr_->subscribe();
+      synchronizerPtr_->init();
     }
     else if (rgbdMode_)
     {

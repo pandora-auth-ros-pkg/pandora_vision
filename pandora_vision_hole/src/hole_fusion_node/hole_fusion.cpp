@@ -302,7 +302,7 @@ namespace pandora_vision_hole
     Timer::start("depthCandidateHolesCallback", "", true);
     #endif
 
-    NODELET_INFO("[%s] Hole Fusion Depth callback", nodeName_.c_str());
+    NODELET_INFO("[%s] Depth callback", nodeName_.c_str());
 
     // Clear the current depthHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -361,7 +361,7 @@ namespace pandora_vision_hole
     Timer::start("thermalCandidateHolesCallback", "", true);
     #endif
 
-    ROS_INFO_NAMED(PKG_NAME, "Hole Fusion Thermal callback");
+    NODELET_INFO("[%s] Thermal callback", nodeName_.c_str());
 
     // Clear the current depthHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)
@@ -1172,7 +1172,7 @@ namespace pandora_vision_hole
     Timer::start("pointCloudCallback", "", true);
 #endif
 
-    NODELET_INFO("[%s] Hole Fusion Point Cloud callback", nodeName_.c_str());
+    NODELET_INFO("[%s] Point Cloud callback", nodeName_.c_str());
 
     // Convert the header of the point cloud message
     std_msgs::Header header;
@@ -1945,7 +1945,7 @@ namespace pandora_vision_hole
     Timer::start("rgbCandidateHolesCallback", "", true);
     #endif
 
-    NODELET_INFO("[%s] Hole Fusion RGB callback", nodeName_.c_str());
+    NODELET_INFO("[%s] RGB callback", nodeName_.c_str());
 
     // Clear the current rgbHolesConveyor struct
     // (or else keyPoints, rectangles and outlines accumulate)

@@ -206,43 +206,40 @@ namespace pandora_vision_hole
     Timer::start("inputThermalImageCallback", "", true);
 #endif
 
-    // Obtain the thermal image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be CV_8UC1.
-    cv::Mat thermalSensorImage;
-    MessageConversions::extractImageFromMessage(imageConstPtr_->thermalImage,
-      &thermalSensorImage, sensor_msgs::image_encodings::TYPE_8UC1);
-
-    //  Obtain the thermal message and extract the temperature information.
-    //  Convert this
-    //  information to cv::Mat in order to be processed.
-    //  It's format will be CV_8UC1
-    cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat(
-        imageConstPtr_->temperatures);
-
-    // Apply double threshold(up and down) in the temperature image.
-    // The threshold is set by configuration
-    cv::inRange(
-      thermalImage, cv::Scalar(Parameters::Thermal::low_temperature),
-      cv::Scalar(Parameters::Thermal::high_temperature), thermalImage);
-
-#ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_thermal_image)
-    {
-      Visualization::showScaled("Thermal image", thermalSensorImage, 1);
-    }
-#endif
-
     HolesConveyor holes;
     // Detection method = 0 --> process the binary image acquired from temperatures
     // Detection method = 1 --> process the sensor image acuired from sensor
     switch (Parameters::Thermal::detection_method)
     {
       case 0:
+        //  Obtain the thermal message and extract the temperature information.
+        //  Convert this
+        //  information to cv::Mat in order to be processed.
+        //  It's format will be CV_8UC1
+        cv::Mat thermalImage = MessageConversions::convertFloat32MultiArrayToMat(
+            imageConstPtr_->temperatures);
+        // Apply double threshold(up and down) in the temperature image.
+        // The threshold is set by configuration
+        cv::inRange(
+          thermalImage, cv::Scalar(Parameters::Thermal::low_temperature),
+          cv::Scalar(Parameters::Thermal::high_temperature), thermalImage);
         // Locate potential holes in the thermal image
         holes = HoleDetector::findHoles(thermalImage);
         break;
       case 1:
+        // Obtain the thermal image. Since the image is in a format of
+        // sensor_msgs::Image, it has to be transformed into a cv format in order
+        // to be processed. Its cv format will be CV_8UC1.
+        cv::Mat thermalSensorImage;
+        MessageConversions::extractImageFromMessage(imageConstPtr_->thermalImage,
+          &thermalSensorImage, sensor_msgs::image_encodings::TYPE_8UC1);
+
+#ifdef DEBUG_SHOW
+        if (Parameters::Debug::show_thermal_image)
+        {
+          Visualization::showScaled("Thermal image", thermalSensorImage, 1);
+        }
+#endif
         // Locate potential holes in the thermal image
         holes = HoleDetector::findHoles(thermalSensorImage);
         break;
