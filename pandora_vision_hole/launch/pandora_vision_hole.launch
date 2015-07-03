@@ -6,9 +6,9 @@
   <!-- Set this if we play with rgbdt hole -->
   <arg name="rgbdt" default="true" />
 
-  <param name="thermal" value="$(arg thermal)" />
-  <param name="rgbd" value="$(arg rgbd)" />
-  <param name="rgbdt" value="$(arg rgbdt)" />
+  <param name="thermal_mode" value="$(arg thermal)" />
+  <param name="rgbd_mode" value="$(arg rgbd)" />
+  <param name="rgbdt_mode" value="$(arg rgbdt)" />
 
   <group if="$(arg thermal)" >
     <include file="$(find pandora_vision_hole)/launch/synchronizer/pandora_pc_thermal_synchronizer.launch" />

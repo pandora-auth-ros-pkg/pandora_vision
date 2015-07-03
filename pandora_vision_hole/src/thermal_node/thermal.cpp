@@ -96,8 +96,8 @@ namespace pandora_vision_hole
     private_nh_ = this->getPrivateNodeHandle();
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
 
-    nh_.param("thermal", thermalMode_, true);
-    nh_.param("rgbdt", rgbdtMode_, true);
+    nh_.param("thermal_mode", thermalMode_, true);
+    nh_.param("rgbdt_mode", rgbdtMode_, true);
     private_nh_.param<std::string>("converted_frame", converted_frame_, "/kinect_rgb_optical_frame");
 
     // Acquire the names of topics which the thermal node will be having

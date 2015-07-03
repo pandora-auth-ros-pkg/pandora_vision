@@ -141,11 +141,11 @@ namespace pandora_vision_hole
 
       // The ROS publisher that will be used to publish the enhanced
       // image produced by this package
-      ros::Publisher enhancedImagesPublisher_;
+      // ros::Publisher enhancedImagesPublisher_;
 
       // The ROS publisher that will be used to publish the
       // interpolated depth iMAGE
-      ros::Publisher InterpolatedDepthImagePublisher_;
+      // ros::Publisher InterpolatedDepthImagePublisher_;
 
       // The name of the topic where the Hole Fusion node will publish
       // additional information, in respect to the valid holes topic,
@@ -154,11 +154,11 @@ namespace pandora_vision_hole
 
       // The name of the topic where the Hole Fusion node will publish
       // the enhanced Images
-      std::string enhancedImagesTopic_;
+      // std::string enhancedImagesTopic_;
 
       // The name of the topic where the Hole Fusion node will publish
       // the interpolated depth imaeg
-      std::string InterpolatedDepthImageTopic_;
+      // std::string InterpolatedDepthImageTopic_;
 
       // The ROS publisher that will be used to publish an image depicting
       // the keypoint, outline points and bounding rectangle of holes found
@@ -283,6 +283,7 @@ namespace pandora_vision_hole
 
       // The on/off state of the Hole Detector package
       bool isOn_;
+      bool publishingEnhancedHoles_;
 
       // The dynamic reconfigure server for debugging parameters
       boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_hole::
@@ -326,7 +327,6 @@ namespace pandora_vision_hole
       // The dynamic reconfigure callback type for the above server
       dynamic_reconfigure::Server< ::pandora_vision_hole::
         validity_cfgConfig >::CallbackType f_validity;
-
 
       /**
         @brief Callback for the candidate holes via the depth node.
@@ -563,13 +563,13 @@ namespace pandora_vision_hole
         @brief Publishes the Images' enhanced information.
         @return void
        **/
-      void publishEnhancedImage();
+      // void publishEnhancedImage();
 
       /**
         @brief Publishes the  interpolated depth Image.
         @return void
        **/
-      void publishInterpolatedDepthImage();
+      // void publishInterpolatedDepthImage();
 
       /**
         @brief Publishes an image showing holes found from the Depth node

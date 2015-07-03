@@ -87,9 +87,9 @@ namespace pandora_vision_hole
     private_nh_ = this->getPrivateNodeHandle();
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
 
-    nh_.param("thermal", thermalMode_, true);
-    nh_.param("rgbd", rgbdMode_, true);
-    nh_.param("rgbdt", rgbdtMode_, true);
+    nh_.param("thermal_mode", thermalMode_, true);
+    nh_.param("rgbd_mode", rgbdMode_, true);
+    nh_.param("rgbdt_mode", rgbdtMode_, true);
     private_nh_.param("simulating", simulating_, false);
 
     // The synchronizer node starts off in life locked, waiting for the
@@ -220,8 +220,6 @@ namespace pandora_vision_hole
     {
       NODELET_INFO("[%s] RGBD Callback", nodeName_.c_str());
       holeFusionLocked_ = true;
-      std_msgs::StringPtr thermalIndex( new std_msgs::String );
-      thermalIndex->data = thermalIndex->data + "hole";
       sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
       PointCloudPtr pointCloudPtr;
       initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
@@ -279,7 +277,11 @@ namespace pandora_vision_hole
 
       synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
       synchronizedDepthImagePublisher_.publish(depthImageMessagePtr);
-      synchronizedThermalImagePublisher_.publish(thermalMsg);
+
+      distrib_msgs::FlirLeptonMsg::Ptr thermalMsgPtr( new distrib_msgs::FlirLeptonMsg );
+      *thermalMsgPtr = *thermalMsg;
+
+      synchronizedThermalImagePublisher_.publish(thermalMsgPtr);
       thermalOutputReceiverPublisher_.publish(thermalIndex);
 
       // syncPointCloudSubscriberPtr_->unsubscribe();
