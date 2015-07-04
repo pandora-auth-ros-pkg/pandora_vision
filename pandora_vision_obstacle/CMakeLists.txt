@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     dynamic_reconfigure
     cv_bridge
     sensor_msgs
+    nav_msgs
     pandora_vision_msgs
     pandora_vision_common
     sensor_processor
@@ -31,6 +32,7 @@ catkin_package(
       dynamic_reconfigure
       cv_bridge
       sensor_msgs
+      nav_msgs
       pandora_vision_msgs
       pandora_vision_common
       sensor_processor
@@ -117,6 +119,64 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_handler
   ${PROJECT_NAME}_obstacle_postprocessor
   ${PROJECT_NAME}_soft_obstacle_processor
 )
+
+########################### hard obstacle preprocessor ################
+
+add_library(${PROJECT_NAME}_hard_obstacle_preprocessor
+  src/hard_obstacle_detection/hard_obstacle_preprocessor.cpp)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_preprocessor
+  ${catkin_LIBRARIES}
+)
+
+############################### hard obstacle postprocessor ##############################
+add_library(${PROJECT_NAME}_hard_obstacle_postprocessor
+  src/hard_obstacle_detection/hard_obstacle_postprocessor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_postprocessor
+  ${catkin_LIBRARIES}
+)
+
+############################### hard obstacle detector ##############################
+add_library(${PROJECT_NAME}_hard_obstacle_detector
+  src/hard_obstacle_detection/hard_obstacle_detector.cpp
+)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_detector
+  ${catkin_LIBRARIES}
+)
+
+############################### hard obstacle processor ##############################
+add_library(${PROJECT_NAME}_hard_obstacle_processor
+  src/hard_obstacle_detection/hard_obstacle_processor.cpp
+)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_hard_obstacle_detector
+)
+
+############################ hard obstacle handler ##############################
+add_library(${PROJECT_NAME}_hard_obstacle_handler
+  src/hard_obstacle_detection/hard_obstacle_handler.cpp
+)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_handler
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_hard_obstacle_preprocessor
+  ${PROJECT_NAME}_hard_obstacle_postprocessor
+  ${PROJECT_NAME}_hard_obstacle_processor
+)
+
+############################ hard obstacle node ##########################
+add_executable(${PROJECT_NAME}_hard_obstacle_node
+  src/hard_obstacle_detection/hard_obstacle_node.cpp
+)
+add_dependencies(${PROJECT_NAME}_hard_obstacle_node
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}_hard_obstacle_node
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_hard_obstacle_handler
+)
+
 
 ############################ barrel node ###############################
 add_executable(${PROJECT_NAME}_barrel_node
