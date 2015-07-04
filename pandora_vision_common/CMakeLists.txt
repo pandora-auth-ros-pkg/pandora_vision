@@ -57,5 +57,12 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
     include/**/*.h
     src/**/*.cpp
+    test/**/*.cpp
     )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
+
+##################################### Testing ##################################
+
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()

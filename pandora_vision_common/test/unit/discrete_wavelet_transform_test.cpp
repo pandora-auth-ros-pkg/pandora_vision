@@ -40,7 +40,7 @@
 #include <vector>
 #include <cmath>
 #include <gtest/gtest.h>
-#include "pandora_vision_obstacle/discrete_wavelet_transform.h"
+#include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
 
 namespace pandora_vision
 {

@@ -12,12 +12,12 @@ ${catkin_INCLUDE_DIRS})
 #                               Unit Tests                                     #
 ################################################################################
 
-catkin_add_gtest(soft_obstacle_detector_test
-  unit/soft_obstacle_detector_test.cpp
+catkin_add_gtest(discrete_wavelet_transform_test
+  unit/discrete_wavelet_transform_test.cpp
   )
-target_link_libraries(soft_obstacle_detector_test
+target_link_libraries(discrete_wavelet_transform_test
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_soft_obstacle_detector
+  ${PROJECT_NAME}_discrete_wavelet_transform
   gtest_main
   gtest
   )

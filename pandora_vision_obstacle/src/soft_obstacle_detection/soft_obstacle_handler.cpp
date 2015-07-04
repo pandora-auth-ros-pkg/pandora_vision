@@ -44,7 +44,6 @@ namespace pandora_vision
   SoftObstacleHandler::SoftObstacleHandler(const std::string& ns) :
     VisionHandler<ObstaclePreProcessor, SoftObstacleProcessor, ObstaclePostProcessor>(ns)
   {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_START_AUTONOMOUS);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
     activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SEMI_AUTONOMOUS);
