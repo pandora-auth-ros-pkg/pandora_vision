@@ -42,10 +42,10 @@
 #include <nodelet/nodelet.h>
 
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-#include "utils/message_conversions.h"
-#include "utils/histogram.h"
-#include "utils/parameters.h"
-#include "utils/wavelets.h"
+#include "rgb_node/utils/message_conversions.h"
+#include "rgb_node/utils/histogram.h"
+#include "rgb_node/utils/parameters.h"
+#include "rgb_node/utils/wavelets.h"
 #include "rgb_node/rgb_hole_detector.h"
 
 /**
@@ -55,6 +55,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @class Rgb
@@ -142,6 +144,7 @@ namespace pandora_vision_hole
       CallbackType f;
   };
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 

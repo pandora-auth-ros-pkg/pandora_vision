@@ -35,12 +35,12 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_EDGE_DETECTION_H
-#define PANDORA_VISION_HOLE_UTILS_EDGE_DETECTION_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_EDGE_DETECTION_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_EDGE_DETECTION_H
 
-#include "utils/outline_discovery.h"
-#include "utils/histogram.h"
-#include "utils/morphological_operators.h"
+#include "depth_node/utils/outline_discovery.h"
+#include "depth_node/utils/histogram.h"
+#include "depth_node/utils/morphological_operators.h"
 
 #define CANNY 0
 #define SCHARR 1
@@ -55,6 +55,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   struct GraphNode
   {
@@ -340,7 +342,8 @@ namespace pandora_vision_hole
         const cv::Mat& backproject, const bool& edges, cv::Mat* outImage);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_EDGE_DETECTION_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_EDGE_DETECTION_H

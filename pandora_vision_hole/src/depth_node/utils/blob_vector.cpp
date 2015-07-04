@@ -40,8 +40,8 @@
 #include "pandora_vision_msgs/Blob.h"
 #include "pandora_vision_msgs/Keypoint.h"
 
-#include "utils/message_conversions.h"
-#include "utils/blob_vector.h"
+#include "depth_node/utils/message_conversions.h"
+#include "depth_node/utils/blob_vector.h"
 
 /**
   @namespace pandora_vision
@@ -50,6 +50,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   BlobVector::
   BlobVector() {}
@@ -418,5 +420,6 @@ namespace pandora_vision_hole
     return rectangleVertices;
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

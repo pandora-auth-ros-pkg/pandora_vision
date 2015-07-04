@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_MESSAGE_CONVERSIONS_H
-#define PANDORA_VISION_HOLE_UTILS_MESSAGE_CONVERSIONS_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_MESSAGE_CONVERSIONS_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_MESSAGE_CONVERSIONS_H
 
 #include <vector>
 #include <string>
@@ -46,9 +46,9 @@
 #include <std_msgs/Float32MultiArray.h>
 
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-#include "utils/defines.h"
-#include "utils/outline_discovery.h"
-#include "utils/holes_conveyor.h"
+#include "depth_node/utils/defines.h"
+#include "depth_node/utils/outline_discovery.h"
+#include "depth_node/utils/holes_conveyor.h"
 
 /**
   @namespace pandora_vision
@@ -57,6 +57,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @class MessageConversions
@@ -218,7 +220,8 @@ namespace pandora_vision_hole
         const std_msgs::Float32MultiArray& inArray);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_MESSAGE_CONVERSIONS_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_MESSAGE_CONVERSIONS_H

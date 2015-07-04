@@ -57,10 +57,9 @@
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "pandora_vision_msgs/IndexedThermal.h"
 
-#include "utils/message_conversions.h"
-#include "utils/noise_elimination.h"
-#include "utils/defines.h"
-#include "utils/parameters.h"
+#include "hole_fusion_node/utils/message_conversions.h"
+#include "hole_fusion_node/utils/noise_elimination.h"
+#include "hole_fusion_node/utils/parameters.h"
 
 /**
   @namespace pandora_vision
@@ -79,6 +78,14 @@ namespace pandora_vision_hole
   typedef boost::shared_ptr<ApprTimePcThermalPolicy> ApprTimePcThermalPolicyPtr;
   typedef message_filters::Synchronizer<ApprTimePcThermalPolicy> ApprTimePcThermalSynchronizer;
   typedef boost::shared_ptr<ApprTimePcThermalSynchronizer> ApprTimePcThermalSynchronizerPtr;
+
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
+  typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudXYZPtr;
+  typedef pcl::PointCloud<pcl::PointXYZ>::ConstPtr PointCloudXYZConstPtr;
+
+  typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
+  typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudPtr;
+  typedef pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr PointCloudConstPtr;
 
   /**
     @class RgbDepthThermalSynchronizer

@@ -35,7 +35,7 @@
  * Authors: Victor Daropoulos, Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/wavelets.h"
+#include "hole_fusion_node/utils/wavelets.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   cv::Mat Wavelets::convCols(const cv::Mat& in,
     const std::vector<float>& kernel)
@@ -275,5 +277,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

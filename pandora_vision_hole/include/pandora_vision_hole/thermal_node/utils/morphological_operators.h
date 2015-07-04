@@ -35,10 +35,10 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_MORPHOLOGICAL_OPERATORS_H
-#define PANDORA_VISION_HOLE_UTILS_MORPHOLOGICAL_OPERATORS_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_MORPHOLOGICAL_OPERATORS_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_MORPHOLOGICAL_OPERATORS_H
 
-#include "utils/visualization.h"
+#include "thermal_node/utils/visualization.h"
 
 /**
   @namespace pandora_vision
@@ -47,6 +47,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @class Morphology
@@ -141,7 +143,8 @@ namespace pandora_vision_hole
         const int& steps, const bool& visualize = false);
   };
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_MORPHOLOGICAL_OPERATORS_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_MORPHOLOGICAL_OPERATORS_H

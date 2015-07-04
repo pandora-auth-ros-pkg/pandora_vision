@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/noise_elimination.h"
+#include "hole_fusion_node/utils/noise_elimination.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @brief Interpolates the noise produced by the depth sensor.
@@ -616,5 +618,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

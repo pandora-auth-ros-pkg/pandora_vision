@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_DEFINES_H
-#define PANDORA_VISION_HOLE_UTILS_DEFINES_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_DEFINES_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_DEFINES_H
 
 #include <iostream>
 #include <fstream>
@@ -81,7 +81,6 @@
 
 // #define DEBUG_SHOW
 // #define DEBUG_TIME
-
 //  Transforms a float number to string
 #define TOSTR(x)      static_cast< std::ostringstream & >( \
   (std::ostringstream() << std::dec << x)).str()
@@ -115,6 +114,8 @@ namespace pandora_vision
 {
 namespace pandora_vision_hole
 {
+namespace thermal
+{
 
   typedef pcl::PointCloud<pcl::PointXYZ> PointCloudXYZ;
   typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudXYZPtr;
@@ -124,7 +125,8 @@ namespace pandora_vision_hole
   typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudPtr;
   typedef pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr PointCloudConstPtr;
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_DEFINES_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_DEFINES_H

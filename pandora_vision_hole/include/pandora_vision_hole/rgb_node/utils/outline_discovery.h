@@ -35,10 +35,10 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_OUTLINE_DISCOVERY_H
-#define PANDORA_VISION_HOLE_UTILS_OUTLINE_DISCOVERY_H
+#ifndef PANDORA_VISION_HOLE_RGB_NODE_UTILS_OUTLINE_DISCOVERY_H
+#define PANDORA_VISION_HOLE_RGB_NODE_UTILS_OUTLINE_DISCOVERY_H
 
-#include "utils/morphological_operators.h"
+#include "rgb_node/utils/morphological_operators.h"
 
 /**
   @namespace pandora_vision
@@ -47,6 +47,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @class OutlineDiscovery
@@ -188,7 +190,8 @@ namespace pandora_vision_hole
         std::vector<float>* blobsArea);
   };
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_OUTLINE_DISCOVERY_H
+#endif  // PANDORA_VISION_HOLE_RGB_NODE_UTILS_OUTLINE_DISCOVERY_H

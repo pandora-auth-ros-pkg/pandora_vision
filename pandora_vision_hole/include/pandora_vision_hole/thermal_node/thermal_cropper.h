@@ -51,8 +51,8 @@
 #include "sensor_processor/ProcessorLogInfo.h"
 #include "pandora_vision_msgs/RegionOfInterest.h"
 
-#include "utils/noise_elimination.h"
-#include "utils/message_conversions.h"
+#include "thermal_node/utils/noise_elimination.h"
+#include "thermal_node/utils/message_conversions.h"
 
 /**
   @namespace pandora_vision
@@ -61,6 +61,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @class ThermalCropper
@@ -193,6 +195,7 @@ namespace pandora_vision_hole
     std::string processEndTopic_;
   };
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 

@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/blob_detection.h"
+#include "rgb_node/utils/blob_detection.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @brief Detects blobs in an image
@@ -103,5 +105,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

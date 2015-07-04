@@ -36,7 +36,7 @@
  * Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/image_matching.h"
+#include "thermal_node/utils/image_matching.h"
 
 
 /**
@@ -46,6 +46,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
 
   /**
@@ -363,5 +365,6 @@ namespace pandora_vision_hole
   }
 
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

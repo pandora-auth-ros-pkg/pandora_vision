@@ -42,9 +42,9 @@
 #include <nodelet/nodelet.h>
 
 #include "depth_node/depth_hole_detector.h"
-#include "utils/parameters.h"
-#include "utils/message_conversions.h"
-#include "utils/wavelets.h"
+#include "depth_node/utils/parameters.h"
+#include "depth_node/utils/message_conversions.h"
+#include "depth_node/utils/wavelets.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 
 /**
@@ -54,6 +54,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
 
   /**
@@ -145,6 +147,7 @@ namespace pandora_vision_hole
       ::CallbackType f;
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 

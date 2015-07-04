@@ -39,15 +39,18 @@
 #include <boost/algorithm/string.hpp>
 
 #include <nodelet/nodelet.h>
+#include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
+#include <pcl_ros/point_cloud.h>
 #include <pcl/conversions.h>
 
 #include "distrib_msgs/FlirLeptonMsg.h"
 
-#include "utils/defines.h"
-#include "utils/noise_elimination.h"
+#include "hole_fusion_node/utils/defines.h"
+#include "hole_fusion_node/utils/noise_elimination.h"
+#include "hole_fusion_node/utils/message_conversions.h"
 #include "synchronizer/pc_thermal_synchronizer.h"
 
 PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::PcThermalSynchronizer, nodelet::Nodelet)
@@ -421,10 +424,10 @@ namespace pandora_vision_hole
       if (pcPtr->height == 1)
       {
         // The point cloud's height
-        pcPtr->height = Parameters::Image::HEIGHT;
+        pcPtr->height = hole_fusion::Parameters::Image::HEIGHT;
 
         // The point cloud's width
-        pcPtr->width = Parameters::Image::WIDTH;
+        pcPtr->width = hole_fusion::Parameters::Image::WIDTH;
       }
     }
 
@@ -443,15 +446,15 @@ namespace pandora_vision_hole
     rgbImageMessagePtr->header = pcMsg->header;
 
     // Extract the depth image from the point cloud
-    cv::Mat depthImage = MessageConversions::convertPointCloudMessageToImage(
+    cv::Mat depthImage = hole_fusion::MessageConversions::convertPointCloudMessageToImage(
         pcPtr, CV_32FC1);
     cv::Mat interpolatedDepthImage;
-    NoiseElimination::performNoiseElimination(depthImage, &interpolatedDepthImage);
+    hole_fusion::NoiseElimination::performNoiseElimination(depthImage, &interpolatedDepthImage);
 
 #ifdef DEBUG_SHOW
-    if (Parameters::Debug::show_depth_image)
+    if (hole_fusion::Parameters::Debug::show_depth_image)
     {
-      Visualization::showScaled("Interpolated Depth image", interpolatedDepthImage, 1);
+      hole_fusion::Visualization::showScaled("Interpolated Depth image", interpolatedDepthImage, 1);
     }
 #endif
 
@@ -479,7 +482,7 @@ namespace pandora_vision_hole
   getSimulationInfo()
   {
     // Read "height" from the nodehandle
-    if (!private_nh_.getParam("height", Parameters::Image::HEIGHT))
+    if (!private_nh_.getParam("height", hole_fusion::Parameters::Image::HEIGHT))
     {
       NODELET_FATAL(
         "[%s] Input dimension height failed to be read", nodeName_.c_str());
@@ -487,7 +490,7 @@ namespace pandora_vision_hole
     }
 
     // Read "width" from the nodehandle
-    if (!private_nh_.getParam("width", Parameters::Image::WIDTH))
+    if (!private_nh_.getParam("width", hole_fusion::Parameters::Image::WIDTH))
     {
       NODELET_FATAL(
         "[%s] Input dimension width failed to be read", nodeName_.c_str());

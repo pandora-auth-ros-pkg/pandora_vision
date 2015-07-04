@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/edge_detection.h"
+#include "depth_node/utils/edge_detection.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @brief Applies the Canny edge detector
@@ -2082,5 +2084,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

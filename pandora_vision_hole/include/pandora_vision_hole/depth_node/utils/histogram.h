@@ -35,14 +35,14 @@
  * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_HISTOGRAM_H
-#define PANDORA_VISION_HOLE_UTILS_HISTOGRAM_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HISTOGRAM_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HISTOGRAM_H
 
 #include <dirent.h>
 #include <ros/package.h>
-#include "utils/defines.h"
-#include "utils/parameters.h"
-#include "utils/visualization.h"
+#include "depth_node/utils/defines.h"
+#include "depth_node/utils/parameters.h"
+#include "depth_node/utils/visualization.h"
 
 /**
   @namespace pandora_vision
@@ -51,6 +51,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @class Histogram
@@ -91,7 +93,8 @@ namespace pandora_vision_hole
         const int& secondaryChannel);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_HISTOGRAM_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HISTOGRAM_H

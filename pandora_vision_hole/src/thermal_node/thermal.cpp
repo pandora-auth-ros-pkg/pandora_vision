@@ -56,12 +56,12 @@
 
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "pandora_vision_hole/CandidateHoleMsg.h"
-#include "utils/parameters.h"
-#include "utils/message_conversions.h"
-#include "utils/image_matching.h"
+#include "thermal_node/utils/parameters.h"
+#include "thermal_node/utils/message_conversions.h"
+#include "thermal_node/utils/image_matching.h"
 #include "thermal_node/thermal.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Thermal, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::thermal::Thermal, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -70,6 +70,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Thermal, nodelet::No
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @brief Default constructor. Initiates communications, loads parameters.
@@ -774,5 +776,6 @@ namespace pandora_vision_hole
     Parameters::Thermal::high_temperature = config.high_temperature;
   }
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

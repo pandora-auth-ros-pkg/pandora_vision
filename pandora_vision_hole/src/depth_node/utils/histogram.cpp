@@ -35,7 +35,7 @@
  * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/histogram.h"
+#include "depth_node/utils/histogram.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @brief Function for calculating the backprojection of an image,
@@ -323,5 +325,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

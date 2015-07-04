@@ -35,10 +35,10 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_PARAMETERS_H
-#define PANDORA_VISION_HOLE_UTILS_PARAMETERS_H
+#ifndef PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_PARAMETERS_H
+#define PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_PARAMETERS_H
 
-#include "utils/defines.h"
+#include "hole_fusion_node/utils/defines.h"
 #include <dynamic_reconfigure/server.h>
 #include <pandora_vision_hole/thermal_cfgConfig.h>
 #include <pandora_vision_hole/depth_cfgConfig.h>
@@ -57,6 +57,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @struct Parameters
@@ -469,7 +471,8 @@ namespace pandora_vision_hole
     };
   };
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_PARAMETERS_H
+#endif  // PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_PARAMETERS_H

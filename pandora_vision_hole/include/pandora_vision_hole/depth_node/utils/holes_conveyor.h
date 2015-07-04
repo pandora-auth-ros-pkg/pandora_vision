@@ -35,12 +35,12 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_HOLES_CONVEYOR_H
-#define PANDORA_VISION_HOLE_UTILS_HOLES_CONVEYOR_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLES_CONVEYOR_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLES_CONVEYOR_H
 
 #include <std_msgs/Header.h>
 
-#include "utils/defines.h"
+#include "depth_node/utils/defines.h"
 
 /**
   @namespace pandora_vision
@@ -49,6 +49,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @brief The structure that represents a single hole.
@@ -237,7 +239,8 @@ namespace pandora_vision_hole
       static void shuffle(HolesConveyor* src);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_HOLES_CONVEYOR_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLES_CONVEYOR_H

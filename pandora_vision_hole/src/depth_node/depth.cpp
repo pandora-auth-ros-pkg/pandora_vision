@@ -41,7 +41,7 @@
 
 #include "depth_node/depth.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Depth, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::depth::Depth, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -50,6 +50,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Depth, nodelet::Node
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @brief Default constructor. Initiates communications, loads parameters.
@@ -343,5 +345,6 @@ namespace pandora_vision_hole
     }
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

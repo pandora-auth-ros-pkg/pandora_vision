@@ -48,11 +48,11 @@
 #include "sensor_processor/ProcessorLogInfo.h"
 #include "pandora_vision_msgs/RegionOfInterest.h"
 
-#include "utils/message_conversions.h"
-#include "utils/noise_elimination.h"
+#include "thermal_node/utils/message_conversions.h"
+#include "thermal_node/utils/noise_elimination.h"
 #include "thermal_node/thermal_cropper.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::ThermalCropper, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::thermal::ThermalCropper, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -61,6 +61,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::ThermalCropper, node
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @brief Default constructor. Initiates communications, loads parameters.
@@ -285,5 +287,6 @@ namespace pandora_vision_hole
     unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
   }
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

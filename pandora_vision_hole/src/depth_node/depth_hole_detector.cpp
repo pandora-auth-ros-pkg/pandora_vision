@@ -45,6 +45,8 @@ namespace pandora_vision
 {
 namespace pandora_vision_hole
 {
+namespace depth
+{
   /**
     @brief Finds holes, provided a depth image in CV_32FC1 format.
 
@@ -179,5 +181,6 @@ namespace pandora_vision_hole
     return conveyor;
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

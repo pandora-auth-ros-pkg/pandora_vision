@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/parameters.h"
+#include "depth_node/utils/parameters.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   //////////////////// Blob detection - specific parameters ////////////////////
 
@@ -379,5 +381,6 @@ namespace pandora_vision_hole
   int Parameters::Rgb::watershed_background_dilation_factor = 1;
   int Parameters::Rgb::watershed_background_erosion_factor = 1;
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

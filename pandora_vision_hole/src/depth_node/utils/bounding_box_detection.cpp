@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/bounding_box_detection.h"
+#include "depth_node/utils/bounding_box_detection.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @brief Finds rotated bounding boxes from blob outlines.
@@ -132,5 +134,6 @@ namespace pandora_vision_hole
     #endif
   }
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

@@ -35,16 +35,16 @@
  * Authors: Victor Daropoulos, Alexandros Philotheou
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_WAVELETS_H
-#define PANDORA_VISION_HOLE_UTILS_WAVELETS_H
+#ifndef PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_WAVELETS_H
+#define PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_WAVELETS_H
 
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "utils/defines.h"
-#include "utils/visualization.h"
+#include "hole_fusion_node/utils/defines.h"
+#include "hole_fusion_node/utils/visualization.h"
 
 /**
   @namespace pandora_vision
@@ -53,6 +53,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @class Wavelets
@@ -95,7 +97,8 @@ namespace pandora_vision_hole
       static void getLowLow(const cv::Mat& inImage, cv::Mat* outImage);
   };
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_WAVELETS_H
+#endif  // PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_WAVELETS_H

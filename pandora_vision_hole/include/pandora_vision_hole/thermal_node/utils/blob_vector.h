@@ -36,14 +36,14 @@
  *          Christos Tsirigotis <tsirif@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_BLOB_VECTOR_H
-#define PANDORA_VISION_HOLE_UTILS_BLOB_VECTOR_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_BLOB_VECTOR_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_BLOB_VECTOR_H
 
 #include "pandora_vision_msgs/BlobVector.h"
 #include "pandora_vision_msgs/Blob.h"
 #include "pandora_vision_msgs/Keypoint.h"
 
-#include "utils/defines.h"
+#include "thermal_node/utils/defines.h"
 
 /**
   @namespace pandora_vision
@@ -52,6 +52,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
    * @Class BlobVector
@@ -232,7 +234,8 @@ namespace pandora_vision_hole
     pandora_vision_msgs::BlobVector blobVector_;
   };
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_BLOB_VECTOR_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_UTILS_BLOB_VECTOR_H

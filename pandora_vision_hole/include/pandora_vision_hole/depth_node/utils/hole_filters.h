@@ -35,14 +35,14 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_HOLE_FILTERS_H
-#define PANDORA_VISION_HOLE_UTILS_HOLE_FILTERS_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLE_FILTERS_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLE_FILTERS_H
 
-#include "utils/noise_elimination.h"
-#include "utils/edge_detection.h"
-#include "utils/outline_discovery.h"
-#include "utils/bounding_box_detection.h"
-#include "utils/holes_conveyor.h"
+#include "depth_node/utils/noise_elimination.h"
+#include "depth_node/utils/edge_detection.h"
+#include "depth_node/utils/outline_discovery.h"
+#include "depth_node/utils/bounding_box_detection.h"
+#include "depth_node/utils/holes_conveyor.h"
 #include <math.h>
 
 /**
@@ -52,6 +52,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @class HoleFilters
@@ -111,7 +113,8 @@ namespace pandora_vision_hole
         HolesConveyor* conveyor);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_HOLE_FILTERS_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_HOLE_FILTERS_H

@@ -35,11 +35,11 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_UTILS_VISUALIZATION_H
-#define PANDORA_VISION_HOLE_UTILS_VISUALIZATION_H
+#ifndef PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_VISUALIZATION_H
+#define PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_VISUALIZATION_H
 
-#include "utils/parameters.h"
-#include "utils/holes_conveyor.h"
+#include "hole_fusion_node/utils/parameters.h"
+#include "hole_fusion_node/utils/holes_conveyor.h"
 
 /**
   @namespace pandora_vision
@@ -48,6 +48,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @class Visualization
@@ -142,7 +144,8 @@ namespace pandora_vision_hole
         const int& ms);
   };
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_VISUALIZATION_H
+#endif  // PANDORA_VISION_HOLE_HOLE_FUSION_NODE_UTILS_VISUALIZATION_H

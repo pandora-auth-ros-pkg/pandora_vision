@@ -45,6 +45,8 @@ namespace pandora_vision
 {
 namespace pandora_vision_hole
 {
+namespace thermal
+{
   /**
     @brief Finds holes, provided a thermal image in CV_8UC1 format.
 
@@ -180,5 +182,6 @@ namespace pandora_vision_hole
     return conveyor;
   }
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

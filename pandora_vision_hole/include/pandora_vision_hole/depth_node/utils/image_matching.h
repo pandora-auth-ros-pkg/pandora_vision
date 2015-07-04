@@ -37,12 +37,12 @@
  *********************************************************************/
 
 
-#ifndef PANDORA_VISION_HOLE_UTILS_IMAGE_MATCHING_H
-#define PANDORA_VISION_HOLE_UTILS_IMAGE_MATCHING_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_IMAGE_MATCHING_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_IMAGE_MATCHING_H
 
-#include "utils/holes_conveyor.h"
-#include "utils/parameters.h"
-#include "utils/outline_discovery.h"
+#include "depth_node/utils/holes_conveyor.h"
+#include "depth_node/utils/parameters.h"
+#include "depth_node/utils/outline_discovery.h"
 
 /**
   @namespace pandora_vision
@@ -51,6 +51,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
   /**
     @class ImageMatching
@@ -140,7 +142,8 @@ namespace pandora_vision_hole
       static void outlinePointsInOrder(HolesConveyor* conveyor);
   };
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_UTILS_IMAGE_MATCHING_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_UTILS_IMAGE_MATCHING_H

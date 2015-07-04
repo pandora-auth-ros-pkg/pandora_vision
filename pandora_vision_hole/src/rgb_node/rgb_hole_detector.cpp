@@ -45,6 +45,8 @@ namespace pandora_vision
 {
 namespace pandora_vision_hole
 {
+namespace rgb
+{
   /**
     @brief Finds holes, provided a RGB image in CV_8UC3 format.
 
@@ -167,5 +169,6 @@ namespace pandora_vision_hole
     return conveyor;
   }
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

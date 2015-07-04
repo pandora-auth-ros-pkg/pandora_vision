@@ -35,7 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/visualization.h"
+#include "thermal_node/utils/defines.h"
+#include "thermal_node/utils/visualization.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +45,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @brief Shows multiple images in one window
@@ -345,5 +348,6 @@ namespace pandora_vision_hole
     cv::waitKey(ms);
   }
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

@@ -35,7 +35,7 @@
  * Author: Alexandros Philotheou
  *********************************************************************/
 
-#include "utils/outline_discovery.h"
+#include "hole_fusion_node/utils/outline_discovery.h"
 
 /**
   @namespace pandora_vision
@@ -44,6 +44,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @brief Implements the brushfire algorithm for one blob keypoint
@@ -995,5 +997,6 @@ namespace pandora_vision_hole
     Timer::tick("raycastKeypoint");
     #endif
   }
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

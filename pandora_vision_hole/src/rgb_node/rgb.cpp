@@ -41,7 +41,7 @@
 
 #include "rgb_node/rgb.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Rgb, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::rgb::Rgb, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -50,6 +50,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::Rgb, nodelet::Nodele
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @brief Constructor
@@ -426,5 +428,6 @@ namespace pandora_vision_hole
       config.watershed_background_erosion_factor;
   }
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

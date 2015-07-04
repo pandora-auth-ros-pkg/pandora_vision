@@ -40,9 +40,9 @@
 
 #define SHOW_DEBUG_IMAGE
 
-#include "utils/blob_detection.h"
-#include "utils/defines.h"
-#include "utils/hole_filters.h"
+#include "rgb_node/utils/blob_detection.h"
+#include "rgb_node/utils/defines.h"
+#include "rgb_node/utils/hole_filters.h"
 
 /**
   @namespace pandora_vision
@@ -51,6 +51,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @class RgbHoleDetector
@@ -76,6 +78,7 @@ namespace pandora_vision_hole
         const std::vector<cv::MatND>& histogram);
   };
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 

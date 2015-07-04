@@ -43,8 +43,8 @@
 #include <std_msgs/Float32MultiArray.h>
 
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
-#include "utils/message_conversions.h"
-#include "utils/holes_conveyor.h"
+#include "rgb_node/utils/message_conversions.h"
+#include "rgb_node/utils/holes_conveyor.h"
 
 /**
   @namespace pandora_vision
@@ -53,6 +53,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace rgb
 {
   /**
     @brief Converts a cv::Mat image into a sensor_msgs::Image message
@@ -556,5 +558,6 @@ namespace pandora_vision_hole
     return image;
   }
 
+}  // namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

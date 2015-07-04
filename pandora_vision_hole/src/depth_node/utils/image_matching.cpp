@@ -36,7 +36,7 @@
  * Manos Tsardoulias
  *********************************************************************/
 
-#include "utils/image_matching.h"
+#include "depth_node/utils/image_matching.h"
 
 
 /**
@@ -46,6 +46,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace depth
 {
 
   /**
@@ -363,5 +365,6 @@ namespace pandora_vision_hole
   }
 
 
+}  // namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision

@@ -53,12 +53,12 @@
 #include "pandora_vision_msgs/HoleDirectionAlert.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
 #include "pandora_vision_msgs/RegionOfInterest.h"
-#include "utils/defines.h"
-#include "utils/histogram.h"
-#include "utils/message_conversions.h"
-#include "utils/noise_elimination.h"
-#include "utils/parameters.h"
-#include "utils/visualization.h"
+#include "hole_fusion_node/utils/defines.h"
+#include "hole_fusion_node/utils/histogram.h"
+#include "hole_fusion_node/utils/message_conversions.h"
+#include "hole_fusion_node/utils/noise_elimination.h"
+#include "hole_fusion_node/utils/parameters.h"
+#include "hole_fusion_node/utils/visualization.h"
 #include "hole_fusion_node/depth_filters.h"
 #include "hole_fusion_node/filters.h"
 #include "hole_fusion_node/filters_resources.h"
@@ -75,6 +75,8 @@
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @class HoleFusion
@@ -690,6 +692,7 @@ namespace pandora_vision_hole
       void completeTransition(void);
   };
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 

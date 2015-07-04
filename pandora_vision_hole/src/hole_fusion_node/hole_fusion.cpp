@@ -40,7 +40,7 @@
 
 #include "hole_fusion_node/hole_fusion.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::HoleFusion, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::hole_fusion::HoleFusion, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -49,6 +49,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::HoleFusion, nodelet:
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace hole_fusion
 {
   /**
     @brief The HoleFusion constructor
@@ -2131,5 +2133,6 @@ namespace pandora_vision_hole
     }
   }
 
+}  // namespace hole_fusion
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
