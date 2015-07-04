@@ -114,7 +114,7 @@ namespace pandora_vision
     else
     {
       *subImage = cv::Mat::zeros(image.rows, static_cast<int>(
-          std::floor(image.cols / 2.0f)), CV_32FC1);
+          std::floor(image.cols / 2.0f)), CV_32FC(image.channels()));
       int imageIndex = 0;
       for (int jj = 1; jj < image.cols; jj += 2)
       {
