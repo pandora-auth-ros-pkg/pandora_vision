@@ -42,6 +42,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/array.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
@@ -171,10 +172,10 @@ namespace pandora_vision
        * @param roi [const cv::Rect&] The bounding box that is
        * used to find the depth distance
        * @param level [int] The number of stages of the DWT
-       * @return [std::vector<float>] The depth distance of each
+       * @return [boost::array<float, 4>] The depth distance of each
        * point of the bounding box
        **/
-      std::vector<float> findDepthDistance(const cv::Mat& depthImage,
+      boost::array<float, 4> findDepthDistance(const cv::Mat& depthImage,
           const std::vector<cv::Vec4i> verticalLines, const cv::Rect& roi,
           int level = 1);
 
