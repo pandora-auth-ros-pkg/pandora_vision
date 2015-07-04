@@ -26,6 +26,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>cv_bridge</depend>
   <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
   <depend>pandora_vision_msgs</depend>
   <depend>pandora_vision_hole</depend>
   <depend>pandora_vision_common</depend>
