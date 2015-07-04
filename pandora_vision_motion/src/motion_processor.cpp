@@ -79,6 +79,7 @@ namespace pandora_vision
     motionDetector.diff_threshold = config.diff_threshold;
     motionDetector.motion_high_thres = config.motion_high_thres;
     motionDetector.motion_low_thres = config.motion_low_thres;
+    motionDetector.dbscanEnable_ = config.dbscanEnable_;
     motionDetector.visualization = config.visualization;
     motionDetector.max_deviation_ = config.max_deviation;
     motionDetector.show_image = config.show_image;

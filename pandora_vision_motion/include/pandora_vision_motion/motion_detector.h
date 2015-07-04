@@ -81,6 +81,9 @@ namespace pandora_vision_motion
       bool show_diff_image;
       bool show_moving_objects_contours;
 
+      //!< Enable dbscan
+      bool dbscanEnable_;
+
       //!< Maximum deviation for calculation position of moving objects;
       int max_deviation_;
 
@@ -102,8 +105,6 @@ namespace pandora_vision_motion
       * @brief
       **/
       // void findMotionParameters(const cv::Mat& frame);
-
-      std::vector<BBoxPOIPtr> getBoundingBox();
 
      std::vector<BBoxPOIPtr> getMotionPosition(void);
 

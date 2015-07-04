@@ -111,23 +111,16 @@ namespace pandora_vision
   */
   void DBSCAN::regionQuery(int p, std::vector<int>* res)
   {
-    // std::vector<int> res;
-     // ROS_INFO_STREAM("ENTER REGION QUERY");
-    /* ROS_INFO_STREAM("DATA="<< _data.size()); */
-    /* ROS_INFO_STREAM("find regionQuery of "<< p); */
     int c =0;
     for (int i = 0; i < _data.size(); i++)
     {
-      if (DP[i*_data.size()+p] <= _eps) //(calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
+      if (DP[i*_data.size()+p] <= _eps) //  (calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
       {
           res->push_back(i);
           int x = (*res)[c];
           c++;
-          // ROS_INFO_STREAM("NEIGHBOR " << x);
       }
     }
-    // ROS_INFO_STREAM("LEAVING REGION QUERY " );
-    //return res;
   }
 
   /**
@@ -158,10 +151,9 @@ namespace pandora_vision
 
          neighbours_p.clear();
          regionQuery(neighbours->at(i), &neighbours_p);
-          // ROS_INFO_STREAM("NEIGHBORS_p of point " << i << " SIZE"<< neighbours_p.size());
          if(neighbours_p.size() >= _minPts)
          {
-           bool flag; 
+           bool flag;
            for (int j = 0; j < neighbours_p.size(); j++)
            {
              flag = false;
@@ -177,17 +169,12 @@ namespace pandora_vision
              if(!flag)
              {
                newNeighours.push_back(neighbours_p[j]);
-               /* for( int r=0; r<newNeighours.size(); r++ ) */
-               // std::cout << newNeighours[r]; 
-               /* std::cout<<std::endl;  */
              }
 
            neighbours->insert(neighbours->end(), newNeighours.begin(), newNeighours.end());
            }
-            // ROS_INFO_STREAM("EXPANDING NEIGHBORS_SIZE="<< neighbours->size());
          }
-
-            // expandCluster(neighbours[i], neighbours_p);
+         // expandCluster(neighbours[i], neighbours_p);
       }
       if(_labels[neighbours->at(i)]== -99)
       {
@@ -228,7 +215,7 @@ namespace pandora_vision
 
     ROS_INFO_STREAM("enter cohesion "<< clusters.size());
 
-    /// calculate centroids 
+    /// calculate centroids
     for (int i = 0; i < clusters.size(); i++)
     {
       cohesion.push_back(0.0);
