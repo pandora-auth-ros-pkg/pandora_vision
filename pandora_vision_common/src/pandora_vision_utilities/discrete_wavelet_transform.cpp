@@ -38,7 +38,7 @@
  *********************************************************************/
 
 #include <vector>
-#include "pandora_vision_obstacle/discrete_wavelet_transform.h"
+#include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
 
 namespace pandora_vision
 {
@@ -49,11 +49,11 @@ namespace pandora_vision
   DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& columnKernelLow,
       const cv::Mat& columnKernelHigh)
   {
-      columnKernelLow_ = columnKernelLow;
-      cv::transpose(columnKernelLow, rowKernelLow_);
+    columnKernelLow_ = columnKernelLow;
+    cv::transpose(columnKernelLow, rowKernelLow_);
 
-      columnKernelHigh_ = columnKernelHigh;
-      cv::transpose(columnKernelHigh, rowKernelHigh_);
+    columnKernelHigh_ = columnKernelHigh;
+    cv::transpose(columnKernelHigh, rowKernelHigh_);
   }
 
   DiscreteWaveletTransform::~DiscreteWaveletTransform()

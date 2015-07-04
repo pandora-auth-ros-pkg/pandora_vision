@@ -44,7 +44,7 @@
 #include <vector>
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
-#include "pandora_vision_obstacle/discrete_wavelet_transform.h"
+#include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
 #include "pandora_vision_obstacle/obstacle_poi.h"
 
 namespace pandora_vision
