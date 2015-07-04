@@ -13,7 +13,7 @@
   <arg name="openni2" default="false" />
   <!-- if not xtion or kinect, set path arg to find a rosbag -->
   <!-- If the source is not a physical device, it is a bag: play "path" bag -->
-  <arg name="path" default="/home/aggelos/Desktop/pcl_thermal_bags/thermal2.bag" />
+  <arg name="path" default="/home/pandora/bitch.bag" />
 
   <group if="$(arg openni)">
     <include file="$(find openni_launch)/launch/openni.launch">
@@ -29,13 +29,19 @@
       <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
     </include>
+    <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
+    <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
   </group>
 
   <group unless="$(arg openni)">
     <group unless="$(arg openni2)">
-      <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
-        <remap from="/camera/depth_registered/points" to="/kinect/depth_registered/points" />
-      </node>
+      <param name="/use_sim_time" value="true" />
+      <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" />
+      <group ns="kinect">
+        <machine name="localhost" address="localhost" env-loader="/opt/ros/hydro/env.sh"/>
+        <node pkg="nodelet" type="nodelet" name="kinect_nodelet_manager" args="manager"
+            output="screen" machine="localhost" />
+      </group>
     </group>
   </group>
 
