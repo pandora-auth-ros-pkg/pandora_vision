@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#include "depth_node/hole_detector.h"
+#include "depth_node/depth_hole_detector.h"
 
 /**
   @namespace pandora_vision
@@ -56,7 +56,7 @@ namespace pandora_vision_hole
     depth image in CV_32FC1 format
     @return HolesConveyor The struct that contains the holes found
    **/
-  HolesConveyor HoleDetector::findHoles(const cv::Mat& interpolatedDepthImage)
+  HolesConveyor DepthHoleDetector::findHoles(const cv::Mat& interpolatedDepthImage)
   {
     #ifdef DEBUG_TIME
     Timer::start("findHoles", "inputDepthImageCallback");

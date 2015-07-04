@@ -150,7 +150,7 @@ namespace pandora_vision_hole
     }
 
     // Locate potential holes in the interpolated depth image
-    HolesConveyor holes = HoleDetector::findHoles(depthImage);
+    HolesConveyor holes = DepthHoleDetector::findHoles(depthImage);
 
     // Create the candidate holes message
     ::pandora_vision_hole::CandidateHolesVectorMsgPtr

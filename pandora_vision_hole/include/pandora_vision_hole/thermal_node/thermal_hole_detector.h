@@ -32,16 +32,14 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou, Alexandros Philotheou
+ * Authors: Alexandros Philotheou, Manos Tsardoulias,Angelos Triantafyllidis
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
-#define PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
-
-#define SHOW_DEBUG_IMAGE
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_HOLE_DETECTOR_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_HOLE_DETECTOR_H
 
 #include "utils/blob_detection.h"
-#include "utils/defines.h"
+#include "utils/holes_conveyor.h"
 #include "utils/hole_filters.h"
 
 /**
@@ -53,30 +51,27 @@ namespace pandora_vision
 namespace pandora_vision_hole
 {
   /**
-    @class HoleDetector
+    @class ThermalHoleDetector
     @brief Provides the functionalities for detecting holes via analysis
-    of a RGB image
+    of a thermal image
    **/
-  class HoleDetector
+  class ThermalHoleDetector
   {
     public:
       /**
-        @brief Finds holes, provided a RGB image in CV_8UC3 format.
-        First, the edges of the RGB image are detected.
+        @brief Finds the holes provided a thermal image in CV_8UC1 format
+
+        First, the edges of the thermal image are detected.
         Then, keypoints of blobs are detected in the above image.
         Finally, the potential holes' outline is found, along with the bounding
         boxes of those outlines.
-        @param[in] rgbImage [const cv::Mat&] The RGB image to be processed,
-        in CV_8UC3 format
-        @param[in] histogram [const std::vector<cv::MatND>&]
-        The vector of histograms of images of wooden walls
+        @param[in] thermalImage [const cv::Mat&] The thermal image in CV_8UC1 format
         @return HolesConveyor The struct that contains the holes found
        **/
-      static HolesConveyor findHoles(const cv::Mat& rgbImage,
-        const std::vector<cv::MatND>& histogram);
+      static HolesConveyor findHoles(const cv::Mat& thermalImage);
   };
 
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_HOLE_DETECTOR_H

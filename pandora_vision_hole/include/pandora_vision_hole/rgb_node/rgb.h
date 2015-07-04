@@ -46,7 +46,7 @@
 #include "utils/histogram.h"
 #include "utils/parameters.h"
 #include "utils/wavelets.h"
-#include "rgb_node/hole_detector.h"
+#include "rgb_node/rgb_hole_detector.h"
 
 /**
   @namespace pandora_vision

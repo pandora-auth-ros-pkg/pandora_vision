@@ -35,7 +35,7 @@
  * Authors: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "rgb_node/hole_detector.h"
+#include "rgb_node/rgb_hole_detector.h"
 
 /**
   @namespace pandora_vision
@@ -58,7 +58,7 @@ namespace pandora_vision_hole
     The vector of histograms of images of wooden walls
     @return HolesConveyor The struct that contains the holes found
    **/
-  HolesConveyor HoleDetector::findHoles(const cv::Mat& rgbImage,
+  HolesConveyor RgbHoleDetector::findHoles(const cv::Mat& rgbImage,
     const std::vector<cv::MatND>& histogram)
   {
     #ifdef DEBUG_TIME

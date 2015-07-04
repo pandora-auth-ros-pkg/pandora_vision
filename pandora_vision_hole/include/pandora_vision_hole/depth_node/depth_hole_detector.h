@@ -52,11 +52,11 @@ namespace pandora_vision_hole
 {
 
   /**
-    @class HoleDetector
+    @class DepthHoleDetector
     @brief Provides the functionalities for detecting holes via analysis
     of a depth image
    **/
-  class HoleDetector
+  class DepthHoleDetector
   {
     public:
       /**

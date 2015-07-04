@@ -251,7 +251,7 @@ namespace pandora_vision_hole
       const sensor_msgs::PointCloud2ConstPtr& pcMsg,
       const distrib_msgs::FlirLeptonMsgConstPtr& thermalMsg)
   {
-    if (!thermalLocked_ || !holeFusionLocked_)
+    if (!thermalLocked_ && !holeFusionLocked_)
     {
       NODELET_INFO("[%s] RGBDT Callback", nodeName_.c_str());
       std_msgs::StringPtr thermalIndex( new std_msgs::String );

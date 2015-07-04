@@ -150,7 +150,7 @@ namespace pandora_vision_hole
     }
 
     // Locate potential holes in the rgb image
-    HolesConveyor conveyor = HoleDetector::findHoles(rgbImage, wallsHistogram_);
+    HolesConveyor conveyor = RgbHoleDetector::findHoles(rgbImage, wallsHistogram_);
 
     // Create the candidate holes message
     ::pandora_vision_hole::CandidateHolesVectorMsgPtr

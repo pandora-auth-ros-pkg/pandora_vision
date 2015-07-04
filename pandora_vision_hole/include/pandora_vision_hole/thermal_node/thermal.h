@@ -63,7 +63,7 @@
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/image_matching.h"
-#include "thermal_node/hole_detector.h"
+#include "thermal_node/thermal_hole_detector.h"
 
 /**
   @namespace pandora_vision

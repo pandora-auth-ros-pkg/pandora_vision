@@ -41,7 +41,7 @@
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 
-#include "depth_node/hole_detector.h"
+#include "depth_node/depth_hole_detector.h"
 #include "utils/parameters.h"
 #include "utils/message_conversions.h"
 #include "utils/wavelets.h"

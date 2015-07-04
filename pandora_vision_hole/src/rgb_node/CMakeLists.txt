@@ -1,6 +1,6 @@
 add_library(${PROJECT_NAME}_rgb
   rgb.cpp
-  hole_detector.cpp)
+  rgb_hole_detector.cpp)
 target_link_libraries(${PROJECT_NAME}_rgb
   ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES})

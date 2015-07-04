@@ -1,6 +1,6 @@
 add_library(${PROJECT_NAME}_depth
   depth.cpp
-  hole_detector.cpp)
+  depth_hole_detector.cpp)
 target_link_libraries(${PROJECT_NAME}_depth
   ${PROJECT_NAME}_utils
   ${catkin_LIBRARIES})

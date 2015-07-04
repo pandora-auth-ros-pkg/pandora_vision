@@ -35,7 +35,7 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias,Angelos Triantafyllidis
  *********************************************************************/
 
-#include "thermal_node/hole_detector.h"
+#include "thermal_node/thermal_hole_detector.h"
 
 /**
   @namespace pandora_vision
@@ -56,7 +56,8 @@ namespace pandora_vision_hole
     image in CV_8UC1 format
     @return HolesConveyor The struct that contains the holes found
    **/
-  HolesConveyor HoleDetector::findHoles(const cv::Mat& thermalImage)
+  HolesConveyor ThermalHoleDetector::findHoles(const cv::Mat& thermalImage)
+
   {
     #ifdef DEBUG_TIME
     Timer::start("findHoles", "inputThermalImageCallback");

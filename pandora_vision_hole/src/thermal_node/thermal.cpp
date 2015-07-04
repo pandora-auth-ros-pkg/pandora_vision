@@ -240,11 +240,11 @@ namespace pandora_vision_hole
     {
       case 0:
         // Locate potential holes in the thermal image
-        holes = HoleDetector::findHoles(thermalImage);
+        holes = ThermalHoleDetector::findHoles(thermalImage);
         break;
       case 1:
         // Locate potential holes in the thermal image
-        holes = HoleDetector::findHoles(thermalSensorImage);
+        holes = ThermalHoleDetector::findHoles(thermalSensorImage);
         break;
       default:
         NODELET_ERROR("[%s] Incorrect callback: detection method param is %d",

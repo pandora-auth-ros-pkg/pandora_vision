@@ -32,21 +32,51 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Despoina Paschalidou
+ * Author: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#include "rgb_node/rgb.h"
+#ifndef PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
+#define PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
+
+#define SHOW_DEBUG_IMAGE
+
+#include "utils/blob_detection.h"
+#include "utils/defines.h"
+#include "utils/hole_filters.h"
 
 /**
-  @brief Main function of the face node
-  @param argc [int] Number of input arguments
-  @param argv [char**] The input arguments
-  @return int : 0 for success
+  @namespace pandora_vision
+  @brief The main namespace for PANDORA vision
  **/
-int main(int argc, char** argv)
+namespace pandora_vision
 {
-  ros::init(argc, argv, "rgb_node");
-  pandora_vision::pandora_vision_hole::Rgb rgb;
-  ros::spin();
-  return 0;
-}
+namespace pandora_vision_hole
+{
+  /**
+    @class RgbHoleDetector
+    @brief Provides the functionalities for detecting holes via analysis
+    of a RGB image
+   **/
+  class RgbHoleDetector
+  {
+    public:
+      /**
+        @brief Finds holes, provided a RGB image in CV_8UC3 format.
+        First, the edges of the RGB image are detected.
+        Then, keypoints of blobs are detected in the above image.
+        Finally, the potential holes' outline is found, along with the bounding
+        boxes of those outlines.
+        @param[in] rgbImage [const cv::Mat&] The RGB image to be processed,
+        in CV_8UC3 format
+        @param[in] histogram [const std::vector<cv::MatND>&]
+        The vector of histograms of images of wooden walls
+        @return HolesConveyor The struct that contains the holes found
+       **/
+      static HolesConveyor findHoles(const cv::Mat& rgbImage,
+        const std::vector<cv::MatND>& histogram);
+  };
+
+}  // namespace pandora_vision_hole
+}  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
