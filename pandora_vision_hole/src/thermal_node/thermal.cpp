@@ -257,7 +257,7 @@ namespace pandora_vision_hole
     findHolesProbability(
       &holes, imageConstPtr_->temperatures, Parameters::Thermal::probability_method);
 
-    if (holes.holes.size() != 0)
+    if (holes.size() != 0)
       NODELET_WARN("[%s] Thermal Alert found!!!", nodeName_.c_str());
 
 

@@ -202,6 +202,7 @@ namespace pandora_vision_hole
     if (thermalEnhancedImageConstPtr_->regionsOfInterest.size() == 0)
     {
       processorLogPtr->success = false;
+      processorLogPtr->logInfo = "No ROIs";
       processEndPublisher_.publish(processorLogPtr);
       return;
     }
@@ -224,6 +225,7 @@ namespace pandora_vision_hole
     enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
 
     processorLogPtr->success = true;
+    processorLogPtr->logInfo = "Finished";
     processEndPublisher_.publish(processorLogPtr);
     victimThermalPublisher_.publish(enhancedImagePtr);
   }
