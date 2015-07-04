@@ -92,8 +92,6 @@ namespace pandora_vision
     show_background = false;
     show_diff_image = false;
     show_moving_objects_contours = false;
-    indexFrame = 0;
-
     max_deviation_ = 25;
     bg_ = cv::BackgroundSubtractorMOG2(history, varThreshold, bShadowDetection);
     ROS_INFO("Created MotionDetector instance");
@@ -101,40 +99,39 @@ namespace pandora_vision
 
    /**
     @brief Function that detects motion, according to substraction
-    between background image and current frame. According to predifined
+    between background image and current frame_. According to predifined
     thresholds motion is detected. According to the type of motion
     the suitable value is returned.
-    @param frame [&cv::Mat] current frame to be processed
-    @return [int] Index of evaluation of Motion in current frame.
+    @param frame_ [&cv::Mat] current frame to be processed
+    @return [int] Index of evaluation of Motion in current frame_.
   */
   void MotionDetector::detectMotion(const cv::Mat& frame)
   {
-    /// Check that frame has data and that image has 3 channels
-    if (frame.data && frame.channels() == 3)
+    frame_ = frame.clone();
+    /// Check that frame_ has data and that image has 3 channels
+    if (frame_.data && frame_.channels() == 3)
     {
-      indexFrame++;
-      movingObjects_ = frame.clone();
+      movingObjects_ = frame_.clone();
       /// Update the background model and create
       /// binary mask for foreground objects
-      bg_.operator()(frame, foreground_);
+      bg_.operator()(frame_, foreground_);
       bg_.getBackgroundImage(background_);
 
-      cv::Mat thresholdedDifference;
-      cv::subtract(frame, background_, thresholdedDifference);
-      cv::cvtColor(thresholdedDifference, thresholdedDifference, CV_BGR2GRAY);
+      cv::subtract(frame_, background_, thresholdedDifference_);
+      cv::cvtColor(thresholdedDifference_, thresholdedDifference_, CV_BGR2GRAY);
 
-      cv::threshold(thresholdedDifference, thresholdedDifference,
+      cv::threshold(thresholdedDifference_, thresholdedDifference_,
         diff_threshold, 255, cv::THRESH_BINARY);
 
 
       cv::Mat kernel = getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3),
         cv::Point(-1, -1));
 
-      cv::morphologyEx(thresholdedDifference, thresholdedDifference,
-        cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), 8);
+      cv::morphologyEx(thresholdedDifference_, thresholdedDifference_,
+       cv::MORPH_BLACKHAT, kernel, cv::Point(-1, -1), 8);
 
 
-      detectMotionPosition(thresholdedDifference);
+      detectMotionPosition(thresholdedDifference_);
 
     /*   cv::Point boxCenter(floor(bounding_box_->getPoint().x + bounding_box_->getWidth() * 0.5), */
         // floor(bounding_box_->getPoint().y + bounding_box_->getHeight() * 0.5));
@@ -144,7 +141,7 @@ namespace pandora_vision
         show_background || show_diff_image ||
         show_moving_objects_contours)
       {
-        debugShow(thresholdedDifference, frame);
+        debugShow();
       }
 
       // return typeOfMovement_;
@@ -159,9 +156,9 @@ namespace pandora_vision
    * @brief
    **/
 
- /*  void MotionDetector::findMotionParameters(const cv::Mat& frame) */
+ /*  void MotionDetector::findMotionParameters(const cv::Mat& frame_) */
   // {
-    // switch (detectMotion(frame))
+    // switch (detectMotion(frame_))
     // {
       // case 0:
         // bounding_box_->setProbability(0);
@@ -185,8 +182,8 @@ namespace pandora_vision
 
   /**
     @brief Function that calculates motion's position
-    @param diff: [&cv::Mat] frame that represents
-      the thresholded difference between current frame and computed
+    @param diff: [&cv::Mat] frame_ that represents
+      the thresholded difference between current frame_ and computed
       background.
     @return void
   */
@@ -332,21 +329,21 @@ namespace pandora_vision
   /**
     @brief Function that defines the type of movement
     according to the number of pixels, that differ from current
-    frame and background. In case insignificant motion 0 is detected
+    frame_ and background. In case insignificant motion 0 is detected
     0 is returned. If there is slight motion 1 is returned and last
     bust not least in case extensive motion is detected 2 is returned
-    @param thresholdedDifference: [&cv::Mat] frame that represents
-      the thresholded difference between current frame and computed
+    @param thresholdedDifference_: [&cv::Mat] frame_ that represents
+      the thresholded difference between current frame_ and computed
       background
     @return typeOfMovement [int], where 2 corresponds to moving objects
     with greater probability whereas 0 corresponds to stationary objects
   */
-  int MotionDetector::motionIdentification(const cv::Mat& thresholdedDifference)
+  int MotionDetector::motionIdentification(const cv::Mat& thresholdedDifference_)
   {
     //!< Counts value of non zero pixels in binary image in order
     //!< to find the exact number of pixels, that differ from current
-    //!< frame and background
-    int countDiff = countNonZero(thresholdedDifference);
+    //!< frame_ and background
+    int countDiff = countNonZero(thresholdedDifference_);
     if (countDiff > motion_high_thres)
       return 2;
     else if (countDiff > motion_low_thres)
@@ -358,17 +355,14 @@ namespace pandora_vision
 
   /**
     @brief Function used for debug reasons, that shows background
-    foreground and contours of motion trajectories in current frame
-    @param thresholdedDifference: [&cv::Mat] frame that represents
-      the thresholded difference between current frame and computed
+    foreground and contours of motion trajectories in current frame_
+    @param thresholdedDifference_: [&cv::Mat] frame_ that represents
+      the thresholded difference between current frame_ and computed
       background.
-    @param frame: [&cv::Mat] current frame, captured from camera
+    @param frame_: [&cv::Mat] current frame, captured from camera
     @return void
   */
-  void MotionDetector::debugShow(
-    const cv::Mat& thresholdedDifference,
-    const cv::Mat& frame
-  )
+  void MotionDetector::debugShow()
   {
     /* std::vector<double> areas(contours.size()); */
     //!< find largest contour area
@@ -378,7 +372,7 @@ namespace pandora_vision
             // areas[i] = cv::contourArea(cv::Mat(contours[i]));
             // ROS_INFO_STREAM("Area of contour=" << areas[i]);
     /* } */
-           cv::Mat grouped = thresholdedDifference.clone();//cv::Mat::zeros(frame.size(),CV_8UC3);
+           // cv::Mat grouped = thresholdedDifference_.clone();//cv::Mat::zeros(frame_.size(),CV_8UC3);
     std::vector<cv::Scalar> colors;
     cv::RNG rng(3);
 
@@ -398,8 +392,8 @@ namespace pandora_vision
             int label = i ;//dbscan._labels[i];
             color = colors[label];
         // }
-        putText(grouped, to_string(i), finalBoxes[i].tl(), cv::FONT_HERSHEY_COMPLEX, .5, color, 1);        // drawContours(grouped, contours, i, color, -1);
-      cv::rectangle(grouped,finalBoxes[i].tl(),finalBoxes[i].br(), color, 2, CV_AA);
+        putText(thresholdedDifference_, to_string(i), finalBoxes[i].tl(), cv::FONT_HERSHEY_COMPLEX, .5, color, 1);        // drawContours(grouped, contours, i, color, -1);
+      cv::rectangle(thresholdedDifference_,finalBoxes[i].tl(),finalBoxes[i].br(), color, 2, CV_AA);
     }
     /* for(int i = 0; i < noiseBoxes.size(); i++) */
     // {
@@ -413,15 +407,33 @@ namespace pandora_vision
    /*  double max; */
     // cv::Point maxPosition;
     /* cv::minMaxLoc(cv::Mat(areas),0,&max,0,&maxPosition); */
+     cv::Mat frame, background, temp, movingObjects;
+     cv::resize(frame_, frame, cv::Size(0,0), 0.75, 0.75, cv::INTER_AREA);
+     cv::resize(background_, background, cv::Size(0,0), 0.75, 0.75, cv::INTER_AREA);
+     cv::resize(thresholdedDifference_, temp, cv::Size(0,0), 0.75, 0.75, cv::INTER_AREA);
+     cv::resize(movingObjects_, movingObjects, cv::Size(0,0), 0.75, 0.75, cv::INTER_AREA);
 
-    if (visualization || show_image)
+     cv::Mat temp1[] = {temp, temp, temp};
+     cv::Mat diff;
+     cv::merge(temp1, 3, diff);
+
+     cv::Mat displayImage = cv::Mat(frame.rows * 2, frame.cols * 2, frame.type());
+     frame.copyTo(displayImage(cv::Rect(0, 0, frame.cols,frame.rows)));
+     background.copyTo(displayImage(cv::Rect(background.cols, 0, background.cols, background.rows)));
+     diff.copyTo(displayImage(cv::Rect(0, diff.rows, diff.cols, diff.rows)));
+     movingObjects.copyTo(displayImage(cv::Rect(movingObjects.cols, movingObjects.rows,
+                                       movingObjects.cols, movingObjects.rows)));
+
+    if (visualization)
+      cv::imshow("Original/Background/ThresholdedDiff/MovingObjects", displayImage);
+    if (show_image)
       cv::imshow("Frame", frame);
-    if (visualization || show_background)
-      cv::imshow("Background", background_);
-    if (visualization || show_diff_image)
-      cv::imshow("Thresholded difference between background and current frame", grouped);
-    if (visualization || show_moving_objects_contours)
-      cv::imshow("Moving objects in current frame", movingObjects_);
+    if (show_background)
+      cv::imshow("Background", background);
+    if (show_diff_image)
+      cv::imshow("Thresholded difference between background and current frame_", diff);
+    if (show_moving_objects_contours)
+      cv::imshow("Moving objects in current frame", movingObjects);
     cv::waitKey(10);
   }
 
@@ -450,7 +462,7 @@ namespace pandora_vision
     return r;
   }
 
-  cv::Scalar MotionDetector::HSVtoRGBcvScalar(int H, int S, int V) 
+  cv::Scalar MotionDetector::HSVtoRGBcvScalar(int H, int S, int V)
   {
 
     int bH = H; // H component
@@ -470,12 +482,12 @@ namespace pandora_vision
     int iI;
     double fI, fF, p, q, t;
 
-    if( bS == 0 ) 
+    if( bS == 0 )
     {
       // achromatic (grey)
-        fR = fG = fB = fV;
+      fR = fG = fB = fV;
     }
-    else 
+    else
     {
         // If Hue == 1.0, then wrap it around the circle to 0.0
         if (fH>= 1.0f)
@@ -490,7 +502,7 @@ namespace pandora_vision
         q = fV * ( 1.0f - fS * fF );
         t = fV * ( 1.0f - fS * ( 1.0f - fF ) );
 
-        switch( iI ) 
+        switch( iI )
         {
         case 0:
             fR = fV;

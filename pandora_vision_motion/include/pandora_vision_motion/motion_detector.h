@@ -148,8 +148,7 @@ namespace pandora_vision_motion
         @param frame: [&cv::Mat] current frame, captured from camera
         @return void
       */
-      void debugShow(const cv::Mat& thresholdedDifference,
-        const cv::Mat &frame);
+      void debugShow();
 
       /**
         @brief Function that calculates motion's position
@@ -175,6 +174,8 @@ namespace pandora_vision_motion
       //!< Foreground mask
       cv::Mat foreground_;
       cv::Mat movingObjects_;
+      //!< diff image
+      cv::Mat thresholdedDifference_;
       //!< Class instance for Gaussian Mixture-based backgound
       //!< and foreground segmentation
       cv::BackgroundSubtractorMOG2 bg_;

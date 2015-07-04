@@ -118,8 +118,7 @@ namespace pandora_vision
     int c =0;
     for (int i = 0; i < _data.size(); i++)
     {
-     
-     if (calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
+      if (DP[i*_data.size()+p] <= _eps) //(calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
       {
           res->push_back(i);
           int x = (*res)[c];
@@ -156,7 +155,7 @@ namespace pandora_vision
          _visitedPoints.at(neighbours->at(i)) = true;
 
          _labels[neighbours->at(i)] = _cluster_id;
-         
+
          neighbours_p.clear();
          regionQuery(neighbours->at(i), &neighbours_p);
           // ROS_INFO_STREAM("NEIGHBORS_p of point " << i << " SIZE"<< neighbours_p.size());
@@ -184,13 +183,13 @@ namespace pandora_vision
              }
 
            neighbours->insert(neighbours->end(), newNeighours.begin(), newNeighours.end());
-           } 
+           }
             // ROS_INFO_STREAM("EXPANDING NEIGHBORS_SIZE="<< neighbours->size());
          }
 
             // expandCluster(neighbours[i], neighbours_p);
       }
-      if(_labels[neighbours->at(i)]== -99) 
+      if(_labels[neighbours->at(i)]== -99)
       {
         _labels[neighbours->at(i)] = _cluster_id;
       }
@@ -250,7 +249,7 @@ namespace pandora_vision
       {
         cohesion[i] += sqrt(pow(clusters[i][j].x - centroid[i].x, 2) +
                     pow(clusters[i][j].y - centroid[i].y, 2));
-      } 
+      }
 
     /* for (int i = 0; i < clusters.size(); i++) */
     // {
@@ -271,29 +270,19 @@ namespace pandora_vision
   {
      try
     {
-      //DP = new double[_data.size() * _data.size()];
-      /*  for (int i = 0; i < _data.size(); i++) */
-       // {
-         // DP[i] =  new double[_data.size()];
-       // }
-
-    // // catch (std::bad_alloc& ba)
-    // // {
-      // // std::cerr << "bad_alloc caught: " << ba.what() << '\n';
-    // [> } <]
-
-   /*  for (int i = 0; i < _data.size(); i++) */
-    // {
-      // for (int j = 0; j < _data.size(); j++)
-      // {
-        // if (i == j)
-            // DP[i*_data.size()+j] = 0.0;
-        // else
-            // DP[i*_data.size()+j] = dist2d(_data[i], _data[j]);
-        /* double x = DP[i*_data.size()+j]; */
-   /*       // ROS_INFO_STREAM("DP["<<i<<"]["<<j<<"]="<<x); */
-      // }
-    /* } */
+      DP = new double[_data.size() * _data.size()];
+      for (int i = 0; i < _data.size(); i++)
+      {
+        for (int j = 0; j < _data.size(); j++)
+        {
+          if (i == j)
+              DP[i*_data.size()+j] = 0.0;
+          else
+              DP[i*_data.size()+j] = dist2d(_data[i], _data[j]);
+          double x = DP[i*_data.size()+j];
+           // ROS_INFO_STREAM("DP["<<i<<"]["<<j<<"]="<<x);
+        }
+      }
     for (int i = 0; i < _data.size(); i++)
     {
       if (isVisited(i) == false)
@@ -320,12 +309,8 @@ namespace pandora_vision
       }
     }
 
-    // for(int i = 0; i < _data.size(); i++)
-    // {
-        // delete [] DP[i];
-    // }
-     // delete [] DP;
-    } 
+    delete [] DP;
+    }
     catch (std::bad_alloc& ba)
     {
       std::cerr << "bad_alloc caught: " << ba.what() << '\n';
@@ -341,8 +326,6 @@ namespace pandora_vision
       // // ROS_INFO_STREAM("dist"<< pt1 << " "<< pt2 <<"=" << x);
       // return DP[pt1][pt2];
     /* }  */
-    
-    
     double minDist = dist2d(_data[pt1], _data[pt2]);
 
   /*   cv::Rect a = _data[pt1]; */
@@ -380,9 +363,9 @@ namespace pandora_vision
     // minDist = std::min(minDist, dist2d(bra, blb));
     /* minDist = std::min(minDist, dist2d(bra, brb)); */
 
-    // DP[pt1][pt2] = minDist; 
-    // DP[pt2][pt1] = minDist;  
+    // DP[pt1][pt2] = minDist;
+    // DP[pt2][pt1] = minDist;
      // // ROS_INFO_STREAM("DIST"<< pt1 << " "<< pt2 <<"=" << minDist);
-    return minDist; 
+    return minDist;
   }
 }  // namespace pandora_vision
