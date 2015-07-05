@@ -45,21 +45,23 @@ namespace pandora_vision
 {
 namespace pandora_vision_obstacle
 {
-  ObstaclePreProcessor::ObstaclePreProcessor() :
-    sensor_processor::PreProcessor<sensor_msgs::PointCloud2, ImagesStamped>(),
-    converterPtr_( new PointCloudToImageConverter )
-  {
-  }
 
-  bool ObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
+  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns,
+    sensor_processor::Handler* handler)
+    : sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, ImagesStamped>(ns, handler)
+  {}
+
+  bool ObstaclePreProcessor::preProcess(const EnhancedImageConstPtr& input,
     const ImagesStampedPtr& output)
   {
     output->setHeader(input->header);
 
-    output->setRgbImage(converterPtr_->convertPclToImage(input,
-          CV_8UC3));
-    output->setDepthImage(converterPtr_->convertPclToImage(input,
-          CV_32FC1));
+    cv_bridge::CvImagePtr inMsg;
+    inMsg = cv_bridge::toCvCopy(input->rgbImage, sensor_msgs::image_encodings::BGR8);
+    output->setRgbImage(inMsg->image);
+
+    inMsg = cv_bridge::toCvCopy(input->depthImage, sensor_msgs::image_encodings::TYPE_32FC1);
+    output->setDepthImage(inMsg->image);
 
     if (output->rgbImage.empty() || output->depthImage.empty())
     {
