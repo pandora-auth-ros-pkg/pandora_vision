@@ -43,16 +43,12 @@
 
 namespace pandora_vision
 {
-  VictimHolePreProcessor::VictimHolePreProcessor(const std::string& ns,
-    sensor_processor::Handler* handler)
+namespace pandora_vision_victim
+{
+  VictimHolePreProcessor::VictimHolePreProcessor()
     : sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage,
-    EnhancedImageStamped>(ns, handler)
-  {
-    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
-  }
-
-  VictimHolePreProcessor::~VictimHolePreProcessor() {}
+    EnhancedImageStamped>()
+  {}
 
   bool VictimHolePreProcessor::preProcess(const EnhancedImageConstPtr& input,
     const EnhancedImageStampedPtr& output)
@@ -77,4 +73,5 @@ namespace pandora_vision
     }
     return true;
   }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

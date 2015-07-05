@@ -44,21 +44,23 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   VictimImageProcessor::VictimImageProcessor(const std::string& ns,
     sensor_processor::Handler* handler)
     : sensor_processor::Processor<EnhancedImageStamped,
       POIsStamped>(ns, handler)
   {
-    params_.configVictim(*this->accessPublicNh());
+    params_.configVictim(this->getProcessorNodeHandle());
 
     _debugVictimsPublisher = image_transport::ImageTransport(
-      *this->accessProcessorNh()).advertise(params_.victimDebugImg, 1, true);
+      this->getProcessorNodeHandle()).advertise(params_.victimDebugImg, 1, true);
 
-    rgbSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "rgb", "svm"));
-    depthSvmValidatorPtr_.reset(new SvmValidator(*this->accessPublicNh(), "depth", "svm"));
+    rgbSvmValidatorPtr_.reset(new SvmValidator(this->getProcessorNodeHandle(), "rgb", "svm"));
+    depthSvmValidatorPtr_.reset(new SvmValidator(this->getProcessorNodeHandle(), "depth", "svm"));
 
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
+      this->getProcessorNodeHandle().getNamespace());
   }
 
   VictimImageProcessor::VictimImageProcessor()
@@ -265,4 +267,5 @@ namespace pandora_vision
     }
     return true;
   }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

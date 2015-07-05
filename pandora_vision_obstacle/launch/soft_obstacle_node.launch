@@ -1,13 +1,12 @@
 <launch>
 
-  <node name="soft_obstacle_node" type="pandora_vision_obstacle_soft_obstacle_node"
-    pkg="pandora_vision_obstacle" respawn="False" output="screen" ns="/pandora_vision"/>
+  <node name="pandora_soft_obstacle" type="pandora_vision_obstacle_soft_obstacle_node"
+    pkg="pandora_vision_obstacle" respawn="False" output="screen" >
     <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
-
-  <rosparam file="$(find pandora_vision_obstacle)/config/obstacle_topics.yaml"
-    command="load" ns="/pandora_vision/pandora_vision_obstacle_soft_obstacle"/>
-
-  <rosparam file="$(find pandora_vision_obstacle)/config/soft_obstacle_params.yaml"
-    command="load" ns="/pandora_vision/pandora_vision_obstacle_soft_obstacle"/>
+    <rosparam file="$(find pandora_vision_obstacle)/config/obstacle_topics.yaml"
+      command="load" />
+    <rosparam file="$(find pandora_vision_obstacle)/config/soft_obstacle_params.yaml"
+      command="load" ns="detector" />
+  </node>
 
 </launch>

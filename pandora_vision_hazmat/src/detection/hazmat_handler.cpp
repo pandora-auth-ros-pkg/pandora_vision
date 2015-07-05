@@ -43,17 +43,11 @@
 
 namespace pandora_vision
 {
-  HazmatHandler::HazmatHandler(const std::string& ns) :
-    VisionHandler<HazmatPreProcessor, pandora_vision_hazmat::HazmatProcessor,
-      HazmatPostProcessor>(ns)
-  {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-  }
-
-  void HazmatHandler::completeTransition()
+namespace pandora_vision_hazmat
+{
+  HazmatHandler::HazmatHandler() :
+    VisionHandler<HazmatPreProcessor, HazmatProcessor, HazmatPostProcessor>()
   {
   }
+}  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision

@@ -37,8 +37,10 @@
 
 #ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H
 #define PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H
+
 #include <iostream>
 #include <cstdlib>
+#include <boost/shared_ptr.hpp>
 
 #include "dynamic_reconfigure/server.h"
 #include "pandora_vision_landoltc/landoltc_cfgConfig.h"
@@ -48,6 +50,8 @@
 #include "opencv2/opencv.hpp"
 
 namespace pandora_vision
+{
+namespace pandora_vision_landoltc
 {
   struct LandoltcParameters
   {
@@ -60,15 +64,15 @@ namespace pandora_vision
     @return void
     **/
     void parametersCallback(
-    const pandora_vision_landoltc::landoltc_cfgConfig& config,
+    const ::pandora_vision_landoltc::landoltc_cfgConfig& config,
     const uint32_t& level);
 
-    dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc_cfgConfig>::CallbackType f;
+    dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig >::CallbackType f;
     public:
 
     //!< The dynamic reconfigure (landoltc) parameters' server
-    dynamic_reconfigure::Server<pandora_vision_landoltc::landoltc_cfgConfig>
-    server;
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig > >
+    server_;
 
     //!< Threshold parameters
     double gradientThreshold;
@@ -79,5 +83,6 @@ namespace pandora_vision
     double timerThreshold;
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision_landoltc
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H

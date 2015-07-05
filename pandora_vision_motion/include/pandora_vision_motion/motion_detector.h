@@ -48,6 +48,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   class MotionDetector  
   {
     public:
@@ -155,5 +157,6 @@ namespace pandora_vision
 
      friend class MotionDetectorTest;
   };
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_MOTION_DETECTOR_H

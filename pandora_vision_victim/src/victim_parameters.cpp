@@ -40,7 +40,9 @@
 
 namespace pandora_vision
 {
-  VictimParameters::VictimParameters()
+namespace pandora_vision_victim
+{
+  VictimParameters::VictimParameters(const ros::NodeHandle& nh) : server(nh)
   {
     //!< Dynamic reconfigure parameters
     rgb_vj_weight = 0.2;
@@ -69,7 +71,7 @@ namespace pandora_vision
   @return void
   **/
   void VictimParameters::parametersCallback(
-    const pandora_vision_victim::victim_dyn_reconfConfig& config,
+    const ::pandora_vision_victim::victim_dyn_reconfConfig& config,
     const uint32_t& level)
   {
     rgb_vj_weight = config.rgb_vj_weight;
@@ -111,4 +113,5 @@ namespace pandora_vision
     }
     cascade_path = packagePath + cascade_path;
   }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

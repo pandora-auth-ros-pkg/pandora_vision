@@ -59,10 +59,13 @@ namespace pandora_vision
       * @param handler [sensor_processor::AbstractHandler*] A pointer of the class that
       * handles this processor
       **/
-    VisionProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-      sensor_processor::Processor<CVMatStamped, POIsStamped>(ns, handler) {}
-    VisionProcessor(void) :
+    VisionProcessor() :
       sensor_processor::Processor<CVMatStamped, POIsStamped>() {}
+    virtual void
+    initialize(const std::string& ns, sensor_processor::Handler* handler)
+    {
+      sensor_processor::Processor<CVMatStamped, POIsStamped>::initialize(ns, handler);
+    }
 
     /**
       * @brief Virtual Destructor

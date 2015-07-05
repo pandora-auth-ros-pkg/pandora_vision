@@ -46,6 +46,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   /*
    * @class ClassifierFactory
    * @brief The class used to produce the different classifier trainer objects
@@ -77,7 +79,8 @@ namespace pandora_vision
     private:
       ros::NodeHandle nh_;
   };
-}  //  namespace pandora_vision
+}  // namespace pandora_vision_victim
+}  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_CLASSIFIER_FACTORY_H
 

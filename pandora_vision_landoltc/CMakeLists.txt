@@ -67,9 +67,9 @@ add_library(${PROJECT_NAME}_2d_preprocessor
 target_link_libraries(${PROJECT_NAME}_2d_preprocessor
   ${catkin_LIBRARIES}
   )
-
 add_dependencies(${PROJECT_NAME}_2d_preprocessor
-  ${catkin_EXPORTED_TARGETS})
+  ${catkin_EXPORTED_TARGETS}
+  )
 ########################### landoltc postprocessor ############################
 
 add_library(${PROJECT_NAME}_2d_postprocessor
@@ -78,9 +78,9 @@ add_library(${PROJECT_NAME}_2d_postprocessor
 target_link_libraries(${PROJECT_NAME}_2d_postprocessor
   ${catkin_LIBRARIES}
   )
-
 add_dependencies(${PROJECT_NAME}_2d_postprocessor
-  ${catkin_EXPORTED_TARGETS})
+  ${catkin_EXPORTED_TARGETS}
+  )
 ########################### landoltc handler ############################
 
 add_library(${PROJECT_NAME}_2d_handler
@@ -96,7 +96,7 @@ target_link_libraries(${PROJECT_NAME}_2d_handler
 ########################### landoltcNode ############################
 add_executable(${PROJECT_NAME}_2d_node
   src/landoltc_2d/landoltc_node.cpp
-)
+  )
 target_link_libraries(${PROJECT_NAME}_2d_node
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}_2d_handler
@@ -104,7 +104,7 @@ target_link_libraries(${PROJECT_NAME}_2d_node
 add_dependencies(${PROJECT_NAME}_2d_node
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
-)
+  )
 
 
 add_library(${PROJECT_NAME}_3d_lib

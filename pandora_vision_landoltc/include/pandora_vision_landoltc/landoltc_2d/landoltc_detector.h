@@ -46,16 +46,16 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_landoltc
+{
   class LandoltCDetector : public VisionProcessor
   {
     public:
       //!< Constructor
-      LandoltCDetector(const std::string& ns, sensor_processor::Handler* handler);
-      
-      LandoltCDetector();
+      virtual void
+      initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-      //!< Destructor
-      virtual ~LandoltCDetector();
+      LandoltCDetector();
 
       /**
       @brief Function for the initialization of the reference image
@@ -123,7 +123,7 @@ namespace pandora_vision
       @return [std::vector<POIPtr>] Vector containing shared pointers of POI class
       **/
       std::vector<POIPtr> begin(cv::Mat input);
-      
+
       /**
       @brief Calculation of rotation based on moments.Precision is good for a
       distance up to 30cm from the camera
@@ -131,8 +131,8 @@ namespace pandora_vision
       @param temp [LandoltCPOIPtr] Shared Pointer of class LandoltCPOI
       @return void
       **/
-      void findRotationA(const cv::Mat& in, LandoltCPOIPtr temp);  
-      
+      void findRotationA(const cv::Mat& in, LandoltCPOIPtr temp);
+
       /**
       @brief Calculation of rotation based on thinning.Precision is good for a
       distance up to 50cm from the camera, gives more accurate results than the first
@@ -140,34 +140,34 @@ namespace pandora_vision
       @param in [const cv::Mat&] Matrix containing the padded frame
       @param temp [LandoltCPOIPtr] Shared Pointer of class LandoltCPOI
       @return void
-      **/  
+      **/
       void findRotationB(const cv::Mat&in, LandoltCPOIPtr temp);
-      
+
       /**
       @brief Function for calculating the neighbours of pixels considering
       8-connectivity
       @param index [unsigned int] Index of pixel in matrix
       @param in [cv::Mat&] Input Image
       @return void
-      **/    
+      **/
       void find8Neights(unsigned int index, const cv::Mat& in);
-      
+
       /**
       @brief Function for calculating perspective transform, in
       order to get better angle calculation precision
       @param rec [cv::rec] Rectangle enclosing a 'C'
       @param in [cv::Mat&] Input Image
-      @return [cv::Mat] Output Image 
-      **/    
+      @return [cv::Mat] Output Image
+      **/
       cv::Mat getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec);
-      
+
       /**
       @brief Clearing vector values
       @param void
       @return void
       **/
       void clear();
-      
+
       /**
       @brief Performs fusion taking in consideration number of C's in each Landolt
       @param void
@@ -180,7 +180,7 @@ namespace pandora_vision
        **/
       virtual bool
         process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
-    
+
     private:
       //!<Value for threshholding gradients
       int _minDiff;
@@ -198,7 +198,7 @@ namespace pandora_vision
       std::vector<std::vector<cv::Point> > _refContours;
       //!<Vector containing edge points of C, found using findRotationB function
       std::vector<cv::Point> _edgePoints;
-      //!<Value representing the number of edges found, again using finRotationB function  
+      //!<Value representing the number of edges found, again using finRotationB function
       int _edges;
       //!<2D Matrix containing "votes" of each pixel, used for finding the centers
       cv::Mat _voting;
@@ -208,10 +208,11 @@ namespace pandora_vision
       cv::Mat _mask;
       //!<Vector containing LandoltCPOIPtrs
       std::vector<LandoltCPOIPtr> _landoltc;
-      
+
       LandoltcParameters params;
 
       friend class LandoltcDetectorTest;
   };
-} // namespace pandora_vision
+}  // namespace pandora_vision_landoltc
+}  // namespace pandora_vision
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_DETECTOR_H

@@ -50,6 +50,8 @@
  */
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   AbstractValidator::AbstractValidator(const ros::NodeHandle& nh,
       const std::string& imageType,
       const std::string& classifierType)
@@ -195,4 +197,5 @@ namespace pandora_vision
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Class Label = " << *classLabel);
     ROS_INFO_STREAM(nodeMessagePrefix_ << ": Probability = " << *probability);
   }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

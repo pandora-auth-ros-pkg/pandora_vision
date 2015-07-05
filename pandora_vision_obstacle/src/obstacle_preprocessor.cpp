@@ -43,15 +43,13 @@
 
 namespace pandora_vision
 {
-  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns,
-    sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-    ImagesStamped>(ns, handler), converterPtr_(new PointCloudToImageConverter)
+namespace pandora_vision_obstacle
+{
+  ObstaclePreProcessor::ObstaclePreProcessor() :
+    sensor_processor::PreProcessor<sensor_msgs::PointCloud2, ImagesStamped>(),
+    converterPtr_( new PointCloudToImageConverter )
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
   }
-
-  ObstaclePreProcessor::~ObstaclePreProcessor() {}
 
   bool ObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
     const ImagesStampedPtr& output)
@@ -72,4 +70,5 @@ namespace pandora_vision
     return true;
   }
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

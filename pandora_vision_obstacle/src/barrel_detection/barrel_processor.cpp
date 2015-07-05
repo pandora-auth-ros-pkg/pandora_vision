@@ -41,16 +41,11 @@
 
 namespace pandora_vision
 {
-  BarrelProcessor::BarrelProcessor(const std::string& ns,
-    sensor_processor::Handler* handler) : sensor_processor::Processor<ImagesStamped,
-    POIsStamped>(ns, handler)
-  {
-    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
-  }
-
-  BarrelProcessor::BarrelProcessor() : sensor_processor::Processor<ImagesStamped,
-    POIsStamped>() {}
+namespace pandora_vision_obstacle
+{
+  BarrelProcessor::BarrelProcessor() :
+    sensor_processor::Processor<ImagesStamped, POIsStamped>()
+  {}
 
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
     const POIsStampedPtr& output)
@@ -67,4 +62,5 @@ namespace pandora_vision
     }
     return true;
   }
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

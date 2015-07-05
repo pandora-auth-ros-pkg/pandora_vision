@@ -46,8 +46,9 @@
 
 namespace pandora_vision
 {
-  SoftObstacleDetector::SoftObstacleDetector(const std::string& name,
-      const ros::NodeHandle& nh)
+namespace pandora_vision_obstacle
+{
+  SoftObstacleDetector::SoftObstacleDetector(const std::string& name, const ros::NodeHandle& nh)
   {
     nodeName_ = name;
 
@@ -475,4 +476,5 @@ float SoftObstacleDetector::detectROI(const std::vector<cv::Vec4i>& verticalLine
     }
     return pois;
   }
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

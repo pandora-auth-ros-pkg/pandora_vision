@@ -48,6 +48,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   class MotionHandler : public VisionHandler<MotionPreProcessor, 
     MotionProcessor, MotionPostProcessor>
   {
@@ -58,6 +60,7 @@ namespace pandora_vision
     private:
       virtual void completeTransition();
   };
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_MOTION_MOTION_HANDLER_H

@@ -45,6 +45,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_landoltc
+{
   class LandoltCPOI : public POI
   {
     public:
@@ -106,6 +108,7 @@ namespace pandora_vision
   };
   
   typedef LandoltCPOI::Ptr LandoltCPOIPtr;
+}  // namespace pandora_vision_landoltc
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_POI_H

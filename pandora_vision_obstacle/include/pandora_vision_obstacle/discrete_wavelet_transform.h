@@ -46,6 +46,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class DiscreteWaveletTransform
   {
     public:
@@ -198,6 +200,7 @@ namespace pandora_vision
   typedef DiscreteWaveletTransform::MatPtr MatPtr;
   typedef DiscreteWaveletTransform::MatConstPtr MatConstPtr;
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H

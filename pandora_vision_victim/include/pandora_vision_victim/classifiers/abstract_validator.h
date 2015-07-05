@@ -57,6 +57,8 @@
  */
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   /**
    * @class AbstractValidator
    * @brief This class classifies images using a classifier model.
@@ -152,5 +154,6 @@ namespace pandora_vision
       /// this vector contains max values.
       std::vector<double> normalizationParamTwoVec_;
   };
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_ABSTRACT_VALIDATOR_H

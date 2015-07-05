@@ -41,16 +41,9 @@
 
 namespace pandora_vision
 {
-  DataMatrixHandler::DataMatrixHandler(const std::string& ns) : 
-    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>(ns)
-  {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-  }
-  
-  void DataMatrixHandler::completeTransition()
-  {
-  }
+namespace pandora_vision_datamatrix
+{
+  DataMatrixHandler::DataMatrixHandler() :
+    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>() {}
+}  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision

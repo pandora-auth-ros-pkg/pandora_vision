@@ -49,13 +49,14 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   /**
    * @brief Constructor. Initialize member variables.
    */
-  AbstractClassifier::AbstractClassifier(const std::string& ns,
+  AbstractClassifier::AbstractClassifier(const ros::NodeHandle& nh,
       const std::string& datasetPath, const std::string& classifierType,
-      const std::string& imageType) :
-      nh_(ns)
+      const std::string& imageType)
   {
     datasetPath_ = datasetPath;
     imageType_ = imageType;
@@ -462,5 +463,6 @@ namespace pandora_vision
     evaluate(results, testLabelsMat);
   }
 
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision
 

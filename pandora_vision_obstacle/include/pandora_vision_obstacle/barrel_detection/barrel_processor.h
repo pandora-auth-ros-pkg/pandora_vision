@@ -48,19 +48,22 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class BarrelProcessor : public sensor_processor::Processor<ImagesStamped, POIsStamped>
   {
     public:
       typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
 
-      BarrelProcessor(const std::string& ns, sensor_processor::Handler* handler);
       BarrelProcessor();
+      virtual void
+      initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-      virtual ~BarrelProcessor() {}
-
-      virtual bool process(const ImagesStampedConstPtr& input,
+      virtual bool
+      process(const ImagesStampedConstPtr& input,
         const POIsStampedPtr& output);
   };
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H

@@ -42,6 +42,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   DiscreteWaveletTransform::DiscreteWaveletTransform(int kernelSize)
   {
   }
@@ -276,4 +278,5 @@ namespace pandora_vision
     return dwtImages;
   }
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

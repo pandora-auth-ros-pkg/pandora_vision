@@ -43,7 +43,7 @@
 #include <string>
 #include <vector>
 
-#include "sensor_processor/handler.h"
+#include "sensor_processor/dynamic_handler.h"
 #include "pandora_vision_victim/victim_image_preprocessor.h"
 #include "pandora_vision_victim/victim_hole_preprocessor.h"
 #include "pandora_vision_victim/victim_image_processor.h"
@@ -52,20 +52,25 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   class VictimHandler : public sensor_processor::Handler
   {
-    public:
-      explicit VictimHandler(const std::string& ns);
-      virtual ~VictimHandler() {}
+   public:
+    VictimHandler();
 
-    private:
-      virtual void startTransition(int newState);
-      virtual void completeTransition();
+   private:
+    virtual void startTransition(int newState);
 
-    private:
-      std::vector<int> holeActiveStates_;
-      std::vector<int> imageActiveStates_;
+   protected:
+    int currentState_;
+    int previousState_;
+
+   private:
+    std::vector<int> holeActiveStates_;
+    std::vector<int> imageActiveStates_;
   };
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_VICTIM_VICTIM_HANDLER_H

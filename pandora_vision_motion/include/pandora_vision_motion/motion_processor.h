@@ -52,6 +52,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   class MotionProcessor : public VisionProcessor
   {
     public:
@@ -75,7 +77,7 @@ namespace pandora_vision
 
     private:
       BBoxPOIPtr bounding_box_;
-      
+
       MotionDetector motionDetector;
 
       dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>::CallbackType f;
@@ -87,5 +89,6 @@ namespace pandora_vision
         const pandora_vision_motion::motion_cfgConfig& config,
         const uint32_t& level);
   };
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_MOTION_PROCESSOR_H

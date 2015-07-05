@@ -43,8 +43,10 @@
 
 namespace pandora_vision
 {
-  VictimHandler::VictimHandler(const std::string& ns) :
-    sensor_processor::Handler(ns)
+namespace pandora_vision_victim
+{
+  VictimHandler::VictimHandler() :
+    sensor_processor::Handler()
   {
     holeActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION);
     holeActiveStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
@@ -79,9 +81,12 @@ namespace pandora_vision
 
     if (holePreviouslyOff && holeCurrentlyOn)
     {
-      preProcPtr_.reset(new VictimHolePreProcessor("~/preprocessor", this));
-      processorPtr_.reset(new VictimHoleProcessor("~/processor", this));
-      postProcPtr_.reset(new VictimPostProcessor("~/postprocessor", this));
+      preProcPtr_.reset( new VictimHolePreProcessor );
+      preProcPtr_->initialize("~preprocessor", this);
+      processorPtr_.reset( new VictimHoleProcessor );
+      processorPtr_->initialize("~detector", this);
+      postProcPtr_.reset( new VictimPostProcessor );
+      postProcPtr_->initialize("~postprocessor", this);
     }
     /*
     else if (imagePreviouslyOff && imageCurrentlyOn)
@@ -110,8 +115,5 @@ namespace pandora_vision
     previousState_ = currentState_;
     transitionComplete(currentState_);
   }
-
-  void VictimHandler::completeTransition()
-  {
-  }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

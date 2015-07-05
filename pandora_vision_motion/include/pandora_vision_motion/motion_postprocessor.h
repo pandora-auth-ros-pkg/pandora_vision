@@ -47,6 +47,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   class MotionPostProcessor : public VisionPostProcessor<pandora_common_msgs::GeneralAlertVector>
   {
     public:
@@ -58,6 +60,7 @@ namespace pandora_vision
       virtual bool
         postProcess(const POIsStampedConstPtr& input, const GeneralAlertVectorPtr& output);
   };
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_MOTION_MOTION_POSTPROCESSOR_H

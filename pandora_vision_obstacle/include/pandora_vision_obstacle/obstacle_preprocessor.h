@@ -47,22 +47,24 @@
 
 namespace pandora_vision
 {
-  class ObstaclePreProcessor : public sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-    ImagesStamped>
+namespace pandora_vision_obstacle
+{
+  class ObstaclePreProcessor :
+    public sensor_processor::PreProcessor<sensor_msgs::PointCloud2, ImagesStamped>
   {
-    public:
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
+   public:
+    typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+    typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
 
-    public:
-      ObstaclePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~ObstaclePreProcessor();
+   public:
+    ObstaclePreProcessor();
 
-      virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
+    virtual bool preProcess(const PointCloud2ConstPtr& input, const ImagesStampedPtr& output);
 
-    private:
-      PointCloudToImageConverterPtr converterPtr_;
+   private:
+    PointCloudToImageConverterPtr converterPtr_;
   };
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_OBSTACLE_PREPROCESSOR_H

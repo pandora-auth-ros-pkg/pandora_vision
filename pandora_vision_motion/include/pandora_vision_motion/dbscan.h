@@ -46,6 +46,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   typedef std::vector<int32_t> Neighbors;
   typedef std::vector<bool> NoisePoints;
   typedef std::vector<bool> VisitedPoints;
@@ -136,5 +138,6 @@ namespace pandora_vision
       */
       std::vector<std::vector<cv::Rect> > getGroups();
   };
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_MOTION_DBSCAN_H

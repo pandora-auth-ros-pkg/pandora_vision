@@ -45,12 +45,16 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_landoltc
+{
   class LandoltCPreProcessor : public VisionPreProcessor
   {
     public:
-      LandoltCPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~LandoltCPreProcessor();
+      LandoltCPreProcessor();
+      virtual void
+      initialize(const std::string& ns, sensor_processor::Handler* handler);
   };
+}  // namespace pandora_vision_landoltc
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_PREPROCESSOR_H

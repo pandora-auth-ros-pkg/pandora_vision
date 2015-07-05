@@ -35,8 +35,8 @@
 * Author: Despoina Paschalidou
 *********************************************************************/
 
-#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H 
-#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H 
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
 
 #include <iostream>
 #include <stdlib.h>
@@ -55,70 +55,72 @@
 
 #define DEBUG_MODE false
 
-namespace pandora_vision 
-{  
+namespace pandora_vision
+{
+namespace pandora_vision_datamatrix
+{
   class DatamatrixDetector : public VisionProcessor
   {
-    public:
-      /**
-        @brief Default Constructor
-        @return void
-      **/
-      DatamatrixDetector(const std::string& ns, sensor_processor::Handler* handler);
-      
-      /**
-        @brief Constructor
-      **/
-      DatamatrixDetector();
-      
-      /**
-        @brief Default Destructor
-        @return void
-      **/
-      virtual ~DatamatrixDetector();
-      
-      /**
-        @brief Detects datamatrixes and stores them in a vector.
-        @param image [cv::Mat] The image in which the datamatrixes are detected
-        @return void
-      **/
-      std::vector<POIPtr> detect_datamatrix(cv::Mat image);
-      
-      /**
-      @brief Function that finds the position of datamatrixe's center
+   public:
+    /**
+      @brief Constructor
+    **/
+    virtual void
+    initialize(const std::string& ns, sensor_processor::Handler* handler);
+
+    DatamatrixDetector();
+
+    /**
+      @brief Default Destructor
+      @return void
+    **/
+    virtual ~DatamatrixDetector();
+
+    /**
+      @brief Detects datamatrixes and stores them in a vector.
       @param image [cv::Mat] The image in which the datamatrixes are detected
       @return void
-      */
-      void locate_datamatrix(cv::Mat image);
-      
-      /**
-      @brief Function that creates view for debugging purposes.
-      @param image [cv::Mat] The image in which the datamatrixes are detected
-      @param datamatrixVector [std::vector<cv::Point2f>] The vector of 4 corners 
-      of datamatrix image, according to which i draw lines for debug reasons
-      @return debug_frcame [cv::Mat], frame with rotated rectangle
-      and center of it
-      */
-      void debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector);
-      
-      virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
-      
-    private:
-      DmtxMessage *msg;
-      DmtxImage *img;
-      DmtxDecode *dec;
-      DmtxRegion *reg;
-      DmtxTime timeout;
-      
-      cv::Mat datamatrix_frame;
-      cv::Mat debug_frame;
-      
-      image_transport::Publisher _datamatrixPublisher;
-      
-      DataMatrixPOIPtr detected_datamatrix;
-      
-      //!< List of detected datamatrixes
-      std::vector<POIPtr> datamatrix_list;  
+    **/
+    std::vector<POIPtr> detect_datamatrix(cv::Mat image);
+
+    /**
+    @brief Function that finds the position of datamatrixe's center
+    @param image [cv::Mat] The image in which the datamatrixes are detected
+    @return void
+    */
+    void locate_datamatrix(cv::Mat image);
+
+#ifdef DEBUG_MODE
+    /**
+    @brief Function that creates view for debugging purposes.
+    @param image [cv::Mat] The image in which the datamatrixes are detected
+    @param datamatrixVector [std::vector<cv::Point2f>] The vector of 4 corners
+    of datamatrix image, according to which i draw lines for debug reasons
+    @return debug_frcame [cv::Mat], frame with rotated rectangle
+    and center of it
+    */
+    void debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector);
+#endif
+
+    virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
+
+   private:
+    DmtxMessage *msg;
+    DmtxImage *img;
+    DmtxDecode *dec;
+    DmtxRegion *reg;
+    DmtxTime timeout;
+
+#ifdef DEBUG_MODE
+    cv::Mat debug_frame;
+    image_transport::Publisher _datamatrixPublisher;
+#endif
+
+    DataMatrixPOIPtr detected_datamatrix;
+
+    //!< List of detected datamatrixes
+    std::vector<POIPtr> datamatrix_list;
   };
+}  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H

@@ -47,6 +47,8 @@
  */
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   /**
    * @brief Default Constructor
    */
@@ -338,4 +340,5 @@ namespace pandora_vision
   {
     return bowTrainerPtr_->getDescriptors();
   }
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision
