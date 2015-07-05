@@ -34,6 +34,7 @@
  *
  * Authors:
  *  Choutas Vassilis <vasilis4ch@gmail.com>
+ *  Angelos Triantafyllidis <aggelostriadafillidis@gmail.com>
  *********************************************************************/
 
 #ifndef PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_DETECTOR_H
@@ -43,6 +44,7 @@
 #include <vector>
 #include "cv_bridge/cv_bridge.h"
 #include "ros/ros.h"
+#include <opencv2/opencv.hpp>
 
 namespace pandora_vision
 {
@@ -58,8 +60,64 @@ namespace pandora_vision
       {
       }
 
+      /**
+        @brief Start of the hard obstacle detection process.
+        @param[in] inputImage [const cv::Mat&] The input image from preprocessor
+        @return cv::Mat
+       **/
+      cv::Mat startDetection(const cv::Mat& inputImage);
+
     private:
       std::string nodeName;
+
+      // Configuration parameters
+      int edge_method;
+      bool show_input_image;
+      bool show_edges_image;
+
+      /**
+        @brief Apply edge detection algorithm based on configuration parameter.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image
+        @return void
+       **/
+      void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Apply the canny edge detection algorithm.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image
+        @return void
+       **/
+      void applyCanny(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Apply the sharr edge detection algorithm.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image
+        @return void
+       **/
+      void applyScharr(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Apply the sobel edge detection algorithm.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image
+        @return void
+       **/
+      void applySobel(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Visualization of an image with CV_8SC1 or CV_8UC1 type.
+        If there is a negative value in mat aka unkown area set it 255 for
+        visualization.
+        @param[in] title [const std::string&] The title of image to be shown.
+        @param[in] image [const cv::Mat&] The image to be shown.
+        @param[in] time [int] The time that imshow function lasts in ms.
+        @return void
+       **/
+      void showImage(
+        const std::string& title, const cv::Mat& image, int time);
   };
 
 }  // namespace pandora_vision
