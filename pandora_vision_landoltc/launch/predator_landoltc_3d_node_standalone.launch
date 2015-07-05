@@ -18,6 +18,12 @@
   <param name="kinect/topic_name" value="/kinect/rgb/image_raw" />
 
   <include file="$(find pandora_vision_landoltc)/launch/predator_landoltc_3d_node.launch" />
+<<<<<<< HEAD
   <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
+=======
+
+  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
+
+>>>>>>> Rename robot [ci skip]
 </launch>
