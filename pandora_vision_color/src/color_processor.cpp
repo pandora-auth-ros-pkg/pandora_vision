@@ -72,6 +72,12 @@ namespace pandora_vision
     const uint32_t& level)
   {
     colorDetector.visualization_= config.visualization;
+    colorDetector.iLowH = config.iLowH;
+    colorDetector.iHighH = config.iHighH;
+    colorDetector.iLowS = config.iLowS;
+    colorDetector.iHighS = config.iHighS;
+    colorDetector.iLowV = config.iLowV;
+    colorDetector.iHighV = config.iHighV;
   }
 
    /**

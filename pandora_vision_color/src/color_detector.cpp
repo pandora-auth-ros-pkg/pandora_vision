@@ -53,12 +53,12 @@ namespace pandora_vision
     bounding_box_->setHeight(0);
     bounding_box_->setProbability(0.0f);
     visualization_ = false;
-    iLowH = 157;
+    iLowH = 120;
     iHighH = 180;
-    iLowS = 72;
-    iHighS = 169;
-    iLowV = 156;
-    iHighV = 255;
+    iLowS = 82;
+    iHighS = 232;
+    iLowV = 0;
+    iHighV = 194;
     ROS_INFO_STREAM("Created ColorDetector instance" << visualization_);
   }
 
@@ -163,19 +163,24 @@ namespace pandora_vision
   {
     if(visualization_)
     {
-      cv::namedWindow("Control", CV_WINDOW_AUTOSIZE);
-      cv::createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
-      cv::createTrackbar("HighH", "Control", &iHighH, 179);
+      /* cv::namedWindow("Control", CV_WINDOW_AUTOSIZE); */
+      // cv::createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
+      // cv::createTrackbar("HighH", "Control", &iHighH, 179);
 
-      cv::createTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
-      cv::createTrackbar("HighS", "Control", &iHighS, 255);
+      // cv::createTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
+      // cv::createTrackbar("HighS", "Control", &iHighS, 255);
 
-      cv::createTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
-      cv::createTrackbar("HighV", "Control", &iHighV, 255);
-
-      imshow("Control",binary_);
-      imshow("Final", frame_);
+      // cv::createTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
+      /* cv::createTrackbar("HighV", "Control", &iHighV, 255); */
+      cv::Mat temp1[] = {binary_, binary_, binary_};
+      cv::Mat diff;
+      cv::merge(temp1, 3, diff);
+      cv::Mat displayImage = cv::Mat(frame_.rows, frame_.cols * 2, frame_.type() );
+      frame_.copyTo(displayImage(cv::Rect(0, 0, frame_.cols, frame_.rows)));
+      diff.copyTo(displayImage(cv::Rect(diff.cols, 0, diff.cols, diff.rows)));
+      imshow("ColorDetection", displayImage);
       cv::waitKey(10);
+
     }
   }
 }  // namespace pandora_vision

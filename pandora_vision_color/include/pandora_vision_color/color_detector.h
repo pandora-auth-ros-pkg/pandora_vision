@@ -73,6 +73,16 @@ namespace pandora_vision
 
       bool visualization_;
 
+      //!< HSV range values
+      int iLowH;
+      int iHighH;
+
+      int iLowS;
+      int iHighS;
+
+      int iLowV;
+      int iHighV;
+
     protected:
 
        /**
@@ -96,15 +106,6 @@ namespace pandora_vision
       cv::Mat binary_;
       //!< Bounding box of moving objects.
       BBoxPOIPtr bounding_box_;
-
-      int iLowH;
-      int iHighH;
-
-      int iLowS;
-      int iHighS;
-
-      int iLowV;
-      int iHighV;
 
      // friend class ColorDetectorTest;
   };
