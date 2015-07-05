@@ -71,6 +71,8 @@ namespace pandora_vision
       */
       void detectColor(const cv::Mat& frame);
 
+      bool visualization_;
+
     protected:
 
        /**
@@ -81,12 +83,9 @@ namespace pandora_vision
 
       /**
         @brief Function that calculates color's position
-        @param diff: [&cv::Mat] frame that represents
-        the thresholded difference between current frame and computed
-        background.
         @return void
       */
-      void detectColorPosition(const cv::Mat& diff);
+      void detectColorPosition();
 
     private:
       //!< Current frame to be processed
@@ -97,6 +96,15 @@ namespace pandora_vision
       cv::Mat binary_;
       //!< Bounding box of moving objects.
       BBoxPOIPtr bounding_box_;
+
+      int iLowH;
+      int iHighH;
+
+      int iLowS;
+      int iHighS;
+
+      int iLowV;
+      int iHighV;
 
      // friend class ColorDetectorTest;
   };

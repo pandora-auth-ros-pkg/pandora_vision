@@ -47,7 +47,19 @@ namespace pandora_vision
 
   ColorDetector::ColorDetector(void)
   {
-
+    bounding_box_.reset( new BBoxPOI() );
+    bounding_box_->setPoint(cv::Point(0, 0));
+    bounding_box_->setWidth(0);
+    bounding_box_->setHeight(0);
+    bounding_box_->setProbability(0.0f);
+    visualization_ = false;
+    iLowH = 157;
+    iHighH = 180;
+    iLowS = 72;
+    iHighS = 169;
+    iLowV = 156;
+    iHighV = 255;
+    ROS_INFO_STREAM("Created ColorDetector instance" << visualization_);
   }
 
   
@@ -79,12 +91,25 @@ namespace pandora_vision
       /// blur the image using GaussianBlur
       GaussianBlur( frame_, frame_, cv::Size(3,3), 0, 0, cv::BORDER_DEFAULT );
 
-      //convert RGB image into HSV image
+      /// convert RGB image into HSV image
       cvtColor(frame, hsvFrame_, CV_BGR2HSV);
 
-      //get binary image
-      /*inRange(hsv, Scalar(157, 72, 156), Scalar(180, 169, 255), binary);//pink*/
-      inRange(hsvFrame_, cv::Scalar(110,50,50), cv::Scalar(130,255,255), binary_);//blue
+      /// get binary image
+      inRange(hsvFrame_, cv::Scalar(iLowH, iLowS, iLowV), cv::Scalar(iHighH, iHighS, iHighV), binary_);//pink*/
+      //inRange(hsvFrame_, cv::Scalar(110,50,50), cv::Scalar(130,255,255), binary_);//blue
+
+      /// morphological opening (remove small objects from the foreground)
+      erode(binary_, binary_, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+      dilate( binary_, binary_, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) ); 
+
+      /// morphological closing (fill small holes in the foreground)
+      dilate( binary_, binary_, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) ); 
+      erode(binary_, binary_, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+
+
+      detectColorPosition();
+      if(visualization_)
+        debugShow();
 
     }
   }
@@ -96,17 +121,61 @@ namespace pandora_vision
       background.
     @return void
   */
-  void ColorDetector::detectColorPosition(const cv::Mat& diff)
+  void ColorDetector::detectColorPosition()
   {
-      
+    std::vector< std::vector<cv::Point> > contours;
+    findContours(binary_, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE); //find contours
+    std::vector<double> areas(contours.size());
+    /// find largest contour area
+
+    for(int ii = 0; ii < contours.size(); ii++)
+    {
+            areas[ii] = contourArea(cv::Mat(contours[ii]));
+    }
+
+    /// get index of largest contour
+    double max;
+    cv::Point maxPosition;
+    minMaxLoc(cv::Mat(areas),0,&max,0,&maxPosition);
+
+    /// draw largest contour.
+    drawContours(binary_, contours, maxPosition.y, cv::Scalar(255), CV_FILLED);
+
+    //draw bounding rectangle around largest contour
+    cv::Point center;
+    cv::Rect r;
+    if (contours.size() >= 1)
+    {
+      r = boundingRect(contours[maxPosition.y]);
+      cv::rectangle(frame_, r.tl(),r.br(), CV_RGB(255, 0, 0), 3, 8, 0); //draw rectangle
+       bounding_box_->setPoint(cv::Point(r.x, r.y));
+      bounding_box_->setWidth(r.width);
+      bounding_box_->setHeight(r.height);
+      bounding_box_->setProbability(1.0f);
+    }
   }
 
   /**
     @brief Function used for debug reasons
     @return void
   */
-  void ColorDetector::debugShow( )
+  void ColorDetector::debugShow()
   {
-    
+    if(visualization_)
+    {
+      cv::namedWindow("Control", CV_WINDOW_AUTOSIZE);
+      cv::createTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
+      cv::createTrackbar("HighH", "Control", &iHighH, 179);
+
+      cv::createTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
+      cv::createTrackbar("HighS", "Control", &iHighS, 255);
+
+      cv::createTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
+      cv::createTrackbar("HighV", "Control", &iHighV, 255);
+
+      imshow("Control",binary_);
+      imshow("Final", frame_);
+      cv::waitKey(10);
+    }
   }
 }  // namespace pandora_vision

@@ -71,6 +71,7 @@ namespace pandora_vision
     const pandora_vision_color::color_cfgConfig& config,
     const uint32_t& level)
   {
+    colorDetector.visualization_= config.visualization;
   }
 
    /**
