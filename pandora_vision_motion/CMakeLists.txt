@@ -44,7 +44,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-################# dpscan #################
+################# dbscan #################
 add_library(${PROJECT_NAME}_dbscan
   src/dbscan.cpp
 )

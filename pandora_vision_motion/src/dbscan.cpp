@@ -54,14 +54,13 @@ namespace pandora_vision
       _visitedPoints.push_back(false);
       // _clusteredPoints.push_back(false);
     }
-
   }
 
   DBSCAN::~DBSCAN()
   {
   }
 
-   /**
+  /**
    @brief Function that initializes all vectors to begin with the
    clustering process. At the beginning both visited and clustered data
    are set to false, for each point of interest.
@@ -114,11 +113,11 @@ namespace pandora_vision
     int c =0;
     for (int i = 0; i < _data.size(); i++)
     {
-      if (DP[i*_data.size()+p] <= _eps) //  (calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
+      if (DP[i*_data.size()+p] <= _eps)  // (calculateDistanceMatrix(p, i) < _eps)// (DP[i*_data.size()+p] <= _eps)
       {
-          res->push_back(i);
-          int x = (*res)[c];
-          c++;
+        res->push_back(i);
+        int x = (*res)[c];
+        c++;
       }
     }
   }
@@ -145,44 +144,44 @@ namespace pandora_vision
       if (!isVisited(neighbours->at(i)))
       {
         /// Mark P' as visited
-         _visitedPoints.at(neighbours->at(i)) = true;
+        _visitedPoints.at(neighbours->at(i)) = true;
 
-         _labels[neighbours->at(i)] = _cluster_id;
+        _labels[neighbours->at(i)] = _cluster_id;
 
-         neighbours_p.clear();
-         regionQuery(neighbours->at(i), &neighbours_p);
-         if(neighbours_p.size() >= _minPts)
-         {
-           bool flag;
-           for (int j = 0; j < neighbours_p.size(); j++)
-           {
-             flag = false;
-             newNeighours.clear();
-             for(int k = 0; k < neighbours->size(); k++)
-             {
-                if(neighbours_p[j] == neighbours->at(k))
-                {
-                  flag = true;
-                  break;
-                }
-             }
-             if(!flag)
-             {
-               newNeighours.push_back(neighbours_p[j]);
-             }
+        neighbours_p.clear();
+        regionQuery(neighbours->at(i), &neighbours_p);
+        if (neighbours_p.size() >= _minPts)
+        {
+          bool flag;
+          for (int j = 0; j < neighbours_p.size(); j++)
+          {
+            flag = false;
+            newNeighours.clear();
+            for (int k = 0; k < neighbours->size(); k++)
+            {
+               if (neighbours_p[j] == neighbours->at(k))
+               {
+                 flag = true;
+                 break;
+               }
+            }
+            if (!flag)
+            {
+              newNeighours.push_back(neighbours_p[j]);
+            }
 
-           neighbours->insert(neighbours->end(), newNeighours.begin(), newNeighours.end());
-           }
-         }
-         // expandCluster(neighbours[i], neighbours_p);
+          neighbours->insert(neighbours->end(), newNeighours.begin(), newNeighours.end());
+          }
+        }
+        // expandCluster(neighbours[i], neighbours_p);
       }
-      if(_labels[neighbours->at(i)]== -99)
+      if (_labels[neighbours->at(i)]== -99)
       {
         _labels[neighbours->at(i)] = _cluster_id;
       }
     }
-
   }
+
   /**
    @brief Function that returns all clusters calculated from the given
    set of points
@@ -231,8 +230,8 @@ namespace pandora_vision
     }
 
     /// calculate cohesion
-    for(int i = 0; i < clusters.size(); i++)
-      for(int j = 0; j < clusters[i].size(); j++)
+    for (int i = 0; i < clusters.size(); i++)
+      for (int j = 0; j < clusters[i].size(); j++)
       {
         cohesion[i] += sqrt(pow(clusters[i][j].x - centroid[i].x, 2) +
                     pow(clusters[i][j].y - centroid[i].y, 2));
@@ -302,7 +301,6 @@ namespace pandora_vision
     {
       std::cerr << "bad_alloc caught: " << ba.what() << '\n';
     }
-
   }
 
   double DBSCAN::calculateDistanceMatrix(int pt1, int pt2)

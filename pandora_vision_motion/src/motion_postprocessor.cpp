@@ -57,7 +57,8 @@ namespace pandora_vision
   {
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
     *output = alertVector;
-    if (output->alerts.size() == 0) {
+    if (output->alerts.size() == 0)
+    {
       return false;
     }
     return true;

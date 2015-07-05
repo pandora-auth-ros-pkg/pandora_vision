@@ -70,7 +70,6 @@ namespace pandora_vision_motion
       ClusteredPoints _clusteredPoints;
       NoisePoints _noise;
 
-      
       /**
        @brief Function that initializes all vectors to begin with the
        clustering process. At the beginning both visited and clustered data
@@ -102,8 +101,7 @@ namespace pandora_vision_motion
        @param P:current point,we are processeing
        @return vector of all point in the neighborhoud
       */
-      void regionQuery(int p, std::vector<int>* res)
-;
+      void regionQuery(int p, std::vector<int>* res);
 
        /**
        @brief If a point is found to be a dense part of a cluster, its
@@ -122,14 +120,13 @@ namespace pandora_vision_motion
       double *DP;
 
     public:
-
       int _cluster_id;
 
       std::map<int, int> _labels;
       std::vector<cv::Point>& _data;
 
-      //!< Class constructor
-      explicit DBSCAN(std::vector<cv::Point>& _data, double eps, int minPts);
+      /// Class constructor
+      DBSCAN(std::vector<cv::Point>& _data, double eps, int minPts);
 
       ~DBSCAN();
 
@@ -143,8 +140,7 @@ namespace pandora_vision_motion
       */
       std::vector<std::vector<cv::Point> > getGroups();
 
-       std::vector<double> getCohesion(const std::vector<std::vector<cv::Point> >& clusters);
-
+      std::vector<double> getCohesion(const std::vector<std::vector<cv::Point> >& clusters);
   };
 }  // namespace pandora_vision_motion
 }  // namespace pandora_vision
