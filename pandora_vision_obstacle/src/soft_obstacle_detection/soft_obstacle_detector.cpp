@@ -356,66 +356,57 @@ namespace pandora_vision
         : depthImage.at<float>(y0 * pow(2, level), x0 * pow(2, level)));
 
     // Second point
-    std::vector<float> lineCenter;
-
     int lineCenterX = ((verticalLines[maxLinePosition][0]
         + verticalLines[maxLinePosition][2]) / 2) * pow(2, level);
     int lineCenterY = ((verticalLines[maxLinePosition][1]
         + verticalLines[maxLinePosition][3]) / 2) * pow(2, level);
 
-    // In a Rect(5, 10) around the line center
-    for (int ii = lineCenterY - 4; ii < lineCenterY + 6; ii++)
-    {
-      for (int jj = lineCenterX - 2; jj < lineCenterX + 3; jj++)
-      {
-        if (depthImage.at<float>(ii, jj) > 0)
-        {
-          lineCenter.push_back(depthImage.at<float>(ii, jj));
-        }
-      }
-    }
+    int centerWidth = 5;
+    int centerHeight = 10;
+    cv::Rect lineCenter(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
+        centerWidth, centerHeight);
 
-    if (lineCenter.size() == 0)
-    {
-      depth[1] = 0.0f;
-    }
-    else
-    {
-      std::sort(lineCenter.begin(), lineCenter.end());
-      // Add the median value
-      depth[1] = lineCenter[static_cast<int>(lineCenter.size() / 2)];
-    }
+    cv::Mat resizedDepthImage = depthImage(lineCenter);
+
+    // Image should be continuous in order to be reshaped
+    cv::Mat lineCenterDepth(centerWidth, centerHeight, CV_32FC1);
+    resizedDepthImage.copyTo(lineCenterDepth);
+
+    cv::Mat rowLineCenterDepth = lineCenterDepth.reshape(0, 1);
+    cv::sort(rowLineCenterDepth, rowLineCenterDepth, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
+
+    int nonZeroValues = cv::countNonZero(rowLineCenterDepth);
+    cv::Mat rowNonZeroDepth = rowLineCenterDepth(cv::Rect(rowLineCenterDepth.cols - nonZeroValues, 0,
+          nonZeroValues, 1));
+
+    // Add the median value
+    depth[1] = (rowNonZeroDepth.empty() ? 0.0f
+        : rowNonZeroDepth.at<float>(0, static_cast<int>(rowNonZeroDepth.cols / 2)));
 
     // Forth point
-    lineCenter.clear();
-
     lineCenterX = ((verticalLines[minLinePosition][0]
         + verticalLines[minLinePosition][2]) / 2) * pow(2, level);
     lineCenterY = ((verticalLines[minLinePosition][1]
         + verticalLines[minLinePosition][3]) / 2) * pow(2, level);
 
-    // In a Rect(5, 10) around the line center
-    for (int ii = lineCenterY - 4; ii < lineCenterY + 6; ii++)
-    {
-      for (int jj = lineCenterX - 2; jj < lineCenterX + 3; jj++)
-      {
-        if (depthImage.at<float>(ii, jj) > 0)
-        {
-          lineCenter.push_back(depthImage.at<float>(ii, jj));
-        }
-      }
-    }
+    lineCenter = cv::Rect(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
+        centerWidth, centerHeight);
 
-    if (lineCenter.empty())
-    {
-      depth[3] = 0.0f;
-    }
-    else
-    {
-      std::sort(lineCenter.begin(), lineCenter.end());
-      // Add the median value
-      depth[3] = lineCenter[static_cast<int>(lineCenter.size() / 2)];
-    }
+    resizedDepthImage = depthImage(lineCenter);
+
+    // Image should be continuous in order to be reshaped
+    resizedDepthImage.copyTo(lineCenterDepth);
+
+    rowLineCenterDepth = lineCenterDepth.reshape(0, 1);
+    cv::sort(rowLineCenterDepth, rowLineCenterDepth, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
+
+    nonZeroValues = cv::countNonZero(rowLineCenterDepth);
+    rowNonZeroDepth = rowLineCenterDepth(cv::Rect(rowLineCenterDepth.cols - nonZeroValues, 0,
+          nonZeroValues, 1));
+
+    // Add the median value
+    depth[3] = (rowNonZeroDepth.empty() ? 0.0f
+        : rowNonZeroDepth.at<float>(0, static_cast<int>(rowNonZeroDepth.cols / 2)));
 
     return depth;
   }
