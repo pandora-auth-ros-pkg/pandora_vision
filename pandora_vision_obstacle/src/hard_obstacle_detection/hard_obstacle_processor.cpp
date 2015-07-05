@@ -34,6 +34,7 @@
  *
  * Authors:
  *  Choutas Vassilis <vasilis4ch@gmail.com>
+ *  Angelos Triantafyllidis <aggelostriadafillidis@gmail.com>
  *********************************************************************/
 
 #include <string>
@@ -60,6 +61,9 @@ namespace pandora_vision
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
       const CVMatStampedPtr& output)
   {
+    output->header = input->getHeader();
+    output->image = detector_->startDetection(input->getImage());
+
     return true;
   }
 
