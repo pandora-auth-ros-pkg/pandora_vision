@@ -60,8 +60,13 @@ namespace pandora_vision
       * @brief Constructor
       * @param ns [const std::string&] The namespace of this handler's nodeHandle
       **/
+<<<<<<< HEAD
     VisionHandler() {}
     virtual ~VisionHandler() {}
+=======
+    VisionHandler() :
+      sensor_processor::DynamicHandler(false) {}
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
 
    protected:
     /**

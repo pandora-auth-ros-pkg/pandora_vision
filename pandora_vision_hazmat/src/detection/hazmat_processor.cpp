@@ -98,6 +98,10 @@ namespace pandora_vision
 
     HazmatProcessor::~HazmatProcessor()
     {
+<<<<<<< HEAD
+=======
+      ROS_INFO("[%s] terminated", this->getName().c_str());
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
       delete detector_;
       ROS_INFO("[%s] destroyed", this->getName().c_str());
     }

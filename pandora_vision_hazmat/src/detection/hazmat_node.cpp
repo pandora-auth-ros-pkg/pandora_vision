@@ -50,7 +50,11 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "hazmat_node");
+<<<<<<< HEAD
   pandora_vision::pandora_vision_hazmat::HazmatHandler hazmatHandler;
+=======
+  pandora_vision::pandora_vision_hazmat::HazmatHandler hazmatHandler();
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   ros::spin();
   return 0;
 }

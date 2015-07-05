@@ -302,6 +302,32 @@ namespace pandora_vision_victim
             cvPoint(10, 80),
             cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 255, 255), 1, CV_AA);
         }
+      }
+      for (unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
+      {
+        cv::rectangle(debugImage, holes_bounding_boxes[i],
+          CV_RGB(0, 0, 0));
+      }
+
+      // if (counter_ == paramsPtr_->positivesCounter)
+      {
+        std::ostringstream convert;
+        convert << "RGB_" << boost::to_upper_copy<std::string>(rgbValidatorPtr_->getClassifierType())
+          << " : " << rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 255), 1, CV_AA);
+      }
+      /*
+      else
+      {
+        std::ostringstream convert;
+        convert << "RGB_SVM : "<< rgb_svm_keypoints.size();
+        cv::putText(debugImage, convert.str().c_str(),
+          cvPoint(10, 60),
+          cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+      }
+      */
 
         {
           std::ostringstream convert;
@@ -487,26 +513,26 @@ namespace pandora_vision_victim
     */
     // Only rgb svm probabilities
 
-    // if (detectionMode == GOT_HOLES )  // || detectionMode == GOT_RGB
-    // {
-      // for (unsigned int i = 0 ; i < rgb_svm_probabilities.size(); i++)
-      // {
-        // VictimPOIPtr temp(new VictimPOI);
-        // if (rgb_svm_probabilities[i]->getClassLabel() == 1)
-        // {
-          // counter_++;
-          // temp->setProbability(rgb_svm_probabilities[i]->getProbability() *
-            // params_.rgb_svm_weight);
-          // temp->setPoint(rgb_svm_probabilities[i]->getPoint());
-          // temp->setSource(RGB_SVM);
-          // temp->setWidth(rgb_svm_probabilities[i]->getWidth());
-          // temp->setHeight(rgb_svm_probabilities[i]->getHeight());
-          // final_probabilities.push_back(temp);
-        // }
-        // else
-          // counter_--;
-     // }
-    /* } */
+    if (detectionMode == GOT_HOLES )  // || detectionMode == GOT_RGB
+    {
+      for (unsigned int i = 0 ; i < rgb_svm_probabilities.size(); i++)
+      {
+        VictimPOIPtr temp(new VictimPOI);
+        if (rgb_svm_probabilities[i]->getClassLabel() == 1)
+        {
+          counter_++;
+          temp->setProbability(rgb_svm_probabilities[i]->getProbability() *
+            paramsPtr_->rgb_svm_weight);
+          temp->setPoint(rgb_svm_probabilities[i]->getPoint());
+          temp->setSource(RGB_SVM);
+          temp->setWidth(rgb_svm_probabilities[i]->getWidth());
+          temp->setHeight(rgb_svm_probabilities[i]->getHeight());
+          final_probabilities.push_back(temp);
+        }
+        else
+          counter_--;
+     }
+    }
     return final_probabilities;
   }
 

@@ -43,7 +43,11 @@ using pandora_vision::pandora_vision_obstacle::SoftObstacleHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "soft_obstacle_node");
+<<<<<<< HEAD
   SoftObstacleHandler softObstacleHandler;
+=======
+  SoftObstacleHandler softObstacleHandler();
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   ros::spin();
   return 0;
 }

@@ -58,8 +58,12 @@ namespace pandora_vision
 {
 namespace pandora_vision_motion
 {
+<<<<<<< HEAD
   template <class T>
   inline std::string to_string(const T& t)
+=======
+  class MotionDetector  
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   {
       std::stringstream ss;
       ss << t;

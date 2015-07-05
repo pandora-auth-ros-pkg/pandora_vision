@@ -1,0 +1,10 @@
+<launch>
+
+  <node name="pandora_datamatrix" type="pandora_vision_datamatrix_node" pkg="pandora_vision_datamatrix"
+    respawn="False" >
+  <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+    <rosparam file="$(find pandora_vision_datamatrix)/config/datamatrix_topics.yaml"
+      command="load" />
+  </node>
+
+</launch>

@@ -82,7 +82,14 @@ namespace pandora_vision_motion
    private:
     std::vector<BBoxPOIPtr> boundingBoxes_;
 
+<<<<<<< HEAD
     boost::shared_ptr<MotionDetector> detectorPtr_;
+=======
+    private:
+      BBoxPOIPtr bounding_box_;
+
+      MotionDetector motionDetector;
+>>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
 
     dynamic_reconfigure::Server< ::pandora_vision_motion::motion_cfgConfig >::CallbackType f;
 
