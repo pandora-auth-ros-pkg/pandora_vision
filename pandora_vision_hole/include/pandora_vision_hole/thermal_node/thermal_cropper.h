@@ -112,14 +112,12 @@ namespace thermal
       The message received by the synchronizer node is stored in private variable.
       A counter is set. When this counter reaches 2 it means both rgb Depth and
       thermal poi messages have been subscribed and are ready to be sent to victim.
-      @param msg [const pandora_vision_msgs::EnhancedImage&]
+      @param msg [const pandora_vision_msgs::EnhancedImageConstPtr&]
       The input synchronized rgb and depth images message
       @return void
       **/
     void
-    inputRgbImageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void
-    inputDepthImageCallback(const sensor_msgs::ImageConstPtr& msg);
+    inputEnhancedImageCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg);
 
    private:
     void
@@ -161,19 +159,11 @@ namespace thermal
 
     // Subscriber of synchronizer node from where we acquire the synchronized
     // rgb and depth image
-    ros::Subscriber rgbImageSubscriber_;
+    ros::Subscriber enhancedImageSubscriber_;
     // The name of the topic where rgb and depth images are acquired from
-    std::string rgbImageTopic_;
-    sensor_msgs::ImageConstPtr rgbImageConstPtr_;
-    bool isRgbAvailable_;
-
-    // Subscriber of synchronizer node from where we acquire the synchronized
-    // rgb and depth image
-    ros::Subscriber depthImageSubscriber_;
-    // The name of the topic where rgb and depth images are acquired from
-    std::string depthImageTopic_;
-    sensor_msgs::ImageConstPtr depthImageConstPtr_;
-    bool isDepthAvailable_;
+    std::string enhancedImageTopic_;
+    pandora_vision_msgs::EnhancedImageConstPtr enhancedImageConstPtr_;
+    bool isEnhancedImageAvailable_;
 
     // Ros publisher for enchanced message directly to victim node.
     ros::Publisher victimThermalPublisher_;

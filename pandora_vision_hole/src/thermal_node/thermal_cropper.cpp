@@ -100,12 +100,9 @@ namespace thermal
       &ThermalCropper::inputThermalRoiCallback, this);
     isThermalAvailable_ = false;
     // Subscribe to rgb and depth images published by synchronizer node.
-    rgbImageSubscriber_ = nh_.subscribe(rgbImageTopic_, 1,
-      &ThermalCropper::inputRgbImageCallback, this);
-    isRgbAvailable_ = false;
-    depthImageSubscriber_ = nh_.subscribe(depthImageTopic_, 1,
-      &ThermalCropper::inputDepthImageCallback, this);
-    isDepthAvailable_ = false;
+    enhancedImageSubscriber_ = nh_.subscribe(enhancedImageTopic_, 1,
+      &ThermalCropper::inputEnhancedImageCallback, this);
+    isEnhancedImageAvailable_ = false;
 
     // Advertise enhanced message to victim node
     victimThermalPublisher_ = nh_.advertise
@@ -147,7 +144,7 @@ namespace thermal
     isThermalAvailable_ = true;
     thermalEnhancedImageConstPtr_ = msg;
 
-    if (isRgbAvailable_ && isDepthAvailable_ && isThermalAvailable_)
+    if (isEnhancedImageAvailable_ && isThermalAvailable_)
     {
       process();
     }
@@ -155,27 +152,13 @@ namespace thermal
 
   void
   ThermalCropper::
-  inputRgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
+  inputEnhancedImageCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
     NODELET_INFO("[%s] RGB callback", nodeName_.c_str());
-    isRgbAvailable_ = true;
-    rgbImageConstPtr_ = msg;
+    isEnhancedImageAvailable_ = true;
+    enhancedImageConstPtr_ = msg;
 
-    if (isRgbAvailable_ && isDepthAvailable_ && isThermalAvailable_)
-    {
-      process();
-    }
-  }
-
-  void
-  ThermalCropper::
-  inputDepthImageCallback(const sensor_msgs::ImageConstPtr& msg)
-  {
-    NODELET_INFO("[%s] Depth callback", nodeName_.c_str());
-    isDepthAvailable_ = true;
-    depthImageConstPtr_ = msg;
-
-    if (isRgbAvailable_ && isDepthAvailable_ && isThermalAvailable_)
+    if (isEnhancedImageAvailable_ && isThermalAvailable_)
     {
       process();
     }
@@ -185,14 +168,13 @@ namespace thermal
   ThermalCropper::
   process()
   {
-    if (!isRgbAvailable_ || !isDepthAvailable_ || !isThermalAvailable_)
+    if (!isEnhancedImageAvailable_ || !isThermalAvailable_)
     {
       NODELET_ERROR("[%s] Incorrect callback: process has not received enough info",
           nodeName_.c_str());
       return;
     }
-    isRgbAvailable_ = false;
-    isDepthAvailable_ = false;
+    isEnhancedImageAvailable_ = false;
     isThermalAvailable_ = false;
 
     NODELET_INFO("[%s] Processing callback", nodeName_.c_str());
@@ -214,9 +196,9 @@ namespace thermal
 
     enhancedImagePtr->header = thermalEnhancedImageConstPtr_->header;
     enhancedImagePtr->thermalImage = thermalEnhancedImageConstPtr_->thermalImage;
-    enhancedImagePtr->rgbImage = *rgbImageConstPtr_;
-    enhancedImagePtr->depthImage = *depthImageConstPtr_;
-    enhancedImagePtr->isDepth = true;
+    enhancedImagePtr->rgbImage = enhancedImageConstPtr_->rgbImage;
+    enhancedImagePtr->depthImage = enhancedImageConstPtr_->depthImage;
+    enhancedImagePtr->isDepth = enhancedImageConstPtr_->isDepth;
     enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
 
     processorLogPtr->success = true;
@@ -238,14 +220,9 @@ namespace thermal
       NODELET_FATAL("[%s] Could not find thermal roi topic", nodeName_.c_str());
       ROS_BREAK();
     }
-    if (!private_nh_.getParam("subscribed_topics/rgb_image_topic", rgbImageTopic_))
+    if (!private_nh_.getParam("subscribed_topics/enhanced_image_topic", enhancedImageTopic_))
     {
-      NODELET_FATAL("[%s] Could not find rgb image topic", nodeName_.c_str());
-      ROS_BREAK();
-    }
-    if (!private_nh_.getParam("subscribed_topics/depth_image_topic", depthImageTopic_))
-    {
-      NODELET_FATAL("[%s] Could not find thermal roi topic", nodeName_.c_str());
+      NODELET_FATAL("[%s] Could not find enhanced image topic", nodeName_.c_str());
       ROS_BREAK();
     }
     if (!private_nh_.getParam("published_topics/thermal_victim_node_topic", victimThermalTopic_))
