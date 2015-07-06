@@ -48,11 +48,11 @@
 #include "sensor_processor/ProcessorLogInfo.h"
 #include "pandora_vision_msgs/RegionOfInterest.h"
 
-#include "utils/message_conversions.h"
-#include "utils/noise_elimination.h"
+#include "thermal_node/utils/message_conversions.h"
+#include "thermal_node/utils/noise_elimination.h"
 #include "thermal_node/thermal_cropper.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::ThermalCropper, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::thermal::ThermalCropper, nodelet::Nodelet)
 
 /**
   @namespace pandora_vision
@@ -61,6 +61,8 @@ PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hole::ThermalCropper, node
 namespace pandora_vision
 {
 namespace pandora_vision_hole
+{
+namespace thermal
 {
   /**
     @brief Default constructor. Initiates communications, loads parameters.
@@ -141,6 +143,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputThermalRoiCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] Thermal callback", nodeName_.c_str());
     isThermalAvailable_ = true;
     thermalEnhancedImageConstPtr_ = msg;
 
@@ -154,6 +157,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputRgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] RGB callback", nodeName_.c_str());
     isRgbAvailable_ = true;
     rgbImageConstPtr_ = msg;
 
@@ -167,6 +171,7 @@ namespace pandora_vision_hole
   ThermalCropper::
   inputDepthImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    NODELET_INFO("[%s] Depth callback", nodeName_.c_str());
     isDepthAvailable_ = true;
     depthImageConstPtr_ = msg;
 
@@ -190,6 +195,8 @@ namespace pandora_vision_hole
     isDepthAvailable_ = false;
     isThermalAvailable_ = false;
 
+    NODELET_INFO("[%s] Processing callback", nodeName_.c_str());
+
     unlockThermalProcedure();
 
     sensor_processor::ProcessorLogInfoPtr processorLogPtr( new sensor_processor::ProcessorLogInfo );
@@ -197,6 +204,7 @@ namespace pandora_vision_hole
     if (thermalEnhancedImageConstPtr_->regionsOfInterest.size() == 0)
     {
       processorLogPtr->success = false;
+      processorLogPtr->logInfo = "No ROIs";
       processEndPublisher_.publish(processorLogPtr);
       return;
     }
@@ -207,56 +215,21 @@ namespace pandora_vision_hole
     enhancedImagePtr->header = thermalEnhancedImageConstPtr_->header;
     enhancedImagePtr->thermalImage = thermalEnhancedImageConstPtr_->thermalImage;
     enhancedImagePtr->rgbImage = *rgbImageConstPtr_;
-    enhancedImagePtr->depthImage = interpolateDepthImage(*depthImageConstPtr_);
-    enhancedImagePtr->isDepth = isDepth_;
-    enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
-
-    processorLogPtr->success = true;
-    processEndPublisher_.publish(processorLogPtr);
-    victimThermalPublisher_.publish(enhancedImagePtr);
-  }
-
-  /**
-    @brief The enhanced messages that is sent to victim node must have the
-    interpolated depth image. So this fuction must extract the image from the
-    message, interpolate it and convert it again to sensor_msgs/Image type.
-    @param[in] depthImage [const sensor_msgs::Image&] The input depthImage
-    @return [sensor_msgs::Image]
-    The interpolated depth image.
-   **/
-  sensor_msgs::Image ThermalCropper::interpolateDepthImage(
-      const sensor_msgs::Image& depthImage)
-  {
-    cv::Mat depthImageMat;
-
-    // Obtain the depth image. Since the image is in a format of
-    // sensor_msgs::Image, it has to be transformed into a cv format in order
-    // to be processed. Its cv format will be CV_32FC1.
-    MessageConversions::extractImageFromMessage(depthImage, &depthImageMat,
-      sensor_msgs::image_encodings::TYPE_32FC1);
-
-    // Perform noise elimination on the depth image.
-    // Every pixel of noise will be eliminated and substituted by an
-    // appropriate non-zero value, depending on the amount of noise present
-    // in the input depth image.
-    cv::Mat interpolatedDepthImage;
-    NoiseElimination::performNoiseElimination(depthImageMat,
-      &interpolatedDepthImage);
-
-    // When the depth image is interpolated, we also acquire the interpolation
-    // method. Check if depth analysis is applicable.
+    enhancedImagePtr->depthImage = *depthImageConstPtr_;
     if (Parameters::Depth::interpolation_method == 0)
     {
-      isDepth_ = true;
+      enhancedImagePtr->isDepth = true;
     }
     else
     {
-      isDepth_ = false;
+      enhancedImagePtr->isDepth = false;
     }
+    enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
 
-    // Convert the cv::Mat to sensor_msgs/Image type
-    return MessageConversions::convertImageToMessage(interpolatedDepthImage,
-      sensor_msgs::image_encodings::TYPE_32FC1, depthImage);
+    processorLogPtr->success = true;
+    processorLogPtr->logInfo = "Finished";
+    processEndPublisher_.publish(processorLogPtr);
+    victimThermalPublisher_.publish(enhancedImagePtr);
   }
 
   /**
@@ -314,5 +287,6 @@ namespace pandora_vision_hole
     unlockThermalProcedurePublisher_.publish(unlockThermalProcedure);
   }
 
+}  // namespace thermal
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
