@@ -239,6 +239,8 @@ namespace pandora_vision_motion
       /// Enable dbscan
       bool enableDBSCAN_;
 
+      // ClusteredPointsPtr clusters_;
+
       friend class MotionDetectorTest;
   };
 }  // namespace pandora_vision_motion

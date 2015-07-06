@@ -39,6 +39,9 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
+
   /**
    @brief Class constructor
   */
@@ -188,7 +191,7 @@ namespace pandora_vision
    @param void
    @return vector of clusters
   */
-  std::vector<std::vector<cv::Point> > DBSCAN::getGroups()
+  std::vector<std::vector<cv::Point> > DBSCAN::getClusters()
   {
     std::vector<std::vector<cv::Point> > clusters;
     for (int i = 0; i <= _cluster_id; i++)
@@ -252,7 +255,7 @@ namespace pandora_vision
     return cohesion;
   }
 
-  void DBSCAN::dbscan_cluster()
+  void DBSCAN::cluster()
   {
      try
     {
@@ -353,4 +356,5 @@ namespace pandora_vision
      // // ROS_INFO_STREAM("DIST"<< pt1 << " "<< pt2 <<"=" << minDist);
     return minDist;
   }
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision

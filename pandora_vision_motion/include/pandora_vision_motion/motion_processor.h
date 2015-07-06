@@ -58,38 +58,41 @@ namespace pandora_vision_motion
 {
   class MotionProcessor : public VisionProcessor
   {
-    public:
-      /**
-       * @brief Class Constructor
-       */
-      MotionProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      MotionProcessor(void);
+   public:
+    /**
+     * @brief Class Constructor
+     */
+    MotionProcessor();
 
-      /**
-       * @brief Class Destructor
-       */
-      virtual ~MotionProcessor();
+    /**
+      * @brief: The Main constructor for the Motion Processor objects.
+      * @param ns[const std::string&]: The namespace for the node.
+      * @param handler[sensor_processor::Handler*]: A pointer to the handler
+      * of the processor used to access the nodehandle of the node
+      */
+    virtual void
+    initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-    protected:
-      /**
-       * @brief
-       */
-      virtual bool
-        process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
+    /**
+     * @brief
+     */
+    virtual bool
+      process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
-    private:
-      std::vector<BBoxPOIPtr> boundingBoxes_;
+   private:
+    std::vector<BBoxPOIPtr> boundingBoxes_;
 
-      MotionDetector motionDetector_;
+    boost::shared_ptr<MotionDetector> detectorPtr_;
 
-      dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig>::CallbackType f;
+    dynamic_reconfigure::Server< ::pandora_vision_motion::motion_cfgConfig >::CallbackType f;
 
-      /// The dynamic reconfigure (motion) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_motion::motion_cfgConfig> server;
+    /// The dynamic reconfigure (motion) parameters' server
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_motion::motion_cfgConfig > >
+      server_;
 
-      void parametersCallback(
-          const pandora_vision_motion::motion_cfgConfig& config,
-          const uint32_t& level);
+    void parametersCallback(
+        const ::pandora_vision_motion::motion_cfgConfig& config,
+        const uint32_t& level);
   };
 }  // namespace pandora_vision_motion
 }  // namespace pandora_vision

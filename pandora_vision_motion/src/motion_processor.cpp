@@ -42,58 +42,58 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   /**
    * @brief Class Constructor
    * Initializes all variables for thresholding
    */
-  MotionProcessor::MotionProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionProcessor(ns, handler)
+  MotionProcessor::MotionProcessor() : VisionProcessor()
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
+  }
+
+  void
+  MotionProcessor::
+  initialize(const std::string& ns, sensor_processor::Handler* handler)
+  {
+    VisionProcessor::initialize(ns, handler);
+
+    ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
+
+    // Initiliaze the motion detector.
+    detectorPtr_.reset( new MotionDetector() );
 
     /// The dynamic reconfigure parameter's callback
-    server.setCallback(boost::bind(&MotionProcessor::parametersCallback, this, _1, _2));
-  }
-
-  MotionProcessor::MotionProcessor(void) : VisionProcessor()
-  {
-  }
-
-  /**
-   * @brief Class Destructor
-   * Deallocates memory used for storing images
-   */
-  MotionProcessor::~MotionProcessor()
-  {
-    ROS_INFO("Destroying MotionProcessor instance");
+    server_.reset( new dynamic_reconfigure::Server< ::pandora_vision_motion::motion_cfgConfig >(
+          processor_nh) );
+    server_->setCallback(boost::bind(&MotionProcessor::parametersCallback, this, _1, _2));
   }
 
   void MotionProcessor::parametersCallback(
-    const pandora_vision_motion::motion_cfgConfig& config,
+    const ::pandora_vision_motion::motion_cfgConfig& config,
     const uint32_t& level)
   {
-    motionDetector_.setDiffThreshold(config.diff_threshold);
-    motionDetector_.setHighMotionThreshold(config.high_motion_threshold);
-    motionDetector_.setLowMotionThreshold(config.low_motion_threshold);
-    motionDetector_.setMaxDeviation(config.max_standard_deviation);
-    motionDetector_.setEnableDBSCAN(config.dbscan_enable);
+    detectorPtr_->setDiffThreshold(config.diff_threshold);
+    detectorPtr_->setHighMotionThreshold(config.high_motion_threshold);
+    detectorPtr_->setLowMotionThreshold(config.low_motion_threshold);
+    detectorPtr_->setMaxDeviation(config.max_standard_deviation);
+    detectorPtr_->setEnableDBSCAN(config.dbscan_enable);
 
-    motionDetector_.visualization = config.visualization;
-    motionDetector_.show_image = config.show_image;
-    motionDetector_.show_background = config.show_background;
-    motionDetector_.show_diff_image = config.show_diff_image;
-    motionDetector_.show_moving_objects_contours = config.show_moving_objects_contours;
+    detectorPtr_->visualization = config.visualization;
+    detectorPtr_->show_image = config.show_image;
+    detectorPtr_->show_background = config.show_background;
+    detectorPtr_->show_diff_image = config.show_diff_image;
+    detectorPtr_->show_moving_objects_contours = config.show_moving_objects_contours;
   }
 
-   /**
-    * @brief
-    */
+  /**
+   * @brief
+   */
   bool MotionProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
-    motionDetector_.detectMotion(input->getImage());
-    boundingBoxes_ = motionDetector_.getMotionPosition();
+    detectorPtr_->detectMotion(input->getImage());
+    boundingBoxes_ = detectorPtr_->getMotionPosition();
     output->frameWidth = input->getImage().cols;
     output->frameHeight = input->getImage().rows;
     for (int i = 0; i < boundingBoxes_.size(); i++)
@@ -101,8 +101,6 @@ namespace pandora_vision
       if (boundingBoxes_[i]->getProbability() > 0.1)
       {
         output->pois.push_back(boundingBoxes_[i]);
-        ROS_INFO_STREAM("Motion bbox no:" << i <<
-                        "with prob=" << boundingBoxes_[i]->getProbability());
       }
     }
     if (output->pois.size() != 0)
@@ -110,4 +108,5 @@ namespace pandora_vision
     else
       return false;
   }
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision

@@ -126,11 +126,11 @@ namespace pandora_vision_motion
       std::vector<cv::Point>& _data;
 
       /// Class constructor
-      DBSCAN(std::vector<cv::Point>& _data, double eps, int minPts);
+      DBSCAN(std::vector<cv::Point>& data, double eps, int minPts);
 
       ~DBSCAN();
 
-      void dbscan_cluster();
+      void cluster();
 
       /**
        @brief Function that returns all clusters calculated from the given
@@ -138,7 +138,7 @@ namespace pandora_vision_motion
        @param void
        @return vector of clusters
       */
-      std::vector<std::vector<cv::Point> > getGroups();
+      std::vector<std::vector<cv::Point> > getClusters();
 
       std::vector<double> getCohesion(const std::vector<std::vector<cv::Point> >& clusters);
   };

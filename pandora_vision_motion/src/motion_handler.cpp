@@ -41,14 +41,11 @@
 
 namespace pandora_vision
 {
-  MotionHandler::MotionHandler(const std::string& ns) :
-    VisionHandler<MotionPreProcessor, MotionProcessor, MotionPostProcessor>(ns)
-  {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-  }
-
-  void MotionHandler::completeTransition()
+namespace pandora_vision_motion
+{
+  MotionHandler::MotionHandler() :
+    VisionHandler<MotionPreProcessor, MotionProcessor, MotionPostProcessor>()
   {
   }
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision

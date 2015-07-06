@@ -43,6 +43,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_motion
+{
   MotionDetector::MotionDetector()
   {
     kernel_erode_ = getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
@@ -125,7 +127,7 @@ namespace pandora_vision
         cv::Point(-1, -1));
 
       cv::morphologyEx(thresholdedDifference_, thresholdedDifference_,
-       cv::MORPH_BLACKHAT, kernel, cv::Point(-1, -1), 8);
+       cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), 8);
 
       detectMotionPosition();
 
@@ -181,26 +183,29 @@ namespace pandora_vision
         }
         ROS_INFO_STREAM("motion points=" << motionPoints.size());
 
-        /// Start dbscan to cluster motion Points for localization
-        std::vector<std::vector<cv::Point> > clusters;
-
         if (contours.size() > 1 && enableDBSCAN_)
         {
-          DBSCAN dbscan(motionPoints, 50, 1);
-          dbscan.dbscan_cluster();
-          clusters = dbscan.getGroups();
-          ROS_INFO_STREAM("CLUSTERS FOUND=" << clusters.size());
-          if (clusters.size() > 0)
-            // cohesion = dbscan.getCohesion(clusters);
-          for (int i = 0; i < cohesion.size(); i++)
-          {
-            std::cout << cohesion[i] << std::endl;
-          }
+          /// Start dbscan to cluster motion Points for localization
+          // clusters_.reset(new ClusteredPoints);
+          DBSCAN dbscan(motionPoints, 50.0, 1);
+          dbscan.cluster();
+          std::vector<std::vector<cv::Point> > clusters_ = dbscan.getClusters();
 
-          /// bound clusters into a box
-          for (int i = 0; i < clusters.size(); i++)
+          // dbscan.getClusters(clusters_);
+          ROS_INFO_STREAM("CLUSTERS FOUND=" << clusters_.size());
+          // if (clusters->size() > 0)
+          // {
+            // cohesion = dbscan.getCohesion(clusters);
+            // for (int i = 0; i < cohesion.size(); i++)
+            // {
+              // std::cout << cohesion[i] << std::endl;
+            // }
+          // }
+
+          // Bound clusters into a box
+          for (int i = 0; i < clusters_.size(); i++)
           {
-            finalBoxes_.push_back(cv::boundingRect(clusters[i]));
+            finalBoxes_.push_back(cv::boundingRect(clusters_.at(i)));
           }
         }
         else if (motionPoints.size() != 0)
@@ -411,4 +416,6 @@ namespace pandora_vision
     // Set the RGB cvScalar with G B R, you can use this values as you want too..
     return cv::Scalar(bB, bG, bR);  // R component
   }
+
+}  // namespace pandora_vision_motion
 }  // namespace pandora_vision
