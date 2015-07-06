@@ -50,7 +50,7 @@
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
   <!-- Load robot description model -->
-  <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" />
+  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
   <!-- Output selection -->
   <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch"

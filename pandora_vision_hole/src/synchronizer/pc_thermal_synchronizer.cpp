@@ -205,6 +205,10 @@ namespace pandora_vision_hole
         <std_msgs::String>
         (thermalOutputReceiverTopic_, 1);
     }
+
+    enhancedImagePublisher_ = nh_.advertise<pandora_vision_msgs::EnhancedImage>(
+        enhancedImageTopic_, 1);
+
     std::string modes;
     if (rgbdMode_)
       modes += "rgbd ";
@@ -467,6 +471,14 @@ namespace pandora_vision_hole
     // depthImageMessagePtr = boost::make_shared<sensor_msgs::Image>();
     // MessageConversions::toROSDepthMsg(*pcMsg, *depthImageMessagePtr);
     // depthImageMessagePtr->header = pcMsg->header;
+
+    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
+        new pandora_vision_msgs::EnhancedImage);
+    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
+    enhancedImagePtr->depthImage = *depthImageMessagePtr;
+    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
+
+    enhancedImagePublisher_.publish(*enhancedImagePtr);
   }
 
 
@@ -620,6 +632,13 @@ namespace pandora_vision_hole
         NODELET_FATAL("[%s] Could not find topic thermal_output_receiver_topic", nodeName_.c_str());
         ROS_BREAK();
       }
+    }
+
+    if (!private_nh_.getParam("published_topics/enhanced_image_topic",
+          enhancedImageTopic_))
+    {
+      NODELET_FATAL("[%s] Could not find topic enhanced_image_topic", nodeName_.c_str());
+      ROS_BREAK();
     }
   }
 

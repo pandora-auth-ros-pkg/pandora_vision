@@ -284,6 +284,9 @@ namespace pandora_vision_hole
     ros::Publisher thermalOutputReceiverPublisher_;
     std::string thermalOutputReceiverTopic_;
 
+    ros::Publisher enhancedImagePublisher_;
+    std::string enhancedImageTopic_;
+
     // Booleans that tell the synchronizer where to publish.
     bool holeFusionLocked_;
     bool thermalLocked_;

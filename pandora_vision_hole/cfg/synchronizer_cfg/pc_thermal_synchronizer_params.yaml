@@ -13,5 +13,6 @@ published_topics:
   rgb_image_topic: synchronized/rgb/image
   thermal_image_topic: synchronized/thermal/image
   thermal_output_receiver_topic: synchronized/thermal/receiver_info
+  enhanced_image_topic: /vision/enhanced_images
 
 synchronized_queue: 1
