@@ -70,18 +70,49 @@ namespace pandora_vision
     private:
       std::string nodeName;
 
+      // The robots mask
+      cv::Mat robotMask_;
+
       // Configuration parameters
       int edge_method;
+      int edges_threshold;
       bool show_input_image;
       bool show_edges_image;
+      bool show_edges_thresholded_image;
+      bool show_edges_and_unkown_image;
+      bool show_new_map_image;
 
       /**
-        @brief Apply edge detection algorithm based on configuration parameter.
-        @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image
+        @brief Visualization of an image with CV_8SC1 or CV_8UC1 type.
+        If there is a negative value in mat aka unkown area set it 255 for
+        visualization.
+        @param[in] title [const std::string&] The title of image to be shown.
+        @param[in] image [const cv::Mat&] The image to be shown.
+        @param[in] time [int] The time that imshow function lasts in ms.
         @return void
        **/
-      void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
+      void showImage(
+        const std::string& title, const cv::Mat& image, int time);
+
+      /**
+        @brief Checks if there is any negative value in the input mat, if yes
+        fill the peer pixel in outImage with value -1.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output image with unkown areas.
+        @return void
+       **/
+      void fillUnkownAreas(const cv::Mat& inImage, cv::Mat* outImage);
+
+      /**
+        @brief Now that we have a complete map, aka dangerous, safe and unkown
+        areas we will include the robot's size. A convolution between the map
+        and robot's mask will make the new map that informs us if we can access 
+        a particular point(territory).
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image will unkown areas.
+        @return void
+       **/
+      void robotMaskOnMap(const cv::Mat& inImage, cv::Mat* outImage);
 
       /**
         @brief Apply the canny edge detection algorithm.
@@ -108,16 +139,14 @@ namespace pandora_vision
       void applySobel(const cv::Mat& inImage, cv::Mat* outImage);
 
       /**
-        @brief Visualization of an image with CV_8SC1 or CV_8UC1 type.
-        If there is a negative value in mat aka unkown area set it 255 for
-        visualization.
-        @param[in] title [const std::string&] The title of image to be shown.
-        @param[in] image [const cv::Mat&] The image to be shown.
-        @param[in] time [int] The time that imshow function lasts in ms.
+        @brief Apply edge detection algorithm. Based on configuration parameter,
+        select the desired method. Finally apply threshold on the extracted
+        edges to keep the ones that we consider as dangerous areas.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @param[in] outImage [cv::Mat*] The output edges image
         @return void
        **/
-      void showImage(
-        const std::string& title, const cv::Mat& image, int time);
+      void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
   };
 
 }  // namespace pandora_vision
