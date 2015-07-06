@@ -45,7 +45,7 @@
 #include <std_msgs/Empty.h>
 #include <urdf_parser/urdf_parser.h>
 #include <image_transport/image_transport.h>
-#include "state_manager/state_client.h"
+#include "state_manager/state_client_nodelet.h"
 #include "sensor_processor/ProcessorLogInfo.h"
 #include "pandora_vision_hole/CandidateHolesVectorMsg.h"
 #include "pandora_vision_hole/CandidateHoleMsg.h"
@@ -83,7 +83,7 @@ namespace hole_fusion
     @brief Provides functionalities and methods for fusing holes obtained
     through Depth and RGB analysis
    **/
-  class HoleFusion : public StateClient, public nodelet::Nodelet
+  class HoleFusion : public state_manager::StateClientNodelet
   {
     private:
       // The main ROS nodehandle

@@ -19,6 +19,8 @@ project(pandora_vision_hole)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  nodelet
+  pluginlib
   message_generation
   rospy
   pandora_vision_msgs
@@ -66,6 +68,8 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS
     roscpp
+    nodelet
+    pluginlib
     message_runtime
     rospy
     pandora_vision_msgs

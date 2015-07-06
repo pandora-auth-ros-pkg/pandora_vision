@@ -41,12 +41,9 @@
 #define PANDORA_VISION_VICTIM_VICTIM_HANDLER_H
 
 #include <string>
-#include <vector>
 
-#include "sensor_processor/dynamic_handler.h"
-#include "pandora_vision_victim/victim_image_preprocessor.h"
+#include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_victim/victim_hole_preprocessor.h"
-#include "pandora_vision_victim/victim_image_processor.h"
 #include "pandora_vision_victim/victim_hole_processor.h"
 #include "pandora_vision_victim/victim_postprocessor.h"
 
@@ -54,21 +51,11 @@ namespace pandora_vision
 {
 namespace pandora_vision_victim
 {
-  class VictimHandler : public sensor_processor::Handler
+  class VictimHandler :
+    public VisionHandler<VictimHolePreProcessor, VictimHoleProcessor, VictimPostProcessor>
   {
    public:
     VictimHandler();
-
-   private:
-    virtual void startTransition(int newState);
-
-   protected:
-    int currentState_;
-    int previousState_;
-
-   private:
-    std::vector<int> holeActiveStates_;
-    std::vector<int> imageActiveStates_;
   };
 }  // namespace pandora_vision_victim
 }  // namespace pandora_vision

@@ -36,8 +36,13 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <string>
+#include <pluginlib/class_list_macros.h>
+#include <nodelet/nodelet.h>
+
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_handler.h"
+
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_obstacle::SoftObstacleHandler,
+    nodelet::Nodelet)
 
 namespace pandora_vision
 {

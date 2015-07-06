@@ -60,8 +60,7 @@ namespace pandora_vision
       * @brief Constructor
       * @param ns [const std::string&] The namespace of this handler's nodeHandle
       **/
-    VisionHandler() :
-      sensor_processor::DynamicHandler(false)
+    VisionHandler() : sensor_processor::DynamicHandler()
     {}
 
    protected:

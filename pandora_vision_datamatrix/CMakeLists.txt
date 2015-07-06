@@ -3,6 +3,8 @@ project(pandora_vision_datamatrix)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    nodelet
+    pluginlib
     state_manager
     state_manager_msgs
     pandora_common_msgs
@@ -23,6 +25,8 @@ catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      nodelet
+      pluginlib
       state_manager
       state_manager_msgs
       pandora_common_msgs
@@ -33,7 +37,7 @@ catkin_package(
       sensor_msgs
       urdf
     #INCLUDE_DIRS
-    #LIBRARIES 
+    #LIBRARIES
 )
 
 include_directories(include
@@ -91,8 +95,8 @@ add_dependencies(${PROJECT_NAME}_node
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-target_link_libraries(${PROJECT_NAME}_node 
-  ${catkin_LIBRARIES} 
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
   ${PROJECT_NAME}_handler
 )
 

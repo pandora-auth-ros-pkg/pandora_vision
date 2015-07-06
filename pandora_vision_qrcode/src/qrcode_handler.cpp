@@ -37,9 +37,13 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include <string>
+#include <pluginlib/class_list_macros.h>
+#include <nodelet/nodelet.h>
 
 #include "pandora_vision_qrcode/qrcode_handler.h"
+
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_qrcode::QrCodeHandler,
+    nodelet::Nodelet)
 
 namespace pandora_vision
 {

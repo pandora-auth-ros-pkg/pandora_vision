@@ -3,6 +3,8 @@ project(pandora_vision_victim)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    nodelet
+    pluginlib
     pandora_common_msgs
     pandora_vision_msgs
     pandora_vision_common
@@ -26,6 +28,8 @@ catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      nodelet
+      pluginlib
       pandora_common_msgs
       pandora_vision_msgs
       pandora_vision_common

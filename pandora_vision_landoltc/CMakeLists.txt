@@ -3,6 +3,8 @@ project(pandora_vision_landoltc)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    nodelet
+    pluginlib
     pandora_common_msgs
     pandora_vision_msgs
     pandora_vision_common
@@ -27,6 +29,8 @@ catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      nodelet
+      pluginlib
       pandora_vision_common
       pandora_vision_msgs
       pandora_common_msgs

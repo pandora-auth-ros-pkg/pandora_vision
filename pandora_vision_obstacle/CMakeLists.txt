@@ -3,6 +3,8 @@ project(pandora_vision_obstacle)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    nodelet
+    pluginlib
     roslint
     dynamic_reconfigure
     cv_bridge
@@ -23,6 +25,8 @@ catkin_package(
     #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      nodelet
+      pluginlib
       dynamic_reconfigure
       cv_bridge
       sensor_msgs

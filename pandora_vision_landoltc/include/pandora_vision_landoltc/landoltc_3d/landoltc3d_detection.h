@@ -59,7 +59,7 @@
 
 namespace pandora_vision
 {
-class LandoltC3dDetection : public StateClient {
+class LandoltC3dDetection : public state_manager::StateClient {
 
 private:
   //!<Subscriber of RGB Image

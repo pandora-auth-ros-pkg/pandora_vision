@@ -68,9 +68,12 @@ namespace hole_fusion
 
   void HoleFusion::onInit()
   {
+    state_manager::StateClientNodelet::onInit();
+
     pointCloud_.reset(new PointCloud);
-    nodeHandle_ = this->getNodeHandle();
+    nodeHandle_ = this->getPublicNodeHandle();
     privateNodeHandle_ = this->getPrivateNodeHandle();
+    ROS_WARN("private hole ns: %s", privateNodeHandle_.getNamespace().c_str());
     nodeName_ = boost::to_upper_copy<std::string>(this->getName());
 
     nodeHandle_.param("rgbd_mode", rgbdMode_, true);
