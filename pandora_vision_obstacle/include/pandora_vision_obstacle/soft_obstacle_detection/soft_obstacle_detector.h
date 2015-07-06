@@ -42,9 +42,10 @@
 
 #include <string>
 #include <vector>
+#include <boost/array.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
-#include "pandora_vision_obstacle/discrete_wavelet_transform.h"
+#include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
 #include "pandora_vision_obstacle/obstacle_poi.h"
 
 namespace pandora_vision
@@ -53,6 +54,9 @@ namespace pandora_vision_obstacle
 {
   class SoftObstacleDetector
   {
+   public:
+    typedef boost::shared_ptr< std::vector<cv::Vec4i> > Vec4iVectorPtr;
+
    public:
     /**
       * @brief Constructor that initializes dwt Haar kernels
@@ -170,30 +174,28 @@ namespace pandora_vision_obstacle
       * @param roi [const cv::Rect&] The bounding box that is
       * used to find the depth distance
       * @param level [int] The number of stages of the DWT
-      * @return [std::vector<float>] The depth distance of each
+      * @return [boost::array<float, 4>] The depth distance of each
       * point of the bounding box
       **/
-    std::vector<float> findDepthDistance(const cv::Mat& depthImage,
+    boost::array<float, 4> findDepthDistance(const cv::Mat& depthImage,
         const std::vector<cv::Vec4i> verticalLines, const cv::Rect& roi,
         int level = 1);
 
     /**
       * @brief Calculate the average depth distance of bounding
-      * box and check whether it is different from the depth distance
-      * of vertical edges of the bounding box
+      * box and check whether it is almost the same with the depth
+      * distance of vertical lines' points in the bounding box
       * @param depthImage [const cv::Mat&] The input depth image
       * @param roi [const cv::Rect&] The bounding box that is
       * used to find the depth distance
-      * @param firstLineDepth [float] The depth distance at the center
-      * of the line with the smallest x coordinate
-      * @param lastLineDepth [float] The depth distance at the center
-      * of the line with the largest x coordinate
+      * @param verticalLines [const std::vector<cv::Vec4i>&] The
+      * input vector that contains the vertical lines found
       * @return [bool] Whether all the points of the bounding box
-      * have different depth distance from the depth distance of
-      * vertical edges of the bounding box
+      * have similar depth distance with the average depth distance of
+      * vertical lines in the bounding box
       **/
-    bool findDifferentROIDepth(const cv::Mat& depthImage,
-        const cv::Rect& roi, float firstLineDepth, float lastLineDepth);
+    bool findSameROIDepth(const cv::Mat& depthImage,
+        const cv::Rect& roi, const Vec4iVectorPtr& verticalLines);
 
    private:
     /// The DWT class object used to perform this operation
@@ -217,7 +219,7 @@ namespace pandora_vision_obstacle
     /// considered almost identical
     float betaThreshold_;
 
-    /// The minimum depth difference for a soft obstacle to be confirmed
+    /// The minimum depth difference for a line to be considered valid
     double depthThreshold_;
 
     /// The size of the kernel used to erode the image
@@ -235,6 +237,8 @@ namespace pandora_vision_obstacle
 
     friend class SoftObstacleDetectorTest;
   };
+  typedef SoftObstacleDetector::Vec4iVectorPtr Vec4iVectorPtr;
+
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 

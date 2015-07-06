@@ -37,8 +37,8 @@
  *   Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
-#define PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
+#ifndef PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_DISCRETE_WAVELET_TRANSFORM_H
+#define PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_DISCRETE_WAVELET_TRANSFORM_H
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -203,4 +203,4 @@ namespace pandora_vision_obstacle
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_OBSTACLE_DISCRETE_WAVELET_TRANSFORM_H
+#endif  // PANDORA_VISION_COMMON_PANDORA_VISION_UTILITIES_DISCRETE_WAVELET_TRANSFORM_H

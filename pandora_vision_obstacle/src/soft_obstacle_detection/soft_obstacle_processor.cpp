@@ -37,6 +37,7 @@
  *********************************************************************/
 
 #include <string>
+
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_processor.h"
 
 namespace pandora_vision
@@ -50,7 +51,7 @@ namespace pandora_vision_obstacle
 
     ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
 
-    detector_.reset(new SoftObstacleDetector(this->getName(), processor_nh));
+    detector_.reset( new SoftObstacleDetector(this->getName(), processor_nh) );
 
     server_.reset( new dynamic_reconfigure::
         Server< ::pandora_vision_obstacle::soft_obstacle_cfgConfig >(processor_nh) );
@@ -74,7 +75,7 @@ namespace pandora_vision_obstacle
   }
 
   bool SoftObstacleProcessor::process(const ImagesStampedConstPtr& input,
-    const POIsStampedPtr& output)
+      const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;

@@ -38,7 +38,7 @@
  *********************************************************************/
 
 #include <vector>
-#include "pandora_vision_obstacle/discrete_wavelet_transform.h"
+#include "pandora_vision_common/pandora_vision_utilities/discrete_wavelet_transform.h"
 
 namespace pandora_vision
 {
@@ -51,11 +51,11 @@ namespace pandora_vision_obstacle
   DiscreteWaveletTransform::DiscreteWaveletTransform(const cv::Mat& columnKernelLow,
       const cv::Mat& columnKernelHigh)
   {
-      columnKernelLow_ = columnKernelLow;
-      cv::transpose(columnKernelLow, rowKernelLow_);
+    columnKernelLow_ = columnKernelLow;
+    cv::transpose(columnKernelLow, rowKernelLow_);
 
-      columnKernelHigh_ = columnKernelHigh;
-      cv::transpose(columnKernelHigh, rowKernelHigh_);
+    columnKernelHigh_ = columnKernelHigh;
+    cv::transpose(columnKernelHigh, rowKernelHigh_);
   }
 
   DiscreteWaveletTransform::~DiscreteWaveletTransform()
@@ -116,7 +116,7 @@ namespace pandora_vision_obstacle
     else
     {
       *subImage = cv::Mat::zeros(image.rows, static_cast<int>(
-          std::floor(image.cols / 2.0f)), CV_32FC1);
+          std::floor(image.cols / 2.0f)), CV_32FC(image.channels()));
       int imageIndex = 0;
       for (int jj = 1; jj < image.cols; jj += 2)
       {
