@@ -40,6 +40,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   /**
     @brief Class Constructor
     Initializes all varialbes for thresholding
@@ -183,4 +185,5 @@ namespace pandora_vision
 
     }
   }
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision

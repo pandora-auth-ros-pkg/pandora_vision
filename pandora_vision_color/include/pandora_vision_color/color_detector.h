@@ -48,6 +48,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   class ColorDetector
   {
     public:
@@ -109,5 +111,6 @@ namespace pandora_vision
 
      // friend class ColorDetectorTest;
   };
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_COLOR_COLOR_DETECTOR_H

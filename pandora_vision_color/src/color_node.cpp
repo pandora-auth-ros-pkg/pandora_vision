@@ -40,12 +40,12 @@
 #include <ros/console.h>
 #include "pandora_vision_color/color_handler.h"
 
-using pandora_vision::ColorHandler;
+using pandora_vision::pandora_vision_color::ColorHandler;
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "color_node");
-  ColorHandler colorDetectionHandler("color");
+  ColorHandler colorDetectionHandler();
   ros::spin();
   return 0;
 }

@@ -52,19 +52,25 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   class ColorProcessor : public VisionProcessor
   {
     public:
+
+      /**
+       * @brief: The Main constructor for the Color code Processor objects.
+       * @param ns[const std::string&]: The namespace for the node.
+       * @param handler[sensor_processor::Handler*]: A pointer to the handler
+       * of the processor used to access the nodehandle of the node
+       */
+      virtual void
+      initialize(const std::string& ns, sensor_processor::Handler* handler);
+
       /**
         @brief Class Constructor
       */
-      ColorProcessor(const std::string& ns, sensor_processor::Handler* handler);
       ColorProcessor(void);
-
-      /**
-        @brief Class Destructor
-      */
-      virtual ~ColorProcessor();
 
     protected:
       /**
@@ -76,16 +82,17 @@ namespace pandora_vision
     private:
       BBoxPOIPtr bounding_box_;
 
-      ColorDetector colorDetector;
+      boost::shared_ptr<ColorDetector> colorDetectorPtr_;
 
-      dynamic_reconfigure::Server<pandora_vision_color::color_cfgConfig>::CallbackType f; 
+      dynamic_reconfigure::Server< ::pandora_vision_color::color_cfgConfig>::CallbackType f; 
 
       //!< The dynamic reconfigure (color) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_color::color_cfgConfig> server; 
+      boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_color::color_cfgConfig> > server_; 
 
       void parametersCallback(
-        const pandora_vision_color::color_cfgConfig& config,
+        const ::pandora_vision_color::color_cfgConfig& config,
         const uint32_t& level);
   };
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_COLOR_COLOR_PROCESSOR_H

@@ -48,16 +48,15 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   class ColorHandler : public VisionHandler<ColorPreProcessor,
     ColorProcessor, ColorPostProcessor>
   {
     public:
-      explicit ColorHandler(const std::string& ns);
-      virtual ~ColorHandler() {}
-
-    private:
-      virtual void completeTransition();
+      ColorHandler();
   };
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_COLOR_COLOR_HANDLER_H

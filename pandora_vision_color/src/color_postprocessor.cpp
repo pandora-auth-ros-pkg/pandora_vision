@@ -41,18 +41,13 @@
 
 namespace pandora_vision
 {
-  ColorPostProcessor::ColorPostProcessor(const std::string& ns,
-    sensor_processor::Handler* handler) :
-    VisionPostProcessor<pandora_common_msgs::GeneralAlertVector>(
-    ns, handler)
-  {
-    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
-  }
+namespace pandora_vision_color
+{
+  ColorPostProcessor::ColorPostProcessor() :
+    VisionPostProcessor<pandora_common_msgs::GeneralAlertVector>()
+  {}
 
-  ColorPostProcessor::~ColorPostProcessor() {}
-
-  bool ColorPostProcessor::postProcess(const POIsStampedConstPtr& input,
+   bool ColorPostProcessor::postProcess(const POIsStampedConstPtr& input,
     const GeneralAlertVectorPtr& output)
   {
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
@@ -62,4 +57,5 @@ namespace pandora_vision
     }
     return true;
   }
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision

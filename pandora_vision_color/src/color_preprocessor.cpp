@@ -41,14 +41,17 @@
 
 namespace pandora_vision
 {
-  ColorPreProcessor::ColorPreProcessor(const std::string& ns, 
-    sensor_processor::Handler* handler) : VisionPreProcessor(ns, handler,
-    sensor_msgs::image_encodings::BGR8)
+namespace pandora_vision_color
+{
+  void ColorPreProcessor::
+  initialize(const std::string& ns, sensor_processor::Handler* handler)
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
+    VisionPreProcessor::initialize(ns, handler);
+    setImageEncoding(sensor_msgs::image_encodings::BGR8);
   }
 
-  ColorPreProcessor::~ColorPreProcessor() {}
-
+  ColorPreProcessor::ColorPreProcessor() : VisionPreProcessor()
+  {
+  }
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision

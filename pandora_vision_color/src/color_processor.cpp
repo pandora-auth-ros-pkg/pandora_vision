@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author:  Marios Protopapas, <marios_protopapas@hotmail.com>
+* Author:  Marios Protopapas, <protopapas_marios@hotmail.com>
 *********************************************************************/
 
 #include <vector>
@@ -40,44 +40,43 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   /**
     @brief Class Constructor
     Initializes all variables for thresholding
   */
-  ColorProcessor::ColorProcessor(const std::string& ns, sensor_processor::Handler* handler) :
-    VisionProcessor(ns, handler)
+
+  ColorProcessor::ColorProcessor() : VisionProcessor()
+  {}
+
+  void ColorProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-      this->accessProcessorNh()->getNamespace());
+    VisionProcessor::initialize(ns, handler);
+
+    ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
+
+    // Initiliaze the Colordetector.
+    colorDetectorPtr_.reset( new ColorDetector() );
 
     //!< The dynamic reconfigure parameter's callback
-    server.setCallback(boost::bind(&ColorProcessor::parametersCallback, this, _1, _2));
+    server_.reset( new dynamic_reconfigure::Server< ::pandora_vision_color::color_cfgConfig >(
+          processor_nh) );
+    server_->setCallback(boost::bind(&ColorProcessor::parametersCallback, this, _1, _2));
   }
 
-  ColorProcessor::ColorProcessor(void) : VisionProcessor()
-  {
-  }
 
-  /**
-    @brief Class Destructor
-    Deallocates memory used for storing images
-  */
-  ColorProcessor::~ColorProcessor()
-  {
-    ROS_INFO("Destroying ColorProcessor instance");
-  }
-  
   void ColorProcessor::parametersCallback(
-    const pandora_vision_color::color_cfgConfig& config,
+    const ::pandora_vision_color::color_cfgConfig& config,
     const uint32_t& level)
   {
-    colorDetector.visualization_= config.visualization;
-    colorDetector.iLowH = config.iLowH;
-    colorDetector.iHighH = config.iHighH;
-    colorDetector.iLowS = config.iLowS;
-    colorDetector.iHighS = config.iHighS;
-    colorDetector.iLowV = config.iLowV;
-    colorDetector.iHighV = config.iHighV;
+    colorDetectorPtr_->visualization_= config.visualization;
+    colorDetectorPtr_->iLowH = config.iLowH;
+    colorDetectorPtr_->iHighH = config.iHighH;
+    colorDetectorPtr_->iLowS = config.iLowS;
+    colorDetectorPtr_->iHighS = config.iHighS;
+    colorDetectorPtr_->iLowV = config.iLowV;
+    colorDetectorPtr_->iHighV = config.iHighV;
   }
 
    /**
@@ -86,8 +85,8 @@ namespace pandora_vision
   bool ColorProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
   {
     output->header = input->getHeader();
-    colorDetector.detectColor(input->getImage());
-    bounding_box_ = colorDetector.getColorPosition();
+    colorDetectorPtr_->detectColor(input->getImage());
+    bounding_box_ = colorDetectorPtr_->getColorPosition();
     output->frameWidth = input->getImage().cols;
     output->frameHeight = input->getImage().rows;
     if (bounding_box_->getProbability() > 0.1)
@@ -97,4 +96,5 @@ namespace pandora_vision
     }
     return false;
   }
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision

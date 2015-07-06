@@ -41,14 +41,11 @@
 
 namespace pandora_vision
 {
-  ColorHandler::ColorHandler(const std::string& ns) :
-    VisionHandler<ColorPreProcessor, ColorProcessor, ColorPostProcessor>(ns)
-  {
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD);
-    activeStates_.push_back(state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
-  }
-  
-  void ColorHandler::completeTransition()
+namespace pandora_vision_color
+{
+  ColorHandler::ColorHandler() :
+    VisionHandler<ColorPreProcessor, ColorProcessor, ColorPostProcessor>()
   {
   }
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision

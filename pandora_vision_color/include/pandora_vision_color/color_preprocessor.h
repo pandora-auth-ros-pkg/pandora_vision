@@ -45,12 +45,16 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_color
+{
   class ColorPreProcessor : public VisionPreProcessor
   {
     public:
-      ColorPreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~ColorPreProcessor();
+      ColorPreProcessor();
+      virtual void
+      initialize(const std::string& ns, sensor_processor::Handler* handler);
   };
+}  // namespace pandora_vision_color
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_COLOR_COLOR_PREPROCESSOR_H
