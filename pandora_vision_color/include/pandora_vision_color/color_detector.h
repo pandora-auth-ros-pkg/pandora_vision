@@ -53,7 +53,6 @@ namespace pandora_vision_color
   class ColorDetector
   {
     public:
-
       /**
         @brief Class Constructor
         Initializes all varialbes for thresholding
@@ -86,7 +85,6 @@ namespace pandora_vision_color
       int iHighV;
 
     protected:
-
        /**
         @brief Function used for debug reasons
         @return void

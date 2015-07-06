@@ -47,7 +47,7 @@ namespace pandora_vision_color
     VisionPostProcessor<pandora_common_msgs::GeneralAlertVector>()
   {}
 
-   bool ColorPostProcessor::postProcess(const POIsStampedConstPtr& input,
+    bool ColorPostProcessor::postProcess(const POIsStampedConstPtr& input,
     const GeneralAlertVectorPtr& output)
   {
     pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);

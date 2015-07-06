@@ -57,7 +57,6 @@ namespace pandora_vision_color
   class ColorProcessor : public VisionProcessor
   {
     public:
-
       /**
        * @brief: The Main constructor for the Color code Processor objects.
        * @param ns[const std::string&]: The namespace for the node.
