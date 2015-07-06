@@ -232,19 +232,29 @@ namespace pandora_vision_hole
   PcThermalSynchronizer::
   inputPointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& pcMsg)
   {
+    sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
+    PointCloudPtr pointCloudPtr;
+    initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
+
     if (!holeFusionLocked_)
     {
       NODELET_INFO("[%s] RGBD Callback", nodeName_.c_str());
       holeFusionLocked_ = true;
-      sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
-      PointCloudPtr pointCloudPtr;
-      initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
       synchronizedPointCloudPublisher_.publish(pointCloudPtr);
       synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
       synchronizedDepthImagePublisher_.publish(depthImageMessagePtr);
 
       // inputPointCloudSubscriber_.shutdown();
     }
+
+    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
+        new pandora_vision_msgs::EnhancedImage );
+    enhancedImagePtr->header = pcMsg->header;
+    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
+    enhancedImagePtr->depthImage = *depthImageMessagePtr;
+    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
+
+    enhancedImagePublisher_.publish(enhancedImagePtr);
   }
 
   /**
