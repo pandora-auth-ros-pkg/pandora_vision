@@ -66,6 +66,7 @@ namespace pandora_vision_datamatrix
       this->getProcessorNodeHandle()).advertise(debugTopic, 1);
 #endif
 
+    detected_datamatrix.reset( new DataMatrixPOI );
     detected_datamatrix->setContent("");
 
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +

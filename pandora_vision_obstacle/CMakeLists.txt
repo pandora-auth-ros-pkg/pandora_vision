@@ -119,8 +119,8 @@ add_dependencies(${PROJECT_NAME}_barrel_node
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-target_link_libraries(${PROJECT_NAME}_barrel_node 
-  ${catkin_LIBRARIES} 
+target_link_libraries(${PROJECT_NAME}_barrel_node
+  ${catkin_LIBRARIES}
   ${PROJECT_NAME}_barrel_handler
 )
 
@@ -132,8 +132,8 @@ add_dependencies(${PROJECT_NAME}_soft_obstacle_node
   ${catkin_EXPORTED_TARGETS}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-target_link_libraries(${PROJECT_NAME}_soft_obstacle_node 
-  ${catkin_LIBRARIES} 
+target_link_libraries(${PROJECT_NAME}_soft_obstacle_node
+  ${catkin_LIBRARIES}
   ${PROJECT_NAME}_soft_obstacle_handler
 )
 

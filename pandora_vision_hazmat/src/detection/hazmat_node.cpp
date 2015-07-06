@@ -50,7 +50,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "hazmat_node");
-  pandora_vision::pandora_vision_hazmat::HazmatHandler hazmatHandler();
+  pandora_vision::pandora_vision_hazmat::HazmatHandler hazmatHandler;
   ros::spin();
   return 0;
 }

@@ -47,7 +47,7 @@ using pandora_vision::pandora_vision_qrcode::QrCodeHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "qrcode_node");
-  QrCodeHandler qrCodeHandler();
+  QrCodeHandler qrCodeHandler;
   ros::spin();
   return 0;
 }

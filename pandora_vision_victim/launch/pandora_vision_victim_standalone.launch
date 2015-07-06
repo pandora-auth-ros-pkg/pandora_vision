@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="namespace" default="/pandora_vision/pandora_vision_victim" />
 
   <arg name="openni" default="false" />
 
   <group if="$(arg openni)">
-  <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole_standalone.launch" >
+    <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole_standalone.launch" 
+        ns="/pandora_vision/pandora_vision_hole" >
    <arg name="openni" value="true" />
    <arg name="output" value="log" />
   </include>
@@ -22,7 +24,8 @@
 
   <!-- <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" /> -->
 
-  <include file="$(find pandora_vision_victim)/launch/victim_node.launch">
+  <include file="$(find pandora_vision_victim)/launch/pandora_vision_victim.launch"
+      ns="$(arg namespace)" >
     <arg name="output" value="screen" />
   </include>
 

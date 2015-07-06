@@ -43,6 +43,7 @@ namespace pandora_vision
 {
 namespace pandora_vision_obstacle
 {
+  void
   SoftObstacleProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
   {
     sensor_processor::Processor<ImagesStamped, POIsStamped>::initialize(ns, handler);

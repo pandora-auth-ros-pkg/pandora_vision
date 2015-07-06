@@ -45,7 +45,7 @@ using pandora_vision::pandora_vision_datamatrix::DataMatrixHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "datamatrix_node");
-  DataMatrixHandler dataMatrixHandler();
+  DataMatrixHandler dataMatrixHandler;
   ros::spin();
   return 0;
 }

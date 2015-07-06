@@ -56,8 +56,6 @@ namespace pandora_vision_obstacle
       typedef boost::shared_ptr<ObstaclePOI> ObstaclePOIPtr;
 
       BarrelProcessor();
-      virtual void
-      initialize(const std::string& ns, sensor_processor::Handler* handler);
 
       virtual bool
       process(const ImagesStampedConstPtr& input,

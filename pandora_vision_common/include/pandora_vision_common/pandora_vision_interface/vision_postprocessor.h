@@ -63,11 +63,6 @@ namespace pandora_vision
      * handles this postprocessor
      **/
     VisionPostProcessor();
-    virtual void
-    initialize(const std::string& ns, sensor_processor::Handler* handler)
-    {
-      sensor_processor::template PostProcessor<POIsStamped, VisionAlertMsg>::initialize(ns, handler);
-    }
 
     /**
      * @brief Virtual Destructor
@@ -96,8 +91,7 @@ namespace pandora_vision
   VisionPostProcessor() :
     sensor_processor::PostProcessor<POIsStamped, VisionAlertMsg>(),
     converter_(new GeneralAlertConverter)
-  {
-  }
+  {}
 
   template <class VisionAlertMsg>
   pandora_common_msgs::GeneralAlertVector

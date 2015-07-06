@@ -61,11 +61,6 @@ namespace pandora_vision
       **/
     VisionProcessor() :
       sensor_processor::Processor<CVMatStamped, POIsStamped>() {}
-    virtual void
-    initialize(const std::string& ns, sensor_processor::Handler* handler)
-    {
-      sensor_processor::Processor<CVMatStamped, POIsStamped>::initialize(ns, handler);
-    }
 
     /**
       * @brief Virtual Destructor

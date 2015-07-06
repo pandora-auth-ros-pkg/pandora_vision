@@ -71,11 +71,6 @@ namespace pandora_vision
       * an OpenCV matrix
       **/
     VisionPreProcessor();
-    virtual void
-    initialize(const std::string& ns, sensor_processor::Handler* handler)
-    {
-      sensor_processor::PreProcessor<sensor_msgs::Image, CVMatStamped>::initialize(ns, handler);
-    }
 
     /**
       * @brief Virtual Destructor

@@ -44,6 +44,7 @@ namespace pandora_vision
 namespace pandora_vision_datamatrix
 {
   DataMatrixHandler::DataMatrixHandler() :
-    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>() {}
+    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>()
+  {}
 }  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision

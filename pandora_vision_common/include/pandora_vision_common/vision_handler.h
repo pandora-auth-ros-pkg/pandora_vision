@@ -61,7 +61,8 @@ namespace pandora_vision
       * @param ns [const std::string&] The namespace of this handler's nodeHandle
       **/
     VisionHandler() :
-      sensor_processor::DynamicHandler(false) {}
+      sensor_processor::DynamicHandler(false)
+    {}
 
    protected:
     /**
@@ -108,6 +109,8 @@ namespace pandora_vision
       }
 
       transitionComplete(this->currentState_);
+      ROS_INFO("[%s] Changed to state %s",
+          this->getName().c_str(), ROBOT_STATES(this->currentState_).c_str());
     }
   };
 }  // namespace pandora_vision

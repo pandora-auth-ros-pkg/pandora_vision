@@ -47,7 +47,6 @@ namespace pandora_vision_hazmat
 {
   HazmatHandler::HazmatHandler() :
     VisionHandler<HazmatPreProcessor, HazmatProcessor, HazmatPostProcessor>()
-  {
-  }
+  {}
 }  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision
