@@ -61,11 +61,6 @@ namespace pandora_vision
       **/
     VisionProcessor() :
       sensor_processor::Processor<CVMatStamped, POIsStamped>() {}
-
-    /**
-      * @brief Virtual Destructor
-      **/
-    virtual ~VisionProcessor() {}
   };
 }  // namespace pandora_vision
 

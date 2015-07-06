@@ -54,7 +54,6 @@ namespace pandora_vision_victim
       POIsStamped>::initialize(ns, handler);
 
     ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
-    ROS_WARN("victim hole processor ns: %s", processor_nh.getNamespace().c_str());
 
     paramsPtr_.reset( new VictimParameters(processor_nh) );
     paramsPtr_->configVictim(processor_nh);

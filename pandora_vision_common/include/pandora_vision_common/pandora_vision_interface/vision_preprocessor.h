@@ -72,12 +72,6 @@ namespace pandora_vision
       **/
     VisionPreProcessor();
 
-    /**
-      * @brief Virtual Destructor
-      **/
-    virtual
-    ~VisionPreProcessor() {}
-
     void
     setImageEncoding(const std::string& encoding)
     {

@@ -88,8 +88,7 @@ namespace pandora_vision_datamatrix
     dmtxDecodeDestroy(&dec);
     dmtxImageDestroy(&img);
     dmtxRegionDestroy(&reg);
-    ROS_INFO("[%s] : Datamatrix_Detector instance destroyed",
-        this->getName().c_str());
+    ROS_INFO("[%s] destroyed", this->getName().c_str());
   }
 
   /**

@@ -64,12 +64,6 @@ namespace pandora_vision
      **/
     VisionPostProcessor();
 
-    /**
-     * @brief Virtual Destructor
-     **/
-    virtual
-    ~VisionPostProcessor() {}
-
    protected:
     /**
      * @brief Function that calculates parameters yaw and pitch for every POI, given its

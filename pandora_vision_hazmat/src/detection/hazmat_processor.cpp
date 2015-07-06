@@ -98,8 +98,8 @@ namespace pandora_vision
 
     HazmatProcessor::~HazmatProcessor()
     {
-      ROS_INFO("[%s] terminated", this->getName().c_str());
       delete detector_;
+      ROS_INFO("[%s] destroyed", this->getName().c_str());
     }
 
     void HazmatProcessor::dynamicReconfigCallback(

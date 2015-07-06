@@ -37,7 +37,13 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
+#include <pluginlib/class_list_macros.h>
+#include <nodelet/nodelet.h>
+
 #include "pandora_vision_color/color_handler.h"
+
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_color::ColorHandler,
+    nodelet::Nodelet)
 
 namespace pandora_vision
 {
@@ -45,7 +51,6 @@ namespace pandora_vision_color
 {
   ColorHandler::ColorHandler() :
     VisionHandler<ColorPreProcessor, ColorProcessor, ColorPostProcessor>()
-  {
-  }
+  {}
 }  // namespace pandora_vision_color
 }  // namespace pandora_vision

@@ -63,7 +63,6 @@ namespace hole_fusion
   HoleFusion::~HoleFusion(void)
   {
     NODELET_INFO("[%s] Terminated", nodeName_.c_str());
-    ros::shutdown();
   }
 
   void HoleFusion::onInit()
@@ -71,10 +70,9 @@ namespace hole_fusion
     state_manager::StateClientNodelet::onInit();
 
     pointCloud_.reset(new PointCloud);
-    nodeHandle_ = this->getPublicNodeHandle();
-    privateNodeHandle_ = this->getPrivateNodeHandle();
-    ROS_WARN("private hole ns: %s", privateNodeHandle_.getNamespace().c_str());
-    nodeName_ = boost::to_upper_copy<std::string>(this->getName());
+    nodeHandle_ = this->getPublicNh();
+    privateNodeHandle_ = this->getPrivateNh();
+    nodeName_ = this->getNodeName();
 
     nodeHandle_.param("rgbd_mode", rgbdMode_, true);
     nodeHandle_.param("rgbdt_mode", rgbdtMode_, true);

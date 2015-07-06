@@ -87,7 +87,6 @@ target_link_libraries(${PROJECT_NAME}_processor
 
 )
 
-
 ################# motion preprocessor #################
 add_library(${PROJECT_NAME}_preprocessor
   src/motion_preprocessor.cpp
