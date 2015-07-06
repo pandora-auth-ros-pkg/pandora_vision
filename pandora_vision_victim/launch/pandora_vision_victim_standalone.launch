@@ -25,7 +25,7 @@
   </group>
 
 
-  <!-- <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" /> -->
+  <!-- <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" /> -->
 
   <include file="$(find pandora_vision_victim)/launch/pandora_vision_victim.launch"
       ns="$(arg namespace)" >

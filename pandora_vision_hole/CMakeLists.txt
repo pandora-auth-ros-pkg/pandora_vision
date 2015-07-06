@@ -119,7 +119,7 @@ download_extra_data(
   EXTRA_FILES walls/extra_files.yaml
   )
 
-if(DOWNLOAD_DATA or FUNCTIONAL_TEST or BENCHMARK)
+if(DOWNLOAD_DATA OR FUNCTIONAL_TEST OR BENCHMARK)
 # Download extra files, not needed when building
 # and not necessary to run any executable.
 # To download run: catkin_make download_extra_data
