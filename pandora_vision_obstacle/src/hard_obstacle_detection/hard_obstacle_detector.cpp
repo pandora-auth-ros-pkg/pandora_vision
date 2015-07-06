@@ -54,6 +54,13 @@ namespace pandora_vision
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
   {
+    // Check if input type is CV_32FC1
+    if (inputImage.depth() != CV_32FC1)
+    {
+      ROS_ERROR_NAMED(nodeName, "Hard obstacle node input image type was wrong");
+      ROS_BREAK();
+    }
+
     if (show_input_image)
     {
       // Show the input image
@@ -69,33 +76,47 @@ namespace pandora_vision
     // Pass the robot mask on the complete area that was made.
     cv::Mat newMap;
     robotMaskOnMap(edgesImage, &newMap);
+
+    return newMap;
   }
 
   void HardObstacleDetector::showImage(
     const std::string& title, const cv::Mat& image, int time)
   {
-    // Copy the input image to another
-    cv::Mat imageCpy;
-    image.copyTo(imageCpy);
-
-    if (imageCpy.depth() != CV_8UC1)
+    if (image.depth() == CV_32FC1)
     {
-      image.convertTo(imageCpy, CV_8UC1);
+      cv::Mat scaledImage = scaleFloatImageToInt(image);
+      cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
 
-      // If value is negative (-1), make it 255 for visualization
+      // If value is negative, make it green for visualization
       for (unsigned int rows = 0; rows < image.rows; rows++)
       {
         for (unsigned int cols = 0; cols < image.cols; cols++)
         {
-          if (image.at<signed char>(rows, cols) < 0)
+          if (image.at<float>(rows, cols) < 0)
           {
-            imageCpy.at<unsigned char>(rows, cols) = 255;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 0;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 255;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
           }
         }
       }
     }
-    cv::imshow(title, imageCpy);
+    cv::imshow(title, image);
     cv::waitKey(time);
+  }
+
+  cv::Mat HardObstacleDetector::scaleFloatImageToInt(const cv::Mat& inImage)
+  {
+    cv::Mat outImage;
+
+    double min;
+    double max;
+    cv::minMaxIdx(inImage, &min, &max);
+
+    inImage.convertTo(outImage, CV_8UC1, 255.0 / max);
+
+    return outImage;
   }
 
   void HardObstacleDetector::fillUnkownAreas(
@@ -105,9 +126,9 @@ namespace pandora_vision
     {
       for (unsigned int cols = 0; cols < inImage.cols; cols++)
       {
-        if (inImage.at<signed char>(rows, cols) < 0)
+        if (inImage.at<float>(rows, cols) < 0)
         {
-          outImage->at<signed char>(rows, cols) = -1;
+          outImage->at<float>(rows, cols) = -1;
         }
       }
     }
@@ -123,12 +144,7 @@ namespace pandora_vision
   {
     cv::Mat newMap;
 
-    // Copy the input image to another
-    cv::Mat imageCpy;
-    inImage.copyTo(imageCpy);
-    imageCpy.convertTo(imageCpy, CV_16SC1);
-
-    cv::filter2D(imageCpy, newMap, -1, robotMask_,
+    cv::filter2D(inImage, newMap, -1, robotMask_,
       cv::Point(-1, -1), 0, cv::BORDER_DEFAULT);
 
     if (show_new_map_image)
@@ -138,10 +154,7 @@ namespace pandora_vision
 
     // After convolution there might be values lower that -1, so we need
     // to set them to -1.
-    cv::Mat setNegatives;
-    fillUnkownAreas(newMap, &setNegatives);
-
-
+    fillUnkownAreas(newMap, outImage);
 
   }
 
@@ -169,26 +182,18 @@ namespace pandora_vision
   void HardObstacleDetector::detectEdges(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
-    // Copy the input image to another
-    cv::Mat imageCpy;
-    inImage.copyTo(imageCpy);
-
-    // Since the input image has CV_8SC1 type, change it to CV_8UC1 in order to
-    // further process it.
-    // The input image had values in range [-1, 100] Occupancy grid map
-    // After conversion its range will be [0, 100]
-    imageCpy.convertTo(imageCpy, CV_8UC1);
+    cv::Mat scaledImage = scaleFloatImageToInt(inImage);
 
     switch (edge_method)
     {
       case 0 :
-        applyCanny(imageCpy, outImage);
+        applyCanny(scaledImage, outImage);
         break;
       case 1 :
-        applyScharr(imageCpy, outImage);
+        applyScharr(scaledImage, outImage);
         break;
       case 2 :
-        applySobel(imageCpy, outImage);
+        applySobel(scaledImage, outImage);
         break;
     }
 
@@ -205,7 +210,7 @@ namespace pandora_vision
       showImage("The thresholded edges image", *outImage, 1);
     }
 
-    // Convert the type of the output image to CV_8SC1.
-    outImage->convertTo(*outImage, CV_8SC1);
+    // Convert the type of the output image to CV_32FC1.
+    outImage->convertTo(*outImage, CV_32FC1, 1.0 / 255.0, 0.0);
   }
 }  // namespace pandora_vision
