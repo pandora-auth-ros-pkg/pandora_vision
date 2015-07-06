@@ -60,8 +60,15 @@ namespace pandora_vision
       showImage("The input image", inputImage, 1);
     }
 
-    //detectEdges(inputImage, );
+    cv::Mat edgesImage;
+    detectEdges(inputImage, &edgesImage);
 
+    // Pass the unkown areas in edges image.
+    fillUnkownAreas(inputImage, &edgesImage);
+
+    // Pass the robot mask on the complete area that was made.
+    cv::Mat newMap;
+    robotMaskOnMap(edgesImage, &newMap);
   }
 
   void HardObstacleDetector::showImage(
@@ -71,7 +78,7 @@ namespace pandora_vision
     cv::Mat imageCpy;
     image.copyTo(imageCpy);
 
-    if (imageCpy.depth() == CV_8SC1)
+    if (imageCpy.depth() != CV_8UC1)
     {
       image.convertTo(imageCpy, CV_8UC1);
 
@@ -91,6 +98,56 @@ namespace pandora_vision
     cv::waitKey(time);
   }
 
+  void HardObstacleDetector::fillUnkownAreas(
+    const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    for (unsigned int rows = 0; rows < inImage.rows; rows++)
+    {
+      for (unsigned int cols = 0; cols < inImage.cols; cols++)
+      {
+        if (inImage.at<signed char>(rows, cols) < 0)
+        {
+          outImage->at<signed char>(rows, cols) = -1;
+        }
+      }
+    }
+
+    if (show_edges_and_unkown_image)
+    {
+      showImage("The edges image with unkown areas", *outImage, 1);
+    }
+  }
+
+  void HardObstacleDetector::robotMaskOnMap(
+    const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    cv::Mat newMap;
+
+    // Copy the input image to another
+    cv::Mat imageCpy;
+    inImage.copyTo(imageCpy);
+    imageCpy.convertTo(imageCpy, CV_16SC1);
+
+    cv::filter2D(imageCpy, newMap, -1, robotMask_,
+      cv::Point(-1, -1), 0, cv::BORDER_DEFAULT);
+
+    if (show_new_map_image)
+    {
+      showImage("The new map after robot mask convolution", newMap, 1);
+    }
+
+    // After convolution there might be values lower that -1, so we need
+    // to set them to -1.
+    cv::Mat setNegatives;
+    fillUnkownAreas(newMap, &setNegatives);
+
+
+
+  }
+
+  /*****************************************************************************
+   *                         Edge Detection methods                            *
+   ****************************************************************************/
   void HardObstacleDetector::applyCanny(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
@@ -116,7 +173,7 @@ namespace pandora_vision
     cv::Mat imageCpy;
     inImage.copyTo(imageCpy);
 
-    // Since the input image has CV_8S type, change it to CV_8UC1 in order to
+    // Since the input image has CV_8SC1 type, change it to CV_8UC1 in order to
     // further process it.
     // The input image had values in range [-1, 100] Occupancy grid map
     // After conversion its range will be [0, 100]
@@ -140,6 +197,15 @@ namespace pandora_vision
       showImage("The edges image", *outImage, 1);
     }
 
-  }
+    // Apply threshold to the edges
+    cv::threshold(*outImage, *outImage, edges_threshold, 255, CV_THRESH_BINARY);
 
+    if (show_edges_thresholded_image)
+    {
+      showImage("The thresholded edges image", *outImage, 1);
+    }
+
+    // Convert the type of the output image to CV_8SC1.
+    outImage->convertTo(*outImage, CV_8SC1);
+  }
 }  // namespace pandora_vision
