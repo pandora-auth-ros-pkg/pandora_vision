@@ -1,0 +1,4 @@
+subscribed_topics: /kinect/rgb/image_raw
+published_topics: /vision/color_alert
+active_states: [SENSOR_HOLD, SENSOR_TEST]
+

@@ -2,11 +2,11 @@
   <!-- Set namespace to load pandora_vision_hole on -->
   <arg name="namespace" default="/pandora_vision/pandora_vision_hole" />
   <!-- Set this if we play with thermal source -->
-  <arg name="thermal" default="true" />
+  <arg name="thermal" default="false" />
   <!-- Set this if we play with rgbd source -->
   <arg name="rgbd" default="true" />
   <!-- Set this if we play with rgbdt hole -->
-  <arg name="rgbdt" default="true" />
+  <arg name="rgbdt" default="false" />
   <!-- Kinect: choose the openni driver -->
   <arg name="openni" default="false" />
   <!-- Xtion: choose the openni2 driver -->
@@ -49,7 +49,7 @@
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
   <!-- Load robot description model -->
-  <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" />
+    <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
   <!-- Output selection -->
   <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch"
