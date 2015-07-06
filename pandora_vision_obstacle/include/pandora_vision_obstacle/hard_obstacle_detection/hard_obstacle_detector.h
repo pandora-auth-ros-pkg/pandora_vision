@@ -83,7 +83,7 @@ namespace pandora_vision
       bool show_new_map_image;
 
       /**
-        @brief Visualization of an image with CV_8SC1 or CV_8UC1 type.
+        @brief Visualization of an image with CV_32FC1 or CV_8UC1 type.
         If there is a negative value in mat aka unkown area set it 255 for
         visualization.
         @param[in] title [const std::string&] The title of image to be shown.
@@ -93,6 +93,14 @@ namespace pandora_vision
        **/
       void showImage(
         const std::string& title, const cv::Mat& image, int time);
+
+      /**
+        @brief Converts an image of CV_32FC1 type to CV_8UC1. Negative values
+        will be replaced with zero values.
+        @param[in] inImage [const cv::Mat&] The input image.
+        @return cv::Mat
+       **/
+      cv::Mat scaleFloatImageToInt(const cv::Mat& inImage);
 
       /**
         @brief Checks if there is any negative value in the input mat, if yes
