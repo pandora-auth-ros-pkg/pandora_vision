@@ -35,6 +35,9 @@
  * Authors: Vasilis Bosdelekidis
  *********************************************************************/
 
+#ifndef PANDORA_VISION_OBSTACLE_BARREL_DETECTION_PARAMETERS_H
+#define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_PARAMETERS_H
+
 #include <pandora_vision_obstacle/barrel_nodeConfig.h>
 #include <dynamic_reconfigure/server.h>
 
@@ -47,7 +50,7 @@ namespace pandora_vision
   class BarrelParametersHandler
   {
     public:
-      //the constructor
+      // The constructor
       BarrelParametersHandler();
 
     private:
@@ -82,7 +85,13 @@ namespace pandora_vision
     static int fsd_max_pair_dist;
     static int fsd_no_of_peaks;
     static float roi_variance_thresh;
+    static float differential_depth_unsymmetry_thresh;
+    static float symmetry_line_depth_difference_thresh;
+    static float curve_approximation_max_epsilon;
+    static float min_circle_overlapping;
+    static float max_corner_thresh;
   };
 
 }  // namespace pandora_vision
 
+#endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_PARAMETERS_H

@@ -33,12 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
+ *   Bosdelekidis Vasilis <vasilis1bos@gmail.com>
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
 #include <string>
 #include <vector>
 #include <limits>
+#include <algorithm>
 #include <utility>
 #include "pandora_vision_obstacle/barrel_detection/barrel_processor.h"
 
@@ -53,8 +55,8 @@ namespace pandora_vision_obstacle
   /**
     @brief Find symmetric object inside frame
     @description Use fast symmetry detector algorith to find symmetric objects
-    based on edges extracted from Canny edge detector  
-    @param[in] inputImage [const cv::Mat&] Input depth image where we do the 
+    based on edges extracted from Canny edge detector
+    @param[in] inputImage [const cv::Mat&] Input depth image where we do the
     processing
     @param[in out] roi [cv::Rect*] Here the candidate roi is stored
     @param[in] symmetricStartPoint [cv::Point*] The symmetry's line start point
@@ -67,8 +69,6 @@ namespace pandora_vision_obstacle
       cv::Point* symmetricStartPoint,
       cv::Point* symmetricEndPoint)
   {
-    cv::namedWindow("");
-    cv::moveWindow("", 0, 0);
     cv::Point accumIndex(-1, -1);
 
     if (!inputImage.data)
@@ -81,16 +81,7 @@ namespace pandora_vision_obstacle
     FastSymmetryDetector detector(inputImage.size(), cv::Size(rhoDivs, thetaDivs), 1);
 
     cv::Rect region(0, inputImage.rows, thetaDivs * 2.0, rhoDivs * 0.5);
-    // setMouseCallback( "", onMouse, static_cast<void*>( &region ) );
     cv::Mat temp, edge, depth8UC3;
-
-    /* Adjustable parameters, depending on the scene condition */
-    // int canny_thresh_1 = 30;
-    // int canny_thresh_2 = 90;
-    // int min_pair_dist  = 25;
-    // int max_pair_dist  = 500;
-    // int no_of_peaks    = 1;
-
 
     int cannyThresh1 = BarrelDetection::fsd_canny_thresh_1;
     int cannyThresh2 = BarrelDetection::fsd_canny_thresh_2;
@@ -101,7 +92,7 @@ namespace pandora_vision_obstacle
     temp = inputImage.clone();
 
     double minVal, maxVal;
-    cv::minMaxLoc(temp, &minVal, &maxVal); 
+    cv::minMaxLoc(temp, &minVal, &maxVal);
     temp.convertTo(edge, CV_8U, 255.0 / (maxVal - minVal), -minVal * 255.0 / (maxVal - minVal));
 
     temp.convertTo(depth8UC3, CV_8UC3, 255);
@@ -123,21 +114,21 @@ namespace pandora_vision_obstacle
 
     for (int i = 0; i < result.size(); i ++)
     {
-      //float len1 = std::sqrt(result[i].first.x * result[i].first.x + result[i].first.y * result[i].first.y);
-      //float len2 = std::sqrt(result[i].second.x * result[i].second.x + result[i].second.y * result[i].second.y);
+      // float len1 = std::sqrt(result[i].first.x * result[i].first.x + result[i].first.y * result[i].first.y);
+      // float len2 = std::sqrt(result[i].second.x * result[i].second.x + result[i].second.y * result[i].second.y);
 
-      //float dot = result[i].first.x * result[i].second.x + result[i].first.y * result[i].second.y;
+      // float dot = result[i].first.x * result[i].second.x + result[i].first.y * result[i].second.y;
 
-      //float a = dot / (len1 * len2);
+      // float a = dot / (len1 * len2);
 
-      //float angle;
-      //if (a >= 1.0)
-      //  angle = 0.0;
-      //else if (a <= -1.0)
-      //  angle = 3.14;
-      //else
-      //  angle = std::acos(a); // 0..PI
-      //angle = angle * 180 / 3.14;
+      // float angle;
+      // if (a >= 1.0)
+      //   angle = 0.0;
+      // else if (a <= -1.0)
+      //   angle = 3.14;
+      // else
+      //   angle = std::acos(a); //  0..PI
+      // angle = angle * 180 / 3.14;
       cv::Point minPoint, maxPoint;
       minPoint.x = std::min(result[i].first.x, result[i].second.x);
       minPoint.y = std::min(result[i].first.y, result[i].second.y);
@@ -200,10 +191,15 @@ namespace pandora_vision_obstacle
 
   /**
     @brief Validates the ROI for barrel existence
-    @description Keep homogeneous regions in rgb, with decreasing depth
-    from left to the symmetry line and increasing depth from symmetry line to
-    right, with almost identical variation between two parts and with almost stable 
-    depth through the symmetry line. 
+    @description Keep; 
+    1. Homogeneous regions in rgb
+    2. Regions with decreasing depth from left to the symmetry line and increasing
+    depth from symmetry line to right
+    3. Regions with almost identical variation between abovementioned two parts
+    4. Regions with almost stable depth through the symmetry line
+    5. Regions with points through the perpendicular to the symmetry line that
+    belong to the equation of a circle
+    6. Regions which do not contain many corners
     @param[in] rgbImage [const cv::Mat&] The rgb image
     @param[in] depthImage [const cv::Mat&] The depth image
     @param[in] rectRoi [const cv::Rect&] The ROI to validate
@@ -215,34 +211,59 @@ namespace pandora_vision_obstacle
       const cv::Mat& rgbImage,
       const cv::Mat& depthImage,
       const cv::Rect& rectRoi,
-      bool* valid)
+      const cv::Point& symmetricStartPoint,
+      const cv::Point& symmetricEndPoint)
   {
-    // Validate based on variance in RGB ROI
+    //  Validate based on variance in RGB ROI
     cv::Scalar mean;
     cv::Scalar stddev;
     cv::Mat roiRgb = rgbImage(rectRoi);
     cv::Mat roiDepth = depthImage(rectRoi);
-    cv::meanStdDev ( roiRgb, mean, stddev );
+    cv::meanStdDev(roiRgb, mean, stddev);
     if (stddev.val[0] > BarrelDetection::roi_variance_thresh)
     {
-      (*valid) = false;
-      return;
+      // (*valid) = false;
+      return false;
     }
-    cv::Point slope;
+
+    //  Validate that through the symmetry line we have almost
+    //  constant depth
+    cv::LineIterator itSym(depthImage, symmetricStartPoint, symmetricEndPoint, 8);
+    std::vector<cv::Vec3b> bufSym(itSym.count);
+    std::vector<cv::Point> pointsSym(itSym.count);
+    float sumDiffs = 0.0;
+
+    for (int linePoint = 0; linePoint < itSym.count; linePoint ++, ++itSym)
+    {
+      bufSym[linePoint] = (const cv::Vec3b)* itSym;
+      pointsSym[linePoint] = itSym.pos();
+      if (depthImage.at<float>(pointsSym[linePoint].y, pointsSym[linePoint].x) != 0.0)
+        sumDiffs +=
+          std::abs(depthImage.at<float>(pointsSym[linePoint].y, pointsSym[linePoint].x)
+              - depthImage.at<float>(pointsSym[linePoint - 1].y, pointsSym[linePoint - 1].x));
+    }
+
+    if (sumDiffs > BarrelDetection::symmetry_line_depth_difference_thresh)
+    {
+      // (*valid) = false;
+      return false;
+    }
+    cv::Point2f slope;
     int length = std::abs(rectRoi.width / 2);
     slope.x = symmetricEndPoint.x - symmetricStartPoint.x;
     slope.y = symmetricEndPoint.y - symmetricStartPoint.y;
     float magnitude = std::sqrt(slope.x * slope.x + slope.y * slope.y);
     slope.x /= magnitude;
     slope.y /= magnitude;
-    // Rotate vector 90 degrees clockwisely
+    //  Rotate vector 90 degrees clockwisely
     float temp1 = slope.x;
     slope.x = -slope.y;
     slope.y = temp1;
-    // A point on the symmetry line
+    //  A point on the symmetry line
     cv::Point s1 =
       cv::Point(rectRoi.x + rectRoi.width / 2,
           rectRoi.y + rectRoi.height / 2);
+    // ROS_INFO("%f, %f", slope.x, slope.y);
     cv::Point s2;
     s2.x = s1.x + slope.x * length;
     s2.y = s1.y + slope.y * length;
@@ -251,8 +272,8 @@ namespace pandora_vision_obstacle
     s3.x = s1.x - slope.x * length;
     s3.y = s1.y - slope.y * length;
 
-    // In order to calculate circularity place points of the perpendicular
-    // line into a vector
+    //  In order to calculate circularity place points of the perpendicular
+    //  line into a vector
 
     cv::LineIterator it(depthImage, s3, s2, 8);
     std::vector<cv::Vec3b> buf(it.count);
@@ -260,15 +281,18 @@ namespace pandora_vision_obstacle
     std::vector<float> differentialPoints(it.count);
     float maxDifferential = std::numeric_limits<float>::min();
 
-    // Ignore values at the border
-    for (int linePoint = 0; linePoint < 10; linePoint ++, ++it)
+    int firstBorder = it.count > 10 ? 10 : it.count;
+    int secondBorder = it.count - firstBorder > 10 ? it.count - 10 : it.count;
+    //  Ignore values at the border
+    for (int linePoint = 0; linePoint < firstBorder; linePoint ++, ++it)
     {
       buf[linePoint] = (const cv::Vec3b)* it;
       points[linePoint] = it.pos();
       differentialPoints[linePoint] = 0.0;
     }
 
-    for (int linePoint = 10; linePoint < it.count - 10; linePoint ++, ++it)
+
+    for (int linePoint = firstBorder; linePoint < secondBorder; linePoint ++, ++it)
     {
       buf[linePoint] = (const cv::Vec3b)* it;
       points[linePoint] = it.pos();
@@ -282,17 +306,17 @@ namespace pandora_vision_obstacle
         maxDifferential = std::abs(differentialPoints[linePoint]);
     }
 
-    for (int linePoint = it.count - 10; linePoint < it.count; linePoint ++, ++it)
+    for (int linePoint = secondBorder; linePoint < it.count; linePoint ++, ++it)
     {
       buf[linePoint] = (const cv::Vec3b)* it;
       points[linePoint] = it.pos();
       differentialPoints[linePoint] = 0.0;
     }
 
-    // calculate differentiation of depth values, through the perpendicular
-    // line(s) for the left side of the barrel and the right side of the
-    // barrel. Calculate avg of differentiation for left and right side
-    // separately.
+    //  calculate differentiation of depth values, through the perpendicular
+    //  line(s) for the left side of the barrel and the right side of the
+    //  barrel. Calculate avg of differentiation for left and right side
+    //  separately.
     int leftRightBorder = static_cast<int>(points.size() / 2);
     float sumLeftLine = 0.0;
 
@@ -302,11 +326,11 @@ namespace pandora_vision_obstacle
     }
 
     float avgLeftLinePoint = 0.0;
-    //if (leftRightBorder + 1 > 0)
-    //  avgLeftLinePoint = sumLeftLine / (leftRightBorder + 1);
-    //else
-    //  avgLeftLinePoint = 0.0;
-    avgLeftLinePoint = sumLeftLine;
+    if (leftRightBorder + 1 > 0)
+      avgLeftLinePoint = sumLeftLine / (leftRightBorder + 1);
+    else
+      avgLeftLinePoint = 0.0;
+    // avgLeftLinePoint = sumLeftLine;
 
 
     float sumRightLine = 0.0;
@@ -316,28 +340,103 @@ namespace pandora_vision_obstacle
     }
 
     float avgRightLinePoint = 0.0;
-    //if (points.size() - leftRightBorder > 0)
-    //  avgRightLinePoint = sumRightLine / (points.size() - leftRightBorder);
-    //else
-    //  avgRightLinePoint = 0.0;
-    avgRightLinePoint = sumRightLine;
+    if (points.size() - leftRightBorder > 0)
+      avgRightLinePoint = sumRightLine / (points.size() - leftRightBorder);
+    else
+      avgRightLinePoint = 0.0;
+    // avgRightLinePoint = sumRightLine;
 
-    // We expect that starting from the left side of the barrel,
-    // we have a decreasing depth up to the peak of the barrel
-    // (negative differential avg), and then increasing depth.
+    //  We expect that starting from the left side of the barrel,
+    //  we have a decreasing depth up to the peak of the barrel
+    //  (negative differential avg), and then increasing depth.
     if (avgLeftLinePoint >= 0 || avgRightLinePoint <= 0)
     {
-      (*valid) = false;
-      return;
+      // (*valid) = false;
+      return false;
     }
 
-    // We must have a symmetry between the differential avgs of the
-    // left and right sides of the barrel.
+    //  We must have a symmetry between the differential avgs of the
+    //  left and right sides of the barrel.
     if (std::abs(avgLeftLinePoint + avgRightLinePoint) > BarrelDetection::differential_depth_unsymmetry_thresh)
     {
-      (*valid) = false;
-      return;
+      // (*valid) = false;
+      return false;
     }
+
+    // Check if some of the points belong to a circle curve
+
+    // Firstly get an approximation of the center of the curve, thus
+    // approximate radius
+
+    // s1 is the coordinates of the center (this point is located on the symmetry line)
+    // so approximate radius as the difference of this point (on a barrel this point
+    // will have the smallest depth, same as all points on the symmetry line) and the
+    // point of the biggest depth inside the roi, hopefully it will be a point on the
+    // wall, but there is no problem if it is on the barrel.
+    float maxDepth = std::numeric_limits<float>::min();
+    for (int row = rectRoi.y; row < rectRoi.y + rectRoi.height; row ++)
+      for (int col = rectRoi.x; col < rectRoi.x + rectRoi.width; col ++)
+        if (depthImage.at<float>(row, col) != 0.0)
+          if (depthImage.at<float>(row, col) > maxDepth)
+            maxDepth = depthImage.at<float>(row, col);
+    float radius = 0.0;
+    if (depthImage.at<float>(s1.y, s1.x) != 0.0)
+      radius =
+        std::sqrt(std::pow(maxDepth - depthImage.at<float>(s1.y, s1.x), 2));
+    else
+      return false;
+    int sumNonZero = 0;
+    int sumOnCurve = 0;
+    for (int linePoint = leftRightBorder; linePoint >= firstBorder; linePoint --)
+      if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
+      {
+        sumNonZero++;
+        float circleLeftEq =
+          std::pow(
+              std::sqrt(std::pow(points[linePoint].x, 2) + std::pow(points[linePoint].y, 2))
+              - std::sqrt(std::pow(s1.x, 2) + std::pow(s1.y, 2)), 2) +
+          std::pow(depthImage.at<float>(points[linePoint].y, points[linePoint].x) - maxDepth, 2);
+        if (std::abs(circleLeftEq - std::pow(radius, 2)) < BarrelDetection::curve_approximation_max_epsilon)
+          sumOnCurve++;
+      }
+    for (int linePoint = leftRightBorder; linePoint < secondBorder; linePoint ++)
+      if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
+      {
+        sumNonZero++;
+        float circleLeftEq =
+          std::pow(points[linePoint].x - s1.x, 2) + std::pow(points[linePoint].y - s1.y, 2) +
+          std::pow(depthImage.at<float>(points[linePoint].y, points[linePoint].x) - maxDepth, 2);
+        if (std::abs(circleLeftEq - std::pow(radius, 2)) < BarrelDetection::curve_approximation_max_epsilon)
+          sumOnCurve++;
+      }
+    float curveProbability = static_cast<float>(sumOnCurve) / static_cast<float>(sumNonZero);
+    if (curveProbability < BarrelDetection::min_circle_overlapping)
+    {
+      // (*valid) = false;
+      return false;
+    }
+
+    // Eliminate corners with Harris Corner Detector
+    int thresh = 100;
+    cv::Mat dst, dst_norm, dst_norm_scaled, gray;
+    // cv::cvtColor(rgbImage, gray, CV_BGR2GRAY);
+    // dst = cv::Mat::zeros(rgbImage.size(), CV_32FC1);
+    depthImage.copyTo(gray);
+    dst = cv::Mat::zeros(depthImage.size(), CV_32FC1);
+
+    // Detecting corners
+    cv::cornerHarris(gray, dst, 7, 5, 0.05, cv::BORDER_DEFAULT);
+
+    // Normalizing
+    cv::normalize(dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+    cv::convertScaleAbs(dst_norm, dst_norm_scaled);
+    if (cv::mean(dst_norm_scaled).val[0] > BarrelDetection::max_corner_thresh)
+    {
+      // (*valid) = false;
+      return false;
+    }
+
+    return true;
   }
 
   float BarrelProcessor::findDepthDistance(const cv::Mat& depthImage,
@@ -347,11 +446,11 @@ namespace pandora_vision_obstacle
 
     for (size_t row = 1; row < roi.height; row ++)
     {
-    for (size_t col = 1; col < roi.width; col ++)
-    {
-      /// Find depth distance
-      depth += depthImage.at<float>(row, col);
-    }
+      for (size_t col = 1; col < roi.width; col ++)
+      {
+        /// Find depth distance
+        depth += depthImage.at<float>(row, col);
+      }
     }
     depth /= static_cast<float>(roi.area());
     return depth;
@@ -359,16 +458,10 @@ namespace pandora_vision_obstacle
 
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,
       const POIsStampedPtr& output)
-  {
+  { // ROS_INFO("Starting bag read");
     output->header = input->getHeader();
     output->frameWidth = input->getRgbImage().cols;
     output->frameHeight = input->getRgbImage().rows;
-
-    // output->pois = ...(input->getImage());
-    cv::Rect roi;
-    getSymmetryObject(input->getDepthImage(), &roi);
-    bool valid = true;
-    validateRoi(input->getRgbImage(), input->getDepthImage(), roi, &valid);
     cv::Rect roi;
     cv::Point symmetricStartPoint;
     cv::Point symmetricEndPoint;
@@ -378,20 +471,14 @@ namespace pandora_vision_obstacle
     float depthDistance;
     if (roi.area() > 0.1)
     {
-      bool valid = true;
-      validateRoi(input->getRgbImage(), input->getDepthImage(),
-          roi, &valid, symmetricStartPoint, symmetricEndPoint);
-
-      ObstaclePOIPtr poi(new ObstaclePOI);
-      std::vector<POIPtr> pois;
+      valid = validateRoi(input->getRgbImage(), input->getDepthImage(),
+          roi, symmetricStartPoint, symmetricEndPoint);
       if (valid)
       {
         depthDistance = findDepthDistance(input->getDepthImage(), roi);
         ObstaclePOIPtr poi(new ObstaclePOI);
         poi->setPoint(cv::Point((roi.x + roi.width / 2),
               (roi.y + roi.height / 2)));
-        poi->setWidth(roi.width);
-        poi->setHeight(roi.height);
 
         poi->setProbability(1.0);
         poi->setType(pandora_vision_msgs::ObstacleAlert::BARREL);
@@ -400,7 +487,7 @@ namespace pandora_vision_obstacle
         output->pois.push_back(poi);
         ROS_INFO("barrel found");
       }
-
+    }
     if (output->pois.empty())
     {
       return false;

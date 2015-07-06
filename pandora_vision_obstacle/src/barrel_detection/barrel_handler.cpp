@@ -44,7 +44,8 @@ namespace pandora_vision
 namespace pandora_vision_obstacle
 {
   BarrelHandler::BarrelHandler() :
-    VisionHandler<ObstaclePreProcessor, BarrelProcessor, ObstaclePostP  {
+    VisionHandler<ObstaclePreProcessor, BarrelProcessor, ObstaclePostProcessor>()
+  {
   }
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

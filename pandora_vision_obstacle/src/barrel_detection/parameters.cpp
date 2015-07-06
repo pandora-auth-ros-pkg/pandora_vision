@@ -46,7 +46,8 @@ namespace pandora_vision
 
   BarrelParametersHandler::BarrelParametersHandler()
   {
-    serverBarrel.setCallback(boost::bind(&BarrelParametersHandler::parametersCallbackBarrel, this, _1, _2)); }
+    serverBarrel.setCallback(boost::bind(&BarrelParametersHandler::parametersCallbackBarrel, this, _1, _2));
+  }
 
   /**
     @brief The function called when a parameter is changed
@@ -58,7 +59,6 @@ namespace pandora_vision
       const pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
       const uint32_t& level)
   {
-
     //////////////////////////////// Debug parameters ////////////////////////////
 
     //// Show the image with the segmented roi from fsd
@@ -82,6 +82,16 @@ namespace pandora_vision
       configBarrel.fsd_no_of_peaks;
     BarrelDetection::roi_variance_thresh =
       configBarrel.roi_variance_thresh;
+    BarrelDetection::differential_depth_unsymmetry_thresh =
+      configBarrel.differential_depth_unsymmetry_thresh;
+    BarrelDetection::symmetry_line_depth_difference_thresh =
+      configBarrel.symmetry_line_depth_difference_thresh;
+    BarrelDetection::curve_approximation_max_epsilon =
+      configBarrel.curve_approximation_max_epsilon;
+    BarrelDetection::min_circle_overlapping =
+      configBarrel.min_circle_overlapping;
+    BarrelDetection::max_corner_thresh =
+      configBarrel.max_corner_thresh;
   }
 
   // Show the barrel that depth node segments through FSD
@@ -94,8 +104,13 @@ namespace pandora_vision
   // Parameters for Fast Symmetry Detection Algorithm
   int BarrelDetection::fsd_canny_thresh_1 = 0;
   int BarrelDetection::fsd_canny_thresh_2 = 27;
-  int BarrelDetection::fsd_min_pair_dist = 140;
-  int BarrelDetection::fsd_max_pair_dist = 500;
+  int BarrelDetection::fsd_min_pair_dist = 100;
+  int BarrelDetection::fsd_max_pair_dist = 640;
   int BarrelDetection::fsd_no_of_peaks = 1;
-  float BarrelDetection::roi_variance_thresh = 30.0;
-} // namespace pandora_vision
+  float BarrelDetection::roi_variance_thresh = 60.0;
+  float BarrelDetection::differential_depth_unsymmetry_thresh = 30.0;
+  float BarrelDetection::symmetry_line_depth_difference_thresh = 11.0;
+  float BarrelDetection::curve_approximation_max_epsilon = 1600.0;
+  float BarrelDetection::min_circle_overlapping = 0.25;
+  float BarrelDetection::max_corner_thresh = 35.0;
+}  // namespace pandora_vision

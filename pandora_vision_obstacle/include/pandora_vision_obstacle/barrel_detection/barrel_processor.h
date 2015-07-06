@@ -47,6 +47,7 @@
 #include "pandora_vision_obstacle/obstacle_poi.h"
 #include "pandora_vision_obstacle/barrel_detection/fast_symmetry_detector.h"
 #include "pandora_vision_obstacle/barrel_detection/parameters.h"
+#include "pandora_vision_msgs/ObstacleAlert.h"
 
 namespace pandora_vision
 {
@@ -80,10 +81,15 @@ namespace pandora_vision_obstacle
 
       /**
         @brief Validates the ROI for barrel existence
-        @description Keep homogeneous regions in rgb, with decreasing depth
-        from left to the symmetry line and increasing depth from symmetry line to
-        right, with almost identical variation between two parts and with almost stable 
-        depth through the symmetry line. 
+        @description Keep; 
+        1. Homogeneous regions in rgb
+        2. Regions with decreasing depth from left to the symmetry line and increasing
+        depth from symmetry line to right
+        3. Regions with almost identical variation between abovementioned two parts
+        4. Regions with almost stable depth through the symmetry line
+        5. Regions with points through the perpendicular to the symmetry line that
+        belong to the equation of a circle
+        6. Regions which do not contain many corners
         @param[in] rgbImage [const cv::Mat&] The rgb image
         @param[in] depthImage [const cv::Mat&] The depth image
         @param[in] rectRoi [const cv::Rect&] The ROI to validate
