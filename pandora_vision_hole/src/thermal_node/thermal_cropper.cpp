@@ -216,14 +216,7 @@ namespace thermal
     enhancedImagePtr->thermalImage = thermalEnhancedImageConstPtr_->thermalImage;
     enhancedImagePtr->rgbImage = *rgbImageConstPtr_;
     enhancedImagePtr->depthImage = *depthImageConstPtr_;
-    if (Parameters::Depth::interpolation_method == 0)
-    {
-      enhancedImagePtr->isDepth = true;
-    }
-    else
-    {
-      enhancedImagePtr->isDepth = false;
-    }
+    enhancedImagePtr->isDepth = true;
     enhancedImagePtr->regionsOfInterest = thermalEnhancedImageConstPtr_->regionsOfInterest;
 
     processorLogPtr->success = true;

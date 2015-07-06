@@ -287,6 +287,9 @@ namespace pandora_vision_hole
     ros::Publisher enhancedImagePublisher_;
     std::string enhancedImageTopic_;
 
+    ros::Publisher enhancedImageCropperPublisher_;
+    std::string enhancedImageCropperTopic_;
+
     // Booleans that tell the synchronizer where to publish.
     bool holeFusionLocked_;
     bool thermalLocked_;

@@ -186,13 +186,16 @@ namespace pandora_vision_hole
         <PointCloud>(synchronizedPointCloudTopic_, 1);
     }
 
-    // Advertise the synchronized depth image
-    synchronizedDepthImagePublisher_ = nh_.advertise
-      <sensor_msgs::Image>(synchronizedDepthImageTopic_, 1);
+    if (rgbdMode_ || rgbdtMode_)
+    {
+      // Advertise the synchronized depth image
+      synchronizedDepthImagePublisher_ = nh_.advertise
+        <sensor_msgs::Image>(synchronizedDepthImageTopic_, 1);
 
-    // Advertise the synchronized rgb image
-    synchronizedRgbImagePublisher_ = nh_.advertise
-      <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1);
+      // Advertise the synchronized rgb image
+      synchronizedRgbImagePublisher_ = nh_.advertise
+        <sensor_msgs::Image>(synchronizedRgbImageTopic_, 1);
+    }
 
     if (rgbdtMode_ || thermalMode_)
     {
@@ -208,6 +211,12 @@ namespace pandora_vision_hole
 
     enhancedImagePublisher_ = nh_.advertise<pandora_vision_msgs::EnhancedImage>(
         enhancedImageTopic_, 1);
+
+    if (thermalMode_)
+    {
+      enhancedImageCropperPublisher_ = nh_.advertise<pandora_vision_msgs::EnhancedImage>(
+          enhancedImageCropperTopic_, 1);
+    }
 
     std::string modes;
     if (rgbdMode_)
@@ -258,38 +267,53 @@ namespace pandora_vision_hole
       const sensor_msgs::PointCloud2ConstPtr& pcMsg,
       const distrib_msgs::FlirLeptonMsgConstPtr& thermalMsg)
   {
-    if (!thermalLocked_ && !holeFusionLocked_)
+    sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
+    PointCloudPtr pointCloudPtr;
+    initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
+
+    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
+        new pandora_vision_msgs::EnhancedImage );
+    enhancedImagePtr->header = pcMsg->header;
+    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
+    enhancedImagePtr->depthImage = *depthImageMessagePtr;
+    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
+
+    enhancedImagePublisher_.publish(enhancedImagePtr);
+
+    if (!thermalLocked_ || !holeFusionLocked_)
     {
       NODELET_INFO("[%s] RGBDT Callback", nodeName_.c_str());
       std_msgs::StringPtr thermalIndex( new std_msgs::String );
-      sensor_msgs::ImagePtr rgbImageMessagePtr, depthImageMessagePtr;
-      PointCloudPtr pointCloudPtr;
-      initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
+
+      if (thermalMode_ && !thermalLocked_)
+      {
+        thermalLocked_ = true;
+        thermalIndex->data = thermalIndex->data + "thermal";
+      }
+
+      if ((rgbdMode_ || rgbdtMode_) && !holeFusionLocked_)
+      {
+        holeFusionLocked_ = true;
+        thermalIndex->data = thermalIndex->data + "hole";
+
+        synchronizedPointCloudPublisher_.publish(pointCloudPtr);
+        synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
+        synchronizedDepthImagePublisher_.publish(depthImageMessagePtr);
+      }
+
+      if (thermalMode_ || rgbdtMode_)
+      {
+        distrib_msgs::FlirLeptonMsg::Ptr thermalMsgPtr( new distrib_msgs::FlirLeptonMsg );
+        *thermalMsgPtr = *thermalMsg;
+
+        synchronizedThermalImagePublisher_.publish(thermalMsgPtr);
+        thermalOutputReceiverPublisher_.publish(thermalIndex);
+      }
 
       if (thermalMode_)
       {
-        if (!thermalLocked_)
-        {
-          thermalLocked_ = true;
-          thermalIndex->data = thermalIndex->data + "thermal";
-        }
+        enhancedImageCropperPublisher_.publish(enhancedImagePtr);
       }
-
-      if (!holeFusionLocked_)
-      {
-        holeFusionLocked_ = true;
-        synchronizedPointCloudPublisher_.publish(pointCloudPtr);
-        thermalIndex->data = thermalIndex->data + "hole";
-      }
-
-      synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
-      synchronizedDepthImagePublisher_.publish(depthImageMessagePtr);
-
-      distrib_msgs::FlirLeptonMsg::Ptr thermalMsgPtr( new distrib_msgs::FlirLeptonMsg );
-      *thermalMsgPtr = *thermalMsg;
-
-      synchronizedThermalImagePublisher_.publish(thermalMsgPtr);
-      thermalOutputReceiverPublisher_.publish(thermalIndex);
 
       // syncPointCloudSubscriberPtr_->unsubscribe();
       // syncThermalCameraSubscriberPtr_->unsubscribe();
@@ -471,14 +495,6 @@ namespace pandora_vision_hole
     // depthImageMessagePtr = boost::make_shared<sensor_msgs::Image>();
     // MessageConversions::toROSDepthMsg(*pcMsg, *depthImageMessagePtr);
     // depthImageMessagePtr->header = pcMsg->header;
-
-    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
-        new pandora_vision_msgs::EnhancedImage);
-    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
-    enhancedImagePtr->depthImage = *depthImageMessagePtr;
-    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
-
-    enhancedImagePublisher_.publish(*enhancedImagePtr);
   }
 
 
@@ -594,23 +610,26 @@ namespace pandora_vision_hole
       }
     }
 
-    // Read the name of the topic that the synchronizer node will be publishing
-    // the depth image extracted from the input point cloud to
-    if (!private_nh_.getParam("published_topics/depth_image_topic",
-          synchronizedDepthImageTopic_))
+    if (rgbdMode_ || rgbdtMode_)
     {
-      NODELET_FATAL(
-        "[%s] Could not find topic depth_image_topic", nodeName_.c_str());
-      ROS_BREAK();
-    }
-    // Read the name of the topic that the synchronizer node will be publishing
-    // the depth image extracted from the input point cloud to
-    if (!private_nh_.getParam("published_topics/rgb_image_topic",
-          synchronizedRgbImageTopic_))
-    {
-      NODELET_FATAL(
-        "[%s] Could not find topic rgb_image_topic", nodeName_.c_str());
-      ROS_BREAK();
+      // Read the name of the topic that the synchronizer node will be publishing
+      // the depth image extracted from the input point cloud to
+      if (!private_nh_.getParam("published_topics/depth_image_topic",
+            synchronizedDepthImageTopic_))
+      {
+        NODELET_FATAL(
+          "[%s] Could not find topic depth_image_topic", nodeName_.c_str());
+        ROS_BREAK();
+      }
+      // Read the name of the topic that the synchronizer node will be publishing
+      // the depth image extracted from the input point cloud to
+      if (!private_nh_.getParam("published_topics/rgb_image_topic",
+            synchronizedRgbImageTopic_))
+      {
+        NODELET_FATAL(
+          "[%s] Could not find topic rgb_image_topic", nodeName_.c_str());
+        ROS_BREAK();
+      }
     }
 
     if (rgbdtMode_ || thermalMode_)
@@ -639,6 +658,16 @@ namespace pandora_vision_hole
     {
       NODELET_FATAL("[%s] Could not find topic enhanced_image_topic", nodeName_.c_str());
       ROS_BREAK();
+    }
+
+    if (thermalMode_)
+    {
+      if (!private_nh_.getParam("published_topics/enhanced_image_cropper_topic",
+            enhancedImageCropperTopic_))
+      {
+        NODELET_FATAL("[%s] Could not find topic enhanced_image_cropper_topic", nodeName_.c_str());
+        ROS_BREAK();
+      }
     }
   }
 
