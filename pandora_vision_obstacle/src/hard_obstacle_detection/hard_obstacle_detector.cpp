@@ -49,7 +49,33 @@ namespace pandora_vision
   HardObstacleDetector::HardObstacleDetector(const std::string& name,
       const ros::NodeHandle& nh)
   {
-    nodeName = name;
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node is on");
+
+    nodeName_ = name;
+
+    double robotXDimention, robotYDimention;
+    nh.param("robot/robotXDimention", robotXDimention, 0.345);
+    nh.param("robot/robotYDimention", robotYDimention, 0.345);
+
+    double resolution;
+    nh.param("cellResolution", resolution, 0.02);
+
+    robotRows_ = robotXDimention / resolution;
+    robotCols_ = robotYDimention / resolution;
+
+    // Minimum acceptable value for the process to work properly
+    robotStrength_ = robotRows_ * robotCols_;
+
+    robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_32FC1) / robotStrength_;
+
+    edge_method_ = 1;
+    edges_threshold_ = 30;
+
+    show_input_image = false;
+    show_edges_image = false;
+    show_edges_thresholded_image = false;
+    show_edges_and_unknown_image = false;
+    show_new_map_image = false;
   }
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
@@ -57,9 +83,11 @@ namespace pandora_vision
     // Check if input type is CV_32FC1
     if (inputImage.depth() != CV_32FC1)
     {
-      ROS_ERROR_NAMED(nodeName, "Hard obstacle node input image type was wrong");
+      ROS_ERROR_NAMED(nodeName_, "Hard obstacle node input image type was wrong");
       ROS_BREAK();
     }
+
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle detection has started");
 
     if (show_input_image)
     {
@@ -72,6 +100,11 @@ namespace pandora_vision
 
     // Pass the unkown areas in edges image.
     fillUnkownAreas(inputImage, &edgesImage);
+
+    if (show_edges_and_unknown_image)
+    {
+      showImage("The edges image with unkown areas", edgesImage, 1);
+    }
 
     // Pass the robot mask on the complete area that was made.
     cv::Mat newMap;
@@ -122,6 +155,8 @@ namespace pandora_vision
   void HardObstacleDetector::fillUnkownAreas(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node fills unkown area");
+
     for (unsigned int rows = 0; rows < inImage.rows; rows++)
     {
       for (unsigned int cols = 0; cols < inImage.cols; cols++)
@@ -132,16 +167,13 @@ namespace pandora_vision
         }
       }
     }
-
-    if (show_edges_and_unkown_image)
-    {
-      showImage("The edges image with unkown areas", *outImage, 1);
-    }
   }
 
   void HardObstacleDetector::robotMaskOnMap(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node convolutes map with robot");
+
     cv::Mat newMap;
 
     cv::filter2D(inImage, newMap, -1, robotMask_,
@@ -152,10 +184,9 @@ namespace pandora_vision
       showImage("The new map after robot mask convolution", newMap, 1);
     }
 
-    // After convolution there might be values lower that -1, so we need
+    // After convolution there might be negative values, so we need
     // to set them to -1.
     fillUnkownAreas(newMap, outImage);
-
   }
 
   /*****************************************************************************
@@ -182,9 +213,11 @@ namespace pandora_vision
   void HardObstacleDetector::detectEdges(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node detects edges");
+
     cv::Mat scaledImage = scaleFloatImageToInt(inImage);
 
-    switch (edge_method)
+    switch (edge_method_)
     {
       case 0 :
         applyCanny(scaledImage, outImage);
@@ -203,7 +236,7 @@ namespace pandora_vision
     }
 
     // Apply threshold to the edges
-    cv::threshold(*outImage, *outImage, edges_threshold, 255, CV_THRESH_BINARY);
+    cv::threshold(*outImage, *outImage, edges_threshold_, 255, CV_THRESH_BINARY);
 
     if (show_edges_thresholded_image)
     {
