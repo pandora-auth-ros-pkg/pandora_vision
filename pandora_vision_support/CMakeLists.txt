@@ -23,17 +23,17 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 add_executable(image_saver_by_topic_node
   src/image_saver_by_topic.cpp
-)
-
-add_executable(enhanced_image_shower_node
-src/enhanced_image_shower.cpp
-)
-
-
+  )
 target_link_libraries(image_saver_by_topic_node
   ${catkin_LIBRARIES}
-)
+  )
 
+add_executable(enhanced_image_shower_node
+  src/enhanced_image_shower.cpp
+  )
 target_link_libraries(enhanced_image_shower_node
   ${catkin_LIBRARIES}
-)
+  )
+add_dependencies(enhanced_image_shower_node
+  ${catkin_EXPORTED_TARGETS}
+  )

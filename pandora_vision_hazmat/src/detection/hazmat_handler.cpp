@@ -42,15 +42,12 @@
 
 #include "pandora_vision_hazmat/detection/hazmat_handler.h"
 
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hazmat::HazmatHandler,
-    nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_hazmat::HazmatHandler, nodelet::Nodelet)
 
 namespace pandora_vision
 {
 namespace pandora_vision_hazmat
 {
-  HazmatHandler::HazmatHandler() :
-    VisionHandler<HazmatPreProcessor, HazmatProcessor, HazmatPostProcessor>()
-  {}
+  HazmatHandler::HazmatHandler() {}
 }  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision

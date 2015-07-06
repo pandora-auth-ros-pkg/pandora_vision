@@ -28,6 +28,7 @@
       <arg name="device_id" value="#1" />
       <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
+      <arg name="num_worker_threads" value="8" />
     </include>
     <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
     <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
@@ -49,7 +50,7 @@
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
   <!-- Load robot description model -->
-    <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
+  <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" />
 
   <!-- Output selection -->
   <include file="$(find pandora_vision_hole)/launch/pandora_vision_hole.launch"
