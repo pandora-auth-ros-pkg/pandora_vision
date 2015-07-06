@@ -46,7 +46,7 @@
 #include "pandora_vision_common/cv_mat_stamped.h"
 // #include "pandora_vision_common/pois_stamped.h"
 // #include "pandora_vision_common/images_stamped.h"
-// #include "pandora_vision_obstacle/hard_obstacle_cfgConfig.h"
+#include "pandora_vision_obstacle/hard_obstacle_cfgConfig.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_detector.h"
 
 
@@ -64,22 +64,23 @@ namespace pandora_vision
       virtual bool process(const CVMatStampedConstPtr& input,
           const CVMatStampedPtr& output);
 
-    // private:
+     private:
       /**
        * @brief The function called when a parameter is changed
        * @param config [const pandora_vision_obstacle::hard_obstacle_cfgConfig&]
        * @param level [const uint32_t] The level
        **/
-      // void parametersCallback(const pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
-          // const uint32_t& level);
+       void parametersCallback(const pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
+           const uint32_t& level);
 
     private:
       /// The dynamic reconfigure parameters' server
-      // dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
-        // server;
+       dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
+         server;
+
       /// The dynamic reconfigure parameters' callback
-      // dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
-        // ::CallbackType f;
+       dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
+         ::CallbackType f;
 
       boost::shared_ptr<HardObstacleDetector> detector_;
   };

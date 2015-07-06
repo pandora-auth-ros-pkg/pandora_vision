@@ -51,11 +51,33 @@ namespace pandora_vision
 
     detector_.reset(new HardObstacleDetector(this->getName(),
           *this->accessPublicNh()));
+
+    server.setCallback(boost::bind(&HardObstacleProcessor::parametersCallback,
+        this, _1, _2));
   }
 
   HardObstacleProcessor::HardObstacleProcessor() :
     sensor_processor::Processor<CVMatStamped, CVMatStamped>()
   {
+  }
+
+  void HardObstacleProcessor::parametersCallback(
+    const pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
+    const uint32_t& level)
+  {
+    // Debug show parameters
+    detector_->setShowInputImage(config.show_input_image);
+    detector_->setShowEdgesImage(config.show_edges_image);
+    detector_->setShowEdgesThresholdedImage(config.show_edges_thresholded_image);
+    detector_->setShowEdgesUnkownImage(config.show_edges_and_unkown_image);
+    detector_->setShowNewMapImage(config.show_new_map_image);
+
+    // Edge detection parameters
+    detector_->setEdgeMethod(config.edge_detection_method);
+    detector_->setEdgesThreshold(config.edges_threshold);
+
+    // Robot mask parameter
+    detector_->setRobotStrength(config.robot_strength_factor);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,

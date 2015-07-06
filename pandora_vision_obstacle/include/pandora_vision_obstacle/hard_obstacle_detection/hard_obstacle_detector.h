@@ -67,19 +67,46 @@ namespace pandora_vision
        **/
       cv::Mat startDetection(const cv::Mat& inputImage);
 
-    private:
-      std::string nodeName;
+      /**
+       @brief Functions used to set debug show configuration parameters.
+       **/
+      inline void setShowInputImage(bool value){show_input_image = value;}
+      inline void setShowEdgesImage(bool value){show_edges_image = value;}
+      inline void setShowEdgesThresholdedImage(bool value){show_edges_thresholded_image = value;}
+      inline void setShowEdgesUnkownImage(bool value){show_edges_and_unknown_image = value;}
+      inline void setShowNewMapImage(bool value){show_new_map_image = value;}
 
-      // The robots mask
+      /**
+        @brief Functions used to set edge detection configuration parameters.
+       **/
+      inline void setEdgeMethod(int value){edge_method_ = value;}
+      inline void setEdgesThreshold(int value){edges_threshold_ = value;}
+
+      inline void setRobotStrength(double value){robotStrength_ *= value;}
+    private:
+      std::string nodeName_;
+
+      // The robots mask dimentions found as robotDimention / ogm_cell_resolution
+      int robotRows_;
+      int robotCols_;
       cv::Mat robotMask_;
 
-      // Configuration parameters
-      int edge_method;
-      int edges_threshold;
+      // This variable devides each robotMask pixel, so it defines the
+      // probability of the extracted hard obstacles.
+      // The higher the value, the lower the probability.
+      double robotStrength_;
+
+      // The parameter that defines the edge detection algorithm to be used
+      int edge_method_;
+
+      // The parameter used to apply thresholdmethod on edges image
+      int edges_threshold_;
+
+      // Debug parameters
       bool show_input_image;
       bool show_edges_image;
       bool show_edges_thresholded_image;
-      bool show_edges_and_unkown_image;
+      bool show_edges_and_unknown_image;
       bool show_new_map_image;
 
       /**
@@ -116,6 +143,13 @@ namespace pandora_vision
         areas we will include the robot's size. A convolution between the map
         and robot's mask will make the new map that informs us if we can access 
         a particular point(territory).
+        The outImage will have -1 values for unkown, 0 for free
+        and (0,1] float values for dangerous territories.
+        Even if 1 dangerous pixel exists (value = 1 from the edges that
+        we found) the output image pixel will be set as obstacle with a
+        probability that depends on its neighbors and robotMask's values.
+        The higher the values in robotMask the more we give strength on dangerous
+        areas probability.
         @param[in] inImage [const cv::Mat&] The input image.
         @param[in] outImage [cv::Mat*] The output edges image will unkown areas.
         @return void
@@ -150,6 +184,7 @@ namespace pandora_vision
         @brief Apply edge detection algorithm. Based on configuration parameter,
         select the desired method. Finally apply threshold on the extracted
         edges to keep the ones that we consider as dangerous areas.
+        The outImage will have float values 0 or 1 for desired edges.
         @param[in] inImage [const cv::Mat&] The input image.
         @param[in] outImage [cv::Mat*] The output edges image
         @return void
