@@ -109,8 +109,6 @@ namespace pandora_vision
       }
 
       transitionComplete(this->currentState_);
-      ROS_INFO("[%s] Changed to state %s",
-          this->getName().c_str(), ROBOT_STATES(this->currentState_).c_str());
     }
   };
 }  // namespace pandora_vision
