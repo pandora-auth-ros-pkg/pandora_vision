@@ -54,7 +54,7 @@ namespace pandora_vision_motion
     MotionProcessor, MotionPostProcessor>
   {
    public:
-    explicit MotionHandler();
+    MotionHandler();
   };
 }  // namespace pandora_vision_motion
 }  // namespace pandora_vision

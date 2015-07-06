@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pandora_vision_motion)
 
-
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    nodelet
+    pluginlib
     pandora_common_msgs
     pandora_vision_common
     state_manager
@@ -22,9 +23,11 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
-    DEPENDS
+    #DEPENDS
     CATKIN_DEPENDS
       roscpp
+      nodelet
+      pluginlib
       pandora_common_msgs
       pandora_vision_common
       state_manager
