@@ -417,7 +417,20 @@ namespace pandora_vision_obstacle
     const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi)
   {
     cv::Mat depthROI = depthImage(roi);
-    cv::Scalar meanValue = cv::mean(depthROI);
+    //cv::Scalar meanValue = cv::mean(depthROI);
+
+    cv::Mat depthROIContinuous(depthROI.rows, depthROI.cols, CV_32FC1);
+    depthROI.copyTo(depthROIContinuous);
+
+    cv::Mat rowDepthROI = depthROIContinuous.reshape(0, 1);
+    cv::sort(rowDepthROI, rowDepthROI, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
+
+    int nonZeroValues = cv::countNonZero(rowDepthROI);
+    rowDepthROI = rowDepthROI(cv::Rect(rowDepthROI.cols - nonZeroValues, 0,
+          nonZeroValues, 1));
+    float roiMedian = (rowDepthROI.empty() ? 0.0f : rowDepthROI.at<float>(0,
+          static_cast<int>(rowDepthROI.cols / 2)));
+    ROS_INFO_STREAM("roi " << roiMedian);
 
     int linePixels = 0;
     float avgLineDepth = 0.0f;
@@ -437,8 +450,9 @@ namespace pandora_vision_obstacle
       linePixels += linePoints.count;
     }
     avgLineDepth /= linePixels;
+    ROS_INFO_STREAM("line " << avgLineDepth);
 
-    if (fabs(meanValue[0] - avgLineDepth) > depthThreshold_)
+    if (fabs(roiMedian - avgLineDepth) > depthThreshold_)
     {
       return false;
     }
@@ -561,8 +575,6 @@ namespace pandora_vision_obstacle
             poi->setDepth(depthDistance[ii]);
             pois.push_back(poi);
           }
-          cv::imshow("points", imageToShow);
-          cv::waitKey(10);
         }
       }
     }
