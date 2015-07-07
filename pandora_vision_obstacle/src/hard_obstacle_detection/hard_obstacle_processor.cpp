@@ -74,6 +74,12 @@ namespace pandora_vision
 
     // Edge detection parameters
     detector_->setEdgeMethod(config.edge_detection_method);
+
+    // Canny parameters
+    detector_->setCannyKernelSize(config.canny_kernel_size);
+    detector_->setCannyLowThreshold(config.canny_low_threshold);
+    detector_->setCannyBlurNoiseKernelSize(config.canny_blur_noise_kernel_size);
+
     detector_->setEdgesThreshold(config.edges_threshold);
 
     // Robot mask parameter

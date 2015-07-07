@@ -215,16 +215,42 @@ namespace pandora_vision
   void HardObstacleDetector::applyCanny(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    if (inImage.depth() != CV_8U)
+    {
+      ROS_ERROR_NAMED(nodeName_, "At canny detection, inappropriate image depth");
+      ROS_BREAK();
+    }
+    ROS_INFO_NAMED(nodeName_, "Canny edge detection is called");
+
+    // Reduce the noise of the input Image
+    cv::blur(inImage, *outImage,
+      cv::Size(cannyBlurKernelSize_, cannyBlurKernelSize_));
+
+    // Detect edges with canny
+    cv::Canny(*outImage, *outImage, cannyLowThreshold_,
+      cannyLowThreshold_ * 3, cannyKernelSize_);
   }
 
   void HardObstacleDetector::applyScharr(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    if (inImage.depth() != CV_8U)
+    {
+      ROS_ERROR_NAMED(nodeName_, "At scharr detection, inappropriate image depth");
+      ROS_BREAK();
+    }
+    ROS_INFO_NAMED(nodeName_, "Scharr edge detection is called");
   }
 
   void HardObstacleDetector::applySobel(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
+    if (inImage.depth() != CV_8U)
+    {
+      ROS_ERROR_NAMED(nodeName_, "At sobel detection, inappropriate image depth");
+      ROS_BREAK();
+    }
+    ROS_INFO_NAMED(nodeName_, "Sobel edge detection is called");
   }
 
   void HardObstacleDetector::detectEdges(
