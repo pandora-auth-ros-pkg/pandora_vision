@@ -39,6 +39,6 @@
 
   <include file="$(find pandora_vision_color)/launch/pandora_vision_color.launch"
       ns="$(arg namespace)" />
-  <include file="$(find pandora_robots_description)/woody/launch/woody_description.launch" />
+  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
 </launch>

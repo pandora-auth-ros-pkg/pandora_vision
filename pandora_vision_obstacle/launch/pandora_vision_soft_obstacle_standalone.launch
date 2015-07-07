@@ -26,7 +26,6 @@
   <!-- If the source is not a physical device, it is a bag: play "path" bag -->
   <group unless="$(arg openni2)">
     <group unless="$(arg openni)">
-
       <arg name="path" default="$(find pandora_vision_obstacle)/launch/pcl_bag0036.bag" />
 
       <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
@@ -39,9 +38,17 @@
   <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
   <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
 
-  <include file="$(find pandora_vision_obstacle)/launch/pandora_vision_soft_obstacle.launch"
-    ns="$(arg namespace)" />
-
   <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
+
+  <include file="$(find pandora_vision_obstacle)/launch/pandora_vision_soft_obstacle.launch"
+      ns="$(arg namespace)" />
+  <group ns="/pandora_vision/pandora_vision_hole" >
+    <param name="thermal_mode" value="false" />
+    <param name="rgbdt_mode" value="false" />
+    <param name="rgbd_mode" value="true" />
+    <include file="$(find pandora_vision_hole)/launch/synchronizer/pandora_pc_thermal_synchronizer.launch"
+        ns="/pandora_vision/pandora_vision_hole" />
+  </group>
+
 
 </launch>
