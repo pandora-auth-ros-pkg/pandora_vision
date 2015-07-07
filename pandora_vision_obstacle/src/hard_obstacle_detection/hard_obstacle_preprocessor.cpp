@@ -57,6 +57,19 @@ namespace pandora_vision
         this->accessProcessorNh()->getNamespace());
     reconfServer_.setCallback(boost::bind(&HardObstaclePreProcessor::reconfCallback,
           this, _1, _2));
+
+    if (!this->accessPublicNh()->getParam("ElevationMap/base_foot_print_id", baseFootPrintFrameId_))
+    {
+      ROS_ERROR_STREAM("[" + this->getName() + "] preprocessor nh processor : Could not "
+          << "retrieve the name of the base Footprint Link!");
+      ROS_BREAK();
+    }
+    if (!this->accessPublicNh()->getParam("ElevationMap/kinect_frame_id", pclSensorFrameId_))
+    {
+      ROS_ERROR_STREAM("[" + this->getName() + "] preprocessor nh processor : Could not "
+          << "retrieve the name of the PCL sensor Link!");
+      ROS_BREAK();
+    }
   }
 
   HardObstaclePreProcessor::~HardObstaclePreProcessor()
@@ -102,11 +115,13 @@ namespace pandora_vision
           << " the input image is empty!");
       return;
     }
-    // cv::Mat elevationMapImg;
+    cv::Mat elevationMapImg;
+    cv::Mat colorMapImg;
+    cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1, cv::NORM_MINMAX);
+    elevationMapImg.convertTo(elevationMapImg, CV_8UC3, 255);
+    cv::applyColorMap(elevationMapImg, colorMapImg, cv::COLORMAP_JET);
 
-    // cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1\ci)
-
-    cv::imshow("Elevation Map Image", elevationMapStamped->image);
+    cv::imshow("Elevation Map Image", colorMapImg);
     cv::waitKey(5);
     return;
   }
@@ -147,7 +162,7 @@ namespace pandora_vision
 
     // Create the output Elevation Map
     outputImgPtr->image = cv::Mat(elevationMapHeight_, elevationMapWidth_, CV_64FC1);
-    outputImgPtr->image.setTo(std::numeric_limits<double>::min());
+    outputImgPtr->image.setTo(-std::numeric_limits<double>::max());
     outputImgPtr->header = inputPointCloud->header;
 
     for (int ii = 0; ii < sensorPointCloudPtr->size(); ++ii)
