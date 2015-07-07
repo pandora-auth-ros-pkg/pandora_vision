@@ -413,20 +413,19 @@ namespace pandora_vision_obstacle
   }
 
   bool SoftObstacleDetector::findSameROIDepth(const cv::Mat& depthImage,
-    const cv::Rect& roi, const Vec4iVectorPtr& verticalLines)
+    const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi)
   {
     cv::Mat depthROI = depthImage(roi);
     cv::Scalar meanValue = cv::mean(depthROI);
 
-    std::vector<cv::Vec4i> diffDepthLines;
+    int linePixels = 0;
+    float avgLineDepth = 0.0f;
 
-    for (size_t ii = 0; ii < verticalLines->size(); ii++)
+    for (size_t ii = 0; ii < verticalLines.size(); ii++)
     {
-      float avgLineDepth = 0.0f;
-
-      cv::Point startPoint((*verticalLines)[ii][0],
-          (*verticalLines)[ii][1]);
-      cv::Point endPoint((*verticalLines)[ii][2], (*verticalLines)[ii][3]);
+      cv::Point startPoint(verticalLines[ii][0],
+          verticalLines[ii][1]);
+      cv::Point endPoint(verticalLines[ii][2], verticalLines[ii][3]);
 
       cv::LineIterator linePoints(depthImage, startPoint, endPoint);
 
@@ -434,21 +433,14 @@ namespace pandora_vision_obstacle
       {
         avgLineDepth += depthImage.at<float>(linePoints.pos());
       }
-      avgLineDepth /= linePoints.count;
-
-      if (fabs(meanValue[0] - avgLineDepth) > depthThreshold_)
-      {
-        diffDepthLines.push_back((*verticalLines)[ii]);
-      }
+      linePixels += linePoints.count;
     }
+    avgLineDepth /= linePixels;
 
-    if (diffDepthLines.size() == verticalLines->size())
+    if (fabs(meanValue[0] - avgLineDepth) > depthThreshold_)
     {
       return false;
     }
-    verticalLines->clear();
-    *verticalLines = diffDepthLines;
-
     return true;
   }
 
@@ -526,20 +518,12 @@ namespace pandora_vision_obstacle
 
       // Examine whether the points of the bounding box have difference in depth
       // distance
-      Vec4iVectorPtr verticalLinesPtr = boost::make_shared< std::vector<cv::Vec4i> >(
-          verticalLines);
-      bool sameDepth = findSameROIDepth(depthImage, fullFrameRect,
-          verticalLinesPtr);
+      bool sameDepth = findSameROIDepth(depthImage, verticalLines, fullFrameRect);
 
-      if (verticalLinesPtr->size() > 2)
+      if (!sameDepth)
       {
         boost::array<float, 4> depthDistance;
 
-        if (sameDepth)
-        {
-          // Detect bounding box that includes the new vertical lines
-          probability = detectROI(*verticalLinesPtr, otsuImage->rows, roi);
-        }
         // Find the new depth distance of the soft obstacle
         depthDistance = findDepthDistance(depthImage, *verticalLinesPtr,
             *roi, level);
