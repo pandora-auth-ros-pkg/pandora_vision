@@ -92,8 +92,10 @@ namespace pandora_vision
       /// The maximum elevation from the base of the robot.
       double maxElevation_;
 
-      // The frame Id for the elevation Map frame of reference.
+      /// The frame Id for the elevation Map frame of reference.
       std::string baseFootPrintFrameId_;
+
+      std::string pclSensorFrameId_;
 
       /// The ros subscriber used to get the transformation from the range sensor
       /// to the elevation Map frame of reference.

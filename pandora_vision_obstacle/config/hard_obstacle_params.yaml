@@ -3,6 +3,10 @@ robot:
   robotXDimention: 0.345
   robotYDimention: 0.345
 
+ElevationMap:
+  base_foot_print_id: /base_footprint
+  kinect_frame_id: /kinect_rgb_frame
+
 # In meters
 cellResolution: 0.02
 
