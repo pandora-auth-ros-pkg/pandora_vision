@@ -135,15 +135,18 @@ namespace pandora_vision
 
       /**
         @brief This function takes runs on every unknown pixel the folded normal
-        distribution and based on its probability gives color to them. Finaly
-        shows the image.
+        distribution and based on its probability gives color to them. If
+        opencv_method is enabled the above procedure is done via opencv functions.
         @param[in] title [const std::string&] The title of image to be shown.
         @param[in] image [const cv::Mat&] The image to be shown.
         @param[in] time [int] The time that imshow function lasts in ms.
+        @param[in] opencv_method [bool] If true enables opencv functions
+        for visualization.
         @return void
        **/
       void visualizeUnknownProbabilities(
-        const std::string& title, const cv::Mat& image, int time);
+        const std::string& title, const cv::Mat& image,
+        int time, bool opencv_method);
 
       /**
         @brief Apply the Folded Normal Distribution to find the probability of
