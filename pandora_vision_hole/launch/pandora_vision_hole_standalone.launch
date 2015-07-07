@@ -2,11 +2,11 @@
   <!-- Set namespace to load pandora_vision_hole on -->
   <arg name="namespace" default="/pandora_vision/pandora_vision_hole" />
   <!-- Set this if we play with thermal source -->
-  <arg name="thermal" default="false" />
+  <arg name="thermal" default="true" />
   <!-- Set this if we play with rgbd source -->
   <arg name="rgbd" default="true" />
   <!-- Set this if we play with rgbdt hole -->
-  <arg name="rgbdt" default="false" />
+  <arg name="rgbdt" default="true" />
   <!-- Kinect: choose the openni driver -->
   <arg name="openni" default="false" />
   <!-- Xtion: choose the openni2 driver -->

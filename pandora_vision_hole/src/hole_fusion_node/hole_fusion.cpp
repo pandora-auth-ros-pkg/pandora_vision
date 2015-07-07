@@ -1739,11 +1739,11 @@ namespace hole_fusion
 
       // Set the hole's bounding box width and height
       int minx = conveyor.holes[it->first].rectangle[0].x;
-      int maxx = conveyor.holes[it->first].rectangle[0].x;
       int miny = conveyor.holes[it->first].rectangle[0].y;
+      int maxx = conveyor.holes[it->first].rectangle[0].x;
       int maxy = conveyor.holes[it->first].rectangle[0].y;
 
-      for (int r = 0; r < conveyor.holes[it->first].rectangle.size(); r++)
+      for (int r = 1; r < conveyor.holes[it->first].rectangle.size(); r++)
       {
         int xx = conveyor.holes[it->first].rectangle[r].x;
         int yy = conveyor.holes[it->first].rectangle[r].y;

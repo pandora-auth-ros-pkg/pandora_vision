@@ -236,6 +236,15 @@ namespace pandora_vision_hole
     PointCloudPtr pointCloudPtr;
     initCallback(pointCloudPtr, rgbImageMessagePtr, depthImageMessagePtr, pcMsg);
 
+    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
+        new pandora_vision_msgs::EnhancedImage );
+    enhancedImagePtr->header = pcMsg->header;
+    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
+    enhancedImagePtr->depthImage = *depthImageMessagePtr;
+    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
+
+    enhancedImagePublisher_.publish(enhancedImagePtr);
+
     if (!holeFusionLocked_)
     {
       NODELET_INFO("[%s] RGBD Callback", nodeName_.c_str());
@@ -246,15 +255,6 @@ namespace pandora_vision_hole
 
       // inputPointCloudSubscriber_.shutdown();
     }
-
-    boost::shared_ptr<pandora_vision_msgs::EnhancedImage> enhancedImagePtr(
-        new pandora_vision_msgs::EnhancedImage );
-    enhancedImagePtr->header = pcMsg->header;
-    enhancedImagePtr->rgbImage = *rgbImageMessagePtr;
-    enhancedImagePtr->depthImage = *depthImageMessagePtr;
-    enhancedImagePtr->isDepth = (hole_fusion::Parameters::Depth::interpolation_method == 0);
-
-    enhancedImagePublisher_.publish(enhancedImagePtr);
   }
 
   /**
@@ -304,7 +304,8 @@ namespace pandora_vision_hole
       if ((rgbdMode_ || rgbdtMode_) && !holeFusionLocked_)
       {
         holeFusionLocked_ = true;
-        thermalIndex->data = thermalIndex->data + "hole";
+        if (rgbdtMode_)
+          thermalIndex->data = thermalIndex->data + "hole";
 
         synchronizedPointCloudPublisher_.publish(pointCloudPtr);
         synchronizedRgbImagePublisher_.publish(rgbImageMessagePtr);
