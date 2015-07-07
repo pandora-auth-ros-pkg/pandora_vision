@@ -40,10 +40,14 @@
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PREPROCESSOR_H
 
 #include <string>
+#include <tf/transform_listener.h>
+#include <dynamic_reconfigure/server.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include "sensor_processor/preprocessor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
+#include "pandora_vision_obstacle/elevation_mapConfig.h"
+
 
 namespace pandora_vision
 {
@@ -72,6 +76,45 @@ namespace pandora_vision
        */
       bool PointCloudToCvMat(const PointCloud2ConstPtr& inputPointCloud,
           const CVMatStampedPtr& outputImgPtr);
+
+      void reconfCallback(const pandora_vision_obstacle::elevation_mapConfig params,
+          const uint32_t& level);
+
+      void viewElevationMap(const CVMatStampedPtr& elevationMapStamped);
+
+    private:
+      /// The maximum distance of a point from the range sensor.
+      double maxAllowedDist_;
+
+      /// The minimum elevation from the base of the robot.
+      double minElevation_;
+
+      /// The maximum elevation from the base of the robot.
+      double maxElevation_;
+
+      // The frame Id for the elevation Map frame of reference.
+      std::string baseFootPrintFrameId_;
+
+      /// The ros subscriber used to get the transformation from the range sensor
+      /// to the elevation Map frame of reference.
+      tf::TransformListener tfListener_;
+
+      /// The width of the elevation map.
+      int elevationMapWidth_;
+
+      /// The height of the elevation map.
+      int elevationMapHeight_;
+
+      /// Flag used to view the elevation map.
+      bool visualisationFlag_;
+
+      /// The dynamic reconfigure server used to changed the parameters for the elevation map
+      /// on runtime.
+      dynamic_reconfigure::Server<pandora_vision_obstacle::elevation_mapConfig> reconfServer_;
+
+      /// The callback for the dynamic reconfigure server.
+      dynamic_reconfigure::Server<pandora_vision_obstacle::elevation_mapConfig>::CallbackType
+        reconfCallback_;
   };
 
 }  // namespace pandora_vision
