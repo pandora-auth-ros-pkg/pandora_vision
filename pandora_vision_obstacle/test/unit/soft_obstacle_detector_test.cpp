@@ -43,6 +43,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class SoftObstacleDetectorTest : public ::testing::Test
   {
     public:
@@ -229,4 +231,5 @@ namespace pandora_vision
     EXPECT_EQ(4, roi->width);
     EXPECT_EQ(3, roi->height);
   }
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

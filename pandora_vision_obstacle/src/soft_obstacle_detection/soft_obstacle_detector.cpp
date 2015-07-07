@@ -40,6 +40,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 
@@ -533,12 +534,12 @@ namespace pandora_vision_obstacle
         {
           ROS_INFO("Soft Obstacle Detected!");
 
+          cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
+              roi->width * pow(2, level), roi->height * pow(2, level));
+          cv::Mat imageToShow = rgbImage.clone();
+
           if (showROI_)
           {
-            cv::Mat imageToShow = rgbImage.clone();
-
-            cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
-                roi->width * pow(2, level), roi->height * pow(2, level));
             cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
 
             cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
@@ -551,8 +552,8 @@ namespace pandora_vision_obstacle
             ObstaclePOIPtr poi(new ObstaclePOI);
 
             poi->setPoint(cv::Point(
-                  (roi->x + (1 - (ii == 3)) * roi->width / pow(2, !(ii % 2))) * pow(2, level),
-                  (roi->y + (1 - (ii == 0)) * roi->height / pow(2, ii % 2)) * pow(2, level)));
+                  (bbox.x + (1 - (ii == 3)) * bbox.width / pow(2, !(ii % 2))),
+                  (bbox.y + (1 - (ii == 0)) * bbox.height / pow(2, ii % 2))));
 
             poi->setProbability(probability);
             poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);
@@ -560,6 +561,8 @@ namespace pandora_vision_obstacle
             poi->setDepth(depthDistance[ii]);
             pois.push_back(poi);
           }
+          cv::imshow("points", imageToShow);
+          cv::waitKey(10);
         }
       }
     }
