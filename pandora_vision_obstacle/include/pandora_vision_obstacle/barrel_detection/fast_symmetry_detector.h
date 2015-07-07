@@ -50,8 +50,8 @@ class FastSymmetryDetector
      **/
 
     FastSymmetryDetector(const cv::Size imageSize, const cv::Size houghSize, const int rotResolution = 1);
-    void vote(cv::Mat& image, int minPairDist, int maxPairDist);
-    inline void rotateEdges(std::vector<cv::Point2f>& edges, int theta);
+    void vote(const cv::Mat& image, int minPairDist, int maxPairDist);
+    inline void rotateEdges(const std::vector<cv::Point2f>& edges, int theta);
 
     cv::Mat getAccumulationMatrix(float thresh = 0.0);
 

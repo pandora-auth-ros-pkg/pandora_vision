@@ -65,7 +65,7 @@ FastSymmetryDetector::FastSymmetryDetector(const cv::Size imageSize, const cv::S
 /**
  * Rotate each edge for a given theta, and append them into rotated edges matrix
  */
-void FastSymmetryDetector::rotateEdges(std::vector<cv::Point2f>& edges, int theta)
+void FastSymmetryDetector::rotateEdges(const std::vector<cv::Point2f>& edges, int theta)
 {
   /* Get the cos and sin values from our pre-calculated rotation matrices */
   float r0 = rotMatrices[theta].at<float>(0, 0);
@@ -95,7 +95,7 @@ void FastSymmetryDetector::rotateEdges(std::vector<cv::Point2f>& edges, int thet
 /**
  * Create the hough accumulation matrix, and vote for each pair of symmetrical edges
  */
-void FastSymmetryDetector::vote(cv::Mat& image, int minPairDist, int maxPairDist)
+void FastSymmetryDetector::vote(const cv::Mat& image, int minPairDist, int maxPairDist)
 {
   float minDist = minPairDist * 0.5;
   float maxDist = maxPairDist * 0.5;

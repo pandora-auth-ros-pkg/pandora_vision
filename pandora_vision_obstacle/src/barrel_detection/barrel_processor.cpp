@@ -157,34 +157,34 @@ namespace pandora_vision_obstacle
 
       if (BarrelDetection::show_respective_barrel)
       {
-        cv::line(depth8UC3, result[i].first, result[i].second, cv::Scalar(0, 0, 255), 2);
-        cv::rectangle(depth8UC3,
-            cv::Point(result[i].second.x - maxDist / 2, result[i].second.y),
-            cv::Point(result[i].first.x + maxDist / 2, result[i].first.y),
-            cv::Scalar(255, 0, 0),
-            2);
+        // cv::line(depth8UC3, result[i].first, result[i].second, cv::Scalar(0, 0, 255), 2);
+        // cv::rectangle(depth8UC3,
+        //     cv::Point(result[i].second.x - maxDist / 2, result[i].second.y),
+        //     cv::Point(result[i].first.x + maxDist / 2, result[i].first.y),
+        //     cv::Scalar(255, 0, 0),
+        //     2);
+        //  cv::line(temp, s3, s2, cv::Scalar(0, 255, 0), 2);
 
         /* Visualize the Hough accum matrix */
-        cv::Mat accum = detector.getAccumulationMatrix();
-        accum.convertTo(accum, CV_8UC3);
-        cv::applyColorMap(accum, accum, cv::COLORMAP_JET);
-        cv::resize(accum, accum, cv::Size(), 2.0, 0.5);
+        // cv::Mat accum = detector.getAccumulationMatrix();
+        // accum.convertTo(accum, CV_8UC3);
+        // cv::applyColorMap(accum, accum, cv::COLORMAP_JET);
+        // cv::resize(accum, accum, cv::Size(), 2.0, 0.5);
 
-        /* Draw lines based on cursor position */
-        if (accumIndex.x != -1 && accumIndex.y != -1)
-        {
-          std::pair<cv::Point, cv::Point> pointPair = detector.getLine(accumIndex.y, accumIndex.x);
-          cv::line(depth8UC3, pointPair.first, pointPair.second, CV_RGB(0, 255, 0), 2);
-        }
+        // /* Draw lines based on cursor position */
+        // if (accumIndex.x != -1 && accumIndex.y != -1)
+        // {
+        //   std::pair<cv::Point, cv::Point> pointPair = detector.getLine(accumIndex.y, accumIndex.x);
+        //   cv::line(depth8UC3, pointPair.first, pointPair.second, CV_RGB(0, 255, 0), 2);
+        // }
 
         /* Show the original and edge images */
-        cv::imshow("edge", depth8UC3);
-        cv::waitKey(10);
-        // cv::Mat appended = cv::Mat::zeros( depth8UC3.rows + accum.rows, depth8UC3.cols * 2, CV_8UC3 );
-        // depth8UC3.copyTo( cv::Mat(appended, cv::Rect(0, 0, depth8UC3.cols, depth8UC3.rows)) );
-        // cv::cvtColor( edge, cv::Mat(appended, cv::Rect(depth8UC3.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR );
-        // accum.copyTo( cv::Mat( appended, Rect(0, depth8UC3.rows, accum.cols, accum.rows) ) );
-        // cv::imshow("Candidate Barrel", appended);
+        debugShow(depth8UC3, (*roi), 1);
+        //  cv::Mat appended = cv::Mat::zeros(depth8UC3.rows + accum.rows, depth8UC3.cols * 2, CV_8UC3);
+        //  depth8UC3.copyTo(cv::Mat(appended, cv::Rect(0, 0, depth8UC3.cols, depth8UC3.rows)));
+        //  cv::cvtColor(edge, cv::Mat(appended, cv::Rect(depth8UC3.cols, 0, edge.cols, edge.rows)), CV_GRAY2BGR);
+        //  accum.copyTo(cv::Mat(appended, Rect(0, depth8UC3.rows, accum.cols, accum.rows)));
+        //  cv::imshow("Candidate Barrel", appended);
       }
     }
   }
@@ -292,14 +292,25 @@ namespace pandora_vision_obstacle
     }
 
 
+    // Used to spot extreme values, in order to remove them from calculations
+    float avgDifferentials = 0.0;
     for (int linePoint = firstBorder; linePoint < secondBorder; linePoint ++, ++it)
     {
       buf[linePoint] = (const cv::Vec3b)* it;
       points[linePoint] = it.pos();
-      if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0)
+      if (depthImage.at<float>(points[linePoint].y, points[linePoint].x) != 0.0
+          && std::abs(
+            depthImage.at<float>(points[linePoint].y, points[linePoint].x) -
+            depthImage.at<float>(points[linePoint - 1].y, points[linePoint - 1].x)
+            - avgDifferentials) <= 0.3)
+      {
         differentialPoints[linePoint] =
           depthImage.at<float>(points[linePoint].y, points[linePoint].x)
           - depthImage.at<float>(points[linePoint - 1].y, points[linePoint - 1].x);
+        avgDifferentials =
+          (avgDifferentials * (linePoint - 1 + 1 - firstBorder)
+           + differentialPoints[linePoint]) / (linePoint + 1 - firstBorder);
+      }
       else
         differentialPoints[linePoint] = 0;
       if (std::abs(differentialPoints[linePoint]) > maxDifferential)
@@ -436,6 +447,9 @@ namespace pandora_vision_obstacle
       return false;
     }
 
+    if (BarrelDetection::show_valid_barrel)
+      debugShow(rgbImage, rectRoi, 2);
+
     return true;
   }
 
@@ -454,6 +468,36 @@ namespace pandora_vision_obstacle
     }
     depth /= static_cast<float>(roi.area());
     return depth;
+  }
+
+  /**
+    @brief Used for visualization of the desired bounding rectangle on the input
+    image
+    @param[in] image [const cv::Mat&] The input image where the roi will be
+    visualized
+    @param[in] rectRoi [const cv::Rect&] The ROI to show
+    @param[in] visualizationMode [int] What we want to visualize; 1 - respective
+    2 - valid
+    @return void
+   **/
+  void BarrelProcessor::debugShow(
+      const cv::Mat& image,
+      const cv::Rect& rectRoi,
+      int visualizationMode)
+  {
+    cv::Mat visualizableFrame;
+    image.copyTo(visualizableFrame);
+
+    cv::rectangle(visualizableFrame,
+        cv::Point(rectRoi.x, rectRoi.y),
+        cv::Point(rectRoi.x + rectRoi.width, rectRoi.y + rectRoi.height),
+        cv::Scalar(255, 0, 0),
+        2);
+    if (visualizationMode == 1 && BarrelDetection::show_respective_barrel)
+      cv::imshow("Respective Barrel", visualizableFrame);
+    else
+      cv::imshow("Valid Barrel", visualizableFrame);
+    cv::waitKey(10);
   }
 
   bool BarrelProcessor::process(const ImagesStampedConstPtr& input,

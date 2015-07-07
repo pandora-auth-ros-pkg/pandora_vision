@@ -107,6 +107,21 @@ namespace pandora_vision_obstacle
       float findDepthDistance(const cv::Mat& depthImage,
           const cv::Rect& roi);
 
+      /**
+        @brief Used for visualization of the desired bounding rectangle on the input
+        image
+        @param[in] image [const cv::Mat&] The input image where the roi will be
+        visualized
+        @param[in] rectRoi [const cv::Rect&] The ROI to show
+        @param[in] visualizationMode [int] What we want to visualize; 1 - respective
+        2 - valid
+        @return void
+       **/
+      void debugShow(
+          const cv::Mat& image,
+          const cv::Rect& rectRoi,
+          int visualizationMode);
+
       virtual bool process(const ImagesStampedConstPtr& input,
           const POIsStampedPtr& output);
 
