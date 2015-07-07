@@ -76,6 +76,7 @@ namespace pandora_vision
     show_edges_thresholded_image = false;
     show_edges_and_unknown_image = false;
     show_new_map_image = false;
+    show_unknown_probabilities = false;
   }
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
@@ -113,6 +114,9 @@ namespace pandora_vision
     return newMap;
   }
 
+  /*****************************************************************************
+   *                         Visualization  methods                            *
+   ****************************************************************************/
   void HardObstacleDetector::showImage(
     const std::string& title, const cv::Mat& image, int time)
   {
@@ -138,6 +142,62 @@ namespace pandora_vision
     cv::imshow(title, image);
     cv::waitKey(time);
   }
+
+  void HardObstacleDetector::visualizeUnknownProbabilities(
+    const std::string& title, const cv::Mat& image, int time)
+  {
+    if (image.depth() == CV_32FC1)
+    {
+      cv::Mat scaledImage = scaleFloatImageToInt(image);
+      cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
+
+      // If value is negative, make it green for visualization
+      for (unsigned int rows = 0; rows < image.rows; rows++)
+      {
+        for (unsigned int cols = 0; cols < image.cols; cols++)
+        {
+          float pixelValue = image.at<float>(rows, cols);
+          float probability = applyFoldedNormalDistribution(pixelValue);
+
+          // Check the probability of the pixel and give color for visualization
+          if (probability < 0.35)
+          {
+            // Give Red color
+            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 0;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 255;
+          }
+          else if (probability < 0.67)
+          {
+            // Give Yellow color
+            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 255;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
+          }
+          else if (probability < 1.0)
+          {
+            // Give Blue color
+            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
+            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
+          }
+        }
+      }
+      cv::imshow(title, scaledImage);
+      cv::waitKey(time);
+    }
+  }
+
+  float HardObstacleDetector::applyFoldedNormalDistribution(float inValue)
+  {
+    float probability;
+
+    return probability;
+  }
+
+  /*****************************************************************************
+   *                     End of Visualization methods                          *
+   ****************************************************************************/
 
   cv::Mat HardObstacleDetector::scaleFloatImageToInt(const cv::Mat& inImage)
   {
@@ -204,10 +264,17 @@ namespace pandora_vision
       showImage("The new map after robot mask convolution", newMap, 1);
     }
 
+    if (show_unknown_probabilities)
+    {
+      // Visualization of unkown areas based on their optimistic probabilities
+      visualizeUnknownProbabilities("Unknown areas probabilities", newMap, 1);
+    }
+
     // After convolution there might be negative values, so we need
     // to set them to -1.
     fillUnkownAreas(newMap, outImage, 1);
   }
+
 
   /*****************************************************************************
    *                         Edge Detection methods                            *
