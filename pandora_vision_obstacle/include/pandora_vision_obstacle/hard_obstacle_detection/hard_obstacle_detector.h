@@ -86,14 +86,6 @@ namespace pandora_vision
       inline void setCannyLowThreshold(int value){cannyLowThreshold_ = value;}
       inline void setCannyBlurNoiseKernelSize(int value){cannyBlurKernelSize_ = value;}
 
-      /**
-        @brief Robot's strength changes dynamicaly.The robot's strength always
-        stays in acceptable value, aka bigger than robotMaskRows * robotMaskCols.
-        The higher the strength the higher the obstacle probability
-        in the end if the process.
-       **/
-      inline void setRobotStrength(double value){robotStrength_ *= value;}
-
     private:
       std::string nodeName_;
 
@@ -102,10 +94,12 @@ namespace pandora_vision
       int robotCols_;
       cv::Mat robotMask_;
 
-      // This variable defines the probability of the extracted hard obstacles,
-      // if the robot is near obstacle and unkown territory.
-      // The higher the value, the higher the probability.
-      double robotStrength_;
+      // This variable defines the probability of the extracted unkown areas
+      // when the robot is near unkown and free space.
+      // It is set to robotRows * robotCols in constructor and this is its
+      // minimum acceptable value. Recommended not to change.
+      // The higher the value, the lower the probability.
+      int robotStrength_;
 
       // The parameter that defines the edge detection algorithm to be used
       int edge_method_;
@@ -161,14 +155,10 @@ namespace pandora_vision
         @brief Now that we have a complete map, aka dangerous, safe and unkown
         areas we will include the robot's size. A convolution between the map
         and robot's mask will make the new map that informs us if we can access 
-        a particular point(territory).
-        The outImage will have -1 values for unkown, 0 for free
-        and (0,1] float values for dangerous territories.
-        Even if 1 dangerous pixel exists (value = 1 from the edges that
-        we found) the output image pixel will be set as obstacle with a
-        probability that depends on its neighbors and robotMask's values.
-        The higher the values in robotMask the more we give strength on dangerous
-        areas probability.
+        a particular point(territory). The outImage will have -1 values for
+        unkown, 0 for free and 1 values for dangerous territories.
+        Even if 1 dangerous pixel exists (value > 0 from the edges that
+        we found) the output image pixel will be set as obstacle.
         @param[in] inImage [const cv::Mat&] The input image.
         @param[out] outImage [cv::Mat*] The output edges image will unkown areas.
         @return void
