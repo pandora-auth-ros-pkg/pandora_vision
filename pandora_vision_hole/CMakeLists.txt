@@ -89,7 +89,8 @@ catkin_package(
   INCLUDE_DIRS
     include
   LIBRARIES
-    ${PROJECT_NAME}_utils
+    ${PROJECT_NAME}_hole_fusion_utils
+    ${PROJECT_NAME}_timer
   )
 
 include_directories(
