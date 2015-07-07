@@ -66,7 +66,7 @@ namespace pandora_vision
     // Minimum acceptable value for the process to work properly
     robotStrength_ = robotRows_ * robotCols_;
 
-    robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_32FC1) / robotStrength_;
+    robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_32FC1);
 
     edge_method_ = 1;
     edges_threshold_ = 30;
@@ -99,7 +99,7 @@ namespace pandora_vision
     detectEdges(inputImage, &edgesImage);
 
     // Pass the unkown areas in edges image.
-    fillUnkownAreas(inputImage, &edgesImage);
+    fillUnkownAreas(inputImage, &edgesImage, 0);
 
     if (show_edges_and_unknown_image)
     {
@@ -153,19 +153,39 @@ namespace pandora_vision
   }
 
   void HardObstacleDetector::fillUnkownAreas(
-    const cv::Mat& inImage, cv::Mat* outImage)
+    const cv::Mat& inImage, cv::Mat* outImage, int method)
   {
     ROS_INFO_NAMED(nodeName_, "Hard obstacle node fills unkown area");
 
-    for (unsigned int rows = 0; rows < inImage.rows; rows++)
+    switch (method)
     {
-      for (unsigned int cols = 0; cols < inImage.cols; cols++)
-      {
-        if (inImage.at<float>(rows, cols) < 0)
+      case 0 :
+        for (unsigned int rows = 0; rows < inImage.rows; rows++)
         {
-          outImage->at<float>(rows, cols) = -1;
+          for (unsigned int cols = 0; cols < inImage.cols; cols++)
+          {
+            // Pass from the input mat the negative values as our policy dictates.
+            if (inImage.at<float>(rows, cols) < 0)
+            {
+              outImage->at<float>(rows, cols) = -1 / robotStrength_;
+            }
+          }
         }
-      }
+        break;
+      case 1 :
+        inImage.copyTo(*outImage);
+        for (unsigned int rows = 0; rows < inImage.rows; rows++)
+        {
+          for (unsigned int cols = 0; cols < inImage.cols; cols++)
+          {
+            // If negative values in the input image, convert them to -1.
+            if (outImage->at<float>(rows, cols) < 0)
+            {
+              outImage->at<float>(rows, cols) = -1;
+            }
+          }
+        }
+        break;
     }
   }
 
@@ -186,7 +206,7 @@ namespace pandora_vision
 
     // After convolution there might be negative values, so we need
     // to set them to -1.
-    fillUnkownAreas(newMap, outImage);
+    fillUnkownAreas(newMap, outImage, 1);
   }
 
   /*****************************************************************************
