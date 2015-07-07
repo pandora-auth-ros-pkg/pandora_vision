@@ -38,21 +38,40 @@
 
 
 #include <string>
-#include "nav_msgs/OccupancyGrid.h"
+#include <limits>
+#include "pcl_ros/point_cloud.h"
+#include "pcl/point_types.h"
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_cloud.h>
+#include "pcl_ros/transforms.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_preprocessor.h"
 
 namespace pandora_vision
 {
+
   HardObstaclePreProcessor::HardObstaclePreProcessor(const std::string& ns,
       sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
   CVMatStamped>(ns, handler)
   {
     ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
         this->accessProcessorNh()->getNamespace());
+    reconfServer_.setCallback(boost::bind(&HardObstaclePreProcessor::reconfCallback,
+          this, _1, _2));
   }
 
   HardObstaclePreProcessor::~HardObstaclePreProcessor()
   {
+  }
+
+  void HardObstaclePreProcessor::reconfCallback(const pandora_vision_obstacle::elevation_mapConfig params,
+          const uint32_t& level)
+  {
+    maxAllowedDist_ = params.maxDist;
+    minElevation_ = params.minElevation;
+    maxElevation_ = params.maxElevation;
+    elevationMapWidth_ = params.elevationMapWidth;
+    elevationMapHeight_ = params.elevationMapHeight;
+    visualisationFlag_ = params.visualisationFlag;
   }
 
   bool HardObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
@@ -69,13 +88,33 @@ namespace pandora_vision
       return false;
     }
 
+    if (visualisationFlag_)
+      viewElevationMap(output);
+
     return true;
+  }
+
+  void HardObstaclePreProcessor::viewElevationMap(const CVMatStampedPtr& elevationMapStamped)
+  {
+    if (elevationMapStamped->image.empty())
+    {
+      ROS_ERROR_STREAM("[" + this->accessPublicNh()->getNamespace() + "]: The elevation map cannot be displayed,"
+          << " the input image is empty!");
+      return;
+    }
+    // cv::Mat elevationMapImg;
+
+    // cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1\ci)
+
+    cv::imshow("Elevation Map Image", elevationMapStamped->image);
+    cv::waitKey(5);
+    return;
   }
 
   /**
    * @brief Converts an Point Cloud to a local elevation map in OpenCV matrix
    * format.
-   * @param inputPointCloud[const PointCloud2ConstPtr&] The Point Cloud received
+   * @param inputPointCloud[const boost::shared_ptr<sensor_msgs::PointCloud2>&] The Point Cloud received
    * from the RGBD sensor.
    * @param outputImgPtr[const CVMatStampedPtr&] The resulting elevation
    * map as an OpenCV matrix.
@@ -85,6 +124,56 @@ namespace pandora_vision
       const PointCloud2ConstPtr& inputPointCloud,
       const CVMatStampedPtr& outputImgPtr)
   {
+    ROS_DEBUG_STREAM("[" + this->accessPublicNh()->getNamespace() + "]: Received a new Point Cloud Message");
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mapPointCloudPtr(new pcl::PointCloud<pcl::PointXYZ> ());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr sensorPointCloudPtr(new pcl::PointCloud<pcl::PointXYZ> ());
+    tf::StampedTransform baseFootPrintTf;
+
+    // converting PointCloud2 msg format to pcl pointcloud format in order to read the 3d data
+    pcl::fromROSMsg(*inputPointCloud, *sensorPointCloudPtr);
+
+    try
+    {
+      tfListener_.waitForTransform(baseFootPrintFrameId_,
+          inputPointCloud->header.frame_id, inputPointCloud->header.stamp, ros::Duration(1.0));
+      pcl_ros::transformPointCloud(baseFootPrintFrameId_, *sensorPointCloudPtr, *mapPointCloudPtr, tfListener_);
+    }
+    catch (tf::TransformException ex)
+    {
+      ROS_ERROR_STREAM("[" << this->accessPublicNh()->getNamespace() << "]:" << ex.what());
+      ROS_DEBUG_STREAM("[" << this->accessPublicNh()->getNamespace() << "]: PointCloud Transform failed");
+      return false;
+    }
+
+    // Create the output Elevation Map
+    outputImgPtr->image = cv::Mat(elevationMapHeight_, elevationMapWidth_, CV_64FC1);
+    outputImgPtr->image.setTo(std::numeric_limits<double>::min());
+    outputImgPtr->header = inputPointCloud->header;
+
+    for (int ii = 0; ii < sensorPointCloudPtr->size(); ++ii)
+    {
+      pcl::PointXYZ& currentPoint = mapPointCloudPtr->points[ii];
+      double measuredDist = sensorPointCloudPtr->points[ii].z;
+
+      // Check if the current point has any NaN value.
+      if (isnan(currentPoint.x) || isnan(currentPoint.y) || isnan(currentPoint.z))
+        continue;
+
+      // Check if the point is in the allowed distance range.
+      if (measuredDist > maxAllowedDist_)
+        continue;
+
+      // Check if the z coordinate is within the specified range.
+      if (currentPoint.z < minElevation_ || currentPoint.z > maxElevation_)
+        continue;
+
+      // If the current point is located higher that the higher point of the corresponding cell
+      // then substitute it.
+      if (currentPoint.z >
+          outputImgPtr->image.at<double>(static_cast<int>(currentPoint.x), static_cast<int>(currentPoint.y)))
+        outputImgPtr->image.at<double>(static_cast<int>(currentPoint.x),
+            static_cast<int>(currentPoint.y)) = currentPoint.z;
+    }
     return true;
   }
 
