@@ -45,6 +45,7 @@
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 #include <std_msgs/Empty.h>
+#include "state_manager/state_client_nodelet.h"
 
 #include "sensor_msgs/Image.h"
 #include "pandora_vision_msgs/EnhancedImage.h"
@@ -72,7 +73,7 @@ namespace thermal
     to victim node, an empty message is sent to synchronizer node to restart
     the whole thermal process.
    **/
-  class ThermalCropper : public nodelet::Nodelet
+  class ThermalCropper : public state_manager::StateClientNodelet
   {
    public:
     /**
@@ -140,6 +141,20 @@ namespace thermal
       **/
     void
     unlockThermalProcedure();
+    /**
+      @brief The node's state manager.
+      @param[in] newState [const int&] The robot's new state
+      @return void
+    **/
+    void startTransition(int newState);
+
+    /**
+      @brief Completes the transition to a new state
+      @param void
+      @return void
+    **/
+    void completeTransition(void);
+
 
    private:
     //!< Node's distinct name
@@ -183,6 +198,10 @@ namespace thermal
     ros::Publisher processEndPublisher_;
     // The name of the topic where the process end will be advertised
     std::string processEndTopic_;
+
+    // The on/off state of the Hole Detector package
+    bool isOn_;
+    bool publishingEnhancedHoles_;
   };
 
 }  // namespace thermal
