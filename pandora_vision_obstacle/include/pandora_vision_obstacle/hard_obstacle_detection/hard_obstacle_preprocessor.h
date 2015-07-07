@@ -51,74 +51,79 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class HardObstaclePreProcessor : public sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
   CVMatStamped>
   {
-    public:
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
-      typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
+   public:
+    typedef boost::shared_ptr<sensor_msgs::PointCloud2> PointCloud2Ptr;
+    typedef boost::shared_ptr<sensor_msgs::PointCloud2 const> PointCloud2ConstPtr;
 
-    public:
-      HardObstaclePreProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~HardObstaclePreProcessor();
+   public:
+    HardObstaclePreProcessor();
+    void
+    initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-      virtual bool preProcess(const PointCloud2ConstPtr& input,
-          const CVMatStampedPtr& output);
+    virtual bool preProcess(const PointCloud2ConstPtr& input,
+        const CVMatStampedPtr& output);
 
-      /**
-       * @brief Converts an Point Cloud to a local elevation map in OpenCV matrix
-       * format.
-       * @param inputPointCloud[const PointCloud2ConstPtr&] The Point Cloud received
-       * from the RGBD sensor.
-       * @param outputImgPtr[const CVMatStampedPtr&] The resulting elevation
-       * map as an OpenCV matrix.
-       * @return bool True if the conversion was successful, false otherwise.
-       */
-      bool PointCloudToCvMat(const PointCloud2ConstPtr& inputPointCloud,
-          const CVMatStampedPtr& outputImgPtr);
+    /**
+      * @brief Converts an Point Cloud to a local elevation map in OpenCV matrix
+      * format.
+      * @param inputPointCloud[const PointCloud2ConstPtr&] The Point Cloud received
+      * from the RGBD sensor.
+      * @param outputImgPtr[const CVMatStampedPtr&] The resulting elevation
+      * map as an OpenCV matrix.
+      * @return bool True if the conversion was successful, false otherwise.
+      */
+    bool PointCloudToCvMat(const PointCloud2ConstPtr& inputPointCloud,
+        const CVMatStampedPtr& outputImgPtr);
 
-      void reconfCallback(const pandora_vision_obstacle::elevation_mapConfig params,
-          const uint32_t& level);
+    void reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,
+        const uint32_t& level);
 
-      void viewElevationMap(const CVMatStampedPtr& elevationMapStamped);
+    void viewElevationMap(const CVMatStampedPtr& elevationMapStamped);
 
-    private:
-      /// The maximum distance of a point from the range sensor.
-      double maxAllowedDist_;
+   private:
+    /// The maximum distance of a point from the range sensor.
+    double maxAllowedDist_;
 
-      /// The minimum elevation from the base of the robot.
-      double minElevation_;
+    /// The minimum elevation from the base of the robot.
+    double minElevation_;
 
-      /// The maximum elevation from the base of the robot.
-      double maxElevation_;
+    /// The maximum elevation from the base of the robot.
+    double maxElevation_;
 
-      /// The frame Id for the elevation Map frame of reference.
-      std::string baseFootPrintFrameId_;
+    /// The frame Id for the elevation Map frame of reference.
+    std::string baseFootPrintFrameId_;
 
-      std::string pclSensorFrameId_;
+    std::string pclSensorFrameId_;
 
-      /// The ros subscriber used to get the transformation from the range sensor
-      /// to the elevation Map frame of reference.
-      tf::TransformListener tfListener_;
+    /// The ros subscriber used to get the transformation from the range sensor
+    /// to the elevation Map frame of reference.
+    tf::TransformListener tfListener_;
 
-      /// The width of the elevation map.
-      int elevationMapWidth_;
+    /// The width of the elevation map.
+    int elevationMapWidth_;
 
-      /// The height of the elevation map.
-      int elevationMapHeight_;
+    /// The height of the elevation map.
+    int elevationMapHeight_;
 
-      /// Flag used to view the elevation map.
-      bool visualisationFlag_;
+    /// Flag used to view the elevation map.
+    bool visualisationFlag_;
 
-      /// The dynamic reconfigure server used to changed the parameters for the elevation map
-      /// on runtime.
-      dynamic_reconfigure::Server<pandora_vision_obstacle::elevation_mapConfig> reconfServer_;
+    /// The dynamic reconfigure server used to changed the parameters for the elevation map
+    /// on runtime.
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_obstacle::elevation_mapConfig > >
+      reconfServerPtr_;
 
-      /// The callback for the dynamic reconfigure server.
-      dynamic_reconfigure::Server<pandora_vision_obstacle::elevation_mapConfig>::CallbackType
-        reconfCallback_;
+    /// The callback for the dynamic reconfigure server.
+    dynamic_reconfigure::Server< ::pandora_vision_obstacle::elevation_mapConfig >::CallbackType
+      reconfCallback_;
   };
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PREPROCESSOR_H

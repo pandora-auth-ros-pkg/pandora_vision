@@ -42,6 +42,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   HardObstacleDetector::HardObstacleDetector()
   {
   }
@@ -416,4 +418,5 @@ namespace pandora_vision
     // Convert the type of the output image to CV_64FC1.
     outImage->convertTo(*outImage, CV_64FC1, 1.0 / 255.0, 0.0);
   }
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

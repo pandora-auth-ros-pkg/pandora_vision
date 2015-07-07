@@ -39,7 +39,6 @@
 #ifndef PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_HANDLER_H
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_HANDLER_H
 
-#include <string>
 #include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_preprocessor.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_postprocessor.h"
@@ -47,16 +46,15 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class HardObstacleHandler : public VisionHandler<HardObstaclePreProcessor, HardObstacleProcessor,
     HardObstaclePostProcessor>
   {
-    public:
-      explicit HardObstacleHandler(const std::string& ns);
-      virtual ~HardObstacleHandler(){}
-
-    private:
-      virtual void completeTransition();
+   public:
+    HardObstacleHandler();
   };
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_HANDLER_H
