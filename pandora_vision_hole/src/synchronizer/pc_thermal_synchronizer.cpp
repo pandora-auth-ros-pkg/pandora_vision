@@ -472,8 +472,8 @@ namespace pandora_vision_hole
 
     // Extract the RGB image from the point cloud
 
-    // cv::Mat rgbImage = MessageConversions::convertPointCloudMessageToImage(
-    //   pointCloud, CV_8UC3);
+    // cv::Mat rgbImage = hole_fusion::MessageConversions::convertPointCloudMessageToImage(
+    //   pcPtr, CV_8UC3);
     // cv_bridge::CvImagePtr rgbImageConverter( new cv_bridge::CvImage() );
     // rgbImageConverter->header = pcMsg->header;
     // rgbImageConverter->encoding = sensor_msgs::image_encodings::BGR8;

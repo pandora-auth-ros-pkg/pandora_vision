@@ -1712,13 +1712,20 @@ namespace hole_fusion
         Parameters::Image::scale_method),
       sensor_msgs::image_encodings::TYPE_8UC1,
       enhancedHolesMsgPtr->depthImage);
+    // enhancedHolesMsgPtr->depthImage = MessageConversions::convertImageToMessage(
+    //   interpolatedDepthImage_,
+    //   sensor_msgs::image_encodings::TYPE_8UC1,
+    //   enhancedHolesMsgPtr->depthImage);
 
     // Set the thermalImage in the enhancedHolesMsg message to the thermal image
-    enhancedHolesMsgPtr->thermalImage = MessageConversions::convertImageToMessage(
-      Visualization::scaleImageForVisualization(thermalImage_,
-        Parameters::Image::scale_method),
-      sensor_msgs::image_encodings::TYPE_8UC1,
-      enhancedHolesMsgPtr->thermalImage);
+    if (rgbdtMode_)
+    {
+      enhancedHolesMsgPtr->thermalImage = MessageConversions::convertImageToMessage(
+        Visualization::scaleImageForVisualization(thermalImage_,
+          Parameters::Image::scale_method),
+        sensor_msgs::image_encodings::TYPE_8UC1,
+        enhancedHolesMsgPtr->thermalImage);
+    }
 
     // Set whether depth analysis is applicable
     enhancedHolesMsgPtr->isDepth = (filteringMode_ == RGBD_MODE);
