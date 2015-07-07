@@ -1,4 +1,5 @@
 <launch>
+  <arg name="namespace" default="/pandora_vision/pandora_vision_obstacle" />
 
   <include file="$(find state_manager)/launch/stateManager.launch" />
 
@@ -38,8 +39,8 @@
   <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
   <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
 
-  <include file="$(find pandora_vision_obstacle)/launch/hard_obstacle_node.launch" />
-
-  <include file="$(find pandora_robots_description)/launch/woody/woody_description.launch" />
+  <include file="$(find pandora_vision_obstacle)/launch/pandora_vision_hard_obstacle.launch"
+      ns="$(arg namespace)" />
+  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
 </launch>
