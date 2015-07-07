@@ -69,7 +69,8 @@ namespace pandora_vision
     detector_->setShowInputImage(config.show_input_image);
     detector_->setShowEdgesImage(config.show_edges_image);
     detector_->setShowEdgesThresholdedImage(config.show_edges_thresholded_image);
-    detector_->setShowEdgesUnkownImage(config.show_edges_and_unkown_image);
+    detector_->setShowEdgesUnkownImage(config.show_edges_and_unknown_image);
+    detector_->setShowUnknownProbabilities(config.show_unknown_probabilities);
     detector_->setShowNewMapImage(config.show_new_map_image);
 
     // Edge detection parameters
