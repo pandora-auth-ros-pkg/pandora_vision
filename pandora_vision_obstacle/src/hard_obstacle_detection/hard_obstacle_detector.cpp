@@ -144,42 +144,61 @@ namespace pandora_vision
   }
 
   void HardObstacleDetector::visualizeUnknownProbabilities(
-    const std::string& title, const cv::Mat& image, int time)
+    const std::string& title, const cv::Mat& image,
+    int time, bool opencv_method)
   {
     if (image.depth() == CV_64FC1)
     {
-      cv::Mat scaledImage = scaleFloatImageToInt(image);
+      cv::Mat scaledImage;
+
+      if (opencv_method)
+      {
+        // Use opencv function for visualization
+        cv::normalize(image, scaledImage, 0, 1, cv::NORM_MINMAX);
+      }
+
+      // Convert CV_8UC1 to CV_8UC3
+      scaledImage = scaleFloatImageToInt(image);
       cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
 
-      // If value is negative, make it green for visualization
-      for (unsigned int rows = 0; rows < image.rows; rows++)
+      if (opencv_method)
       {
-        for (unsigned int cols = 0; cols < image.cols; cols++)
-        {
-          double pixelValue = image.at<double>(rows, cols);
-          double probability = applyFoldedNormalDistribution(pixelValue);
+        // use Opencv function for visualization
+        cv::applyColorMap(scaledImage, scaledImage, cv::COLORMAP_JET);
+      }
 
-          // Check the probability of the pixel and give color for visualization
-          if (probability < 0.35)
+      if (!opencv_method)
+      {
+        // If value is negative give color
+        for (unsigned int rows = 0; rows < image.rows; rows++)
+        {
+          for (unsigned int cols = 0; cols < image.cols; cols++)
           {
-            // Give Red color
-            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 0;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 255;
-          }
-          else if (probability < 0.67)
-          {
-            // Give Yellow color
-            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 255;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
-          }
-          else if (probability < 1.0)
-          {
-            // Give Blue color
-            scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
-            scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
+            double pixelValue = image.at<double>(rows, cols);
+            double probability = applyFoldedNormalDistribution(pixelValue);
+
+            // Check the probability of the pixel and give color for visualization
+            if (probability < 0.35)
+            {
+              // Give Red color
+              scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 0;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 255;
+            }
+            else if (probability < 0.67)
+            {
+              // Give Yellow color
+              scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 255;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
+            }
+            else if (probability < 1.0)
+            {
+              // Give Blue color
+              scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 255;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 0;
+              scaledImage.at<unsigned char>(rows, 3 * cols + 2) = 0;
+            }
           }
         }
       }
@@ -267,7 +286,8 @@ namespace pandora_vision
     if (show_unknown_probabilities)
     {
       // Visualization of unkown areas based on their optimistic probabilities
-      visualizeUnknownProbabilities("Unknown areas probabilities", newMap, 1);
+      visualizeUnknownProbabilities("Unknown areas probabilities",
+        newMap, 1, true);
     }
 
     // After convolution there might be negative values, so we need
