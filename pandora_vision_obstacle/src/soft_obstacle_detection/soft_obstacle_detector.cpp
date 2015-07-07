@@ -85,7 +85,7 @@ namespace pandora_vision_obstacle
     cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
     cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
 
-    dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
+    dwtPtr_.reset(new pandora_vision_common::DiscreteWaveletTransform(kernelLow, kernelHigh));
   }
 
   SoftObstacleDetector::SoftObstacleDetector() {}
@@ -125,7 +125,7 @@ namespace pandora_vision_obstacle
     gaussianKernelSize_ = size;
   }
 
-  void SoftObstacleDetector::dilateImage(const MatPtr& image)
+  void SoftObstacleDetector::dilateImage(const pandora_vision_common::MatPtr& image)
   {
     int nonZero = cv::countNonZero(*image);
     if (nonZero > image->rows * image->cols / 2)
@@ -468,8 +468,8 @@ namespace pandora_vision_obstacle
           gaussianKernelSize_), 0);
 
     // Perform DWT
-    std::vector<MatPtr> LHImages = dwtPtr_->getLowHigh(blurImage, level);
-    MatPtr lhImage(LHImages[LHImages.size() - 1]);
+    std::vector<pandora_vision_common::MatPtr> LHImages = dwtPtr_->getLowHigh(blurImage, level);
+    pandora_vision_common::MatPtr lhImage(LHImages[LHImages.size() - 1]);
 
     // Normalize image [0, 255]
     cv::Mat normalizedImage;
@@ -483,7 +483,7 @@ namespace pandora_vision_obstacle
     }
 
     // Convert image to binary with Otsu thresholding
-    MatPtr otsuImage(new cv::Mat());
+    pandora_vision_common::MatPtr otsuImage(new cv::Mat());
     cv::threshold(normalizedImage, *otsuImage, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
     if (showOtsuImage_)

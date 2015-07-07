@@ -94,9 +94,9 @@ namespace pandora_vision_obstacle
     private:
       /**
        * @brief Invert image if necessary and dilate it
-       * @param image [const MatPtr&] The image to be dilated
+       * @param image [const pandora_vision_common::MatPtr&] The image to be dilated
        **/
-      void dilateImage(const MatPtr& image);
+      void dilateImage(const pandora_vision_common::MatPtr& image);
 
       /**
        * @brief Find out if a line is almost the same with another
@@ -196,7 +196,7 @@ namespace pandora_vision_obstacle
 
     private:
       /// The DWT class object used to perform this operation
-      boost::shared_ptr<DiscreteWaveletTransform> dwtPtr_;
+      boost::shared_ptr<pandora_vision_common::DiscreteWaveletTransform> dwtPtr_;
 
       /// The node's name
       std::string nodeName_;
