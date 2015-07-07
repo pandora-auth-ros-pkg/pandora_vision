@@ -7,7 +7,7 @@
     args="load pandora_vision/pandora_vision_hard_obstacle $(arg nodelet_manager)" output="screen" >
     <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 
-    <rosparam file="$(find pandora_vision_obstacle)/config/obstacle_topics.yaml"
+    <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_topics.yaml"
         command="load" />
     <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_preprocessor_params.yaml"
         command="load" ns="preprocessor" />
