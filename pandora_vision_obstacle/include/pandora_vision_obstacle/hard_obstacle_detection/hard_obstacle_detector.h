@@ -82,7 +82,14 @@ namespace pandora_vision
       inline void setEdgeMethod(int value){edge_method_ = value;}
       inline void setEdgesThreshold(int value){edges_threshold_ = value;}
 
+      /**
+        @brief Robot's strength changes dynamicaly.The robot's strength always
+        stays in acceptable value, aka bigger than robotMaskRows * robotMaskCols.
+        The higher the strength the higher the obstacle probability
+        in the end if the process.
+       **/
       inline void setRobotStrength(double value){robotStrength_ *= value;}
+
     private:
       std::string nodeName_;
 
@@ -91,9 +98,9 @@ namespace pandora_vision
       int robotCols_;
       cv::Mat robotMask_;
 
-      // This variable devides each robotMask pixel, so it defines the
-      // probability of the extracted hard obstacles.
-      // The higher the value, the lower the probability.
+      // This variable defines the probability of the extracted hard obstacles,
+      // if the robot is near obstacle and unkown territory.
+      // The higher the value, the higher the probability.
       double robotStrength_;
 
       // The parameter that defines the edge detection algorithm to be used
@@ -130,13 +137,16 @@ namespace pandora_vision
       cv::Mat scaleFloatImageToInt(const cv::Mat& inImage);
 
       /**
-        @brief Checks if there is any negative value in the input mat, if yes
-        fill the peer pixel in outImage with value -1.
+        @brief If method is 0 checks if there is any negative value in the input
+        mat, if yes fill the peer pixel in outImage with the appropriate value
+        to continue the process. If method is 1 find negative values and set
+        them to -1.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output image with unkown areas.
+        @param[in] method [int] The method to be used.
+        @param[out] outImage [cv::Mat*] The output image with unkown areas.
         @return void
        **/
-      void fillUnkownAreas(const cv::Mat& inImage, cv::Mat* outImage);
+      void fillUnkownAreas(const cv::Mat& inImage, cv::Mat* outImage, int method);
 
       /**
         @brief Now that we have a complete map, aka dangerous, safe and unkown
@@ -151,7 +161,7 @@ namespace pandora_vision
         The higher the values in robotMask the more we give strength on dangerous
         areas probability.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image will unkown areas.
+        @param[out] outImage [cv::Mat*] The output edges image will unkown areas.
         @return void
        **/
       void robotMaskOnMap(const cv::Mat& inImage, cv::Mat* outImage);
@@ -159,7 +169,7 @@ namespace pandora_vision
       /**
         @brief Apply the canny edge detection algorithm.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image
+        @param[out] outImage [cv::Mat*] The output edges image
         @return void
        **/
       void applyCanny(const cv::Mat& inImage, cv::Mat* outImage);
@@ -167,7 +177,7 @@ namespace pandora_vision
       /**
         @brief Apply the sharr edge detection algorithm.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image
+        @param[out] outImage [cv::Mat*] The output edges image
         @return void
        **/
       void applyScharr(const cv::Mat& inImage, cv::Mat* outImage);
@@ -175,7 +185,7 @@ namespace pandora_vision
       /**
         @brief Apply the sobel edge detection algorithm.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image
+        @param[out] outImage [cv::Mat*] The output edges image
         @return void
        **/
       void applySobel(const cv::Mat& inImage, cv::Mat* outImage);
@@ -186,7 +196,7 @@ namespace pandora_vision
         edges to keep the ones that we consider as dangerous areas.
         The outImage will have float values 0 or 1 for desired edges.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[in] outImage [cv::Mat*] The output edges image
+        @param[out] outImage [cv::Mat*] The output edges image
         @return void
        **/
       void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
