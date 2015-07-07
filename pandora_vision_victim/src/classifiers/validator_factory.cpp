@@ -44,6 +44,7 @@
 
 #include "pandora_vision_victim/classifiers/validator_factory.h"
 #include "pandora_vision_victim/classifiers/svm_validator.h"
+#include "pandora_vision_victim/classifiers/rgbd_svm_validator.h"
 #include "pandora_vision_victim/classifiers/neural_network_validator.h"
 #include "pandora_vision_victim/classifiers/random_forests_validator.h"
 
@@ -79,10 +80,16 @@ namespace pandora_vision_victim
     AbstractValidator* validatorPtr;
 
     std::cout << "In factory : " << validatorType << std::endl;
-    if (boost::iequals(validatorType, "svm"))
+    if (boost::iequals(validatorType, "svm") &&
+        (boost::iequals(imageType, "rgb") || (boost::iequals(imageType, "depth"))))
     {
       validatorPtr = new SvmValidator(nh, imageType, validatorType);
     }
+    else if (boost::iequals(validatorType, "svm") && boost::iequals(imageType, "rgbd"))
+    {
+      validatorPtr = new RgbdSvmValidator(nh, imageType, validatorType);
+    }
+
     else if (boost::iequals(validatorType, "ann"))
     {
       validatorPtr =  new NeuralNetworkValidator(nh, imageType, validatorType);

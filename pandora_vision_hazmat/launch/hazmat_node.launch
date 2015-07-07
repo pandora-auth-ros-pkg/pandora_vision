@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="pandora_hazmat" type="pandora_vision_hazmat_node" pkg="pandora_vision_hazmat"
+    respawn="False" >
+  <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
+    <rosparam file="$(find pandora_vision_hazmat)/config/pandora_vision_hazmat/hazmat_topics.yaml"
+      command="load" />
+    <rosparam file="$(find pandora_vision_hazmat)/config/pandora_vision_hazmat/hazmat_params.yaml"
+      command="load" ns="detector"/>
+  </node>
+
+</launch>

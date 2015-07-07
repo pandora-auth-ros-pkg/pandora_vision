@@ -52,5 +52,5 @@ namespace pandora_vision_victim
   VictimHandler::VictimHandler() :
     VisionHandler<VictimHolePreProcessor, VictimHoleProcessor, VictimPostProcessor>()
   {}
-}  // namespace pandora_vision_hazmat
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision

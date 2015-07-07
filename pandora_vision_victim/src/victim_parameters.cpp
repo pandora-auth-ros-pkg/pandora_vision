@@ -58,6 +58,7 @@ namespace pandora_vision_victim
     depth_svm_prob_scaling = 4.7;
     depth_svm_prob_translation = 1.0;
     positivesCounter = 1;
+    rgbdEnabled = false;
 
     /// The dynamic reconfigure (depth) parameter's callback
     server.setCallback(boost::bind(&VictimParameters::parametersCallback,
@@ -85,6 +86,7 @@ namespace pandora_vision_victim
     depth_svm_prob_scaling = config.depth_svm_prob_scaling;
     depth_svm_prob_translation = config.depth_svm_prob_translation;
     positivesCounter = config.positivesCounter;
+    rgbdEnabled = config.rgbdEnabled;
   }
 
   void VictimParameters::configVictim(const ros::NodeHandle& nh)

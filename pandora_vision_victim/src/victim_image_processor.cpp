@@ -113,7 +113,7 @@ namespace pandora_vision_victim
               rgb_svm_bounding_boxes.push_back(re);
               rgb_svm_p.push_back(final_victims[i]->getProbability());
               break;
-            case DEPTH_RGB_SVM:
+            case DEPTH_SVM:
               depth_svm_keypoints.push_back(kp);
               depth_svm_bounding_boxes.push_back(re);
               depth_svm_p.push_back(final_victims[i]->getProbability());
@@ -227,7 +227,7 @@ namespace pandora_vision_victim
       depthSvmProbability->setPoint(p);  // center of frame???]
       depthSvmProbability->setWidth(input->getDepthImage().rows);
       depthSvmProbability->setHeight(input->getDepthImage().cols);
-      depthSvmProbability->setSource(DEPTH_RGB_SVM);
+      depthSvmProbability->setSource(DEPTH_SVM);
     }
 
     finalProbability.push_back(rgbSvmProbability);
