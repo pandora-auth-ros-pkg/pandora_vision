@@ -240,6 +240,26 @@ namespace pandora_vision
       ROS_BREAK();
     }
     ROS_INFO_NAMED(nodeName_, "Scharr edge detection is called");
+
+    cv::Mat blured;
+    // Reduce the noise of the input image
+    cv::GaussianBlur(inImage, blured, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT);
+
+    cv::Mat grad_x, grad_y;
+    cv::Mat abs_grad_x, abs_grad_y;
+
+    // Gradient X
+    //        src, dst, ddepth, 1, 0, scale, delta, border_type
+    cv::Scharr(blured, grad_x, CV_16S, 1, 0, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(grad_x, abs_grad_x);
+
+    // Gradient Y
+    //        src, dst, ddepth, 1, 0, kernelSize, scale, delta, border_type
+    cv::Scharr(blured, grad_y, CV_16S, 0, 1, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(grad_y, abs_grad_y);
+
+    // Total Gradient (approximate)
+    cv::addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, *outImage);
   }
 
   void HardObstacleDetector::applySobel(
@@ -251,6 +271,26 @@ namespace pandora_vision
       ROS_BREAK();
     }
     ROS_INFO_NAMED(nodeName_, "Sobel edge detection is called");
+
+    cv::Mat blured;
+    // Reduce the noise of the input image
+    cv::GaussianBlur(inImage, blured, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT);
+
+    cv::Mat grad_x, grad_y;
+    cv::Mat abs_grad_x, abs_grad_y;
+
+    // Gradient X
+    //        src, dst, ddepth, 1, 0, kernelSize, scale, delta, border_type
+    cv::Sobel(blured, grad_x, CV_16S, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(grad_x, abs_grad_x);
+
+    // Gradient Y
+    //        src, dst, ddepth, 1, 0, kernelSize, scale, delta, border_type
+    cv::Sobel(blured, grad_y, CV_16S, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::convertScaleAbs(grad_y, abs_grad_y);
+
+    // Total Gradient (approximate)
+    cv::addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, *outImage);
   }
 
   void HardObstacleDetector::detectEdges(
