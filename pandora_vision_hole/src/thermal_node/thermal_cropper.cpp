@@ -123,9 +123,6 @@ namespace thermal
     processEndPublisher_ = nh_.advertise
       <sensor_processor::ProcessorLogInfo>(processEndTopic_, 1, true);
 
-    // When the node starts from launch file dictates thermal procedure to start
-    unlockThermalProcedure();
-
     clientInitialize();
 
     NODELET_INFO("[%s] Initiated", nodeName_.c_str());
@@ -193,6 +190,9 @@ namespace thermal
     isEnhancedImageAvailable_ = false;
     isThermalAvailable_ = false;
 
+    if (!publishingEnhancedHoles_)
+      return;
+
     NODELET_INFO("[%s] Processing callback", nodeName_.c_str());
 
     unlockThermalProcedure();
@@ -220,10 +220,7 @@ namespace thermal
     processorLogPtr->success = true;
     processorLogPtr->logInfo = "Finished";
     processEndPublisher_.publish(processorLogPtr);
-    if(publishingEnhancedHoles_)
-    {
-      victimThermalPublisher_.publish(enhancedImagePtr);
-    }
+    victimThermalPublisher_.publish(enhancedImagePtr);
   }
 
   /**
