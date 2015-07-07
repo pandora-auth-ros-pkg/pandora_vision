@@ -81,9 +81,6 @@ namespace pandora_vision
     detector_->setCannyBlurNoiseKernelSize(config.canny_blur_noise_kernel_size);
 
     detector_->setEdgesThreshold(config.edges_threshold);
-
-    // Robot mask parameter
-    detector_->setRobotStrength(config.robot_strength_factor);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
