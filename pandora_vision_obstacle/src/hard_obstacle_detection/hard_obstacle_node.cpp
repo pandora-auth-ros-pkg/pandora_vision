@@ -41,7 +41,7 @@
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "hard_obstacle_node");
-  pandora_vision::HardObstacleHandler hardObstacleHandler("pandora_vision_obstacle_hard_obstacle");
+  pandora_vision::pandora_vision_obstacle::HardObstacleHandler hardObstacleHandler;
   ros::spin();
   return 0;
 }

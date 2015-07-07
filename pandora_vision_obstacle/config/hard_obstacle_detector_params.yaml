@@ -1,0 +1,4 @@
+robot:
+  # In meters
+  robotXDimention: 0.345
+  robotYDimention: 0.345

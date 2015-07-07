@@ -47,26 +47,28 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class HardObstaclePostProcessor :
     public sensor_processor::PostProcessor<CVMatStamped, nav_msgs::OccupancyGrid>
   {
-    public:
-      HardObstaclePostProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      virtual ~HardObstaclePostProcessor();
+   public:
+    HardObstaclePostProcessor();
 
-      /**
-       * @brief Converts an OpenCV matrix that represents a traversability map
-       * to a Occupancy Grid Format.
-       * @param inputImage[const CVMatStampedConstPtr&] The input elevation map that will
-       * converted.
-       * @param outputOccupancyGrid[const nav_msgs::OccupancyGridPtr&] The resulting elevation
-       * map in Occupancy Grid format.
-       * @return bool True if the conversion was successful, false otherwise.
-       */
-      virtual bool
-        postProcess(const CVMatStampedConstPtr& input, const nav_msgs::OccupancyGridPtr& output);
+    /**
+      * @brief Converts an OpenCV matrix that represents a traversability map
+      * to a Occupancy Grid Format.
+      * @param inputImage[const CVMatStampedConstPtr&] The input elevation map that will
+      * converted.
+      * @param outputOccupancyGrid[const nav_msgs::OccupancyGridPtr&] The resulting elevation
+      * map in Occupancy Grid format.
+      * @return bool True if the conversion was successful, false otherwise.
+      */
+    virtual bool
+      postProcess(const CVMatStampedConstPtr& input, const nav_msgs::OccupancyGridPtr& output);
   };
+
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_POSTPROCESSOR_H
-
