@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     sensor_msgs
     nav_msgs
+    pcl_ros
     pandora_vision_msgs
     pandora_vision_common
     sensor_processor
@@ -23,6 +24,7 @@ generate_dynamic_reconfigure_options(
   config/barrel_node.cfg
   config/pandora_vision_obstacle/soft_obstacle_cfg.cfg
   config/pandora_vision_obstacle/hard_obstacle_cfg.cfg
+  config/pandora_vision_obstacle/elevation_map.cfg
 )
 
 catkin_package(
@@ -33,6 +35,7 @@ catkin_package(
       pluginlib
       dynamic_reconfigure
       cv_bridge
+      pcl_ros
       sensor_msgs
       nav_msgs
       pandora_vision_msgs

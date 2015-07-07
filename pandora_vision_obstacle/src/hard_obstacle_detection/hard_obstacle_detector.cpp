@@ -195,19 +195,16 @@ namespace pandora_vision
   void HardObstacleDetector::applyCanny(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
-
   }
 
   void HardObstacleDetector::applyScharr(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
-
   }
 
   void HardObstacleDetector::applySobel(
     const cv::Mat& inImage, cv::Mat* outImage)
   {
-
   }
 
   void HardObstacleDetector::detectEdges(
