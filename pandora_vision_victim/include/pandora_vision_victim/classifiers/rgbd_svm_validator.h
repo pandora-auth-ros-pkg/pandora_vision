@@ -54,6 +54,8 @@
  */
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   /**
    * @class SvmValidator
    * @brief This class classifies images using an SVM classifier model.
@@ -109,5 +111,6 @@ namespace pandora_vision
 
       bool usePlattScaling_;
   };
+}  // namespace pandora_vision_victim
 }  // namespace pandora_vision
 #endif  // PANDORA_VISION_VICTIM_CLASSIFIERS_RGBD_SVM_VALIDATOR_H

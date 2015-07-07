@@ -66,10 +66,7 @@ namespace pandora_vision_datamatrix
       this->getProcessorNodeHandle()).advertise(debugTopic, 1);
 #endif
 
-<<<<<<< HEAD
     detected_datamatrix.reset( new DataMatrixPOI );
-=======
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
     detected_datamatrix->setContent("");
 
     ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
@@ -91,12 +88,7 @@ namespace pandora_vision_datamatrix
     dmtxDecodeDestroy(&dec);
     dmtxImageDestroy(&img);
     dmtxRegionDestroy(&reg);
-<<<<<<< HEAD
     ROS_INFO("[%s] destroyed", this->getName().c_str());
-=======
-    ROS_INFO("[%s] : Datamatrix_Detector instance destroyed",
-        this->getName().c_str());
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   }
 
   /**

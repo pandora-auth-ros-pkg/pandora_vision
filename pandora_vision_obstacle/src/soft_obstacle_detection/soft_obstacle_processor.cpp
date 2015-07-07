@@ -44,7 +44,6 @@ namespace pandora_vision
 {
 namespace pandora_vision_obstacle
 {
-<<<<<<< HEAD
   void
   SoftObstacleProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
   {
@@ -53,14 +52,6 @@ namespace pandora_vision_obstacle
     ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
 
     detector_.reset( new SoftObstacleDetector(this->getName(), processor_nh) );
-=======
-  SoftObstacleProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
-  {
-    sensor_processor::Processor<ImagesStamped, POIsStamped>::initialize(ns, handler);
-
-    ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
-    detector_.reset(new SoftObstacleDetector(this->getName(), processor_nh));
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
 
     server_.reset( new dynamic_reconfigure::
         Server< ::pandora_vision_obstacle::soft_obstacle_cfgConfig >(processor_nh) );

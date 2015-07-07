@@ -136,7 +136,7 @@ namespace pandora_vision_victim
     }
 
     DetectionImages imgs;
-    int stateIndicator = 2 * input->getDepth() + (input->getRegions().size() > 0) + 1;
+    int stateIndicator = 2; //* input->getDepth() + (input->getRegions().size() > 0) + 1;
     DetectionMode detectionMode;
     switch (stateIndicator)
     {
@@ -224,20 +224,27 @@ namespace pandora_vision_victim
     {
       for (int jj = 0; jj < debugImage.size(); jj++)
       {
+
+        for (unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
+        {
+          cv::rectangle(debugImage[jj], holes_bounding_boxes[i],
+          CV_RGB(100, 100, 150));
+        }
+
         cv::drawKeypoints(debugImage[jj], rgb_svm_keypoints, debugImage[jj],
-          CV_RGB(0, 100, 255),
+          CV_RGB(255, 100, 0),
           cv::DrawMatchesFlags::DEFAULT);
         for (unsigned int i = 0 ; i < rgb_svm_bounding_boxes.size() ; i++)
         {
           cv::rectangle(debugImage[jj], rgb_svm_bounding_boxes[i],
-            CV_RGB(0, 100, 255));
+            CV_RGB(255, 100, 0));
           {
             std::ostringstream convert;
             convert.str("");
             convert << rgb_svm_p[i];
             cv::putText(debugImage[jj], convert.str().c_str(),
               rgb_svm_keypoints[i].pt,
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
           }
         }
 
@@ -275,12 +282,6 @@ namespace pandora_vision_victim
           }
         }
 
-        for (unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
-        {
-          cv::rectangle(debugImage[jj], holes_bounding_boxes[i],
-            CV_RGB(0, 0, 0));
-        }
-
         {
           std::ostringstream convert;
           convert.str("");
@@ -288,7 +289,7 @@ namespace pandora_vision_victim
             << " : " << rgb_svm_keypoints.size();
           cv::putText(debugImage[jj], convert.str().c_str(),
             cvPoint(10, 60),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 100, 255), 1, CV_AA);
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(255, 100, 0), 1, CV_AA);
         }
 
         {
@@ -318,7 +319,7 @@ namespace pandora_vision_victim
           convert << "Holes got : "<< input->getRegions().size();
           cv::putText(debugImage[jj], convert.str().c_str(),
             cvPoint(10, 120),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(0, 0, 0), 1, CV_AA);
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, CV_RGB(100, 100, 150), 1, CV_AA);
         }
       }
     }
@@ -407,7 +408,7 @@ namespace pandora_vision_victim
 
     if (detectionMode == GOT_HOLES_AND_DEPTH)
     {
-      if (!params_.rgbdEnabled)
+      if (!paramsPtr_->rgbdEnabled)
       {
         for (int i = 0 ; i < imgs.depthMasks.size(); i++)
         {
@@ -494,7 +495,7 @@ namespace pandora_vision_victim
         // {
           // counter_++;
           // temp->setProbability(rgb_svm_probabilities[i]->getProbability() *
-            // params_.rgb_svm_weight);
+            // paramsPtr_->rgb_svm_weight);
           // temp->setPoint(rgb_svm_probabilities[i]->getPoint());
           // temp->setSource(RGB_SVM);
           // temp->setWidth(rgb_svm_probabilities[i]->getWidth());

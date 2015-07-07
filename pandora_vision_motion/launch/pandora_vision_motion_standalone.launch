@@ -40,7 +40,7 @@
     <group unless="$(arg openni2)">
       <group unless="$(arg usbcamera)">
 
-      <arg name="path" default="$(find pandora_vision_motion)/motion-true.bag" />
+      <arg name="path" default="$(find pandora_vision_motion)/motion-false.bag" />
 
       <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -l $(arg path)" >
        </node>

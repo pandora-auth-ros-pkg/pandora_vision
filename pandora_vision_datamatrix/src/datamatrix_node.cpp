@@ -45,11 +45,7 @@ using pandora_vision::pandora_vision_datamatrix::DataMatrixHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "datamatrix_node");
-<<<<<<< HEAD
   DataMatrixHandler dataMatrixHandler;
-=======
-  DataMatrixHandler dataMatrixHandler();
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   ros::spin();
   return 0;
 }

@@ -50,11 +50,7 @@ namespace pandora_vision
 namespace pandora_vision_datamatrix
 {
   DataMatrixHandler::DataMatrixHandler() :
-<<<<<<< HEAD
     VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>()
   {}
-=======
-    VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>() {}
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
 }  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision

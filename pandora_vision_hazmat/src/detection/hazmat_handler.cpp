@@ -48,13 +48,6 @@ namespace pandora_vision
 {
 namespace pandora_vision_hazmat
 {
-<<<<<<< HEAD
   HazmatHandler::HazmatHandler() {}
-=======
-  HazmatHandler::HazmatHandler() :
-    VisionHandler<HazmatPreProcessor, HazmatProcessor, HazmatPostProcessor>()
-  {
-  }
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
 }  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision

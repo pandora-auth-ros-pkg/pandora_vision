@@ -50,11 +50,7 @@ namespace pandora_vision
 {
 namespace pandora_vision_motion
 {
-<<<<<<< HEAD
   class MotionHandler : public VisionHandler<MotionPreProcessor,
-=======
-  class MotionHandler : public VisionHandler<MotionPreProcessor, 
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
     MotionProcessor, MotionPostProcessor>
   {
    public:

@@ -87,7 +87,7 @@ namespace pandora_vision_victim
     }
     else if (boost::iequals(validatorType, "svm") && boost::iequals(imageType, "rgbd"))
     {
-      validatorPtr = new RgbdSvmValidator(ns, imageType, validatorType);
+      validatorPtr = new RgbdSvmValidator(nh, imageType, validatorType);
     }
 
     else if (boost::iequals(validatorType, "ann"))

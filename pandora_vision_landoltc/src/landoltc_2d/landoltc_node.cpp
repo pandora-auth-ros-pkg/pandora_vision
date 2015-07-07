@@ -47,11 +47,7 @@ using pandora_vision::pandora_vision_landoltc::LandoltCHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "landoltc_2d_node");
-<<<<<<< HEAD
   LandoltCHandler landoltCHandler;
-=======
-  LandoltCHandler landoltCHandler();
->>>>>>> Refactoring of pandora_vision to comply with changes in sensor_processor
   ros::spin();
   return 0;
 }
