@@ -62,24 +62,33 @@ void imageCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   //!< Current frame to be processed
   if(msg->isDepth)
   {
-    depth_msg = cv_bridge::toCvCopy(msg->depthImage,
-    sensor_msgs::image_encodings::TYPE_8UC1);
-    cv::cvtColor(depth_msg->image, temp, CV_GRAY2RGB);
+    depth_msg = cv_bridge::toCvCopy(msg->depthImage);
+    if( msg->depthImage.encoding == "8UC1" || msg->depthImage.encoding == "mono8")
+    {
+      cv::cvtColor(depth_msg->image, temp, CV_GRAY2RGB);
+    }
+
+    else if (msg->depthImage.encoding == "16UC1" || msg->depthImage.encoding == "32FC1")
+    {
+      double min, max;
+      cv::minMaxLoc(depth_msg->image, &min, &max);
+      cv::Mat img_scaled_8u;
+      cv::Mat(depth_msg->image-min).convertTo(img_scaled_8u, CV_8UC1, 255. / (max - min));
+      cv::cvtColor(img_scaled_8u, temp, CV_GRAY2RGB);
+    }
 
     imgs.push_back(temp);
     rgb_msg = cv_bridge::toCvCopy(msg->rgbImage,
     sensor_msgs::image_encodings::TYPE_8UC3);
-    cv::cvtColor(rgb_msg->image, temp1, CV_BGR2RGB);
-
-    imgs.push_back(temp1);
+    imgs.push_back(rgb_msg->image);
 
   }
   else
   {
     rgb_msg = cv_bridge::toCvCopy(msg->rgbImage,
     sensor_msgs::image_encodings::TYPE_8UC3);
-    cv::cvtColor(rgb_msg->image, temp, CV_BGR2RGB);
-    imgs.push_back(temp);
+    // cv::cvtColor(rgb_msg->image, temp, CV_BGR2RGB);
+    imgs.push_back(rgb_msg->image);
   }
   for (unsigned int i = 0 ; i < msg->regionsOfInterest.size(); i++)
    {
@@ -108,12 +117,14 @@ void imageCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
     imgs[0].copyTo(displayImage(cv::Rect(0, 0, imgs[0].cols, imgs[0].rows)));
     imgs[1].copyTo(displayImage(cv::Rect(imgs[1].cols, 0, imgs[1].cols, imgs[1].rows)));
     cv::imshow("EnhancedImage", displayImage);
+    ROS_INFO_STREAM("displayImage" << displayImage.type());
     cv::waitKey(10);
   }
   else
   {
     cv::Mat displayImage = imgs[0].clone();
     cv::imshow("EnhancedImage", displayImage);
+    ROS_INFO_STREAM("displayImage" << displayImage.type());
     cv::waitKey(10);
   }
 
