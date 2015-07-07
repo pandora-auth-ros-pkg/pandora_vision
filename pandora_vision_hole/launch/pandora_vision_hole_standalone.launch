@@ -2,15 +2,15 @@
   <!-- Set namespace to load pandora_vision_hole on -->
   <arg name="namespace" default="/pandora_vision/pandora_vision_hole" />
   <!-- Set this if we play with thermal source -->
-  <arg name="thermal" default="true" />
+  <arg name="thermal" default="false" />
   <!-- Set this if we play with rgbd source -->
-  <arg name="rgbd" default="true" />
+  <arg name="rgbd" default="false" />
   <!-- Set this if we play with rgbdt hole -->
-  <arg name="rgbdt" default="true" />
+  <arg name="rgbdt" default="false" />
   <!-- Kinect: choose the openni driver -->
   <arg name="openni" default="false" />
   <!-- Xtion: choose the openni2 driver -->
-  <arg name="openni2" default="false" />
+  <arg name="openni2" default="true" />
   <!-- if not xtion or kinect, set path arg to find a rosbag -->
   <!-- If the source is not a physical device, it is a bag: play "path" bag -->
   <arg name="path" default="/home/pandora/bitch.bag" />
@@ -28,7 +28,7 @@
       <arg name="device_id" value="#1" />
       <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
-      <arg name="num_worker_threads" value="8" />
+      <arg name="num_worker_threads" value="4" />
     </include>
     <param name="/kinect_rgb_optical_frame/hfov" value="58.0" />
     <param name="/kinect_rgb_optical_frame/vfov" value="45.0" />
