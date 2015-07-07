@@ -74,6 +74,7 @@ namespace pandora_vision
       inline void setShowEdgesImage(bool value){show_edges_image = value;}
       inline void setShowEdgesThresholdedImage(bool value){show_edges_thresholded_image = value;}
       inline void setShowEdgesUnkownImage(bool value){show_edges_and_unknown_image = value;}
+      inline void setShowUnknownProbabilities(bool value){show_unknown_probabilities = value;}
       inline void setShowNewMapImage(bool value){show_new_map_image = value;}
 
       /**
@@ -118,6 +119,7 @@ namespace pandora_vision
       bool show_edges_thresholded_image;
       bool show_edges_and_unknown_image;
       bool show_new_map_image;
+      bool show_unknown_probabilities;
 
       /**
         @brief Visualization of an image with CV_32FC1 or CV_8UC1 type.
@@ -130,6 +132,28 @@ namespace pandora_vision
        **/
       void showImage(
         const std::string& title, const cv::Mat& image, int time);
+
+      /**
+        @brief This function takes runs on every unknown pixel the folded normal
+        distribution and based on its probability gives color to them. Finaly
+        shows the image.
+        @param[in] title [const std::string&] The title of image to be shown.
+        @param[in] image [const cv::Mat&] The image to be shown.
+        @param[in] time [int] The time that imshow function lasts in ms.
+        @return void
+       **/
+      void visualizeUnknownProbabilities(
+        const std::string& title, const cv::Mat& image, int time);
+
+      /**
+        @brief Apply the Folded Normal Distribution to find the probability of
+        each unknown pixel. The extracted probability range is between [0 - 1].
+        The bigger the probability means that this pixel is very optimistic
+        because many of it's neighboors are free (safe) for the robot.
+        @param[in] inValue [float] The input value to find it's probability.
+        @return float. The extracted probability.
+       **/
+      float applyFoldedNormalDistribution(float inValue);
 
       /**
         @brief Converts an image of CV_32FC1 type to CV_8UC1. Negative values
