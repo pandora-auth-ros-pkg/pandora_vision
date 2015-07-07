@@ -46,9 +46,8 @@ namespace pandora_vision
 namespace pandora_vision_obstacle
 {
 
-  ObstaclePreProcessor::ObstaclePreProcessor(const std::string& ns,
-    sensor_processor::Handler* handler)
-    : sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, ImagesStamped>(ns, handler)
+  ObstaclePreProcessor::ObstaclePreProcessor()
+    : sensor_processor::PreProcessor<pandora_vision_msgs::EnhancedImage, ImagesStamped>()
   {}
 
   bool ObstaclePreProcessor::preProcess(const EnhancedImageConstPtr& input,

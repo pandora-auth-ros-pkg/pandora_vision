@@ -525,7 +525,7 @@ namespace pandora_vision_obstacle
         boost::array<float, 4> depthDistance;
 
         // Find the new depth distance of the soft obstacle
-        depthDistance = findDepthDistance(depthImage, *verticalLinesPtr,
+        depthDistance = findDepthDistance(depthImage, verticalLines,
             *roi, level);
         bool nonZeroDepth = (depthDistance[1] && depthDistance[3]);
 
