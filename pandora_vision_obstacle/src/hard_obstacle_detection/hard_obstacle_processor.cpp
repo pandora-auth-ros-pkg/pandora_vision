@@ -42,17 +42,20 @@
 
 namespace pandora_vision
 {
-  HardObstacleProcessor::HardObstacleProcessor(const std::string& ns,
-      sensor_processor::Handler* handler) :
-    sensor_processor::Processor<CVMatStamped, CVMatStamped>(ns, handler)
+namespace pandora_vision_obstacle
+{
+  void
+  HardObstacleProcessor::initialize(const std::string& ns,
+      sensor_processor::Handler* handler)
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-    this->accessProcessorNh()->getNamespace());
+    sensor_processor::Processor<CVMatStamped, CVMatStamped>::initialize(ns, handler);
 
     detector_.reset(new HardObstacleDetector(this->getName(),
-          *this->accessPublicNh()));
+          this->getProcessorNodeHandle()));
 
-    server.setCallback(boost::bind(&HardObstacleProcessor::parametersCallback,
+    serverPtr_.reset(new dynamic_reconfigure::Server< ::pandora_vision_obstacle::hard_obstacle_cfgConfig >(
+          this->getProcessorNodeHandle()));
+    serverPtr_->setCallback(boost::bind(&HardObstacleProcessor::parametersCallback,
         this, _1, _2));
   }
 
@@ -62,7 +65,7 @@ namespace pandora_vision
   }
 
   void HardObstacleProcessor::parametersCallback(
-    const pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
+    const ::pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
     const uint32_t& level)
   {
     // Debug show parameters
@@ -87,10 +90,12 @@ namespace pandora_vision
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
       const CVMatStampedPtr& output)
   {
+    NODELET_INFO("[%s] In process", this->getName().c_str());
     output->header = input->getHeader();
     output->image = detector_->startDetection(input->getImage());
 
     return true;
   }
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

@@ -48,6 +48,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class HardObstacleDetector
   {
     public:
@@ -228,6 +230,7 @@ namespace pandora_vision
       void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
   };
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_DETECTOR_H

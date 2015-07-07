@@ -48,23 +48,30 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
+  HardObstaclePreProcessor::
+  HardObstaclePreProcessor() {}
 
-  HardObstaclePreProcessor::HardObstaclePreProcessor(const std::string& ns,
-      sensor_processor::Handler* handler) : sensor_processor::PreProcessor<sensor_msgs::PointCloud2,
-  CVMatStamped>(ns, handler)
+  void
+  HardObstaclePreProcessor::initialize(const std::string& ns,
+      sensor_processor::Handler* handler)
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] preprocessor nh processor : " +
-        this->accessProcessorNh()->getNamespace());
-    reconfServer_.setCallback(boost::bind(&HardObstaclePreProcessor::reconfCallback,
+    sensor_processor::PreProcessor<sensor_msgs::PointCloud2, CVMatStamped>::
+      initialize(ns, handler);
+
+    reconfServerPtr_.reset( new dynamic_reconfigure::Server< ::pandora_vision_obstacle::elevation_mapConfig >(
+          this->getProcessorNodeHandle()) );
+    reconfServerPtr_->setCallback(boost::bind(&HardObstaclePreProcessor::reconfCallback,
           this, _1, _2));
 
-    if (!this->accessPublicNh()->getParam("ElevationMap/base_foot_print_id", baseFootPrintFrameId_))
+    if (!this->getProcessorNodeHandle().getParam("ElevationMap/base_foot_print_id", baseFootPrintFrameId_))
     {
       ROS_ERROR_STREAM("[" + this->getName() + "] preprocessor nh processor : Could not "
           << "retrieve the name of the base Footprint Link!");
       ROS_BREAK();
     }
-    if (!this->accessPublicNh()->getParam("ElevationMap/kinect_frame_id", pclSensorFrameId_))
+    if (!this->getProcessorNodeHandle().getParam("ElevationMap/kinect_frame_id", pclSensorFrameId_))
     {
       ROS_ERROR_STREAM("[" + this->getName() + "] preprocessor nh processor : Could not "
           << "retrieve the name of the PCL sensor Link!");
@@ -72,11 +79,7 @@ namespace pandora_vision
     }
   }
 
-  HardObstaclePreProcessor::~HardObstaclePreProcessor()
-  {
-  }
-
-  void HardObstaclePreProcessor::reconfCallback(const pandora_vision_obstacle::elevation_mapConfig params,
+  void HardObstaclePreProcessor::reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,
           const uint32_t& level)
   {
     maxAllowedDist_ = params.maxDist;
@@ -90,13 +93,13 @@ namespace pandora_vision
   bool HardObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
       const CVMatStampedPtr& output)
   {
-    ROS_DEBUG_STREAM("["+this->accessPublicNh()->getNamespace()+"] In preprocessor!");
+    NODELET_INFO("[%s] In preprocess", this->getName().c_str());
 
     // Convert the input Point Cloud to a local elevation map
     // in the form of a occupancy Grid Map
     if (!PointCloudToCvMat(input, output))
     {
-      ROS_ERROR_STREAM("[" + this->accessPublicNh()->getNamespace() + "]: Could not convert the "
+      ROS_ERROR_STREAM("[" + this->getName() + "]: Could not convert the "
           "Point Cloud to an OpenCV matrix!");
       return false;
     }
@@ -111,7 +114,7 @@ namespace pandora_vision
   {
     if (elevationMapStamped->image.empty())
     {
-      ROS_ERROR_STREAM("[" + this->accessPublicNh()->getNamespace() + "]: The elevation map cannot be displayed,"
+      ROS_ERROR_STREAM("[" + this->getName() + "]: The elevation map cannot be displayed,"
           << " the input image is empty!");
       return;
     }
@@ -139,7 +142,7 @@ namespace pandora_vision
       const PointCloud2ConstPtr& inputPointCloud,
       const CVMatStampedPtr& outputImgPtr)
   {
-    ROS_DEBUG_STREAM("[" + this->accessPublicNh()->getNamespace() + "]: Received a new Point Cloud Message");
+    ROS_DEBUG_STREAM("[" + this->getName() + "]: Received a new Point Cloud Message");
     pcl::PointCloud<pcl::PointXYZ>::Ptr mapPointCloudPtr(new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::PointCloud<pcl::PointXYZ>::Ptr sensorPointCloudPtr(new pcl::PointCloud<pcl::PointXYZ> ());
     tf::StampedTransform baseFootPrintTf;
@@ -155,8 +158,8 @@ namespace pandora_vision
     }
     catch (tf::TransformException ex)
     {
-      ROS_ERROR_STREAM("[" << this->accessPublicNh()->getNamespace() << "]:" << ex.what());
-      ROS_DEBUG_STREAM("[" << this->accessPublicNh()->getNamespace() << "]: PointCloud Transform failed");
+      ROS_ERROR_STREAM("[" << this->getName() << "]:" << ex.what());
+      ROS_DEBUG_STREAM("[" << this->getName() << "]: PointCloud Transform failed");
       return false;
     }
 
@@ -192,4 +195,5 @@ namespace pandora_vision
     return true;
   }
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

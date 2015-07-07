@@ -36,19 +36,21 @@
 *  Choutas Vassilis <vasilis4ch@gmail.com>
 *********************************************************************/
 
-#include <string>
+#include <pluginlib/class_list_macros.h>
+#include <nodelet/nodelet.h>
+
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_handler.h"
+
+PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_obstacle::HardObstacleHandler,
+    nodelet::Nodelet)
 
 namespace pandora_vision
 {
-  HardObstacleHandler::HardObstacleHandler(const std::string& ns):
-    VisionHandler<HardObstaclePreProcessor, HardObstacleProcessor, HardObstaclePostProcessor>(ns)
+namespace pandora_vision_obstacle
+{
+  HardObstacleHandler::HardObstacleHandler() :
+    VisionHandler<HardObstaclePreProcessor, HardObstacleProcessor, HardObstaclePostProcessor>()
   {
   }
-
-  void HardObstacleHandler::completeTransition()
-  {
-    return;
-  }
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
-

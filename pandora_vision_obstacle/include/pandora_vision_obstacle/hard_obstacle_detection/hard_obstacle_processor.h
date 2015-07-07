@@ -44,46 +44,45 @@
 #include <dynamic_reconfigure/server.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
-// #include "pandora_vision_common/pois_stamped.h"
-// #include "pandora_vision_common/images_stamped.h"
 #include "pandora_vision_obstacle/hard_obstacle_cfgConfig.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_detector.h"
 
-
 namespace pandora_vision
+{
+namespace pandora_vision_obstacle
 {
   class HardObstacleProcessor : public sensor_processor::Processor<CVMatStamped, CVMatStamped>
   {
-    public:
-      HardObstacleProcessor(const std::string& ns, sensor_processor::Handler* handler);
-      HardObstacleProcessor();
+   public:
+    void
+    initialize(const std::string& ns, sensor_processor::Handler* handler);
+    HardObstacleProcessor();
 
-      virtual ~HardObstacleProcessor() {}
-
-    public:
-      virtual bool process(const CVMatStampedConstPtr& input,
-          const CVMatStampedPtr& output);
-
-     private:
-      /**
-       * @brief The function called when a parameter is changed
-       * @param config [const pandora_vision_obstacle::hard_obstacle_cfgConfig&]
-       * @param level [const uint32_t] The level
-       **/
-       void parametersCallback(const pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
-           const uint32_t& level);
+   public:
+    virtual bool process(const CVMatStampedConstPtr& input,
+        const CVMatStampedPtr& output);
 
     private:
-      /// The dynamic reconfigure parameters' server
-       dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
-         server;
+    /**
+      * @brief The function called when a parameter is changed
+      * @param config [const pandora_vision_obstacle::hard_obstacle_cfgConfig&]
+      * @param level [const uint32_t] The level
+      **/
+    void parametersCallback(const ::pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
+        const uint32_t& level);
 
-      /// The dynamic reconfigure parameters' callback
-       dynamic_reconfigure::Server<pandora_vision_obstacle::hard_obstacle_cfgConfig>
-         ::CallbackType f;
+   private:
+    /// The dynamic reconfigure parameters' server
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_obstacle::hard_obstacle_cfgConfig > >
+      serverPtr_;
 
-      boost::shared_ptr<HardObstacleDetector> detector_;
+    /// The dynamic reconfigure parameters' callback
+    dynamic_reconfigure::Server< ::pandora_vision_obstacle::hard_obstacle_cfgConfig >
+      ::CallbackType f;
+
+    boost::shared_ptr<HardObstacleDetector> detector_;
   };
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PROCESSOR_H

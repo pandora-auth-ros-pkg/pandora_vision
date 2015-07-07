@@ -41,15 +41,12 @@
 
 namespace pandora_vision
 {
-  HardObstaclePostProcessor::HardObstaclePostProcessor(const std::string& ns,
-      sensor_processor::Handler* handler) :
-    sensor_processor::PostProcessor<CVMatStamped, nav_msgs::OccupancyGrid>(ns, handler)
+namespace pandora_vision_obstacle
+{
+  HardObstaclePostProcessor::HardObstaclePostProcessor() :
+    sensor_processor::PostProcessor<CVMatStamped, nav_msgs::OccupancyGrid>()
   {
-    ROS_INFO_STREAM("[" + this->getName() + "] postprocessor nh processor : " +
-        this->accessProcessorNh()->getNamespace());
   }
-
-  HardObstaclePostProcessor::~HardObstaclePostProcessor() {}
 
   /**
    * @brief Converts an OpenCV matrix that represents a traversability map
@@ -60,16 +57,18 @@ namespace pandora_vision
    * map in Occupancy Grid format.
    * @return bool True if the conversion was successful, false otherwise.
   */
-  bool CvMatToOccupancyGrid(const CVMatStampedConstPtr& inputImage,
-      const nav_msgs::OccupancyGridPtr& outputOccupancyGrid)
-  {
-    return true;
-  }
+  // bool CvMatToOccupancyGrid(const CVMatStampedConstPtr& inputImage,
+  //     const nav_msgs::OccupancyGridPtr& outputOccupancyGrid)
+  // {
+  //   return true;
+  // }
 
   bool HardObstaclePostProcessor::postProcess(const CVMatStampedConstPtr& input,
       const nav_msgs::OccupancyGridPtr& output)
   {
-    return CvMatToOccupancyGrid(input, output);
+    // return CvMatToOccupancyGrid(input, output);
+    return true;
   }
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
