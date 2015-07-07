@@ -82,6 +82,10 @@ namespace pandora_vision
       inline void setEdgeMethod(int value){edge_method_ = value;}
       inline void setEdgesThreshold(int value){edges_threshold_ = value;}
 
+      inline void setCannyKernelSize(int value){cannyKernelSize_ = value;}
+      inline void setCannyLowThreshold(int value){cannyLowThreshold_ = value;}
+      inline void setCannyBlurNoiseKernelSize(int value){cannyBlurKernelSize_ = value;}
+
       /**
         @brief Robot's strength changes dynamicaly.The robot's strength always
         stays in acceptable value, aka bigger than robotMaskRows * robotMaskCols.
@@ -106,7 +110,12 @@ namespace pandora_vision
       // The parameter that defines the edge detection algorithm to be used
       int edge_method_;
 
-      // The parameter used to apply thresholdmethod on edges image
+      // Parameters used for canny edge detection method
+      int cannyKernelSize_;
+      int cannyLowThreshold_;
+      int cannyBlurKernelSize_;
+
+      // The parameter used to apply threshold  on the edges image
       int edges_threshold_;
 
       // Debug parameters
