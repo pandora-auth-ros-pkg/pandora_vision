@@ -66,7 +66,7 @@ namespace pandora_vision
     // Minimum acceptable value for the process to work properly
     robotStrength_ = robotRows_ * robotCols_;
 
-    robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_32FC1);
+    robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
 
     edge_method_ = 1;
     edges_threshold_ = 30;
@@ -81,8 +81,8 @@ namespace pandora_vision
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
   {
-    // Check if input type is CV_32FC1
-    if (inputImage.depth() != CV_32FC1)
+    // Check if input type is CV_64FC1
+    if (inputImage.depth() != CV_64FC1)
     {
       ROS_ERROR_NAMED(nodeName_, "Hard obstacle node input image type was wrong");
       ROS_BREAK();
@@ -120,7 +120,7 @@ namespace pandora_vision
   void HardObstacleDetector::showImage(
     const std::string& title, const cv::Mat& image, int time)
   {
-    if (image.depth() == CV_32FC1)
+    if (image.depth() == CV_64FC1)
     {
       cv::Mat scaledImage = scaleFloatImageToInt(image);
       cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
@@ -130,7 +130,7 @@ namespace pandora_vision
       {
         for (unsigned int cols = 0; cols < image.cols; cols++)
         {
-          if (image.at<float>(rows, cols) < 0)
+          if (image.at<double>(rows, cols) < 0)
           {
             scaledImage.at<unsigned char>(rows, 3 * cols + 0) = 0;
             scaledImage.at<unsigned char>(rows, 3 * cols + 1) = 255;
@@ -146,7 +146,7 @@ namespace pandora_vision
   void HardObstacleDetector::visualizeUnknownProbabilities(
     const std::string& title, const cv::Mat& image, int time)
   {
-    if (image.depth() == CV_32FC1)
+    if (image.depth() == CV_64FC1)
     {
       cv::Mat scaledImage = scaleFloatImageToInt(image);
       cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
@@ -156,8 +156,8 @@ namespace pandora_vision
       {
         for (unsigned int cols = 0; cols < image.cols; cols++)
         {
-          float pixelValue = image.at<float>(rows, cols);
-          float probability = applyFoldedNormalDistribution(pixelValue);
+          double pixelValue = image.at<double>(rows, cols);
+          double probability = applyFoldedNormalDistribution(pixelValue);
 
           // Check the probability of the pixel and give color for visualization
           if (probability < 0.35)
@@ -188,9 +188,9 @@ namespace pandora_vision
     }
   }
 
-  float HardObstacleDetector::applyFoldedNormalDistribution(float inValue)
+  double HardObstacleDetector::applyFoldedNormalDistribution(double inValue)
   {
-    float probability;
+    double probability;
 
     return probability;
   }
@@ -225,9 +225,9 @@ namespace pandora_vision
           for (unsigned int cols = 0; cols < inImage.cols; cols++)
           {
             // Pass from the input mat the negative values as our policy dictates.
-            if (inImage.at<float>(rows, cols) < 0)
+            if (inImage.at<double>(rows, cols) < 0)
             {
-              outImage->at<float>(rows, cols) = -1 / robotStrength_;
+              outImage->at<double>(rows, cols) = -1 / robotStrength_;
             }
           }
         }
@@ -239,9 +239,9 @@ namespace pandora_vision
           for (unsigned int cols = 0; cols < inImage.cols; cols++)
           {
             // If negative values in the input image, convert them to -1.
-            if (outImage->at<float>(rows, cols) < 0)
+            if (outImage->at<double>(rows, cols) < 0)
             {
-              outImage->at<float>(rows, cols) = -1;
+              outImage->at<double>(rows, cols) = -1;
             }
           }
         }
@@ -393,7 +393,7 @@ namespace pandora_vision
       showImage("The thresholded edges image", *outImage, 1);
     }
 
-    // Convert the type of the output image to CV_32FC1.
-    outImage->convertTo(*outImage, CV_32FC1, 1.0 / 255.0, 0.0);
+    // Convert the type of the output image to CV_64FC1.
+    outImage->convertTo(*outImage, CV_64FC1, 1.0 / 255.0, 0.0);
   }
 }  // namespace pandora_vision

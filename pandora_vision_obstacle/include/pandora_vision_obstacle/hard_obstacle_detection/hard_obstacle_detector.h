@@ -150,10 +150,10 @@ namespace pandora_vision
         each unknown pixel. The extracted probability range is between [0 - 1].
         The bigger the probability means that this pixel is very optimistic
         because many of it's neighboors are free (safe) for the robot.
-        @param[in] inValue [float] The input value to find it's probability.
-        @return float. The extracted probability.
+        @param[in] inValue [double] The input value to find it's probability.
+        @return double. The extracted probability.
        **/
-      float applyFoldedNormalDistribution(float inValue);
+      double applyFoldedNormalDistribution(double inValue);
 
       /**
         @brief Converts an image of CV_32FC1 type to CV_8UC1. Negative values
@@ -178,7 +178,7 @@ namespace pandora_vision
       /**
         @brief Now that we have a complete map, aka dangerous, safe and unkown
         areas we will include the robot's size. A convolution between the map
-        and robot's mask will make the new map that informs us if we can access 
+        and robot's mask will make the new map that informs us if we can access
         a particular point(territory). The outImage will have -1 values for
         unkown, 0 for free and 1 values for dangerous territories.
         Even if 1 dangerous pixel exists (value > 0 from the edges that
@@ -217,7 +217,7 @@ namespace pandora_vision
         @brief Apply edge detection algorithm. Based on configuration parameter,
         select the desired method. Finally apply threshold on the extracted
         edges to keep the ones that we consider as dangerous areas.
-        The outImage will have float values 0 or 1 for desired edges.
+        The outImage will have double values 0 or 1 for desired edges.
         @param[in] inImage [const cv::Mat&] The input image.
         @param[out] outImage [cv::Mat*] The output edges image
         @return void
