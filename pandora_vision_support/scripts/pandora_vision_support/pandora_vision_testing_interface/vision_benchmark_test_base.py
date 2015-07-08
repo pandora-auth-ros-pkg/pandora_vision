@@ -370,7 +370,6 @@ class VisionBenchmarkTestBase(test_base.TestBase):
                   (2.0 * math.tan(self.imageVFOV / 2.0)))
         imageX = -imageX + self.imageWidth / 2.0
         imageY = imageY + self.imageHeight / 2.0
-        print imageX, imageY
 
         return imageX, imageY
 
