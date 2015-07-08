@@ -102,6 +102,7 @@ namespace pandora_vision_obstacle
     /// The frame Id for the elevation Map frame of reference.
     std::string baseFootPrintFrameId_;
 
+    /// The frame Id for the Point Cloud sensor.
     std::string pclSensorFrameId_;
 
     /// The ros subscriber used to get the transformation from the range sensor
