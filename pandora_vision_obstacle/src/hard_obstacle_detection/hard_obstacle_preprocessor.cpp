@@ -36,15 +36,22 @@
  *  Choutas Vassilis <vasilis4ch@gmail.com>
  *********************************************************************/
 
-
 #include <string>
 #include <limits>
 #include <cmath>
-#include "pcl_ros/point_cloud.h"
-#include "pcl/point_types.h"
+
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
-#include "pcl_ros/transforms.h"
+#include <pcl_ros/transforms.h>
+#include <tf/exceptions.h>
+
+#include "sensor_processor/processor_error.h"
+#include "sensor_processor/handler.h"
+#include "pandora_vision_common/cv_mat_stamped.h"
+
+#include "pandora_vision_obstacle/elevation_mapConfig.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_preprocessor.h"
 
 namespace pandora_vision
@@ -80,12 +87,12 @@ namespace pandora_vision_obstacle
     }
 
     tf::StampedTransform tfTransform;
-    tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(2));
-    tfListener_.lookupTransform("/world", "/map", ros::Time(0), tfTransform);
+    tfListener_.waitForTransform("/world", "/map", ros::Time::now(), ros::Duration(2));
+    tfListener_.lookupTransform("/world", "/map", ros::Time::now(), tfTransform);
   }
 
   void HardObstaclePreProcessor::reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,
-          const uint32_t& level)
+      uint32_t level)
   {
     maxAllowedDist_ = params.maxDist;
     minElevation_ = params.minElevation;
@@ -173,11 +180,9 @@ namespace pandora_vision_obstacle
           inputPointCloud->header.frame_id, inputPointCloud->header.stamp, ros::Duration(0.2));
       pcl_ros::transformPointCloud(baseFootPrintFrameId_, *sensorPointCloudPtr, *mapPointCloudPtr, tfListener_);
     }
-    catch (tf::TransformException ex)
+    catch (const tf::TransformException& ex)
     {
-      ROS_ERROR_STREAM("[" << this->getName() << "]:" << ex.what());
-      ROS_DEBUG_STREAM("[" << this->getName() << "]: PointCloud Transform failed");
-      return false;
+      sensor_processor::processor_error(ex.what());
     }
 
     // Create the output Elevation Map

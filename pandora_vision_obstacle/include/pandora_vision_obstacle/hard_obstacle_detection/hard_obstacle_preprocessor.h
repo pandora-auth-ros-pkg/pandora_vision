@@ -40,14 +40,17 @@
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PREPROCESSOR_H
 
 #include <string>
+
 #include <tf/transform_listener.h>
 #include <dynamic_reconfigure/server.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include "sensor_processor/preprocessor.h"
-#include "pandora_vision_common/cv_mat_stamped.h"
-#include "pandora_vision_obstacle/elevation_mapConfig.h"
 
+#include "sensor_processor/preprocessor.h"
+#include "sensor_processor/handler.h"
+#include "pandora_vision_common/cv_mat_stamped.h"
+
+#include "pandora_vision_obstacle/elevation_mapConfig.h"
 
 namespace pandora_vision
 {
@@ -81,7 +84,7 @@ namespace pandora_vision_obstacle
         const CVMatStampedPtr& outputImgPtr);
 
     void reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,
-        const uint32_t& level);
+        uint32_t level);
 
     void viewElevationMap(const CVMatStampedPtr& elevationMapStamped);
 
