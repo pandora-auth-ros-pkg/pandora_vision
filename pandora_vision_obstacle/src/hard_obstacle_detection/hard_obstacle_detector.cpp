@@ -38,6 +38,9 @@
  *********************************************************************/
 
 #include <string>
+#include <cmath>
+#include <limits>
+
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_detector.h"
 
 namespace pandora_vision
@@ -92,14 +95,17 @@ namespace pandora_vision_obstacle
 
     ROS_INFO_NAMED(nodeName_, "Hard obstacle detection has started");
 
+    cv::Mat scaledImage;
+    scaleInputImage(inputImage, &scaledImage);
+
     if (show_input_image)
     {
       // Show the input image
-      showImage("The input image", inputImage, 1);
+      showImage("The input image", scaledImage, 1);
     }
 
     cv::Mat edgesImage;
-    detectEdges(inputImage, &edgesImage);
+    detectEdges(scaledImage, &edgesImage);
 
     // Pass the unkown areas in edges image.
     fillUnkownAreas(inputImage, &edgesImage, 0);
@@ -114,6 +120,27 @@ namespace pandora_vision_obstacle
     robotMaskOnMap(edgesImage, &newMap);
 
     return newMap;
+  }
+
+  void
+  HardObstacleDetector::
+  scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage)
+  {
+    for (unsigned int rows = 0; rows < inImage.rows; rows++)
+    {
+      for (unsigned int cols = 0; cols < inImage.cols; cols++)
+      {
+        if (inImage.at<double>(rows, cols) >= min_input_image_value_)
+        {
+          outImage->at<double>(rows, cols) = inImage.at<double>(rows, cols) +
+            fabs(min_input_image_value_);
+        }
+        else
+        {
+          outImage->at<double>(rows, cols) = 0.0;
+        }
+      }
+    }
   }
 
   /*****************************************************************************
@@ -246,7 +273,7 @@ namespace pandora_vision_obstacle
           for (unsigned int cols = 0; cols < inImage.cols; cols++)
           {
             // Pass from the input mat the negative values as our policy dictates.
-            if (inImage.at<double>(rows, cols) < 0)
+            if (inImage.at<double>(rows, cols) == -std::numeric_limits<double>::max())
             {
               outImage->at<double>(rows, cols) = -1 / robotStrength_;
             }
