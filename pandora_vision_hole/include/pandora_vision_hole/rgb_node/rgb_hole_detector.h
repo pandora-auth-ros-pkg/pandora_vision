@@ -35,8 +35,8 @@
  * Author: Despoina Paschalidou, Alexandros Philotheou
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
-#define PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
+#ifndef PANDORA_VISION_HOLE_RGB_NODE_RGB_HOLE_DETECTOR_H
+#define PANDORA_VISION_HOLE_RGB_NODE_RGB_HOLE_DETECTOR_H
 
 #define SHOW_DEBUG_IMAGE
 
@@ -82,4 +82,4 @@ namespace rgb
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_RGB_NODE_HOLE_DETECTOR_H
+#endif  // PANDORA_VISION_HOLE_RGB_NODE_RGB_HOLE_DETECTOR_H

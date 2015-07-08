@@ -35,8 +35,8 @@
  * Authors: Angelos Triantafyllidis <aggelostriadafillidis@gmail.com>
  *********************************************************************/
 
-#ifndef THERMAL_NODE_TEMPERATURE_H
-#define THERMAL_NODE_TEMPERATURE_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_H
 
 #include <ros/ros.h>
 #include <ros/console.h>
@@ -80,7 +80,7 @@ namespace pandora_vision
       // The name of the topic where the thermal Pois are pulished to
       std::string thermalPoiTopic_;
 
-      // Variables that help measure the processing time of the node 
+      // Variables that help measure the processing time of the node
       double processTime_;
       double timeBefore_;
       double timeNow_;
@@ -88,12 +88,12 @@ namespace pandora_vision
       // The dynamic reconfigure (Temperatures) parameters server
       dynamic_reconfigure::Server<pandora_vision_hole::temperatures_cfgConfig>
         server_;
-      
+
       // The dynamic reconfigure (Temperatures) parameters callback
       dynamic_reconfigure::Server<pandora_vision_hole::temperatures_cfgConfig>
         ::CallbackType f_;
 
-      // The variables that define the temperature range that we search 
+      // The variables that define the temperature range that we search
       float lowTemperature;
       float highTemperature;
 
@@ -127,7 +127,6 @@ namespace pandora_vision
         const uint32_t& level);
 
     public:
-
       /**
         @brief Default constructor. Initiates communications, loads parameters.
         @return void
@@ -139,10 +138,9 @@ namespace pandora_vision
         @return void
        **/
       ~Temperatures(void);
-
   };
 
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // THERMAL_NODE_TEMPERATURE_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_H

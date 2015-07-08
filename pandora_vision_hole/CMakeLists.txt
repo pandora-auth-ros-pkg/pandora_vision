@@ -148,13 +148,13 @@ endif()
   #"--filter=-whitespace/end_of_line, -build/include_order, -whitespace/blank_line, -whitespace/parens, -whitespace/comments, -build/include_what_you_use, -whitespace/braces, -whitespace/newline, -readability/multiline_string, -runtime/printf, -readability/streams")
 
 set(ROSLINT_CPP_OPTS
-  "--filter=-build/include_what_you_use")
+  "--filter=-build/include_what_you_use, -runtime/references")
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  include/**/*.h
-  src/**/*.cpp
+  include/*.h
+  src/*.cpp
 
   ##################### tests #####################
 

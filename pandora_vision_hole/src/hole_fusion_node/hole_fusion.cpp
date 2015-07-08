@@ -114,7 +114,7 @@ namespace hole_fusion
       // Thermal is enabled
       counter_ = 4;
     }
-    else if(rgbdMode_)
+    else if (rgbdMode_)
     {
       // Thermal is disabled
       counter_ = 3;

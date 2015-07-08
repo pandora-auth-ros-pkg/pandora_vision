@@ -36,8 +36,8 @@
  *********************************************************************/
 
 
-#ifndef THERMAL_NODE_TEMPERATURE_PARAMETERS_H
-#define THERMAL_NODE_TEMPERATURE_PARAMETERS_H
+#ifndef PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_PARAMETERS_H
+#define PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_PARAMETERS_H
 
 #include <ros/ros.h>
 #include "pandora_vision_hole/temperatures_cfgConfig.h"
@@ -49,7 +49,6 @@
  **/
 namespace pandora_vision
 {
-
   /**
     @struct Parameters
     @brief Provides flexibility by parameterizing variables needed by the
@@ -57,14 +56,14 @@ namespace pandora_vision
    **/
   struct TemperatureParameters
   {
-    //! The variables that define the temperature range that we search 
+    /// The variables that define the temperature range that we search
     struct TemperatureRange
     {
       float lowTemperature;
       float highTemperature;
     };
 
-    //! Blob detection - specific parameters
+    /// Blob detection - specific parameters
     struct Blob
     {
       int min_threshold;
@@ -83,10 +82,10 @@ namespace pandora_vision
 
 
 
-    //! Debug-specific parameters
+    /// Debug-specific parameters
     struct Debug
     {
-      //Show the thermal image that arrives in the thermal node
+      // Show the thermal image that arrives in the thermal node
       bool show_temperature_image;
 
       // Show the holes that each of the depth and RGB nodes transmit to the
@@ -104,7 +103,7 @@ namespace pandora_vision
       int show_find_holes_size;
     };
 
-    //! Image representation specific parameters
+    /// Image representation specific parameters
     struct Image
     {
       // The depth sensor's horizontal field of view
@@ -118,7 +117,7 @@ namespace pandora_vision
       int WIDTH;
     };
 
-    //! Outline discovery specific parameters
+    /// Outline discovery specific parameters
     struct Outline
     {
       // The detection method used to obtain the outline of a blob
@@ -136,9 +135,8 @@ namespace pandora_vision
       int AB_to_MO_ratio;
       int minimum_curve_points;
     };
-
   };
 
-} // namespace pandora_vision
+}  // namespace pandora_vision
 
-#endif  // THERMAL_NODE_TEMPERATURE_PARAMETERS_H
+#endif  // PANDORA_VISION_HOLE_THERMAL_NODE_TEMPERATURES_PARAMETERS_H

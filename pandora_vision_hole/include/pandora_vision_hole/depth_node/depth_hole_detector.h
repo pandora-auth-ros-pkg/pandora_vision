@@ -35,8 +35,8 @@
  * Authors: Alexandros Philotheou, Manos Tsardoulias
  *********************************************************************/
 
-#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_HOLE_DETECTOR_H
-#define PANDORA_VISION_HOLE_DEPTH_NODE_HOLE_DETECTOR_H
+#ifndef PANDORA_VISION_HOLE_DEPTH_NODE_DEPTH_HOLE_DETECTOR_H
+#define PANDORA_VISION_HOLE_DEPTH_NODE_DEPTH_HOLE_DETECTOR_H
 
 #include "depth_node/utils/blob_detection.h"
 #include "depth_node/utils/holes_conveyor.h"
@@ -79,4 +79,4 @@ namespace depth
 }  // namespace pandora_vision_hole
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_HOLE_DETECTOR_H
+#endif  // PANDORA_VISION_HOLE_DEPTH_NODE_DEPTH_HOLE_DETECTOR_H

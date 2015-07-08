@@ -43,7 +43,6 @@
  **/
 namespace pandora_vision
 {
-  
   /**
     @brief Default constructor. Initiates communications, loads parameters.
     @return void
@@ -60,9 +59,9 @@ namespace pandora_vision
       &Temperatures::inputThermalMsgCallback, this);
 
     // Advertise the thermal pois found by temperature node
-    //thermalPoiPublisher_ = nodeHandle_.advertise
-      //<pandora_vision_msgs::CandidateHolesVectorMsg>(
-      //thermalPoiTopic_, 1000);
+    // thermalPoiPublisher_ = nodeHandle_.advertise
+      // <pandora_vision_msgs::CandidateHolesVectorMsg>(
+      // thermalPoiTopic_, 1000);
 
     // The dynamic reconfigure (Temperatures) parameter's callback
     f_ = boost::bind(&Temperatures::parametersCallback, this, _1, _2);
@@ -94,7 +93,7 @@ namespace pandora_vision
 
     // Read the name of the topic from where the temperature node acquires
     // the thermal message
-    if(nodeHandle_.getParam(
+    if (nodeHandle_.getParam(
       ns + "/thermal_temperatures_node/subscribed_topics/thermal_msg_topic",
       thermalMsgTopic_))
     {
@@ -108,7 +107,7 @@ namespace pandora_vision
 
     // Read the name of the topic to which the temperatures node will be
     // publishing.
-    if(nodeHandle_.getParam(
+    if (nodeHandle_.getParam(
       ns + "/thermal_temperatures_node/published_topics/thermal_poi_topic",
       thermalPoiTopic_))
     {
@@ -138,9 +137,9 @@ namespace pandora_vision
 
     ROS_INFO("Temperatures Callback called");
     timeNow_ = ros::Time::now().toSec();
-    
+
     processTime_ = timeNow_ - timeBefore_;
-    
+
     ROS_INFO_STREAM("[Temperatures node] Process time:" << processTime_);
 
     ROS_INFO("=========================================================");
@@ -157,28 +156,26 @@ namespace pandora_vision
     // Apply double threshold(up and down) in the temperature image.
     // The threshold is set by configuration
     ///////////////////////////////////////////////////////////////////////////////////////////
-    //cv::Mat thresholdImage;
-    //cv::threshold(temperatureImage, thresholdImage, highTemperature, 255, cv::THRESH_TOZERO_INV);
-    //cv::threshold(thresholdImage, thresholdImage, lowTemperature, 255, cv::THRESH_BINARY);
+    // cv::Mat thresholdImage;
+    // cv::threshold(temperatureImage, thresholdImage, highTemperature, 255, cv::THRESH_TOZERO_INV);
+    // cv::threshold(thresholdImage, thresholdImage, lowTemperature, 255, cv::THRESH_BINARY);
 
-    //cv::resize(thresholdImage, thresholdImage, cvSize(640, 480));
-    //cv::imshow("threshold",thresholdImage);
-    //cv::waitKey(1);
+    // cv::resize(thresholdImage, thresholdImage, cvSize(640, 480));
+    // cv::imshow("threshold",thresholdImage);
+    // cv::waitKey(1);
     ///////////////////////////////////////////////////////////////////////////////////////////
     cv::inRange(
-      temperatureImage, cv::Scalar(lowTemperature), cv::Scalar(highTemperature), temperatureImage); 
+      temperatureImage, cv::Scalar(lowTemperature), cv::Scalar(highTemperature), temperatureImage);
 
     cv::resize(temperatureImage, temperatureImage, cvSize(640, 480));
-    cv::imshow("temperature",temperatureImage);
+    cv::imshow("temperature", temperatureImage);
     cv::waitKey(1);
 
     // Find blobs in the thresholded image. Each blob is represented as
     // a keypoint which is the center of the blob found
     ////////////////////// change the parameters make thermal /////////////////
-    //std::vector<cv::KeyPoint> keyPoints;
-    //BlobDetection::detectBlobs(thresholdImage, &keyPoints);
-
-
+    // std::vector<cv::KeyPoint> keyPoints;
+    // BlobDetection::detectBlobs(thresholdImage, &keyPoints);
   }
 
   /**
@@ -199,4 +196,4 @@ namespace pandora_vision
   }
 
 
-} // namespace pandora_vision
+}  // namespace pandora_vision

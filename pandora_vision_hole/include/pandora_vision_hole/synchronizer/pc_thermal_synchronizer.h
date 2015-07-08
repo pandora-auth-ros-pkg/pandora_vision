@@ -122,7 +122,7 @@ namespace pandora_vision_hole
         const sensor_msgs::PointCloud2ConstPtr& pcMsg,
         const distrib_msgs::FlirLeptonMsgConstPtr& thermalMsg);
     void
-    inputPointCloudCallback( const sensor_msgs::PointCloud2ConstPtr& pcMsg);
+    inputPointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& pcMsg);
 
     /**
       @brief The callback executed when the Hole Fusion node requests
