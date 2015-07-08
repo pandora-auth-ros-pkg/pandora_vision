@@ -102,7 +102,7 @@ namespace pandora_vision_obstacle
   {
     if (map_const_ptr_.get() == NULL)
     {
-      NODELET_ERROR("[%s] Map pointer is still uninitialized!");
+      NODELET_ERROR("[%s] Map pointer is still uninitialized!", this->getName().c_str());
       throw sensor_processor::processor_error("Map pointer is still uninitialized!");
     }
     NODELET_INFO("[%s] postprocessing to costmap", this->getName().c_str());
@@ -152,7 +152,7 @@ namespace pandora_vision_obstacle
         if ((coords >= output->data.size()) || (coords < 0))
         {
           NODELET_WARN("[%s] Error resizing to: %d\nCoords Xn: %f, Yn: %f\n",
-              this->getName().c_str(), map_const_ptr_->data.size(), xn, yn);
+              this->getName().c_str(), int(map_const_ptr_->data.size()), xn, yn);
         }
         else
         {
