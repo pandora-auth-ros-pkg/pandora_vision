@@ -35,8 +35,8 @@
 * Authors: Victor Daropoulos
 *********************************************************************/
 
-#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H
-#define PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_PARAMETERS_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_PARAMETERS_H
 
 #include <iostream>
 #include <cstdlib>
@@ -68,13 +68,12 @@ namespace pandora_vision_landoltc
     const uint32_t& level);
 
     dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig >::CallbackType f;
-    public:
 
-    //!< The dynamic reconfigure (landoltc) parameters' server
+    /// The dynamic reconfigure (landoltc) parameters' server
     boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig > >
     server_;
 
-    //!< Threshold parameters
+    /// Threshold parameters
     double gradientThreshold;
     double centerThreshold;
     double huMomentsPrec;
@@ -85,4 +84,4 @@ namespace pandora_vision_landoltc
 
 }  // namespace pandora_vision_landoltc
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_PARAMETERS_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_PARAMETERS_H

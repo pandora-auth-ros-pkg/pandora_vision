@@ -37,8 +37,8 @@
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_POSTPROCESSOR_H
-#define PANDORA_VISION_LANDOLTC_LANDOLTC_POSTPROCESSOR_H
+#ifndef PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_POSTPROCESSOR_H
+#define PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_POSTPROCESSOR_H
 
 #include <string>
 #include "pandora_common_msgs/GeneralAlertVector.h"
@@ -63,4 +63,4 @@ namespace pandora_vision_landoltc
 }  // namespace pandora_vision_landoltc
 }  // namespace pandora_vision
 
-#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_POSTPROCESSOR_H
+#endif  // PANDORA_VISION_LANDOLTC_LANDOLTC_2D_LANDOLTC_POSTPROCESSOR_H

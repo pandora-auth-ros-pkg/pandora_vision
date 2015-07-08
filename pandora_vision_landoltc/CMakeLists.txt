@@ -139,8 +139,8 @@ set(ROSLINT_CPP_OPTS
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
 
-  include/landoltc_2d/*
-  src/landoltc_2d/*
+  include/*.h
+  src/*.cpp
   test/unit/*.cpp
   # include/landoltc_3d/*.h
   # src/landoltc_3d/*.cpp
