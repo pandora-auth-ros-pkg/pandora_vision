@@ -55,6 +55,14 @@ target_link_libraries(${PROJECT_NAME}_detector
   ${DMTX_LIBRARIES}
 )
 
+add_library(${PROJECT_NAME}_processor
+  src/datamatrix_processor.cpp)
+target_link_libraries(${PROJECT_NAME}_processor
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_detector
+  )
+
+
 ################# datamatrix preprocessor #################
 add_library(${PROJECT_NAME}_preprocessor
   src/datamatrix_preprocessor.cpp
@@ -82,7 +90,7 @@ add_library(${PROJECT_NAME}_handler
 )
 target_link_libraries(${PROJECT_NAME}_handler
   ${catkin_LIBRARIES}
-  ${PROJECT_NAME}_detector
+  ${PROJECT_NAME}_processor
   ${PROJECT_NAME}_preprocessor
   ${PROJECT_NAME}_postprocessor
 )

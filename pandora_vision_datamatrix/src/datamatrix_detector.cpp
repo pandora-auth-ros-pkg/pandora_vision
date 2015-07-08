@@ -44,39 +44,19 @@ namespace pandora_vision_datamatrix
   /**
    *@brief Constructor
   **/
-  void
-  DatamatrixDetector::initialize(const std::string& ns, sensor_processor::Handler* handler)
+  DatamatrixDetector::DatamatrixDetector()
   {
-    VisionProcessor::initialize(ns, handler);
 
     img = NULL;
     dec = NULL;
     reg = NULL;
     msg = NULL;
 
-#ifdef DEBUG_MODE
-    std::string debugTopic;
-    if (this->getProcessorNodeHandle().getParam("debug_topic", debugTopic))
-    ROS_DEBUG_STREAM("debugTopic : " << debugTopic);
-    else
-    {
-      ROS_WARN("Cannot find datamatrix debug show topic");
-    }
-    _datamatrixPublisher = image_transport::ImageTransport(
-      this->getProcessorNodeHandle()).advertise(debugTopic, 1);
-#endif
-
     detected_datamatrix.reset( new DataMatrixPOI );
     detected_datamatrix->setContent("");
 
-    ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
-      this->getProcessorNodeHandle().getNamespace());
-  }
 
-  /**
-    @brief Constructor
-  **/
-  DatamatrixDetector::DatamatrixDetector() : VisionProcessor() {}
+  }
 
   /**
     @brief Destructor
@@ -88,7 +68,6 @@ namespace pandora_vision_datamatrix
     dmtxDecodeDestroy(&dec);
     dmtxImageDestroy(&img);
     dmtxRegionDestroy(&reg);
-    ROS_INFO("[%s] destroyed", this->getName().c_str());
   }
 
   /**
@@ -177,9 +156,8 @@ namespace pandora_vision_datamatrix
 
     detected_datamatrix->setPoint(calculatedRect.center);
 
-#ifdef DEBUG_MODE
-    debug_show(image, datamatrixVector);
-#endif
+    if (visualizationFlag_)
+      debug_show(image, datamatrixVector);
   }
 
   /**
@@ -190,7 +168,6 @@ namespace pandora_vision_datamatrix
     @return debug_frcame [cv::Mat], frame with rotated rectangle
     and center of it
   */
-#ifdef DEBUG_MODE
   void DatamatrixDetector::debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector)
   {
     image.copyTo(debug_frame);
@@ -208,30 +185,10 @@ namespace pandora_vision_datamatrix
     cv::circle(debug_frame, calculatedRect.center, 4, cv::Scalar(0, 0, 255), 8, 8);
     ROS_INFO_STREAM("Angle given by minAreaRect:" << calculatedRect.angle);
     cvtColor(debug_frame, debug_frame, CV_BGR2GRAY);
-    cv_bridge::CvImage datamatrixMSg;
-    datamatrixMSg.encoding  = sensor_msgs::image_encodings::MONO8;
-    datamatrixMSg.image = debug_frame.clone();
 
-      _datamatrixPublisher.publish(datamatrixMSg.toImageMsg());
+    cv::imshow("Debug DataMatrix Image", debug_frame);
+    cv::waitKey(5);
   }
-#endif
 
-  /**
-   * @brief
-   **/
-  bool DatamatrixDetector::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
-  {
-    output->header = input->getHeader();
-    output->frameWidth = input->getImage().cols;
-    output->frameHeight = input->getImage().rows;
-
-    output->pois = detect_datamatrix(input->getImage());
-
-    if (output->pois.empty())
-    {
-      return false;
-    }
-    return true;
-  }
 }  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision

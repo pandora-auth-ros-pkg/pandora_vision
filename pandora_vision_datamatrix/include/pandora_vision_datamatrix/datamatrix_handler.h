@@ -44,14 +44,14 @@
 #include "pandora_vision_common/vision_handler.h"
 #include "pandora_vision_datamatrix/datamatrix_preprocessor.h"
 #include "pandora_vision_datamatrix/datamatrix_postprocessor.h"
-#include "pandora_vision_datamatrix/datamatrix_detector.h"
+#include "pandora_vision_datamatrix/datamatrix_processor.h"
 
 namespace pandora_vision
 {
 namespace pandora_vision_datamatrix
 {
   class DataMatrixHandler :
-    public VisionHandler<DataMatrixPreProcessor, DatamatrixDetector, DataMatrixPostProcessor>
+    public VisionHandler<DataMatrixPreProcessor, DatamatrixProcessor, DataMatrixPostProcessor>
   {
    public:
     DataMatrixHandler();

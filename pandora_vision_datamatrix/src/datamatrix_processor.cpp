@@ -32,81 +32,83 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Despoina Paschalidou
+* Author: Despoina Paschalidou, Vasilis Bosdelekidis
 *********************************************************************/
 
-#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
-#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
-
-#include <iostream>
-#include <stdlib.h>
-#include <dmtx.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <ros/ros.h>
-#include <ros/package.h>
-#include "pandora_vision_datamatrix/datamatrix_poi.h"
-
+#include "pandora_vision_datamatrix/datamatrix_processor.h"
 
 namespace pandora_vision
 {
 namespace pandora_vision_datamatrix
 {
-  class DatamatrixDetector
+  /**
+   *@brief Constructor
+   **/
+  void
+    DatamatrixProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
+    {
+      VisionProcessor::initialize(ns, handler);
+
+      img = NULL;
+      dec = NULL;
+      reg = NULL;
+      msg = NULL;
+
+#ifdef DEBUG_MODE
+      std::string debugTopic;
+      if (this->getProcessorNodeHandle().getParam("debug_topic", debugTopic))
+        ROS_DEBUG_STREAM("debugTopic : " << debugTopic);
+      else
+      {
+        ROS_WARN("Cannot find datamatrix debug show topic");
+      }
+      _datamatrixPublisher = image_transport::ImageTransport(
+          this->getProcessorNodeHandle()).advertise(debugTopic, 1);
+#endif
+
+      detected_datamatrix.reset( new DataMatrixPOI );
+      detected_datamatrix->setContent("");
+
+      detectorPtr_.reset(new DatamatrixDetector());
+
+      ROS_INFO_STREAM("[" + this->getName() + "] processor nh processor : " +
+          this->getProcessorNodeHandle().getNamespace());
+    }
+
+  /**
+    @brief Constructor
+   **/
+  DatamatrixProcessor::DatamatrixProcessor() : VisionProcessor() {}
+
+  /**
+    @brief Destructor
+    */
+  DatamatrixProcessor::~DatamatrixProcessor()
   {
-   public:
-    /**
-      @brief Constructor
-    **/
-    DatamatrixDetector();
+    //!< Deallocate memory
+    dmtxMessageDestroy(&msg);
+    dmtxDecodeDestroy(&dec);
+    dmtxImageDestroy(&img);
+    dmtxRegionDestroy(&reg);
+    ROS_INFO("[%s] destroyed", this->getName().c_str());
+  }
 
-    /**
-      @brief Default Destructor
-      @return void
-    **/
-    virtual ~DatamatrixDetector();
+   /**
+   * @brief
+   **/
+  bool DatamatrixProcessor::process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output)
+  {
+    output->header = input->getHeader();
+    output->frameWidth = input->getImage().cols;
+    output->frameHeight = input->getImage().rows;
 
-    /**
-      @brief Detects datamatrixes and stores them in a vector.
-      @param image [cv::Mat] The image in which the datamatrixes are detected
-      @return void
-    **/
-    std::vector<POIPtr> detect_datamatrix(cv::Mat image);
+    output->pois = detectorPtr_->detect_datamatrix(input->getImage());
 
-    /**
-    @brief Function that finds the position of datamatrixe's center
-    @param image [cv::Mat] The image in which the datamatrixes are detected
-    @return void
-    */
-    void locate_datamatrix(cv::Mat image);
-
-    /**
-    @brief Function that creates view for debugging purposes.
-    @param image [cv::Mat] The image in which the datamatrixes are detected
-    @param datamatrixVector [std::vector<cv::Point2f>] The vector of 4 corners
-    of datamatrix image, according to which i draw lines for debug reasons
-    @return debug_frcame [cv::Mat], frame with rotated rectangle
-    and center of it
-    */
-    void debug_show(cv::Mat image, std::vector<cv::Point2f> datamatrixVector);
-
-   private:
-    DmtxMessage *msg;
-    DmtxImage *img;
-    DmtxDecode *dec;
-    DmtxRegion *reg;
-    DmtxTime timeout;
-
-    cv::Mat debug_frame;
-
-    bool visualizationFlag_;
-
-    DataMatrixPOIPtr detected_datamatrix;
-
-    //!< List of detected datamatrixes
-    std::vector<POIPtr> datamatrix_list;
-  };
+    if (output->pois.empty())
+    {
+      return false;
+    }
+    return true;
+  }
 }  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision
-#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_DETECTOR_H
