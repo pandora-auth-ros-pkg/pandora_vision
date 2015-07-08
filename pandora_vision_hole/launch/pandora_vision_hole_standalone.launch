@@ -10,7 +10,7 @@
   <!-- Kinect: choose the openni driver -->
   <arg name="openni" default="false" />
   <!-- Xtion: choose the openni2 driver -->
-  <arg name="openni2" default="true" />
+  <arg name="openni2" default="false" />
   <!-- if not xtion or kinect, set path arg to find a rosbag -->
   <!-- If the source is not a physical device, it is a bag: play "path" bag -->
   <arg name="path" default="/home/pandora/bitch.bag" />
@@ -20,6 +20,7 @@
       <arg name="device_id" value="#1" />
       <arg name="camera" value="kinect" />
       <arg name="depth_registration" value="true"/>
+      <arg name="num_worker_threads" value="4" />
     </include>
   </group>
 
