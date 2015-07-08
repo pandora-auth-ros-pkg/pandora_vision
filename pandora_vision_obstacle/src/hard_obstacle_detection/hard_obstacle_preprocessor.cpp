@@ -127,13 +127,15 @@ namespace pandora_vision_obstacle
     cv::Mat elevationMapImg;
     cv::Mat colorMapImg;
 
+    cv::Mat mask = elevationMapStamped->image != -std::numeric_limits<double>::max();
     // Normalize only the map elements that correspond to known cells.
-    cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1, cv::NORM_MINMAX, -1,
-        elevationMapStamped->image != -std::numeric_limits<double>::max());
+    cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1, cv::NORM_MINMAX, -1, mask);
     // Set all unknown areas to 0 so that they appear as black.
-    elevationMapImg.setTo(0.0, elevationMapStamped->image == -std::numeric_limits<double>::max());
     elevationMapImg.convertTo(elevationMapImg, CV_8UC3, 255);
     cv::applyColorMap(elevationMapImg, colorMapImg, cv::COLORMAP_JET);
+    cv::bitwise_not(mask, mask);
+    elevationMapImg.setTo(0.0, mask);
+
 
     cv::imshow("Elevation Map Image", colorMapImg);
     cv::waitKey(5);
