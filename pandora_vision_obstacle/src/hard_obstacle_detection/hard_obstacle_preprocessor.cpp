@@ -124,6 +124,7 @@ namespace pandora_vision_obstacle
           << " the input image is empty!");
       return;
     }
+    cv::namedWindow("Elevation Map Image", cv::WINDOW_NORMAL);
     cv::Mat elevationMapImg(elevationMapStamped->image.size(), CV_8UC1);
     cv::Mat colorMapImg;
 
