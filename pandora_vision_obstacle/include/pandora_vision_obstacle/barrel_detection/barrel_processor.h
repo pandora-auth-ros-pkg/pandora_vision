@@ -40,6 +40,7 @@
 #define PANDORA_VISION_OBSTACLE_BARREL_DETECTION_BARREL_PROCESSOR_H
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include "sensor_processor/processor.h"
 #include "pandora_vision_common/pois_stamped.h"
@@ -126,7 +127,7 @@ namespace pandora_vision_obstacle
           const POIsStampedPtr& output);
 
     private:
-      BarrelParametersHandler* BarrelParametersHandler_;
+      boost::shared_ptr<BarrelParametersHandler> BarrelParametersHandler_;
   };
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

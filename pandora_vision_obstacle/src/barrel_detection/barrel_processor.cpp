@@ -48,6 +48,13 @@ namespace pandora_vision
 {
 namespace pandora_vision_obstacle
 {
+  void BarrelProcessor::initialize(const std::string& ns, sensor_processor::Handler* handler)
+  {
+    sensor_processor::Processor<ImagesStamped, POIsStamped>::initialize(ns, handler);
+    ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
+    BarrelParametersHandler_.reset( new BarrelParametersHandler(this->getName(), processor_nh) );
+  }
+
   BarrelProcessor::BarrelProcessor() :
     sensor_processor::Processor<ImagesStamped, POIsStamped>()
   {}
@@ -93,9 +100,10 @@ namespace pandora_vision_obstacle
 
     double minVal, maxVal;
     cv::minMaxLoc(temp, &minVal, &maxVal);
-    temp.convertTo(edge, CV_8U, 255.0 / (maxVal - minVal), -minVal * 255.0 / (maxVal - minVal));
-
-    temp.convertTo(depth8UC3, CV_8UC3, 255);
+    cv::Mat(temp - minVal).convertTo(edge, CV_8UC1, 255.0 / (maxVal - minVal));
+    edge = cv::abs(edge);
+    edge.copyTo(depth8UC3);
+    // temp.convertTo(depth8UC3, CV_8UC3, 255);
     /* Find the edges */
     if (edge.channels() == 3)
       cvtColor(edge, edge, CV_BGR2GRAY);

@@ -40,6 +40,7 @@
 
 #include <pandora_vision_obstacle/barrel_nodeConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <boost/shared_ptr.hpp>
 
 /**
   @namespace pandora_vision
@@ -47,18 +48,20 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
   class BarrelParametersHandler
   {
     public:
       // The constructor
-      BarrelParametersHandler();
+      BarrelParametersHandler(const std::string& name, const ros::NodeHandle& nh);
 
     private:
       // The dynamic reconfigure (Barrel) parameters' server
-      dynamic_reconfigure::Server<pandora_vision_obstacle::barrel_nodeConfig> serverBarrel;
+      dynamic_reconfigure::Server< ::pandora_vision_obstacle::barrel_nodeConfig> serverBarrel;
 
       // The dynamic reconfigure (Barrel) parameters' callback
-      dynamic_reconfigure::Server<pandora_vision_obstacle::barrel_nodeConfig>::CallbackType fBarrel;
+      dynamic_reconfigure::Server< ::pandora_vision_obstacle::barrel_nodeConfig>::CallbackType fBarrel;
 
       /**
         @brief The function called when a parameter is changed
@@ -67,7 +70,7 @@ namespace pandora_vision
         @return void
        **/
       void parametersCallbackBarrel(
-          const pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
+          const ::pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
           const uint32_t& level);
   };
   /**
@@ -92,6 +95,7 @@ namespace pandora_vision
     static float max_corner_thresh;
   };
 
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
 #endif  // PANDORA_VISION_OBSTACLE_BARREL_DETECTION_PARAMETERS_H

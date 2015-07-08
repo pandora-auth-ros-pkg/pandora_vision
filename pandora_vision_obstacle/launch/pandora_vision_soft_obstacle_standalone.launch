@@ -50,5 +50,4 @@
         ns="/pandora_vision/pandora_vision_hole" />
   </group>
 
-  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 </launch>

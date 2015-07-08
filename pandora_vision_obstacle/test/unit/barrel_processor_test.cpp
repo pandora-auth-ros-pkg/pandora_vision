@@ -283,7 +283,7 @@ namespace pandora_vision
     cv::Point symmetricStartPoint;
     cv::Point symmetricEndPoint;
 
-    BarrelProcessor barrelProcessor;
+    pandora_vision_obstacle::BarrelProcessor barrelProcessor;
 
     barrelProcessor.getSymmetryObject(
         depthImage,
@@ -360,7 +360,7 @@ namespace pandora_vision
     cv::Point symmetricStartPoint = cv::Point(445, 130);
     cv::Point symmetricEndPoint(445, 440);
 
-    BarrelProcessor barrelProcessor;
+    pandora_vision_obstacle::BarrelProcessor barrelProcessor;
 
     bool valid = true;
 

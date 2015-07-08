@@ -43,8 +43,11 @@
  **/
 namespace pandora_vision
 {
+namespace pandora_vision_obstacle
+{
 
-  BarrelParametersHandler::BarrelParametersHandler()
+  BarrelParametersHandler::BarrelParametersHandler(const std::string& name,
+                              const ros::NodeHandle& nh) : serverBarrel(nh)
   {
     serverBarrel.setCallback(boost::bind(&BarrelParametersHandler::parametersCallbackBarrel, this, _1, _2));
   }
@@ -56,7 +59,7 @@ namespace pandora_vision
     @return void
    **/
   void BarrelParametersHandler::parametersCallbackBarrel(
-      const pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
+      const ::pandora_vision_obstacle::barrel_nodeConfig& configBarrel,
       const uint32_t& level)
   {
     //////////////////////////////// Debug parameters ////////////////////////////
@@ -113,4 +116,6 @@ namespace pandora_vision
   float BarrelDetection::curve_approximation_max_epsilon = 1600.0;
   float BarrelDetection::min_circle_overlapping = 0.25;
   float BarrelDetection::max_corner_thresh = 35.0;
+
+}  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
