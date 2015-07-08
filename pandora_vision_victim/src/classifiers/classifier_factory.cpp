@@ -128,20 +128,20 @@ namespace pandora_vision_victim
     if (boost::iequals(classifierType, "svm") &&
       (boost::iequals(imageType, "rgb") || (boost::iequals(imageType, "rgb"))))
     {
-      classifierPtr = new SvmClassifier(nh, datasetPath, classifierType, imageType);
+      classifierPtr = new SvmClassifier(nh_, datasetPath, classifierType, imageType);
     }
 
     else if (boost::iequals(classifierType, "svm") && boost::iequals(imageType, "rgbd"))
     {
-      classifierPtr = new RgbdSvmClassifier(ns, datasetPath, classifierType, imageType);
+      classifierPtr = new RgbdSvmClassifier(nh_, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "ann"))
     {
-      classifierPtr =  new NeuralNetworkClassifier(nh, datasetPath, classifierType, imageType);
+      classifierPtr =  new NeuralNetworkClassifier(nh_, datasetPath, classifierType, imageType);
     }
     else if (boost::iequals(classifierType, "rf"))
     {
-      classifierPtr =  new RandomForestsClassifier(nh, datasetPath, classifierType, imageType);
+      classifierPtr =  new RandomForestsClassifier(nh_, datasetPath, classifierType, imageType);
     }
     else
     {

@@ -60,7 +60,7 @@ namespace pandora_vision_victim
        * @brief The constructor for the factory used to produce the classifier trainer objects.
        * @param ns[const std::string&] The namespace for the node handles of the object
        */
-      explicit ClassifierFactory(const std::string& ns);
+      explicit ClassifierFactory();
       ~ClassifierFactory()
       {}
 
