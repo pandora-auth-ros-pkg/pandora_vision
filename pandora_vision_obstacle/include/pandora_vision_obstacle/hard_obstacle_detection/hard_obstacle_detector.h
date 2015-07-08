@@ -127,6 +127,11 @@ namespace pandora_vision_obstacle
       bool show_new_map_image;
       bool show_unknown_probabilities;
 
+      /**
+        @brief The input image consists of negative, positive and unknown values
+        defined as -max(double) values. This function converts all pixel values
+        to positive and sets the unknown to -1.
+       **/
       void
       scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
 

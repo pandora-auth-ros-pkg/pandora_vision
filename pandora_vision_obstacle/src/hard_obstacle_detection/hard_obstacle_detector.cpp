@@ -95,6 +95,7 @@ namespace pandora_vision_obstacle
 
     ROS_INFO_NAMED(nodeName_, "Hard obstacle detection has started");
 
+    // Convert all pixel values to positive and set unknown to -1.
     cv::Mat scaledImage(inputImage.size(), inputImage.depth());
     scaleInputImage(inputImage, &scaledImage);
 
@@ -104,10 +105,14 @@ namespace pandora_vision_obstacle
       showImage("The input image", scaledImage, 1);
     }
 
+    // Find the dangerous areas(edges) aka territories where we got big height
+    // differences. The output image will include safe(0) and dangerous areas
+    // (positive values).
     cv::Mat edgesImage;
     detectEdges(scaledImage, &edgesImage);
 
-    // Pass the unknown areas in edges image.
+    // Pass the unknown areas in edges image. The output image will include
+    // unknown areas with a specified negative value.
     fillUnknownAreas(inputImage, &edgesImage, 0);
 
     if (show_edges_and_unknown_image)
@@ -137,7 +142,7 @@ namespace pandora_vision_obstacle
         }
         else
         {
-          outImage->at<double>(rows, cols) = 0.0;
+          outImage->at<double>(rows, cols) = -1;
         }
       }
     }
@@ -155,7 +160,7 @@ namespace pandora_vision_obstacle
       scaledImage = scaleFloatImageToInt(image);
       cv::cvtColor(scaledImage, scaledImage, CV_GRAY2BGR);
 
-      // If value is negative, make it green for visualization
+      // If value is negative(unknown), make it green for visualization
       for (unsigned int rows = 0; rows < image.rows; rows++)
       {
         for (unsigned int cols = 0; cols < image.cols; cols++)
@@ -309,6 +314,8 @@ namespace pandora_vision_obstacle
 
     cv::Mat newMap;
 
+    // newMap will have negative for unknown, zero for free and positive for
+    // dangerous areas.
     cv::filter2D(inImage, newMap, -1, robotMask_,
       cv::Point(-1, -1), 0, cv::BORDER_DEFAULT);
 
