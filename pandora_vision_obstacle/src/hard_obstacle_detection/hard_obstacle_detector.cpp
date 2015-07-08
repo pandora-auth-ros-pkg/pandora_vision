@@ -126,7 +126,6 @@ namespace pandora_vision_obstacle
   HardObstacleDetector::
   scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage)
   {
-
     for (unsigned int rows = 0; rows < inImage.rows; rows++)
     {
       for (unsigned int cols = 0; cols < inImage.cols; cols++)
@@ -150,9 +149,10 @@ namespace pandora_vision_obstacle
   void HardObstacleDetector::showImage(
     const std::string& title, const cv::Mat& image, int time)
   {
+    cv::Mat scaledImage;
     if (image.depth() == CV_64FC1)
     {
-      cv::Mat scaledImage = scaleFloatImageToInt(image);
+      scaledImage = scaleFloatImageToInt(image);
       cv::cvtColor(scaledImage, scaledImage, CV_GRAY2BGR);
 
       // If value is negative, make it green for visualization
@@ -171,7 +171,7 @@ namespace pandora_vision_obstacle
     }
     else
     {
-     inImage.copyTo(scaledImage);
+     image.copyTo(scaledImage);
     }
     cv::imshow(title, scaledImage);
     cv::waitKey(time);
@@ -280,7 +280,7 @@ namespace pandora_vision_obstacle
             // Pass from the input mat the negative values as our policy dictates.
             if (inImage.at<double>(rows, cols) == -std::numeric_limits<double>::max())
             {
-              outImage->at<double>(rows, cols) = -1 / robotStrength_;
+              outImage->at<double>(rows, cols) = -0.5 / robotStrength_;
             }
           }
         }
