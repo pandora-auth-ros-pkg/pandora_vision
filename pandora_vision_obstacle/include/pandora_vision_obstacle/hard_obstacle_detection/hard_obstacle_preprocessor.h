@@ -86,6 +86,10 @@ namespace pandora_vision_obstacle
     void viewElevationMap(const CVMatStampedPtr& elevationMapStamped);
 
    private:
+    inline int convertToXCoord(double meters);
+    inline int convertToYCoord(double meters);
+
+   private:
     /// The maximum distance of a point from the range sensor.
     double maxAllowedDist_;
 
@@ -112,6 +116,9 @@ namespace pandora_vision_obstacle
 
     /// Flag used to view the elevation map.
     bool visualisationFlag_;
+
+    /// Meters of pointcloud measurements per grid cell
+    double gridResolution_;
 
     /// The dynamic reconfigure server used to changed the parameters for the elevation map
     /// on runtime.

@@ -39,6 +39,7 @@
 
 #include <string>
 #include <limits>
+#include <cmath>
 #include "pcl_ros/point_cloud.h"
 #include "pcl/point_types.h"
 #include <pcl_conversions/pcl_conversions.h>
@@ -88,6 +89,7 @@ namespace pandora_vision_obstacle
     elevationMapWidth_ = params.elevationMapWidth;
     elevationMapHeight_ = params.elevationMapHeight;
     visualisationFlag_ = params.visualisationFlag;
+    gridResolution_ = params.gridResolution;
   }
 
   bool HardObstaclePreProcessor::preProcess(const PointCloud2ConstPtr& input,
@@ -188,11 +190,25 @@ namespace pandora_vision_obstacle
       // If the current point is located higher that the higher point of the corresponding cell
       // then substitute it.
       if (currentPoint.z >
-          outputImgPtr->image.at<double>(static_cast<int>(currentPoint.x), static_cast<int>(currentPoint.y)))
-        outputImgPtr->image.at<double>(static_cast<int>(currentPoint.x),
-            static_cast<int>(currentPoint.y)) = currentPoint.z;
+          outputImgPtr->image.at<double>(convertToYCoord(currentPoint.y), convertToXCoord(currentPoint.x)))
+        outputImgPtr->image.at<double>(convertToYCoord(currentPoint.y),
+            convertToXCoord(currentPoint.x)) = currentPoint.z;
     }
     return true;
+  }
+
+  int
+  HardObstaclePreProcessor::
+  convertToXCoord(double meters)
+  {
+    return static_cast<int>(floor(meters / gridResolution_ + static_cast<double>(elevationMapWidth_) / 2));
+  }
+
+  int
+  HardObstaclePreProcessor::
+  convertToYCoord(double meters)
+  {
+    return static_cast<int>(floor(static_cast<double>(elevationMapHeight_) / 2 - meters / gridResolution_));
   }
 
 }  // namespace pandora_vision_obstacle
