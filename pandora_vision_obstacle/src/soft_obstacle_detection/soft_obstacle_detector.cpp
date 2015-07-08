@@ -40,6 +40,8 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <algorithm>
+
 #include "pandora_vision_msgs/ObstacleAlert.h"
 #include "pandora_vision_obstacle/soft_obstacle_detection/soft_obstacle_detector.h"
 

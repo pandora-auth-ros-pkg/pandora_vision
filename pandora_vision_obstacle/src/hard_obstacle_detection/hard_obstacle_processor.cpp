@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * Hardware License Agreement (BSD License)
+ * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
@@ -38,6 +38,11 @@
  *********************************************************************/
 
 #include <string>
+
+#include "pandora_vision_common/cv_mat_stamped.h"
+#include "sensor_processor/handler.h"
+
+#include "pandora_vision_obstacle/hard_obstacle_cfgConfig.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_processor.h"
 
 namespace pandora_vision
@@ -66,7 +71,7 @@ namespace pandora_vision_obstacle
 
   void HardObstacleProcessor::parametersCallback(
     const ::pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
-    const uint32_t& level)
+    uint32_t level)
   {
     // Debug show parameters
     detector_->setShowInputImage(config.show_input_image);

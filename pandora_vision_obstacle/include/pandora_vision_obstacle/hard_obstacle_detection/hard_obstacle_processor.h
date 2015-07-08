@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * Hardware License Agreement (BSD License)
+ * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2015, P.A.N.D.O.R.A. Team.
  *  All rights reserved.
@@ -40,10 +40,14 @@
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PROCESSOR_H
 
 #include <string>
+
 #include <cv_bridge/cv_bridge.h>
 #include <dynamic_reconfigure/server.h>
+
 #include "sensor_processor/processor.h"
+#include "sensor_processor/handler.h"
 #include "pandora_vision_common/cv_mat_stamped.h"
+
 #include "pandora_vision_obstacle/hard_obstacle_cfgConfig.h"
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_detector.h"
 
@@ -69,7 +73,7 @@ namespace pandora_vision_obstacle
       * @param level [const uint32_t] The level
       **/
     void parametersCallback(const ::pandora_vision_obstacle::hard_obstacle_cfgConfig& config,
-        const uint32_t& level);
+        uint32_t level);
 
    private:
     /// The dynamic reconfigure parameters' server
