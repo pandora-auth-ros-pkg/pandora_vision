@@ -78,6 +78,10 @@ namespace pandora_vision_obstacle
           << "retrieve the name of the PCL sensor Link!");
       ROS_BREAK();
     }
+
+    tf::StampedTransform tfTransform;
+    tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(1));
+    tfListener_.lookupTransform("/world", "/map", ros::Time(0), tfTransform);
   }
 
   void HardObstaclePreProcessor::reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,
@@ -155,7 +159,7 @@ namespace pandora_vision_obstacle
     try
     {
       tfListener_.waitForTransform(baseFootPrintFrameId_,
-          inputPointCloud->header.frame_id, inputPointCloud->header.stamp, ros::Duration(1.0));
+          inputPointCloud->header.frame_id, inputPointCloud->header.stamp, ros::Duration(0.2));
       pcl_ros::transformPointCloud(baseFootPrintFrameId_, *sensorPointCloudPtr, *mapPointCloudPtr, tfListener_);
     }
     catch (tf::TransformException ex)
