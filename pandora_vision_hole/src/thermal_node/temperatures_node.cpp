@@ -32,25 +32,21 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors:
- *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
+ * Authors: Angelos Triantafyllidis <aggelostriadafillidis@gmail.com>
  *********************************************************************/
 
-#include <pluginlib/class_list_macros.h>
-#include <nodelet/nodelet.h>
+#include "thermal_node/temperatures.h"
 
-#include "pandora_vision_obstacle/barrel_detection/barrel_handler.h"
-
-PLUGINLIB_EXPORT_CLASS(pandora_vision::pandora_vision_obstacle::BarrelHandler,
-    nodelet::Nodelet)
-
-namespace pandora_vision
+/**
+  @brief Main function of the temperatures node
+  @param argc [int] Number of input arguments
+  @param argv [char**] The input arguments
+  @return int : 0 for success
+ **/
+int main(int argc, char** argv)
 {
-namespace pandora_vision_obstacle
-{
-  BarrelHandler::BarrelHandler() :
-    VisionHandler<ObstaclePreProcessor, BarrelProcessor, ObstaclePostProcessor>()
-  {
-  }
-}  // namespace pandora_vision_obstacle
-}  // namespace pandora_vision
+  ros::init(argc, argv, "temperatures_node");
+  pandora_vision::Temperatures temperatures;
+  ros::spin();
+  return 0;
+}
