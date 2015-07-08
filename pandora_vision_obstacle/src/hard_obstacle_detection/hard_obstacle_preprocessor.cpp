@@ -80,7 +80,7 @@ namespace pandora_vision_obstacle
     }
 
     tf::StampedTransform tfTransform;
-    tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(1));
+    tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(2));
     tfListener_.lookupTransform("/world", "/map", ros::Time(0), tfTransform);
   }
 
