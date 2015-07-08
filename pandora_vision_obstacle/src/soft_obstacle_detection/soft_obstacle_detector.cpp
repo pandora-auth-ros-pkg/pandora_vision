@@ -311,6 +311,37 @@ namespace pandora_vision_obstacle
     return probability;
   }
 
+  float SoftObstacleDetector::calculateLineMedian(const cv::Mat& depthImage,
+      const cv::Vec4i& line, int level)
+  {
+    int lineCenterX = ((line[0] + line[2]) / 2) * pow(2, level);
+    int lineCenterY = ((line[1] + line[3]) / 2) * pow(2, level);
+
+    int centerWidth = 5;
+    int centerHeight = 10;
+    cv::Rect lineCenter(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
+        centerWidth, centerHeight);
+
+    cv::Mat resizedDepthImage = depthImage(lineCenter);
+
+    // Image should be continuous in order to be reshaped
+    cv::Mat lineCenterDepth(centerWidth, centerHeight, CV_32FC1);
+    resizedDepthImage.copyTo(lineCenterDepth);
+
+    // Get one sorted row of depth values
+    cv::Mat rowLineCenterDepth = lineCenterDepth.reshape(0, 1);
+    cv::sort(rowLineCenterDepth, rowLineCenterDepth, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
+
+    // Remove the zero values
+    int nonZeroValues = cv::countNonZero(rowLineCenterDepth);
+    cv::Mat rowNonZeroDepth = rowLineCenterDepth(cv::Rect(rowLineCenterDepth.cols - nonZeroValues, 0,
+          nonZeroValues, 1));
+
+    float medianValue = (rowNonZeroDepth.empty() ? 0.0f
+        : rowNonZeroDepth.at<float>(0, static_cast<int>(rowNonZeroDepth.cols / 2)));
+    return medianValue;
+  }
+
   boost::array<float, 4> SoftObstacleDetector::findDepthDistance(const cv::Mat& depthImage,
       const std::vector<cv::Vec4i> verticalLines, const cv::Rect& roi, int level)
   {
@@ -357,80 +388,26 @@ namespace pandora_vision_obstacle
     depth[2] = (y0 < y1 ? depthImage.at<float>(y1 * pow(2, level), x1 * pow(2, level))
         : depthImage.at<float>(y0 * pow(2, level), x0 * pow(2, level)));
 
-    // Second point
-    int lineCenterX = ((verticalLines[maxLinePosition][0]
-        + verticalLines[maxLinePosition][2]) / 2) * pow(2, level);
-    int lineCenterY = ((verticalLines[maxLinePosition][1]
-        + verticalLines[maxLinePosition][3]) / 2) * pow(2, level);
-
-    int centerWidth = 5;
-    int centerHeight = 10;
-    cv::Rect lineCenter(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
-        centerWidth, centerHeight);
-
-    cv::Mat resizedDepthImage = depthImage(lineCenter);
-
-    // Image should be continuous in order to be reshaped
-    cv::Mat lineCenterDepth(centerWidth, centerHeight, CV_32FC1);
-    resizedDepthImage.copyTo(lineCenterDepth);
-
-    cv::Mat rowLineCenterDepth = lineCenterDepth.reshape(0, 1);
-    cv::sort(rowLineCenterDepth, rowLineCenterDepth, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
-
-    int nonZeroValues = cv::countNonZero(rowLineCenterDepth);
-    cv::Mat rowNonZeroDepth = rowLineCenterDepth(cv::Rect(rowLineCenterDepth.cols - nonZeroValues, 0,
-          nonZeroValues, 1));
-
-    // Add the median value
-    depth[1] = (rowNonZeroDepth.empty() ? 0.0f
-        : rowNonZeroDepth.at<float>(0, static_cast<int>(rowNonZeroDepth.cols / 2)));
-
-    // Forth point
-    lineCenterX = ((verticalLines[minLinePosition][0]
-        + verticalLines[minLinePosition][2]) / 2) * pow(2, level);
-    lineCenterY = ((verticalLines[minLinePosition][1]
-        + verticalLines[minLinePosition][3]) / 2) * pow(2, level);
-
-    lineCenter = cv::Rect(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
-        centerWidth, centerHeight);
-
-    resizedDepthImage = depthImage(lineCenter);
-
-    // Image should be continuous in order to be reshaped
-    resizedDepthImage.copyTo(lineCenterDepth);
-
-    rowLineCenterDepth = lineCenterDepth.reshape(0, 1);
-    cv::sort(rowLineCenterDepth, rowLineCenterDepth, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
-
-    nonZeroValues = cv::countNonZero(rowLineCenterDepth);
-    rowNonZeroDepth = rowLineCenterDepth(cv::Rect(rowLineCenterDepth.cols - nonZeroValues, 0,
-          nonZeroValues, 1));
-
-    // Add the median value
-    depth[3] = (rowNonZeroDepth.empty() ? 0.0f
-        : rowNonZeroDepth.at<float>(0, static_cast<int>(rowNonZeroDepth.cols / 2)));
+    // Second and Forth point
+    depth[1] = calculateLineMedian(depthImage, verticalLines[maxLinePosition], level);
+    depth[3] = calculateLineMedian(depthImage, verticalLines[minLinePosition], level);
 
     return depth;
   }
 
-  bool SoftObstacleDetector::findSameROIDepth(const cv::Mat& depthImage,
+  bool SoftObstacleDetector::findDifferentROIDepth(const cv::Mat& depthImage,
     const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi)
   {
-    cv::Mat depthROI = depthImage(roi);
-    //cv::Scalar meanValue = cv::mean(depthROI);
+    boost::array<float, 4> meanValue;
 
-    cv::Mat depthROIContinuous(depthROI.rows, depthROI.cols, CV_32FC1);
-    depthROI.copyTo(depthROIContinuous);
-
-    cv::Mat rowDepthROI = depthROIContinuous.reshape(0, 1);
-    cv::sort(rowDepthROI, rowDepthROI, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
-
-    int nonZeroValues = cv::countNonZero(rowDepthROI);
-    rowDepthROI = rowDepthROI(cv::Rect(rowDepthROI.cols - nonZeroValues, 0,
-          nonZeroValues, 1));
-    float roiMedian = (rowDepthROI.empty() ? 0.0f : rowDepthROI.at<float>(0,
-          static_cast<int>(rowDepthROI.cols / 2)));
-    ROS_INFO_STREAM("roi " << roiMedian);
+    // Split vertically ROI to four parts
+    for (int ii = 0; ii < 4; ii++)
+    {
+      cv::Mat depthROI = depthImage(cv::Rect(roi.x + roi.width * ii / 4, roi.y,
+            roi.width / 4, roi.height));
+      meanValue[ii] = cv::mean(depthROI)[0];
+    }
+    float minDepth = *std::min_element(meanValue.begin(), meanValue.end());
 
     int linePixels = 0;
     float avgLineDepth = 0.0f;
@@ -445,14 +422,13 @@ namespace pandora_vision_obstacle
 
       for (int jj = 0; jj < linePoints.count; jj++, ++linePoints)
       {
-        avgLineDepth += depthImage.at<float>(linePoints.pos());
+        avgLineDepth += depthImage.at<float>(linePoints.pos().y, linePoints.pos().x);
       }
       linePixels += linePoints.count;
     }
     avgLineDepth /= linePixels;
-    ROS_INFO_STREAM("line " << avgLineDepth);
 
-    if (fabs(roiMedian - avgLineDepth) > depthThreshold_)
+    if (fabs(minDepth - avgLineDepth) < depthThreshold_)
     {
       return false;
     }
@@ -533,9 +509,9 @@ namespace pandora_vision_obstacle
 
       // Examine whether the points of the bounding box have difference in depth
       // distance
-      bool sameDepth = findSameROIDepth(depthImage, verticalLines, fullFrameRect);
+      bool diffDepth = findDifferentROIDepth(depthImage, verticalLines, fullFrameRect);
 
-      if (!sameDepth)
+      if (diffDepth)
       {
         boost::array<float, 4> depthDistance;
 
@@ -548,13 +524,10 @@ namespace pandora_vision_obstacle
         {
           ROS_INFO("Soft Obstacle Detected!");
 
-          cv::Rect bbox(roi->x * pow(2, level), roi->y * pow(2, level),
-              roi->width * pow(2, level), roi->height * pow(2, level));
           cv::Mat imageToShow = rgbImage.clone();
-
           if (showROI_)
           {
-            cv::rectangle(imageToShow, bbox, cv::Scalar(0, 255, 0), 4);
+            cv::rectangle(imageToShow, fullFrameRect, cv::Scalar(0, 255, 0), 4);
 
             cv::imshow("[" + nodeName_ + "] : Original Image with Soft Obstacle Bounding Box",
                 imageToShow);
@@ -566,8 +539,8 @@ namespace pandora_vision_obstacle
             ObstaclePOIPtr poi(new ObstaclePOI);
 
             poi->setPoint(cv::Point(
-                  (bbox.x + (1 - (ii == 3)) * bbox.width / pow(2, !(ii % 2))),
-                  (bbox.y + (1 - (ii == 0)) * bbox.height / pow(2, ii % 2))));
+                  (fullFrameRect.x + (1 - (ii == 3)) * fullFrameRect.width / pow(2, !(ii % 2))),
+                  (fullFrameRect.y + (1 - (ii == 0)) * fullFrameRect.height / pow(2, ii % 2))));
 
             poi->setProbability(probability);
             poi->setType(pandora_vision_msgs::ObstacleAlert::SOFT_OBSTACLE);

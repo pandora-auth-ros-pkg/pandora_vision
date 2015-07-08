@@ -164,6 +164,18 @@ namespace pandora_vision_obstacle
           int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr);
 
       /**
+       * @brief Calculate the median value around the center of a line
+       * @param resizedDepthImage [const cv::Mat&] The input depth image
+       * values that are used to determine the median
+       * @param line [const cv::Vec4i&] The coordinates of the line
+       * around which the median is calculated
+       * @param level [int] The number of stages of the DWT
+       * @return [float] The median value that is found for the line
+       **/
+      float calculateLineMedian(const cv::Mat& depthImage,
+          const cv::Vec4i& line, int level = 1);
+
+      /**
        * @brief Find depth distance of soft obstacle bounding box edges
        * @param depthImage [const cv::Mat&] The input depth image
        * @param verticalLines [const std::vector<cv::Vec4i>&] The
@@ -180,7 +192,7 @@ namespace pandora_vision_obstacle
 
       /**
        * @brief Calculate the average depth distance of bounding
-       * box and check whether it is almost the same with the depth
+       * box and check whether it is different from the depth
        * distance of vertical lines' points in the bounding box
        * @param depthImage [const cv::Mat&] The input depth image
        * @param verticalLines [const std::vector<cv::Vec4i>&] The
@@ -188,10 +200,10 @@ namespace pandora_vision_obstacle
        * @param roi [const cv::Rect&] The bounding box that is
        * used to find the depth distance
        * @return [bool] Whether all the points of the bounding box
-       * have similar depth distance with the average depth distance of
+       * have different depth distance from the average depth distance of
        * vertical lines in the bounding box
        **/
-      bool findSameROIDepth(const cv::Mat& depthImage,
+      bool findDifferentROIDepth(const cv::Mat& depthImage,
           const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi);
 
     private:
