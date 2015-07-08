@@ -75,7 +75,7 @@ namespace pandora_vision_obstacle
       inline void setShowInputImage(bool value){show_input_image = value;}
       inline void setShowEdgesImage(bool value){show_edges_image = value;}
       inline void setShowEdgesThresholdedImage(bool value){show_edges_thresholded_image = value;}
-      inline void setShowEdgesUnkownImage(bool value){show_edges_and_unknown_image = value;}
+      inline void setShowEdgesUnknownImage(bool value){show_edges_and_unknown_image = value;}
       inline void setShowUnknownProbabilities(bool value){show_unknown_probabilities = value;}
       inline void setShowNewMapImage(bool value){show_new_map_image = value;}
 
@@ -99,8 +99,8 @@ namespace pandora_vision_obstacle
       int robotCols_;
       cv::Mat robotMask_;
 
-      // This variable defines the probability of the extracted unkown areas
-      // when the robot is near unkown and free space.
+      // This variable defines the probability of the extracted unknown areas
+      // when the robot is near unknown and free space.
       // It is set to robotRows * robotCols in constructor and this is its
       // minimum acceptable value. Recommended not to change.
       // The higher the value, the lower the probability.
@@ -132,7 +132,7 @@ namespace pandora_vision_obstacle
 
       /**
         @brief Visualization of an image with CV_32FC1 or CV_8UC1 type.
-        If there is a negative value in mat aka unkown area set it 255 for
+        If there is a negative value in mat aka unknown area set it 255 for
         visualization.
         @param[in] title [const std::string&] The title of image to be shown.
         @param[in] image [const cv::Mat&] The image to be shown.
@@ -182,21 +182,21 @@ namespace pandora_vision_obstacle
         them to -1.
         @param[in] inImage [const cv::Mat&] The input image.
         @param[in] method [int] The method to be used.
-        @param[out] outImage [cv::Mat*] The output image with unkown areas.
+        @param[out] outImage [cv::Mat*] The output image with unknown areas.
         @return void
        **/
-      void fillUnkownAreas(const cv::Mat& inImage, cv::Mat* outImage, int method);
+      void fillUnknownAreas(const cv::Mat& inImage, cv::Mat* outImage, int method);
 
       /**
-        @brief Now that we have a complete map, aka dangerous, safe and unkown
+        @brief Now that we have a complete map, aka dangerous, safe and unknown
         areas we will include the robot's size. A convolution between the map
         and robot's mask will make the new map that informs us if we can access
         a particular point(territory). The outImage will have -1 values for
-        unkown, 0 for free and 1 values for dangerous territories.
+        unknown, 0 for free and 1 values for dangerous territories.
         Even if 1 dangerous pixel exists (value > 0 from the edges that
         we found) the output image pixel will be set as obstacle.
         @param[in] inImage [const cv::Mat&] The input image.
-        @param[out] outImage [cv::Mat*] The output edges image will unkown areas.
+        @param[out] outImage [cv::Mat*] The output edges image will unknown areas.
         @return void
        **/
       void robotMaskOnMap(const cv::Mat& inImage, cv::Mat* outImage);
