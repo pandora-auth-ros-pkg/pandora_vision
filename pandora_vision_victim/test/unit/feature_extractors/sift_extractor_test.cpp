@@ -46,6 +46,8 @@
 
 namespace pandora_vision
 {
+namespace pandora_vision_victim
+{
   class SiftExtractorTest : public ::testing::Test
   {
   public:
@@ -200,4 +202,6 @@ namespace pandora_vision
       }
     }
   }  // End of DenseSiftTest
+
+}   // namespace pandora_vision_victim
 }  // namespace pandora_vision
