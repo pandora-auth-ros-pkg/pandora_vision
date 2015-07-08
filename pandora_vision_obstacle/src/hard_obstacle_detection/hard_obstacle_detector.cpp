@@ -107,12 +107,12 @@ namespace pandora_vision_obstacle
     cv::Mat edgesImage;
     detectEdges(scaledImage, &edgesImage);
 
-    // Pass the unkown areas in edges image.
-    fillUnkownAreas(inputImage, &edgesImage, 0);
+    // Pass the unknown areas in edges image.
+    fillUnknownAreas(inputImage, &edgesImage, 0);
 
     if (show_edges_and_unknown_image)
     {
-      showImage("The edges image with unkown areas", edgesImage, 1);
+      showImage("The edges image with unknown areas", edgesImage, 1);
     }
 
     // Pass the robot mask on the complete area that was made.
@@ -153,7 +153,7 @@ namespace pandora_vision_obstacle
     if (image.depth() == CV_64FC1)
     {
       cv::Mat scaledImage = scaleFloatImageToInt(image);
-      cv::cvtColor(scaledImage, scaledImage, CV_GRAY2RGB);
+      cv::cvtColor(scaledImage, scaledImage, CV_GRAY2BGR);
 
       // If value is negative, make it green for visualization
       for (unsigned int rows = 0; rows < image.rows; rows++)
@@ -169,7 +169,11 @@ namespace pandora_vision_obstacle
         }
       }
     }
-    cv::imshow(title, image);
+    else
+    {
+     inImage.copyTo(scaledImage);
+    }
+    cv::imshow(title, scaledImage);
     cv::waitKey(time);
   }
 
@@ -261,10 +265,10 @@ namespace pandora_vision_obstacle
     return outImage;
   }
 
-  void HardObstacleDetector::fillUnkownAreas(
+  void HardObstacleDetector::fillUnknownAreas(
     const cv::Mat& inImage, cv::Mat* outImage, int method)
   {
-    ROS_INFO_NAMED(nodeName_, "Hard obstacle node fills unkown area");
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node fills unknown area");
 
     switch (method)
     {
@@ -315,14 +319,14 @@ namespace pandora_vision_obstacle
 
     if (show_unknown_probabilities)
     {
-      // Visualization of unkown areas based on their optimistic probabilities
+      // Visualization of unknown areas based on their optimistic probabilities
       visualizeUnknownProbabilities("Unknown areas probabilities",
         newMap, 1, true);
     }
 
     // After convolution there might be negative values, so we need
     // to set them to -1.
-    fillUnkownAreas(newMap, outImage, 1);
+    fillUnknownAreas(newMap, outImage, 1);
   }
 
 
