@@ -149,7 +149,7 @@ namespace pandora_vision
     alert.header = result.header;
     alert.header.frame_id = findParentFrameId(nh, result.header.frame_id,
                                               "/robot_description");
-    double x = frameWidth - result.point.x;
+    double x = frameWidth / 2 - result.point.x;
     double y = result.point.y - frameHeight / 2;
 
     alert.info.yaw = atan(2 * x / frameWidth * tan(hfov * CV_PI / 360.0f));
