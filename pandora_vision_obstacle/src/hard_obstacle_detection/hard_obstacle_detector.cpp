@@ -95,7 +95,7 @@ namespace pandora_vision_obstacle
 
     ROS_INFO_NAMED(nodeName_, "Hard obstacle detection has started");
 
-    cv::Mat scaledImage;
+    cv::Mat scaledImage(inputImage.size(), inputImage.depth());
     scaleInputImage(inputImage, &scaledImage);
 
     if (show_input_image)
@@ -126,6 +126,7 @@ namespace pandora_vision_obstacle
   HardObstacleDetector::
   scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage)
   {
+
     for (unsigned int rows = 0; rows < inImage.rows; rows++)
     {
       for (unsigned int cols = 0; cols < inImage.cols; cols++)
