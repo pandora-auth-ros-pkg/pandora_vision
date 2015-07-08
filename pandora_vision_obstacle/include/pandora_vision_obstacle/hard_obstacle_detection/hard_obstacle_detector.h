@@ -89,6 +89,8 @@ namespace pandora_vision_obstacle
       inline void setCannyLowThreshold(int value){cannyLowThreshold_ = value;}
       inline void setCannyBlurNoiseKernelSize(int value){cannyBlurKernelSize_ = value;}
 
+      inline void setMinInputImageValue(int value){min_input_image_value_ = value;}
+
     private:
       std::string nodeName_;
 
@@ -115,6 +117,8 @@ namespace pandora_vision_obstacle
       // The parameter used to apply threshold  on the edges image
       int edges_threshold_;
 
+      double min_input_image_value_;
+
       // Debug parameters
       bool show_input_image;
       bool show_edges_image;
@@ -122,6 +126,9 @@ namespace pandora_vision_obstacle
       bool show_edges_and_unknown_image;
       bool show_new_map_image;
       bool show_unknown_probabilities;
+
+      void
+      scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
 
       /**
         @brief Visualization of an image with CV_32FC1 or CV_8UC1 type.

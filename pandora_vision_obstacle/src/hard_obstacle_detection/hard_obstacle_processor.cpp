@@ -85,6 +85,8 @@ namespace pandora_vision_obstacle
     detector_->setCannyBlurNoiseKernelSize(config.canny_blur_noise_kernel_size);
 
     detector_->setEdgesThreshold(config.edges_threshold);
+
+    detector_->setMinInputImageValue(config.min_input_image_value);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
