@@ -32,7 +32,7 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Vassilis Choutas 
+* Author: Vassilis Choutas
 *********************************************************************/
 
 #include <vector>
@@ -58,7 +58,7 @@ namespace pandora_vision_victim
     virtual void SetUp()
     {
       std::string packagePath = ros::package::getPath("pandora_vision_victim");
-      testImg = cv::imread(packagePath + "/data/box.png");
+      testImg = cv::imread(packagePath + "/test/unit/test_data/box.png");
 
       ASSERT_TRUE(testImg.data != NULL) << "Could not read the test image!";
     }
