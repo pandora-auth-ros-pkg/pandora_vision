@@ -111,7 +111,7 @@ namespace pandora_vision_victim
     public:
       /// Default contructor
       VictimParameters() {}
-      VictimParameters(const ros::NodeHandle& nh);
+      explicit VictimParameters(const ros::NodeHandle& nh);
 
       /// The dynamic reconfigure (motion's) parameters' server
       dynamic_reconfigure::Server

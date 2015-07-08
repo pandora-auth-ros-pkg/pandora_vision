@@ -136,7 +136,7 @@ namespace pandora_vision_victim
     }
 
     DetectionImages imgs;
-    int stateIndicator = 2; //* input->getDepth() + (input->getRegions().size() > 0) + 1;
+    int stateIndicator = 2;  //  * input->getDepth() + (input->getRegions().size() > 0) + 1;
     DetectionMode detectionMode;
     switch (stateIndicator)
     {
@@ -224,7 +224,6 @@ namespace pandora_vision_victim
     {
       for (int jj = 0; jj < debugImage.size(); jj++)
       {
-
         for (unsigned int i = 0 ; i < holes_bounding_boxes.size() ; i++)
         {
           cv::rectangle(debugImage[jj], holes_bounding_boxes[i],

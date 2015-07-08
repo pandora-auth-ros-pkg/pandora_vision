@@ -35,6 +35,9 @@
 * Author: Despoina Paschalidou, Vasilis Bosdelekidis
 *********************************************************************/
 
+#ifndef PANDORA_VISION_DATAMATRIX_DATAMATRIX_PROCESSOR_H
+#define PANDORA_VISION_DATAMATRIX_DATAMATRIX_PROCESSOR_H
+
 #include <iostream>
 #include <stdlib.h>
 #include <dmtx.h>
@@ -53,49 +56,47 @@
 
 namespace pandora_vision
 {
-  namespace pandora_vision_datamatrix
+namespace pandora_vision_datamatrix
+{
+  class DatamatrixProcessor : public VisionProcessor
   {
+    public:
+      /**
+        @brief Constructor
+       **/
+      virtual void
+        initialize(const std::string& ns, sensor_processor::Handler* handler);
 
-    class DatamatrixProcessor : public VisionProcessor
-    {
-      public:
-        /**
-          @brief Constructor
-         **/
-        virtual void
-          initialize(const std::string& ns, sensor_processor::Handler* handler);
+      DatamatrixProcessor();
 
-        DatamatrixProcessor();
+      /**
+        @brief Default Destructor
+        @return void
+       **/
+      virtual ~DatamatrixProcessor();
 
-        /**
-          @brief Default Destructor
-          @return void
-         **/
-        virtual ~DatamatrixProcessor();
+      virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
 
-        virtual bool process(const CVMatStampedConstPtr& input, const POIsStampedPtr& output);
+    private:
+      DmtxMessage *msg;
+      DmtxImage *img;
+      DmtxDecode *dec;
+      DmtxRegion *reg;
+      DmtxTime timeout;
 
-      private:
-        DmtxMessage *msg;
-        DmtxImage *img;
-        DmtxDecode *dec;
-        DmtxRegion *reg;
-        DmtxTime timeout;
+      cv::Mat debug_frame;
+      image_transport::Publisher _datamatrixPublisher;
 
-        cv::Mat debug_frame;
-        image_transport::Publisher _datamatrixPublisher;
+      bool visualizationFlag_;
 
-        bool visualizationFlag_;
+      DataMatrixPOIPtr detected_datamatrix;
 
-        DataMatrixPOIPtr detected_datamatrix;
+      //!< List of detected datamatrixes
+      std::vector<POIPtr> datamatrix_list;
 
-        //!< List of detected datamatrixes
-        std::vector<POIPtr> datamatrix_list;
-
-        boost::shared_ptr<DatamatrixDetector> detectorPtr_;
-    };
-
-
-  }  // namespace pandora_vision_datamatrix
+      boost::shared_ptr<DatamatrixDetector> detectorPtr_;
+  };
+}  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision
+#endif  // PANDORA_VISION_DATAMATRIX_DATAMATRIX_PROCESSOR_H
 

@@ -58,7 +58,8 @@ namespace pandora_vision
       std::string featureType;
 
       ros::NodeHandle processor_nh = this->getProcessorNodeHandle();
-      dynamicReconfServer_.reset( new dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig >(processor_nh) );
+      dynamicReconfServer_.reset( new dynamic_reconfigure::Server< ::pandora_vision_hazmat::DisplayConfig >
+                                (processor_nh) );
 
       if (!processor_nh.getParam("feature_type", featureType))
       {

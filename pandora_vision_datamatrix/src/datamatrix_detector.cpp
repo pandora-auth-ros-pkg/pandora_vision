@@ -46,7 +46,6 @@ namespace pandora_vision_datamatrix
   **/
   DatamatrixDetector::DatamatrixDetector()
   {
-
     img = NULL;
     dec = NULL;
     reg = NULL;
@@ -54,8 +53,6 @@ namespace pandora_vision_datamatrix
 
     detected_datamatrix.reset( new DataMatrixPOI );
     detected_datamatrix->setContent("");
-
-
   }
 
   /**
@@ -189,6 +186,5 @@ namespace pandora_vision_datamatrix
     cv::imshow("Debug DataMatrix Image", debug_frame);
     cv::waitKey(5);
   }
-
 }  // namespace pandora_vision_datamatrix
 }  // namespace pandora_vision
