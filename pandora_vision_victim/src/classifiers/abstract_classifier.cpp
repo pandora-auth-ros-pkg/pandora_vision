@@ -80,6 +80,7 @@ namespace pandora_vision_victim
     classifierFile_ = filePrefix + classifierType_ +  "_classifier.xml";
 
     const std::string trainingDatasetPath = datasetPath_;  // + "/Training_Images";
+    // const std::string trainingDatasetPath = datasetPath_ + "/Training_Images";
     std::cout << trainingDatasetPath << std::endl;
     boost::filesystem::path trainingDirectory(trainingDatasetPath);
     trainingDirectory_ = trainingDirectory;
@@ -89,6 +90,7 @@ namespace pandora_vision_victim
     int numTrainingFiles = file_utilities::findNumberOfAnnotations(trainingAnnotationsFile_);
 
     const std::string testDatasetPath = datasetPath_;  // + "/Test_Images";
+    // const std::string testDatasetPath = datasetPath_ + "/Test_Images";
     std::cout << testDatasetPath << std::endl;
     boost::filesystem::path testDirectory(testDatasetPath);
     testDirectory_ = testDirectory;

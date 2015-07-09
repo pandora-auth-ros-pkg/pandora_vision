@@ -69,6 +69,7 @@ namespace pandora_vision_victim
         numLevels);
   }
 
+
   /**
    * @brief Destructor
    */

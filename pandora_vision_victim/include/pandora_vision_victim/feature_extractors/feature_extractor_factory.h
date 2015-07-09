@@ -75,6 +75,9 @@ namespace pandora_vision_victim
       {
       }
 
+      virtual int getNumFeatures()
+      {}
+
       /**
        * @brief
        */

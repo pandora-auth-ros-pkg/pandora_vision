@@ -147,6 +147,8 @@ namespace pandora_vision_victim
       numFeatures_ += 28;
     if (extractSiftFeatures)
       numFeatures_ += dictionarySize_;
+    if (extractHogFeatures)
+      numFeatures_ += featureFactoryPtrMap_["hog"]->getNumFeatures();
 
     imageType_ = "rgb_";
   }

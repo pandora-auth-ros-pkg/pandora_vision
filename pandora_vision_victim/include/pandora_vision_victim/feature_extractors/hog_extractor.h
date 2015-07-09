@@ -77,6 +77,11 @@ namespace pandora_vision_victim
       virtual void extractFeatures(const cv::Mat& inImage,
           std::vector<float>* descriptors);
 
+      int getNumFeatures()
+      {
+        return hogDescriptor_->getDescriptorSize();
+      }
+
     private:
       ///
       cv::Ptr<cv::HOGDescriptor> hogDescriptor_;
