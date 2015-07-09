@@ -65,8 +65,8 @@ namespace pandora_vision_obstacle
     double resolution;
     nh.param("cellResolution", resolution, 0.02);
 
-    robotRows_ = robotXDimention / resolution;
-    robotCols_ = robotYDimention / resolution;
+    robotRows_ = robotYDimention / resolution;
+    robotCols_ = robotXDimention / resolution;
 
     // Minimum acceptable value for the process to work properly
     robotStrength_ = robotRows_ * robotCols_;

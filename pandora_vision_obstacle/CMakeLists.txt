@@ -23,6 +23,7 @@ generate_dynamic_reconfigure_options(
   config/pandora_vision_obstacle/soft_obstacle_cfg.cfg
   config/pandora_vision_obstacle/hard_obstacle_cfg.cfg
   config/pandora_vision_obstacle/elevation_map.cfg
+  config/barrel_node.cfg
   )
 
 catkin_package(
