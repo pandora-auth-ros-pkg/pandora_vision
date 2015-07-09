@@ -152,7 +152,7 @@ namespace pandora_vision_obstacle
         if ((coords >= output->data.size()) || (coords < 0))
         {
           NODELET_WARN("[%s] Error resizing to: %d\nCoords Xn: %f, Yn: %f\n",
-              this->getName().c_str(), int(map_const_ptr_->data.size()), xn, yn);
+              this->getName().c_str(), static_cast<int>(map_const_ptr_->data.size()), xn, yn);
         }
         else
         {

@@ -36,6 +36,7 @@
  *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
+#include <limits>
 #include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
 
 namespace pandora_vision
@@ -48,67 +49,286 @@ namespace pandora_vision_obstacle
   TraversabilityMask::
   ~TraversabilityMask() {}
 
+  /**
+   * @brief Check if the provided point is traversible by the robot or not
+  */
   int8_t
-  TraversabilityMask::
-  findTraversability(int x, int y)
+  TraversabilityMask::findTraversability(const cv::Point& center)
+  {
+    center_ = center;
+
+    // Calculate the current position of the Upper Left Wheel.
+    cv::Point upperLeftWheelPos(
+        metersToSteps(center_.x - description_->robotD - 2 * description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y - description_->robotD - 2 * description_->barrelD - description_->wheelD));
+    // Calculate the current position of the Lower Left Wheel.
+    cv::Point lowerLeftWheelPos(
+        metersToSteps(center_.x - description_->robotD - description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD + description_->barrelD + description_->wheelD));
+
+    double upperLeftWheelMeanHeight, upperLeftWheelStdDev;
+    bool upperLeftWheelValid = findHeightOnWheel(upperLeftWheelPos, &upperLeftWheelMeanHeight,
+        &upperLeftWheelStdDev);
+    double lowerLeftWheelMeanHeight, lowerLeftWheelStdDev;
+    bool lowerLeftWheelValid = findHeightOnWheel(lowerLeftWheelPos, &lowerLeftWheelMeanHeight,
+        &lowerLeftWheelStdDev);
+    if (!upperLeftWheelValid)
+    {
+      // leftElevationMap.reset();
+      return -1;
+    }
+    if (!lowerLeftWheelValid)
+    {
+      // leftElevationMap.reset();
+      return -1;
+    }
+  }  // End of findTraversability
 
   void
-  TraversabilityMask::
-  setElevationMap(const boost::shared_ptr<cv::Mat const>& map)
+  TraversabilityMask::setElevationMap(const boost::shared_ptr<cv::Mat const>& map)
+  {
+    elevationMapPtr_ = map;
+  }
 
   void
-  TraversabilityMask::
-  loadGeometryMask(const ros::NodeHandle& nh);
+  TraversabilityMask::loadGeometryMask(const ros::NodeHandle& nh)
+  {
+  }
 
-  MatPtr
-  TraversabilityMask::
-  findElevatedLeft()
+  void
+  TraversabilityMask::findElevatedLeft(MatPtr al, double hForward, double hBack, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hForward > hBack)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hForward - hBack) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hBack;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          al->at<double>(j, i) += val;
+        }
+      }
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hBack - hForward) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
+      {
+        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+            + hForward;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          al->at<double>(j, i) += val;
+        }
+      }
+    }
 
-  MatPtr
-  TraversabilityMask::
-  findElevatedRight()
+    return;
+  }
 
-  MapPtr
-  TraversabilityMask::
-  findElevatedTop();
+  void
+  TraversabilityMask::findElevatedRight(MatPtr ar, double hForward, double hBack, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hForward > hBack)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hForward - hBack) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hBack;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          ar->at<double>(j, i) += val;
+        }
+      }
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hBack - hForward) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
+      {
+        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+            + hForward;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          ar->at<double>(j, i) += val;
+        }
+      }
+    }
 
-  MapPtr
-  TraversabilityMask::
-  findElevatedBottom()
+    return;
+  }
+
+  void
+  TraversabilityMask::findElevatedTop(MatPtr at, double hLeft, double hRight, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hLeft < hRight)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hRight - hLeft) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < at->cols - wheelSize; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hLeft;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          at->at<double>(i, j) += val;
+        }
+      }
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hLeft - hRight) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < at->rows - wheelSize; ++j)
+      {
+        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+            + hRight;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          at->at<double>(i, j) += val;
+        }
+      }
+    }
+
+    return;
+  }
+
+  void
+  TraversabilityMask::findElevatedBottom(MatPtr ab, double hLeft, double hRight, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hLeft < hRight)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hRight - hLeft) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < ab->cols - wheelSize; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hLeft;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          ab->at<double>(i, j) += val;
+        }
+      }
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hLeft - hRight) / d);
+      slope =  tan(angle);
+      for (int j = wheelSize + 1; j < ab->rows - wheelSize; ++j)
+      {
+        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+            + hRight;
+        for (int i = 0; i < wheelSize; ++i)
+        {
+          ab->at<double>(i, j) += val;
+        }
+      }
+    }
+
+    return;
+  }
 
   bool
-  TraversabilityMask::
-  findHeightOnWheel(int wheel_x, int wheel_y, double* meanHeight, double* stdDevHeight)
+  TraversabilityMask::findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight)
   {
-    MapPtr wheel( new cv::Mat(elevationMap_->rows, elevationMap_->cols, CV_8UC1, cv::Scalar(0) );
-    bool known = cropToWheel(wheel_x, wheel_y, wheel);
+    // MatPtr wheel( new cv::Mat(elevationMapPtr_->rows, elevationMapPtr_->cols, CV_64FC1, cv::Scalar(0)));
+    MatPtr wheelElevation;
+    bool known = cropToWheel(wheelPos, wheelElevation);
     if (!known)
       return false;
+
+    cv::Mat validityMask = *wheelElevation == - std::numeric_limits<double>::max();
+    if (cv::countNonZero(validityMask) > 0)
+      return false;
+
     cv::Scalar mean, std_dev;
-    cv::meanStdDev(*elevationMap_, mean, std_dev, *wheel);
+    cv::meanStdDev(*elevationMapPtr_, mean, std_dev, *wheelElevation);
     *meanHeight = mean[0];
     *stdDevHeight = std_dev[0];
+
+    wheelElevation->setTo(*meanHeight, *wheelElevation);
+
     return true;
   }
 
-  MatPtr
-  TraversabilityMask::
-  cropToWheel(int wheel_x, int wheel_y)
+  /**
+   * @brief Creates a mask for the given wheel on the elevation map.
+  */
+  bool
+  TraversabilityMask::cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel)
+  {
+    int wheelSize = static_cast<int>(description_->wheelD / description_->RESOLUTION) + 1;
+    // Copy the region of the elevation map that corresponds to the current wheel.
+    elevationMapPtr_->copyTo((*wheel)(cv::Rect(wheelPos.x, wheelPos.x, wheelSize, wheelSize)));
 
-  MatPtr
-  TraversabilityMask::
-  cropToRight()
+    return true;
+  }
 
-  MatPtr
-  TraversabilityMask::
-  cropToLeft()
+  TraversabilityMask::MatPtr
+  TraversabilityMask::cropToRight()
+  {
+  }
 
-  MatPtr
-  TraversabilityMask::
-  cropToTop()
+  TraversabilityMask::MatPtr
+  TraversabilityMask::cropToLeft()
+  {
+  }
 
-  MatPtr
-  TraversabilityMask::
-  cropToBottom()
+  TraversabilityMask::MatPtr
+  TraversabilityMask::cropToTop()
+  {
+  }
+
+  TraversabilityMask::MatPtr
+  TraversabilityMask::cropToBottom()
+  {
+  }
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

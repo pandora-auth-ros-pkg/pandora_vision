@@ -36,13 +36,13 @@
  *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
-#ifndef HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
-#define HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
+#ifndef PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
+#define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
 
 #include <boost/shared_ptr.hpp>
 
-#include <opencv/opencv2.hpp>
-
+#include "ros/ros.h"
+#include "opencv2/core/core.hpp"
 #include "pandora_vision_obstacle/hard_obstacle_detection/RobotGeometryMaskDescription.h"
 
 namespace pandora_vision
@@ -90,28 +90,28 @@ namespace pandora_vision_obstacle
      * distance. Should compare wheel heights and make the proper
      * transformations
      */
-    MatPtr
-    findElevatedLeft(const MapConstPtr& al, double ht, double hb, int d);
-    MatPtr
-    findElevatedRight(const MapConstPtr& ar, double ht, double hb, int d);
-    MapPtr
-    findElevatedTop(const MapConstPtr& at, double hl, double hr, int d);
-    MapPtr
-    findElevatedBottom(const MapConstPtr& ab, double hl, double hr, int d);
+    void
+    findElevatedLeft(MatPtr al, double hForward, double hBack, double d);
+    void
+    findElevatedRight(MatPtr ar, double hForward, double hBack, double d);
+    void
+    findElevatedTop(MatPtr at, double hLeft, double hRight, double d);
+    void
+    findElevatedBottom(MatPtr ab, double hLeft, double hRight, double d);
 
     /**
      * @brief: find mean and stdev of height on wheel, false if wheel has
      * unknown values underneath it
      */
     bool
-    findHeightOnWheel(int wheel_x, int wheel_y, double* meanHeight, double* stdDevHeight);
+    findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight);
 
     /**
      * Fills up wheel with a mask which corresponds to the wheel, performs a
      * check whether wheel is on unknown terrain. Returns false if it is
      */
     bool
-    cropToWheel(int wheel_x, int wheel_y, const MatPtr& wheel);
+    cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel);
 
     /**
      * Crops elevationMap_ to Ar according to center point and geometric params
@@ -137,13 +137,17 @@ namespace pandora_vision_obstacle
     MatPtr
     cropToBottom();
 
+    inline int metersToSteps(double meters)
+    {
+      return static_cast<int>(meters / description_->RESOLUTION) + 1;
+    }
    private:
     //!< This is A matrix
     MatPtr robotGeometryMask_;
     //!< This is geometrical description of robot's base
     RobotGeometryMaskDescriptionPtr description_;
     //!< Local elevation map created
-    MatConstPtr elevationMap_;
+    MatConstPtr elevationMapPtr_;
 
     //!< center of matrix A
     cv::Point center_;
@@ -154,4 +158,4 @@ namespace pandora_vision_obstacle
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
-#endif  // HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
+#endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_TRAVERSABILITY_MASK_H
