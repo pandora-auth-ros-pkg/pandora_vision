@@ -78,9 +78,10 @@ namespace pandora_vision_obstacle
       inline void setShowEdgesUnknownImage(bool value){show_edges_and_unknown_image = value;}
       inline void setShowUnknownProbabilities(bool value){show_unknown_probabilities = value;}
       inline void setShowNewMapImage(bool value){show_new_map_image = value;}
+      inline void setShowRobotMaskUsed(bool value){show_robot_mask_used = value;}
 
       /**
-        @brief Functions used to set edge detection configuration parameters.
+        @brief functions used to set edge detection configuration parameters.
        **/
       inline void setEdgeMethod(int value){edge_method_ = value;}
       inline void setEdgesThreshold(int value){edges_threshold_ = value;}
@@ -89,7 +90,17 @@ namespace pandora_vision_obstacle
       inline void setCannyLowThreshold(int value){cannyLowThreshold_ = value;}
       inline void setCannyBlurNoiseKernelSize(int value){cannyBlurKernelSize_ = value;}
 
+      /**
+        @brief function used to set the minimum input value in image from
+        preprocessor.
+       **/
       inline void setMinInputImageValue(int value){min_input_image_value_ = value;}
+
+      /**
+        @brief function used to change the robot mask that is used in the process
+        by dynamic reconfigure.
+       **/
+      void changeRobotMask(int value);
 
     private:
       std::string nodeName_;
@@ -97,6 +108,12 @@ namespace pandora_vision_obstacle
       // The robots mask dimentions found as robotDimention / ogm_cell_resolution
       int robotRows_;
       int robotCols_;
+
+      // The half robot wheels dimentions in meters(dilated) used to set most of robotMasks.
+      // Rows and Cols size is considered as same.
+      double wheel_;
+
+      // Changes by dynamic reconfigure
       cv::Mat robotMask_;
 
       // This variable defines the probability of the extracted unknown areas
@@ -126,15 +143,28 @@ namespace pandora_vision_obstacle
       bool show_edges_and_unknown_image;
       bool show_new_map_image;
       bool show_unknown_probabilities;
+      bool show_robot_mask_used;
 
       /**
         @brief The input image consists of negative, positive and unknown values
         defined as -max(double) values. This function converts all pixel values
         to positive and sets the unknown to -1.
+        @param[in] inImage [const cv::Mat&] The image to be scaled.
+        @param[out] outImage [cv::Mat*] The output scaled image.
+        @return void
        **/
-      void
-      scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
+      void scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
 
+      /**
+        @brief Function used to scale and visualize the robot mask that is used
+        in hard obstacle detection procedure.
+        @param[in] title [const std::string&] The title of image to be shown.
+        @param[in] image [const cv::Mat&] The robot image to be shown.
+        @param[in] time [int] The time that imshow function lasts in ms.
+        @return void
+       **/
+      void showRobotMask(
+        const std::string& title, const cv::Mat& image, int time);
       /**
         @brief Visualization of an image with CV_32FC1 or CV_8UC1 type.
         If there is a negative value in mat aka unknown area set it 255 for

@@ -58,9 +58,10 @@ namespace pandora_vision_obstacle
 
     nodeName_ = name;
 
+
     double robotXDimention, robotYDimention;
-    nh.param("robot/robotXDimention", robotXDimention, 0.345);
-    nh.param("robot/robotYDimention", robotYDimention, 0.345);
+    nh.param("robot/robotXDimention", robotXDimention, 0.35);
+    nh.param("robot/robotYDimention", robotYDimention, 0.35);
 
     double resolution;
     nh.param("cellResolution", resolution, 0.02);
@@ -73,6 +74,12 @@ namespace pandora_vision_obstacle
 
     robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
 
+    double robotWheel;
+    nh.param("robot/half_wheel", robotWheel, 0.1);
+
+    // Robots wheel size in map.
+    wheel_ = robotWheel / resolution;
+
     edge_method_ = 1;
     edges_threshold_ = 30;
 
@@ -82,6 +89,7 @@ namespace pandora_vision_obstacle
     show_edges_and_unknown_image = false;
     show_new_map_image = false;
     show_unknown_probabilities = false;
+    show_robot_mask_used = false;
   }
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
@@ -103,6 +111,12 @@ namespace pandora_vision_obstacle
     {
       // Show the input image
       showImage("The input image", scaledImage, 1);
+    }
+
+    if (show_robot_mask_used)
+    {
+      // Show the robot mask that the process use
+      showRobotMask("Robot Mask", robotMask_, 1);
     }
 
     // Find the dangerous areas(edges) aka territories where we got big height
@@ -127,9 +141,69 @@ namespace pandora_vision_obstacle
     return newMap;
   }
 
-  void
-  HardObstacleDetector::
-  scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage)
+  void HardObstacleDetector::changeRobotMask(int value)
+  {
+    switch (value)
+    {
+      case 0 :
+        robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
+        break;
+      case 1 :
+        robotMask_ = cv::Mat::zeros(robotRows_, robotCols_, CV_64FC1);
+        for (unsigned int i = 0; i < robotMask_.rows; i++)
+        {
+          for (unsigned int j = 0; j < robotMask_.cols; j++)
+          {
+            if (i < wheel_ || i > (robotMask_.rows - wheel_) || j < wheel_ || j > (robotMask_.cols - wheel_))
+            {
+              robotMask_.at<double>(i, j) = 1;
+            }
+          }
+        }
+        break;
+      case 2 :
+        robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
+        for (unsigned int i = 0; i < robotMask_.rows; i++)
+        {
+          for (unsigned int j = 0; j < robotMask_.cols; j++)
+          {
+            if ((i > wheel_ && i < (robotMask_.rows - wheel_)) && (j < wheel_ || j > (robotMask_.cols - wheel_)))
+            {
+              robotMask_.at<double>(i, j) = 0;
+            }
+            else if ((i < wheel_ || i > (robotMask_.rows - wheel_)) && (j > wheel_ && (j < robotMask_.cols - wheel_)))
+            {
+              robotMask_.at<double>(i, j) = 0;
+            }
+          }
+        }
+        break;
+      case 3 :
+        robotMask_ = cv::Mat::zeros(robotRows_, robotCols_, CV_64FC1);
+        for (unsigned int i = 0; i < robotMask_.rows; i++)
+        {
+          for (unsigned int j = 0; j < robotMask_.cols; j++)
+          {
+            if (i < wheel_ && ((j < wheel_) || j > (robotMask_.cols - wheel_)))
+            {
+              robotMask_.at<double>(i, j) = 1;
+            }
+            else if (i > (robotMask_.rows - wheel_) && ((j < wheel_) || j > (robotMask_.cols - wheel_)))
+            {
+              robotMask_.at<double>(i, j) = 1;
+            }
+            else if(i == wheel_ || i == (robotMask_.rows - wheel_) || j == wheel_ || j == (robotMask_.cols - wheel_))
+            {
+              robotMask_.at<double>(i, j) = 1;
+            }
+          }
+        }
+        break;
+    }
+  }
+
+  void HardObstacleDetector::scaleInputImage(
+    const cv::Mat& inImage, cv::Mat* outImage)
   {
     for (unsigned int rows = 0; rows < inImage.rows; rows++)
     {
@@ -151,6 +225,19 @@ namespace pandora_vision_obstacle
   /*****************************************************************************
    *                         Visualization  methods                            *
    ****************************************************************************/
+  void HardObstacleDetector::showRobotMask(
+    const std::string& title, const cv::Mat& image, int time)
+  {
+    cv::Mat showRobot;
+    image.copyTo(showRobot);
+
+    // Resize the robot mask for a better perception
+    cv::resize(showRobot, showRobot, cv::Size(640,480));
+
+    cv::imshow(title, showRobot);
+    cv::waitKey(time);
+  }
+
   void HardObstacleDetector::showImage(
     const std::string& title, const cv::Mat& image, int time)
   {

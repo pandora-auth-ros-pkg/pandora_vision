@@ -1,4 +1,10 @@
 robot:
   # In meters
-  robotXDimention: 0.345
-  robotYDimention: 0.345
+  robotXDimention: 0.35
+  robotYDimention: 0.35
+
+  # Robot half wheel dimentions(dilated) used to set robot masks (in meters)
+  half_wheel: 0.1
+
+# In meters
+cellResolution: 0.02

@@ -80,6 +80,7 @@ namespace pandora_vision_obstacle
     detector_->setShowEdgesUnknownImage(config.show_edges_and_unknown_image);
     detector_->setShowUnknownProbabilities(config.show_unknown_probabilities);
     detector_->setShowNewMapImage(config.show_new_map_image);
+    detector_->setShowRobotMaskUsed(config.show_robot_mask_used);
 
     // Edge detection parameters
     detector_->setEdgeMethod(config.edge_detection_method);
@@ -91,7 +92,11 @@ namespace pandora_vision_obstacle
 
     detector_->setEdgesThreshold(config.edges_threshold);
 
+    // Set the minimum input value in image from preprocessor node
     detector_->setMinInputImageValue(config.min_input_image_value);
+
+    // If user ask it, change the robot mask to test it
+    detector_->changeRobotMask(config.robot_mask);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
