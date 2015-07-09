@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
     state_manager
     state_manager_msgs
     pandora_cmake_tools
+    pandora_vision_hole
 )
 
 generate_dynamic_reconfigure_options(
@@ -33,6 +34,7 @@ catkin_package(
       sensor_msgs
       pandora_vision_msgs
       pandora_vision_common
+      pandora_vision_hole
       sensor_processor
       state_manager
       state_manager_msgs

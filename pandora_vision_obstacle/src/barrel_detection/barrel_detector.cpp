@@ -450,10 +450,6 @@ namespace pandora_vision_obstacle
       // (*valid) = false;
       return false;
     }
-
-    if (BarrelDetection::show_valid_barrel)
-      debugShow(rgbImage, rectRoi, 2);
-
     return true;
   }
 
@@ -529,6 +525,8 @@ namespace pandora_vision_obstacle
           roi, symmetricStartPoint, symmetricEndPoint);
       if (valid)
       {
+        if (BarrelDetection::show_valid_barrel)
+          debugShow(rgbImage, roi, 2);
         depthDistance = findDepthDistance(depthImage, roi);
         ObstaclePOIPtr poi(new ObstaclePOI);
         poi->setPoint(cv::Point((roi.x + roi.width / 2),
@@ -540,6 +538,11 @@ namespace pandora_vision_obstacle
         poi->setDepth(depthDistance);
         pois.push_back(poi);
         ROS_INFO("barrel found");
+      }
+      else
+      {
+        if (BarrelDetection::show_valid_barrel)
+          debugShow(rgbImage, cv::Rect(0, 0, 0, 0), 2);
       }
     }
 
