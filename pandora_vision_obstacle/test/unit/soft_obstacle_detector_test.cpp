@@ -73,7 +73,8 @@ namespace pandora_vision_obstacle
         cv::Mat kernelLow = (cv::Mat_<float>(2, 1) << invRootTwo, invRootTwo);
         cv::Mat kernelHigh = (cv::Mat_<float>(2, 1) << invRootTwo, - invRootTwo);
 
-        detector_->dwtPtr_.reset(new DiscreteWaveletTransform(kernelLow, kernelHigh));
+        detector_->dwtPtr_.reset(new pandora_vision_common::DiscreteWaveletTransform(
+              kernelLow, kernelHigh));
       }
 
       bool findNonIdenticalLines(const std::vector<cv::Vec2f> lineCoeffs,
@@ -104,6 +105,18 @@ namespace pandora_vision_obstacle
             int frameHeight, const boost::shared_ptr<cv::Rect>& roiPtr)
       {
         return detector_->detectROI(verticalLines, frameHeight, roiPtr);
+      }
+
+      float calculateLineMedian(const cv::Mat& depthImage, const cv::Vec4i& line,
+          int level = 1)
+      {
+        return detector_->calculateLineMedian(depthImage, line, level);
+      }
+
+      bool findDifferentROIDepth(const cv::Mat& depthImage,
+        const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi)
+      {
+        return detector_->findDifferentROIDepth(depthImage, verticalLines, roi);
       }
 
     protected:
@@ -230,6 +243,55 @@ namespace pandora_vision_obstacle
     // Considering that a pixel has width and height equal to 1
     EXPECT_EQ(4, roi->width);
     EXPECT_EQ(3, roi->height);
+  }
+
+  TEST_F(SoftObstacleDetectorTest, isLineMedianCorrectlyCalculated)
+  {
+    cv::Mat depthImage = cv::Mat::zeros(15, 15, CV_32FC1);
+
+    for (int ii = 0; ii < depthImage.cols; ii++)
+    {
+      if (ii % 2)
+      {
+        depthImage.at<float>(10, ii) = ii;
+      }
+      depthImage.at<float>(7, ii) = 0.2 * ii;
+    }
+    float median = calculateLineMedian(depthImage, cv::Vec4i(4, 3, 5, 6));
+
+    ASSERT_NEAR(median, 1.8, 1e-5);
+  }
+
+  TEST_F(SoftObstacleDetectorTest, isROIDepthDifferent)
+  {
+    cv::Mat depthImage = cv::Mat::ones(10, 10, CV_32FC1);
+
+    std::vector<cv::Vec4i> lines;
+    lines.push_back(cv::Vec4i(2, 2, 3, 8));
+    lines.push_back(cv::Vec4i(4, 3, 3, 9));
+    lines.push_back(cv::Vec4i(8, 4, 9, 8));
+
+    cv::Rect roi(2, 2, 8, 8);
+    ASSERT_FALSE(findDifferentROIDepth(depthImage, lines, roi));
+
+    cv::line(depthImage, cv::Point(2, 2), cv::Point(3, 8), cv::Scalar(0.4), 1, 8);
+    ASSERT_FALSE(findDifferentROIDepth(depthImage, lines, roi));
+
+    cv::line(depthImage, cv::Point(4, 3), cv::Point(3, 9), cv::Scalar(0.4), 1, 8);
+    ASSERT_FALSE(findDifferentROIDepth(depthImage, lines, roi));
+
+    cv::line(depthImage, cv::Point(8, 4), cv::Point(9, 8), cv::Scalar(0.4), 1, 8);
+    ASSERT_FALSE(findDifferentROIDepth(depthImage, lines, roi));
+
+    cv::line(depthImage, cv::Point(2, 2), cv::Point(3, 8), cv::Scalar(0.6), 1, 8);
+    cv::line(depthImage, cv::Point(4, 3), cv::Point(3, 9), cv::Scalar(0.6), 1, 8);
+    cv::line(depthImage, cv::Point(8, 4), cv::Point(9, 8), cv::Scalar(0.6), 1, 8);
+    ASSERT_FALSE(findDifferentROIDepth(depthImage, lines, roi));
+
+    cv::line(depthImage, cv::Point(2, 2), cv::Point(3, 8), cv::Scalar(0.2), 1, 8);
+    cv::line(depthImage, cv::Point(4, 3), cv::Point(3, 9), cv::Scalar(0.2), 1, 8);
+    cv::line(depthImage, cv::Point(8, 4), cv::Point(9, 8), cv::Scalar(0.2), 1, 8);
+    ASSERT_TRUE(findDifferentROIDepth(depthImage, lines, roi));
   }
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
