@@ -36,8 +36,8 @@
  *   Tsirigotis Christos <tsirif@gmail.com>
  *********************************************************************/
 
-#ifndef HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
-#define HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
+#ifndef PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
+#define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
 
 namespace pandora_vision
 {
@@ -77,4 +77,5 @@ namespace pandora_vision_obstacle
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
 
-#endif  // HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
+#endif  // PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
+

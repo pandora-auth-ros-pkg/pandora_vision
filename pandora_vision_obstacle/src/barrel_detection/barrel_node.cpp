@@ -43,7 +43,7 @@ using pandora_vision::pandora_vision_obstacle::BarrelHandler;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "barrel_node");
-  BarrelHandler barrelHandler();
+  BarrelHandler barrelHandler;
   ros::spin();
   return 0;
 }

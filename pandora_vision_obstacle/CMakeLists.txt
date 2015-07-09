@@ -24,7 +24,8 @@ generate_dynamic_reconfigure_options(
   config/pandora_vision_obstacle/soft_obstacle_cfg.cfg
   config/pandora_vision_obstacle/hard_obstacle_cfg.cfg
   config/pandora_vision_obstacle/elevation_map.cfg
-)
+  config/pandora_vision_obstacle/barrel_node.cfg
+  )
 
 catkin_package(
     #DEPENDS
@@ -164,6 +165,7 @@ target_link_libraries(${PROJECT_NAME}_hard_obstacle_postprocessor
 ############################### hard obstacle detector ##############################
 add_library(${PROJECT_NAME}_hard_obstacle_detector
   src/hard_obstacle_detection/hard_obstacle_detector.cpp
+  src/hard_obstacle_detection/traversability_mask.cpp
   )
 target_link_libraries(${PROJECT_NAME}_hard_obstacle_detector
   ${catkin_LIBRARIES}
@@ -233,9 +235,9 @@ target_link_libraries(${PROJECT_NAME}_soft_obstacle_node
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LINT_SRCS
   RELATIVE ${PROJECT_SOURCE_DIR}
-  include/**/*.h
-  src/**/*.cpp
-  test/**/*.cpp
+  include/*/*.h
+  src/*/*.cpp
+  test/*/*.cpp
   )
 roslint_cpp(${${PROJECT_NAME}_LINT_SRCS})
 
