@@ -456,42 +456,36 @@ namespace pandora_vision_obstacle
     {
       cv::Mat hsvImage = rgbImage(rectRoi);
       cv::Mat binary, binaryTemp;
-      /// convert RGB image into HSV image
+      // convert RGB image into HSV image
       cv::cvtColor(hsvImage, hsvImage, CV_BGR2HSV);
       std::vector<cv::Mat> hsvChannels;
       cv::split(hsvImage, hsvChannels);
       cv::Mat hImage = hsvChannels[0];
 
-      /// get binary image
-      int iLowS = 100, iHighS = 255;
-      int iLowV = 50, iHighV = 255;
-      // ----------- RED ----------
-      int iLowH = 155, iHighH = 180;
-      cv::inRange(hImage, iLowH, iHighH, binary);
-      // cv::inRange(
-      //     hsvImage, 
-      //     cv::Scalar(iLowH, iLowS, iLowV), 
-      //     cv::Scalar(iHighH, iHighS, iHighV), 
-      //     binary);
-      iLowH = 0;
-      iHighH = 3;
-      cv::inRange(hImage, iLowH, iHighH, binaryTemp);
-      // cv::inRange(
-      //     hsvImage, 
-      //     cv::Scalar(iLowH, iLowS, iLowV), 
-      //     cv::Scalar(iHighH, iHighS, iHighV), 
-      //     binaryTemp);
-      binary += binaryTemp;
-      // --------------------------
-      // ----------- BLUE ---------
-      // int iLowH = 80, iHighH = 140;
-      // cv::inRange(
-      //     hsvImage, 
-      //     cv::Scalar(iLowH, iLowS, iLowV), 
-      //     cv::Scalar(iHighH, iHighS, iHighV), 
-      //     binary);
-      // --------------------------
-      
+      int iLowH = BarrelDetection::hue_lowest_thresh, iHighH = BarrelDetection::hue_highest_thresh;
+      int iLowS = BarrelDetection::saturation_lowest_thresh, iHighS = BarrelDetection::saturation_highest_thresh;
+      int iLowV = BarrelDetection::value_lowest_thresh, iHighV = BarrelDetection::value_highest_thresh;
+      // cv::inRange(hImage, iLowH, iHighH, binary);
+      cv::inRange(
+          hsvImage, 
+          cv::Scalar(iLowH, iLowS, iLowV), 
+          cv::Scalar(iHighH, iHighS, iHighV), 
+          binary);
+      // For RED define one second threshold
+      if (BarrelDetection::color_selection_R_1_G_2_B_3 == 1)
+      {
+        iLowH = 0;
+        iHighH = 3;
+        // cv::inRange(hImage, iLowH, iHighH, binaryTemp);
+        cv::inRange(
+            hsvImage, 
+            cv::Scalar(iLowH, iLowS, iLowV), 
+            cv::Scalar(iHighH, iHighS, iHighV), 
+            binaryTemp);
+        binary += binaryTemp;
+      }
+    
+
       int whitesCounter = cv::countNonZero(binary);
       float whitesOverlap =
         static_cast<float>(whitesCounter) / static_cast<float>(rectRoi.area());

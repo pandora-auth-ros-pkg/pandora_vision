@@ -99,8 +99,62 @@ namespace pandora_vision_obstacle
     BarrelDetection::color_validation =
       configBarrel.color_validation;
 
+    BarrelDetection::color_selection_R_1_G_2_B_3 =
+      configBarrel.color_selection_R_1_G_2_B_3;
+    BarrelDetection::use_recommended_color_thresholds =
+      configBarrel.use_recommended_color_thresholds;
     BarrelDetection::specific_color_min_overlap =
       configBarrel.specific_color_min_overlap;
+    if (BarrelDetection::use_recommended_color_thresholds)
+    {
+      resetToRecommendedColors();
+    }
+    else
+    {
+      BarrelDetection::hue_lowest_thresh =
+        configBarrel.hue_lowest_thresh;
+      BarrelDetection::hue_highest_thresh =
+        configBarrel.hue_highest_thresh;
+      BarrelDetection::saturation_lowest_thresh =
+        configBarrel.saturation_lowest_thresh;
+      BarrelDetection::saturation_highest_thresh =
+        configBarrel.saturation_highest_thresh;
+      BarrelDetection::value_lowest_thresh =
+        configBarrel.value_lowest_thresh;
+      BarrelDetection::value_highest_thresh =
+        configBarrel.value_highest_thresh;
+    }
+  }
+
+  void BarrelParametersHandler::resetToRecommendedColors()
+  {
+    if (BarrelDetection::color_selection_R_1_G_2_B_3 == 1)
+    {
+      BarrelDetection::hue_lowest_thresh = 155;
+      BarrelDetection::hue_highest_thresh = 180;
+      BarrelDetection::saturation_lowest_thresh = 0;
+      BarrelDetection::saturation_highest_thresh = 255;
+      BarrelDetection::value_lowest_thresh = 0;
+      BarrelDetection::value_highest_thresh = 255;
+    }
+    else if (BarrelDetection::color_selection_R_1_G_2_B_3 == 2)
+    {
+      BarrelDetection::hue_lowest_thresh = 40;
+      BarrelDetection::hue_highest_thresh = 75;
+      BarrelDetection::saturation_lowest_thresh = 100;
+      BarrelDetection::saturation_highest_thresh = 255;
+      BarrelDetection::value_lowest_thresh = 50;
+      BarrelDetection::value_highest_thresh = 255;
+    }
+    else
+    {
+      BarrelDetection::hue_lowest_thresh = 80;
+      BarrelDetection::hue_highest_thresh = 140;
+      BarrelDetection::saturation_lowest_thresh = 100;
+      BarrelDetection::saturation_highest_thresh = 255;
+      BarrelDetection::value_lowest_thresh = 50;
+      BarrelDetection::value_highest_thresh = 255;
+    }
   }
 
   // Show the barrel that depth node segments through FSD
@@ -125,6 +179,14 @@ namespace pandora_vision_obstacle
 
   bool BarrelDetection::color_validation = false;
 
+  int BarrelDetection::color_selection_R_1_G_2_B_3 = 1;
+  bool BarrelDetection::use_recommended_color_thresholds = false;
   float BarrelDetection::specific_color_min_overlap = 0.2;
+  int BarrelDetection::hue_lowest_thresh = 155;
+  int BarrelDetection::hue_highest_thresh = 180;
+  int BarrelDetection::saturation_lowest_thresh = 100;
+  int BarrelDetection::saturation_highest_thresh = 255;
+  int BarrelDetection::value_lowest_thresh = 50;
+  int BarrelDetection::value_highest_thresh = 255;
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
