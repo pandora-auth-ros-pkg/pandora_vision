@@ -177,10 +177,10 @@ namespace pandora_vision_obstacle
   float BarrelDetection::min_circle_overlapping = 0.25;
   float BarrelDetection::max_corner_thresh = 65.0;
 
-  bool BarrelDetection::color_validation = false;
+  bool BarrelDetection::color_validation = true;
 
   int BarrelDetection::color_selection_R_1_G_2_B_3 = 1;
-  bool BarrelDetection::use_recommended_color_thresholds = false;
+  bool BarrelDetection::use_recommended_color_thresholds = true;
   float BarrelDetection::specific_color_min_overlap = 0.2;
   int BarrelDetection::hue_lowest_thresh = 155;
   int BarrelDetection::hue_highest_thresh = 180;
