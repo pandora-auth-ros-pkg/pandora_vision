@@ -44,9 +44,98 @@ namespace pandora_vision
 namespace pandora_vision_obstacle
 {
   TraversabilityMask::
-  TraversabilityMask() {}
+    TraversabilityMask()
+    {
+
+    }
+
+  TraversabilityMask::TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr)
+  {
+    ROS_INFO("[Traversability Mask]: Creating Traversability Mask object!");
+    description_ = descriptionPtr;
+
+    // Create the robot height mask.
+    createMaskFromDesc(robotGeometryMask_, description_);
+
+    ROS_INFO("[Traversability Mask]: Finished constructing Traversability Mask Object.");
+  }
 
   TraversabilityMask::~TraversabilityMask() {}
+
+  /**
+   * @brief Creates the Robot Height Mask
+   * @description Creates the height mask for the robot according to the description file.
+   * @param inputOutputMap[const MatPtr&] A pointer to the matrix that contains the mask.
+   * @param description[RobotGeometryMaskDescriptionPtr] A pointer to the parameter structure
+   * that approximately describes the robot.
+   * @return void
+   */
+  void TraversabilityMask::createMaskFromDesc(const MatPtr& inputOutputMask,
+      const RobotGeometryMaskDescriptionPtr& description)
+  {
+    // Initialize the Mask dimensions
+    // int totalSize = metersToSteps(description_->totalD);
+    // Calculate the values for the size of the robot parts.
+    int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
+    int barrelSize = metersToSteps(description_->barrelD);
+    int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
+    // Initialize the mask of the robot.
+    robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1));
+    robotGeometryMask_->setTo(0.0);
+
+    // Assign to the mask the height of the wheels.
+    for (int i = 0; i < wheelSize; ++i)
+    {
+      for (int j = 0; j < wheelSize; ++j)
+      {
+        // Top Left Wheel Height
+        robotGeometryMask_->at<double>(i, j) = description_->wheelH;
+        // Top Right Wheel Height
+        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) =
+          description_->wheelH;
+        // Bottom Left Wheel Height
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j) =
+          description_->wheelH;
+        // Bottom Right Wheel Height
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize,
+            j + totalSize - wheelSize) = description_->wheelH;
+      }
+    }
+    // Assign the values for the motors of the robots.
+    for (int i = 0; i < barrelSize; ++i)
+    {
+      for (int j = 0; j < barrelSize; ++j)
+      {
+        // Top Left Barrel Height
+        robotGeometryMask_->at<double>(i + wheelSize, j + wheelSize) = description_->barrelH;
+        // Top Right Barrel Height
+        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize - barrelSize) =
+          description_->barrelH;
+        // Bottom Left Barrel Height
+        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j + wheelSize) =
+          description_->barrelH;
+        // Bottom Right Barrel Height
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize - barrelSize,
+            j + totalSize - wheelSize - barrelSize) = description_->barrelH;
+      }
+    }
+
+    // Fill in the values for the height for the body of the robot.
+    for (int i = 0; i < robotSize; ++i)
+    {
+      for (int j = 0; j < robotSize; ++j)
+      {
+        // Assign the height of the robot to the corresponding positions.
+        robotGeometryMask_->at<double>(i + wheelSize + barrelSize,
+            j + wheelSize + barrelSize) = description_->robotH;
+      }
+    }
+    cv::imshow("Mask", *robotGeometryMask_);
+    cv::waitKey(0);
+    return;
+  }
+
 
   /**
    * @brief Check if the provided point is traversible by the robot or not
@@ -113,40 +202,35 @@ namespace pandora_vision_obstacle
     double wheelCenterDist = description_->robotD + 2 * description_->barrelD + description_->wheelD;
     // Get the mask for the left side of the robot
     MatPtr updatedMaskPtr(new cv::Mat(robotGeometryMask_->size(), CV_64FC1));
-    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(0, 0, wheelSize, robotGeometryMask_->rows)));
+    // Initialize the transformed map by creating a deep copy of the original.
+    robotGeometryMask_->copyTo(*updatedMaskPtr);
 
-    findElevatedLeft(updatedMaskPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+    MatPtr tempMapPtr;
+    cv::Mat tempMap = (*updatedMaskPtr)(cv::Rect(0, 0, wheelSize, robotGeometryMask_->rows));
+    tempMapPtr.reset(&tempMap);
+    // Calculate the mask for the left side of the robot.
+    findElevatedLeft(tempMapPtr,  upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
 
     // Get the mask for the right side of the robot.
-    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(robotGeometryMask_->cols - wheelSize - 1, 0, wheelSize,
-            robotGeometryMask_->rows)));
-
-    findElevatedRight(updatedMaskPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+    tempMap = (*updatedMaskPtr)(cv::Rect(robotGeometryMask_->cols - wheelSize - 1, 0, wheelSize,
+            robotGeometryMask_->rows));
+    tempMapPtr.reset(&tempMap);
+    findElevatedRight(tempMapPtr,  upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
 
     // Get the mask for the top side of the robot.
-    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize)));
-
-    findElevatedTop(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+    tempMap = (*updatedMaskPtr)(cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize));
+    tempMapPtr.reset(&tempMap);
+    findElevatedTop(tempMapPtr,  upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
 
     // Get the mask for the bottom side of the robot.
-    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(robotGeometryMask_->rows - wheelSize - 1, 0,
-            robotGeometryMask_->cols, wheelSize)));
+    tempMap = (*updatedMaskPtr)(cv::Rect(robotGeometryMask_->rows - wheelSize - 1, 0,
+            robotGeometryMask_->cols, wheelSize));
+    tempMapPtr.reset(&tempMap);
+    findElevatedBottom(tempMapPtr,  lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+        wheelCenterDist);
 
-    findElevatedBottom(updatedMaskPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
-
-    // Interpolate the mask values to get the robot's local estimated elevation.
-    for (int i = wheelSize + 1; i < robotSize - wheelSize; ++i)
-    {
-      for (int j = wheelSize + 1; j < robotSize - wheelSize; ++j)
-      {
-        updatedMaskPtr->at<double>(i, j) = robotGeometryMask_->at<double>(i, j) +
-          bilinearInterpolation(cv::Point(j, i),
-            cv::Point(0, 0), cv::Point(updatedMaskPtr->cols - 1, 0),
-            cv::Point(updatedMaskPtr->cols - 1, updatedMaskPtr->rows - 1), cv::Point(0, updatedMaskPtr->rows - 1),
-            upperLeftWheelMeanHeight, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
-            lowerLeftWheelMeanHeight);
-      }
-    }
+    interpolateElevationMap(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
+        lowerRightWheelMeanHeight, lowerLeftWheelMeanHeight);
     // Decide about binary traversability
   }  // End of findTraversability
 
@@ -157,6 +241,39 @@ namespace pandora_vision_obstacle
     double R2 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ12 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ22;
 
     return (Q22.y - P.y) / (Q22.y - Q21.y) * R1 + (P.y - Q11.y) / (Q22.y - Q11.y) * R2;
+  }
+
+  /**
+   * @brief Performs interpolation on the elevation Map
+   * @description Applies bilinear interpolation on the elevation map to fill the
+   * unknown values in the middle of the robot's mask.
+   * @param inputOutputMap[const MatPtr&] The input mask that will be updated to
+   * produce the filled mask.
+   * @param upperLeftWheelMeanHeight[double] The mean estimated height of the upper left wheel.
+   * @param upperRightWheelMeanHeight[double] The mean estimated height of the upper right wheel.
+   * @param lowerRightWheelMeanHeight[double] The mean estimated height of the lower right wheel.
+   * @param lowerLeftWheelMeanHeight[double] The mean estimated height of the lower left wheel.
+   */
+  void TraversabilityMask::interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftWheelMeanHeight,
+      double upperRightWheelMeanHeight, double lowerRightWheelMeanHeight,
+      double lowerLeftWheelMeanHeight)
+  {
+    int wheelSize = metersToSteps(description_->wheelD);
+    double robotSize = metersToSteps(description_->totalD);
+
+    // Interpolate the mask values to get the robot's local estimated elevation.
+    for (int i = wheelSize + 1; i < robotSize - wheelSize; ++i)
+    {
+      for (int j = wheelSize + 1; j < robotSize - wheelSize; ++j)
+      {
+        inputOutputMap->at<double>(i, j) +=
+          bilinearInterpolation(cv::Point(j, i),
+              cv::Point(0, 0), cv::Point(inputOutputMap->cols - 1, 0),
+              cv::Point(inputOutputMap->cols - 1, inputOutputMap->rows - 1), cv::Point(0, inputOutputMap->rows - 1),
+              upperLeftWheelMeanHeight, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
+              lowerLeftWheelMeanHeight);
+      }
+    }
   }
 
   void

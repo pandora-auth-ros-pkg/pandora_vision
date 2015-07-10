@@ -39,6 +39,9 @@
 #ifndef PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_ROBOTGEOMETRYMASKDESCRIPTION_H
 
+#include "opencv2/core/core.hpp"
+#include <boost/shared_ptr.hpp>
+
 namespace pandora_vision
 {
 namespace pandora_vision_obstacle
@@ -53,8 +56,14 @@ namespace pandora_vision_obstacle
     typedef boost::shared_ptr<RobotGeometryMaskDescription const> ConstPtr;
 
    public:
-    RobotGeometryMaskDescription();
-    virtual ~RobotGeometryMaskDescription();
+    RobotGeometryMaskDescription()
+    {
+
+    }
+    virtual ~RobotGeometryMaskDescription()
+    {
+
+    }
 
     cv::Mat mask;  // square mask simulating /base_footprint in dim totalD x totalD
 
@@ -62,12 +71,12 @@ namespace pandora_vision_obstacle
     double barrelH;  // height measured at 6cm from /base_footprint
     double robotH;  // height measured at 12cm from /base_footprint
 
-    int wheelD;  // width of wheel foot - measured 7cm
-    int barrelD;  // width of motor barrel - measured 10cm
-    int robotD;  // width of main robot - measured 8cm
+    double wheelD;  // width of wheel foot - measured 7cm
+    double barrelD;  // width of motor barrel - measured 10cm
+    double robotD;  // width of main robot - measured 8cm
     // half robot mask (al,ar,ah,ab,bl,br,bt,bb) is in max id equal to totalD
     // and in min dim equal to (wheelD + barrelD + robotD/2)
-    int totalD;  // total width/height of square mask
+    double totalD;  // total width/height of square mask
 
     double RESOLUTION;
   };
