@@ -454,7 +454,9 @@ namespace pandora_vision_obstacle
     // Validation based on specific barrels' color
     if (BarrelDetection::color_validation)
     {
-      cv::Mat hsvImage = rgbImage(rectRoi);
+      cv::Mat rgbTemp;
+      rgbImage.copyTo(rgbTemp);
+      cv::Mat hsvImage = rgbTemp(rectRoi);
       cv::Mat binary, binaryTemp;
       // convert RGB image into HSV image
       cv::cvtColor(hsvImage, hsvImage, CV_BGR2HSV);
