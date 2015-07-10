@@ -43,6 +43,7 @@
 
 #include "ros/ros.h"
 #include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
 #include "pandora_vision_obstacle/hard_obstacle_detection/RobotGeometryMaskDescription.h"
 
 namespace pandora_vision
@@ -63,6 +64,9 @@ namespace pandora_vision_obstacle
 
    public:
     TraversabilityMask();
+
+    TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr);
+
     virtual ~TraversabilityMask();
 
     /**
@@ -87,6 +91,21 @@ namespace pandora_vision_obstacle
     double bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
       const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12);
 
+    void setRobotMaskDescriptionPtr(const RobotGeometryMaskDescriptionPtr& robotGeometryMaskDescriptionPtr)
+    {
+      description_ = robotGeometryMaskDescriptionPtr;
+    }
+
+    /**
+     * @brief Creates the Robot Height Mask
+     * @description Creates the height mask for the robot according to the description file.
+     * @param inputOutputMap[const MatPtr&] A pointer to the matrix that contains the mask.
+     * @param description[RobotGeometryMaskDescriptionPtr] A pointer to the parameter structure
+     * that approximately describes the robot.
+     * @return void
+     */
+    void createMaskFromDesc(const MatPtr& inputOutputMask,
+        const RobotGeometryMaskDescriptionPtr& description);
 
    private:
     /**
@@ -109,6 +128,21 @@ namespace pandora_vision_obstacle
      */
     bool
     findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight);
+
+    /**
+     * @brief Performs interpolation on the elevation Map
+     * @description Applies bilinear interpolation on the elevation map to fill the
+     * unknown values in the middle of the robot's mask.
+     * @param inputOutputMap[const MatPtr&] The input mask that will be updated to
+     * produce the filled mask.
+     * @param upperLeftWheelMeanHeight[double] The mean estimated height of the upper left wheel.
+     * @param upperRightWheelMeanHeight[double] The mean estimated height of the upper right wheel.
+     * @param lowerRightWheelMeanHeight[double] The mean estimated height of the lower right wheel.
+     * @param lowerLeftWheelMeanHeight[double] The mean estimated height of the lower left wheel.
+     */
+    void interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftWheelMeanHeight,
+      double upperRightWheelMeanHeight, double lowerRightWheelMeanHeight,
+      double lowerLeftWheelMeanHeight);
 
     /**
      * Fills up wheel with a mask which corresponds to the wheel, performs a
@@ -143,18 +177,21 @@ namespace pandora_vision_obstacle
 
     inline int metersToSteps(double meters)
     {
-      return static_cast<int>(meters / description_->RESOLUTION) + 1;
+      return static_cast<int>(meters / description_->RESOLUTION);
     }
+
    private:
-    //!< This is A matrix
+    /// This is A matrix
     MatPtr robotGeometryMask_;
-    //!< This is geometrical description of robot's base
+    /// This is geometrical description of robot's base
     RobotGeometryMaskDescriptionPtr description_;
-    //!< Local elevation map created
+    /// Local elevation map created
     MatConstPtr elevationMapPtr_;
 
-    //!< center of matrix A
+    /// Center of matrix A
     cv::Point center_;
+
+    friend class TraversabilityMaskTest;
   };
 
   typedef TraversabilityMask::Ptr TraversabilityMaskPtr;
