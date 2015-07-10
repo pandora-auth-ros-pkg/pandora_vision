@@ -199,12 +199,14 @@ namespace pandora_vision_obstacle
        * input vector that contains the vertical lines found
        * @param roi [const cv::Rect&] The bounding box that is
        * used to find the depth distance
+       * @param level [int] The number of stages of the DWT
        * @return [bool] Whether all the points of the bounding box
        * have different depth distance from the average depth distance of
        * vertical lines in the bounding box
        **/
       bool findDifferentROIDepth(const cv::Mat& depthImage,
-          const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi);
+          const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi,
+          int level = 1);
 
     private:
       /// The DWT class object used to perform this operation

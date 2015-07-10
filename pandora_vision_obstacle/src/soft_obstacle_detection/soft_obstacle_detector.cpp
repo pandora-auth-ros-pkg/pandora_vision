@@ -396,15 +396,19 @@ namespace pandora_vision_obstacle
   }
 
   bool SoftObstacleDetector::findDifferentROIDepth(const cv::Mat& depthImage,
-    const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi)
+    const std::vector<cv::Vec4i>& verticalLines, const cv::Rect& roi, int level)
   {
     boost::array<float, 4> meanValue;
+
+    cv::Rect fullFrameRect(roi.x * pow(2, level), roi.y * pow(2, level),
+        roi.width * pow(2, level), roi.height * pow(2, level));
 
     // Split vertically ROI to four parts
     for (int ii = 0; ii < 4; ii++)
     {
-      cv::Mat depthROI = depthImage(cv::Rect(roi.x + roi.width * ii / 4, roi.y,
-            roi.width / 4, roi.height));
+      cv::Mat depthROI = depthImage(cv::Rect(
+            fullFrameRect.x + fullFrameRect.width * ii / 4, fullFrameRect.y,
+            fullFrameRect.width / 4, fullFrameRect.height));
       meanValue[ii] = cv::mean(depthROI)[0];
     }
     float minDepth = *std::min_element(meanValue.begin(), meanValue.end());
@@ -414,9 +418,10 @@ namespace pandora_vision_obstacle
 
     for (size_t ii = 0; ii < verticalLines.size(); ii++)
     {
-      cv::Point startPoint(verticalLines[ii][0],
-          verticalLines[ii][1]);
-      cv::Point endPoint(verticalLines[ii][2], verticalLines[ii][3]);
+      cv::Point startPoint(verticalLines[ii][0] * pow(2, level),
+          verticalLines[ii][1] * pow(2, level));
+      cv::Point endPoint(verticalLines[ii][2] * pow(2, level),
+          verticalLines[ii][3] * pow(2, level));
 
       cv::LineIterator linePoints(depthImage, startPoint, endPoint);
 
@@ -504,12 +509,9 @@ namespace pandora_vision_obstacle
       boost::shared_ptr<cv::Rect> roi(new cv::Rect());
       float probability = detectROI(verticalLines, otsuImage->rows, roi);
 
-      cv::Rect fullFrameRect(roi->x * pow(2, level), roi->y * pow(2, level),
-          roi->width * pow(2, level), roi->height * pow(2, level));
-
       // Examine whether the points of the bounding box have difference in depth
       // distance
-      bool diffDepth = findDifferentROIDepth(depthImage, verticalLines, fullFrameRect);
+      bool diffDepth = findDifferentROIDepth(depthImage, verticalLines, *roi, level);
 
       if (diffDepth)
       {
@@ -525,6 +527,9 @@ namespace pandora_vision_obstacle
           ROS_INFO("Soft Obstacle Detected!");
 
           cv::Mat imageToShow = rgbImage.clone();
+          cv::Rect fullFrameRect(roi->x * pow(2, level), roi->y * pow(2, level),
+              roi->width * pow(2, level), roi->height * pow(2, level));
+
           if (showROI_)
           {
             cv::rectangle(imageToShow, fullFrameRect, cv::Scalar(0, 255, 0), 4);
