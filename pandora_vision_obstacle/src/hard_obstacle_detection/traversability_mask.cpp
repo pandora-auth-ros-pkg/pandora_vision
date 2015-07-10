@@ -88,6 +88,7 @@ namespace pandora_vision_obstacle
     bool lowerRightWheelValid = findHeightOnWheel(lowerRightWheelPos, &lowerRightWheelMeanHeight,
         &lowerRightWheelStdDev);
 
+    // TODO(Vassilis Choutas): Check return values
     if (!upperLeftWheelValid)
     {
       return -1;
@@ -111,7 +112,7 @@ namespace pandora_vision_obstacle
 
     double wheelCenterDist = description_->robotD + 2 * description_->barrelD + description_->wheelD;
     // Get the mask for the left side of the robot
-    MatPtr updatedMaskPtr;
+    MatPtr updatedMaskPtr(new cv::Mat(robotGeometryMask_->size(), CV_64FC1));
     robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(0, 0, wheelSize, robotGeometryMask_->rows)));
 
     findElevatedLeft(updatedMaskPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
@@ -140,12 +141,13 @@ namespace pandora_vision_obstacle
       {
         updatedMaskPtr->at<double>(i, j) = robotGeometryMask_->at<double>(i, j) +
           bilinearInterpolation(cv::Point(j, i),
-            cv::Point(0, 0), cv::Point(0, updatedMaskPtr->cols),
-            cv::Point(updatedMaskPtr->cols, updatedMaskPtr->rows), cv::Point(updatedMaskPtr->rows, 0),
+            cv::Point(0, 0), cv::Point(updatedMaskPtr->cols - 1, 0),
+            cv::Point(updatedMaskPtr->cols - 1, updatedMaskPtr->rows - 1), cv::Point(0, updatedMaskPtr->rows - 1),
             upperLeftWheelMeanHeight, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
             lowerLeftWheelMeanHeight);
       }
     }
+    // Decide about binary traversability
   }  // End of findTraversability
 
   double TraversabilityMask::bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
@@ -154,7 +156,7 @@ namespace pandora_vision_obstacle
     double R1 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ11 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ21;
     double R2 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ12 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ22;
 
-    return (Q22.y - P.y) / (Q22.y - Q21.y) * R1 + (P.y - Q11.y) / (P.y - Q11.y) / (Q22.y - Q11.y) * R2;
+    return (Q22.y - P.y) / (Q22.y - Q21.y) * R1 + (P.y - Q11.y) / (Q22.y - Q11.y) * R2;
   }
 
   void
@@ -174,6 +176,7 @@ namespace pandora_vision_obstacle
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
     int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
     double angle;
     double slope;
     // Find the wheel that is located higher
@@ -186,10 +189,10 @@ namespace pandora_vision_obstacle
       for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-            + hBack;
+          + hBack;
         for (int i = 0; i < al->cols; ++i)
         {
-          al->at<double>(j, i) += val;
+          al->at<double>(robotSize - j, i) += val;
         }
       }
     }
@@ -201,8 +204,8 @@ namespace pandora_vision_obstacle
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
       {
-        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
-            + hForward;
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+          + hForward;
         for (int i = 0; i < al->cols; ++i)
         {
           al->at<double>(j, i) += val;
@@ -219,6 +222,7 @@ namespace pandora_vision_obstacle
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
     int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
     double angle;
     double slope;
     // Find the wheel that is located higher
@@ -231,10 +235,10 @@ namespace pandora_vision_obstacle
       for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-            + hBack;
+          + hBack;
         for (int i = 0; i < ar->cols; ++i)
         {
-          ar->at<double>(j, i) += val;
+          ar->at<double>(robotSize - j, i) += val;
         }
       }
     }
@@ -246,8 +250,8 @@ namespace pandora_vision_obstacle
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
       {
-        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
-            + hForward;
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+          + hForward;
         for (int i = 0; i < ar->cols; ++i)
         {
           ar->at<double>(j, i) += val;
@@ -264,6 +268,7 @@ namespace pandora_vision_obstacle
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
     int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
     double angle;
     double slope;
     // Find the wheel that is located higher
@@ -291,11 +296,11 @@ namespace pandora_vision_obstacle
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < at->cols - wheelSize; ++j)
       {
-        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hRight;
         for (int i = 0; i < at->rows; ++i)
         {
-          at->at<double>(i, j) += val;
+          at->at<double>(i, robotSize - j) += val;
         }
       }
     }
@@ -309,6 +314,7 @@ namespace pandora_vision_obstacle
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
     int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
     double angle;
     double slope;
     // Find the wheel that is located higher
@@ -336,11 +342,11 @@ namespace pandora_vision_obstacle
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < ab->cols - wheelSize; ++j)
       {
-        double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hRight;
         for (int i = 0; i < ab->rows; ++i)
         {
-          ab->at<double>(i, j) += val;
+          ab->at<double>(i, robotSize - j) += val;
         }
       }
     }

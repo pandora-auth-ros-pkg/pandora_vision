@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
   )
 
 generate_dynamic_reconfigure_options(
-  config/barrel_node.cfg
   config/pandora_vision_obstacle/soft_obstacle_cfg.cfg
   config/pandora_vision_obstacle/hard_obstacle_cfg.cfg
   config/pandora_vision_obstacle/elevation_map.cfg
