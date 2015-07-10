@@ -84,6 +84,10 @@ namespace pandora_vision_obstacle
     void
     loadGeometryMask(const ros::NodeHandle& nh);
 
+    double bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
+      const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12);
+
+
    private:
     /**
      * Finds B matrices, input is respective A matrix, heights and wheel

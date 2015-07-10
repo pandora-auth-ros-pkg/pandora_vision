@@ -46,8 +46,7 @@ namespace pandora_vision_obstacle
   TraversabilityMask::
   TraversabilityMask() {}
 
-  TraversabilityMask::
-  ~TraversabilityMask() {}
+  TraversabilityMask::~TraversabilityMask() {}
 
   /**
    * @brief Check if the provided point is traversible by the robot or not
@@ -65,24 +64,98 @@ namespace pandora_vision_obstacle
     cv::Point lowerLeftWheelPos(
         metersToSteps(center_.x - description_->robotD - description_->barrelD - description_->wheelD),
         metersToSteps(center_.y + description_->robotD + description_->barrelD + description_->wheelD));
+    cv::Point upperRightWheelPos(
+        metersToSteps(center_.x + description_->robotD + 2 * description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD + 2 * description_->barrelD - description_->wheelD));
+    // Calculate the current position of the Lower Right Wheel.
+    cv::Point lowerRightWheelPos(
+        metersToSteps(center_.x + description_->robotD + description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD + description_->barrelD + description_->wheelD));
 
     double upperLeftWheelMeanHeight, upperLeftWheelStdDev;
     bool upperLeftWheelValid = findHeightOnWheel(upperLeftWheelPos, &upperLeftWheelMeanHeight,
         &upperLeftWheelStdDev);
+
     double lowerLeftWheelMeanHeight, lowerLeftWheelStdDev;
     bool lowerLeftWheelValid = findHeightOnWheel(lowerLeftWheelPos, &lowerLeftWheelMeanHeight,
         &lowerLeftWheelStdDev);
+
+    double upperRightWheelMeanHeight, upperRightWheelStdDev;
+    bool upperRightWheelValid = findHeightOnWheel(upperRightWheelPos, &upperRightWheelMeanHeight,
+        &upperRightWheelStdDev);
+
+    double lowerRightWheelMeanHeight, lowerRightWheelStdDev;
+    bool lowerRightWheelValid = findHeightOnWheel(lowerRightWheelPos, &lowerRightWheelMeanHeight,
+        &lowerRightWheelStdDev);
+
     if (!upperLeftWheelValid)
     {
-      // leftElevationMap.reset();
       return -1;
     }
     if (!lowerLeftWheelValid)
     {
-      // leftElevationMap.reset();
       return -1;
     }
+
+    if (!lowerRightWheelValid)
+    {
+      return -1;
+    }
+    if (!upperLeftWheelValid)
+    {
+      return -1;
+    }
+
+    int wheelSize = metersToSteps(description_->wheelD);
+    double robotSize = metersToSteps(description_->totalD);
+
+    double wheelCenterDist = description_->robotD + 2 * description_->barrelD + description_->wheelD;
+    // Get the mask for the left side of the robot
+    MatPtr updatedMaskPtr;
+    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(0, 0, wheelSize, robotGeometryMask_->rows)));
+
+    findElevatedLeft(updatedMaskPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+
+    // Get the mask for the right side of the robot.
+    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(robotGeometryMask_->cols - wheelSize - 1, 0, wheelSize,
+            robotGeometryMask_->rows)));
+
+    findElevatedRight(updatedMaskPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+
+    // Get the mask for the top side of the robot.
+    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize)));
+
+    findElevatedTop(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+
+    // Get the mask for the bottom side of the robot.
+    robotGeometryMask_->copyTo((*updatedMaskPtr)(cv::Rect(robotGeometryMask_->rows - wheelSize - 1, 0,
+            robotGeometryMask_->cols, wheelSize)));
+
+    findElevatedBottom(updatedMaskPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+
+    // Interpolate the mask values to get the robot's local estimated elevation.
+    for (int i = wheelSize + 1; i < robotSize - wheelSize; ++i)
+    {
+      for (int j = wheelSize + 1; j < robotSize - wheelSize; ++j)
+      {
+        updatedMaskPtr->at<double>(i, j) = robotGeometryMask_->at<double>(i, j) +
+          bilinearInterpolation(cv::Point(j, i),
+            cv::Point(0, 0), cv::Point(0, updatedMaskPtr->cols),
+            cv::Point(updatedMaskPtr->cols, updatedMaskPtr->rows), cv::Point(updatedMaskPtr->rows, 0),
+            upperLeftWheelMeanHeight, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
+            lowerLeftWheelMeanHeight);
+      }
+    }
   }  // End of findTraversability
+
+  double TraversabilityMask::bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
+      const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12)
+  {
+    double R1 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ11 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ21;
+    double R2 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ12 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ22;
+
+    return (Q22.y - P.y) / (Q22.y - Q21.y) * R1 + (P.y - Q11.y) / (P.y - Q11.y) / (Q22.y - Q11.y) * R2;
+  }
 
   void
   TraversabilityMask::setElevationMap(const boost::shared_ptr<cv::Mat const>& map)
@@ -114,7 +187,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hBack;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < al->cols; ++i)
         {
           al->at<double>(j, i) += val;
         }
@@ -130,7 +203,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
             + hForward;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < al->cols; ++i)
         {
           al->at<double>(j, i) += val;
         }
@@ -159,7 +232,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hBack;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < ar->cols; ++i)
         {
           ar->at<double>(j, i) += val;
         }
@@ -175,7 +248,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
             + hForward;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < ar->cols; ++i)
         {
           ar->at<double>(j, i) += val;
         }
@@ -204,7 +277,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hLeft;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < at->rows; ++i)
         {
           at->at<double>(i, j) += val;
         }
@@ -216,11 +289,11 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hLeft - hRight) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < at->rows - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < at->cols - wheelSize; ++j)
       {
         double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
             + hRight;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < at->rows; ++i)
         {
           at->at<double>(i, j) += val;
         }
@@ -249,7 +322,7 @@ namespace pandora_vision_obstacle
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hLeft;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < ab->rows; ++i)
         {
           ab->at<double>(i, j) += val;
         }
@@ -261,11 +334,11 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hLeft - hRight) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < ab->rows - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < ab->cols - wheelSize; ++j)
       {
         double val = slope * (d - (j * description_->RESOLUTION - description_->wheelD / 2))
             + hRight;
-        for (int i = 0; i < wheelSize; ++i)
+        for (int i = 0; i < ab->rows; ++i)
         {
           ab->at<double>(i, j) += val;
         }
@@ -311,8 +384,7 @@ namespace pandora_vision_obstacle
     return true;
   }
 
-  TraversabilityMask::MatPtr
-  TraversabilityMask::cropToRight()
+  TraversabilityMask::MatPtr TraversabilityMask::cropToRight()
   {
   }
 
