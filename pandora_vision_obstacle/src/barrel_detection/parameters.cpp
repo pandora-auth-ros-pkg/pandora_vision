@@ -95,6 +95,12 @@ namespace pandora_vision_obstacle
       configBarrel.min_circle_overlapping;
     BarrelDetection::max_corner_thresh =
       configBarrel.max_corner_thresh;
+
+    BarrelDetection::color_validation =
+      configBarrel.color_validation;
+
+    BarrelDetection::specific_color_min_overlap =
+      configBarrel.specific_color_min_overlap;
   }
 
   // Show the barrel that depth node segments through FSD
@@ -110,12 +116,15 @@ namespace pandora_vision_obstacle
   int BarrelDetection::fsd_min_pair_dist = 100;
   int BarrelDetection::fsd_max_pair_dist = 640;
   int BarrelDetection::fsd_no_of_peaks = 1;
-  float BarrelDetection::roi_variance_thresh = 60.0;
-  float BarrelDetection::differential_depth_unsymmetry_thresh = 30.0;
+  float BarrelDetection::roi_variance_thresh = 110.0;
+  float BarrelDetection::differential_depth_unsymmetry_thresh = 0.2;
   float BarrelDetection::symmetry_line_depth_difference_thresh = 11.0;
-  float BarrelDetection::curve_approximation_max_epsilon = 1600.0;
+  float BarrelDetection::curve_approximation_max_epsilon = 1200.0;
   float BarrelDetection::min_circle_overlapping = 0.25;
-  float BarrelDetection::max_corner_thresh = 35.0;
+  float BarrelDetection::max_corner_thresh = 65.0;
 
+  bool BarrelDetection::color_validation = false;
+
+  float BarrelDetection::specific_color_min_overlap = 0.2;
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

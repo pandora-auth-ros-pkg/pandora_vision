@@ -93,6 +93,10 @@ namespace pandora_vision_obstacle
     static float curve_approximation_max_epsilon;
     static float min_circle_overlapping;
     static float max_corner_thresh;
+
+    static bool color_validation;
+
+    static float specific_color_min_overlap;
   };
 
 }  // namespace pandora_vision_obstacle
