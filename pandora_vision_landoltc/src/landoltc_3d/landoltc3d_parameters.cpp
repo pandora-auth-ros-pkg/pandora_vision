@@ -41,19 +41,39 @@ namespace pandora_vision
 {
 namespace pandora_vision_landoltc
 {
-  double Landoltc3DParameters::gradientThreshold = 60;
+  void LandoltcParameters::configLandoltC(const ros::NodeHandle& nh)
+  {
 
-  double Landoltc3DParameters::centerThreshold = 90;
+   //!< The dynamic reconfigure parameter's callback
+    server_.reset( new dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig >(nh) );
+    server_->setCallback(boost::bind(&Landoltc3dParameters::parametersCallback, this, _1, _2));
 
-  double Landoltc3DParameters::huMomentsPrec = 0.3;
+    nh.param("/gradientThreshold", gradientThreshold, 60.);
+    nh.param("/centerThreshold", centerThreshold, 90.);
+    nh.param("/huMomentsPrec", huMomentsPrec, 0.3);
+    nh.param("/adaptiveThresholdSubtractSize", adaptiveThresholdSubtractSize, 2);
+    nh.param("/visualization", visualization, false);
+    nh.param("/timerThreshold", timerThreshold, 0.05);
+  }
 
-  int Landoltc3DParameters::adaptiveThresholdSubtractSize = 2;
-
-  double Landoltc3DParameters::bradleyPerc = 0.15;
-
-  bool Landoltc3DParameters::visualization = false;
-
-  double Landoltc3DParameters::timerThreshold = 0.05;
+ /**
+  @brief The function called when a parameter is changed
+  @param[in] config [const pandora_vision_landoltc::landoltc_cfgConfig&]
+  @param[in] level [const uint32_t] The level
+  @return void
+  **/
+  void Landoltc3dParameters::parametersCallback(
+    const ::pandora_vision_landoltc::landoltc_cfgConfig& config,
+    const uint32_t& level)
+  {
+    //!< Threshold parameters
+    gradientThreshold = config.gradientThreshold;
+    centerThreshold = config.centerThreshold;
+    huMomentsPrec = config.huMomentsPrec;
+    adaptiveThresholdSubtractSize = config.adaptiveThresholdSubtractSize;
+    visualization = config.visualization;
+    timerThreshold = config.timerThreshold;
+  }
 
 }  // namespace pandora_vision_landoltc
 }  // namespace pandora_vision

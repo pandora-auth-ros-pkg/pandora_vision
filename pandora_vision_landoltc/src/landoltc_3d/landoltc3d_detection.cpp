@@ -52,27 +52,25 @@ namespace pandora_vision_landoltc
 @param void
 @return void
 **/
-LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landoltc3dNowON(false)
+LandoltC3dProcessor:::initialize(const std::string& ns, sensor_processor::Handler* handler)
 {
-  getGeneralParams();
+   VisionProcessor::initialize(ns, handler);
 
-  // Convert field of view from degrees to rads
-  hfov = hfov * CV_PI / 180;
-  vfov = vfov * CV_PI / 180;
+   getGeneralParams();
 
   // Initiliaze and preprocess reference image
   _landoltc3dDetector.initializeReferenceImage(patternPath);
 
-  if (PredatorOn)
-  {
-    _landoltc3dPredator = _nh.subscribe(predator_topic_name, 1,
-    &LandoltC3dDetection::predatorCallback, this);
-  }
-  else
-  {
-    _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
-    &LandoltC3dDetection::imageCallback, this);
-  }
+  /* if (PredatorOn) */
+  // {
+    // _landoltc3dPredator = _nh.subscribe(predator_topic_name, 1,
+    // &LandoltC3dProcessor::predatorCallback, this);
+  // }
+  // else
+  // {
+    // _inputImageSubscriber = _nh.subscribe(imageTopic, 1,
+    // &LandoltC3dProcessor::imageCallback, this);
+  // }
 
   // Setting Predator value ON or OFF for the 3DLandoltC Detector
   // This is used for the fusion function later, in order to assign
@@ -81,17 +79,11 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
   _landoltc3dDetector.setPredatorOn(PredatorOn);
 
   // The dynamic reconfigure parameter's callback
-  server.setCallback(boost::bind(&LandoltC3dDetection::parametersCallback, this, _1, _2));
-
-  //!< initialize states - robot starts in STATE_OFF
-  curState = state_manager_msgs::RobotModeMsg::MODE_OFF;
-  prevState = state_manager_msgs::RobotModeMsg::MODE_OFF;
-
-  clientInitialize();
+  server.setCallback(boost::bind(&LandoltC3dProcessor::parametersCallback, this, _1, _2));
 
   _lastTimeProcessed = ros::Time::now();
 
-  ROS_INFO("[landoltc3d_node] : Created LandoltC3d Detection instance");
+  ROS_INFO("[landoltc3d_node] : Created LandoltC3d Processor instance");
 }
 
 /**
@@ -99,22 +91,22 @@ LandoltC3dDetection::LandoltC3dDetection(const std::string& ns): _nh(ns), landol
 @return void
 **/
 
-LandoltC3dDetection::~LandoltC3dDetection(void)
+LandoltC3dProcessor::~LandoltC3dDetection(void)
 {
-  ROS_INFO("[landoltc3d_node] : Destroying LandoltC3d Detection instance");
+  ROS_INFO("[landoltc3d_node] : Destroying LandoltC3d Processor instance");
 }
 
 /**
 @brief Get parameters referring to view and frame characteristics
 @return void
 **/
-void LandoltC3dDetection::getGeneralParams()
+void LandoltC3dProcessor::getGeneralParams()
 {
   packagePath = ros::package::getPath("pandora_vision_landoltc");
 
   // Declare publisher and advertise topic
   // where algorithm results are posted if it works alone
-  if (_nh.getParam("published_topic_names/landoltc_alert", param))
+  if (this->getProcessorNodeHandle().getParam("published_topic_names/landoltc_alert", param))
   {
     _landoltc3dPublisher =
       _nh.advertise<pandora_vision_msgs::LandoltcAlertVector>(param, 10);
@@ -127,7 +119,7 @@ void LandoltC3dDetection::getGeneralParams()
 
   // Declare subscriber
   // where algorithm results are posted if it works with predator
-  if (_nh.getParam("subscribed_topic_names/predator_topic_name", predator_topic_name))
+  if (this->getProcessorNodeHandle().getParam("subscribed_topic_names/predator_topic_name", predator_topic_name))
     ROS_DEBUG("[landoltc3d_node] : Loaded topic name to use with predator");
   else
   {
@@ -184,24 +176,6 @@ void LandoltC3dDetection::getGeneralParams()
     ROS_BREAK();
   }
 
-  // Get the HFOV parameter if available;
-  if (_nh.getParam("hfov", hfov))
-    ROS_DEBUG_STREAM("HFOV : " << hfov);
-  else
-  {
-    ROS_FATAL("[landoltc3d_node] : Horiznontal field of view not found.");
-    ROS_BREAK();
-  }
-
-  // Get the VFOV parameter if available;
-  if (_nh.getParam("vfov", vfov))
-    ROS_DEBUG_STREAM("VFOV : " << vfov);
-  else
-  {
-    ROS_FATAL("[landoltc3d_node] : Vertical field of view not found.");
-    ROS_BREAK();
-  }
-
   // Get the listener's topic;
   if (_nh.getParam("/" + cameraName + "/topic_name", imageTopic))
     ROS_DEBUG_STREAM("imageTopic : " << imageTopic);
@@ -217,7 +191,7 @@ void LandoltC3dDetection::getGeneralParams()
   @param void
   @return bool Returns true is frame_id found or false if not
 **/
-bool LandoltC3dDetection::getParentFrameId()
+bool LandoltC3dProcessor::getParentFrameId()
 {
   // Parse robot description
   const std::string model_param_name = "/robot_description";
@@ -254,7 +228,7 @@ bool LandoltC3dDetection::getParentFrameId()
 @param msg [const sensor_msgs::ImageConstPtr& msg] The RGB Image
 @return void
 **/
-void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+void LandoltC3dProcessor::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
   if ( ros::Time::now() - _lastTimeProcessed < ros::Duration (Landoltc3DParameters::timerThreshold))
       return;
@@ -290,7 +264,7 @@ void LandoltC3dDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   landoltc3dCallback();
 }
 
-void LandoltC3dDetection::predatorCallback(
+void LandoltC3dProcessor::predatorCallback(
     const pandora_vision_msgs::Predator& msg)
 {
   cv_bridge::CvImagePtr in_msg;
@@ -327,7 +301,7 @@ void LandoltC3dDetection::predatorCallback(
  @return void
  **/
 
-void LandoltC3dDetection::landoltc3dCallback()
+void LandoltC3dProcessor::landoltc3dCallback()
 {
   if (!landoltc3dNowON)
   {
@@ -386,7 +360,7 @@ void LandoltC3dDetection::landoltc3dCallback()
   @param newState [int] The robot's new state
   @return void
 */
-void LandoltC3dDetection::startTransition(int newState)
+void LandoltC3dProcessor::startTransition(int newState)
 {
   curState = newState;
 
@@ -396,8 +370,26 @@ void LandoltC3dDetection::startTransition(int newState)
      state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE)
     || (curState ==
         state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
-    || (curState ==
-        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
+    || (curState =onfigLandoltC(const ros::NodeHandle& nh);
+        
+            /**
+             *     @brief The function called when a parameter is changed
+             *         @param[in] config [const pandora_vision_landoltc::landoltc_cfgConfig&]
+             *             @param[in] level [const uint32_t] The level
+             *                 @return void
+             *                     **/
+        void parametersCallback(
+              const ::pandora_vision_landoltc::landoltc_cfgConfig& config,
+                  const uint32_t& level
+          );
+        
+            dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig >::CallbackType f;
+            
+                /// The dynamic reconfigure (landoltc) parameters' server
+                //    boost::shared_ptr< dynamic_reconfigure::Server<
+                //    ::pandora_vision_landoltc::landoltc_cfgConfig > >
+                //        server_;
+                //        state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
     || (curState ==
         state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
 
@@ -419,7 +411,7 @@ void LandoltC3dDetection::startTransition(int newState)
  @brief After completion of state transition
  @return void
  */
-void LandoltC3dDetection::completeTransition()
+void LandoltC3dProcessor::completeTransition()
 {
   ROS_INFO("[Landoltc3d_node] : Transition Complete");
 }
@@ -430,7 +422,7 @@ void LandoltC3dDetection::completeTransition()
   @param[in] level [const uint32_t] The level
   @return void
 **/
-void LandoltC3dDetection::parametersCallback(const ::pandora_vision_landoltc::landoltc3d_cfgConfig& config,
+void LandoltC3dProcessor::parametersCallback(const ::pandora_vision_landoltc::landoltc3d_cfgConfig& config,
 const uint32_t& level)
 {
   // Threshold parameters

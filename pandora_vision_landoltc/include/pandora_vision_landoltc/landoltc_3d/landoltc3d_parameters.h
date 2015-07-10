@@ -46,6 +46,24 @@ namespace pandora_vision_landoltc
 {
   struct Landoltc3DParameters
   {
+    void configLandoltC(const ros::NodeHandle& nh);
+
+    /**
+    @brief The function called when a parameter is changed
+    @param[in] config [const pandora_vision_landoltc::landoltc_cfgConfig&]
+    @param[in] level [const uint32_t] The level
+    @return void
+    **/
+    void parametersCallback(
+    const ::pandora_vision_landoltc::landoltc_cfgConfig& config,
+    const uint32_t& level);
+
+    dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig >::CallbackType f;
+
+    /// The dynamic reconfigure (landoltc) parameters' server
+    boost::shared_ptr< dynamic_reconfigure::Server< ::pandora_vision_landoltc::landoltc_cfgConfig > >
+    server_;
+
     /// Threshold parameters
     static double gradientThreshold;
     static double centerThreshold;
