@@ -339,23 +339,132 @@ namespace pandora_vision_obstacle
     }
   }
 
-  TEST_F(TraversabilityMaskTest, findElevatedLeftRightHorizontal)
+  TEST_F(TraversabilityMaskTest, findElevatedLeftHorizontal)
   {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
     MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
-        cv::Rect(0, 0, wheelSize_, updatedElevationMaskPtr_->rows)));
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
 
-    double upperLeftWheelMeanHeight = 0.0;
-    double lowerLeftWheelMeanHeight = 0.0;
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.0;
 
-    findElevatedLeftRight(tempMapPtr,  upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, descriptionPtr_->totalD);
+    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
     for (int ii = 0; ii < tempMapPtr->rows; ++ii)
     {
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
       {
-        ASSERT_EQ(updatedElevationMaskPtr_->at<double>(ii, jj),
-                  tempMapPtr->at<double>(ii, jj));
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
+                    tempMapPtr->at<double>(ii, jj), 1e-6);
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedRightHorizontal)
+  {
+    int bBoxX = updatedElevationMaskPtr_->cols - wheelSize_;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.0;
+
+    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+    {
+      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
+                    tempMapPtr->at<double>(ii, jj), 1e-6);
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedTopHorizontal)
+  {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = updatedElevationMaskPtr_->cols;
+    int bBoxHeight = wheelSize_;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.0;
+
+    findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->cols, tempMapPtr->cols);
+    ASSERT_EQ(wheelSize_, tempMapPtr->rows);
+    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+    {
+      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
+                    tempMapPtr->at<double>(ii, jj), 1e-6);
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedBottomHorizontal)
+  {
+    int bBoxX = 0;
+    int bBoxY = updatedElevationMaskPtr_->rows - wheelSize_;
+    int bBoxWidth = updatedElevationMaskPtr_->cols;
+    int bBoxHeight = wheelSize_;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.0;
+
+    findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->cols, tempMapPtr->cols);
+    ASSERT_EQ(wheelSize_, tempMapPtr->rows);
+    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+    {
+      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
+                    tempMapPtr->at<double>(ii, jj), 1e-6);
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedLeftSlopeBackWheelHigher)
+  {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.2;
+
+    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+    {
+      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
+                    tempMapPtr->at<double>(ii, jj), 1e-6);
       }
     }
   }
