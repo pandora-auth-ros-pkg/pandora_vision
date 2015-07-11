@@ -154,11 +154,13 @@ namespace pandora_vision_obstacle
 
   TEST_F(TraversabilityMaskTest, ExtractWheelAreaTest)
   {
-    MatPtr elevationMapPtr;
+    MatPtr elevationMapPtr(new cv::Mat);
     int width = 300;
     int height = 300;
 
     createUniformElevationMap(elevationMapPtr, width, height, 0);
+
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
     traversabilityMaskPtr_->getRobotMaskPtr()->copyTo(*updatedElevationMaskPtr_);
     MatPtr wheelElevationPtr(new cv::Mat(wheelSize_, wheelSize_, CV_64FC1));
@@ -166,13 +168,12 @@ namespace pandora_vision_obstacle
     {
       for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
-        cv::Point wheelPos(i, j);
+        cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
         for (int k = 0; k < wheelSize_; ++k)
         {
           for (int ii = 0; ii < wheelSize_; ++ii)
           {
-            std::cout << k << " " << ii << std::endl;
             ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
                 elevationMapPtr->at<double>(i + k, j + ii), 0.1)
               << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal!" << std::endl;
