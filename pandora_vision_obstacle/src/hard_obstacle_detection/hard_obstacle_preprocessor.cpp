@@ -136,7 +136,7 @@ namespace pandora_vision_obstacle
     cv::Mat colorMapImg;
 
     // Find the known areas in the map.
-    cv::Mat mask = elevationMapStamped->image != -std::numeric_limits<double>::max();
+    cv::Mat mask = elevationMapStamped->image != unknownElevation;
 
     // Normalize only the map elements that correspond to known cells.
     cv::normalize(elevationMapStamped->image, elevationMapImg, 0, 1, cv::NORM_MINMAX, -1, mask);
@@ -187,7 +187,7 @@ namespace pandora_vision_obstacle
 
     // Create the output Elevation Map
     outputImgPtr->image = cv::Mat(elevationMapHeight_, elevationMapWidth_, CV_64FC1);
-    outputImgPtr->image.setTo(-std::numeric_limits<double>::max());
+    outputImgPtr->image.setTo(unknownElevation);
     outputImgPtr->header = inputPointCloud->header;
 
     for (int ii = 0; ii < sensorPointCloudPtr->size(); ++ii)

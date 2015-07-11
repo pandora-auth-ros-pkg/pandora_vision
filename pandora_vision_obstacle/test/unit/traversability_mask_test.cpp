@@ -80,6 +80,7 @@ namespace pandora_vision_obstacle
         descriptionPtr_->robotD = 0.08;
         descriptionPtr_->totalD = descriptionPtr_->wheelD + 2 * descriptionPtr_->barrelD
           + descriptionPtr_->robotD;
+        descriptionPtr_->maxPossibleAngle = 20;
         descriptionPtr_->RESOLUTION = 0.01;
       }
 

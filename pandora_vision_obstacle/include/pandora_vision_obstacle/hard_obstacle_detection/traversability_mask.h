@@ -91,6 +91,24 @@ namespace pandora_vision_obstacle
     double bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
       const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12);
 
+    /**
+     * @brief Applies barycentric Interpolation to calculate unknown values in a triangle.
+     * @description Given the three vertices of the triangles and their corresponding values
+     * we calculate the barycentric coordinates of the query point and using them the approximate value
+     * of the function at this point
+     * @param P[const cv::Point&] The query point where the interpolation will be performed.
+     * @param A[const cv::Point&] A vertice of the triangle
+     * @param B[const cv::Point&] The second vertice of the triangle.
+     * @param C[const cv::Point&] The third vertice of the triangle.
+     * @param fA[double] The value of the function at the first vertice.
+     * @param fB[double] The value of the function at the second vertice.
+     * @param fC[double] The value of the function at the final vertice.
+     * @return double The interpolated value at the query point.
+     */
+    double barycentricInterpolation(const cv::Point& P, const cv::Point& A,
+      const cv::Point& B, const cv::Point&C, double fA, double fB, double fC);
+
+
     void setRobotMaskDescriptionPtr(const RobotGeometryMaskDescriptionPtr& robotGeometryMaskDescriptionPtr)
     {
       description_ = robotGeometryMaskDescriptionPtr;
@@ -118,10 +136,16 @@ namespace pandora_vision_obstacle
      * distance. Should compare wheel heights and make the proper
      * transformations
      */
-    void
+    bool
     findElevatedLeftRight(MatPtr aLeftRight, double hForward, double hBack, double d);
-    void
+    bool
     findElevatedTopBottom(MatPtr aTopBottom, double hLeft, double hRight, double d);
+
+    bool
+    findElevatedLeftRightBody(MatPtr aLeftRight, double hForward, double hBack, double d);
+
+    bool
+    findElevatedTopBottomBody(MatPtr aTopBottom, double hLeft, double hRight, double d);
 
     /**
      * @brief: find mean and stdev of height on wheel, false if wheel has
@@ -141,9 +165,9 @@ namespace pandora_vision_obstacle
      * @param lowerRightWheelMeanHeight[double] The mean estimated height of the lower right wheel.
      * @param lowerLeftWheelMeanHeight[double] The mean estimated height of the lower left wheel.
      */
-    void interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftWheelMeanHeight,
-      double upperRightWheelMeanHeight, double lowerRightWheelMeanHeight,
-      double lowerLeftWheelMeanHeight);
+    void interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftCornerMeanHeight,
+      double upperRightCornerMeanHeight, double lowerRightCornerMeanHeight,
+      double lowerLeftCornerMeanHeight);
 
     /**
      * Fills up wheel with a mask which corresponds to the wheel, performs a
@@ -194,6 +218,10 @@ namespace pandora_vision_obstacle
 
     friend class TraversabilityMaskTest;
   };
+
+  const int8_t occupiedArea = 70;
+  const int8_t freeArea = 0;
+  const int8_t unknownArea = 51;
 
   typedef TraversabilityMask::Ptr TraversabilityMaskPtr;
   typedef TraversabilityMask::ConstPtr TraversabilityMaskConstPtr;

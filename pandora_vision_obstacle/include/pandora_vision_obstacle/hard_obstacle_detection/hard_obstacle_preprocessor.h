@@ -40,6 +40,7 @@
 #define PANDORA_VISION_OBSTACLE_HARD_OBSTACLE_DETECTION_HARD_OBSTACLE_PREPROCESSOR_H
 
 #include <string>
+#include <limits>
 
 #include <tf/transform_listener.h>
 #include <dynamic_reconfigure/server.h>
@@ -133,6 +134,8 @@ namespace pandora_vision_obstacle
     dynamic_reconfigure::Server< ::pandora_vision_obstacle::elevation_mapConfig >::CallbackType
       reconfCallback_;
   };
+
+  const double unknownElevation = - std::numeric_limits<double>::max();
 
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

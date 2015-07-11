@@ -34,7 +34,9 @@
  *
  * Authors:
  *   Tsirigotis Christos <tsirif@gmail.com>
- *********************************************************************/
+ *   Vassilis Choutas <vasilis4ch@gmail.com>
+ *   Kofinas Miltiadis <mkofinas@gmail.com>
+ *   *********************************************************************/
 
 #include <limits>
 #include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
@@ -139,8 +141,8 @@ namespace pandora_vision_obstacle
         robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) = description_->robotH;
       }
     }
-    // cv::imshow("mask", *robotGeometryMask_);
-    // cv::waitKey(0);
+    cv::imshow("mask", *robotGeometryMask_);
+    cv::waitKey(0);
     return;
   }
 
@@ -155,19 +157,19 @@ namespace pandora_vision_obstacle
 
     // Calculate the current position of the Upper Left Wheel.
     cv::Point upperLeftWheelPos(
-        metersToSteps(center_.x - description_->robotD - 2 * description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y - description_->robotD - 2 * description_->barrelD - description_->wheelD));
+        metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD - description_->wheelD));
     // Calculate the current position of the Lower Left Wheel.
     cv::Point lowerLeftWheelPos(
-        metersToSteps(center_.x - description_->robotD - description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD + description_->barrelD + description_->wheelD));
+        metersToSteps(center_.x - description_->robotD / 2  - description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD + description_->wheelD));
     cv::Point upperRightWheelPos(
-        metersToSteps(center_.x + description_->robotD + 2 * description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD + 2 * description_->barrelD - description_->wheelD));
+        metersToSteps(center_.x + description_->robotD / 2  + description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD - description_->wheelD));
     // Calculate the current position of the Lower Right Wheel.
     cv::Point lowerRightWheelPos(
-        metersToSteps(center_.x + description_->robotD + description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD + description_->barrelD + description_->wheelD));
+        metersToSteps(center_.x + description_->robotD / 2  + description_->barrelD - description_->wheelD),
+        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD + description_->wheelD));
 
     double upperLeftWheelMeanHeight, upperLeftWheelStdDev;
     bool upperLeftWheelValid = findHeightOnWheel(upperLeftWheelPos, &upperLeftWheelMeanHeight,
@@ -185,60 +187,213 @@ namespace pandora_vision_obstacle
     bool lowerRightWheelValid = findHeightOnWheel(lowerRightWheelPos, &lowerRightWheelMeanHeight,
         &lowerRightWheelStdDev);
 
-    // TODO(Vassilis Choutas): Check return values
-    if (!upperLeftWheelValid)
-    {
-      return -1;
-    }
-    if (!lowerLeftWheelValid)
-    {
-      return -1;
-    }
-
-    if (!lowerRightWheelValid)
-    {
-      return -1;
-    }
-    if (!upperLeftWheelValid)
-    {
-      return -1;
-    }
+    int validWheelNum = upperLeftWheelValid + upperRightWheelValid + lowerLeftWheelValid
+      + lowerRightWheelValid;
 
     int wheelSize = metersToSteps(description_->wheelD);
-    double robotSize = metersToSteps(description_->totalD);
+    int barrelSize = metersToSteps(description_->barrelD);
+    int robotSize = metersToSteps(description_->totalD);
+    int robotDSize = metersToSteps(description_->robotD);
 
     double wheelCenterDist = description_->robotD + 2 * description_->barrelD + description_->wheelD;
     // Get the mask for the left side of the robot
     MatPtr updatedMaskPtr(new cv::Mat(robotGeometryMask_->size(), CV_64FC1));
-    // Initialize the transformed map by creating a deep copy of the original.
-    robotGeometryMask_->copyTo(*updatedMaskPtr);
 
-    MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(0, 0, wheelSize, updatedMaskPtr->rows)));
-    // Calculate the mask for the left side of the robot.
-    findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+    int validAreaTopLeftX = 0, validAreaTopLeftY = 0;
+    int validAreaWidth = 0, validAreaHeight = 0;
 
-    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, updatedMaskPtr->rows)));
-    // Get the mask for the right side of the robot.
-    findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+    // TODO(Vassilis Choutas): Check return values
+    // If no wheel position is know then mark the current point as unknown.
+    if (validWheelNum == 0)
+    {
+        return unknownArea;
+    }
+    if (validWheelNum == 2)
+    {
+      if (upperLeftWheelValid && upperRightWheelValid)
+      {
+        MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+              cv::Rect(0, 0, updatedMaskPtr->cols - 1, wheelSize)));
+        // Get the mask for the top side of the robot.
+        bool traversabilityFlag = findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight,
+            upperRightWheelMeanHeight, wheelCenterDist);
+        // If the return value is false then it that point is not traversible.
+        if (!traversabilityFlag)
+          return occupiedArea;
+        validAreaWidth += updatedMaskPtr->cols - 1;
+        validAreaHeight += wheelSize;
+        // Get the Position of the the barrels that are located below the forward wheels.
+        cv::Point leftBarrelPos(
+            metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD
+              - description_->wheelD),
+            metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD));
+        cv::Point rightBarrelPos(
+            metersToSteps(center_.x + description_->robotD / 2 + description_->barrelD),
+            metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD));
 
-    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(0, 0, updatedMaskPtr->cols, wheelSize)));
-    // Get the mask for the top side of the robot.
-    findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+        double upperLeftBarrelMeanHeight, upperLeftBarrelStdDev;
+        bool upperLeftBarrelValid = findHeightOnWheel(leftBarrelPos, &upperLeftBarrelMeanHeight,
+            &upperLeftBarrelStdDev);
 
-    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(updatedMaskPtr->rows - wheelSize, 0, updatedMaskPtr->cols, wheelSize)));
-    // Get the mask for the bottom side of the robot.
-    findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
-        wheelCenterDist);
+        double upperRightBarrelMeanHeight, upperRightBarrelStdDev;
+        bool upperRightBarrelValid = findHeightOnWheel(rightBarrelPos, &upperRightBarrelMeanHeight,
+            &upperRightBarrelStdDev);
+        if (upperLeftBarrelValid && upperRightBarrelValid)
+        {
+          // Update the values for the elevated mask for the barrel area.
+          tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+                cv::Rect(0, wheelSize, updatedMaskPtr->cols - 1, barrelSize)));
+          traversabilityFlag = findElevatedTopBottomBody(tempMapPtr, upperRightWheelMeanHeight,
+              lowerRightWheelMeanHeight, wheelCenterDist);
+          if (!traversabilityFlag)
+            return occupiedArea;
+          validAreaHeight += barrelSize;
+          // Get the Position of the upper half of the robot body located below .
+          cv::Point leftBodyPartPos(
+              metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD
+                - description_->wheelD),
+              metersToSteps(center_.y - description_->robotD / 2));
+          cv::Point rightBodyPartPos(
+              metersToSteps(center_.x + description_->robotD / 2 + description_->barrelD),
+              metersToSteps(center_.y - description_->robotD));
 
-    interpolateElevationMap(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
-        lowerRightWheelMeanHeight, lowerLeftWheelMeanHeight);
-    // Decide about binary traversability
+          double upperLeftBodyPartMeanHeight, upperLeftBodyPartStdDev;
+          bool upperLeftBodyPartValid = findHeightOnWheel(leftBodyPartPos, &upperLeftBodyPartMeanHeight,
+              &upperLeftBodyPartStdDev);
+
+          double upperRightBodyPartMeanHeight, upperRightBodyPartStdDev;
+          bool upperRightBodyPartValid = findHeightOnWheel(rightBodyPartPos, &upperRightBodyPartMeanHeight,
+              &upperRightBodyPartStdDev);
+          // Check that the upper half parts of the robot are within a known area of the elevation map
+          if (upperLeftBodyPartValid && upperRightBodyPartValid)
+          {
+            tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+                  cv::Rect(0, wheelSize + barrelSize, updatedMaskPtr->cols - 1, robotDSize / 2)));
+            traversabilityFlag = findElevatedTopBottomBody(tempMapPtr, upperRightWheelMeanHeight,
+                lowerRightWheelMeanHeight, wheelCenterDist);
+            // If the upper half of the main robot body is not located in a valid area
+            // then mark the point as occupied.
+            if (!traversabilityFlag)
+              return occupiedArea;
+            validAreaHeight += robotDSize / 2;
+          }
+          // Extract the elevation map area that corresponds to the valid part of the mask.
+          cv::Mat validElevationMapOverlap =
+            (*elevationMapPtr_)(cv::Rect(center_.x - robotDSize / 2 - barrelSize - wheelSize,
+                center_.y -  - robotDSize / 2 - barrelSize - wheelSize, validAreaWidth, validAreaHeight));
+          // Create a shallow copy of the valid region of the transformed robot height mask.
+          cv::Mat validMask = (*updatedMaskPtr)(cv::Rect(validAreaTopLeftX, validAreaTopLeftY,
+                validAreaWidth, validAreaHeight));
+          cv::Mat diff = validMask - validElevationMapOverlap;
+          cv::Mat result = diff > 0 & validElevationMapOverlap != unknownArea;
+          if (cv::countNonZero(result) > 0)
+            return occupiedArea;
+          else
+            return freeArea;
+        }
+      }  // End_if : Only top wheels on known elevation.
+      if (lowerLeftWheelValid && lowerRightWheelValid)
+      {
+      }
+      if (upperLeftWheelValid && lowerLeftWheelValid)
+      {
+      }
+      if (upperRightWheelValid && lowerRightWheelValid)
+      {
+      }
+
+      // double lowerLeftBarrelMeanHeight, lowerLeftBarrelStdDev;
+      // bool lowerLeftBarrelValid = findHeightOnBarrel(lowerLeftBarrelPos, &lowerLeftBarrelMeanHeight,
+          // &lowerLeftBarrelStdDev);
+
+      // double upperRightBarrelMeanHeight, upperRightBarrelStdDev;
+      // bool upperRightBarrelValid = findHeightOnBarrel(upperRightBarrelPos, &upperRightBarrelMeanHeight,
+          // &upperRightBarrelStdDev);
+
+      // double lowerRightBarrelMeanHeight, lowerRightBarrelStdDev;
+      // bool lowerRightBarrelValid = findHeightOnBarrel(lowerRightBarrelPos, &lowerRightBarrelMeanHeight,
+          // &lowerRightBarrelStdDev);
+      }
+    // If the wheels of the left side of the robot are on unknown area the simply perform
+    // the calculations for the right side of the robot.
+    else if (!upperLeftWheelValid && !lowerLeftWheelValid && validWheelNum == 2)
+    {
+      MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(updatedMaskPtr->cols - wheelSize - 1, 0, wheelSize, updatedMaskPtr->rows - 1)));
+
+      findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+      // TODO(Vassilis Choutas) See what height will be calculated on the barrels.
+      // Bilinear with 4 points : Wheels & Barrels?
+    }
+    // If the wheels of the right side of the robot are on unknown area the simply perform
+    // the calculations for the left side of the robot.
+    else if (!upperRightWheelValid && !lowerRightWheelValid && validWheelNum == 2)
+    {
+      MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(0, 0, wheelSize - 1, updatedMaskPtr->rows - 1)));
+
+      findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+      // TODO(Vassilis Choutas) See what height will be calculated on the barrels.
+      // Bilinear with 4 points : Wheels & Barrels?
+    }
+    // If the wheels of the bottom side of the robot are on unknown area the simply perform
+    // the calculations for the forward side of the robot.
+    else if (!upperRightWheelValid && !upperRightWheelValid && validWheelNum == 2)
+    {
+      MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(0, 0, updatedMaskPtr->cols - 1, wheelSize - 1)));
+      // Get the mask for the top side of the robot.
+      findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+    }
+    // If the wheels of the right side of the robot are on unknown area the simply perform
+    // the calculations for the left side of the robot.
+    else if (!lowerRightWheelValid && !lowerRightWheelValid && validWheelNum == 2)
+    {
+      MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(updatedMaskPtr->rows - wheelSize - 1, 0, updatedMaskPtr->cols - 1, wheelSize - 1)));
+      // Get the mask for the bottom side of the robot.
+      findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+          wheelCenterDist);
+    }
+    // If all the wheels are on a known area of the elevation Map.
+    else if (upperLeftWheelValid && lowerLeftWheelValid && upperRightWheelValid && lowerRightWheelValid)
+    {
+      // Initialize the transformed map by creating a deep copy of the original.
+      robotGeometryMask_->copyTo(*updatedMaskPtr);
+
+      MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(0, 0, wheelSize, updatedMaskPtr->rows)));
+      // Calculate the mask for the left side of the robot.
+      findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+
+      tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, updatedMaskPtr->rows)));
+      // Get the mask for the right side of the robot.
+      findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+
+      tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(0, 0, updatedMaskPtr->cols, wheelSize)));
+      // Get the mask for the top side of the robot.
+      findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+
+      tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+            cv::Rect(updatedMaskPtr->rows - wheelSize, 0, updatedMaskPtr->cols, wheelSize)));
+      // Get the mask for the bottom side of the robot.
+      findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+          wheelCenterDist);
+
+      interpolateElevationMap(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
+          lowerRightWheelMeanHeight, lowerLeftWheelMeanHeight);
+      // Decide about binary traversability
+    }
+    return unknownArea;
   }  // End of findTraversability
 
+  /**
+   * @brief Implements the bilinear interpolation method
+   * @description This method takes as input a set of four known and one unknown point and
+   * applies bilinear interpolation to find the function value on the unknown Point.
+  */
   double TraversabilityMask::bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
       const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12)
   {
@@ -246,6 +401,25 @@ namespace pandora_vision_obstacle
     double R2 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ12 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ22;
 
     return (Q22.y - P.y) / (Q22.y - Q21.y) * R1 + (P.y - Q11.y) / (Q22.y - Q11.y) * R2;
+  }
+
+  /**
+   * @brief Applies barycentric Interpolation to calculate unknown values in a triangle.
+   * @description Given the three vertices of the triangles and their corresponding values
+   * we calculate the barycentric coordinates of the query point and using them the approximate value
+   * of the function at this point
+   * @param P[const cv::Point&] The query point where the interpolation will be performed.
+   * @param A[const cv::Point&] A vertice of the triangle
+   * @param B[const cv::Point&] The second vertice of the triangle.
+   * @param C[const cv::Point&] The third vertice of the triangle.
+   * @param fA[double] The value of the function at the first vertice.
+   * @param fB[double] The value of the function at the second vertice.
+   * @param fC[double] The value of the function at the final vertice.
+   * @return double The interpolated value at the query point.
+   */
+  double TraversabilityMask::barycentricInterpolation(const cv::Point& P, const cv::Point& A,
+      const cv::Point& B, const cv::Point&C, double fA, double fB, double fC)
+  {
   }
 
   /**
@@ -259,9 +433,9 @@ namespace pandora_vision_obstacle
    * @param lowerRightWheelMeanHeight[double] The mean estimated height of the lower right wheel.
    * @param lowerLeftWheelMeanHeight[double] The mean estimated height of the lower left wheel.
    */
-  void TraversabilityMask::interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftWheelMeanHeight,
-      double upperRightWheelMeanHeight, double lowerRightWheelMeanHeight,
-      double lowerLeftWheelMeanHeight)
+  void TraversabilityMask::interpolateElevationMap(const MatPtr& inputOutputMap, double upperLeftCornerMeanHeight,
+      double upperRightCornerMeanHeight, double lowerRightCornerMeanHeight,
+      double lowerLeftCornerMeanHeight)
   {
     int wheelSize = metersToSteps(description_->wheelD);
     double robotSize = metersToSteps(description_->totalD);
@@ -275,8 +449,8 @@ namespace pandora_vision_obstacle
           bilinearInterpolation(cv::Point(j, i),
               cv::Point(0, 0), cv::Point(inputOutputMap->cols - 1, 0),
               cv::Point(inputOutputMap->cols - 1, inputOutputMap->rows - 1), cv::Point(0, inputOutputMap->rows - 1),
-              upperLeftWheelMeanHeight, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
-              lowerLeftWheelMeanHeight);
+              upperLeftCornerMeanHeight, upperRightCornerMeanHeight, lowerRightCornerMeanHeight,
+              lowerLeftCornerMeanHeight);
       }
     }
   }
@@ -292,7 +466,7 @@ namespace pandora_vision_obstacle
   {
   }
 
-  void
+  bool
   TraversabilityMask::findElevatedLeftRight(MatPtr aLeftRight, double hForward, double hBack, double d)
   {
     // Convert the size of the wheel from distance units to the number of cells
@@ -307,6 +481,10 @@ namespace pandora_vision_obstacle
       // Iterate over the section of the mask for the current pair of wheels
       // and update their corresponding values.
       angle = asin((hForward - hBack) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
+
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
       {
@@ -317,12 +495,16 @@ namespace pandora_vision_obstacle
           aLeftRight->at<double>(robotSize - j, i) += val;
         }
       }
+      return true;
     }
     else
     {
       // Iterate over the section of the mask for the current pair of wheels
       // and update their corresponding values.
       angle = asin((hBack - hForward) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
       {
@@ -333,12 +515,66 @@ namespace pandora_vision_obstacle
           aLeftRight->at<double>(j, i) += val;
         }
       }
+      return true;
     }
-
-    return;
+    return true;
   }
 
-  void
+  bool
+  TraversabilityMask::findElevatedLeftRightBody(MatPtr aLeftRight, double hForward, double hBack, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hForward > hBack)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hForward - hBack) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
+
+      slope =  tan(angle);
+      for (int j = 0; j < aLeftRight->rows; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+          + hBack;
+        for (int i = 0; i < aLeftRight->cols; ++i)
+        {
+          aLeftRight->at<double>(robotSize - j, i) += val;
+        }
+      }
+      return true;
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hBack - hForward) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
+      slope =  tan(angle);
+      for (int j = 0; j < aLeftRight->rows; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+          + hForward;
+        for (int i = 0; i < aLeftRight->cols; ++i)
+        {
+          aLeftRight->at<double>(j, i) += val;
+        }
+      }
+      return true;
+    }
+    return true;
+  }
+
+  bool
   TraversabilityMask::findElevatedTopBottom(MatPtr aTopBottom, double hLeft, double hRight, double d)
   {
     // Convert the size of the wheel from distance units to the number of cells
@@ -353,6 +589,9 @@ namespace pandora_vision_obstacle
       // Iterate over the section of the mask for the current pair of wheels
       // and update their corresponding values.
       angle = asin((hRight - hLeft) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
       {
@@ -363,12 +602,16 @@ namespace pandora_vision_obstacle
           aTopBottom->at<double>(i, j) += val;
         }
       }
+      return true;
     }
     else
     {
       // Iterate over the section of the mask for the current pair of wheels
       // and update their corresponding values.
       angle = asin((hLeft - hRight) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
       slope =  tan(angle);
       for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
       {
@@ -379,9 +622,64 @@ namespace pandora_vision_obstacle
           aTopBottom->at<double>(i, robotSize - j) += val;
         }
       }
+      return true;
     }
 
-    return;
+    return true;
+  }
+
+  bool
+  TraversabilityMask::findElevatedTopBottomBody(MatPtr aTopBottom, double hLeft, double hRight, double d)
+  {
+    // Convert the size of the wheel from distance units to the number of cells
+    // it corresponds using the current elevation map resolution.
+    int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
+    double angle;
+    double slope;
+    // Find the wheel that is located higher
+    if (hLeft < hRight)
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hRight - hLeft) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
+      slope =  tan(angle);
+      for (int j = 0; j < aTopBottom->cols; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hLeft;
+        for (int i = 0; i < aTopBottom->rows; ++i)
+        {
+          aTopBottom->at<double>(i, j) += val;
+        }
+      }
+      return true;
+    }
+    else
+    {
+      // Iterate over the section of the mask for the current pair of wheels
+      // and update their corresponding values.
+      angle = asin((hLeft - hRight) / d);
+      // Reject slopes greater than the maximum possible angle.
+      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+        return false;
+      slope =  tan(angle);
+      for (int j = 0; j < aTopBottom->cols; ++j)
+      {
+        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
+            + hRight;
+        for (int i = 0; i < aTopBottom->rows; ++i)
+        {
+          aTopBottom->at<double>(i, robotSize - j) += val;
+        }
+      }
+      return true;
+    }
+
+    return true;
   }
 
   bool
