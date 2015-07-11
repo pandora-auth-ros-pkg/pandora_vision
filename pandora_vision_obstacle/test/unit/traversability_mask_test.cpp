@@ -47,102 +47,112 @@ namespace pandora_vision_obstacle
 {
   class TraversabilityMaskTest: public ::testing::Test
   {
-  public:
-    TraversabilityMaskTest()    {}
+    public:
+      TraversabilityMaskTest()    {}
 
-    typedef TraversabilityMask::MatPtr MatPtr;
+      typedef TraversabilityMask::MatPtr MatPtr;
 
-    virtual void SetUp()
-    {
-      // Set the robot dimensions.
-      boost::shared_ptr<RobotGeometryMaskDescription> descriptionPtr(new RobotGeometryMaskDescription);
-      setRobotDescription(descriptionPtr);
-
-      traversabilityMaskPtr_.reset(new TraversabilityMask(descriptionPtr));
-
-      int wheelSize = traversabilityMaskPtr_->metersToSteps(descriptionPtr->wheelD);
-      int robotSize = traversabilityMaskPtr_->metersToSteps(descriptionPtr->robotD);
-      int barrelSize = traversabilityMaskPtr_->metersToSteps(descriptionPtr->barrelD);
-      int totalSize = traversabilityMaskPtr_->metersToSteps(descriptionPtr->totalD);
-
-      updatedElevationMaskPtr_.reset(new cv::Mat(traversabilityMaskPtr_->robotGeometryMask_->size(), CV_64FC1));
-    }
-
-    void setRobotDescription(const boost::shared_ptr<RobotGeometryMaskDescription>& descriptionPtr)
-    {
-      descriptionPtr->wheelH = 0.0;
-      descriptionPtr->barrelH = 0.067;
-      descriptionPtr->robotH = 0.134;
-      descriptionPtr->wheelD = 0.0742;
-      descriptionPtr->barrelD = 0.075;
-      descriptionPtr->robotD = 0.296;
-      descriptionPtr->totalD = 2 * descriptionPtr->wheelD + 2 * descriptionPtr->barrelD
-        + descriptionPtr->robotD;
-      descriptionPtr->RESOLUTION = 0.01;
-    }
-
-    void createUniformElevationMap(const MatPtr& elevationMapPtr, int width, int height, double elevation)
-    {
-      elevationMapPtr->create(height, width, CV_64FC1);
-      elevationMapPtr->setTo(elevation);
-      return;
-    }
-
-    void createLinearHorizontalElMap(const MatPtr& elevationMapPtr, int width, int height,
-        double minElevation, double maxElevation)
-    {
-      elevationMapPtr->create(height, width, CV_64FC1);
-      double slope = tan((maxElevation - minElevation) / width);
-      for (int j = 0; j < width; ++j)
+      virtual void SetUp()
       {
-        double val = slope * j + minElevation;
-        for (int i = 0; i < height; ++i)
-        {
-          elevationMapPtr->at<double>(i, j) = val;
-        }
+        // Set the robot dimensions.
+        boost::shared_ptr<RobotGeometryMaskDescription> descriptionPtr(new RobotGeometryMaskDescription);
+        setRobotDescription(descriptionPtr);
+
+        traversabilityMaskPtr_.reset(new TraversabilityMask(descriptionPtr));
+
+        wheelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->wheelD);
+        robotSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->robotD);
+        barrelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->barrelD);
+        totalSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->totalD);
+
+        updatedElevationMaskPtr_.reset(new cv::Mat(traversabilityMaskPtr_->robotGeometryMask_->size(), CV_64FC1));
       }
-      return;
-    }
 
-    void createLinearVerticalElMap(const MatPtr& elevationMapPtr, int width, int height,
-        double minElevation, double maxElevation)
-    {
-      elevationMapPtr->create(height, width, CV_64FC1);
-      double slope = tan((maxElevation - minElevation) / height);
-
-      for (int i = 0; i < height; ++i)
+      void setRobotDescription(const boost::shared_ptr<RobotGeometryMaskDescription>& descriptionPtr)
       {
-        double val = slope * i + minElevation;
+        descriptionPtr->wheelH = 0.0;
+        descriptionPtr->barrelH = 0.067;
+        descriptionPtr->robotH = 0.134;
+        descriptionPtr->wheelD = 0.0742;
+        descriptionPtr->barrelD = 0.075;
+        descriptionPtr->robotD = 0.08;
+        descriptionPtr->totalD = 2 * descriptionPtr->wheelD + 2 * descriptionPtr->barrelD
+          + descriptionPtr->robotD;
+        descriptionPtr->RESOLUTION = 0.01;
+      }
 
+      void createUniformElevationMap(const MatPtr& elevationMapPtr, int width, int height, double elevation)
+      {
+        elevationMapPtr->create(height, width, CV_64FC1);
+        elevationMapPtr->setTo(elevation);
+        return;
+      }
+
+      void createLinearHorizontalElMap(const MatPtr& elevationMapPtr, int width, int height,
+          double minElevation, double maxElevation)
+      {
+        elevationMapPtr->create(height, width, CV_64FC1);
+        double slope = tan((maxElevation - minElevation) / width);
         for (int j = 0; j < width; ++j)
         {
-          elevationMapPtr->at<double>(i, j) = val;
+          double val = slope * j + minElevation;
+          for (int i = 0; i < height; ++i)
+          {
+            elevationMapPtr->at<double>(i, j) = val;
+          }
         }
+        return;
       }
-      return;
-    }
 
-    void findElevatedLeft(MatPtr al, double hForward, double hBack, double d)
-    {
-      traversabilityMaskPtr_->findElevatedLeft(al, hForward, hBack, d);
-    }
+      void createLinearVerticalElMap(const MatPtr& elevationMapPtr, int width, int height,
+          double minElevation, double maxElevation)
+      {
+        elevationMapPtr->create(height, width, CV_64FC1);
+        double slope = tan((maxElevation - minElevation) / height);
 
-    inline double getMaskValue(int i, int j)
-    {
-      return traversabilityMaskPtr_->robotGeometryMask_->at<double>(i,j);
-    }
+        for (int i = 0; i < height; ++i)
+        {
+          double val = slope * i + minElevation;
+
+          for (int j = 0; j < width; ++j)
+          {
+            elevationMapPtr->at<double>(i, j) = val;
+          }
+        }
+        return;
+      }
+
+      void findElevatedLeft(MatPtr al, double hForward, double hBack, double d)
+      {
+        traversabilityMaskPtr_->findElevatedLeft(al, hForward, hBack, d);
+      }
+
+      bool cropToWheel(const cv::Point& wheelPos,const MatPtr& wheel)
+      {
+        return traversabilityMaskPtr_->cropToWheel(wheelPos, wheel);
+      }
+
+      inline double getMaskValue(int i, int j)
+      {
+        return traversabilityMaskPtr_->robotGeometryMask_->at<double>(i,j);
+      }
 
 
-    virtual ~TraversabilityMaskTest ()
-    {}
+      virtual ~TraversabilityMaskTest ()
+      {}
 
-  protected:
-    boost::shared_ptr<TraversabilityMask> traversabilityMaskPtr_;
-    MatPtr updatedElevationMaskPtr_;
+    protected:
+      boost::shared_ptr<TraversabilityMask> traversabilityMaskPtr_;
+      MatPtr updatedElevationMaskPtr_;
+
+      int wheelSize_;
+      int robotSize_;
+      int barrelSize_;
+      int totalSize_;
   };
 
 
-  TEST_F(TraversabilityMaskTest, SideElevationTransform)
+  TEST_F(TraversabilityMaskTest, ExtractWheelAreaTest)
   {
     MatPtr elevationMapPtr;
     int width = 300;
@@ -150,12 +160,24 @@ namespace pandora_vision_obstacle
 
     createUniformElevationMap(elevationMapPtr, width, height, 0);
 
-    for (int i = 0; i < elevationMapPtr->rows; ++i)
+    traversabilityMaskPtr_->getRobotMaskPtr()->copyTo(*updatedElevationMaskPtr_);
+    MatPtr wheelElevationPtr(new cv::Mat(wheelSize_, wheelSize_, CV_64FC1));
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = 0; j < elevationMapPtr->cols; ++j)
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
-        ASSERT_NEAR(elevationMapPtr->at<double>(i, j), getMaskValue(i, j),
-            0.01);
+        cv::Point wheelPos(i, j);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            std::cout << k << " " << ii << std::endl;
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal!" << std::endl;
+          }
+        }
       }
     }
   }

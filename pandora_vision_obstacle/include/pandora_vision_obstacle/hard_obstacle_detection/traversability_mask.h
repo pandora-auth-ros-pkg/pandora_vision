@@ -107,6 +107,11 @@ namespace pandora_vision_obstacle
     void createMaskFromDesc(const MatPtr& inputOutputMask,
         const RobotGeometryMaskDescriptionPtr& description);
 
+    MatConstPtr getRobotMaskPtr()
+    {
+      return robotGeometryMask_;
+    }
+
    private:
     /**
      * Finds B matrices, input is respective A matrix, heights and wheel
