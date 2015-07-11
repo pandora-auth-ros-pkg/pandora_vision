@@ -214,28 +214,25 @@ namespace pandora_vision_obstacle
     // Initialize the transformed map by creating a deep copy of the original.
     robotGeometryMask_->copyTo(*updatedMaskPtr);
 
-    MatPtr tempMapPtr;
-    cv::Mat tempMap = (*updatedMaskPtr)(cv::Rect(0, 0, wheelSize, robotGeometryMask_->rows));
-    tempMapPtr.reset(&tempMap);
+    MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
+        cv::Rect(0, 0, wheelSize, updatedMaskPtr->rows)));
     // Calculate the mask for the left side of the robot.
-    findElevatedLeft(tempMapPtr,  upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+    findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
 
+    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+        cv::Rect(robotGeometryMask_->cols - wheelSize, 0, wheelSize, robotGeometryMask_->rows)));
     // Get the mask for the right side of the robot.
-    tempMap = (*updatedMaskPtr)(cv::Rect(robotGeometryMask_->cols - wheelSize - 1, 0, wheelSize,
-            robotGeometryMask_->rows));
-    tempMapPtr.reset(&tempMap);
-    findElevatedRight(tempMapPtr,  upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+    findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
 
+    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+        cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize)));
     // Get the mask for the top side of the robot.
-    tempMap = (*updatedMaskPtr)(cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize));
-    tempMapPtr.reset(&tempMap);
-    findElevatedTop(tempMapPtr,  upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+    findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
 
+    tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
+        cv::Rect(robotGeometryMask_->rows - wheelSize, 0, robotGeometryMask_->cols, wheelSize)));
     // Get the mask for the bottom side of the robot.
-    tempMap = (*updatedMaskPtr)(cv::Rect(robotGeometryMask_->rows - wheelSize - 1, 0,
-            robotGeometryMask_->cols, wheelSize));
-    tempMapPtr.reset(&tempMap);
-    findElevatedBottom(tempMapPtr,  lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+    findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
         wheelCenterDist);
 
     interpolateElevationMap(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
@@ -297,7 +294,7 @@ namespace pandora_vision_obstacle
   }
 
   void
-  TraversabilityMask::findElevatedLeft(MatPtr al, double hForward, double hBack, double d)
+  TraversabilityMask::findElevatedLeftRight(MatPtr aLeftRight, double hForward, double hBack, double d)
   {
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
@@ -312,13 +309,13 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hForward - hBack) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
           + hBack;
-        for (int i = 0; i < al->cols; ++i)
+        for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          al->at<double>(robotSize - j, i) += val;
+          aLeftRight->at<double>(robotSize - j, i) += val;
         }
       }
     }
@@ -328,13 +325,13 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hBack - hForward) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < al->rows - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
           + hForward;
-        for (int i = 0; i < al->cols; ++i)
+        for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          al->at<double>(j, i) += val;
+          aLeftRight->at<double>(j, i) += val;
         }
       }
     }
@@ -343,53 +340,7 @@ namespace pandora_vision_obstacle
   }
 
   void
-  TraversabilityMask::findElevatedRight(MatPtr ar, double hForward, double hBack, double d)
-  {
-    // Convert the size of the wheel from distance units to the number of cells
-    // it corresponds using the current elevation map resolution.
-    int wheelSize = metersToSteps(description_->wheelD);
-    int robotSize = metersToSteps(description_->robotD);
-    double angle;
-    double slope;
-    // Find the wheel that is located higher
-    if (hForward > hBack)
-    {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hForward - hBack) / d);
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
-      {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-          + hBack;
-        for (int i = 0; i < ar->cols; ++i)
-        {
-          ar->at<double>(robotSize - j, i) += val;
-        }
-      }
-    }
-    else
-    {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hBack - hForward) / d);
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < ar->rows - wheelSize; ++j)
-      {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-          + hForward;
-        for (int i = 0; i < ar->cols; ++i)
-        {
-          ar->at<double>(j, i) += val;
-        }
-      }
-    }
-
-    return;
-  }
-
-  void
-  TraversabilityMask::findElevatedTop(MatPtr at, double hLeft, double hRight, double d)
+  TraversabilityMask::findElevatedTopBottom(MatPtr aTopBottom, double hLeft, double hRight, double d)
   {
     // Convert the size of the wheel from distance units to the number of cells
     // it corresponds using the current elevation map resolution.
@@ -404,13 +355,13 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hRight - hLeft) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < at->cols - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hLeft;
-        for (int i = 0; i < at->rows; ++i)
+        for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          at->at<double>(i, j) += val;
+          aTopBottom->at<double>(i, j) += val;
         }
       }
     }
@@ -420,59 +371,13 @@ namespace pandora_vision_obstacle
       // and update their corresponding values.
       angle = asin((hLeft - hRight) / d);
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < at->cols - wheelSize; ++j)
+      for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hRight;
-        for (int i = 0; i < at->rows; ++i)
+        for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          at->at<double>(i, robotSize - j) += val;
-        }
-      }
-    }
-
-    return;
-  }
-
-  void
-  TraversabilityMask::findElevatedBottom(MatPtr ab, double hLeft, double hRight, double d)
-  {
-    // Convert the size of the wheel from distance units to the number of cells
-    // it corresponds using the current elevation map resolution.
-    int wheelSize = metersToSteps(description_->wheelD);
-    int robotSize = metersToSteps(description_->robotD);
-    double angle;
-    double slope;
-    // Find the wheel that is located higher
-    if (hLeft < hRight)
-    {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hRight - hLeft) / d);
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < ab->cols - wheelSize; ++j)
-      {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-            + hLeft;
-        for (int i = 0; i < ab->rows; ++i)
-        {
-          ab->at<double>(i, j) += val;
-        }
-      }
-    }
-    else
-    {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hLeft - hRight) / d);
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < ab->cols - wheelSize; ++j)
-      {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-            + hRight;
-        for (int i = 0; i < ab->rows; ++i)
-        {
-          ab->at<double>(i, robotSize - j) += val;
+          aTopBottom->at<double>(i, robotSize - j) += val;
         }
       }
     }
