@@ -76,7 +76,8 @@ namespace pandora_vision_obstacle
     nh.param("centerRect/width", centerWidth_, 5);
     nh.param("centerRect/height", centerHeight_, 10);
 
-    nh.param("depthThreshold", depthThreshold_, 0.3);
+    nh.param("minDepthThreshold", minDepthThreshold_, 0.3);
+    nh.param("maxDepthThreshold", maxDepthThreshold_, 0.5);
     nh.param("linesThreshold", linesThreshold_, 2);
 
     showOriginalImage_ = false;
@@ -436,7 +437,7 @@ namespace pandora_vision_obstacle
     }
     avgLineDepth /= linePixels;
 
-    if (fabs(minDepth - avgLineDepth) < depthThreshold_)
+    if (fabs(minDepth - avgLineDepth) < minDepthThreshold_)
     {
       return false;
     }
@@ -525,7 +526,12 @@ namespace pandora_vision_obstacle
             *roi, level);
         bool nonZeroDepth = (depthDistance[1] && depthDistance[3]);
 
-        if (probability > 0.0f && nonZeroDepth)
+        // Compare the minimum and maximum depth distance of a bounding box
+        double minDepth = *std::min_element(depthDistance.begin(), depthDistance.end());
+        double maxDepth = *std::max_element(depthDistance.begin(), depthDistance.end());
+        bool similarDepthResult = (maxDepth - minDepth < maxDepthThreshold_);
+
+        if (probability > 0.0f && nonZeroDepth && similarDepthResult)
         {
           ROS_INFO("Soft Obstacle Detected!");
 

@@ -16,7 +16,8 @@ centerRect:
   width: 5
   height: 10
 
-depthThreshold: 0.3
+minDepthThreshold: 0.3
+maxDepthThreshold: 0.5
 
 gradientThreshold: 2.0
 betaThreshold: 3.0

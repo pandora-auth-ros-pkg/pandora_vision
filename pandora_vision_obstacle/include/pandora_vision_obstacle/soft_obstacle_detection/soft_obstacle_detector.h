@@ -235,17 +235,19 @@ namespace pandora_vision_obstacle
       float betaThreshold_;
 
       /// The minimum depth difference for a line to be considered valid
-      double depthThreshold_;
+      double minDepthThreshold_;
+      /// The maximum depth difference for a bounding box to be valid
+      double maxDepthThreshold_;
 
       /// The size of the kernel used to erode the image
       cv::Size erodeKernelSize_;
       /// The size of the kernel used to dilate the image
       cv::Size dilateKernelSize_;
 
-      ///The width of the rectangle in which the depth is calculated around the
+      /// The width of the rectangle in which the depth is calculated around the
       /// line center
       int centerWidth_;
-      ///The height of the rectangle in which the depth is calculated around the
+      /// The height of the rectangle in which the depth is calculated around the
       /// line center
       int centerHeight_;
 
