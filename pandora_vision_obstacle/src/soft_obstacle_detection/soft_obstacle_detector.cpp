@@ -52,10 +52,11 @@ namespace pandora_vision_obstacle
   {
     nodeName_ = name;
 
+    nh.param("minLineLength", minLineLength_, 100);
+    nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
+
     nh.param("hsvColor/sThreshold", sValueThreshold_, 95);
     nh.param("hsvColor/vThreshold", vValueThreshold_, 130);
-
-    nh.param("gaussianKernelSize", gaussianKernelSize_, 13);
 
     int rows, cols;
     nh.param("erodeKernelSize/rows", rows, 3);
@@ -72,7 +73,11 @@ namespace pandora_vision_obstacle
     nh.param("betaThreshold", param, 3.0);
     betaThreshold_ = param;
 
+    nh.param("centerRect/width", centerWidth_, 5);
+    nh.param("centerRect/height", centerHeight_, 10);
+
     nh.param("depthThreshold", depthThreshold_, 0.3);
+    nh.param("linesThreshold", linesThreshold_, 2);
 
     showOriginalImage_ = false;
     showDWTImage_ = false;
@@ -226,7 +231,7 @@ namespace pandora_vision_obstacle
   {
     /// Perform Hough Transform
     std::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(binaryImage, lines, 1, CV_PI / 180, 100, 100, 10);
+    cv::HoughLinesP(binaryImage, lines, 1, CV_PI / 180, 100, minLineLength_, 10);
 
     cv::Mat imageToShow;
     cv::cvtColor(binaryImage, imageToShow, CV_GRAY2BGR);
@@ -317,15 +322,13 @@ namespace pandora_vision_obstacle
     int lineCenterX = ((line[0] + line[2]) / 2) * pow(2, level);
     int lineCenterY = ((line[1] + line[3]) / 2) * pow(2, level);
 
-    int centerWidth = 5;
-    int centerHeight = 10;
-    cv::Rect lineCenter(lineCenterX - centerWidth / 2, lineCenterY - centerHeight / 2,
-        centerWidth, centerHeight);
+    cv::Rect lineCenter(lineCenterX - centerWidth_ / 2, lineCenterY - centerHeight_ / 2,
+        centerWidth_, centerHeight_);
 
     cv::Mat resizedDepthImage = depthImage(lineCenter);
 
     // Image should be continuous in order to be reshaped
-    cv::Mat lineCenterDepth(centerWidth, centerHeight, CV_32FC1);
+    cv::Mat lineCenterDepth(centerWidth_, centerHeight_, CV_32FC1);
     resizedDepthImage.copyTo(lineCenterDepth);
 
     // Get one sorted row of depth values
@@ -501,7 +504,7 @@ namespace pandora_vision_obstacle
 
     std::vector<POIPtr> pois;
 
-    if (verticalLines.size() > 2)
+    if (verticalLines.size() > linesThreshold_)
     {
       ROS_INFO("Detected Vertical Lines");
 
