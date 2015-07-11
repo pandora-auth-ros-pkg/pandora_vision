@@ -119,13 +119,9 @@ namespace pandora_vision_obstacle
      * transformations
      */
     void
-    findElevatedLeft(MatPtr al, double hForward, double hBack, double d);
+    findElevatedLeftRight(MatPtr aLeftRight, double hForward, double hBack, double d);
     void
-    findElevatedRight(MatPtr ar, double hForward, double hBack, double d);
-    void
-    findElevatedTop(MatPtr at, double hLeft, double hRight, double d);
-    void
-    findElevatedBottom(MatPtr ab, double hLeft, double hRight, double d);
+    findElevatedTopBottom(MatPtr aTopBottom, double hLeft, double hRight, double d);
 
     /**
      * @brief: find mean and stdev of height on wheel, false if wheel has

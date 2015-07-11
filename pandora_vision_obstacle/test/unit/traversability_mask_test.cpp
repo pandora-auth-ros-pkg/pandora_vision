@@ -55,30 +55,31 @@ namespace pandora_vision_obstacle
       virtual void SetUp()
       {
         // Set the robot dimensions.
-        boost::shared_ptr<RobotGeometryMaskDescription> descriptionPtr(new RobotGeometryMaskDescription);
-        setRobotDescription(descriptionPtr);
+        descriptionPtr_.reset(new RobotGeometryMaskDescription);
+        setRobotDescription();
 
-        traversabilityMaskPtr_.reset(new TraversabilityMask(descriptionPtr));
+        traversabilityMaskPtr_.reset(new TraversabilityMask(descriptionPtr_));
 
-        wheelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->wheelD);
-        robotSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->robotD);
-        barrelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->barrelD);
-        totalSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr->totalD);
+        wheelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr_->wheelD);
+        robotSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr_->robotD);
+        barrelSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr_->barrelD);
+        totalSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr_->totalD);
 
         updatedElevationMaskPtr_.reset(new cv::Mat(traversabilityMaskPtr_->robotGeometryMask_->size(), CV_64FC1));
+        *updatedElevationMaskPtr_ = traversabilityMaskPtr_->robotGeometryMask_->clone();
       }
 
-      void setRobotDescription(const boost::shared_ptr<RobotGeometryMaskDescription>& descriptionPtr)
+      void setRobotDescription()
       {
-        descriptionPtr->wheelH = 0.0;
-        descriptionPtr->barrelH = 0.067;
-        descriptionPtr->robotH = 0.134;
-        descriptionPtr->wheelD = 0.0742;
-        descriptionPtr->barrelD = 0.075;
-        descriptionPtr->robotD = 0.08;
-        descriptionPtr->totalD = 2 * descriptionPtr->wheelD + 2 * descriptionPtr->barrelD
-          + descriptionPtr->robotD;
-        descriptionPtr->RESOLUTION = 0.01;
+        descriptionPtr_->wheelH = 0.0;
+        descriptionPtr_->barrelH = 0.067;
+        descriptionPtr_->robotH = 0.134;
+        descriptionPtr_->wheelD = 0.0742;
+        descriptionPtr_->barrelD = 0.075;
+        descriptionPtr_->robotD = 0.08;
+        descriptionPtr_->totalD = descriptionPtr_->wheelD + 2 * descriptionPtr_->barrelD
+          + descriptionPtr_->robotD;
+        descriptionPtr_->RESOLUTION = 0.01;
       }
 
       void createUniformElevationMap(const MatPtr& elevationMapPtr, int width, int height, double elevation)
@@ -122,9 +123,14 @@ namespace pandora_vision_obstacle
         return;
       }
 
-      void findElevatedLeft(MatPtr al, double hForward, double hBack, double d)
+      void findElevatedLeftRight(MatPtr al, double hForward, double hBack, double d)
       {
-        traversabilityMaskPtr_->findElevatedLeft(al, hForward, hBack, d);
+        traversabilityMaskPtr_->findElevatedLeftRight(al, hForward, hBack, d);
+      }
+
+      void findElevatedTopBottom(MatPtr al, double hForward, double hBack, double d)
+      {
+        traversabilityMaskPtr_->findElevatedTopBottom(al, hForward, hBack, d);
       }
 
       bool cropToWheel(const cv::Point& wheelPos,const MatPtr& wheel)
@@ -137,20 +143,18 @@ namespace pandora_vision_obstacle
         return traversabilityMaskPtr_->robotGeometryMask_->at<double>(i,j);
       }
 
-
       virtual ~TraversabilityMaskTest ()
       {}
 
     protected:
       boost::shared_ptr<TraversabilityMask> traversabilityMaskPtr_;
       MatPtr updatedElevationMaskPtr_;
-
+      boost::shared_ptr<RobotGeometryMaskDescription> descriptionPtr_;
       int wheelSize_;
       int robotSize_;
       int barrelSize_;
       int totalSize_;
   };
-
 
   TEST_F(TraversabilityMaskTest, ExtractWheelAreaTest)
   {
@@ -331,6 +335,27 @@ namespace pandora_vision_obstacle
               << std::endl;
           }
         }
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedLeftRightHorizontal)
+  {
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(0, 0, wheelSize_, updatedElevationMaskPtr_->rows)));
+
+    double upperLeftWheelMeanHeight = 0.0;
+    double lowerLeftWheelMeanHeight = 0.0;
+
+    findElevatedLeftRight(tempMapPtr,  upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+    {
+      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      {
+        ASSERT_EQ(updatedElevationMaskPtr_->at<double>(ii, jj),
+                  tempMapPtr->at<double>(ii, jj));
       }
     }
   }
