@@ -159,7 +159,6 @@ namespace pandora_vision_obstacle
     int height = 300;
 
     createUniformElevationMap(elevationMapPtr, width, height, 0);
-
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
     traversabilityMaskPtr_->getRobotMaskPtr()->copyTo(*updatedElevationMaskPtr_);
@@ -176,7 +175,160 @@ namespace pandora_vision_obstacle
           {
             ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
                 elevationMapPtr->at<double>(i + k, j + ii), 0.1)
-              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal!" << std::endl;
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for height = !"
+              << 0 << std::endl;
+          }
+        }
+      }
+    }
+
+    createUniformElevationMap(elevationMapPtr, width, height, 0.3);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for height = !"
+              << 0.3 << std::endl;
+          }
+        }
+      }
+    }
+    createUniformElevationMap(elevationMapPtr, width, height, 0.5);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for height = !"
+              << 0.5 << std::endl;
+          }
+        }
+      }
+    }
+    createUniformElevationMap(elevationMapPtr, width, height, 0.75);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for height = !"
+              << 0.75 << std::endl;
+          }
+        }
+      }
+    }
+    createLinearHorizontalElMap(elevationMapPtr, width, height, 0, width);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
+              << "Horizontal Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << width << " )"
+              << std::endl;
+          }
+        }
+      }
+    }
+    createLinearHorizontalElMap(elevationMapPtr, width, height, width / 2.0, width);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
+              << "Horizontal Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << width / 2.0 << " )"
+              << std::endl;
+          }
+        }
+      }
+    }
+    createLinearVerticalElMap(elevationMapPtr, width, height, 0, height);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(j + k, i + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
+              << "Vertical Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << height << " )"
+              << std::endl;
+          }
+        }
+      }
+    }
+    createLinearVerticalElMap(elevationMapPtr, width, height, height / 2.0, height);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+
+    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    {
+      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      {
+        cv::Point wheelPos(j, i);
+        TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
+        for (int k = 0; k < wheelSize_; ++k)
+        {
+          for (int ii = 0; ii < wheelSize_; ++ii)
+          {
+            ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
+                elevationMapPtr->at<double>(j + k, i + ii), 0.1)
+              << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
+              << "Horizontal Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << height / 2.0 << " )"
+              << std::endl;
           }
         }
       }
