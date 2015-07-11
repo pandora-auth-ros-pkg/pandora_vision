@@ -76,6 +76,9 @@ namespace pandora_vision_obstacle
     // and in min dim equal to (wheelD + barrelD + robotD/2)
     double totalD;  // total width/height of square mask
 
+    /// Max possible Angle for the robot's orientation in Degrees.
+    double maxPossibleAngle;
+
     double RESOLUTION;
   };
 
