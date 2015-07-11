@@ -79,45 +79,34 @@ namespace pandora_vision_obstacle
     int wheelSize = metersToSteps(description_->wheelD);
     int robotSize = metersToSteps(description_->robotD);
     int barrelSize = metersToSteps(description_->barrelD);
-    int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
+    int totalSize = 2 * wheelSize + robotSize;
     // Initialize the mask of the robot.
     robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1));
     robotGeometryMask_->setTo(0.0);
 
-    // Assign to the mask the height of the wheels.
-    for (int i = 0; i < wheelSize; ++i)
-    {
-      for (int j = 0; j < wheelSize; ++j)
-      {
-        // Top Left Wheel Height
-        robotGeometryMask_->at<double>(i, j) = description_->wheelH;
-        // Top Right Wheel Height
-        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) =
-          description_->wheelH;
-        // Bottom Left Wheel Height
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j) =
-          description_->wheelH;
-        // Bottom Right Wheel Height
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize,
-            j + totalSize - wheelSize) = description_->wheelH;
-      }
-    }
     // Assign the values for the motors of the robots.
     for (int i = 0; i < barrelSize; ++i)
     {
       for (int j = 0; j < barrelSize; ++j)
       {
         // Top Left Barrel Height
-        robotGeometryMask_->at<double>(i + wheelSize, j + wheelSize) = description_->barrelH;
+        robotGeometryMask_->at<double>(i, j + wheelSize) = description_->barrelH;
+        robotGeometryMask_->at<double>(i + wheelSize, j) = description_->barrelH;
         // Top Right Barrel Height
-        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize - barrelSize) =
+        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize) =
+          description_->barrelH;
+        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize - barrelSize) =
           description_->barrelH;
         // Bottom Left Barrel Height
-        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j + wheelSize) =
+        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j) =
+          description_->barrelH;
+        robotGeometryMask_->at<double>(i + totalSize  - wheelSize, j + wheelSize) =
           description_->barrelH;
         // Bottom Right Barrel Height
         robotGeometryMask_->at<double>(i + totalSize - wheelSize - barrelSize,
-            j + totalSize - wheelSize - barrelSize) = description_->barrelH;
+            j + totalSize - wheelSize) = description_->barrelH;
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j + totalSize - wheelSize - barrelSize)
+          = description_->barrelH;
       }
     }
 
@@ -127,10 +116,29 @@ namespace pandora_vision_obstacle
       for (int j = 0; j < robotSize; ++j)
       {
         // Assign the height of the robot to the corresponding positions.
-        robotGeometryMask_->at<double>(i + wheelSize + barrelSize,
-            j + wheelSize + barrelSize) = description_->robotH;
+        robotGeometryMask_->at<double>(i + wheelSize, j + wheelSize) = description_->robotH;
       }
     }
+    for (int i = 0; i < wheelSize; ++i)
+    {
+      for (int j = 0; j < robotSize - wheelSize - barrelSize; ++j)
+      {
+        robotGeometryMask_->at<double>(i, j + wheelSize + barrelSize) = description_->robotH;
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j + wheelSize + barrelSize) = description_->robotH;
+      }
+    }
+    for (int i = 0; i < robotSize - wheelSize - barrelSize; ++i)
+    {
+      for (int j = 0; j < wheelSize; ++j)
+      {
+        robotGeometryMask_->at<double>(i + wheelSize + barrelSize, j) = description_->robotH;
+        robotGeometryMask_->at<double>(i + wheelSize + barrelSize, j + totalSize - wheelSize) = description_->robotH;
+      }
+    }
+    std::cout << robotSize << std::endl;
+    std::cout << wheelSize << std::endl;
+    std::cout << barrelSize << std::endl;
+    // std::cout << *robotGeometryMask_ << std::endl;
     cv::imshow("Mask", *robotGeometryMask_);
     cv::waitKey(0);
     return;
@@ -500,7 +508,7 @@ namespace pandora_vision_obstacle
   bool
   TraversabilityMask::cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel)
   {
-    int wheelSize = static_cast<int>(description_->wheelD / description_->RESOLUTION) + 1;
+    int wheelSize = metersToSteps(description_->wheelD / description_->RESOLUTION);
     // Copy the region of the elevation map that corresponds to the current wheel.
     elevationMapPtr_->copyTo((*wheel)(cv::Rect(wheelPos.x, wheelPos.x, wheelSize, wheelSize)));
 
