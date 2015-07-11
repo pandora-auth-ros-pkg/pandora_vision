@@ -220,17 +220,17 @@ namespace pandora_vision_obstacle
     findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
 
     tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(robotGeometryMask_->cols - wheelSize, 0, wheelSize, robotGeometryMask_->rows)));
+        cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, updatedMaskPtr->rows)));
     // Get the mask for the right side of the robot.
     findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
 
     tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(0, 0, robotGeometryMask_->cols, wheelSize)));
+        cv::Rect(0, 0, updatedMaskPtr->cols, wheelSize)));
     // Get the mask for the top side of the robot.
     findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
 
     tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
-        cv::Rect(robotGeometryMask_->rows - wheelSize, 0, robotGeometryMask_->cols, wheelSize)));
+        cv::Rect(updatedMaskPtr->rows - wheelSize, 0, updatedMaskPtr->cols, wheelSize)));
     // Get the mask for the bottom side of the robot.
     findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
         wheelCenterDist);
