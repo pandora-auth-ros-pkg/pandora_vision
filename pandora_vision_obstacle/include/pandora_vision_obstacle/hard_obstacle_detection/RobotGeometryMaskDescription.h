@@ -58,11 +58,9 @@ namespace pandora_vision_obstacle
    public:
     RobotGeometryMaskDescription()
     {
-
     }
     virtual ~RobotGeometryMaskDescription()
     {
-
     }
 
     cv::Mat mask;  // square mask simulating /base_footprint in dim totalD x totalD

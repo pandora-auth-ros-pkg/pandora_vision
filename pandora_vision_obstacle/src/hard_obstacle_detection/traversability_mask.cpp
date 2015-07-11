@@ -46,7 +46,6 @@ namespace pandora_vision_obstacle
   TraversabilityMask::
     TraversabilityMask()
     {
-
     }
 
   TraversabilityMask::TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr)
@@ -388,8 +387,8 @@ namespace pandora_vision_obstacle
   bool
   TraversabilityMask::findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight)
   {
-    // MatPtr wheel( new cv::Mat(elevationMapPtr_->rows, elevationMapPtr_->cols, CV_64FC1, cv::Scalar(0)));
-    MatPtr wheelElevation;
+    int wheelSize = metersToSteps(description_->wheelD);
+    MatPtr wheelElevation( new cv::Mat(wheelSize, wheelSize, CV_64FC1, cv::Scalar(0)));
     bool known = cropToWheel(wheelPos, wheelElevation);
     if (!known)
       return false;
@@ -399,11 +398,9 @@ namespace pandora_vision_obstacle
       return false;
 
     cv::Scalar mean, std_dev;
-    cv::meanStdDev(*elevationMapPtr_, mean, std_dev, *wheelElevation);
+    cv::meanStdDev(*wheelElevation, mean, std_dev);
     *meanHeight = mean[0];
     *stdDevHeight = std_dev[0];
-
-    wheelElevation->setTo(*meanHeight, *wheelElevation);
 
     return true;
   }
@@ -417,6 +414,7 @@ namespace pandora_vision_obstacle
     int wheelSize = metersToSteps(description_->wheelD);
     // Copy the region of the elevation map that corresponds to the current wheel.
     cv::Mat roi = (*elevationMapPtr_)(cv::Rect(wheelPos.x, wheelPos.x, wheelSize, wheelSize));
+
     roi.copyTo(*wheel);
     return true;
   }

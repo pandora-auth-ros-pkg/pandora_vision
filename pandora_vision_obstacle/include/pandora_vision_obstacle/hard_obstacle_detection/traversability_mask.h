@@ -65,7 +65,7 @@ namespace pandora_vision_obstacle
    public:
     TraversabilityMask();
 
-    TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr);
+    explicit TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr);
 
     virtual ~TraversabilityMask();
 
