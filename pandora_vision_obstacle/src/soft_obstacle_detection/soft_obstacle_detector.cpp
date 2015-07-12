@@ -422,6 +422,7 @@ namespace pandora_vision_obstacle
 
     int linePixels = 0;
     float avgLineDepth = 0.0f;
+    ROS_INFO_STREAM("Mean Depth in bounding box: " << mean);
 
     for (size_t ii = 0; ii < verticalLines.size(); ii++)
     {
@@ -440,6 +441,7 @@ namespace pandora_vision_obstacle
     }
     avgLineDepth /= linePixels;
 
+    ROS_INFO_STREAM("Average Line Depth:" << avgLineDepth);
     if (fabs(mean - avgLineDepth) < minDepthThreshold_)
     {
       return false;
@@ -520,7 +522,7 @@ namespace pandora_vision_obstacle
       // distance
       bool diffDepth = findDifferentROIDepth(depthImage, verticalLines, *roi, level);
 
-      diffDepth = true;
+      // diffDepth = true;
 
       if (diffDepth)
       {
