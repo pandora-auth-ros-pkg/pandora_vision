@@ -87,8 +87,8 @@ namespace pandora_vision_obstacle
     }
 
     tf::StampedTransform tfTransform;
-    tfListener_.waitForTransform("/world", "/map", ros::Time::now(), ros::Duration(2));
-    tfListener_.lookupTransform("/world", "/map", ros::Time::now(), tfTransform);
+    // tfListener_.waitForTransform("/world", "/map", ros::Time::now(), ros::Duration(2));
+    // tfListener_.lookupTransform("/world", "/map", ros::Time::now(), tfTransform);
   }
 
   void HardObstaclePreProcessor::reconfCallback(const ::pandora_vision_obstacle::elevation_mapConfig params,

@@ -56,34 +56,22 @@ namespace pandora_vision_obstacle
     description_ = descriptionPtr;
 
     // Create the robot height mask.
-    createMaskFromDesc(robotGeometryMask_, description_);
+    createMaskFromDesc(description_);
 
     ROS_INFO("[Traversability Mask]: Finished constructing Traversability Mask Object.");
   }
 
   TraversabilityMask::~TraversabilityMask() {}
 
-  /**
-   * @brief Creates the Robot Height Mask
-   * @description Creates the height mask for the robot according to the description file.
-   * @param inputOutputMap[const MatPtr&] A pointer to the matrix that contains the mask.
-   * @param description[RobotGeometryMaskDescriptionPtr] A pointer to the parameter structure
-   * that approximately describes the robot.
-   * @return void
-   */
-  void TraversabilityMask::createMaskFromDesc(const MatPtr& inputOutputMask,
-      const RobotGeometryMaskDescriptionPtr& description)
+  void TraversabilityMask::createMaskFromDesc()
   {
-    // Initialize the Mask dimensions
-    // int totalSize = metersToSteps(description_->totalD);
     // Calculate the values for the size of the robot parts.
     int wheelSize = metersToSteps(description_->wheelD);
     int robotSize = metersToSteps(description_->robotD);
     int barrelSize = metersToSteps(description_->barrelD);
     int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
     // Initialize the mask of the robot.
-    robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1));
-    robotGeometryMask_->setTo(0.0);
+    robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1, cv::Scalar(0)));
 
     // Assign the values for the motors of the robots.
     for (int i = 0; i < barrelSize; ++i)
@@ -110,12 +98,7 @@ namespace pandora_vision_obstacle
           = description_->barrelH;
       }
     }
-
     int robotBoxSize = totalSize - 2 * wheelSize - 2 * barrelSize;
-    // std::cout << totalSize << std::endl;
-    // std::cout << robotBoxSize << std::endl;
-    // std::cout << barrelSize << std::endl;
-    // std::cout << wheelSize << std::endl;
     // Fill in the values for the height for the body of the robot.
     for (int i = wheelSize; i < totalSize - wheelSize; ++i)
     {
@@ -141,7 +124,79 @@ namespace pandora_vision_obstacle
         robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) = description_->robotH;
       }
     }
-    // cv::imshow("mask", *robotGeometryMask_);
+    return;
+  }
+
+  /**
+   * @brief Creates the Robot Height Mask
+   * @description Creates the height mask for the robot according to the description file.
+   * @param inputOutputMap[const MatPtr&] A pointer to the matrix that contains the mask.
+   * @param description[RobotGeometryMaskDescriptionPtr] A pointer to the parameter structure
+   * that approximately describes the robot.
+   * @return void
+   */
+  void TraversabilityMask::createMaskFromDesc(const RobotGeometryMaskDescriptionPtr& description)
+  {
+    // Calculate the values for the size of the robot parts.
+    int wheelSize = metersToSteps(description->wheelD);
+    int robotSize = metersToSteps(description->robotD);
+    int barrelSize = metersToSteps(description->barrelD);
+    int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
+    // Initialize the mask of the robot.
+    robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1, cv::Scalar(0)));
+
+    // Assign the values for the motors of the robots.
+    for (int i = 0; i < barrelSize; ++i)
+    {
+      for (int j = 0; j < barrelSize; ++j)
+      {
+        // Top Left Barrel Height
+        robotGeometryMask_->at<double>(i, j + wheelSize) = description->barrelH;
+        robotGeometryMask_->at<double>(i + wheelSize, j) = description->barrelH;
+        // Top Right Barrel Height
+        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize) =
+          description->barrelH;
+        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize - barrelSize) =
+          description->barrelH;
+        // Bottom Left Barrel Height
+        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j) =
+          description->barrelH;
+        robotGeometryMask_->at<double>(i + totalSize  - wheelSize, j + wheelSize) =
+          description->barrelH;
+        // Bottom Right Barrel Height
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize - barrelSize,
+            j + totalSize - wheelSize) = description->barrelH;
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j + totalSize - wheelSize - barrelSize)
+          = description->barrelH;
+      }
+    }
+    int robotBoxSize = totalSize - 2 * wheelSize - 2 * barrelSize;
+    // Fill in the values for the height for the body of the robot.
+    for (int i = wheelSize; i < totalSize - wheelSize; ++i)
+    {
+      for (int j = wheelSize ; j < totalSize - wheelSize; ++j)
+      {
+        // Assign the height of the robot to the corresponding positions.
+        robotGeometryMask_->at<double>(i, j) = description->robotH;
+      }
+    }
+    for (int i = 0; i < wheelSize; ++i)
+    {
+      for (int j = wheelSize + barrelSize; j < totalSize - wheelSize - barrelSize; ++j)
+      {
+        robotGeometryMask_->at<double>(i, j) = description->robotH;
+        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j) = description->robotH;
+      }
+    }
+    for (int i = wheelSize + barrelSize; i < totalSize - wheelSize - barrelSize; ++i)
+    {
+      for (int j = 0; j < wheelSize; ++j)
+      {
+        robotGeometryMask_->at<double>(i, j) = description->robotH;
+        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) = description->robotH;
+      }
+    }
+    // cv::imshow("Mask", *robotGeometryMask_);
     // cv::waitKey(0);
     return;
   }
@@ -502,7 +557,8 @@ namespace pandora_vision_obstacle
       description_->RESOLUTION = 0.02;
     }
 
-    createMaskFromDesc(robotGeometryMask_, description_);
+    ROS_INFO("[Traversability Mask]: Mask Loading finished successfully!");
+    return;
   }
 
   bool
@@ -733,25 +789,6 @@ namespace pandora_vision_obstacle
 
     roi.copyTo(*wheel);
     return true;
-  }
-
-  TraversabilityMask::MatPtr TraversabilityMask::cropToRight()
-  {
-  }
-
-  TraversabilityMask::MatPtr
-  TraversabilityMask::cropToLeft()
-  {
-  }
-
-  TraversabilityMask::MatPtr
-  TraversabilityMask::cropToTop()
-  {
-  }
-
-  TraversabilityMask::MatPtr
-  TraversabilityMask::cropToBottom()
-  {
   }
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision

@@ -68,6 +68,7 @@ namespace pandora_vision_obstacle
         totalSize_ = traversabilityMaskPtr_->metersToSteps(descriptionPtr_->totalD);
 
         updatedElevationMaskPtr_.reset(new cv::Mat(traversabilityMaskPtr_->robotGeometryMask_->size(), CV_64FC1));
+
         *updatedElevationMaskPtr_ = traversabilityMaskPtr_->robotGeometryMask_->clone();
       }
 

@@ -56,7 +56,8 @@ namespace pandora_vision_obstacle
 {
   HardObstaclePostProcessor::
   HardObstaclePostProcessor() :
-    sensor_processor::PostProcessor<CVMatStamped, nav_msgs::OccupancyGrid>()
+    sensor_processor::PostProcessor<CVMatStamped, nav_msgs::OccupancyGrid>(),
+    tfListener_(this->getProcessorNodeHandle())
   {
   }
 
@@ -83,8 +84,15 @@ namespace pandora_vision_obstacle
         &HardObstaclePostProcessor::updateMap, this);
 
     tf::StampedTransform tfTransform;
-    tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(2));
-    tfListener_.lookupTransform("/world", "/map", ros::Time(0), tfTransform);
+    try
+    {
+      tfListener_.waitForTransform("/world", "/map", ros::Time(0), ros::Duration(2));
+      tfListener_.lookupTransform("/world", "/map", ros::Time(0), tfTransform);
+    }
+    catch (const tf::TransformException& ex)
+    {
+      sensor_processor::processor_error(ex.what());
+    }
   }
 
   /**
