@@ -126,14 +126,14 @@ namespace pandora_vision_obstacle
         return;
       }
 
-      void findElevatedLeftRight(MatPtr al, double hForward, double hBack, double d)
+      bool findElevatedLeftRight(MatPtr al, double hForward, double hBack, double d)
       {
-        traversabilityMaskPtr_->findElevatedLeftRight(al, hForward, hBack, d);
+        return traversabilityMaskPtr_->findElevatedLeftRight(al, hForward, hBack, d);
       }
 
-      void findElevatedTopBottom(MatPtr al, double hForward, double hBack, double d)
+      bool findElevatedTopBottom(MatPtr al, double hForward, double hBack, double d)
       {
-        traversabilityMaskPtr_->findElevatedTopBottom(al, hForward, hBack, d);
+        return traversabilityMaskPtr_->findElevatedTopBottom(al, hForward, hBack, d);
       }
 
       bool cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel)
@@ -527,7 +527,7 @@ namespace pandora_vision_obstacle
     }
   }
 
-  TEST_F(TraversabilityMaskTest, findElevatedLeftRightHorizontal)
+  TEST_F(TraversabilityMaskTest, findElevatedLeftHorizontal)
   {
     int bBoxX = 0;
     int bBoxY = 0;
@@ -539,10 +539,12 @@ namespace pandora_vision_obstacle
     double firstWheelMeanHeight = 0.0;
     double secondWheelMeanHeight = 0.0;
 
-    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
     ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    ASSERT_TRUE(allowedAngle);
     for (int ii = 0; ii < tempMapPtr->rows; ++ii)
     {
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
@@ -565,10 +567,12 @@ namespace pandora_vision_obstacle
     double firstWheelMeanHeight = 0.0;
     double secondWheelMeanHeight = 0.0;
 
-    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
     ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    ASSERT_TRUE(allowedAngle);
     for (int ii = 0; ii < tempMapPtr->rows; ++ii)
     {
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
@@ -591,10 +595,12 @@ namespace pandora_vision_obstacle
     double firstWheelMeanHeight = 0.0;
     double secondWheelMeanHeight = 0.0;
 
-    findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->cols, tempMapPtr->cols);
     ASSERT_EQ(wheelSize_, tempMapPtr->rows);
+    ASSERT_TRUE(allowedAngle);
     for (int ii = 0; ii < tempMapPtr->rows; ++ii)
     {
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
@@ -617,10 +623,12 @@ namespace pandora_vision_obstacle
     double firstWheelMeanHeight = 0.0;
     double secondWheelMeanHeight = 0.0;
 
-    findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedTopBottom(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->cols, tempMapPtr->cols);
     ASSERT_EQ(wheelSize_, tempMapPtr->rows);
+    ASSERT_TRUE(allowedAngle);
     for (int ii = 0; ii < tempMapPtr->rows; ++ii)
     {
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
@@ -643,22 +651,119 @@ namespace pandora_vision_obstacle
     double firstWheelMeanHeight = 0.0;
     double secondWheelMeanHeight = 0.1;
 
-    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) / descriptionPtr_->totalD;
+    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) /
+                   (descriptionPtr_->totalD);
     double slopeResolution = 0.0;
-    findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
     ASSERT_EQ(wheelSize_, tempMapPtr->cols);
-
+    ASSERT_TRUE(allowedAngle);
     for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
     {
+      slopeResolution += slope * descriptionPtr_->RESOLUTION;
       for (int ii = 0; ii < tempMapPtr->cols; ++ii)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + jj, bBoxX + ii),
                     getMaskValue(jj, ii) + slopeResolution, 1e-6)
                     << "Failure at (" << jj << ", " << ii << ")";
       }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedLeftSlopeBackWheelHigherHighAngle)
+  {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.0;
+    double secondWheelMeanHeight = 0.3;
+
+    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) /
+                   (descriptionPtr_->totalD);
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    ASSERT_FALSE(allowedAngle);
+    for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
+    {
+      for (int ii = 0; ii < tempMapPtr->cols; ++ii)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + jj, bBoxX + ii),
+                    getMaskValue(jj, ii), 1e-6)
+                    << "Failure at (" << jj << ", " << ii << ")";
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedLeftSlopeFrontWheelHigher)
+  {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.1;
+    double secondWheelMeanHeight = 0.0;
+
+    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) /
+                   descriptionPtr_->totalD;
+    double slopeResolution = 0.0;
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    ASSERT_TRUE(allowedAngle);
+    for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
+    {
       slopeResolution += slope * descriptionPtr_->RESOLUTION;
+      for (int ii = 0; ii < tempMapPtr->cols; ++ii)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + totalSize_ - jj, bBoxX + ii),
+                    getMaskValue(jj, ii) + slopeResolution, 1e-6)
+                    << "Failure at (" << jj << ", " << ii << ")";
+      }
+    }
+  }
+
+  TEST_F(TraversabilityMaskTest, findElevatedLeftSlopeFrontWheelHigherHighAngle)
+  {
+    int bBoxX = 0;
+    int bBoxY = 0;
+    int bBoxWidth = wheelSize_;
+    int bBoxHeight = updatedElevationMaskPtr_->rows;
+    MatPtr tempMapPtr(new cv::Mat(*updatedElevationMaskPtr_,
+        cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
+
+    double firstWheelMeanHeight = 0.3;
+    double secondWheelMeanHeight = 0.0;
+
+    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) /
+                   descriptionPtr_->totalD;
+    bool allowedAngle = findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight,
+        secondWheelMeanHeight, descriptionPtr_->totalD);
+
+    ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
+    ASSERT_EQ(wheelSize_, tempMapPtr->cols);
+    ASSERT_FALSE(allowedAngle);
+    for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
+    {
+      for (int ii = 0; ii < tempMapPtr->cols; ++ii)
+      {
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + totalSize_ - jj, bBoxX + ii),
+                    getMaskValue(jj, ii), 1e-6)
+                    << "Failure at (" << jj << ", " << ii << ")";
+      }
     }
   }
 }  // namespace pandora_vision_obstacle
