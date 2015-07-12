@@ -135,6 +135,8 @@ namespace pandora_vision_obstacle
     if (traversabilityMaskEnabled_)
     {
       createTraversabilityMap(edgesImage, &newMap);
+      if (displayTraversabilityMapEnabled_)
+        displayTraversabilityMap(newMap);
     }
     else
     {
@@ -168,8 +170,9 @@ namespace pandora_vision_obstacle
       {
         // Check that we are on a valid cell.
         if (inputImage.at<double>(i, j) == 0)
-          continue;
-        traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+          traversabilityMap->at<int8_t>(i, j) = unknownArea;
+        else
+          traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
       }
     }
     return;
@@ -228,6 +231,26 @@ namespace pandora_vision_obstacle
     }
     cv::imshow(title, scaledImage);
     cv::waitKey(time);
+  }
+
+  void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map)
+  {
+    cv::Mat traversabilityVisualization(map.size(), CV_8UC3);
+    for (int i = 0; i < map.rows; ++i)
+    {
+      for (int j = 0; j < map.cols; ++j)
+      {
+        // If the map value is unknown then paint it black.
+        if (map.at<double>(i, j) == unknownArea)
+          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+        else if (map.at<double>(i, j) == occupiedArea)
+          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 255);
+        else if (map.at<double>(i, j) == freeArea)
+          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 0);
+      }
+    }
+    imshow("Traversability Map", traversabilityVisualization);
+    cv::waitKey(5);
   }
 
   void HardObstacleDetector::visualizeUnknownProbabilities(

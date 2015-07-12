@@ -111,8 +111,14 @@ namespace pandora_vision_obstacle
       {
         traversabilityMaskEnabled_ = traversabilityMaskEnableFlag;
       }
+      inline void setTraversabilityMaskDisplay(bool traversabilityMaskDisplay)
+      {
+        displayTraversabilityMapEnabled_ = traversabilityMaskDisplay;
+      }
 
     private:
+      void displayTraversabilityMap(const cv::Mat& map);
+
       void
       scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
 
@@ -261,6 +267,7 @@ namespace pandora_vision_obstacle
 
       bool edgeDetectionEnabled_;
       bool traversabilityMaskEnabled_;
+      bool displayTraversabilityMapEnabled_;
   };
 
 }  // namespace pandora_vision_obstacle
