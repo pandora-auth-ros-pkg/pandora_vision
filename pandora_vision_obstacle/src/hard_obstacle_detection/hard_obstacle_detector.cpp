@@ -42,6 +42,7 @@
 #include <limits>
 
 #include "pandora_vision_obstacle/hard_obstacle_detection/hard_obstacle_detector.h"
+#include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
 
 namespace pandora_vision
 {
@@ -75,6 +76,7 @@ namespace pandora_vision_obstacle
 
     edge_method_ = 1;
     edges_threshold_ = 30;
+    edgeDetectionEnabled_ = true;
 
     show_input_image = false;
     show_edges_image = false;
@@ -82,6 +84,10 @@ namespace pandora_vision_obstacle
     show_edges_and_unknown_image = false;
     show_new_map_image = false;
     show_unknown_probabilities = false;
+
+    traversabilityMaskPtr_.reset(new TraversabilityMask);
+    // Load the robot's description and create it's 2d Elevation Mask.
+    traversabilityMaskPtr_->loadGeometryMask(nh);
   }
 
   cv::Mat HardObstacleDetector::startDetection(const cv::Mat& inputImage)
@@ -104,11 +110,20 @@ namespace pandora_vision_obstacle
       showImage("The input image", scaledImage, 1);
     }
 
-    cv::Mat edgesImage;
-    detectEdges(scaledImage, &edgesImage);
 
-    // Pass the unknown areas in edges image.
-    fillUnknownAreas(inputImage, &edgesImage, 0);
+    TraversabilityMask::MatConstPtr elevationMapPtr_(&inputImage);
+    traversabilityMaskPtr_->setElevationMap(elevationMapPtr_);
+    cv::Mat edgesImage;
+    if (edgeDetectionEnabled_)
+    {
+      detectEdges(scaledImage, &edgesImage);
+    }
+    else
+    {
+      edgesImage = scaledImage;
+      // Pass the unknown areas in edges image.
+      fillUnknownAreas(inputImage, &edgesImage, 0);
+    }
 
     if (show_edges_and_unknown_image)
     {
@@ -117,9 +132,47 @@ namespace pandora_vision_obstacle
 
     // Pass the robot mask on the complete area that was made.
     cv::Mat newMap;
-    robotMaskOnMap(edgesImage, &newMap);
+    if (traversabilityMaskEnabled_)
+    {
+      createTraversabilityMap(edgesImage, &newMap);
+    }
+    else
+    {
+      robotMaskOnMap(edgesImage, &newMap);
+    }
 
     return newMap;
+  }
+
+  /**
+   * @brief Creates a traversability map using the input image.
+   * @description Creates the traversability map for the current elevation map by iterating over the
+   * input image and applying the robot's mask only it's non zero entries.
+   * @param inputImage[const cv::Mat&] The input image whose non zero entries represent candidate obstacle cells.
+   * It can be the elevation map itself or a processed image, such as an edge map from the elevation map.
+   * @param traversabilityMap[cv::Mat*] The resulting traversability map.
+   * @return void
+   */
+  void HardObstacleDetector::createTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap)
+  {
+    // Initialize the output traversability map
+    traversabilityMap->create(inputImage.size(), CV_8UC1);
+    // Set all of it's cells to unknown.
+    traversabilityMap->setTo(unknownArea);
+    int robotMaskHeight = traversabilityMaskPtr_->getRobotMaskPtr()->rows;
+    int robotMaskWidth = traversabilityMaskPtr_->getRobotMaskPtr()->cols;
+    // Iterate over the map
+    for (int i = robotMaskHeight / 2 + 1; i < inputImage.rows / 2 - robotMaskHeight / 2 + 1; ++i)
+    {
+      for (int j = robotMaskWidth / 2 + 1; j < inputImage.cols / 2 - robotMaskWidth / 2 + 1; ++j)
+      {
+        // Check that we are on a valid cell.
+        if (inputImage.at<double>(i, j) == 0)
+          continue;
+        traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+      }
+    }
+    return;
   }
 
   void

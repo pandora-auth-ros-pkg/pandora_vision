@@ -34,6 +34,7 @@
  *
  * Authors:
  *  Choutas Vassilis <vasilis4ch@gmail.com>
+ *  Kofinas Miltiadis <mkofinas@gmail.com>
  *********************************************************************/
 
 #include <vector>
@@ -174,7 +175,7 @@ namespace pandora_vision_obstacle
 
     traversabilityMaskPtr_->getRobotMaskPtr()->copyTo(*updatedElevationMaskPtr_);
     MatPtr wheelElevationPtr(new cv::Mat(wheelSize_, wheelSize_, CV_64FC1));
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
       for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
@@ -196,9 +197,9 @@ namespace pandora_vision_obstacle
     createUniformElevationMap(elevationMapPtr, width, height, 0.3);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -217,9 +218,9 @@ namespace pandora_vision_obstacle
     createUniformElevationMap(elevationMapPtr, width, height, 0.5);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -238,9 +239,9 @@ namespace pandora_vision_obstacle
     createUniformElevationMap(elevationMapPtr, width, height, 0.75);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -262,7 +263,7 @@ namespace pandora_vision_obstacle
 
     for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -281,9 +282,9 @@ namespace pandora_vision_obstacle
     createLinearHorizontalElMap(elevationMapPtr, width, height, width / 2.0, width);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -302,9 +303,9 @@ namespace pandora_vision_obstacle
     createLinearVerticalElMap(elevationMapPtr, width, height, 0, height);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);
@@ -323,9 +324,9 @@ namespace pandora_vision_obstacle
     createLinearVerticalElMap(elevationMapPtr, width, height, height / 2.0, height);
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
 
-    for (int i = wheelSize_; i < elevationMapPtr->rows - wheelSize_; ++i)
+    for (int i = 0; i < elevationMapPtr->rows - wheelSize_; ++i)
     {
-      for (int j = wheelSize_; j < elevationMapPtr->cols - wheelSize_; ++j)
+      for (int j = 0; j < elevationMapPtr->cols - wheelSize_; ++j)
       {
         cv::Point wheelPos(j, i);
         TraversabilityMaskTest::cropToWheel(wheelPos, wheelElevationPtr);

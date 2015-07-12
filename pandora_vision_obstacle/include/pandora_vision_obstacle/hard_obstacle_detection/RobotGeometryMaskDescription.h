@@ -63,7 +63,7 @@ namespace pandora_vision_obstacle
     {
     }
 
-    cv::Mat mask;  // square mask simulating /base_footprint in dim totalD x totalD
+    // cv::Mat mask;  // square mask simulating /base_footprint in dim totalD x totalD
 
     double wheelH;  // height measured at 0cm from /base_footprint
     double barrelH;  // height measured at 6cm from /base_footprint
@@ -72,10 +72,12 @@ namespace pandora_vision_obstacle
     double wheelD;  // width of wheel foot - measured 7cm
     double barrelD;  // width of motor barrel - measured 10cm
     double robotD;  // width of main robot - measured 8cm
-    // half robot mask (al,ar,ah,ab,bl,br,bt,bb) is in max id equal to totalD
+    // half robot mask (al,ar,ah,ab,bl,br,bt,bb) is in max dim equal to totalD
     // and in min dim equal to (wheelD + barrelD + robotD/2)
     double totalD;  // total width/height of square mask
 
+    /// Tolerance for the difference used to determine if the robot can move to certain
+    /// position without collisions.
     double eps;
 
     /// Max possible Angle for the robot's orientation in Degrees.
