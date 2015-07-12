@@ -444,49 +444,39 @@ namespace pandora_vision_obstacle
     // it corresponds using the current elevation map resolution.
     int wheelSize = metersToSteps(description_->wheelD);
     int robotSize = metersToSteps(description_->robotD);
-    double angle;
-    double slope;
+
+    // Iterate over the section of the mask for the current pair of wheels
+    // and update their corresponding values.
+    double slope = fabs(hForward - hBack) / d;
+    double angle = asin(slope);
+    slope *= description_->RESOLUTION;
+    // Reject slopes greater than the maximum possible angle.
+    if (angle * 180 / CV_PI > description_->maxPossibleAngle)
+      return false;
     // Find the wheel that is located higher
     if (hForward > hBack)
     {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hForward - hBack) / d);
-      // Reject slopes greater than the maximum possible angle.
-      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
-        return false;
-
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
+      double slopeResolution = hBack;
+      for (int j = wheelSize; j < aLeftRight->rows - wheelSize; ++j)
       {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-          + hBack;
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(robotSize - j, i) += val;
+          aLeftRight->at<double>(robotSize - j, i) += slopeResolution;
         }
+        slopeResolution += slope;
       }
-      return true;
     }
     else
     {
-      // Iterate over the section of the mask for the current pair of wheels
-      // and update their corresponding values.
-      angle = asin((hBack - hForward) / d);
-      // Reject slopes greater than the maximum possible angle.
-      if (angle * 180 / CV_PI > description_->maxPossibleAngle)
-        return false;
-      slope =  tan(angle);
-      for (int j = wheelSize + 1; j < aLeftRight->rows - wheelSize; ++j)
+      double slopeResolution = hForward;
+      for (int j = wheelSize; j < aLeftRight->rows - wheelSize; ++j)
       {
-        double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
-          + hForward;
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(j, i) += val;
+          aLeftRight->at<double>(j, i) += slopeResolution;
         }
+        slopeResolution += slope;
       }
-      return true;
     }
     return true;
   }
@@ -564,7 +554,7 @@ namespace pandora_vision_obstacle
       if (angle * 180 / CV_PI > description_->maxPossibleAngle)
         return false;
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
+      for (int j = wheelSize; j < aTopBottom->cols - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hLeft;
@@ -584,7 +574,7 @@ namespace pandora_vision_obstacle
       if (angle * 180 / CV_PI > description_->maxPossibleAngle)
         return false;
       slope =  tan(angle);
-      for (int j = wheelSize + 1; j < aTopBottom->cols - wheelSize; ++j)
+      for (int j = wheelSize; j < aTopBottom->cols - wheelSize; ++j)
       {
         double val = slope * (j * description_->RESOLUTION - description_->wheelD / 2)
             + hRight;

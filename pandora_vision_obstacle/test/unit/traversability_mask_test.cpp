@@ -81,7 +81,7 @@ namespace pandora_vision_obstacle
         descriptionPtr_->totalD = descriptionPtr_->wheelD + 2 * descriptionPtr_->barrelD
           + descriptionPtr_->robotD;
         descriptionPtr_->maxPossibleAngle = 20;
-        descriptionPtr_->RESOLUTION = 0.01;
+        descriptionPtr_->RESOLUTION = 0.02;
       }
 
       void createUniformElevationMap(const MatPtr& elevationMapPtr, int width, int height, double elevation)
@@ -547,7 +547,7 @@ namespace pandora_vision_obstacle
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
-                    tempMapPtr->at<double>(ii, jj), 1e-6);
+                    getMaskValue(ii, jj), 1e-6);
       }
     }
   }
@@ -573,7 +573,7 @@ namespace pandora_vision_obstacle
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
-                    tempMapPtr->at<double>(ii, jj), 1e-6);
+                    getMaskValue(ii, jj), 1e-6);
       }
     }
   }
@@ -599,7 +599,7 @@ namespace pandora_vision_obstacle
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
-                    tempMapPtr->at<double>(ii, jj), 1e-6);
+                    getMaskValue(ii, jj), 1e-6);
       }
     }
   }
@@ -625,7 +625,7 @@ namespace pandora_vision_obstacle
       for (int jj = 0; jj < tempMapPtr->cols; ++jj)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
-                    tempMapPtr->at<double>(ii, jj), 1e-6);
+                    getMaskValue(ii, jj), 1e-6);
       }
     }
   }
@@ -640,19 +640,24 @@ namespace pandora_vision_obstacle
         cv::Rect(bBoxX, bBoxY, bBoxWidth, bBoxHeight)));
 
     double firstWheelMeanHeight = 0.0;
-    double secondWheelMeanHeight = 0.2;
+    double secondWheelMeanHeight = 0.1;
 
+    double slope = fabs(firstWheelMeanHeight - secondWheelMeanHeight) / descriptionPtr_->totalD;
+    double slopeResolution = 0.0;
     findElevatedLeftRight(tempMapPtr, firstWheelMeanHeight, secondWheelMeanHeight, descriptionPtr_->totalD);
 
     ASSERT_EQ(updatedElevationMaskPtr_->rows, tempMapPtr->rows);
     ASSERT_EQ(wheelSize_, tempMapPtr->cols);
-    for (int ii = 0; ii < tempMapPtr->rows; ++ii)
+
+    for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
     {
-      for (int jj = 0; jj < tempMapPtr->cols; ++jj)
+      for (int ii = 0; ii < tempMapPtr->cols; ++ii)
       {
-        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + ii, bBoxX + jj),
-                    tempMapPtr->at<double>(ii, jj), 1e-6);
+        EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + jj, bBoxX + ii),
+                    getMaskValue(jj, ii) + slopeResolution, 1e-6)
+                    << "Failure at (" << jj << ", " << ii << ")";
       }
+      slopeResolution += slope * descriptionPtr_->RESOLUTION;
     }
   }
 }  // namespace pandora_vision_obstacle
