@@ -276,7 +276,7 @@ namespace hole_fusion
    **/
   void HoleFusion::completeTransition(void)
   {
-    NODELET_INFO("[%s]Transition Complete", nodeName_.c_str());
+    NODELET_INFO("[%s] Transition Complete", nodeName_.c_str());
   }
 
 
