@@ -114,6 +114,8 @@ namespace pandora_vision_obstacle
       description_ = robotGeometryMaskDescriptionPtr;
     }
 
+
+    void createMaskFromDesc();
     /**
      * @brief Creates the Robot Height Mask
      * @description Creates the height mask for the robot according to the description file.
@@ -122,8 +124,7 @@ namespace pandora_vision_obstacle
      * that approximately describes the robot.
      * @return void
      */
-    void createMaskFromDesc(const MatPtr& inputOutputMask,
-        const RobotGeometryMaskDescriptionPtr& description);
+    void createMaskFromDesc(const RobotGeometryMaskDescriptionPtr& description);
 
     MatConstPtr getRobotMaskPtr()
     {

@@ -57,6 +57,11 @@ namespace pandora_vision_obstacle
 
     detector_.reset(new HardObstacleDetector(this->getName(),
           this->getProcessorNodeHandle()));
+    if (detector_ == NULL)
+    {
+      ROS_FATAL("Could not initialize Hard Obstacle Detector!");
+      ROS_BREAK();
+    }
 
     serverPtr_.reset(new dynamic_reconfigure::Server< ::pandora_vision_obstacle::hard_obstacle_cfgConfig >(
           this->getProcessorNodeHandle()));
@@ -93,8 +98,9 @@ namespace pandora_vision_obstacle
     detector_->setTraversabilityMaskDisplay(config.display_traversability_map);
 
     detector_->setMinInputImageValue(config.min_input_image_value);
-    detector_->setEdgesThreshold(config.edge_detection_enabled);
+    detector_->setEdgeDetectionEnableFlag(config.edge_detection_enabled);
     detector_->setTraversabilityMaskEnableFlag(config.enable_traversability_mask);
+    detector_->setTraversabilityMaskDisplay(config.display_traversability_map);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
