@@ -44,7 +44,9 @@
 #include <vector>
 #include "cv_bridge/cv_bridge.h"
 #include "ros/ros.h"
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
+
+#include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
 
 namespace pandora_vision
 {
@@ -70,6 +72,17 @@ namespace pandora_vision_obstacle
       cv::Mat startDetection(const cv::Mat& inputImage);
 
       /**
+       * @brief Creates a traversability map using the input image.
+       * @description Creates the traversability map for the current elevation map by iterating over the
+       * input image and applying the robot's mask only it's non zero entries.
+       * @param inputImage[const cv::Mat&] The input image whose non zero entries represent candidate obstacle cells.
+       * It can be the elevation map itself or a processed image, such as an edge map from the elevation map.
+       * @param traversabilityMap[cv::Mat*] The resulting traversability map.
+       * @return void
+       */
+      void createTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap);
+
+      /**
        @brief Functions used to set debug show configuration parameters.
        **/
       inline void setShowInputImage(bool value){show_input_image = value;}
@@ -90,43 +103,16 @@ namespace pandora_vision_obstacle
       inline void setCannyBlurNoiseKernelSize(int value){cannyBlurKernelSize_ = value;}
 
       inline void setMinInputImageValue(int value){min_input_image_value_ = value;}
+      inline void setEdgeDetectionEnableFlag(bool edgeDetectionEnabledFlag)
+      {
+        edgeDetectionEnabled_ = edgeDetectionEnabledFlag;
+      }
+      inline void setTraversabilityMaskEnableFlag(bool traversabilityMaskEnableFlag)
+      {
+        traversabilityMaskEnabled_ = traversabilityMaskEnableFlag;
+      }
 
     private:
-      std::string nodeName_;
-
-      // The robots mask dimentions found as robotDimention / ogm_cell_resolution
-      int robotRows_;
-      int robotCols_;
-      cv::Mat robotMask_;
-
-      // This variable defines the probability of the extracted unknown areas
-      // when the robot is near unknown and free space.
-      // It is set to robotRows * robotCols in constructor and this is its
-      // minimum acceptable value. Recommended not to change.
-      // The higher the value, the lower the probability.
-      int robotStrength_;
-
-      // The parameter that defines the edge detection algorithm to be used
-      int edge_method_;
-
-      // Parameters used for canny edge detection method
-      int cannyKernelSize_;
-      int cannyLowThreshold_;
-      int cannyBlurKernelSize_;
-
-      // The parameter used to apply threshold  on the edges image
-      int edges_threshold_;
-
-      double min_input_image_value_;
-
-      // Debug parameters
-      bool show_input_image;
-      bool show_edges_image;
-      bool show_edges_thresholded_image;
-      bool show_edges_and_unknown_image;
-      bool show_new_map_image;
-      bool show_unknown_probabilities;
-
       void
       scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);
 
@@ -235,6 +221,46 @@ namespace pandora_vision_obstacle
         @return void
        **/
       void detectEdges(const cv::Mat& inImage, cv::Mat* outImage);
+    private:
+      std::string nodeName_;
+
+      TraversabilityMaskPtr traversabilityMaskPtr_;
+
+      // The robots mask dimentions found as robotDimention / ogm_cell_resolution
+      int robotRows_;
+      int robotCols_;
+      cv::Mat robotMask_;
+
+      // This variable defines the probability of the extracted unknown areas
+      // when the robot is near unknown and free space.
+      // It is set to robotRows * robotCols in constructor and this is its
+      // minimum acceptable value. Recommended not to change.
+      // The higher the value, the lower the probability.
+      int robotStrength_;
+
+      // The parameter that defines the edge detection algorithm to be used
+      int edge_method_;
+
+      // Parameters used for canny edge detection method
+      int cannyKernelSize_;
+      int cannyLowThreshold_;
+      int cannyBlurKernelSize_;
+
+      // The parameter used to apply threshold  on the edges image
+      int edges_threshold_;
+
+      double min_input_image_value_;
+
+      // Debug parameters
+      bool show_input_image;
+      bool show_edges_image;
+      bool show_edges_thresholded_image;
+      bool show_edges_and_unknown_image;
+      bool show_new_map_image;
+      bool show_unknown_probabilities;
+
+      bool edgeDetectionEnabled_;
+      bool traversabilityMaskEnabled_;
   };
 
 }  // namespace pandora_vision_obstacle

@@ -92,6 +92,8 @@ namespace pandora_vision_obstacle
     detector_->setEdgesThreshold(config.edges_threshold);
 
     detector_->setMinInputImageValue(config.min_input_image_value);
+    detector_->setEdgesThreshold(config.edge_detection_enabled);
+    detector_->setTraversabilityMaskEnableFlag(config.enable_traversability_mask);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
