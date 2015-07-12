@@ -124,12 +124,13 @@ namespace pandora_vision_obstacle
     if (edgeDetectionEnabled_)
     {
       detectEdges(scaledImage, &edgesImage);
+      // Pass the unknown areas in edges image.
+      fillUnknownAreas(inputImage, &edgesImage, 0);
+
     }
     else
     {
       edgesImage = scaledImage;
-      // Pass the unknown areas in edges image.
-      fillUnknownAreas(inputImage, &edgesImage, 0);
     }
 
     if (show_edges_and_unknown_image)
