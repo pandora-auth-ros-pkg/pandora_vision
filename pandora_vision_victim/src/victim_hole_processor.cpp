@@ -164,7 +164,8 @@ namespace pandora_vision_victim
         return temp;
       }
 
-      if (input->getRegion(i).x + input->getRegion(i).width / 2  >= 640 || input->getRegion(i).y + input->getRegion(i).height / 2 >= 480)
+      if (input->getRegion(i).x + input->getRegion(i).width / 2  >= 640 ||
+          input->getRegion(i).y + input->getRegion(i).height / 2 >= 480)
       {
         ROS_WARN("[victim_node] bbox bigger than image");
         return temp;
