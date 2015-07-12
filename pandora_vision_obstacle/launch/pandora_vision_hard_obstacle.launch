@@ -8,11 +8,13 @@
     <!-- Add in upper line to enable debugging: launch-prefix="kdbg" /-->
 
     <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_topics.yaml"
-        command="load" />
+      command="load" />
     <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_preprocessor_params.yaml"
-        command="load" ns="preprocessor" />
+      command="load" ns="preprocessor" />
     <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_detector_params.yaml"
-        command="load" ns="detector" />
+      command="load" ns="detector" />
+    <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_postprocessor_params.yaml"
+      command="load" ns="postprocessor" />
 
   </node>
 
