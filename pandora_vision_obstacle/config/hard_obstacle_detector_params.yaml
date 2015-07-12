@@ -2,3 +2,11 @@ robot:
   # In meters
   robotXDimention: 0.345
   robotYDimention: 0.345
+robot_description:
+  wheel_height: 0
+  barrel_height: 0.06
+  robot_height: 0.08
+  wheel_width: 0.07
+  barrel_width: 0.1
+  robot_width: 0.08
+  epsilon: 0.01

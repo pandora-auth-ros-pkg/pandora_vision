@@ -444,37 +444,37 @@ namespace pandora_vision_obstacle
   {
     description_.reset(new RobotGeometryMaskDescription);
 
-    if (!nh.getParam("robotDescription/wheel_height", description_->wheelH))
+    if (!nh.getParam("robot_description/wheel_height", description_->wheelH))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the height of the wheels!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
       description_->wheelH = 0;
     }
-    if (!nh.getParam("robotDescription/barrel_height", description_->barrelH))
+    if (!nh.getParam("robot_description/barrel_height", description_->barrelH))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the height of the motor cylinder!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
       description_->barrelH = 0.06;
     }
-    if (!nh.getParam("robotDescription/robot_height", description_->robotH))
+    if (!nh.getParam("robot_description/robot_height", description_->robotH))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the height of the body of the robot!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
       description_->robotH = 0.08;
     }
-    if (!nh.getParam("robotDescription/wheel_width", description_->wheelD))
+    if (!nh.getParam("robot_description/wheel_width", description_->wheelD))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the width of the robot's wheel!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
       description_->wheelD = 0.07;
     }
-    if (!nh.getParam("robotDescription/barrel_width", description_->barrelD))
+    if (!nh.getParam("robot_description/barrel_width", description_->barrelD))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the width of the robot's motor cylinder!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
       description_->barrelD = 0.1;
     }
-    if (!nh.getParam("robotDescription/robot_width", description_->robotD))
+    if (!nh.getParam("robot_description/robot_width", description_->robotD))
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the width of the robot's body!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
@@ -483,13 +483,13 @@ namespace pandora_vision_obstacle
 
     description_->totalD = description_->robotD + 2 * (description_->barrelD + description_->wheelD);
 
-    if (!nh.getParam("robotDescription/epsilon", description_->eps))
+    if (!nh.getParam("robot_description/epsilon", description_->eps))
     {
       ROS_WARN("[Traversability Mask]: Could not read the tolerance parameter!");
       ROS_INFO("[Traversability Mask]: Setting it to 1 cm!");
       description_->eps = 0.01;
     }
-    if (!nh.getParam("robotDescription/max_slope", description_->eps))
+    if (!nh.getParam("robot_description/max_slope", description_->eps))
     {
       ROS_WARN("[Traversability Mask]: Could not read the maximum possible slope!");
       ROS_INFO("[Traversability Mask]: Setting it to 20 degrees!");
