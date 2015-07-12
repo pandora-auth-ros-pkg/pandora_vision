@@ -690,6 +690,7 @@ namespace pandora_vision_obstacle
     }
     else
     {
+      double slopeResolution = hRight;
       for (int j = wheelSize; j < aTopBottom->cols - wheelSize; ++j)
       {
         slopeResolution += slope;
