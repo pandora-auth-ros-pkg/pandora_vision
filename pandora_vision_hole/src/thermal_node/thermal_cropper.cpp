@@ -268,12 +268,14 @@ namespace thermal
   startTransition(int newState)
   {
     // The new on/off state of the Hole Detector package
-    bool toBeOn = (newState ==
-        state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
+    bool toBeOn = ((newState ==
+          state_manager_msgs::RobotModeMsg::MODE_EXPLORATION_RESCUE)
+      || (newState ==
+          state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION)
       || (newState ==
         state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD)
       || (newState ==
-        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST);
+        state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST));
 
     // off -> on
     if (!isOn_ && toBeOn)
@@ -290,7 +292,9 @@ namespace thermal
     }
 
     // Shutdown or open publisher of enhanced images
-    if (toBeOn)
+    if (newState == state_manager_msgs::RobotModeMsg::MODE_IDENTIFICATION
+      || newState == state_manager_msgs::RobotModeMsg::MODE_SENSOR_HOLD
+      || newState == state_manager_msgs::RobotModeMsg::MODE_SENSOR_TEST)
     {
       if (!publishingEnhancedHoles_)
       {
