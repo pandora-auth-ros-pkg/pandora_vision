@@ -232,7 +232,7 @@ namespace thermal
 #ifdef DEBUG_SHOW
     if (Parameters::Debug::show_thermal_image)
     {
-      Visualization::showScaled("Thermal image", thermalSensorImage, 1);
+      Visualization::showScaled("Thermal image", thermalImage, 1);
     }
 #endif
     HolesConveyor holes;
