@@ -118,7 +118,8 @@ namespace pandora_vision_obstacle
     }
 
 
-    TraversabilityMask::MatConstPtr elevationMapPtr_(&inputImage);
+    TraversabilityMask::MatPtr elevationMapPtr_(new cv::Mat(inputImage));
+    // *elevationMapPtr_ = inputImage;
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr_);
     cv::Mat edgesImage;
     if (edgeDetectionEnabled_)
@@ -126,7 +127,6 @@ namespace pandora_vision_obstacle
       detectEdges(scaledImage, &edgesImage);
       // Pass the unknown areas in edges image.
       fillUnknownAreas(inputImage, &edgesImage, 0);
-
     }
     else
     {
