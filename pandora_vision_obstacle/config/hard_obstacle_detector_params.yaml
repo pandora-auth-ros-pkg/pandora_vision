@@ -7,6 +7,6 @@ robot_description:
   barrel_height: 0.06
   robot_height: 0.08
   wheel_width: 0.07
-  barrel_width: 0.1
+  barrel_width: 0.07
   robot_width: 0.08
   epsilon: 0.01

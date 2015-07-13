@@ -12,6 +12,7 @@ namespace pandora_vision_obstacle
     public:
       DummyProcessor();
 
+      void displayElevationMap(cv::Mat elevationMapImg);
     public:
       virtual bool process(const CVMatStampedConstPtr& input,
           const CVMatStampedPtr& output);

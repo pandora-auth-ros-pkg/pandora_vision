@@ -40,6 +40,7 @@
 
 #include <limits>
 #include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
+#include "opencv2/imgproc/imgproc.hpp"
 
 namespace pandora_vision
 {
@@ -69,61 +70,45 @@ namespace pandora_vision_obstacle
     int wheelSize = metersToSteps(description_->wheelD);
     int robotSize = metersToSteps(description_->robotD);
     int barrelSize = metersToSteps(description_->barrelD);
-    int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
+    int totalSize = robotSize + 2 * (barrelSize + wheelSize);
     // Initialize the mask of the robot.
     robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1, cv::Scalar(0)));
 
     // Assign the values for the motors of the robots.
-    for (int i = 0; i < barrelSize; ++i)
-    {
-      for (int j = 0; j < barrelSize; ++j)
-      {
-        // Top Left Barrel Height
-        robotGeometryMask_->at<double>(i, j + wheelSize) = description_->barrelH;
-        robotGeometryMask_->at<double>(i + wheelSize, j) = description_->barrelH;
-        // Top Right Barrel Height
-        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize) =
-          description_->barrelH;
-        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize - barrelSize) =
-          description_->barrelH;
-        // Bottom Left Barrel Height
-        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j) =
-          description_->barrelH;
-        robotGeometryMask_->at<double>(i + totalSize  - wheelSize, j + wheelSize) =
-          description_->barrelH;
-        // Bottom Right Barrel Height
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize - barrelSize,
-            j + totalSize - wheelSize) = description_->barrelH;
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j + totalSize - wheelSize - barrelSize)
-          = description_->barrelH;
-      }
-    }
-    int robotBoxSize = totalSize - 2 * wheelSize - 2 * barrelSize;
-    // Fill in the values for the height for the body of the robot.
-    for (int i = wheelSize; i < totalSize - wheelSize; ++i)
-    {
-      for (int j = wheelSize ; j < totalSize - wheelSize; ++j)
-      {
-        // Assign the height of the robot to the corresponding positions.
-        robotGeometryMask_->at<double>(i, j) = description_->robotH;
-      }
-    }
-    for (int i = 0; i < wheelSize; ++i)
-    {
-      for (int j = wheelSize + barrelSize; j < totalSize - wheelSize - barrelSize; ++j)
-      {
-        robotGeometryMask_->at<double>(i, j) = description_->robotH;
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j) = description_->robotH;
-      }
-    }
-    for (int i = wheelSize + barrelSize; i < totalSize - wheelSize - barrelSize; ++i)
-    {
-      for (int j = 0; j < wheelSize; ++j)
-      {
-        robotGeometryMask_->at<double>(i, j) = description_->robotH;
-        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) = description_->robotH;
-      }
-    }
+    // Top Left Barrels
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize, wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize, 0, wheelSize, wheelSize)) = description_->barrelH;
+
+    // Top Right Barrels
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize + robotSize, 0,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize, wheelSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+
+    // robotGeometryMask_->at<double>(i + wheelSize, j) = description_->barrelH;
+    // Top Right Barrel Height
+        // Bottom Left Barrels.
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize + barrelSize + robotSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize,
+          wheelSize + 2 * barrelSize + robotSize, wheelSize, wheelSize)) = description_->barrelH;
+    // Bottom Right Barrels.
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize + robotSize, wheelSize + 2 * barrelSize + robotSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize,
+          wheelSize + barrelSize + robotSize, wheelSize, wheelSize)) = description_->barrelH;
+
+    // Robot sidelines.
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize + barrelSize, wheelSize, robotSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize, wheelSize + barrelSize,
+          wheelSize, robotSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize, 0, robotSize, wheelSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize, wheelSize + 2 * barrelSize + robotSize,
+          robotSize, wheelSize)) = description_->robotH;
+
+    // Robot Main body.
+    (*robotGeometryMask_)(cv::Rect(wheelSize, wheelSize, 2 * barrelSize + robotSize,
+          2 * barrelSize + robotSize)) = description_->robotH;
     return;
   }
 
@@ -138,66 +123,48 @@ namespace pandora_vision_obstacle
   void TraversabilityMask::createMaskFromDesc(const RobotGeometryMaskDescriptionPtr& description)
   {
     // Calculate the values for the size of the robot parts.
-    int wheelSize = metersToSteps(description->wheelD);
-    int robotSize = metersToSteps(description->robotD);
-    int barrelSize = metersToSteps(description->barrelD);
-    int totalSize = 2 * wheelSize + 2 * barrelSize + robotSize;
+    int wheelSize = metersToSteps(description_->wheelD);
+    int robotSize = metersToSteps(description_->robotD);
+    int barrelSize = metersToSteps(description_->barrelD);
+    int totalSize = robotSize + 2 * (barrelSize + wheelSize);
     // Initialize the mask of the robot.
     robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1, cv::Scalar(0)));
 
     // Assign the values for the motors of the robots.
-    for (int i = 0; i < barrelSize; ++i)
-    {
-      for (int j = 0; j < barrelSize; ++j)
-      {
-        // Top Left Barrel Height
-        robotGeometryMask_->at<double>(i, j + wheelSize) = description->barrelH;
-        robotGeometryMask_->at<double>(i + wheelSize, j) = description->barrelH;
-        // Top Right Barrel Height
-        robotGeometryMask_->at<double>(i + wheelSize, j + totalSize - wheelSize) =
-          description->barrelH;
-        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize - barrelSize) =
-          description->barrelH;
-        // Bottom Left Barrel Height
-        robotGeometryMask_->at<double>(i + totalSize - barrelSize - wheelSize, j) =
-          description->barrelH;
-        robotGeometryMask_->at<double>(i + totalSize  - wheelSize, j + wheelSize) =
-          description->barrelH;
-        // Bottom Right Barrel Height
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize - barrelSize,
-            j + totalSize - wheelSize) = description->barrelH;
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j + totalSize - wheelSize - barrelSize)
-          = description->barrelH;
-      }
-    }
-    int robotBoxSize = totalSize - 2 * wheelSize - 2 * barrelSize;
-    // Fill in the values for the height for the body of the robot.
-    for (int i = wheelSize; i < totalSize - wheelSize; ++i)
-    {
-      for (int j = wheelSize ; j < totalSize - wheelSize; ++j)
-      {
-        // Assign the height of the robot to the corresponding positions.
-        robotGeometryMask_->at<double>(i, j) = description->robotH;
-      }
-    }
-    for (int i = 0; i < wheelSize; ++i)
-    {
-      for (int j = wheelSize + barrelSize; j < totalSize - wheelSize - barrelSize; ++j)
-      {
-        robotGeometryMask_->at<double>(i, j) = description->robotH;
-        robotGeometryMask_->at<double>(i + totalSize - wheelSize, j) = description->robotH;
-      }
-    }
-    for (int i = wheelSize + barrelSize; i < totalSize - wheelSize - barrelSize; ++i)
-    {
-      for (int j = 0; j < wheelSize; ++j)
-      {
-        robotGeometryMask_->at<double>(i, j) = description->robotH;
-        robotGeometryMask_->at<double>(i, j + totalSize - wheelSize) = description->robotH;
-      }
-    }
-    // cv::imshow("Mask", *robotGeometryMask_);
-    // cv::waitKey(0);
+    // Top Left Barrels
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize, wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize, 0, wheelSize, wheelSize)) = description_->barrelH;
+
+    // Top Right Barrels
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize + robotSize, 0,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize, wheelSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+
+    // robotGeometryMask_->at<double>(i + wheelSize, j) = description_->barrelH;
+    // Top Right Barrel Height
+        // Bottom Left Barrels.
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize + barrelSize + robotSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize,
+          wheelSize + 2 * barrelSize + robotSize, wheelSize, wheelSize)) = description_->barrelH;
+    // Bottom Right Barrels.
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize + robotSize, wheelSize + 2 * barrelSize + robotSize,
+          wheelSize, wheelSize)) = description_->barrelH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize,
+          wheelSize + barrelSize + robotSize, wheelSize, wheelSize)) = description_->barrelH;
+
+    // Robot sidelines.
+    (*robotGeometryMask_)(cv::Rect(0, wheelSize + barrelSize, wheelSize, robotSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + 2 * barrelSize + robotSize, wheelSize + barrelSize,
+          wheelSize, robotSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize, 0, robotSize, wheelSize)) = description_->robotH;
+    (*robotGeometryMask_)(cv::Rect(wheelSize + barrelSize, wheelSize + 2 * barrelSize + robotSize,
+          robotSize, wheelSize)) = description_->robotH;
+
+    // Robot Main body.
+    (*robotGeometryMask_)(cv::Rect(wheelSize, wheelSize, 2 * barrelSize + robotSize,
+          2 * barrelSize + robotSize)) = description_->robotH;
     return;
   }
 
@@ -527,7 +494,7 @@ namespace pandora_vision_obstacle
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the width of the robot's motor cylinder!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
-      description_->barrelD = 0.1;
+      description_->barrelD = 0.07;
     }
     if (!nh.getParam("robot_description/robot_width", description_->robotD))
     {

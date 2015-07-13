@@ -85,14 +85,14 @@ namespace pandora_vision_obstacle
     show_new_map_image = false;
     show_unknown_probabilities = false;
 
-    traversabilityMaskEnabled_ = false;
+    traversabilityMaskEnabled_ = true;
     edgeDetectionEnabled_ = true;
-    this->displayTraversabilityMapEnabled_ = false;
+    displayTraversabilityMapEnabled_ = false;
     traversabilityMaskPtr_.reset(new TraversabilityMask);
     // Load the robot's description and create it's 2d Elevation Mask.
     ROS_INFO("Loading robot description!");
-    //traversabilityMaskPtr_->loadGeometryMask(nh);
-    //traversabilityMaskPtr_->createMaskFromDesc();
+    traversabilityMaskPtr_->loadGeometryMask(nh);
+    traversabilityMaskPtr_->createMaskFromDesc();
     // ROS_INFO("Finished loading robot description and creating robot mask!");
     ROS_INFO("[Hard Obstacle Detector]: Created Detector Object!");
   }
@@ -176,6 +176,7 @@ namespace pandora_vision_obstacle
     {
       for (int j = robotMaskWidth / 2 + 1; j < inputImage.cols / 2 - robotMaskWidth / 2 + 1; ++j)
       {
+        std::cout << "(i ,j) = ( " << i << " , " << j <<" )" << std::endl;
         // Check that we are on a valid cell.
         if (inputImage.at<double>(i, j) == 0)
           traversabilityMap->at<int8_t>(i, j) = unknownArea;

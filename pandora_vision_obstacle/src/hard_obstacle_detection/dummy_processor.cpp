@@ -1,5 +1,6 @@
 #include <string>
 #include "sensor_msgs/Image.h"
+#include <limits>
 #include <sensor_msgs/image_encodings.h>
 
 #include "pandora_vision_obstacle/hard_obstacle_detection/dummy_processor.h"
@@ -21,6 +22,30 @@ namespace pandora_vision_obstacle
     pub = it.advertise("/traversability_map", 1);
   }
 
+  void DummyProcessor::displayElevationMap(cv::Mat inputImage)
+  {
+    cv::namedWindow("Elevation Map Image", cv::WINDOW_NORMAL);
+    cv::Mat elevationMapImg(inputImage.size(), CV_8UC1);
+    cv::Mat colorMapImg;
+
+    // Find the known areas in the map.
+    cv::Mat mask = inputImage != -std::numeric_limits<double>::max();
+
+    // Normalize only the map elements that correspond to known cells.
+    cv::normalize(inputImage, elevationMapImg, 0, 1, cv::NORM_MINMAX, -1, mask);
+
+    elevationMapImg.convertTo(elevationMapImg, CV_8UC1, 255);
+    cv::applyColorMap(elevationMapImg, colorMapImg, cv::COLORMAP_JET);
+
+    // Set all unknown areas to 0 so that they appear as black.
+    cv::bitwise_not(mask, mask);
+    colorMapImg.setTo(0.0, mask);
+
+    cv::imshow("Elevation Map Image", colorMapImg);
+    cv::waitKey(5);
+    return;
+  }
+
   void DummyProcessor::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImagePtr cv_ptr;
@@ -39,6 +64,7 @@ namespace pandora_vision_obstacle
 
     CVMatStampedPtr outputImagePtr( new CVMatStamped );
 
+    displayElevationMap(inputImagePtr->image);
     bool flag = process(inputImagePtr, outputImagePtr);
 
     cv_bridge::CvImage out_msg;
