@@ -94,6 +94,8 @@ namespace pandora_vision_obstacle
     inline int convertToYCoord(double meters);
 
    private:
+    ros::Publisher imagePublisher_;
+
     /// The maximum distance of a point from the range sensor.
     double maxAllowedDist_;
 

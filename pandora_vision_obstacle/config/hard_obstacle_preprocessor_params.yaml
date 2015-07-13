@@ -4,3 +4,5 @@ ElevationMap:
 
 # In meters
 cellResolution: 0.02
+
+published_image_topic: /elevation_map

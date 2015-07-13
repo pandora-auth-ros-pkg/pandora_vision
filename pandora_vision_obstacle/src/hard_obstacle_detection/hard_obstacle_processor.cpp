@@ -106,9 +106,9 @@ namespace pandora_vision_obstacle
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
       const CVMatStampedPtr& output)
   {
-    NODELET_INFO("[%s] In process", this->getName().c_str());
-    output->header = input->getHeader();
-    output->image = detector_->startDetection(input->getImage());
+    //NODELET_INFO("[%s] In process", this->getName().c_str());
+    //output->header = input->getHeader();
+    //output->image = detector_->startDetection(input->getImage());
 
     return true;
   }

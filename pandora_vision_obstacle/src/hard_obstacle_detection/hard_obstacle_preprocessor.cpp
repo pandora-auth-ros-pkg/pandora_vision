@@ -40,6 +40,7 @@
 #include <limits>
 #include <cmath>
 
+#include <cv_bridge/cv_bridge.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -86,6 +87,15 @@ namespace pandora_vision_obstacle
       ROS_BREAK();
     }
 
+    std::string topic;
+    if (!this->getProcessorNodeHandle().getParam("published_image_topic", topic))
+    {
+      ROS_ERROR_STREAM("[" + this->getName() + "] preprocessor nh processor : Could not "
+          << "retrieve the name of the topic to publish!");
+      ROS_BREAK();
+    }
+    imagePublisher_ = this->getPublicNodeHandle().advertise<sensor_msgs::Image>(topic, 1);
+
     tf::StampedTransform tfTransform;
     tfListener_.waitForTransform("/world", "/map", ros::Time::now(), ros::Duration(2));
     tfListener_.lookupTransform("/world", "/map", ros::Time::now(), tfTransform);
@@ -119,6 +129,12 @@ namespace pandora_vision_obstacle
 
     if (visualisationFlag_)
       viewElevationMap(output);
+
+    cv_bridge::CvImagePtr imagePtr(new cv_bridge::CvImage);
+    imagePtr->header = output->getHeader();
+    imagePtr->encoding = output->getImage().depth();
+    imagePtr->image = output->getImage().clone();
+    imagePublisher_.publish(imagePtr->toImageMsg());
 
     return true;
   }
