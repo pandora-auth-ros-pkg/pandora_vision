@@ -177,21 +177,24 @@ namespace pandora_vision_obstacle
   {
     center_ = center;
 
+
+    int maskSize = robotGeometryMask_->rows;
+
     // Calculate the current position of the Upper Left Wheel.
     cv::Point upperLeftWheelPos(
-        metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD - description_->wheelD));
+        center_.x - maskSize / 2,
+        center_.y - maskSize / 2);
     // Calculate the current position of the Lower Left Wheel.
     cv::Point lowerLeftWheelPos(
-        metersToSteps(center_.x - description_->robotD / 2  - description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD + description_->wheelD));
+        center_.x - maskSize / 2,
+        center_.y + maskSize / 2 - metersToSteps(description_->wheelD));
     cv::Point upperRightWheelPos(
-        metersToSteps(center_.x + description_->robotD / 2  + description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD - description_->wheelD));
+        center_.x + maskSize / 2  - metersToSteps(description_->wheelD),
+        center_.y - maskSize / 2);
     // Calculate the current position of the Lower Right Wheel.
     cv::Point lowerRightWheelPos(
-        metersToSteps(center_.x + description_->robotD / 2  + description_->barrelD - description_->wheelD),
-        metersToSteps(center_.y + description_->robotD / 2  + description_->barrelD + description_->wheelD));
+        center_.x + maskSize / 2  - metersToSteps(description_->wheelD),
+        center_.y + maskSize / 2  - metersToSteps(description_->wheelD));
 
     double upperLeftWheelMeanHeight, upperLeftWheelStdDev;
     bool upperLeftWheelValid = findHeightOnWheel(upperLeftWheelPos, &upperLeftWheelMeanHeight,
@@ -201,13 +204,16 @@ namespace pandora_vision_obstacle
     bool lowerLeftWheelValid = findHeightOnWheel(lowerLeftWheelPos, &lowerLeftWheelMeanHeight,
         &lowerLeftWheelStdDev);
 
+
     double upperRightWheelMeanHeight, upperRightWheelStdDev;
     bool upperRightWheelValid = findHeightOnWheel(upperRightWheelPos, &upperRightWheelMeanHeight,
         &upperRightWheelStdDev);
 
+
     double lowerRightWheelMeanHeight, lowerRightWheelStdDev;
     bool lowerRightWheelValid = findHeightOnWheel(lowerRightWheelPos, &lowerRightWheelMeanHeight,
         &lowerRightWheelStdDev);
+
 
     // Calculate the number of valid wheels.
     int validWheelNum = upperLeftWheelValid + upperRightWheelValid + lowerLeftWheelValid

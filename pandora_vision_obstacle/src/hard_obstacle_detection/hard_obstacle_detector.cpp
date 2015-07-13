@@ -78,16 +78,16 @@ namespace pandora_vision_obstacle
     edges_threshold_ = 30;
     edgeDetectionEnabled_ = true;
 
-    show_input_image = false;
-    show_edges_image = false;
+    show_input_image = true;
+    show_edges_image = true;
     show_edges_thresholded_image = false;
-    show_edges_and_unknown_image = false;
-    show_new_map_image = false;
-    show_unknown_probabilities = false;
+    show_edges_and_unknown_image = true;
+    show_new_map_image = true;
+    show_unknown_probabilities = true;
 
-    traversabilityMaskEnabled_ = true;
+    traversabilityMaskEnabled_ = false;
     edgeDetectionEnabled_ = true;
-    displayTraversabilityMapEnabled_ = false;
+    displayTraversabilityMapEnabled_ = true;
     traversabilityMaskPtr_.reset(new TraversabilityMask);
     // Load the robot's description and create it's 2d Elevation Mask.
     ROS_INFO("Loading robot description!");
@@ -130,7 +130,7 @@ namespace pandora_vision_obstacle
     }
     else
     {
-      edgesImage = scaledImage;
+      edgesImage = inputImage;
     }
 
     if (show_edges_and_unknown_image)
@@ -176,9 +176,8 @@ namespace pandora_vision_obstacle
     {
       for (int j = robotMaskWidth / 2 + 1; j < inputImage.cols / 2 - robotMaskWidth / 2 + 1; ++j)
       {
-        std::cout << "(i ,j) = ( " << i << " , " << j <<" )" << std::endl;
         // Check that we are on a valid cell.
-        if (inputImage.at<double>(i, j) == 0)
+        if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
           traversabilityMap->at<int8_t>(i, j) = unknownArea;
         else
           traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
@@ -245,6 +244,7 @@ namespace pandora_vision_obstacle
   void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map)
   {
     cv::Mat traversabilityVisualization(map.size(), CV_8UC3);
+    traversabilityVisualization.setTo(0);
     for (int i = 0; i < map.rows; ++i)
     {
       for (int j = 0; j < map.cols; ++j)
