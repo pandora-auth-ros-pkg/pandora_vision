@@ -16,6 +16,7 @@ centerRect:
   width: 5
   height: 10
 
+depthLimit: 1.5
 maxDepthDiff: 1.0
 depthThreshold: 0.3
 
