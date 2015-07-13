@@ -78,6 +78,8 @@ namespace pandora_vision_obstacle
     nh.param("centerRect/width", centerWidth_, 5);
     nh.param("centerRect/height", centerHeight_, 10);
 
+    nh.param("maxDepthDiff", param, 1.0);
+    maxDepthDiff_ = param;
     nh.param("depthThreshold", depthThreshold_, 0.3);
     nh.param("linesThreshold", linesThreshold_, 2);
 
@@ -528,9 +530,12 @@ namespace pandora_vision_obstacle
         // Find the new depth distance of the soft obstacle
         depthDistance = findDepthDistance(depthImage, verticalLines,
             *roi, level);
-        bool nonZeroDepth = (depthDistance[1] && depthDistance[3]);
 
-        if (probability > 0.0f && nonZeroDepth)
+        bool nonZeroDepth = (depthDistance[1] && depthDistance[3]);
+        bool smallDepthDiff = (fabs(depthDistance[1] - depthDistance[3])
+            < maxDepthDiff_);
+
+        if (probability > 0.0f && nonZeroDepth && smallDepthDiff)
         {
           ROS_INFO("Soft Obstacle Detected!");
 
