@@ -203,6 +203,19 @@ target_link_libraries(${PROJECT_NAME}_hard_obstacle_node
   ${PROJECT_NAME}_hard_obstacle_handler
   )
 
+add_library(${PROJECT_NAME}_dummy_lib
+  src/hard_obstacle_detection/dummy_processor.cpp)
+
+target_link_libraries(${PROJECT_NAME}_dummy_lib
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}_hard_obstacle_detector
+)
+add_executable(${PROJECT_NAME}_dummy
+  src/hard_obstacle_detection/dummy_main.cpp
+)
+target_link_libraries(${PROJECT_NAME}_dummy
+  ${PROJECT_NAME}_dummy_lib
+    )
 
 ############################ barrel node ###############################
 add_executable(${PROJECT_NAME}_barrel_node

@@ -95,7 +95,6 @@ namespace pandora_vision_obstacle
     detector_->setCannyBlurNoiseKernelSize(config.canny_blur_noise_kernel_size);
 
     detector_->setEdgesThreshold(config.edges_threshold);
-    detector_->setTraversabilityMaskDisplay(config.display_traversability_map);
 
     detector_->setMinInputImageValue(config.min_input_image_value);
     detector_->setEdgeDetectionEnableFlag(config.edge_detection_enabled);

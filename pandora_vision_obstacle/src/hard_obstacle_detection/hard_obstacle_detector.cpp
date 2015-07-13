@@ -92,7 +92,7 @@ namespace pandora_vision_obstacle
     // Load the robot's description and create it's 2d Elevation Mask.
     ROS_INFO("Loading robot description!");
     traversabilityMaskPtr_->loadGeometryMask(nh);
-    // traversabilityMaskPtr_->createMaskFromDesc();
+    traversabilityMaskPtr_->createMaskFromDesc();
     // ROS_INFO("Finished loading robot description and creating robot mask!");
     ROS_INFO("[Hard Obstacle Detector]: Created Detector Object!");
   }
