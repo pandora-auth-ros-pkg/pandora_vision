@@ -32,14 +32,12 @@ namespace pandora_vision_obstacle
     {
       ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
     }
-    CVMatStamped inputImage;
-    inputImage.image = cv_ptr->image;
-    inputImage.header = cv_ptr->header;
 
-    CVMatStampedPtr inputImagePtr;
-    *inputImagePtr = inputImage;
+    CVMatStampedPtr inputImagePtr( new CVMatStamped );
+    inputImagePtr->image = cv_ptr->image;
+    inputImagePtr->header = cv_ptr->header;
 
-    CVMatStampedPtr outputImagePtr;
+    CVMatStampedPtr outputImagePtr( new CVMatStamped );
 
     bool flag = process(inputImagePtr, outputImagePtr);
 
