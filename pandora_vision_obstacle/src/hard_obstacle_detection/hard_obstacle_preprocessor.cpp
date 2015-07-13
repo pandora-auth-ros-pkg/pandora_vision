@@ -47,6 +47,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <tf/exceptions.h>
+#include <sensor_msgs/image_encodings.h>
 
 #include "sensor_processor/processor_error.h"
 #include "sensor_processor/handler.h"
@@ -132,7 +133,7 @@ namespace pandora_vision_obstacle
 
     cv_bridge::CvImagePtr imagePtr(new cv_bridge::CvImage);
     imagePtr->header = output->getHeader();
-    imagePtr->encoding = output->getImage().depth();
+    imagePtr->encoding = sensor_msgs::image_encodings::TYPE_64FC1;
     imagePtr->image = output->getImage().clone();
     imagePublisher_.publish(imagePtr->toImageMsg());
 
