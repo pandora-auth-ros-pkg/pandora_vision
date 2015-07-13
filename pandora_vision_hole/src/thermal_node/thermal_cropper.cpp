@@ -155,7 +155,6 @@ namespace thermal
   ThermalCropper::
   inputThermalRoiCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
-    NODELET_INFO("[%s] Thermal callback", nodeName_.c_str());
     isThermalAvailable_ = true;
     thermalEnhancedImageConstPtr_ = msg;
 
@@ -169,7 +168,6 @@ namespace thermal
   ThermalCropper::
   inputEnhancedImageCallback(const pandora_vision_msgs::EnhancedImageConstPtr& msg)
   {
-    NODELET_INFO("[%s] RGB callback", nodeName_.c_str());
     isEnhancedImageAvailable_ = true;
     enhancedImageConstPtr_ = msg;
 
@@ -193,6 +191,8 @@ namespace thermal
     isThermalAvailable_ = false;
 
     unlockThermalProcedure();
+
+    NODELET_INFO("[%s] Processing thermal images", nodeName_.c_str());
 
     if (!publishingEnhancedHoles_)
       return;
