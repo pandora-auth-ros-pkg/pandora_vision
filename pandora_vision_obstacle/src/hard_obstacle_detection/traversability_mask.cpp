@@ -71,6 +71,7 @@ namespace pandora_vision_obstacle
     int robotSize = metersToSteps(description_->robotD);
     int barrelSize = metersToSteps(description_->barrelD);
     int totalSize = robotSize + 2 * (barrelSize + wheelSize);
+
     // Initialize the mask of the robot.
     robotGeometryMask_.reset(new cv::Mat(totalSize, totalSize, CV_64FC1, cv::Scalar(0)));
 
@@ -177,9 +178,7 @@ namespace pandora_vision_obstacle
   {
     center_ = center;
 
-
     int maskSize = robotGeometryMask_->rows;
-
     // Calculate the current position of the Upper Left Wheel.
     cv::Point upperLeftWheelPos(
         center_.x - maskSize / 2,
@@ -506,7 +505,7 @@ namespace pandora_vision_obstacle
     {
       ROS_WARN("[Traversability Mask]: Could not retrieve the width of the robot's body!");
       ROS_INFO("[Traversability Mask]: Using the default value!");
-      description_->robotD = 0.08;
+      description_->robotD = 0.09;
     }
 
     description_->totalD = description_->robotD + 2 * (description_->barrelD + description_->wheelD);
@@ -523,7 +522,7 @@ namespace pandora_vision_obstacle
       ROS_INFO("[Traversability Mask]: Setting it to 20 degrees!");
       description_->maxPossibleAngle = 20;
     }
-    if (!nh.getParam("cellResolution", description_->RESOLUTION))
+    if (!nh.getParam("robot_description/cellResolution", description_->RESOLUTION))
     {
       ROS_WARN("[Traversability Mask]: Could not read the mask resolution!");
       ROS_INFO("[Traversability Mask]: Setting it to 2 cm per cell!");

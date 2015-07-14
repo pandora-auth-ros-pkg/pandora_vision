@@ -171,16 +171,21 @@ namespace pandora_vision_obstacle
     traversabilityMap->setTo(unknownArea);
     int robotMaskHeight = traversabilityMaskPtr_->getRobotMaskPtr()->rows;
     int robotMaskWidth = traversabilityMaskPtr_->getRobotMaskPtr()->cols;
+    std::cout << robotMaskWidth << std::endl;
+    std::cout << robotMaskHeight << std::endl;
     // Iterate over the map
-    for (int i = robotMaskHeight / 2 + 1; i < inputImage.rows / 2 - robotMaskHeight / 2 + 1; ++i)
+    for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
     {
-      for (int j = robotMaskWidth / 2 + 1; j < inputImage.cols / 2 - robotMaskWidth / 2 + 1; ++j)
+      for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
       {
         // Check that we are on a valid cell.
         // if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
           // traversabilityMap->at<int8_t>(i, j) = unknownArea;
         // else
-          traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+          // std::cout << "i , j = " << i << " " << j << std::endl;
+          // std::cout << "Height, width = " << robotMaskHeight << " " <<robotMaskWidth << std::endl;
+          // std::cout << "Map Height Width =" << inputImage.rows << " " << inputImage.cols <<  std::endl;
+          traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
       }
     }
     return;
