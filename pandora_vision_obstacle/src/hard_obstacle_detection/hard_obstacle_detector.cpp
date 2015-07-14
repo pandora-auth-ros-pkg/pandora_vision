@@ -78,14 +78,14 @@ namespace pandora_vision_obstacle
     edges_threshold_ = 30;
     edgeDetectionEnabled_ = true;
 
-    show_input_image = true;
-    show_edges_image = true;
+    show_input_image = false;
+    show_edges_image = false;
     show_edges_thresholded_image = false;
-    show_edges_and_unknown_image = true;
-    show_new_map_image = true;
-    show_unknown_probabilities = true;
+    show_edges_and_unknown_image = false;
+    show_new_map_image = false;
+    show_unknown_probabilities = false;
 
-    traversabilityMaskEnabled_ = false;
+    traversabilityMaskEnabled_ = true;
     edgeDetectionEnabled_ = true;
     displayTraversabilityMapEnabled_ = true;
     traversabilityMaskPtr_.reset(new TraversabilityMask);
@@ -177,9 +177,9 @@ namespace pandora_vision_obstacle
       for (int j = robotMaskWidth / 2 + 1; j < inputImage.cols / 2 - robotMaskWidth / 2 + 1; ++j)
       {
         // Check that we are on a valid cell.
-        if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
-          traversabilityMap->at<int8_t>(i, j) = unknownArea;
-        else
+        // if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
+          // traversabilityMap->at<int8_t>(i, j) = unknownArea;
+        // else
           traversabilityMap->at<int8_t>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
       }
     }
@@ -252,8 +252,10 @@ namespace pandora_vision_obstacle
         // If the map value is unknown then paint it black.
         if (map.at<double>(i, j) == unknownArea)
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+        // Paint the occupied Areas red
         else if (map.at<double>(i, j) == occupiedArea)
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 255);
+        // Paint the free areas blue
         else if (map.at<double>(i, j) == freeArea)
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 0);
       }

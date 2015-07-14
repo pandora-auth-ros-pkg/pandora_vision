@@ -1,6 +1,0 @@
-<launch>
-<node pkg="pandora_vision_obstacle" type="pandora_vision_obstacle_dummy" name="pandora_hard_obstacle"
-  launch-prefix="xterm -e gdb --args" />
-
-</launch>
-
