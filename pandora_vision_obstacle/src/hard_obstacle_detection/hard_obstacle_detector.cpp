@@ -74,20 +74,20 @@ namespace pandora_vision_obstacle
 
     robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
 
-    edge_method_ = 1;
+    edge_method_ = 0;
     edges_threshold_ = 30;
     edgeDetectionEnabled_ = true;
 
-    show_input_image = false;
-    show_edges_image = false;
-    show_edges_thresholded_image = false;
+    show_input_image = true;
+    show_edges_image = true;
+    show_edges_thresholded_image = true;
     show_edges_and_unknown_image = false;
     show_new_map_image = false;
     show_unknown_probabilities = false;
 
-    traversabilityMaskEnabled_ = true;
+    traversabilityMaskEnabled_ = false;
     edgeDetectionEnabled_ = true;
-    displayTraversabilityMapEnabled_ = true;
+    displayTraversabilityMapEnabled_ = false;
     traversabilityMaskPtr_.reset(new TraversabilityMask);
     // Load the robot's description and create it's 2d Elevation Mask.
     ROS_INFO("Loading robot description!");
@@ -436,12 +436,16 @@ namespace pandora_vision_obstacle
     ROS_INFO_NAMED(nodeName_, "Canny edge detection is called");
 
     // Reduce the noise of the input Image
+    int cannyKernelSize_ = 3;
+    int cannyBlurKernelSize_ = 7;
+    int cannyLowThreshold_ = 50;
+    int cannyHighThreshold_ = 200;
+
     cv::blur(inImage, *outImage,
       cv::Size(cannyBlurKernelSize_, cannyBlurKernelSize_));
-
     // Detect edges with canny
     cv::Canny(*outImage, *outImage, cannyLowThreshold_,
-      cannyLowThreshold_ * 3, cannyKernelSize_);
+      cannyHighThreshold_, cannyKernelSize_);
   }
 
   void HardObstacleDetector::applyScharr(
@@ -530,10 +534,31 @@ namespace pandora_vision_obstacle
     {
       showImage("The edges image", *outImage, 1);
     }
-
     // Apply threshold to the edges
     cv::threshold(*outImage, *outImage, edges_threshold_, 255, CV_THRESH_BINARY);
-
+    for (unsigned int i = 1 ; i < outImage->rows - 1 ; i++)
+    {
+      for (unsigned int j = 1 ; j < outImage->cols - 1 ; j++)
+      {
+        if (outImage->at<uchar>(i,j) > 0)
+        {
+          bool unkownNeighDetection =
+            (inImage.at<double>(i - 1, j - 1) == 0) ||
+            (inImage.at<double>(i, j - 1) == 0) ||
+            (inImage.at<double>(i + 1, j - 1) == 0) ||
+            (inImage.at<double>(i - 1, j) == 0) ||
+            (inImage.at<double>(i, j) == 0) ||
+            (inImage.at<double>(i + 1, j) == 0) ||
+            (inImage.at<double>(i - 1, j + 1) == 0) ||
+            (inImage.at<double>(i, j + 1) == 0) ||
+            (inImage.at<double>(i + 1, j + 1) == 0);
+          if (unkownNeighDetection)
+          {
+            outImage->at<uchar>(i, j) = 0;
+          }
+        }
+      }
+    }
     if (show_edges_thresholded_image)
     {
       showImage("The thresholded edges image", *outImage, 1);
