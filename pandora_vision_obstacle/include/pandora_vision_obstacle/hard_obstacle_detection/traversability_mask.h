@@ -76,6 +76,10 @@ namespace pandora_vision_obstacle
     int8_t
     findTraversability(const cv::Point& center);
 
+    cv::Mat findRowTraversability(const cv::Mat& inputImage);
+
+    cv::Mat findColTraversability(const cv::Mat& inputImage);
+
     /**
      * Sets elevation map to be used
      */

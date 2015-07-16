@@ -121,17 +121,17 @@ namespace pandora_vision_obstacle
     TraversabilityMask::MatPtr elevationMapPtr_(new cv::Mat(inputImage));
     // *elevationMapPtr_ = inputImage;
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr_);
-    cv::Mat edgesImage;
-    if (edgeDetectionEnabled_)
-    {
-      detectEdges(scaledImage, &edgesImage);
-      // Pass the unknown areas in edges image.
-      fillUnknownAreas(inputImage, &edgesImage, 0);
-    }
-    else
-    {
-      edgesImage = inputImage;
-    }
+    cv::Mat edgesImage = inputImage.clone();
+    // if (edgeDetectionEnabled_)
+    // {
+      // detectEdges(scaledImage, &edgesImage);
+      // // Pass the unknown areas in edges image.
+      // fillUnknownAreas(inputImage, &edgesImage, 0);
+    // }
+    // else
+    // {
+      // edgesImage = inputImage;
+    // }
 
     if (show_edges_and_unknown_image)
     {
@@ -174,10 +174,10 @@ namespace pandora_vision_obstacle
     std::cout << robotMaskWidth << std::endl;
     std::cout << robotMaskHeight << std::endl;
     // Iterate over the map
-    for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
-    {
-      for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
-      {
+    // for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
+    // {
+      // for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
+      // {
         // Check that we are on a valid cell.
         // if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
           // traversabilityMap->at<int8_t>(i, j) = unknownArea;
@@ -185,10 +185,48 @@ namespace pandora_vision_obstacle
           // std::cout << "i , j = " << i << " " << j << std::endl;
           // std::cout << "Height, width = " << robotMaskHeight << " " <<robotMaskWidth << std::endl;
           // std::cout << "Map Height Width =" << inputImage.rows << " " << inputImage.cols <<  std::endl;
-          traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+        // traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+      // }
+    // }
+
+    // Iterate over the map
+    cv::Mat nonTraversableRowPoints = traversabilityMaskPtr_->findRowTraversability(inputImage);
+    cv::Mat nonTraversableColPoints = traversabilityMaskPtr_->findColTraversability(inputImage);
+
+    std::cout << inputImage.size() << std::endl;
+    for (int ii = 0; ii < inputImage.rows; ++ii)
+    {
+      for (int jj = 0; jj < inputImage.cols; ++jj)
+      {
+        int8_t traversablePoint;
+        if (ii < inputImage.rows - 1 && jj < inputImage.cols - 1)
+        {
+          if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea) ||
+              (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == occupiedArea))
+          {
+            traversablePoint = occupiedArea;
+          }
+          else if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == freeArea) ||
+                   (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == freeArea))
+          {
+            traversablePoint = freeArea;
+          }
+          else
+          {
+            traversablePoint = unknownArea;
+          }
+        }
+        else if (ii == inputImage.rows - 1)
+        {
+          traversablePoint = static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj));
+        }
+        else
+        {
+          traversablePoint = static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj));
+        }
+        traversabilityMap->at<int8_t>(ii, jj) = traversablePoint;
       }
     }
-    return;
   }
 
   void
@@ -255,17 +293,29 @@ namespace pandora_vision_obstacle
       for (int j = 0; j < map.cols; ++j)
       {
         // If the map value is unknown then paint it black.
-        if (map.at<double>(i, j) == unknownArea)
-          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+        if (map.at<uchar>(i, j) == unknownArea)
+        {
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[0] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[1] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[2] = 0;
+        }
         // Paint the occupied Areas red
-        else if (map.at<double>(i, j) == occupiedArea)
-          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 255);
+        else if (map.at<uchar>(i, j) == occupiedArea)
+        {
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[0] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[1] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[2] = 255;
+        }
         // Paint the free areas blue
-        else if (map.at<double>(i, j) == freeArea)
-          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 0);
+        else if (map.at<uchar>(i, j) == freeArea)
+        {
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[0] = 255;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[1] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[2] = 0;
+        }
       }
     }
-    imshow("Traversability Map", traversabilityVisualization);
+    cv::imshow("Traversability Map", traversabilityVisualization);
     cv::waitKey(5);
   }
 

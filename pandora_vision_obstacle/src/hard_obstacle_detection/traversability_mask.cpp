@@ -758,5 +758,67 @@ namespace pandora_vision_obstacle
     roi.copyTo(*wheel);
     return true;
   }
+
+  cv::Mat TraversabilityMask::findRowTraversability(const cv::Mat& inputImage)
+  {
+    cv::Mat nonTraversableRowPoints = cv::Mat(inputImage.rows - 1, inputImage.cols, CV_8UC1);
+    double gradThreshold = 0.07;
+    for (int jj = 0; jj < nonTraversableRowPoints.cols; ++jj)
+    {
+      for (int ii = 0; ii < nonTraversableRowPoints.rows; ++ii)
+      {
+        if (inputImage.at<double>(ii, jj) == -std::numeric_limits<double>::max() ||
+            inputImage.at<double>(ii + 1, jj) == -std::numeric_limits<double>::max())
+        {
+          nonTraversableRowPoints.at<uchar>(ii, jj) = unknownArea;
+        }
+        else
+        {
+          double grad = inputImage.at<double>(ii + 1, jj) -
+                        inputImage.at<double>(ii, jj);
+          if (grad <= gradThreshold)
+          {
+            nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
+          }
+          else
+          {
+            nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
+          }
+        }
+      }
+    }
+    return nonTraversableRowPoints;
+  }
+
+  cv::Mat TraversabilityMask::findColTraversability(const cv::Mat& inputImage)
+  {
+    cv::Mat nonTraversableColPoints = cv::Mat(inputImage.rows, inputImage.cols - 1, CV_8UC1);
+    double gradThreshold = 0.07;
+    for (int ii = 0; ii < nonTraversableColPoints.rows; ++ii)
+    {
+      for (int jj = 0; jj < nonTraversableColPoints.cols; ++jj)
+      {
+        if (inputImage.at<double>(ii, jj) == -std::numeric_limits<double>::max() ||
+            inputImage.at<double>(ii, jj + 1) == -std::numeric_limits<double>::max())
+        {
+          nonTraversableColPoints.at<uchar>(ii, jj) = unknownArea;
+        }
+        else
+        {
+          double grad = inputImage.at<double>(ii, jj + 1) -
+                        inputImage.at<double>(ii, jj);
+          if (grad <= gradThreshold)
+          {
+            nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
+          }
+          else
+          {
+            nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
+          }
+        }
+      }
+    }
+    return nonTraversableColPoints;
+  }
 }  // namespace pandora_vision_obstacle
 }  // namespace pandora_vision
