@@ -68,9 +68,9 @@ namespace pandora_vision_obstacle
     bool flag = process(inputImagePtr, outputImagePtr);
 
     cv_bridge::CvImage out_msg;
-    out_msg.header   = outputImagePtr->header; // Same timestamp and tf frame as input image
-    out_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1; // Or whatever
-    out_msg.image    = outputImagePtr->image; // Your cv::Mat
+    out_msg.header   = outputImagePtr->header;  // Same timestamp and tf frame as input image
+    out_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1;  // Or whatever
+    out_msg.image    = outputImagePtr->image;  // Your cv::Mat
     if (flag)
       pub.publish(out_msg.toImageMsg());
   }
@@ -83,6 +83,5 @@ namespace pandora_vision_obstacle
 
     return true;
   }
-
-}
-}
+}  // namespace pandora_vision_obstacle
+}  // namespace pandora_vision

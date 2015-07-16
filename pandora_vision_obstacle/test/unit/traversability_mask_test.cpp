@@ -342,7 +342,7 @@ namespace pandora_vision_obstacle
           for (int ii = 0; ii < wheelSize_; ++ii)
           {
             ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
-                elevationMapPtr->at<double>(j + k, i + ii), 0.1)
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
               << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
               << "Vertical Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << height << " )";
           }
@@ -363,7 +363,7 @@ namespace pandora_vision_obstacle
           for (int ii = 0; ii < wheelSize_; ++ii)
           {
             ASSERT_NEAR(wheelElevationPtr->at<double>(k, ii),
-                elevationMapPtr->at<double>(j + k, i + ii), 0.1)
+                elevationMapPtr->at<double>(i + k, j + ii), 0.1)
               << " Values for Wheel Position (i, j) = " << i << " , " << j << " are not equal for "
               << "Horizontal Linear Elevation Map (minHeight, maxHeight) = ( " << 0 << "," << height / 2.0 << " )";
           }
