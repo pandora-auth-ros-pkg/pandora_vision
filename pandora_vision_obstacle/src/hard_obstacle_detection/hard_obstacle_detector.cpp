@@ -75,7 +75,7 @@ namespace pandora_vision_obstacle
     robotMask_ = cv::Mat::ones(robotRows_, robotCols_, CV_64FC1);
 
     edge_method_ = 0;
-    edges_threshold_ = 30;
+    edges_threshold_ = 50;
     edgeDetectionEnabled_ = true;
 
     show_input_image = true;
@@ -216,7 +216,7 @@ namespace pandora_vision_obstacle
    *                         Visualization  methods                            *
    ****************************************************************************/
   void HardObstacleDetector::showImage(
-    const std::string& title, const cv::Mat& image, int time)
+    const std::string& title, const cv::Mat& image, int time, float scale)
   {
     cv::Mat scaledImage;
     if (image.depth() == CV_64FC1)
@@ -242,6 +242,7 @@ namespace pandora_vision_obstacle
     {
      image.copyTo(scaledImage);
     }
+    cv::resize(scaledImage, scaledImage, cv::Size(), scale, scale, CV_INTER_AREA);
     cv::imshow(title, scaledImage);
     cv::waitKey(time);
   }
@@ -437,8 +438,8 @@ namespace pandora_vision_obstacle
 
     // Reduce the noise of the input Image
     int cannyKernelSize_ = 3;
-    int cannyBlurKernelSize_ = 7;
-    int cannyLowThreshold_ = 50;
+    int cannyBlurKernelSize_ = 1;
+    int cannyLowThreshold_ = 150;
     int cannyHighThreshold_ = 200;
 
     cv::blur(inImage, *outImage,
@@ -534,6 +535,13 @@ namespace pandora_vision_obstacle
     {
       showImage("The edges image", *outImage, 1);
     }
+    cv::Mat tmpImage;
+    if(show_edges_thresholded_image)
+    {
+      tmpImage = scaleFloatImageToInt(inImage);
+      cv::cvtColor(tmpImage, tmpImage, CV_GRAY2RGB); 
+    }
+
     // Apply threshold to the edges
     cv::threshold(*outImage, *outImage, edges_threshold_, 255, CV_THRESH_BINARY);
     for (unsigned int i = 1 ; i < outImage->rows - 1 ; i++)
@@ -542,7 +550,7 @@ namespace pandora_vision_obstacle
       {
         if (outImage->at<uchar>(i,j) > 0)
         {
-          bool unkownNeighDetection =
+          bool unknownNeighDetection =
             (inImage.at<double>(i - 1, j - 1) == 0) ||
             (inImage.at<double>(i, j - 1) == 0) ||
             (inImage.at<double>(i + 1, j - 1) == 0) ||
@@ -552,16 +560,29 @@ namespace pandora_vision_obstacle
             (inImage.at<double>(i - 1, j + 1) == 0) ||
             (inImage.at<double>(i, j + 1) == 0) ||
             (inImage.at<double>(i + 1, j + 1) == 0);
-          if (unkownNeighDetection)
+          if (unknownNeighDetection)
           {
+            // This is unknown!
             outImage->at<uchar>(i, j) = 0;
+            tmpImage.at<cv::Vec3b>(i,j)[0] = 0;
+            tmpImage.at<cv::Vec3b>(i,j)[1] = 255;
+            tmpImage.at<cv::Vec3b>(i,j)[2] = 0;
           }
         }
       }
     }
+    // If outImage(i,j) != 0 its hard
     if (show_edges_thresholded_image)
     {
-      showImage("The thresholded edges image", *outImage, 1);
+      for(unsigned int i = 0 ; i < inImage.rows ; i++)
+        for(unsigned int j = 0 ; j < inImage.cols ; j++)
+          if(outImage->at<uchar>(i, j) != 0)
+          {
+            tmpImage.at<cv::Vec3b>(i, j)[0] = 0;
+            tmpImage.at<cv::Vec3b>(i, j)[1] = 0;
+            tmpImage.at<cv::Vec3b>(i, j)[2] = 255;
+          }
+      showImage("The thresholded edges image", tmpImage, 500, 3);
     }
 
     // Convert the type of the output image to CV_64FC1.

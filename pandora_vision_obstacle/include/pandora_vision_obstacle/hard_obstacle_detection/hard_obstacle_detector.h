@@ -132,7 +132,8 @@ namespace pandora_vision_obstacle
         @return void
        **/
       void showImage(
-        const std::string& title, const cv::Mat& image, int time);
+        const std::string& title, const cv::Mat& image, int time, 
+        float scale = 1.1);
 
       /**
         @brief This function takes runs on every unknown pixel the folded normal
