@@ -171,8 +171,6 @@ namespace pandora_vision_obstacle
     traversabilityMap->setTo(unknownArea);
     int robotMaskHeight = traversabilityMaskPtr_->getRobotMaskPtr()->rows;
     int robotMaskWidth = traversabilityMaskPtr_->getRobotMaskPtr()->cols;
-    std::cout << robotMaskWidth << std::endl;
-    std::cout << robotMaskHeight << std::endl;
     // Iterate over the map
     for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
     {
@@ -255,17 +253,17 @@ namespace pandora_vision_obstacle
       for (int j = 0; j < map.cols; ++j)
       {
         // If the map value is unknown then paint it black.
-        if (map.at<double>(i, j) == unknownArea)
+        if (map.at<uchar>(i, j) == unknownArea)
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
         // Paint the occupied Areas red
-        else if (map.at<double>(i, j) == occupiedArea)
-          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 255);
+        else if (map.at<uchar>(i, j) == occupiedArea)
+          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 255);
         // Paint the free areas blue
-        else if (map.at<double>(i, j) == freeArea)
+        else if (map.at<uchar>(i, j) == freeArea)
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 0);
       }
     }
-    imshow("Traversability Map", traversabilityVisualization);
+    cv::imshow("Traversability Map", traversabilityVisualization);
     cv::waitKey(5);
   }
 
