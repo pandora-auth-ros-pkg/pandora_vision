@@ -545,7 +545,6 @@ namespace pandora_vision_obstacle
     // and update their corresponding values.
     double slope = fabs(hForward - hBack) / d;
     double angle = asin(slope);
-    slope *= description_->RESOLUTION;
     // Reject slopes greater than the maximum possible angle.
     if (angle * 180 / CV_PI > description_->maxPossibleAngle)
       return false;
@@ -555,10 +554,9 @@ namespace pandora_vision_obstacle
       double slopeResolution = hBack;
       for (int j = wheelSize; j < aLeftRight->rows - wheelSize; ++j)
       {
-        slopeResolution += slope;
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(robotSize - j, i) += slopeResolution;
+          aLeftRight->at<double>(robotSize - j, i) += j * fabs(hForward - hBack) / aLeftRight->rows;
         }
       }
     }
@@ -570,7 +568,7 @@ namespace pandora_vision_obstacle
         slopeResolution += slope;
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(j, i) += slopeResolution;
+          aLeftRight->at<double>(j, i) += j * fabs(hForward - hBack) / aLeftRight->rows;
         }
       }
     }
@@ -643,7 +641,6 @@ namespace pandora_vision_obstacle
     // and update their corresponding values.
     double slope = fabs(hRight - hLeft) / d;
     double angle = asin(slope);
-    slope *= description_->RESOLUTION;
     // Reject slopes greater than the maximum possible angle.
     if (angle * 180 / CV_PI > description_->maxPossibleAngle)
       return false;
@@ -653,10 +650,9 @@ namespace pandora_vision_obstacle
       double slopeResolution = hLeft;
       for (int j = wheelSize; j < aTopBottom->cols - wheelSize; ++j)
       {
-        slopeResolution += slope;
         for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          aTopBottom->at<double>(i, j) += slopeResolution;
+          aTopBottom->at<double>(i, j) += j * fabs(hRight - hLeft) / aTopBottom->cols;
         }
       }
     }
@@ -665,10 +661,9 @@ namespace pandora_vision_obstacle
       double slopeResolution = hRight;
       for (int j = wheelSize; j < aTopBottom->cols - wheelSize; ++j)
       {
-        slopeResolution += slope;
         for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          aTopBottom->at<double>(i, robotSize - j) += slopeResolution;
+          aTopBottom->at<double>(i, robotSize - j) += j * fabs(hRight - hLeft) / aTopBottom->cols;
         }
       }
     }

@@ -152,6 +152,33 @@ namespace pandora_vision_obstacle
         return traversabilityMaskPtr_->robotGeometryMask_->at<double>(i, j);
       }
 
+      void createMaskFromDesc()
+      {
+        traversabilityMaskPtr_->createMaskFromDesc();
+      }
+
+      MatPtr getRobotMask()
+      {
+        return traversabilityMaskPtr_->robotGeometryMask_;
+      }
+
+      void
+      setElevationMap(const boost::shared_ptr<cv::Mat const>& elevationMapPtr)
+      {
+        traversabilityMaskPtr_->elevationMapPtr_ = elevationMapPtr;
+      }
+
+      boost::shared_ptr<cv::Mat const> getElevationMap()
+      {
+        return traversabilityMaskPtr_->elevationMapPtr_;
+      }
+
+      int8_t findTraversability(const cv::Point& center)
+      {
+        return traversabilityMaskPtr_->findTraversability(center);
+      }
+
+
       virtual ~TraversabilityMaskTest()
       {}
 
@@ -663,7 +690,7 @@ namespace pandora_vision_obstacle
     ASSERT_TRUE(allowedAngle);
     for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
     {
-      slopeResolution += slope * descriptionPtr_->RESOLUTION;
+      slopeResolution = jj * fabs(firstWheelMeanHeight - secondWheelMeanHeight) / tempMapPtr->rows;
       for (int ii = 0; ii < tempMapPtr->cols; ++ii)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + jj, bBoxX + ii),
@@ -727,7 +754,8 @@ namespace pandora_vision_obstacle
     ASSERT_TRUE(allowedAngle);
     for (int jj = wheelSize_; jj < tempMapPtr->rows - wheelSize_; ++jj)
     {
-      slopeResolution += slope * descriptionPtr_->RESOLUTION;
+      slopeResolution = fabs(firstWheelMeanHeight - secondWheelMeanHeight) * jj / tempMapPtr->rows;
+      std::cout << slopeResolution << std::endl;
       for (int ii = 0; ii < tempMapPtr->cols; ++ii)
       {
         EXPECT_NEAR(updatedElevationMaskPtr_->at<double>(bBoxY + totalSize_ - jj, bBoxX + ii),
