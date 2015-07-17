@@ -85,8 +85,9 @@ namespace pandora_vision_obstacle
     show_new_map_image = false;
     show_unknown_probabilities = false;
 
-    traversabilityMaskEnabled_ = true;
-    edgeDetectionEnabled_ = true;
+    traversabilityMaskEnabled_ = false;
+    edgeTraversabilityMaskEnabled_ = true;
+    edgeDetectionEnabled_ = false;
     displayTraversabilityMapEnabled_ = true;
     traversabilityMaskPtr_.reset(new TraversabilityMask);
     // Load the robot's description and create it's 2d Elevation Mask.
@@ -122,16 +123,16 @@ namespace pandora_vision_obstacle
     // *elevationMapPtr_ = inputImage;
     traversabilityMaskPtr_->setElevationMap(elevationMapPtr_);
     cv::Mat edgesImage = inputImage.clone();
-    // if (edgeDetectionEnabled_)
-    // {
-      // detectEdges(scaledImage, &edgesImage);
-      // // Pass the unknown areas in edges image.
-      // fillUnknownAreas(inputImage, &edgesImage, 0);
-    // }
-    // else
-    // {
-      // edgesImage = inputImage;
-    // }
+    if (edgeDetectionEnabled_)
+    {
+      detectEdges(scaledImage, &edgesImage);
+      // Pass the unknown areas in edges image.
+      fillUnknownAreas(inputImage, &edgesImage, 0);
+    }
+    else
+    {
+      edgesImage = inputImage;
+    }
 
     if (show_edges_and_unknown_image)
     {
@@ -140,7 +141,13 @@ namespace pandora_vision_obstacle
 
     // Pass the robot mask on the complete area that was made.
     cv::Mat newMap;
-    if (traversabilityMaskEnabled_)
+    if (edgeTraversabilityMaskEnabled_)
+    {
+      createEdgeTraversabilityMap(edgesImage, &newMap);
+      if (displayTraversabilityMapEnabled_)
+        displayTraversabilityMap(newMap);
+    }
+    else if (traversabilityMaskEnabled_)
     {
       createTraversabilityMap(edgesImage, &newMap);
       if (displayTraversabilityMapEnabled_)
@@ -171,29 +178,37 @@ namespace pandora_vision_obstacle
     traversabilityMap->setTo(unknownArea);
     int robotMaskHeight = traversabilityMaskPtr_->getRobotMaskPtr()->rows;
     int robotMaskWidth = traversabilityMaskPtr_->getRobotMaskPtr()->cols;
-    std::cout << robotMaskWidth << std::endl;
-    std::cout << robotMaskHeight << std::endl;
     // Iterate over the map
-    // for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
-    // {
-      // for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
-      // {
+    for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
+    {
+      for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
+      {
         // Check that we are on a valid cell.
-        // if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
-          // traversabilityMap->at<int8_t>(i, j) = unknownArea;
-        // else
-          // std::cout << "i , j = " << i << " " << j << std::endl;
-          // std::cout << "Height, width = " << robotMaskHeight << " " <<robotMaskWidth << std::endl;
-          // std::cout << "Map Height Width =" << inputImage.rows << " " << inputImage.cols <<  std::endl;
-        // traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
-      // }
-    // }
+        if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
+          traversabilityMap->at<int8_t>(i, j) = unknownArea;
+        else
+          traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
+      }
+    }
+  }
 
-    // Iterate over the map
+  /**
+   * @brief Creates a traversability map using the input image.
+   * @param inputImage[const cv::Mat&] The input image whose non zero entries represent candidate obstacle cells.
+   * It can be the elevation map itself or a processed image, such as an edge map from the elevation map.
+   * @param traversabilityMap[cv::Mat*] The resulting traversability map.
+   * @return void
+   */
+  void HardObstacleDetector::createEdgeTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap)
+  {
+    // Initialize the output traversability map
+    traversabilityMap->create(inputImage.size(), CV_8UC1);
+    // Set all of it's cells to unknown.
+    traversabilityMap->setTo(unknownArea);
     cv::Mat nonTraversableRowPoints = traversabilityMaskPtr_->findRowTraversability(inputImage);
     cv::Mat nonTraversableColPoints = traversabilityMaskPtr_->findColTraversability(inputImage);
 
-    std::cout << inputImage.size() << std::endl;
+    // Iterate over the map
     for (int ii = 0; ii < inputImage.rows; ++ii)
     {
       for (int jj = 0; jj < inputImage.cols; ++jj)

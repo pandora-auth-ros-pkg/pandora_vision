@@ -528,6 +528,20 @@ namespace pandora_vision_obstacle
       ROS_INFO("[Traversability Mask]: Setting it to 2 cm per cell!");
       description_->RESOLUTION = 0.02;
     }
+    if (!nh.getParam("elevation_difference/horizontal_axis_elevation_difference",
+                     horizontalAxisElevationDifference_))
+    {
+      ROS_WARN("[Traversability Mask]: Could not read the horizontal axis elevation difference!");
+      ROS_INFO("[Traversability Mask]: Setting it to 7 centimeters!");
+      horizontalAxisElevationDifference_ = 0.07;
+    }
+    if (!nh.getParam("elevation_difference/vertical_axis_elevation_difference",
+                     verticalAxisElevationDifference_))
+    {
+      ROS_WARN("[Traversability Mask]: Could not read the vertical axis elevation difference!");
+      ROS_INFO("[Traversability Mask]: Setting it to 7 centimeters!");
+      verticalAxisElevationDifference_ = 0.07;
+    }
 
     ROS_INFO("[Traversability Mask]: Mask Loading finished successfully!");
     return;
@@ -762,7 +776,6 @@ namespace pandora_vision_obstacle
   cv::Mat TraversabilityMask::findRowTraversability(const cv::Mat& inputImage)
   {
     cv::Mat nonTraversableRowPoints = cv::Mat(inputImage.rows - 1, inputImage.cols, CV_8UC1);
-    double gradThreshold = 0.07;
     for (int jj = 0; jj < nonTraversableRowPoints.cols; ++jj)
     {
       for (int ii = 0; ii < nonTraversableRowPoints.rows; ++ii)
@@ -776,7 +789,7 @@ namespace pandora_vision_obstacle
         {
           double grad = inputImage.at<double>(ii + 1, jj) -
                         inputImage.at<double>(ii, jj);
-          if (grad <= gradThreshold)
+          if (grad <= verticalAxisElevationDifference_)
           {
             nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
           }
@@ -793,7 +806,6 @@ namespace pandora_vision_obstacle
   cv::Mat TraversabilityMask::findColTraversability(const cv::Mat& inputImage)
   {
     cv::Mat nonTraversableColPoints = cv::Mat(inputImage.rows, inputImage.cols - 1, CV_8UC1);
-    double gradThreshold = 0.07;
     for (int ii = 0; ii < nonTraversableColPoints.rows; ++ii)
     {
       for (int jj = 0; jj < nonTraversableColPoints.cols; ++jj)
@@ -807,7 +819,7 @@ namespace pandora_vision_obstacle
         {
           double grad = inputImage.at<double>(ii, jj + 1) -
                         inputImage.at<double>(ii, jj);
-          if (grad <= gradThreshold)
+          if (grad <= horizontalAxisElevationDifference_)
           {
             nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
           }

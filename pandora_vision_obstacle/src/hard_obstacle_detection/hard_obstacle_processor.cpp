@@ -99,15 +99,18 @@ namespace pandora_vision_obstacle
     detector_->setMinInputImageValue(config.min_input_image_value);
     detector_->setEdgeDetectionEnableFlag(config.edge_detection_enabled);
     detector_->setTraversabilityMaskEnableFlag(config.enable_traversability_mask);
+    detector_->setEdgeTraversabilityMaskEnableFlag(config.enable_edge_traversability_mask);
     detector_->setTraversabilityMaskDisplay(config.display_traversability_map);
+    detector_->setHorizontalAxisElevationDifference(config.horizontal_axis_elevation_difference);
+    detector_->setVerticalAxisElevationDifference(config.vertical_axis_elevation_difference);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
       const CVMatStampedPtr& output)
   {
     // NODELET_INFO("[%s] In process", this->getName().c_str());
-    // output->header = input->getHeader();
-    // output->image = detector_->startDetection(input->getImage());
+    output->header = input->getHeader();
+    output->image = detector_->startDetection(input->getImage());
 
     return true;
   }

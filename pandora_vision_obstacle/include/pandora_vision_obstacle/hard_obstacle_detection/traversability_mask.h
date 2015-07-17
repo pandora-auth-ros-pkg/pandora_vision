@@ -135,6 +135,16 @@ namespace pandora_vision_obstacle
       return robotGeometryMask_;
     }
 
+    void setHorizontalAxisElevationDifference(double horizontalAxisElevationDifference)
+    {
+      horizontalAxisElevationDifference_ = horizontalAxisElevationDifference;
+    }
+
+    void setVerticalAxisElevationDifference(double verticalAxisElevationDifference)
+    {
+      verticalAxisElevationDifference_ = verticalAxisElevationDifference;
+    }
+
    private:
     /**
      * Finds B matrices, input is respective A matrix, heights and wheel
@@ -217,6 +227,9 @@ namespace pandora_vision_obstacle
     RobotGeometryMaskDescriptionPtr description_;
     /// Local elevation map created
     MatConstPtr elevationMapPtr_;
+
+    double horizontalAxisElevationDifference_;
+    double verticalAxisElevationDifference_;
 
     /// Center of matrix A
     cv::Point center_;

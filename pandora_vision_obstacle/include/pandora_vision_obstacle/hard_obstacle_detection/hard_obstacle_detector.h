@@ -83,6 +83,15 @@ namespace pandora_vision_obstacle
       void createTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap);
 
       /**
+      * @brief Creates a traversability map using the input image.
+      * @param inputImage[const cv::Mat&] The input image whose non zero entries represent candidate obstacle cells.
+      * It can be the elevation map itself or a processed image, such as an edge map from the elevation map.
+      * @param traversabilityMap[cv::Mat*] The resulting traversability map.
+      * @return void
+      */
+      void createEdgeTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap);
+
+      /**
        @brief Functions used to set debug show configuration parameters.
        **/
       inline void setShowInputImage(bool value){show_input_image = value;}
@@ -111,9 +120,22 @@ namespace pandora_vision_obstacle
       {
         traversabilityMaskEnabled_ = traversabilityMaskEnableFlag;
       }
+      inline void setEdgeTraversabilityMaskEnableFlag(bool edgeTraversabilityMaskEnableFlag)
+      {
+        edgeTraversabilityMaskEnabled_ = edgeTraversabilityMaskEnableFlag;
+      }
       inline void setTraversabilityMaskDisplay(bool traversabilityMaskDisplay)
       {
         displayTraversabilityMapEnabled_ = traversabilityMaskDisplay;
+      }
+
+      inline void setHorizontalAxisElevationDifference(double horizontalAxisElevationDifference)
+      {
+        traversabilityMaskPtr_->setHorizontalAxisElevationDifference(horizontalAxisElevationDifference);
+      }
+      inline void setVerticalAxisElevationDifference(double verticalAxisElevationDifference)
+      {
+        traversabilityMaskPtr_->setVerticalAxisElevationDifference(verticalAxisElevationDifference);
       }
 
     private:
@@ -267,6 +289,7 @@ namespace pandora_vision_obstacle
 
       bool edgeDetectionEnabled_;
       bool traversabilityMaskEnabled_;
+      bool edgeTraversabilityMaskEnabled_;
       bool displayTraversabilityMapEnabled_;
   };
 

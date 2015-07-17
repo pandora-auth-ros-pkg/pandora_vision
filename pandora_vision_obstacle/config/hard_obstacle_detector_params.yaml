@@ -11,3 +11,7 @@ robot_description:
   robot_width: 0.09
   epsilon: 0.01
   cellResolution: 0.01
+elevation_difference:
+  # In meters
+  horizontal_axis_elevation_difference: 0.07
+  vertical_axis_elevation_difference: 0.07
