@@ -117,7 +117,7 @@ namespace pandora_vision_obstacle
       }
 
     private:
-      void displayTraversabilityMap(const cv::Mat& map);
+      void displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap);
 
       void
       scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);

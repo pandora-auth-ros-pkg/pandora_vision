@@ -170,6 +170,8 @@ namespace pandora_vision_obstacle
   TraversabilityMask::findTraversability(const cv::Point& center)
   {
     center_ = center;
+    if (elevationMapPtr_->at<double>(center_.y, center_.x) == - std::numeric_limits<double>::max())
+      return unknownArea;
 
     int maskSize = robotGeometryMask_->rows;
     // Calculate the current position of the Upper Left Wheel.
@@ -548,7 +550,7 @@ namespace pandora_vision_obstacle
   TraversabilityMask::setElevationMap(const boost::shared_ptr<cv::Mat const>& map)
   {
     elevationMapPtr_ = map;
-  }
+   }
 
   /**
    * @brief Loads a robot description and create a 2D mask to describe it.

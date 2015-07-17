@@ -144,7 +144,7 @@ namespace pandora_vision_obstacle
     {
       createTraversabilityMap(edgesImage, &newMap);
       if (displayTraversabilityMapEnabled_)
-        displayTraversabilityMap(newMap);
+        displayTraversabilityMap(newMap, inputImage);
     }
     else
     {
@@ -244,23 +244,29 @@ namespace pandora_vision_obstacle
     cv::waitKey(time);
   }
 
-  void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map)
+  void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap)
   {
-    cv::Mat traversabilityVisualization(map.size(), CV_8UC3);
-    traversabilityVisualization.setTo(0);
+    cv::Mat traversabilityVisualization;
+    cv::Mat tempImg;
+    elevationMap.convertTo(tempImg, CV_8UC1, 255.0);
+    cv::normalize(tempImg, tempImg, 0, 255, cv::NORM_MINMAX);
+    cv::cvtColor(tempImg, traversabilityVisualization, CV_GRAY2BGR);
+
+    // traversabilityVisualization.setTo(0);
     for (int i = 0; i < map.rows; ++i)
     {
       for (int j = 0; j < map.cols; ++j)
       {
-        // If the map value is unknown then paint it black.
-        if (map.at<uchar>(i, j) == unknownArea)
-          traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
         // Paint the occupied Areas red
-        else if (map.at<uchar>(i, j) == occupiedArea)
+        if (map.at<uchar>(i, j) == occupiedArea)
+        {
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 255);
+        }
         // Paint the free areas blue
         else if (map.at<uchar>(i, j) == freeArea)
+        {
           traversabilityVisualization.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 0, 0);
+        }
       }
     }
     cv::imshow("Traversability Map", traversabilityVisualization);
