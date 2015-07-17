@@ -229,6 +229,8 @@ namespace pandora_vision_obstacle
     int validAreaWidth = 0, validAreaHeight = 0;
 
     cv::Mat tempImg, displayImage;
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     // Create a mask for the wheels.
     cv::Mat wheelMask(updatedMaskPtr->size(), CV_8UC1, cv::Scalar(1));
@@ -481,7 +483,7 @@ namespace pandora_vision_obstacle
       MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
             cv::Rect(0, 0, wheelSize, updatedMaskPtr->rows)));
       // Calculate the mask for the left side of the robot.
-      calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight,
+      bool calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight,
           wheelCenterDist);
       tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
             cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, updatedMaskPtr->rows)));
@@ -553,6 +555,12 @@ namespace pandora_vision_obstacle
     if (validWheelNum >= 2)
       cv::waitKey(0);
 
+    // Display the position of the robot on the map.
+    if (displayWheelPositionFlag_)
+    {
+      cv::imshow("Display Image", displayImage);
+      cv::waitKey(1);
+    }
     return returnValue;
   }  // End of findTraversability
 
