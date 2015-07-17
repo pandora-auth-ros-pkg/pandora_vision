@@ -57,6 +57,7 @@ namespace pandora_vision_obstacle
     public:
       HardObstacleDetector();
 
+      HardObstacleDetector(const RobotGeometryMaskDescriptionPtr& descriptionPtr);
       HardObstacleDetector(const std::string& name,
           const ros::NodeHandle& nh);
 
@@ -115,9 +116,13 @@ namespace pandora_vision_obstacle
       {
         displayTraversabilityMapEnabled_ = traversabilityMaskDisplay;
       }
+      void updateElevationMap(const boost::shared_ptr<cv::Mat const>& elevationMapPtr)
+      {
+        traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
+      }
 
+      void displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap, int time = 5);
     private:
-      void displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap);
 
       void
       scaleInputImage(const cv::Mat& inImage, cv::Mat* outImage);

@@ -51,13 +51,33 @@ namespace pandora_vision_obstacle
   HardObstacleDetector::HardObstacleDetector()
   {
   }
+  HardObstacleDetector::HardObstacleDetector(const RobotGeometryMaskDescriptionPtr& descriptionPtr) :
+    nodeName_("Hard Obstacle Detector")
+  {
+    ROS_INFO_STREAM("[" + nodeName_ + "]: Created Hard Obstacle Detector Object!");
+    edge_method_ = 1;
+    edges_threshold_ = 30;
+
+    show_input_image = false;
+    show_edges_image = false;
+    show_edges_thresholded_image = false;
+    show_edges_and_unknown_image = false;
+    show_new_map_image = false;
+    show_unknown_probabilities = false;
+
+    traversabilityMaskEnabled_ = true;
+    edgeDetectionEnabled_ = true;
+    displayTraversabilityMapEnabled_ = true;
+    traversabilityMaskPtr_.reset(new TraversabilityMask(descriptionPtr));
+
+    ROS_INFO_STREAM(nodeName_ + ": Created Detector Object!");
+  }
 
   HardObstacleDetector::HardObstacleDetector(const std::string& name,
       const ros::NodeHandle& nh)
   {
-    ROS_INFO_NAMED(nodeName_, "Hard obstacle node is on");
-
     nodeName_ = name;
+    ROS_INFO_NAMED(nodeName_, "Hard obstacle node is on");
 
     double robotXDimention, robotYDimention;
     nh.param("robot/robotXDimention", robotXDimention, 0.345);
@@ -76,7 +96,6 @@ namespace pandora_vision_obstacle
 
     edge_method_ = 1;
     edges_threshold_ = 30;
-    edgeDetectionEnabled_ = true;
 
     show_input_image = false;
     show_edges_image = false;
@@ -116,7 +135,6 @@ namespace pandora_vision_obstacle
       // Show the input image
       showImage("The input image", scaledImage, 1);
     }
-
 
     TraversabilityMask::MatPtr elevationMapPtr_(new cv::Mat(inputImage));
     // *elevationMapPtr_ = inputImage;
@@ -165,6 +183,7 @@ namespace pandora_vision_obstacle
    */
   void HardObstacleDetector::createTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap)
   {
+    ROS_INFO_STREAM("[ " + nodeName_ + "]: Creating traversability Mask!");
     // Initialize the output traversability map
     traversabilityMap->create(inputImage.size(), CV_8UC1);
     // Set all of it's cells to unknown.
@@ -174,15 +193,12 @@ namespace pandora_vision_obstacle
     // Iterate over the map
     for (int i = robotMaskHeight / 2; i < inputImage.rows - robotMaskHeight / 2; ++i)
     {
-      for (int j = robotMaskWidth / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
+      for (int j = inputImage.cols / 2; j < inputImage.cols - robotMaskWidth / 2; ++j)
       {
         // Check that we are on a valid cell.
-        // if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
-          // traversabilityMap->at<int8_t>(i, j) = unknownArea;
-        // else
-          // std::cout << "i , j = " << i << " " << j << std::endl;
-          // std::cout << "Height, width = " << robotMaskHeight << " " <<robotMaskWidth << std::endl;
-          // std::cout << "Map Height Width =" << inputImage.rows << " " << inputImage.cols <<  std::endl;
+        if (inputImage.at<double>(i, j) == 0 || inputImage.at<double>(i, j) == unknownArea)
+          continue;
+        else
           traversabilityMap->at<uchar>(i, j) = traversabilityMaskPtr_->findTraversability(cv::Point(j, i));
       }
     }
@@ -244,12 +260,12 @@ namespace pandora_vision_obstacle
     cv::waitKey(time);
   }
 
-  void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap)
+  void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap, int time)
   {
     cv::Mat traversabilityVisualization;
     cv::Mat tempImg;
+    cv::normalize(elevationMap, elevationMap, 0, 1, cv::NORM_MINMAX);
     elevationMap.convertTo(tempImg, CV_8UC1, 255.0);
-    cv::normalize(tempImg, tempImg, 0, 255, cv::NORM_MINMAX);
     cv::cvtColor(tempImg, traversabilityVisualization, CV_GRAY2BGR);
 
     // traversabilityVisualization.setTo(0);
@@ -270,7 +286,7 @@ namespace pandora_vision_obstacle
       }
     }
     cv::imshow("Traversability Map", traversabilityVisualization);
-    cv::waitKey(5);
+    cv::waitKey(time);
   }
 
   void HardObstacleDetector::visualizeUnknownProbabilities(

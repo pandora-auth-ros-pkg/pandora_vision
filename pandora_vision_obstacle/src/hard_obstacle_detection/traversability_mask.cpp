@@ -49,15 +49,18 @@ namespace pandora_vision_obstacle
   TraversabilityMask::
     TraversabilityMask()
     {
+      displayWheelPositionFlag_ = false;
     }
 
   TraversabilityMask::TraversabilityMask(const RobotGeometryMaskDescriptionPtr& descriptionPtr)
   {
     ROS_INFO("[Traversability Mask]: Creating Traversability Mask object!");
     description_ = descriptionPtr;
+    displayWheelPositionFlag_ = false;
 
     // Create the robot height mask.
     createMaskFromDesc(description_);
+
 
     ROS_INFO("[Traversability Mask]: Finished constructing Traversability Mask Object.");
   }
@@ -169,26 +172,33 @@ namespace pandora_vision_obstacle
   int8_t
   TraversabilityMask::findTraversability(const cv::Point& center)
   {
+    int8_t returnValue;
     center_ = center;
-    if (elevationMapPtr_->at<double>(center_.y, center_.x) == - std::numeric_limits<double>::max())
-      return unknownArea;
+    // if (elevationMapPtr_->at<double>(center_.y, center_.x) == - std::numeric_limits<double>::max())
+      // return unknownArea;
 
     int maskSize = robotGeometryMask_->rows;
+    int wheelSize = metersToSteps(description_->wheelD);
+    int barrelSize = metersToSteps(description_->barrelD);
+    int robotSize = metersToSteps(description_->totalD);
+    int robotDSize = metersToSteps(description_->robotD);
+
     // Calculate the current position of the Upper Left Wheel.
-    cv::Point upperLeftWheelPos(
+
+    cv::Point2d upperLeftWheelPos(
         center_.x - maskSize / 2,
         center_.y - maskSize / 2);
     // Calculate the current position of the Lower Left Wheel.
-    cv::Point lowerLeftWheelPos(
+    cv::Point2d lowerLeftWheelPos(
         center_.x - maskSize / 2,
-        center_.y + maskSize / 2 - metersToSteps(description_->wheelD));
-    cv::Point upperRightWheelPos(
-        center_.x + maskSize / 2  - metersToSteps(description_->wheelD),
+        center_.y + maskSize / 2 - wheelSize);
+    cv::Point2d upperRightWheelPos(
+        center_.x + maskSize / 2  - wheelSize,
         center_.y - maskSize / 2);
     // Calculate the current position of the Lower Right Wheel.
-    cv::Point lowerRightWheelPos(
-        center_.x + maskSize / 2  - metersToSteps(description_->wheelD),
-        center_.y + maskSize / 2  - metersToSteps(description_->wheelD));
+    cv::Point2d lowerRightWheelPos(
+        center_.x + maskSize / 2  - wheelSize,
+        center_.y + maskSize / 2  - wheelSize);
 
     double upperLeftWheelMeanHeight, upperLeftWheelStdDev;
     bool upperLeftWheelValid = findHeightOnWheel(upperLeftWheelPos, &upperLeftWheelMeanHeight,
@@ -205,15 +215,9 @@ namespace pandora_vision_obstacle
     bool lowerRightWheelValid = findHeightOnWheel(lowerRightWheelPos, &lowerRightWheelMeanHeight,
         &lowerRightWheelStdDev);
 
-    int wheelSize = metersToSteps(description_->wheelD);
-    int barrelSize = metersToSteps(description_->barrelD);
-    int robotSize = metersToSteps(description_->totalD);
-    int robotDSize = metersToSteps(description_->robotD);
-
     // Calculate the number of valid wheels.
     int validWheelNum = upperLeftWheelValid + upperRightWheelValid + lowerLeftWheelValid
       + lowerRightWheelValid;
-
 
     double wheelCenterDist = description_->robotD + 2 * description_->barrelD + description_->wheelD;
     // Get the mask for the left side of the robot
@@ -224,33 +228,52 @@ namespace pandora_vision_obstacle
     int validAreaTopLeftX = 0, validAreaTopLeftY = 0;
     int validAreaWidth = 0, validAreaHeight = 0;
 
+    cv::Mat tempImg, displayImage;
+
+    // Create a mask for the wheels.
+    cv::Mat wheelMask(updatedMaskPtr->size(), CV_8UC1, cv::Scalar(1));
+    // Update the value of the mask on the wheels.
+    // Set the height of the upper left wheel.
+    wheelMask(cv::Rect(0, 0, wheelSize, wheelSize)) = cv::Scalar(0);
+    // Set the height of the lower left wheel.
+    wheelMask(cv::Rect(0, updatedMaskPtr->rows - wheelSize, wheelSize, wheelSize)) = cv::Scalar(0);
+    // Set the height of the upper right wheel.
+    wheelMask(cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, wheelSize)) = cv::Scalar(0);
+    // Set the height of the lower right wheel.
+    wheelMask(cv::Rect(updatedMaskPtr->cols - wheelSize, updatedMaskPtr->rows - wheelSize,
+          wheelSize, wheelSize)) = cv::Scalar(0);
+
+    bool calcElevationFlag;
+
+    if (displayWheelPositionFlag_)
+    {
+      elevationMapPtr_->convertTo(tempImg, CV_8UC1, 255.0);
+      cv::normalize(tempImg, tempImg, 0, 255, cv::NORM_MINMAX);
+      cv::cvtColor(tempImg, displayImage, CV_GRAY2BGR);
+      // Paint the area that the top left wheel occupies red.
+      cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
+            center_.y - robotDSize / 2 - 2 * wheelSize, wheelSize, wheelSize), cv::Scalar(255, 0, 0), -1);
+      // Paint the area that the top right wheel occupies blue.
+      cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
+            center_.y - robotDSize / 2 - 2 * wheelSize, wheelSize, wheelSize), cv::Scalar(0, 0, 255), -1);
+      // Paint the area that the bottom left wheel occupies green.
+      cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
+            center_.y + robotDSize / 2 + wheelSize, wheelSize, wheelSize), cv::Scalar(0, 255, 0), -1);
+      // Paint the area that the bottom right wheel occupies magenta.
+      cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
+            center_.y + robotDSize / 2 + wheelSize, wheelSize, wheelSize), cv::Scalar(255, 0, 255), -1);
+    }
     // TODO(Vassilis Choutas): Check return values
     // If no wheel position is know then mark the current point as unknown.
     if (validWheelNum == 0 || validWheelNum == 1)
     {
-        return unknownArea;
+        returnValue = unknownArea;
     }
     else if (validWheelNum == 2 || validWheelNum == 3)
     {
-      cv::Mat tempImg, displayImage;
-      elevationMapPtr_->convertTo(tempImg, CV_8UC1, 255.0);
-      cv::normalize(tempImg, tempImg, 0, 255, cv::NORM_MINMAX);
-      cv::cvtColor(tempImg, displayImage, CV_GRAY2BGR);
-
       MatPtr tempMapPtr;
       cv::Mat validElevationMapOverlap;
-      // Top left
-      cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
-              center_.y - robotDSize / 2 - 2 * wheelSize, wheelSize, wheelSize), cv::Scalar(255, 0, 0), -1);
-      // Top Right
-      cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
-            center_.y - robotDSize / 2 - 2 * wheelSize, wheelSize, wheelSize), cv::Scalar(0, 0, 255), -1);
-      // Bottom Left
-      cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
-            center_.y + robotDSize / 2 + wheelSize, wheelSize, wheelSize), cv::Scalar(0, 255, 0), -1);
-      // Bottom Right
-      cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
-            center_.y + robotDSize / 2 + wheelSize, wheelSize, wheelSize), cv::Scalar(255, 0, 255), -1);
+
       // If the diagonal wheels are valid the ignore this cell.
       // if ((upperLeftWheelValid && lowerRightWheelValid) || (upperRightWheelValid && lowerLeftWheelValid))
         // return unknownArea;
@@ -265,11 +288,15 @@ namespace pandora_vision_obstacle
         tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
               cv::Rect(wheelSize, 0, validAreaWidth, wheelSize)));
         // Get the mask for the top side of the robot.
-        findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+        calcElevationFlag = findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
+            wheelCenterDist);
         validElevationMapOverlap = (*elevationMapPtr_)(cv::Rect(center_.x - robotDSize / 2 - wheelSize,
               center_.y - robotDSize / 2 - 2 * wheelSize , validAreaWidth, validAreaHeight));
-        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
-              center_.y - robotDSize / 2 - 2 * wheelSize , validAreaWidth, validAreaHeight), cv::Scalar(0, 255, 255), -1);
+        // Paint yellow the area between the top wheels if they are valid.
+        if (displayWheelPositionFlag_)
+          cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
+                center_.y - robotDSize / 2 - 2 * wheelSize , validAreaWidth, validAreaHeight),
+              cv::Scalar(0, 255, 255), -1);
       }
       // The bottom part of the robot is valid.
       else if (lowerLeftWheelValid && lowerRightWheelValid)
@@ -281,12 +308,16 @@ namespace pandora_vision_obstacle
         tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
               cv::Rect(wheelSize, validAreaTopLeftY, validAreaWidth, wheelSize)));
         // Get the mask for the bottom side of the robot.
-        findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+        calcElevationFlag = findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
             wheelCenterDist);
         validElevationMapOverlap = (*elevationMapPtr_)(cv::Rect(center_.x - robotDSize / 2 - wheelSize,
               center_.y + robotDSize / 2 + wheelSize, validAreaWidth, validAreaHeight));
-        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
-              center_.y + robotDSize / 2 + wheelSize, validAreaWidth, validAreaHeight), cv::Scalar(0, 255, 255), -1);
+
+        // Paint yellow the area between the bottom wheels if they are valid.
+        if (displayWheelPositionFlag_)
+          cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
+                center_.y + robotDSize / 2 + wheelSize, validAreaWidth, validAreaHeight),
+              cv::Scalar(0, 255, 255), -1);
       }
       // The left part of the robot is valid.
       else if (upperLeftWheelValid && lowerLeftWheelValid)
@@ -298,11 +329,15 @@ namespace pandora_vision_obstacle
         tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
               cv::Rect(0, wheelSize, wheelSize, validAreaHeight)));
         // Calculate the mask for the left side of the robot.
-        findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
+        calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight,
+            wheelCenterDist);
         validElevationMapOverlap = (*elevationMapPtr_)(cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
               center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight));
-        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
-              center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight), cv::Scalar(0, 255, 255), -1);
+        // Paint yellow the area between the left wheels if they are valid.
+        if (displayWheelPositionFlag_)
+          cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
+                center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight),
+              cv::Scalar(0, 255, 255), -1);
       }
       // The right part of the robot is valid.
       else if (upperRightWheelValid && lowerRightWheelValid)
@@ -314,14 +349,16 @@ namespace pandora_vision_obstacle
         tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
               cv::Rect(validAreaTopLeftX, wheelSize, wheelSize, validAreaHeight)));
         // Get the mask for the right side of the robot.
-        findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+        calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
+            wheelCenterDist);
         validElevationMapOverlap = (*elevationMapPtr_)(cv::Rect(center_.x + robotDSize / 2 + wheelSize,
               center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight));
-        cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
-              center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight), cv::Scalar(0, 255, 255), -1);
+        // Paint yellow the area between the right wheels if they are valid.
+        if (displayWheelPositionFlag_)
+          cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
+                center_.y - robotDSize / 2 - wheelSize, validAreaWidth, validAreaHeight),
+              cv::Scalar(0, 255, 255), -1);
       }
-      cv::imshow("Wheels", displayImage);
-      cv::waitKey(1);
 
       // if (upperLeftWheelValid && upperRightWheelValid)
       // {
@@ -336,11 +373,11 @@ namespace pandora_vision_obstacle
         // validAreaWidth += updatedMaskPtr->cols - 1;
         // validAreaHeight += wheelSize;
         // // Get the Position of the the barrels that are located below the forward wheels.
-        // cv::Point leftBarrelPos(
+        // cv::Point2d leftBarrelPos(
             // metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD
               // - description_->wheelD),
             // metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD));
-        // cv::Point rightBarrelPos(
+        // cv::Point2d rightBarrelPos(
             // metersToSteps(center_.x + description_->robotD / 2 + description_->barrelD),
             // metersToSteps(center_.y - description_->robotD / 2 - description_->barrelD));
 
@@ -362,11 +399,11 @@ namespace pandora_vision_obstacle
             // return occupiedArea;
           // validAreaHeight += barrelSize;
           // // Get the Position of the upper half of the robot body located below .
-          // cv::Point leftBodyPartPos(
+          // cv::Point2d leftBodyPartPos(
               // metersToSteps(center_.x - description_->robotD / 2 - description_->barrelD
                 // - description_->wheelD),
               // metersToSteps(center_.y - description_->robotD / 2));
-          // cv::Point rightBodyPartPos(
+          // cv::Point2d rightBodyPartPos(
               // metersToSteps(center_.x + description_->robotD / 2 + description_->barrelD),
               // metersToSteps(center_.y - description_->robotD));
 
@@ -422,14 +459,18 @@ namespace pandora_vision_obstacle
       // Create a shallow copy of the valid region of the transformed robot height mask.
       cv::Mat validMask = (*updatedMaskPtr)(cv::Rect(validAreaTopLeftX, validAreaTopLeftY,
             validAreaWidth, validAreaHeight));
+
+      if (validMask.empty())
+        return unknownArea;
       cv::Mat diff = validMask - validElevationMapOverlap;
       if (diff.empty())
-        return occupiedArea;
-      cv::Mat result = ((diff <= 0) & (validElevationMapOverlap != unknownArea));
+        returnValue = unknownArea;
+      cv::Mat result = (diff <= 0) & (validElevationMapOverlap != unknownArea) &
+        wheelMask(cv::Rect(validAreaTopLeftX, validAreaTopLeftY, validAreaWidth, validAreaHeight));
       if (cv::countNonZero(result) > 0)
-        return occupiedArea;
+        returnValue = occupiedArea;
       else
-        return freeArea;
+        returnValue = freeArea;
     }
     // else if (validWheelNum == 3)
     // {
@@ -440,53 +481,88 @@ namespace pandora_vision_obstacle
       MatPtr tempMapPtr(new cv::Mat(*updatedMaskPtr,
             cv::Rect(0, 0, wheelSize, updatedMaskPtr->rows)));
       // Calculate the mask for the left side of the robot.
-      findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight, wheelCenterDist);
-
+      calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperLeftWheelMeanHeight, lowerLeftWheelMeanHeight,
+          wheelCenterDist);
       tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
             cv::Rect(updatedMaskPtr->cols - wheelSize, 0, wheelSize, updatedMaskPtr->rows)));
       // Get the mask for the right side of the robot.
-      findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight, wheelCenterDist);
+      calcElevationFlag = findElevatedLeftRight(tempMapPtr, upperRightWheelMeanHeight, lowerRightWheelMeanHeight,
+          wheelCenterDist);
 
       tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
             cv::Rect(0, 0, updatedMaskPtr->cols, wheelSize)));
       // Get the mask for the top side of the robot.
-      findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight, wheelCenterDist);
+      calcElevationFlag = findElevatedTopBottom(tempMapPtr, upperLeftWheelMeanHeight,
+          upperRightWheelMeanHeight, wheelCenterDist);
 
       tempMapPtr.reset(new cv::Mat(*updatedMaskPtr,
             cv::Rect(0, updatedMaskPtr->rows - wheelSize, updatedMaskPtr->cols, wheelSize)));
       // Get the mask for the bottom side of the robot.
-      findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
+      calcElevationFlag = findElevatedTopBottom(tempMapPtr, lowerLeftWheelMeanHeight, lowerRightWheelMeanHeight,
           wheelCenterDist);
+
+      // Paint the area between all the wheels.
+      if (displayWheelPositionFlag_)
+      {
+        // Paint the area between the top pair of wheels.
+        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
+                center_.y - robotDSize / 2 - 2 * wheelSize , updatedMaskPtr->cols - 2 * wheelSize, wheelSize),
+              cv::Scalar(0, 255, 255), -1);
+        // Paint the area between the bottom pair of wheels.
+        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - wheelSize,
+              center_.y + robotDSize / 2 + wheelSize, updatedMaskPtr->cols - 2 * wheelSize, wheelSize),
+            cv::Scalar(0, 255, 255), -1);
+        cv::rectangle(displayImage, cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
+              center_.y - robotDSize / 2 - wheelSize, wheelSize, updatedMaskPtr->rows - 2 * wheelSize),
+            cv::Scalar(0, 255, 255), -1);
+        cv::rectangle(displayImage, cv::Rect(center_.x + robotDSize / 2 + wheelSize,
+              center_.y - robotDSize / 2 - wheelSize, wheelSize, updatedMaskPtr->rows - 2 * wheelSize),
+            cv::Scalar(0, 255, 255), -1);
+      }
 
       interpolateElevationMap(updatedMaskPtr, upperLeftWheelMeanHeight, upperRightWheelMeanHeight,
           lowerRightWheelMeanHeight, lowerLeftWheelMeanHeight);
+      validAreaTopLeftX = 0;
+      validAreaTopLeftY = 0;
       validAreaWidth = updatedMaskPtr->cols;
       validAreaHeight = updatedMaskPtr->rows;
       // Decide about binary traversability
       // Extract the elevation map area that corresponds to the valid part of the mask.
       cv::Mat validElevationMapOverlap =
         (*elevationMapPtr_)(cv::Rect(center_.x - robotDSize / 2 - 2 * wheelSize,
-              center_.y -  - robotDSize / 2 - 2 * wheelSize, validAreaWidth, validAreaHeight));
+              center_.y - robotDSize / 2 - 2 * wheelSize, validAreaWidth, validAreaHeight));
       // Create a shallow copy of the valid region of the transformed robot height mask.
       cv::Mat validMask = (*updatedMaskPtr)(cv::Rect(validAreaTopLeftX, validAreaTopLeftY,
             validAreaWidth, validAreaHeight));
       cv::Mat diff = validMask - validElevationMapOverlap;
-      cv::Mat result = diff <= - description_->eps & validElevationMapOverlap != unknownArea;
+
+      cv::Mat result = (diff <= 0) & (validElevationMapOverlap != unknownArea) &
+        wheelMask;
       if (cv::countNonZero(result) > 0)
-        return occupiedArea;
+        returnValue = occupiedArea;
       else
-        return freeArea;
+        returnValue = freeArea;
     }
-    return unknownArea;
+    // Display the position of the robot on the map.
+    if (displayWheelPositionFlag_)
+    {
+      cv::imshow("Display Image", displayImage);
+      cv::waitKey(1);
+    }
+
+    if (validWheelNum >= 2)
+      cv::waitKey(0);
+
+    return returnValue;
   }  // End of findTraversability
 
   /**
    * @brief Implements the bilinear interpolation method
    * @description This method takes as input a set of four known and one unknown point and
-   * applies bilinear interpolation to find the function value on the unknown Point.
+   * applies bilinear interpolation to find the function value on the unknown Point2d.
   */
-  double TraversabilityMask::bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
-      const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12)
+  double TraversabilityMask::bilinearInterpolation(const cv::Point2d& P, const cv::Point2d& Q11, const cv::Point2d& Q21,
+      const cv::Point2d& Q22, const cv::Point2d& Q12, double fQ11, double fQ21, double fQ22, double fQ12)
   {
     double R1 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ11 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ21;
     double R2 = (Q22.x - P.x) / (Q22.x - Q11.x) * fQ12 + (P.x - Q11.x) / (Q22.x - Q11.x) * fQ22;
@@ -499,17 +575,17 @@ namespace pandora_vision_obstacle
    * @description Given the three vertices of the triangles and their corresponding values
    * we calculate the barycentric coordinates of the query point and using them the approximate value
    * of the function at this point
-   * @param P[const cv::Point&] The query point where the interpolation will be performed.
-   * @param A[const cv::Point&] A vertice of the triangle
-   * @param B[const cv::Point&] The second vertice of the triangle.
-   * @param C[const cv::Point&] The third vertice of the triangle.
+   * @param P[const cv::Point2d&] The query point where the interpolation will be performed.
+   * @param A[const cv::Point2d&] A vertice of the triangle
+   * @param B[const cv::Point2d&] The second vertice of the triangle.
+   * @param C[const cv::Point2d&] The third vertice of the triangle.
    * @param fA[double] The value of the function at the first vertice.
    * @param fB[double] The value of the function at the second vertice.
    * @param fC[double] The value of the function at the final vertice.
    * @return double The interpolated value at the query point.
    */
-  double TraversabilityMask::barycentricInterpolation(const cv::Point& P, const cv::Point& A,
-      const cv::Point& B, const cv::Point&C, double fA, double fB, double fC)
+  double TraversabilityMask::barycentricInterpolation(const cv::Point2d& P, const cv::Point2d& A,
+      const cv::Point2d& B, const cv::Point2d&C, double fA, double fB, double fC)
   {
   }
 
@@ -529,17 +605,16 @@ namespace pandora_vision_obstacle
       double lowerLeftCornerMeanHeight)
   {
     int wheelSize = metersToSteps(description_->wheelD);
-    double robotSize = metersToSteps(description_->totalD);
 
     // Interpolate the mask values to get the robot's local estimated elevation.
-    for (int i = wheelSize + 1; i < robotSize - wheelSize; ++i)
+    for (int i = wheelSize; i < inputOutputMap->rows - wheelSize; ++i)
     {
-      for (int j = wheelSize + 1; j < robotSize - wheelSize; ++j)
+      for (int j = wheelSize; j < inputOutputMap->cols - wheelSize; ++j)
       {
         inputOutputMap->at<double>(i, j) +=
-          bilinearInterpolation(cv::Point(j, i),
-              cv::Point(0, 0), cv::Point(inputOutputMap->cols - 1, 0),
-              cv::Point(inputOutputMap->cols - 1, inputOutputMap->rows - 1), cv::Point(0, inputOutputMap->rows - 1),
+          bilinearInterpolation(cv::Point2d(j, i),
+              cv::Point2d(0, 0), cv::Point2d(inputOutputMap->cols - 1, 0),
+              cv::Point2d(inputOutputMap->cols - 1, inputOutputMap->rows - 1), cv::Point2d(0, inputOutputMap->rows - 1),
               upperLeftCornerMeanHeight, upperRightCornerMeanHeight, lowerRightCornerMeanHeight,
               lowerLeftCornerMeanHeight);
       }
@@ -649,7 +724,8 @@ namespace pandora_vision_obstacle
       {
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(aLeftRight->rows - j - 1, i) += j * fabs(hForward - hBack) / aLeftRight->rows;
+          aLeftRight->at<double>(aLeftRight->rows - j - 1, i) += j * fabs(hForward - hBack) / aLeftRight->rows
+            + hBack;
         }
       }
     }
@@ -661,7 +737,7 @@ namespace pandora_vision_obstacle
         slopeResolution += slope;
         for (int i = 0; i < aLeftRight->cols; ++i)
         {
-          aLeftRight->at<double>(j, i) += j * fabs(hForward - hBack) / aLeftRight->rows;
+          aLeftRight->at<double>(j, i) += j * fabs(hForward - hBack) / aLeftRight->rows + hForward;
         }
       }
     }
@@ -734,6 +810,7 @@ namespace pandora_vision_obstacle
     // and update their corresponding values.
     double slope = fabs(hRight - hLeft) / d;
     double angle = asin(slope);
+
     // Reject slopes greater than the maximum possible angle.
     if (angle * 180 / CV_PI > description_->maxPossibleAngle)
       return false;
@@ -745,7 +822,7 @@ namespace pandora_vision_obstacle
       {
         for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          aTopBottom->at<double>(i, j) += j * fabs(hRight - hLeft) / aTopBottom->cols;
+          aTopBottom->at<double>(i, j) += j * fabs(hRight - hLeft) / aTopBottom->cols + hLeft;
         }
       }
     }
@@ -756,7 +833,8 @@ namespace pandora_vision_obstacle
       {
         for (int i = 0; i < aTopBottom->rows; ++i)
         {
-          aTopBottom->at<double>(i, aTopBottom->cols - j - 1) += j * fabs(hRight - hLeft) / aTopBottom->cols;
+          aTopBottom->at<double>(i, aTopBottom->cols - j - 1) += j * fabs(hRight - hLeft) / aTopBottom->cols
+            + hRight;
         }
       }
     }
@@ -818,16 +896,19 @@ namespace pandora_vision_obstacle
   }
 
   bool
-  TraversabilityMask::findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight)
+  TraversabilityMask::findHeightOnWheel(const cv::Point2d& wheelPos, double* meanHeight, double* stdDevHeight)
   {
     int wheelSize = metersToSteps(description_->wheelD);
     MatPtr wheelElevation( new cv::Mat(wheelSize, wheelSize, CV_64FC1, cv::Scalar(0)));
+
     bool known = cropToWheel(wheelPos, wheelElevation);
     if (!known)
       return false;
 
     cv::Mat validityMask;
+
     cv::compare(*wheelElevation, - std::numeric_limits<double>::max(), validityMask, cv::CMP_EQ);
+
     if (cv::countNonZero(validityMask) > 0)
       return false;
 
@@ -843,7 +924,7 @@ namespace pandora_vision_obstacle
    * @brief Creates a mask for the given wheel on the elevation map.
   */
   bool
-  TraversabilityMask::cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel)
+  TraversabilityMask::cropToWheel(const cv::Point2d& wheelPos, const MatPtr& wheel)
   {
     int wheelSize = metersToSteps(description_->wheelD);
     // Copy the region of the elevation map that corresponds to the current wheel.

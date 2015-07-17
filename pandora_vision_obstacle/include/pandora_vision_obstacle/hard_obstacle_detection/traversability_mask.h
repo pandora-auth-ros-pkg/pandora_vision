@@ -88,25 +88,25 @@ namespace pandora_vision_obstacle
     void
     loadGeometryMask(const ros::NodeHandle& nh);
 
-    double bilinearInterpolation(const cv::Point& P, const cv::Point& Q11, const cv::Point& Q21,
-      const cv::Point& Q22, const cv::Point& Q12, double fQ11, double fQ21, double fQ22, double fQ12);
+    double bilinearInterpolation(const cv::Point2d& P, const cv::Point2d& Q11, const cv::Point2d& Q21,
+      const cv::Point2d& Q22, const cv::Point2d& Q12, double fQ11, double fQ21, double fQ22, double fQ12);
 
     /**
      * @brief Applies barycentric Interpolation to calculate unknown values in a triangle.
      * @description Given the three vertices of the triangles and their corresponding values
      * we calculate the barycentric coordinates of the query point and using them the approximate value
      * of the function at this point
-     * @param P[const cv::Point&] The query point where the interpolation will be performed.
-     * @param A[const cv::Point&] A vertice of the triangle
-     * @param B[const cv::Point&] The second vertice of the triangle.
-     * @param C[const cv::Point&] The third vertice of the triangle.
+     * @param P[const cv::Point2d&] The query point where the interpolation will be performed.
+     * @param A[const cv::Point2d&] A vertice of the triangle
+     * @param B[const cv::Point2d&] The second vertice of the triangle.
+     * @param C[const cv::Point2d&] The third vertice of the triangle.
      * @param fA[double] The value of the function at the first vertice.
      * @param fB[double] The value of the function at the second vertice.
      * @param fC[double] The value of the function at the final vertice.
      * @return double The interpolated value at the query point.
      */
-    double barycentricInterpolation(const cv::Point& P, const cv::Point& A,
-      const cv::Point& B, const cv::Point&C, double fA, double fB, double fC);
+    double barycentricInterpolation(const cv::Point2d& P, const cv::Point2d& A,
+      const cv::Point2d& B, const cv::Point2d&C, double fA, double fB, double fC);
 
 
     void setRobotMaskDescriptionPtr(const RobotGeometryMaskDescriptionPtr& robotGeometryMaskDescriptionPtr)
@@ -153,7 +153,7 @@ namespace pandora_vision_obstacle
      * unknown values underneath it
      */
     bool
-    findHeightOnWheel(const cv::Point& wheelPos, double* meanHeight, double* stdDevHeight);
+    findHeightOnWheel(const cv::Point2d& wheelPos, double* meanHeight, double* stdDevHeight);
 
     /**
      * @brief Performs interpolation on the elevation Map
@@ -175,7 +175,7 @@ namespace pandora_vision_obstacle
      * check whether wheel is on unknown terrain. Returns false if it is
      */
     bool
-    cropToWheel(const cv::Point& wheelPos, const MatPtr& wheel);
+    cropToWheel(const cv::Point2d& wheelPos, const MatPtr& wheel);
 
     /**
      * Crops elevationMap_ to Ar according to center point and geometric params
@@ -206,6 +206,11 @@ namespace pandora_vision_obstacle
       return static_cast<int>(meters / description_->RESOLUTION);
     }
 
+    void setWheelDisplayFlag(bool wheelDisplayFlag)
+    {
+      displayWheelPositionFlag_ = wheelDisplayFlag;
+    }
+
    private:
     /// This is A matrix
     MatPtr robotGeometryMask_;
@@ -216,6 +221,8 @@ namespace pandora_vision_obstacle
 
     /// Center of matrix A
     cv::Point center_;
+
+    bool displayWheelPositionFlag_;
 
     friend class TraversabilityMaskTest;
   };

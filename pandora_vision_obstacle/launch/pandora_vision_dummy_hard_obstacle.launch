@@ -1,6 +1,6 @@
 <launch>
   <node pkg="pandora_vision_obstacle" type="pandora_vision_obstacle_dummy" name="pandora_hard_obstacle"
-    output="screen">
+    output="screen" >
    <rosparam file="$(find pandora_vision_obstacle)/config/hard_obstacle_detector_params.yaml"
      command="load" ns="/" />
   </node>
