@@ -121,7 +121,7 @@ namespace pandora_vision_obstacle
         traversabilityMaskPtr_->setElevationMap(elevationMapPtr);
       }
 
-      void displayTraversabilityMap(const cv::Mat& map);
+      void displayTraversabilityMap(const cv::Mat& map, const cv::Mat& elevationMap, int time = 5);
     private:
 
       void

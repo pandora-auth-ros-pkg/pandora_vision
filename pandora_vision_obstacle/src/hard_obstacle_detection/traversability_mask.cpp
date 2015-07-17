@@ -229,8 +229,6 @@ namespace pandora_vision_obstacle
     int validAreaWidth = 0, validAreaHeight = 0;
 
     cv::Mat tempImg, displayImage;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
     // Create a mask for the wheels.
     cv::Mat wheelMask(updatedMaskPtr->size(), CV_8UC1, cv::Scalar(1));
