@@ -355,6 +355,12 @@ namespace pandora_vision_obstacle
           traversabilityVisualization.at<cv::Vec3b>(i, j)[1] = 0;
           traversabilityVisualization.at<cv::Vec3b>(i, j)[2] = 0;
         }
+        else if (map.at<uchar>(i, j) == rampArea)
+        {
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[0] = 0;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[1] = 255;
+          traversabilityVisualization.at<cv::Vec3b>(i, j)[2] = 255;
+        }
       }
     }
     cv::imshow("Traversability Map", traversabilityVisualization);
