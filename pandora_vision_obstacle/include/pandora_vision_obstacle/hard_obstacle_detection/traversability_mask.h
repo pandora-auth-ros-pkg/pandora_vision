@@ -135,14 +135,24 @@ namespace pandora_vision_obstacle
       return robotGeometryMask_;
     }
 
-    void setHorizontalAxisElevationDifference(double horizontalAxisElevationDifference)
+    void setElevationDifferenceHighFreeThreshold(double elevationDifferenceHighFreeThreshold)
     {
-      horizontalAxisElevationDifference_ = horizontalAxisElevationDifference;
+      elevationDifferenceHighFreeThreshold_ = elevationDifferenceHighFreeThreshold;
     }
 
-    void setVerticalAxisElevationDifference(double verticalAxisElevationDifference)
+    void setElevationDifferenceLowFreeThreshold(double elevationDifferenceLowFreeThreshold)
     {
-      verticalAxisElevationDifference_ = verticalAxisElevationDifference;
+      elevationDifferenceLowFreeThreshold_ = elevationDifferenceLowFreeThreshold;
+    }
+
+    void setElevationDifferenceHighOccupiedThreshold(double elevationDifferenceHighOccupiedThreshold)
+    {
+      elevationDifferenceHighOccupiedThreshold_ = elevationDifferenceHighOccupiedThreshold;
+    }
+
+    void setElevationDifferenceLowOccupiedThreshold(double elevationDifferenceLowOccupiedThreshold)
+    {
+      elevationDifferenceLowOccupiedThreshold_ = elevationDifferenceLowOccupiedThreshold;
     }
 
    private:
@@ -228,8 +238,10 @@ namespace pandora_vision_obstacle
     /// Local elevation map created
     MatConstPtr elevationMapPtr_;
 
-    double horizontalAxisElevationDifference_;
-    double verticalAxisElevationDifference_;
+    double elevationDifferenceLowOccupiedThreshold_;
+    double elevationDifferenceHighOccupiedThreshold_;
+    double elevationDifferenceLowFreeThreshold_;
+    double elevationDifferenceHighFreeThreshold_;
 
     /// Center of matrix A
     cv::Point center_;
@@ -240,6 +252,7 @@ namespace pandora_vision_obstacle
   const int8_t occupiedArea = 70;
   const int8_t freeArea = 0;
   const int8_t unknownArea = 51;
+  const int8_t rampArea = 50;
 
   typedef TraversabilityMask::Ptr TraversabilityMaskPtr;
   typedef TraversabilityMask::ConstPtr TraversabilityMaskConstPtr;

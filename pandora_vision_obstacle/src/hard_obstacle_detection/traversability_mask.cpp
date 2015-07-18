@@ -36,7 +36,7 @@
  *   Tsirigotis Christos <tsirif@gmail.com>
  *   Vassilis Choutas <vasilis4ch@gmail.com>
  *   Kofinas Miltiadis <mkofinas@gmail.com>
- *   *********************************************************************/
+ **********************************************************************/
 
 #include <limits>
 #include "pandora_vision_obstacle/hard_obstacle_detection/traversability_mask.h"
@@ -528,19 +528,33 @@ namespace pandora_vision_obstacle
       ROS_INFO("[Traversability Mask]: Setting it to 2 cm per cell!");
       description_->RESOLUTION = 0.02;
     }
-    if (!nh.getParam("elevation_difference/horizontal_axis_elevation_difference",
-                     horizontalAxisElevationDifference_))
+    if (!nh.getParam("elevation_difference/elevation_difference_low_free_threshold",
+                     elevationDifferenceLowFreeThreshold_))
     {
-      ROS_WARN("[Traversability Mask]: Could not read the horizontal axis elevation difference!");
-      ROS_INFO("[Traversability Mask]: Setting it to 7 centimeters!");
-      horizontalAxisElevationDifference_ = 0.07;
+      ROS_WARN("[Traversability Mask]: Could not read the elevation difference low free threshold!");
+      ROS_INFO("[Traversability Mask]: Setting it to 10 centimeters!");
+      elevationDifferenceLowFreeThreshold_ = 0.10;
     }
-    if (!nh.getParam("elevation_difference/vertical_axis_elevation_difference",
-                     verticalAxisElevationDifference_))
+    if (!nh.getParam("elevation_difference/elevation_difference_high_free_threshold",
+                     elevationDifferenceHighFreeThreshold_))
     {
-      ROS_WARN("[Traversability Mask]: Could not read the vertical axis elevation difference!");
-      ROS_INFO("[Traversability Mask]: Setting it to 7 centimeters!");
-      verticalAxisElevationDifference_ = 0.07;
+      ROS_WARN("[Traversability Mask]: Could not read the elevation difference high free threshold!");
+      ROS_INFO("[Traversability Mask]: Setting it to 19 centimeters!");
+      elevationDifferenceHighFreeThreshold_ = 0.19;
+    }
+    if (!nh.getParam("elevation_difference/elevation_difference_low_occupied_threshold",
+                     elevationDifferenceLowOccupiedThreshold_))
+    {
+      ROS_WARN("[Traversability Mask]: Could not read the elevation difference low occupied threshold!");
+      ROS_INFO("[Traversability Mask]: Setting it to 14 centimeters!");
+      elevationDifferenceLowOccupiedThreshold_ = 0.14;
+    }
+    if (!nh.getParam("elevation_difference/elevation_difference_high_occupied_threshold",
+                     elevationDifferenceHighOccupiedThreshold_))
+    {
+      ROS_WARN("[Traversability Mask]: Could not read the elevation difference high occupied threshold!");
+      ROS_INFO("[Traversability Mask]: Setting it to 23 centimeters!");
+      elevationDifferenceHighOccupiedThreshold_ = 0.23;
     }
 
     ROS_INFO("[Traversability Mask]: Mask Loading finished successfully!");
@@ -787,11 +801,19 @@ namespace pandora_vision_obstacle
         }
         else
         {
-          double grad = inputImage.at<double>(ii + 1, jj) -
-                        inputImage.at<double>(ii, jj);
-          if (grad <= verticalAxisElevationDifference_)
+          double grad = fabs(inputImage.at<double>(ii + 1, jj) -
+                             inputImage.at<double>(ii, jj));
+
+          if (grad <= elevationDifferenceLowFreeThreshold_ ||
+              (grad > elevationDifferenceLowOccupiedThreshold_ &&
+               grad <= elevationDifferenceHighFreeThreshold_))
           {
             nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
+          }
+          else if (grad > elevationDifferenceHighFreeThreshold_ &&
+                   grad <= elevationDifferenceHighOccupiedThreshold_)
+          {
+            nonTraversableRowPoints.at<uchar>(ii, jj) = rampArea;
           }
           else
           {
@@ -817,11 +839,18 @@ namespace pandora_vision_obstacle
         }
         else
         {
-          double grad = inputImage.at<double>(ii, jj + 1) -
-                        inputImage.at<double>(ii, jj);
-          if (grad <= horizontalAxisElevationDifference_)
+          double grad = fabs(inputImage.at<double>(ii, jj + 1) -
+                             inputImage.at<double>(ii, jj));
+          if (grad <= elevationDifferenceLowFreeThreshold_ ||
+              (grad > elevationDifferenceLowOccupiedThreshold_ &&
+               grad <= elevationDifferenceHighFreeThreshold_))
           {
             nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
+          }
+          else if (grad > elevationDifferenceHighFreeThreshold_ &&
+                   grad <= elevationDifferenceHighOccupiedThreshold_)
+          {
+            nonTraversableColPoints.at<uchar>(ii, jj) = rampArea;
           }
           else
           {

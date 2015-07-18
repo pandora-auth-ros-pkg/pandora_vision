@@ -129,13 +129,27 @@ namespace pandora_vision_obstacle
         displayTraversabilityMapEnabled_ = traversabilityMaskDisplay;
       }
 
-      inline void setHorizontalAxisElevationDifference(double horizontalAxisElevationDifference)
+      void setElevationDifferenceHighOccupiedThreshold(double elevationDifferenceHighOccupiedThreshold)
       {
-        traversabilityMaskPtr_->setHorizontalAxisElevationDifference(horizontalAxisElevationDifference);
+        traversabilityMaskPtr_->setElevationDifferenceHighOccupiedThreshold(elevationDifferenceHighOccupiedThreshold);
       }
-      inline void setVerticalAxisElevationDifference(double verticalAxisElevationDifference)
+      void setElevationDifferenceLowOccupiedThreshold(double elevationDifferenceLowOccupiedThreshold)
       {
-        traversabilityMaskPtr_->setVerticalAxisElevationDifference(verticalAxisElevationDifference);
+        traversabilityMaskPtr_->setElevationDifferenceLowOccupiedThreshold(elevationDifferenceLowOccupiedThreshold);
+      }
+
+      void setElevationDifferenceHighFreeThreshold(double elevationDifferenceHighFreeThreshold)
+      {
+        traversabilityMaskPtr_->setElevationDifferenceHighFreeThreshold(elevationDifferenceHighFreeThreshold);
+      }
+      void setElevationDifferenceLowFreeThreshold(double elevationDifferenceLowFreeThreshold)
+      {
+        traversabilityMaskPtr_->setElevationDifferenceLowFreeThreshold(elevationDifferenceLowFreeThreshold);
+      }
+
+      void setInflationRadius(double radius)
+      {
+        inflationRadius_ = radius;
       }
 
     private:
@@ -291,6 +305,8 @@ namespace pandora_vision_obstacle
       bool traversabilityMaskEnabled_;
       bool edgeTraversabilityMaskEnabled_;
       bool displayTraversabilityMapEnabled_;
+
+      double inflationRadius_;
   };
 
 }  // namespace pandora_vision_obstacle

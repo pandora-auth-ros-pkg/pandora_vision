@@ -208,6 +208,8 @@ namespace pandora_vision_obstacle
     cv::Mat nonTraversableRowPoints = traversabilityMaskPtr_->findRowTraversability(inputImage);
     cv::Mat nonTraversableColPoints = traversabilityMaskPtr_->findColTraversability(inputImage);
 
+    std::vector<cv::Point> occupiedPoints;
+    std::vector<cv::Point> rampPoints;
     // Iterate over the map
     for (int ii = 0; ii < inputImage.rows; ++ii)
     {
@@ -216,10 +218,17 @@ namespace pandora_vision_obstacle
         int8_t traversablePoint;
         if (ii < inputImage.rows - 1 && jj < inputImage.cols - 1)
         {
-          if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea) ||
+          if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
+              (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == rampArea))
+          {
+            traversablePoint = rampArea;
+            rampPoints.push_back(cv::Point(jj, ii));
+          }
+          else if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea) ||
               (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == occupiedArea))
           {
             traversablePoint = occupiedArea;
+            occupiedPoints.push_back(cv::Point(jj ,ii));
           }
           else if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == freeArea) ||
                    (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == freeArea))
@@ -234,12 +243,30 @@ namespace pandora_vision_obstacle
         else if (ii == inputImage.rows - 1)
         {
           traversablePoint = static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj));
+          if (traversablePoint == occupiedArea)
+            occupiedPoints.push_back(cv::Point(jj, ii));
+          else if (traversablePoint == rampArea)
+            rampPoints.push_back(cv::Point(jj, ii));
         }
         else
         {
           traversablePoint = static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj));
+          if (traversablePoint == occupiedArea)
+            occupiedPoints.push_back(cv::Point(jj, ii));
+          else if (traversablePoint == rampArea)
+            rampPoints.push_back(cv::Point(jj, ii));
         }
         traversabilityMap->at<int8_t>(ii, jj) = traversablePoint;
+      }
+    }
+    for (int ii = 0; ii < rampPoints.size(); ++ii)
+    {
+      for (int jj = 0; jj < occupiedPoints.size(); ++jj)
+      {
+        if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) <= inflationRadius_)
+        {
+          traversabilityMap->at<int8_t>(occupiedPoints[jj].y, occupiedPoints[jj].x) = freeArea;
+        }
       }
     }
   }
