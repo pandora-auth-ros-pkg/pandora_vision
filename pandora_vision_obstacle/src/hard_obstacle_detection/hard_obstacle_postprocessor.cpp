@@ -108,67 +108,67 @@ namespace pandora_vision_obstacle
   HardObstaclePostProcessor::
   postProcess(const CVMatStampedConstPtr& input, const nav_msgs::OccupancyGridPtr& output)
   {
-    //if (map_const_ptr_.get() == NULL)
-    //{
-      //NODELET_ERROR("[%s] Map pointer is still uninitialized!", this->getName().c_str());
-      //throw sensor_processor::processor_error("Map pointer is still uninitialized!");
-    //}
-    //NODELET_INFO("[%s] postprocessing to costmap", this->getName().c_str());
+    if (map_const_ptr_.get() == NULL)
+    {
+      NODELET_ERROR("[%s] Map pointer is still uninitialized!", this->getName().c_str());
+      throw sensor_processor::processor_error("Map pointer is still uninitialized!");
+    }
+    NODELET_INFO("[%s] postprocessing to costmap", this->getName().c_str());
 
-    //output->header.frame_id = map_const_ptr_->header.frame_id;
-    //output->header.stamp = input->getHeader().stamp;
-    //output->info = map_const_ptr_->info;
+    output->header.frame_id = map_const_ptr_->header.frame_id;
+    output->header.stamp = input->getHeader().stamp;
+    output->info = map_const_ptr_->info;
 
-    //output->data.clear();
-    //output->data.resize(map_const_ptr_->data.size(), UNKNOWN_VALUE);
+    output->data.clear();
+    output->data.resize(map_const_ptr_->data.size(), UNKNOWN_VALUE);
 
-    //// Get robot base footprint transform
-    //tf::StampedTransform baseTransform;
-    //try
-    //{
-      //tfListener_.waitForTransform(LOCAL_FRAME, output->header.frame_id,
-          //output->header.stamp, ros::Duration(0.2));
-      //tfListener_.lookupTransform(LOCAL_FRAME, output->header.frame_id,
-          //output->header.stamp, baseTransform);
-    //}
-    //catch (const tf::TransformException& ex)
-    //{
-      //throw sensor_processor::processor_error(ex.what());
-    //}
+    // Get robot base footprint transform
+    tf::StampedTransform baseTransform;
+    try
+    {
+      tfListener_.waitForTransform(LOCAL_FRAME, output->header.frame_id,
+          output->header.stamp, ros::Duration(0.2));
+      tfListener_.lookupTransform(LOCAL_FRAME, output->header.frame_id,
+          output->header.stamp, baseTransform);
+    }
+    catch (const tf::TransformException& ex)
+    {
+      throw sensor_processor::processor_error(ex.what());
+    }
 
-    //tf::Quaternion baseOrientation;
-    //baseTransform.getBasis().getRotation(baseOrientation);
-    //tf::Vector3 origin = baseTransform.getOrigin();
+    tf::Quaternion baseOrientation;
+    baseTransform.getBasis().getRotation(baseOrientation);
+    tf::Vector3 origin = baseTransform.getOrigin();
 
-    //double yawDiff = tf::getYaw(map_const_ptr_->info.origin.orientation) -
-      //tf::getYaw(baseOrientation);
-    //double xDiff = map_const_ptr_->info.origin.position.x - origin[0];
-    //double yDiff = map_const_ptr_->info.origin.position.y - origin[1];
+    double yawDiff = tf::getYaw(map_const_ptr_->info.origin.orientation) -
+      tf::getYaw(baseOrientation);
+    double xDiff = map_const_ptr_->info.origin.position.x - origin[0];
+    double yDiff = map_const_ptr_->info.origin.position.y - origin[1];
 
-    //int trans_ii, trans_jj;
-    //double x, y, xn, yn;
-    //for (int ii = 0; ii < input->image.cols; ++ii) {
-      //for (int jj = 0; jj < input->image.rows; ++jj) {
-        //trans_ii = ii - input->image.cols / 2;
-        //trans_jj = jj - input->image.rows / 2;
-        //x = ii * MAT_RESOLUTION;
-        //y = jj * MAT_RESOLUTION;
-        //xn = cos(yawDiff) * x - sin(yawDiff) * y - xDiff;
-        //yn = sin(yawDiff) * x + cos(yawDiff) * y - yDiff;
-        //int coords = static_cast<int>(round(xn / output->info.resolution) +
-              //round(yn * output->info.width / output->info.resolution));
-        //if ((coords >= output->data.size()) || (coords < 0))
-        //{
-          //NODELET_WARN("[%s] Error resizing to: %d\nCoords Xn: %f, Yn: %f\n",
-              //this->getName().c_str(), static_cast<int>(map_const_ptr_->data.size()), xn, yn);
-        //}
-        //else
-        //{
-          //output->data[coords] = input->image.at<int8_t>(jj, ii);
-          //obstacleDilation(output, 2, coords);
-        //}
-      //}
-    //}
+    int trans_ii, trans_jj;
+    double x, y, xn, yn;
+    for (int ii = 0; ii < input->image.cols; ++ii) {
+      for (int jj = 0; jj < input->image.rows; ++jj) {
+        trans_ii = ii - input->image.cols / 2;
+        trans_jj = jj - input->image.rows / 2;
+        x = ii * MAT_RESOLUTION;
+        y = jj * MAT_RESOLUTION;
+        xn = cos(yawDiff) * x - sin(yawDiff) * y - xDiff;
+        yn = sin(yawDiff) * x + cos(yawDiff) * y - yDiff;
+        int coords = static_cast<int>(round(xn / output->info.resolution)) +
+              static_cast<int>(round(yn / output->info.resolution)) * output->info.width;
+        if (coords >= output->data.size() || coords < 0)
+        {
+          NODELET_WARN("[%s] Error resizing to: %d\nCoords Xn: %f, Yn: %f\n",
+              this->getName().c_str(), static_cast<int>(map_const_ptr_->data.size()), xn, yn);
+        }
+        else
+        {
+          output->data[coords] = static_cast<int8_t>(input->image.at<uchar>(jj, ii));
+          obstacleDilation(output, 2, coords);
+        }
+      }
+    }
 
     return true;
   }
@@ -189,7 +189,7 @@ namespace pandora_vision_obstacle
 
     int8_t cell = output->data[coords];
 
-    if (cell != 0)  // That's foreground
+    if (cell != 0 && cell != UNKNOWN_VALUE)  // That's foreground
     {
       // Check for all adjacent
       if (output->data[coords + output->info.width + 1] == 0)
