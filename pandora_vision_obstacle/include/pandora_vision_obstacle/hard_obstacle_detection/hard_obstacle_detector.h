@@ -307,6 +307,8 @@ namespace pandora_vision_obstacle
       bool displayTraversabilityMapEnabled_;
 
       double inflationRadius_;
+
+      double resolution_;
   };
 
 }  // namespace pandora_vision_obstacle

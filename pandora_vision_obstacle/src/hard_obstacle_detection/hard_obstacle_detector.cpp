@@ -63,11 +63,10 @@ namespace pandora_vision_obstacle
     nh.param("robot/robotXDimention", robotXDimention, 0.345);
     nh.param("robot/robotYDimention", robotYDimention, 0.345);
 
-    double resolution;
-    nh.param("cellResolution", resolution, 0.02);
+    nh.param("cellResolution", resolution_, 0.02);
 
-    robotRows_ = robotXDimention / resolution;
-    robotCols_ = robotYDimention / resolution;
+    robotRows_ = robotXDimention / resolution_;
+    robotCols_ = robotYDimention / resolution_;
 
     // Minimum acceptable value for the process to work properly
     robotStrength_ = robotRows_ * robotCols_;
@@ -263,7 +262,7 @@ namespace pandora_vision_obstacle
     {
       for (int jj = 0; jj < occupiedPoints.size(); ++jj)
       {
-        if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) <= inflationRadius_)
+        if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) * resolution_ <= inflationRadius_)
         {
           traversabilityMap->at<int8_t>(occupiedPoints[jj].y, occupiedPoints[jj].x) = freeArea;
         }
