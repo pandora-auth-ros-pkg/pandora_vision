@@ -36,6 +36,7 @@ namespace pandora_vision_obstacle
       image_transport::ImageTransport it;
       image_transport::Subscriber sub;
       image_transport::Publisher pub;
+      ros::Subscriber mapSub_;
       ros::Publisher traversabilityMapPub_;
       nav_msgs::OccupancyGridConstPtr map_const_ptr_;
       int UNKNOWN_VALUE;

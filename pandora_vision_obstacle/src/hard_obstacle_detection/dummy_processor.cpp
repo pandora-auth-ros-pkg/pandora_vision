@@ -22,9 +22,13 @@ namespace pandora_vision_obstacle
       &DummyProcessor::imageCallback, this);
     pub = it.advertise("/traversability_map", 1);
     traversabilityMapPub_ = nh.advertise<nav_msgs::OccupancyGrid>("/vision/traversability_map", 1);
+    mapSub_ = nh.subscribe("/slam/map", 1, &DummyProcessor::updateMap, this);
+
+    map_const_ptr_.reset();
+
     nh.param<int>("unknown_value", UNKNOWN_VALUE, 51);
     nh.param<double>("mat_resolution", MAT_RESOLUTION, 0.02);
-    nh.param<std::string>("local_frame", LOCAL_FRAME, "/base_foorprint");
+    nh.param<std::string>("local_frame", LOCAL_FRAME, "/base_footprint");
   }
 
   void DummyProcessor::displayElevationMap(cv::Mat inputImage)
@@ -68,12 +72,19 @@ namespace pandora_vision_obstacle
     inputImagePtr->header = cv_ptr->header;
 
     CVMatStampedPtr outputImagePtr( new CVMatStamped );
-
+    struct timeval startwtime, endwtime;
     displayElevationMap(inputImagePtr->image);
+
+    gettimeofday(&startwtime , NULL);
     bool flag = process(inputImagePtr, outputImagePtr);
+    gettimeofday(&endwtime, NULL);
+    std::cout <<  static_cast<double>((endwtime.tv_usec -
+            startwtime.tv_usec) / 1.0e6
+            + endwtime.tv_sec - startwtime.tv_sec) << std::endl;
 
     nav_msgs::OccupancyGridPtr outputMapPtr;
-    bool navFlag = postProcess(inputImagePtr, outputMapPtr);
+    outputMapPtr.reset(new nav_msgs::OccupancyGrid);
+    bool navFlag = postProcess(outputImagePtr, outputMapPtr);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = outputImagePtr->header;
@@ -96,12 +107,13 @@ namespace pandora_vision_obstacle
 
   void DummyProcessor::updateMap(const nav_msgs::OccupancyGridConstPtr& mapConstPtr)
   {
+    ROS_INFO("[%s]: Inside Map callback!", getName().c_str());
     map_const_ptr_ = mapConstPtr;
   }
 
   bool DummyProcessor::postProcess(const CVMatStampedConstPtr& input, const nav_msgs::OccupancyGridPtr& output)
   {
-    if (map_const_ptr_.get() == NULL)
+    if (map_const_ptr_ == NULL)
     {
       ROS_ERROR("[%s] Map pointer is still uninitialized!", this->getName().c_str());
       return false;
@@ -161,7 +173,7 @@ namespace pandora_vision_obstacle
         else
         {
           output->data[coords] = static_cast<int8_t>(flippedMap.at<uchar>(jj, ii));
-          obstacleDilation(output, 1, coords);
+          // obstacleDilation(output, 1, coords);
         }
       }
     }
