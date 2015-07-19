@@ -165,7 +165,7 @@ namespace pandora_vision_obstacle
     cv::bitwise_not(mask, mask);
     colorMapImg.setTo(0.0, mask);
 
-    cv::imshow("Elevation Map Image", colorMapImg);
+    //cv::imshow("Elevation Map Image", colorMapImg);
     cv::waitKey(5);
     return;
   }

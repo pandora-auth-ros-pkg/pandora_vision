@@ -321,7 +321,7 @@ namespace pandora_vision_obstacle
     {
      image.copyTo(scaledImage);
     }
-    cv::imshow(title, scaledImage);
+    //cv::imshow(title, scaledImage);
     cv::waitKey(time);
   }
 
@@ -362,7 +362,8 @@ namespace pandora_vision_obstacle
         }
       }
     }
-    cv::imshow("Traversability Map", traversabilityVisualization);
+    //cv::imshow("Traversability Map", traversabilityVisualization);
+    //
     cv::waitKey(5);
   }
 
@@ -425,7 +426,7 @@ namespace pandora_vision_obstacle
           }
         }
       }
-      cv::imshow(title, scaledImage);
+      //cv::imshow(title, scaledImage);
       cv::waitKey(time);
     }
   }
