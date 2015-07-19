@@ -804,20 +804,34 @@ namespace pandora_vision_obstacle
           double grad = fabs(inputImage.at<double>(ii + 1, jj) -
                              inputImage.at<double>(ii, jj));
 
-          if (grad <= elevationDifferenceLowFreeThreshold_ ||
-              (grad > elevationDifferenceLowOccupiedThreshold_ &&
-               grad <= elevationDifferenceHighFreeThreshold_))
+          if (detectRamps_)
           {
-            nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
-          }
-          else if (grad > elevationDifferenceHighFreeThreshold_ &&
-                   grad <= elevationDifferenceHighOccupiedThreshold_)
-          {
-            nonTraversableRowPoints.at<uchar>(ii, jj) = rampArea;
+            if (grad <= elevationDifferenceLowFreeThreshold_ ||
+                (grad > elevationDifferenceLowOccupiedThreshold_ &&
+                grad <= elevationDifferenceHighFreeThreshold_))
+            {
+              nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
+            }
+            else if (grad > elevationDifferenceHighFreeThreshold_ &&
+                    grad <= elevationDifferenceHighOccupiedThreshold_)
+            {
+              nonTraversableRowPoints.at<uchar>(ii, jj) = rampArea;
+            }
+            else
+            {
+              nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
+            }
           }
           else
           {
-            nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
+            if (grad <= elevationDifferenceLowFreeThreshold_)
+            {
+              nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
+            }
+            else
+            {
+              nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
+            }
           }
         }
       }
@@ -841,20 +855,34 @@ namespace pandora_vision_obstacle
         {
           double grad = fabs(inputImage.at<double>(ii, jj + 1) -
                              inputImage.at<double>(ii, jj));
-          if (grad <= elevationDifferenceLowFreeThreshold_ ||
-              (grad > elevationDifferenceLowOccupiedThreshold_ &&
-               grad <= elevationDifferenceHighFreeThreshold_))
+          if (detectRamps_)
           {
-            nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
-          }
-          else if (grad > elevationDifferenceHighFreeThreshold_ &&
-                   grad <= elevationDifferenceHighOccupiedThreshold_)
-          {
-            nonTraversableColPoints.at<uchar>(ii, jj) = rampArea;
+            if (grad <= elevationDifferenceLowFreeThreshold_ ||
+                (grad > elevationDifferenceLowOccupiedThreshold_ &&
+                grad <= elevationDifferenceHighFreeThreshold_))
+            {
+              nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
+            }
+            else if (grad > elevationDifferenceHighFreeThreshold_ &&
+                    grad <= elevationDifferenceHighOccupiedThreshold_)
+            {
+              nonTraversableColPoints.at<uchar>(ii, jj) = rampArea;
+            }
+            else
+            {
+              nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
+            }
           }
           else
           {
-            nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
+            if (grad <= elevationDifferenceLowFreeThreshold_)
+            {
+              nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
+            }
+            else
+            {
+              nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
+            }
           }
         }
       }

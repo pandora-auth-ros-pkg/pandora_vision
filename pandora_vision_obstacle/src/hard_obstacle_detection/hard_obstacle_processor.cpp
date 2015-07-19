@@ -106,6 +106,7 @@ namespace pandora_vision_obstacle
     detector_->setElevationDifferenceLowFreeThreshold(config.elevation_difference_low_free_threshold);
     detector_->setElevationDifferenceHighFreeThreshold(config.elevation_difference_high_free_threshold);
     detector_->setInflationRadius(config.inflation_radius);
+    detector_->setDetectRamps(config.detect_ramps);
   }
 
   bool HardObstacleProcessor::process(const CVMatStampedConstPtr& input,
