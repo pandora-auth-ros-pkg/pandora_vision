@@ -332,6 +332,7 @@ namespace pandora_vision_obstacle
 
   void HardObstacleDetector::displayTraversabilityMap(const cv::Mat& map)
   {
+    cv::namedWindow("Traversability Map", cv::WINDOW_NORMAL);
     cv::Mat traversabilityVisualization(map.size(), CV_8UC3);
     traversabilityVisualization.setTo(0);
     for (int i = 0; i < map.rows; ++i)

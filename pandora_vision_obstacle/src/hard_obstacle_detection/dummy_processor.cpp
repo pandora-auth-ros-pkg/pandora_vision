@@ -21,7 +21,7 @@ namespace pandora_vision_obstacle
     sub = it.subscribe("/elevation_map", 1,
       &DummyProcessor::imageCallback, this);
     pub = it.advertise("/traversability_map", 1);
-    traversabilityMapPub_ = nh.advertise<nav_msgs::OccupancyGrid>("/vision/traversability_map", 1);
+    traversabilityMapPub_ = nh.advertise<nav_msgs::OccupancyGrid>("/vision/dummy_traversability_map", 1);
     mapSub_ = nh.subscribe("/slam/map", 1, &DummyProcessor::updateMap, this);
 
     map_const_ptr_.reset();
@@ -75,12 +75,7 @@ namespace pandora_vision_obstacle
     struct timeval startwtime, endwtime;
     displayElevationMap(inputImagePtr->image);
 
-    gettimeofday(&startwtime , NULL);
     bool flag = process(inputImagePtr, outputImagePtr);
-    gettimeofday(&endwtime, NULL);
-    std::cout <<  static_cast<double>((endwtime.tv_usec -
-            startwtime.tv_usec) / 1.0e6
-            + endwtime.tv_sec - startwtime.tv_sec) << std::endl;
 
     nav_msgs::OccupancyGridPtr outputMapPtr;
     outputMapPtr.reset(new nav_msgs::OccupancyGrid);
@@ -154,7 +149,7 @@ namespace pandora_vision_obstacle
     int trans_ii, trans_jj;
     double x, y, xn, yn;
     cv::Mat flippedMap;
-    cv::flip(input->image, flippedMap, 1);
+    cv::flip(input->image, flippedMap, 0);
     for (int ii = 0; ii < flippedMap.cols; ++ii) {
       for (int jj = 0; jj < flippedMap.rows; ++jj) {
         trans_ii = ii - flippedMap.cols / 2;
@@ -173,7 +168,7 @@ namespace pandora_vision_obstacle
         else
         {
           output->data[coords] = static_cast<int8_t>(flippedMap.at<uchar>(jj, ii));
-          // obstacleDilation(output, 1, coords);
+          obstacleDilation(output, 1, coords);
         }
       }
     }
