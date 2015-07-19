@@ -147,10 +147,12 @@ namespace pandora_vision_obstacle
 
     int trans_ii, trans_jj;
     double x, y, xn, yn;
-    for (int ii = 0; ii < input->image.cols; ++ii) {
-      for (int jj = 0; jj < input->image.rows; ++jj) {
-        trans_ii = ii - input->image.cols / 2;
-        trans_jj = jj - input->image.rows / 2;
+    cv::Mat flippedMap;
+    cv::flip(input->image, flippedMap, 0);
+    for (int ii = 0; ii < flippedMap.cols; ++ii) {
+      for (int jj = 0; jj < flippedMap.rows; ++jj) {
+        trans_ii = ii - flippedMap.cols / 2;
+        trans_jj = jj - flippedMap.rows / 2;
         x = trans_ii * MAT_RESOLUTION;
         y = trans_jj * MAT_RESOLUTION;
         xn = cos(yawDiff) * x - sin(yawDiff) * y - xDiff;
@@ -164,7 +166,7 @@ namespace pandora_vision_obstacle
         }
         else
         {
-          output->data[coords] = static_cast<int8_t>(input->image.at<uchar>(jj, ii));
+          output->data[coords] = static_cast<int8_t>(flippedMap.at<uchar>(jj, ii));
           obstacleDilation(output, 1, coords);
         }
       }
