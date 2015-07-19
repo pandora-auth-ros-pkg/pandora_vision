@@ -93,6 +93,7 @@ namespace pandora_vision_obstacle
     ROS_INFO("Loading robot description!");
     traversabilityMaskPtr_->loadGeometryMask(nh);
     traversabilityMaskPtr_->createMaskFromDesc();
+    traversabilityMaskPtr_->setDetectRamps(detectRamps_);
     // ROS_INFO("Finished loading robot description and creating robot mask!");
     ROS_INFO("[Hard Obstacle Detector]: Created Detector Object!");
   }
@@ -217,8 +218,9 @@ namespace pandora_vision_obstacle
         int8_t traversablePoint;
         if (ii < inputImage.rows - 1 && jj < inputImage.cols - 1)
         {
-          if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
-              (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == rampArea))
+          if (detectRamps_ &&
+              ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
+               (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == rampArea)))
           {
             traversablePoint = rampArea;
             rampPoints.push_back(cv::Point(jj, ii));
@@ -258,13 +260,16 @@ namespace pandora_vision_obstacle
         traversabilityMap->at<int8_t>(ii, jj) = traversablePoint;
       }
     }
-    for (int ii = 0; ii < rampPoints.size(); ++ii)
+    if (detectRamps_)
     {
-      for (int jj = 0; jj < occupiedPoints.size(); ++jj)
+      for (int ii = 0; ii < rampPoints.size(); ++ii)
       {
-        if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) * resolution_ <= inflationRadius_)
+        for (int jj = 0; jj < occupiedPoints.size(); ++jj)
         {
-          traversabilityMap->at<int8_t>(occupiedPoints[jj].y, occupiedPoints[jj].x) = freeArea;
+          if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) * resolution_ <= inflationRadius_)
+          {
+            traversabilityMap->at<int8_t>(occupiedPoints[jj].y, occupiedPoints[jj].x) = freeArea;
+          }
         }
       }
     }

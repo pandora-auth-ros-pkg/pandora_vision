@@ -152,6 +152,11 @@ namespace pandora_vision_obstacle
         inflationRadius_ = radius;
       }
 
+      void setDetectRamps(bool detectRamps)
+      {
+        detectRamps_ = detectRamps;
+      }
+
     private:
       void displayTraversabilityMap(const cv::Mat& map);
 
@@ -309,6 +314,8 @@ namespace pandora_vision_obstacle
       double inflationRadius_;
 
       double resolution_;
+
+      bool detectRamps_;
   };
 
 }  // namespace pandora_vision_obstacle
