@@ -804,16 +804,9 @@ namespace pandora_vision_obstacle
           double grad = fabs(inputImage.at<double>(ii + 1, jj) -
                              inputImage.at<double>(ii, jj));
 
-          if (grad <= elevationDifferenceLowFreeThreshold_ ||
-              (grad > elevationDifferenceLowOccupiedThreshold_ &&
-               grad <= elevationDifferenceHighFreeThreshold_))
+          if (grad <= elevationDifferenceLowFreeThreshold_)
           {
             nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
-          }
-          else if (grad > elevationDifferenceHighFreeThreshold_ &&
-                   grad <= elevationDifferenceHighOccupiedThreshold_)
-          {
-            nonTraversableRowPoints.at<uchar>(ii, jj) = rampArea;
           }
           else
           {
@@ -841,16 +834,9 @@ namespace pandora_vision_obstacle
         {
           double grad = fabs(inputImage.at<double>(ii, jj + 1) -
                              inputImage.at<double>(ii, jj));
-          if (grad <= elevationDifferenceLowFreeThreshold_ ||
-              (grad > elevationDifferenceLowOccupiedThreshold_ &&
-               grad <= elevationDifferenceHighFreeThreshold_))
+          if (grad <= elevationDifferenceLowFreeThreshold_)
           {
             nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
-          }
-          else if (grad > elevationDifferenceHighFreeThreshold_ &&
-                   grad <= elevationDifferenceHighOccupiedThreshold_)
-          {
-            nonTraversableColPoints.at<uchar>(ii, jj) = rampArea;
           }
           else
           {
