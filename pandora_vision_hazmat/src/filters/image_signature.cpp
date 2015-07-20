@@ -70,7 +70,6 @@ namespace pandora_vision
     void ImageSignature::calculateSignature(const cv::Mat& image ,
         cv::Mat* imgSign)
     {
-
       cv::Mat imageDCT;
 
       // Compute the discrete cosine transform of the input image.
@@ -147,16 +146,12 @@ namespace pandora_vision
       // Calculate the mean of the saliency values of the 3 input channels.
       sum = (1 / static_cast<float>(channelNum)) * sum;
 
-      // Threshold the mask to decrease noise and keep only the regions
-      // of interest.
-      // cv::threshold(sum , sum, roiThreshold_, 1, cv::THRESH_BINARY);
-
       // Resize the mask so that it can be applied to the frame.
       cv::resize(sum, sum, frame.size());
 
       // Threshold the mask to decrease noise and keep only the regions
       // of interest.
-      cv::threshold(sum , sum, roiThreshold_, 1, cv::THRESH_BINARY);
+      cv::threshold(sum , sum, roiThreshold_, 0.98, cv::THRESH_BINARY);
 
 
       // Convert the mask to 1-channel 8 bit format.
@@ -169,7 +164,7 @@ namespace pandora_vision
       *mask = cv::Mat(frame.size(), CV_8UC1);
       mask->setTo(0);
       // *mask = sum;
-      for( int i = 0; i< contours.size(); i++ )
+      for ( int i = 0; i< contours.size(); i++ )
       {
         if (cv::contourArea(contours[i]) < areaThreshold_)
           continue;
@@ -177,5 +172,6 @@ namespace pandora_vision
       }
 
       return;
-    }}  // namespace pandora_vision_hazmat
+    }
+}  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision

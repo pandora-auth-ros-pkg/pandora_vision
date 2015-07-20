@@ -97,7 +97,7 @@ namespace pandora_vision
 
       // Create the mask that will be used to extract regions of interest
       // on the image based on the Image Signature Saliency Map.
-      ImageSignature::createSaliencyMapMask(frame, &mask);
+      maskCreatorPtr_->createSaliencyMapMask(frame, &mask);
       // Calculate the keypoints and extract the descriptors from the
       // frame.
 
