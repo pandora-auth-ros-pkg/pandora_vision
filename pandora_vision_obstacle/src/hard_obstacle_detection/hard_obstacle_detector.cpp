@@ -19,7 +19,7 @@
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
- *  THIS HARDWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -29,7 +29,7 @@
  *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
  *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS HARDWARE, EVEN IF ADVISED OF THE
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
@@ -201,6 +201,7 @@ namespace pandora_vision_obstacle
    */
   void HardObstacleDetector::createEdgeTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap)
   {
+    const int local_radius = static_cast<int>(ceil(locality_radius_ / resolution_));
     // Initialize the output traversability map
     traversabilityMap->create(inputImage.size(), CV_8UC1);
     // Set all of it's cells to unknown.
@@ -260,10 +261,101 @@ namespace pandora_vision_obstacle
         traversabilityMap->at<int8_t>(ii, jj) = traversablePoint;
       }
     }
+
+    for (int ii = local_radius; ii < nonTraversableRowPoints.rows - local_radius; ++ii) {
+      for (int jj = local_radius; jj < nonTraversableRowPoints.cols - local_radius; ++jj) {
+        if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
+            (static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == freeArea))
+        {
+          double maxHeight = -std::numeric_limits<double>::max();
+          double minHeight = std::numeric_limits<double>::max();
+          double mean = 0.0;
+          int count = 0;
+          for (double theta = 0; theta < 2 * CV_PI; theta += 0.2) {
+            int iic = ii + static_cast<int>(cos(theta) * local_radius);
+            int jjc = jj + static_cast<int>(sin(theta) * local_radius);
+            double height = inputImage.at<double>(iic, jjc);
+            if (height != -std::numeric_limits<double>::max())
+            {
+              mean += height;
+              count++;
+              if (height > maxHeight) maxHeight = height;
+              if (height < minHeight) minHeight = height;
+            }
+          }
+          // Escape if information is not considered sufficient
+          if (count < static_cast<int>((2 * CV_PI / 0.2) / 2))
+            continue;
+          mean /= count;
+          double heightDiff = inputImage.at<double>(ii, jj) - mean;
+          // Escape if edge point does not lie in high ground... (error)
+          if (heightDiff <= 0)
+            continue;
+          if (heightDiff <= height_diff_)
+            continue;
+          // Escape if max is smaller than min
+          if (maxHeight < minHeight)
+            continue;
+          double grad = maxHeight - minHeight;
+          if (grad >= grad_diff_)
+            continue;
+
+          // Edge is definetely a hard obstacle
+          traversabilityMap->at<int8_t>(ii, jj) = occupiedArea;
+        }
+      }
+    }
+    for (int ii = local_radius; ii < nonTraversableColPoints.rows - local_radius; ++ii) {
+      for (int jj = local_radius; jj < nonTraversableColPoints.cols - local_radius; ++jj) {
+        if ((static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == rampArea) ||
+            (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == freeArea))
+        {
+          double maxHeight = -std::numeric_limits<double>::max();
+          double minHeight = std::numeric_limits<double>::max();
+          double mean = 0.0;
+          int count = 0;
+          for (double theta = 0; theta < 2 * CV_PI; theta += 0.2) {
+            int iic = ii + static_cast<int>(cos(theta) * local_radius);
+            int jjc = jj + static_cast<int>(sin(theta) * local_radius);
+            double height = inputImage.at<double>(iic, jjc);
+            if (height != -std::numeric_limits<double>::max())
+            {
+              mean += height;
+              count++;
+              if (height > maxHeight) maxHeight = height;
+              if (height < minHeight) minHeight = height;
+            }
+          }
+          // Escape if information is not considered sufficient
+          if (count < static_cast<int>((2 * CV_PI / 0.2) / 2))
+            continue;
+          mean /= count;
+          double heightDiff = inputImage.at<double>(ii, jj) - mean;
+          // Escape if edge point does not lie in high ground... (error)
+          if (heightDiff <= 0)
+            continue;
+          if (heightDiff <= height_diff_)
+            continue;
+          // Escape if max is smaller than min
+          if (maxHeight < minHeight)
+            continue;
+          double grad = maxHeight - minHeight;
+          if (grad >= grad_diff_)
+            continue;
+
+          // Edge is definetely a hard obstacle
+          traversabilityMap->at<int8_t>(ii, jj) = occupiedArea;
+          occupiedPoints.push_back(cv::Point(jj ,ii));
+        }
+      }
+    }
+
     if (detectRamps_)
     {
       for (int ii = 0; ii < rampPoints.size(); ++ii)
       {
+        if (traversabilityMap->at<int8_t>(rampPoints[ii].y, rampPoints[ii].x) != rampArea)
+          continue;
         for (int jj = 0; jj < occupiedPoints.size(); ++jj)
         {
           if (cv::norm(rampPoints[ii] - occupiedPoints[jj]) * resolution_ <= inflationRadius_)
