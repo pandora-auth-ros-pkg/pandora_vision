@@ -126,9 +126,9 @@ namespace pandora_vision_obstacle
     tf::StampedTransform baseTransform;
     try
     {
-      tfListener_.waitForTransform(LOCAL_FRAME, output->header.frame_id,
+      tfListener_.waitForTransform(output->header.frame_id, LOCAL_FRAME,
           output->header.stamp, ros::Duration(0.2));
-      tfListener_.lookupTransform(LOCAL_FRAME, output->header.frame_id,
+      tfListener_.lookupTransform(output->header.frame_id, LOCAL_FRAME,
           output->header.stamp, baseTransform);
     }
     catch (const tf::TransformException& ex)
@@ -179,7 +179,7 @@ namespace pandora_vision_obstacle
         else
         {
           output->data[coords_map] = static_cast<int8_t>(input->image.at<uchar>(jj, ii));
-          obstacleDilation(output, 1, coords_map);
+          obstacleDilation(output, 2, coords_map);
         }
       }
     }

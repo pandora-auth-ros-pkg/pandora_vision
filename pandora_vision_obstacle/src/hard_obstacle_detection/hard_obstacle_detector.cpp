@@ -212,9 +212,9 @@ namespace pandora_vision_obstacle
     std::vector<cv::Point> occupiedPoints;
     std::vector<cv::Point> rampPoints;
     // Iterate over the map
-    for (int ii = 0; ii < inputImage.rows; ++ii)
+    for (int ii = 0; ii < inputImage.rows; ++ii)  // this is y
     {
-      for (int jj = 0; jj < inputImage.cols; ++jj)
+      for (int jj = 0; jj < inputImage.cols; ++jj)  // this is x
       {
         int8_t traversablePoint;
         if (ii < inputImage.rows - 1 && jj < inputImage.cols - 1)
