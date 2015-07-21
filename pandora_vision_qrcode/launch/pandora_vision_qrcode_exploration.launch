@@ -16,7 +16,7 @@
       args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-    <rosparam name="subscribed_topics" value="/rpi2/pi_camera/image" />
+  <rosparam name="subscribed_topics" value="/rpi2_primary/pi_camera_front/image" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>
@@ -26,7 +26,7 @@
       args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-    <rosparam name="subscribed_topics" value="/back/pi_camera/image" />
+    <rosparam name="subscribed_topics" value="/rpi2_secondary/pi_camera_rear/image" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>
