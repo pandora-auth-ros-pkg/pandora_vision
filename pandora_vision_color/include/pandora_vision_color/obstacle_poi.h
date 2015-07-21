@@ -33,47 +33,53 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  * Authors:
- *   Tsirigotis Christos <tsirif@gmail.com>
  *   Chatzieleftheriou Eirini <eirini.ch0@gmail.com>
  *********************************************************************/
 
-#include "pandora_vision_color/color_postprocessor.h"
-#include "pandora_vision_color/obstacle_poi.h"
+#ifndef PANDORA_VISION_COLOR_OBSTACLE_POI_H
+#define PANDORA_VISION_COLOR_OBSTACLE_POI_H
+
+#include <string>
+#include "pandora_vision_common/bbox_poi.h"
 
 namespace pandora_vision
 {
 namespace pandora_vision_color
 {
-  ColorPostProcessor::ColorPostProcessor() :
-    VisionPostProcessor<pandora_vision_msgs::ObstacleAlertVector>()
-  {}
-
-    bool ColorPostProcessor::postProcess(const POIsStampedConstPtr& input,
-    const ObstacleAlertVectorPtr& output)
+  class ObstaclePOI : public POI
   {
-    pandora_common_msgs::GeneralAlertVector alertVector = getGeneralAlertInfo(input);
-    output->header = alertVector.header;
+    public:
+      typedef boost::shared_ptr<ObstaclePOI> Ptr;
 
-    pandora_vision_msgs::ObstacleAlert obstacleAlert;
+    public:
+      virtual ~ObstaclePOI() {}
 
-    for (int ii = 0; ii < alertVector.alerts.size(); ii++)
-    {
-      obstacleAlert.pointsYaw[ii] = alertVector.alerts[ii].yaw;
-      obstacleAlert.pointsPitch[ii] = alertVector.alerts[ii].pitch;
-      obstacleAlert.probability = alertVector.alerts[ii].probability;
+    public:
+      int type;
+      float depthDistance;
 
-      boost::shared_ptr<ObstaclePOI> obstaclePOI(boost::dynamic_pointer_cast<ObstaclePOI>(
-        input->pois[ii]));
-      obstacleAlert.type = obstaclePOI->getType();
-      obstacleAlert.pointsDepth[ii] = obstaclePOI->getDepth();
-    }
-    output->alerts.push_back(obstacleAlert);
+    public:
+      void setType(int typeArg)
+      {
+        type = typeArg;
+      }
+      int getType() const
+      {
+        return type;
+      }
 
-    if (output->alerts.empty())
-    {
-      return false;
-    }
-    return true;
-  }
+      void setDepth(float distance)
+      {
+        depthDistance = distance;
+      }
+      float getDepth() const
+      {
+        return depthDistance;
+      }
+  };
+  typedef ObstaclePOI::Ptr ObstaclePOIPtr;
+
 }  // namespace pandora_vision_color
 }  // namespace pandora_vision
+
+#endif  // PANDORA_VISION_COLOR_OBSTACLE_POI_H
