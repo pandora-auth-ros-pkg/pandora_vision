@@ -67,6 +67,7 @@ namespace pandora_vision_hazmat
 
       boost::shared_ptr<HazmatPOI> hazmatPOI(boost::dynamic_pointer_cast<HazmatPOI>(input->pois[ii]));
       hazmatAlert.patternType = hazmatPOI->getPattern();
+      hazmatAlert.name = hazmatPOI->getName();
 
       output->alerts.push_back(hazmatAlert);
     }
