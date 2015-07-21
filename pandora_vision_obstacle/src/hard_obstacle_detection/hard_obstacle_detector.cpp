@@ -262,11 +262,10 @@ namespace pandora_vision_obstacle
       }
     }
 
-    /*
     for (int ii = local_radius; ii < nonTraversableRowPoints.rows - local_radius; ++ii) {
       for (int jj = local_radius; jj < nonTraversableRowPoints.cols - local_radius; ++jj) {
-        if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
-            (static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == freeArea))
+        if (static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea)
+            // (static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == freeArea))
         {
           double maxHeight = -std::numeric_limits<double>::max();
           double minHeight = std::numeric_limits<double>::max();
@@ -293,17 +292,22 @@ namespace pandora_vision_obstacle
           if (heightDiff <= 0)
             continue;
           if (heightDiff <= height_diff_)
+          {
+            traversabilityMap->at<int8_t>(ii, jj) = freeArea;
             continue;
+          }
           // Escape if max is smaller than min
           if (maxHeight < minHeight)
             continue;
           double grad = maxHeight - minHeight;
           if (grad >= grad_diff_)
-            continue;
+          {
+            traversabilityMap->at<int8_t>(ii, jj) = freeArea;
+            // continue;
+          }
 
           // Edge is definetely a hard obstacle
-          traversabilityMap->at<int8_t>(ii, jj) = occupiedArea;
-          occupiedPoints.push_back(cv::Point(jj ,ii));
+          // occupiedPoints.push_back(cv::Point(jj ,ii));
         }
       }
     }
@@ -347,11 +351,10 @@ namespace pandora_vision_obstacle
 
           // Edge is definetely a hard obstacle
           traversabilityMap->at<int8_t>(ii, jj) = occupiedArea;
-          occupiedPoints.push_back(cv::Point(jj ,ii));
+          // occupiedPoints.push_back(cv::Point(jj ,ii));
         }
       }
     }
-    */
 /*    if (detectRamps_)
     {
       for (int ii = 0; ii < rampPoints.size(); ++ii)
