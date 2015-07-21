@@ -197,7 +197,7 @@ namespace pandora_vision_obstacle
    * @param inputImage[const cv::Mat&] The input image whose non zero entries represent candidate obstacle cells.
    * It can be the elevation map itself or a processed image, such as an edge map from the elevation map.
    * @param traversabilityMap[cv::Mat*] The resulting traversability map.
-   * @return void
+   w* @return void
    */
   void HardObstacleDetector::createEdgeTraversabilityMap(const cv::Mat& inputImage, cv::Mat* traversabilityMap)
   {
@@ -219,14 +219,14 @@ namespace pandora_vision_obstacle
         int8_t traversablePoint;
         if (ii < inputImage.rows - 1 && jj < inputImage.cols - 1)
         {
-          if (detectRamps_ &&
+         /* if (detectRamps_ &&
               ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
                (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == rampArea)))
           {
             traversablePoint = rampArea;
             rampPoints.push_back(cv::Point(jj, ii));
-          }
-          else if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea) ||
+          } */
+          if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == occupiedArea) ||
               (static_cast<int8_t>(nonTraversableColPoints.at<uchar>(ii, jj)) == occupiedArea))
           {
             traversablePoint = occupiedArea;
@@ -262,6 +262,7 @@ namespace pandora_vision_obstacle
       }
     }
 
+    /*
     for (int ii = local_radius; ii < nonTraversableRowPoints.rows - local_radius; ++ii) {
       for (int jj = local_radius; jj < nonTraversableRowPoints.cols - local_radius; ++jj) {
         if ((static_cast<int8_t>(nonTraversableRowPoints.at<uchar>(ii, jj)) == rampArea) ||
@@ -302,6 +303,7 @@ namespace pandora_vision_obstacle
 
           // Edge is definetely a hard obstacle
           traversabilityMap->at<int8_t>(ii, jj) = occupiedArea;
+          occupiedPoints.push_back(cv::Point(jj ,ii));
         }
       }
     }
@@ -349,8 +351,8 @@ namespace pandora_vision_obstacle
         }
       }
     }
-
-    if (detectRamps_)
+    */
+/*    if (detectRamps_)
     {
       for (int ii = 0; ii < rampPoints.size(); ++ii)
       {
@@ -364,7 +366,7 @@ namespace pandora_vision_obstacle
           }
         }
       }
-    }
+    } */
   }
 
   void

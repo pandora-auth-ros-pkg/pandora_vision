@@ -179,11 +179,12 @@ namespace pandora_vision_obstacle
         else
         {
           output->data[coords_map] = static_cast<int8_t>(input->image.at<uchar>(jj, ii));
-          obstacleDilation(output, 2, coords_map);
+          // obstacleDilation(output, 2, coords_map);
         }
       }
     }
 
+    obstacleBlur(output);
     return true;
   }
 
@@ -194,6 +195,42 @@ namespace pandora_vision_obstacle
     map_const_ptr_ = mapConstPtr;
   }
 
+  void HardObstaclePostProcessor::
+  obstacleBlur(const nav_msgs::OccupancyGridPtr& inputOutput)
+  {
+    nav_msgs::OccupancyGrid result = *inputOutput;
+    int width = inputOutput->info.width;
+    int height = inputOutput->info.height;
+
+    for (int i = 1; i < height - 1; i++)
+    {
+      for (int j = 1; j < width - 1; j++)
+      {
+        if (inputOutput->data[i * width + j] != 51)
+          continue;
+        bool breakFlag = false;
+        for (int k = -1; k <= 1 ; k++)
+        {
+          for (int l = -1; l <= 1; l++)
+          {
+            if (k == 0 && l == 0)
+              continue;
+            if (inputOutput->data[(i + k) * width + j + l] == 0)
+            {
+              result.data[i * width + j] = 0;
+              breakFlag = true;
+              break;
+            }
+          }
+          if (breakFlag)
+            break;
+        }
+      }
+    }
+    *inputOutput = result;
+    return;
+  }
+
   void
   HardObstaclePostProcessor::
   obstacleDilation(const nav_msgs::OccupancyGridPtr& output, int steps, int coords)
@@ -202,6 +239,8 @@ namespace pandora_vision_obstacle
       return;
 
     int8_t cell = output->data[coords];
+    if (steps == 0)
+      return;
 
     if (cell != 0 && cell != UNKNOWN_VALUE)  // That's foreground
     {

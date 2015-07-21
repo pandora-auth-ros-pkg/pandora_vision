@@ -1,7 +1,7 @@
 <launch>
   <arg name="namespace" default="/pandora_vision/pandora_vision_obstacle" />
 
-  <!--<include file="$(find state_manager)/launch/stateManager.launch" />-->
+  <include file="$(find state_manager)/launch/stateManager.launch" />
 
   <arg name="openni" default="false" />
 
@@ -41,6 +41,6 @@
 
   <include file="$(find pandora_vision_obstacle)/launch/pandora_vision_hard_obstacle.launch"
       ns="$(arg namespace)" />
-  <!--<include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />-->
+  <include file="$(find pandora_robots_description)/gio/launch/gio_description.launch" />
 
 </launch>

@@ -167,6 +167,8 @@ namespace pandora_vision_obstacle
 
     //cv::imshow("Elevation Map Image", colorMapImg);
     cv::waitKey(5);
+
+
     return;
   }
 

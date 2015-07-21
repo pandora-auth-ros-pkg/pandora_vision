@@ -803,7 +803,7 @@ namespace pandora_vision_obstacle
         {
           double grad = fabs(inputImage.at<double>(ii + 1, jj) -
                              inputImage.at<double>(ii, jj));
-
+          /*
           if (detectRamps_)
           {
             if (grad <= elevationDifferenceLowFreeThreshold_ ||
@@ -821,9 +821,9 @@ namespace pandora_vision_obstacle
             {
               nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
             }
-          }
-          else
-          {
+          } */
+          //if ()
+          //{
             if (grad <= elevationDifferenceLowFreeThreshold_)
             {
               nonTraversableRowPoints.at<uchar>(ii, jj) = freeArea;
@@ -832,7 +832,7 @@ namespace pandora_vision_obstacle
             {
               nonTraversableRowPoints.at<uchar>(ii, jj) = occupiedArea;
             }
-          }
+        //  }
         }
       }
     }
@@ -855,7 +855,7 @@ namespace pandora_vision_obstacle
         {
           double grad = fabs(inputImage.at<double>(ii, jj + 1) -
                              inputImage.at<double>(ii, jj));
-          if (detectRamps_)
+   /*       if (detectRamps_)
           {
             if (grad <= elevationDifferenceLowFreeThreshold_ ||
                 (grad > elevationDifferenceLowOccupiedThreshold_ &&
@@ -872,9 +872,9 @@ namespace pandora_vision_obstacle
             {
               nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
             }
-          }
-          else
-          {
+          } */
+          //else
+          //{
             if (grad <= elevationDifferenceLowFreeThreshold_)
             {
               nonTraversableColPoints.at<uchar>(ii, jj) = freeArea;
@@ -883,7 +883,7 @@ namespace pandora_vision_obstacle
             {
               nonTraversableColPoints.at<uchar>(ii, jj) = occupiedArea;
             }
-          }
+          //}
         }
       }
     }
