@@ -60,7 +60,7 @@
         <arg name="thermal" value="false" />
     </include>
     <include if="$(arg vision_thermal)"
-        file="$(arg pandora_vision_hole)/launch/pandora_vision_thermal.launch"
+        file="$(find pandora_vision_hole)/launch/pandora_vision_thermal.launch"
         ns="pandora_vision_thermal" />
     <include if="$(arg vision_victim)"
         file="$(find pandora_vision_victim)/launch/pandora_vision_victim.launch"
