@@ -4,7 +4,7 @@
   <!-- <node name="pandora_vision_color" type="pandora_vision_color_node" pkg="pandora_vision_color" -->
   <!--   respawn="False" output = "screen">                                                -->
   <node pkg="nodelet" type="nodelet" name="pandora_color"
-    args="standalone pandora_vision/pandora_vision_color"  output="screen" >
+    args="load pandora_vision/pandora_vision_color $(arg nodelet_manager)"  output="screen" >
     <rosparam file="$(find pandora_vision_color)/config/color_topics.yaml"
       command="load" />
   </node>
