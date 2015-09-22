@@ -151,8 +151,8 @@ namespace pandora_vision_hole
     //if (rgbdMode_ || rgbdtMode_)
     //{
     //  // Subscribe to the hole_fusion lock/unlock topic
-    //  unlockHoleFusionSubscriber_ = nh_.subscribe(unlockHoleFusionTopic_, 1,
-    //    &PcThermalSynchronizer::unlockHoleFusionCallback, this);
+      unlockHoleFusionSubscriber_ = nh_.subscribe(unlockHoleFusionTopic_, 1,
+        &PcThermalSynchronizer::unlockHoleFusionCallback, this);
     //}
     //if (thermalMode_)
     //{
@@ -200,13 +200,13 @@ namespace pandora_vision_hole
     //if (rgbdtMode_ || thermalMode_)
     //{
       // Advertise the synchronized thermal image and its index
-      synchronizedThermalImagePublisher_ = nh_.advertise
-        <distrib_msgs::FlirLeptonMsg>
-        (synchronizedThermalImageTopic_, 1);
+      //synchronizedThermalImagePublisher_ = nh_.advertise
+      //  <distrib_msgs::FlirLeptonMsg>
+      //  (synchronizedThermalImageTopic_, 1);
 
-      thermalOutputReceiverPublisher_ = nh_.advertise
-        <std_msgs::String>
-        (thermalOutputReceiverTopic_, 1);
+      //thermalOutputReceiverPublisher_ = nh_.advertise
+      //  <std_msgs::String>
+      //  (thermalOutputReceiverTopic_, 1);
     //}
 
     enhancedImagePublisher_ = nh_.advertise<pandora_vision_msgs::EnhancedImage>(
