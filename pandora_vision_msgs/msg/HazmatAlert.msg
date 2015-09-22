@@ -1,3 +1,3 @@
 pandora_common_msgs/GeneralAlertInfo info
-string patternType
+int8 patternType
 string name

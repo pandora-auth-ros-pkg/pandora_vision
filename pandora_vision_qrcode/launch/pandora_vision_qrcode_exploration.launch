@@ -6,7 +6,7 @@
       args="load pandora_vision/pandora_vision_qrcode /kinect/kinect_nodelet_manager" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-    <rosparam name="subscribed_topics" value="/kinect/rgb/image_raw" />
+    <param name="subscribed_topics" value="/kinect/rgb/image_raw" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>
@@ -16,27 +16,27 @@
       args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-  <rosparam name="subscribed_topics" value="/rpi2_primary/pi_camera_front/image" />
+    <param name="subscribed_topics" value="/rpi2_primary/pi_camera_front/image" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>
 
   <!-- launcher for qr of back pi camera -->
-  <node pkg="nodelet" type="nodelet" name="pandora_qrcode_back_pi"
-      args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
-    <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
-      command="load" />
-    <rosparam name="subscribed_topics" value="/rpi2_secondary/pi_camera_rear/image" />
-    <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
-      command="load" ns="detector" />
-  </node>
+  <!--<node pkg="nodelet" type="nodelet" name="pandora_qrcode_rear_camera"        -->
+  <!--    args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >-->
+  <!--  <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"  -->
+  <!--    command="load" />                                                       -->
+  <!--  <param name="subscribed_topics" value="/rear_camera/image" />             -->
+  <!--  <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"  -->
+  <!--    command="load" ns="detector" />                                         -->
+  <!--</node>                                                                     -->
 
   <!-- launcher for qr of left camera -->
   <node pkg="nodelet" type="nodelet" name="pandora_qrcode_left_camera"
       args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-    <rosparam name="subscribed_topics" value="/left_camera/image" />
+    <param name="subscribed_topics" value="/left_camera/image" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>
@@ -46,7 +46,7 @@
       args="standalone pandora_vision/pandora_vision_qrcode" output="screen" >
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_topics.yaml"
       command="load" />
-    <rosparam name="subscribed_topics" value="/right_camera/image" />
+    <param name="subscribed_topics" value="/right_camera/image" />
     <rosparam file="$(find pandora_vision_qrcode)/config/qrcode_params.yaml"
       command="load" ns="detector" />
   </node>

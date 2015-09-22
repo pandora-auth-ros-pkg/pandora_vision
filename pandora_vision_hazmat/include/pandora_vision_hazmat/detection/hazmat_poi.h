@@ -51,11 +51,11 @@ namespace pandora_vision
       virtual ~HazmatPOI() {}
 
     public:
-      std::string patternID;
+      int patternID;
       std::string hazmatName;  // keep??
 
     public:
-      void setPatternId(const std::string& id)
+      void setPatternId(int id)
       {
         patternID = id;
       }
@@ -64,7 +64,7 @@ namespace pandora_vision
         hazmatName = name;
       }
 
-      std::string getPattern() const
+      int getPattern() const
       {
         return patternID;
       }

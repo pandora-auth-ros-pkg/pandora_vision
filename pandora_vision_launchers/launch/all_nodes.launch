@@ -17,6 +17,7 @@
   <arg name="vision_obstacle" default="true"/>
   <arg name="vision_hard_obstacle" default="true"/>
   <arg name="vision_barrel" default="true"/>
+  <arg name="vision_color" default="true"/>
 
 
   <!-- Cameras -->
@@ -72,10 +73,15 @@
     <include if="$(arg vision_barrel)"
         file="$(find pandora_vision_obstacle)/launch/pandora_vision_barrel.launch"
         ns="pandora_vision_obstacle" />
-
-    <include if="$(arg vision_hard_obstacle)"
-        file="$(find pandora_vision_obstacle)/launch/pandora_vision_dummy_hard_obstacle.launch"
-        ns="pandora_vision_obstacle" />
+    <include if="$(arg vision_color)"
+        file="$(find pandora_vision_color)/launch/pandora_vision_color.launch"
+        ns="pandora_vision_color" />
+    <include if="$(arg vision_obstacle)"
+        file="$(find pandora_vision_hole)/launch/synchronizer/pandora_pc_thermal_synchronizer.launch"
+        ns="pandora_vision_hole" />
+    <!--<include if="$(arg vision_hard_obstacle)"                                            -->
+    <!--    file="$(find pandora_vision_obstacle)/launch/pandora_vision_hard_obstacle.launch"-->
+    <!--    ns="pandora_vision_obstacle" />                                                  -->
 
   </group>
 </launch>

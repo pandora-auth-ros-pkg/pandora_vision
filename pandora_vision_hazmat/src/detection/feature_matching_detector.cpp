@@ -263,7 +263,8 @@ namespace pandora_vision
         p.boundingBox = boundingBox;
         p.keyPoints = keyPoints;
         p.descriptors = descriptors;
-        std::string number = currentPatternNode["number"];
+        int number;
+        currentPatternNode["number"] >> number;
         p.hazmatNum = number;
         std::string name = currentPatternNode["name"];
         p.hazmatLabelName = name;

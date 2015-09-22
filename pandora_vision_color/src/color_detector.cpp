@@ -168,7 +168,6 @@ namespace pandora_vision_color
   {
     if (visualization_)
     {
-   er name: marios   host name: marios-Lenovo-G580
      cv::Mat temp1[] = {binary_, binary_, binary_};
       cv::Mat diff;
       cv::merge(temp1, 3, diff);

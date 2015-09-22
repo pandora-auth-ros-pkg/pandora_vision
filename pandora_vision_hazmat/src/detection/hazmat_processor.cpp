@@ -155,9 +155,9 @@ namespace pandora_vision
         {
           boost::shared_ptr<HazmatPOI> hazmatPOIPtr(
             boost::dynamic_pointer_cast<HazmatPOI>(output->pois[i]));
-          ROS_DEBUG_NAMED("detection", "[%s] : Found Hazmat : %s",
+          ROS_DEBUG_NAMED("detection", "[%s] : Found Hazmat : %d",
               this->getName().c_str(),
-              hazmatPOIPtr->getPattern().c_str());
+              hazmatPOIPtr->getPattern());
         }
         ROS_DEBUG_NAMED("detection", "[%s] : Number of Hazmats"
             " Found = %d", this->getName().c_str(),

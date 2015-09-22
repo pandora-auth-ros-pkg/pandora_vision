@@ -123,7 +123,7 @@ namespace pandora_vision
       cv::Mat histogram;  //!< Color histogram of the pattern.
 
       std::string hazmatLabelName;  // keep??
-      std::string hazmatNum;
+      int hazmatNum;
     };
 }  // namespace pandora_vision_hazmat
 }  // namespace pandora_vision
