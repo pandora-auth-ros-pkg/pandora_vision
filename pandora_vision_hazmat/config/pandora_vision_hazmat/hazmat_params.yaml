@@ -1,4 +1,4 @@
-feature_type: ORB
+feature_type: SIFT
 visualization: false
 execution_timer: false
 debug_message: true
