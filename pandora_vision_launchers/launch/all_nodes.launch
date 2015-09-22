@@ -6,18 +6,18 @@
   <arg name="xtion" default="true"/>
   <arg name="vision_qr" default="true"/>
   <arg name="vision_hazmat" default="true"/>
-  <arg name="vision_landoltc" default="true"/>
+  <arg name="vision_landoltc" default="false"/>
   <arg name="vision_motion" default="false"/>
   <arg name="vision_datamatrix" default="false"/>
   <arg name="vision_landoltc3d" default="false"/>
   <arg name="vision_predator" default="false"/>
-  <arg name="vision_hole_detector" default="false"/>
+  <arg name="vision_hole_detector" default="true"/>
   <arg name="vision_thermal" default="false"/>
-  <arg name="vision_victim" default="false"/>
-  <arg name="vision_obstacle" default="true"/>
-  <arg name="vision_hard_obstacle" default="true"/>
-  <arg name="vision_barrel" default="true"/>
-  <arg name="vision_color" default="true"/>
+  <arg name="vision_victim" default="true"/>
+  <arg name="vision_obstacle" default="false"/>
+  <arg name="vision_hard_obstacle" default="false"/>
+  <arg name="vision_barrel" default="false"/>
+  <arg name="vision_color" default="false"/>
 
 
   <!-- Cameras -->
@@ -27,19 +27,16 @@
       <arg name="camera_right" value="$(arg camera_right)" />
       <arg name="xtion" value="$(arg xtion)" />
     </include>
-  </group>i
+  </group>
 
   <!-- Vision Nodes -->
   <group if="$(arg vision_nodes)" ns="/pandora_vision" >
-    <!-- OK -->
     <include if="$(arg vision_qr)"
         file="$(find pandora_vision_qrcode)/launch/pandora_vision_qrcode_exploration.launch"
         ns="pandora_vision_qrcode" />
-    <!-- OK -->
     <include if="$(arg vision_hazmat)"
         file="$(find pandora_vision_hazmat)/launch/pandora_vision_hazmat.launch"
         ns="pandora_vision_hazmat" />
-    <!-- OK -->
     <include if="$(arg vision_landoltc)"
         file="$(find pandora_vision_landoltc)/launch/pandora_vision_landoltc_2d.launch"
         ns="pandora_vision_landoltc" />
@@ -79,9 +76,9 @@
     <include if="$(arg vision_obstacle)"
         file="$(find pandora_vision_hole)/launch/synchronizer/pandora_pc_thermal_synchronizer.launch"
         ns="pandora_vision_hole" />
-    <!--<include if="$(arg vision_hard_obstacle)"                                            -->
-    <!--    file="$(find pandora_vision_obstacle)/launch/pandora_vision_hard_obstacle.launch"-->
-    <!--    ns="pandora_vision_obstacle" />                                                  -->
+    <include if="$(arg vision_hard_obstacle)"
+        file="$(find pandora_vision_obstacle)/launch/pandora_vision_hard_obstacle.launch"
+        ns="pandora_vision_obstacle" />
 
   </group>
 </launch>
