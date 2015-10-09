@@ -184,7 +184,7 @@ namespace pandora_vision
       @param img [Qimage] the QImage
       @return void
       **/
-      void setImage(const QImage& img);
+      void setQImage();
       
       /**
       @brief function that sets the frames loaded from bag

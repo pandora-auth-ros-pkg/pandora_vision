@@ -254,11 +254,12 @@ namespace pandora_vision
   void CConnector::setcurrentFrame(int x)
   {
     currFrame = x;
-    QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols,
-                frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
-    dest.bits(); // enforce deep copy, see documentation
-    setImage(dest);
-    updateImage();
+    // setQImage();
+    /* QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols, */
+                // frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
+    // dest.bits(); // enforce deep copy, see documentation
+    /* setImage(dest); */
+    // updateImage();
   } 
   
   /**
@@ -296,12 +297,17 @@ namespace pandora_vision
   @param img [Qimage] the QImage
   @return void
   **/
-  void CConnector::setImage(const QImage& img)
+  void CConnector::setQImage()
   {
-       localImage_ = img.copy();
+      QImage dest((const uchar *) frames[currFrame].data, frames[currFrame].cols,
+                frames[currFrame].rows, frames[currFrame].step, QImage::Format_RGB888);
+       dest.bits(); 
+       localImage_ = dest.copy();
        if(currFrame == offset_)
           ImgAnnotations::setOriginalImgDimensions(localImage_.width(), localImage_.height());
        localImage_ = localImage_.scaled(640, 480,  Qt::KeepAspectRatio, Qt::SmoothTransformation);
+       // updateImage();
+
   }
  
   /**
@@ -309,7 +315,8 @@ namespace pandora_vision
   @return void
   **/
   void CConnector::updateImage()
-  {
+  { 
+    ROS_INFO_STREAM("UPDATED IMAGE NO "<<currFrame);
     loader_.imageLabel->setPixmap(QPixmap::fromImage(localImage_));
     // loader_.imageLabel->setScaledContents(true);
   }
@@ -601,6 +608,8 @@ namespace pandora_vision
     ImgAnnotations::deleteFromFile(file.str(), img_name);
     loader_.statusLabel->setText("Delete Annotations from " +  QString(img_name.c_str()));
     setcurrentFrame(currFrame);
+    setQImage();
+    updateImage();
   }
   
   /**
@@ -616,6 +625,8 @@ namespace pandora_vision
       file << package_path << "/data/annotations.txt";
       currFrame++;
       setcurrentFrame(currFrame);
+       setQImage();
+      updateImage();
       std::string img_name = "frame" + boost::to_string(currFrame+offset_) + ".png";
       loader_.statusLabel->setText(QString(img_name.c_str()));
       ImgAnnotations::annotations.clear();
@@ -641,6 +652,8 @@ namespace pandora_vision
       file << package_path << "/data/annotations.txt";
       currFrame--;
       setcurrentFrame(currFrame);
+      setQImage();
+      updateImage();
       std::string img_name = "frame" + boost::to_string(currFrame + offset_)+ ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(), img_name);
@@ -664,13 +677,13 @@ namespace pandora_vision
       ImgAnnotations::annotations.clear();
       std::string img_name = "frame" + boost::to_string(currFrame + offset_) + ".png";
       std::string category;
-      /*if(img_state_ == VICTIM_CLICK)
+      if(img_state_ == VICTIM_CLICK)
         category = "1";
-      if(img_state_ == HOLE_CLICK)*/
+      if(img_state_ == HOLE_CLICK)
         category = "-1";
       ImgAnnotations::setAnnotations(img_name, category, 0, 0);
       ImgAnnotations::setAnnotations(img_name, category, 640, 480);
-      //drawBox();  
+      //drawBox();
       std::stringstream file;
       file << package_path << "/data/annotations.txt";
       ImgAnnotations::writeToFile(file.str() );
@@ -698,6 +711,8 @@ namespace pandora_vision
     file << package_path << "/data/annotations.txt";
     currFrame = temp.at(1).toInt() - offset_;
       setcurrentFrame(currFrame);
+      setQImage();
+      updateImage();
       std::string img_name = "frame" + boost::to_string(currFrame + offset_ )+ ".png";
       ImgAnnotations::annotations.clear();
       ImgAnnotations::readFromFile(file.str(), img_name);
@@ -710,10 +725,12 @@ namespace pandora_vision
 
   void CConnector::setPredatorValues(int x, int y, int width, int height, bool initial )
   {
+
      if(ImgAnnotations::annotations[0].x1 == x && ImgAnnotations::annotations[0].y1 == y &&
         ImgAnnotations::annotations[0].x2 == x + width && ImgAnnotations::annotations[0].y2 == y + height && !initial)
      {
-       ROS_INFO_STREAM("SAME ANNOTATION AS PREVIOUS FRAME");
+        ROS_INFO_STREAM("SAME ANNOTATION AS PREVIOUS FRAME");
+        drawBox();
      }
      else
      {
@@ -726,7 +743,7 @@ namespace pandora_vision
          category = "-1";
        ImgAnnotations::setAnnotations(img_name, category, x, y);
        ImgAnnotations::setAnnotations(img_name, category, x+width, y+height);
-       drawBox();  
+       drawBox();
        std::stringstream file;
        file << package_path << "/data/annotations.txt";
        ImgAnnotations::writeToFile(file.str() );
@@ -735,12 +752,12 @@ namespace pandora_vision
        cv::Mat temp;
        cv::cvtColor(frames[currFrame], temp, CV_BGR2RGB);
        cv::imwrite(imgName.str(), temp);
-       loader_.statusLabel->setText("Save current Frame as:" + QString(imgName.str().c_str() )); 
+       loader_.statusLabel->setText("Save current Frame as:" + QString(imgName.str().c_str() ));
     }
   }
-  
+
   /**
-  @brief function that draws annotations to the 
+  @brief function that draws annotations to the
   current QImage
   @return void
   **/
@@ -765,7 +782,7 @@ namespace pandora_vision
                 ImgAnnotations::annotations[i].y2);
       QRect r(p1, p2);
       painter.drawRect(r);
-      Q_EMIT updateImage();
+      updateImage();
     }
   }
 }// namespace pandora_vision

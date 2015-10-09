@@ -305,14 +305,14 @@
        <item>
         <widget class="QLineEdit" name="bagLineEdit">
          <property name="text">
-          <string>thermal8.bag</string>
+          <string>test.bag</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="rosTopicLineEdit">
          <property name="text">
-          <string>/flir_lepton/fused_msg</string>
+          <string>/kinect/rgb/image_raw</string>
          </property>
         </widget>
        </item>

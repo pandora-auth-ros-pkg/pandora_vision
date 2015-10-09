@@ -285,9 +285,11 @@ namespace pandora_vision
     }
     connector_.setFrames(frames, offset);
     connector_.setcurrentFrame(0);
+    connector_.setQImage();
+    Q_EMIT updateImage();
     frames.clear();
   }
-  
+
   /**
   @brief function that receives pointcloud msg and converts it
   to cv::Mat
@@ -416,6 +418,10 @@ namespace pandora_vision
       out_msg.image = temp;
       out_msg.toImageMsg(annotationMsg.image);
       annotationPublisher_.publish(annotationMsg);
+      connector_.setcurrentFrame(currentFrameNo_);
+      connector_.setQImage();
+      connector_.drawBox();
+      Q_EMIT updateImage();
       ROS_INFO_STREAM("send initial frame" << currentFrameNo_ 
                     << " " << annotationMsg.header.frame_id
                     << " " << annotationMsg.header.stamp 
@@ -455,6 +461,10 @@ namespace pandora_vision
       out_msg.toImageMsg(annotationMsg.image);
       annotationPublisher_.publish(annotationMsg);
       connector_.setcurrentFrame(currentFrameNo_);
+      connector_.setQImage();
+      connector_.drawBox();
+      Q_EMIT updateImage();
+
       ROS_INFO_STREAM("send next frame "<< currentFrameNo_ 
                        << " " << annotationMsg.header.frame_id 
                        << " " << annotationMsg.header.stamp 
@@ -491,6 +501,10 @@ namespace pandora_vision
     out_msg.toImageMsg(annotationMsg.image);
     annotationPublisher_.publish(annotationMsg);
     connector_.setcurrentFrame(currentFrameNo_);
+    connector_.setQImage();
+    connector_.drawBox();
+    Q_EMIT updateImage();
+
     ROS_INFO_STREAM("send 'closing' frame " << currentFrameNo_ 
                      << " " << annotationMsg.header.frame_id 
                      << " " << annotationMsg.header.stamp 
@@ -553,11 +567,11 @@ namespace pandora_vision
 
     else
     {
-      QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+      /* QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
       dest.bits(); // enforce deep copy, see documentation
-      connector_.setImage(dest);
+      connector_.setQImage(dest);
       connector_.msgTimeStamp(msg->header);
-      Q_EMIT updateImage();
+      Q_EMIT updateImage(); */
     }
   }   
  
@@ -641,11 +655,11 @@ namespace pandora_vision
 
     else
     {
-      QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-      dest.bits(); // enforce deep copy, see documentation
-      connector_.setImage(dest);
-      connector_.msgTimeStamp(msg->header);
-      Q_EMIT updateImage();
+     /*  QImage dest((const uchar *) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888); */
+      // dest.bits(); // enforce deep copy, see documentation
+      // connector_.setQImage(dest);
+      // connector_.msgTimeStamp(msg->header);
+      /* Q_EMIT updateImage(); */
     }
   }
   /**
@@ -655,6 +669,7 @@ namespace pandora_vision
 
   bool CController::init(void)
   {
+    ROS_INFO_STREAM("CONTROLLER INITIALIZED");
     if ( !ros::master::check() )
     {
       return false;
