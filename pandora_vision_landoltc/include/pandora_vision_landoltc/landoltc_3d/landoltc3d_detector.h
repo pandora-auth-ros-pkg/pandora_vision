@@ -119,6 +119,7 @@ class LandoltC3dDetector
   @param A [cv::Point] The start point of a line
   @param B [cv::Point] The end point of a line
   @return void
+  http://cyberalaska.cs.uaf.edu/blogs/archives/533
   **/
   void rasterizeLine(cv::Point A, cv::Point B);
 
@@ -129,6 +130,7 @@ class LandoltC3dDetector
   @param grX [float*] X gradient component
   @param grY [float*] Y gradient component
   @return void
+  http://cyberalaska.cs.uaf.edu/blogs/archives/533
   **/
   void findCenters(int rows, int cols, float* grX, float* grY);
 
@@ -152,6 +154,7 @@ class LandoltC3dDetector
   @brief Thinning algorith using the Zhang-Suen method
   @param in [cv::Mat*] Matrix containing the frame to thin
   @return void
+  http://opencv-code.com/quick-tips/implementation-of-thinning-algorithm-in-opencv/
   **/
   void thinning(cv::Mat* in);
 
@@ -160,6 +163,7 @@ class LandoltC3dDetector
   @param in [cv::Mat*] Matrix containing the frame to thin
   @param iter [int] Number of iteration with values 1-2
   @return void
+  http://opencv-code.com/quick-tips/implementation-of-thinning-algorithm-in-opencv/
   **/
   void thinningIter(cv::Mat* in, int iter);
 
@@ -175,6 +179,7 @@ class LandoltC3dDetector
   @param in [cv::Mat&] Input Image to be thresholded
   @param out [cv::Mat*] Output, thresholded image
   @return void
+  http://www.tandfonline.com/doi/suppl/10.1080/2151237X.2007.10129236
   **/
 
   void applyBradleyThresholding(const cv::Mat& in, cv::Mat* out);
@@ -204,6 +209,7 @@ class LandoltC3dDetector
   @param rec [cv::Rect] Rectangle enclosing a 'C'
   @param in [cv::Mat&] Input Image
   @return [cv::Mat] Output Image
+  http://opencv-code.com/tutorials/automatic-perspective-correction-for-quadrilateral-objects/
   **/
   cv::Mat getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec);
 
