@@ -125,6 +125,7 @@ void LandoltC3dDetector::applyMask()
   @brief Thinning algorith using the Zhang-Suen method
   @param in [cv::Mat*] Matrix containing the frame to thin
   @return void
+  http://opencv-code.com/quick-tips/implementation-of-thinning-algorithm-in-opencv/
 **/
 void LandoltC3dDetector::thinning(cv::Mat* in)
 {
@@ -150,6 +151,7 @@ void LandoltC3dDetector::thinning(cv::Mat* in)
   @param in [cv::Mat*] Matrix containing the frame to thin
   @param iter [int] Number of iteration with values 1-2
   @return void
+  http://opencv-code.com/quick-tips/implementation-of-thinning-algorithm-in-opencv/
   **/
 void LandoltC3dDetector::thinningIter(cv::Mat* in, int iter)
 {
@@ -236,6 +238,7 @@ void LandoltC3dDetector::find8Neights(unsigned int index, const cv::Mat& in)
   @param rec [cv::rec] Rectangle enclosing a 'C'
   @param in [cv::Mat&] Input Image
   @return [cv::Mat] Output Image
+  http://opencv-code.com/tutorials/automatic-perspective-correction-for-quadrilateral-objects/
 **/
 cv::Mat LandoltC3dDetector::getWarpPerspectiveTransform(const cv::Mat& in, cv::Rect rec)
 {
@@ -356,6 +359,7 @@ void LandoltC3dDetector::findRotation(const cv::Mat&in, LandoltC3D* temp)
   @param in [cv::Mat&] Input Image to be thresholded
   @param out [cv::Mat*] Output, thresholded image
   @return void
+  http://www.tandfonline.com/doi/suppl/10.1080/2151237X.2007.10129236
 **/
 void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat* output)
 {
@@ -429,6 +433,7 @@ void LandoltC3dDetector::applyBradleyThresholding(const cv::Mat& input, cv::Mat*
   @param A [cv::Point] The start point of a line
   @param B [cv::Point] The end point of a line
   @return void
+  http://cyberalaska.cs.uaf.edu/blogs/archives/533
 **/
 void LandoltC3dDetector::rasterizeLine(cv::Point A, cv::Point B)
 {
@@ -483,6 +488,7 @@ void LandoltC3dDetector::rasterizeLine(cv::Point A, cv::Point B)
   @param grX [float*] X gradient component
   @param grY [float*] Y gradient component
   @return void
+  http://cyberalaska.cs.uaf.edu/blogs/archives/533
 **/
 void LandoltC3dDetector::findCenters(int rows, int cols, float* grX, float* grY)
 {
